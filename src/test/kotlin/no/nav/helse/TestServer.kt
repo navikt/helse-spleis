@@ -4,10 +4,9 @@ import io.ktor.application.log
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,18 +18,16 @@ import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 import kotlin.random.Random
 
-fun createTestApplicationEnvironment() = applicationEngineEnvironment {
-    connector {
-        port = Random.nextInt(1000, 9999)
-    }
+@KtorExperimentalAPI
+private fun createTestApplicationConfig(config: Map<String, String>) =
+        createApplicationEnvironment(createConfigFromEnvironment(mapOf(
+                "server.port" to "${Random.nextInt(1000, 9999)}"
+        ) + config))
 
-    module {
-        sakskompleksApplication()
-    }
-}
-
+@KtorExperimentalAPI
 fun testServer(shutdownTimeoutMs: Long = 10000,
-               test: ApplicationEngine.() -> Unit) = embeddedServer(Netty, createTestApplicationEnvironment()).apply {
+               config: Map<String, String> = emptyMap(),
+               test: ApplicationEngine.() -> Unit) = embeddedServer(Netty, createTestApplicationConfig(config)).apply {
     val stopper = GlobalScope.launch {
         delay(shutdownTimeoutMs)
         this@apply.application.log.info("stopping server after timeout")
