@@ -29,7 +29,7 @@ class SakskompleksServiceTest {
         val søknad_json = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
         val søknad = Sykepengesøknad(søknad_json)
 
-        val sak = sakskompleksService.finnSakSøknad(søknad)
+        val sak = sakskompleksService.finnSak(søknad)
 
         assertNull(sak)
     }
@@ -51,7 +51,7 @@ class SakskompleksServiceTest {
         val dao = SakskompleksDao(saker)
         val sakskompleksService = SakskompleksService(dao)
 
-        val sak = sakskompleksService.finnSakSøknad(søknad)
+        val sak = sakskompleksService.finnSak(søknad)
 
         assertEquals(sakForBruker, sak)
     }

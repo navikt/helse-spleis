@@ -5,7 +5,7 @@ import no.nav.helse.søknad.domain.Sykepengesøknad
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
-    fun finnSakSøknad(sykepengesøknad: Sykepengesøknad) =
+    fun finnSak(sykepengesøknad: Sykepengesøknad) =
             sakskompleksDao.finnSaker(sykepengesøknad.aktørId)
                     .firstOrNull { sakskompleks ->
                         sykepengesøknad.hørerSammenMed(sakskompleks)
