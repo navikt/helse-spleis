@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.JsonNodeSerde
+import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
-import org.slf4j.LoggerFactory
 
 class SøknadConsumer(streamsBuilder: StreamsBuilder, private val probe: SøknadProbe) {
 
@@ -18,8 +18,6 @@ class SøknadConsumer(streamsBuilder: StreamsBuilder, private val probe: Søknad
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(SøknadConsumer::class.java)
-
         private val topics = listOf("soknader")
 
         private val objectMapper = jacksonObjectMapper()
@@ -30,13 +28,16 @@ class SøknadConsumer(streamsBuilder: StreamsBuilder, private val probe: Søknad
     fun build(builder: StreamsBuilder): StreamsBuilder {
         builder.stream<String, JsonNode>(topics, Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST))
+                .mapValues { jsonNode ->
+                    Sykepengesøknad(jsonNode)
+                }
                 .foreach(::håndterSøknad)
 
         return builder
     }
 
-    private fun håndterSøknad(key: String, søknad: JsonNode) {
-        probe.mottattSøknad(key, søknad)
+    private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
+        probe.mottattSøknad(søknad)
         // TODO: finn eksisterende sak fra søknad
     }
 }

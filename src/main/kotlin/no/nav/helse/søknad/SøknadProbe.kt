@@ -1,7 +1,7 @@
 package no.nav.helse.søknad
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
+import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
 
 class SøknadProbe {
@@ -13,8 +13,8 @@ class SøknadProbe {
                 .register()
     }
 
-    fun mottattSøknad(key: String, søknad: JsonNode) {
-        log.info("mottok søknad med key=$key")
+    fun mottattSøknad(søknad: Sykepengesøknad) {
+        log.info("mottok søknad med id=${søknad.id} for sykmelding=${søknad.sykmeldingId}")
         søknadCounter.inc()
     }
 }
