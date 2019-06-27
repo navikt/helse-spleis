@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val ktorVersion = "1.2.2"
 val jacksonVersion = "2.9.8"
 val prometheusVersion = "0.6.0"
+//val kafkaVersion = "2.3.0"
+val kafkaVersion = "2.0.1"
 val junitJupiterVersion = "5.4.0"
 val mainClass = "no.nav.helse.AppKt"
 
@@ -28,8 +30,14 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
+    compile("org.apache.kafka:kafka-streams:$kafkaVersion")
+
     compile("io.prometheus:simpleclient_common:$prometheusVersion")
     compile("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+
+    testCompile("org.awaitility:awaitility:3.1.6")
+    testCompile("no.nav:kafka-embedded-env:2.1.1")
+    testCompile("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
     testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
@@ -40,6 +48,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven("https://dl.bintray.com/kotlin/ktor")
+    maven("http://packages.confluent.io/maven/")
 }
 
 java {

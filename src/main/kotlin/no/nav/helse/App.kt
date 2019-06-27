@@ -1,13 +1,7 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.Application
-import io.ktor.application.install
 import io.ktor.config.ApplicationConfig
 import io.ktor.config.MapApplicationConfig
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -20,6 +14,15 @@ import java.util.concurrent.TimeUnit
 fun createConfigFromEnvironment(env: Map<String, String>) =
         MapApplicationConfig().apply {
             put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
+
+            put("kafka.app-id", "sykepenger-sakskompleks-v1")
+            put("kafka.bootstrap-servers", env.getValue("KAFKA_BOOTSTRAP_SERVERS"))
+
+            env["KAFKA_USERNAME"]?.let { put("kafka.username", it) }
+            env["KAFKA_PASSWORD"]?.let { put("kafka.password", it) }
+
+            env["NAV_TRUSTSTORE_PATH"]?.let { put("kafka.truststore-path", it) }
+            env["NAV_TRUSTSTORE_PASSWORD"]?.let { put("kafka.truststore-password", it) }
         }
 
 @KtorExperimentalAPI
@@ -44,18 +47,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     }
 
     module {
+        nais()
         sakskompleksApplication()
     }
-}
-
-fun Application.sakskompleksApplication() {
-
-    install(ContentNegotiation) {
-        jackson {
-            registerModule(JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        }
-    }
-
-    nais()
 }
