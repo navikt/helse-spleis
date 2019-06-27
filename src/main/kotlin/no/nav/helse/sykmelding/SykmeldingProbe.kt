@@ -1,7 +1,7 @@
 package no.nav.helse.sykmelding
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.prometheus.client.Counter
+import no.nav.helse.sykmelding.domain.Sykmelding
 import org.slf4j.LoggerFactory
 
 class SykmeldingProbe {
@@ -12,8 +12,8 @@ class SykmeldingProbe {
                 .register()
     }
 
-    fun mottattSykmelding(key: String, sykmelding: JsonNode) {
-        log.info("mottok sykmelding med key=$key")
+    fun mottattSykmelding(sykmelding: Sykmelding) {
+        log.info("mottok sykmelding med id=${sykmelding.id}")
         sykmeldingCounter.inc()
     }
 }
