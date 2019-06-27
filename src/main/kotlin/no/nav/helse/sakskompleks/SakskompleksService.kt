@@ -7,9 +7,12 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     fun finnSak(sykepengesøknad: Sykepengesøknad) =
             sakskompleksDao.finnSaker(sykepengesøknad.aktørId)
-                    .firstOrNull { sakskompleks ->
-                        sykepengesøknad.hørerSammenMed(sakskompleks)
-                    }
+                    .finnSak(sykepengesøknad)
+
+    private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =
+            firstOrNull { sakskompleks ->
+                sykepengesøknad.hørerSammenMed(sakskompleks)
+            }
 
     private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
             sakskompleks.søknader.any { søknad ->
