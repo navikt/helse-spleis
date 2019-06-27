@@ -39,7 +39,7 @@ class AppComponentTest {
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf("sykmeldinger", "soknader")
+                topicNames = listOf("privat-syfo-sm2013-automatiskBehandling", "syfo-soknad-v2")
         )
 
         @BeforeAll
@@ -56,7 +56,7 @@ class AppComponentTest {
     }
 
     @Test
-    fun `should start`() {
+    fun `skal ta imot innkommende sykmeldinger og søknader`() {
         testServer(config = mapOf(
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
                 "KAFKA_USERNAME" to username,
@@ -66,11 +66,11 @@ class AppComponentTest {
             val sykmeldingCounterBefore = getCounterValue("sykmeldinger_totals")
             val søknadCounterBefore = getCounterValue("soknader_totals")
 
-            val sykmelding = objectMapper.readValue(sykmelding_json, JsonNode::class.java)
-            produceOneMessage("sykmeldinger", sykmelding["id"].asText(), sykmelding)
+            val sykmelding = objectMapper.readTree("/sykmelding.json".readResource())
+            produceOneMessage("privat-syfo-sm2013-automatiskBehandling", sykmelding["sykmelding"]["id"].asText(), sykmelding)
 
-            val søknad = objectMapper.readValue(søknad_json, JsonNode::class.java)
-            produceOneMessage("soknader", søknad["id"].asText(), søknad)
+            val søknad = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
+            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
 
             await()
                     .atMost(10, TimeUnit.SECONDS)
@@ -115,20 +115,3 @@ class AppComponentTest {
                         metricFamily.samples
                     }
 }
-
-private val sykmelding_json = """
-{
-    "id": "71bd853d-36a1-49df-a34c-6e02cf727cfa",
-    "fnr": "11111111111",
-    "lege": "Hans Hansen"
-}
-""".trimIndent()
-
-private val søknad_json = """
-{
-    "id": "68da259c-ff7f-47cf-8fa0-c348ae95e220",
-    "sykmeldingId": "71bd853d-36a1-49df-a34c-6e02cf727cfa",
-    "status": "NY",
-    "arbeidsgiver": "Nærbutikken AS"
-}
-""".trimIndent()

@@ -18,7 +18,7 @@ class SøknadConsumer(streamsBuilder: StreamsBuilder, private val probe: Søknad
     }
 
     companion object {
-        private val topics = listOf("soknader")
+        private val topics = listOf("syfo-soknad-v2")
 
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())

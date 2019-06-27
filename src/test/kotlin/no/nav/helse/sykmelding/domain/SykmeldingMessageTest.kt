@@ -1,4 +1,4 @@
-package no.nav.helse.søknad.domain
+package no.nav.helse.sykmelding.domain
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -7,7 +7,7 @@ import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class SykepengesøknadTest {
+class SykmeldingMessageTest {
 
     companion object {
 
@@ -15,16 +15,11 @@ class SykepengesøknadTest {
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val testSøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val testSykmelding = SykmeldingMessage(objectMapper.readTree("/sykmelding.json".readResource()))
     }
 
     @Test
     fun `skal svare med id`() {
-        assertEquals("68da259c-ff7f-47cf-8fa0-c348ae95e220", testSøknad.id)
-    }
-
-    @Test
-    fun `skal svare med sykmeldingId`() {
-        assertEquals("71bd853d-36a1-49df-a34c-6e02cf727cfa", testSøknad.sykmeldingId)
+        assertEquals("71bd853d-36a1-49df-a34c-6e02cf727cfa", testSykmelding.sykmelding.id)
     }
 }

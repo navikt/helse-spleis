@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.JsonNodeSerde
-import no.nav.helse.sykmelding.domain.Sykmelding
+import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
@@ -18,7 +18,7 @@ class SykmeldingConsumer(streamsBuilder: StreamsBuilder, private val probe: Sykm
     }
 
     companion object {
-        private val topics = listOf("sykmeldinger")
+        private val topics = listOf("privat-syfo-sm2013-automatiskBehandling")
 
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
@@ -29,15 +29,15 @@ class SykmeldingConsumer(streamsBuilder: StreamsBuilder, private val probe: Sykm
         builder.stream<String, JsonNode>(topics, Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST))
                 .mapValues { jsonNode ->
-                    Sykmelding(jsonNode)
+                    SykmeldingMessage(jsonNode)
                 }
                 .foreach(::håndterSykmelding)
 
         return builder
     }
 
-    private fun håndterSykmelding(key: String, sykmelding: Sykmelding) {
-        probe.mottattSykmelding(sykmelding)
+    private fun håndterSykmelding(key: String, sykmeldingMessage: SykmeldingMessage) {
+        probe.mottattSykmelding(sykmeldingMessage.sykmelding)
         // TODO: finn eksisterende sak fra sykmeldingen, eller opprett ny sak
     }
 }
