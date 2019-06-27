@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
+import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -19,11 +20,13 @@ class SakskompleksServiceTest {
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
+        private val testSykmelding = SykmeldingMessage(objectMapper.readTree("/sykmelding.json".readResource()))
+
         private val testSøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
     }
 
     @Test
-    fun `skal ikke finne sak når søknaden ikke finnes`() {
+    fun `skal ikke finne sak når søknaden ikke er tilknyttet en sak`() {
         val sakskompleksService = SakskompleksService(SakskompleksDao(emptyList()))
 
         val sak = sakskompleksService.finnSak(testSøknad)
@@ -32,7 +35,7 @@ class SakskompleksServiceTest {
     }
 
     @Test
-    fun `skal finne sak når søknaden finnes`() {
+    fun `skal finne sak når søknaden er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
                 søknader = listOf(testSøknad)
         )
@@ -40,6 +43,28 @@ class SakskompleksServiceTest {
         val sakskompleksService = SakskompleksService(SakskompleksDao(listOf(sakForBruker)))
 
         val sak = sakskompleksService.finnSak(testSøknad)
+
+        assertEquals(sakForBruker, sak)
+    }
+
+    @Test
+    fun `skal ikke finne sak når sykmeldingen ikke er tilknyttet en sak`() {
+        val sakskompleksService = SakskompleksService(SakskompleksDao(emptyList()))
+
+        val sak = sakskompleksService.finnSak(testSykmelding.sykmelding)
+
+        assertNull(sak)
+    }
+
+    @Test
+    fun `skal finne sak når sykmeldingen er tilknyttet en sak`() {
+        val sakForBruker = etSakskompleks(
+                sykmeldinger = listOf(testSykmelding.sykmelding)
+        )
+
+        val sakskompleksService = SakskompleksService(SakskompleksDao(listOf(sakForBruker)))
+
+        val sak = sakskompleksService.finnSak(testSykmelding.sykmelding)
 
         assertEquals(sakForBruker, sak)
     }
