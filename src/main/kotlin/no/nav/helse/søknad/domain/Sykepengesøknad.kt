@@ -7,4 +7,6 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val id = jsonNode["id"].asText()!!
 
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
+
+    val aktørId = jsonNode["aktorId"].asText()!!
 }
