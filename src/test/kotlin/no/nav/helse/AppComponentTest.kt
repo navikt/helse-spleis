@@ -5,24 +5,20 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.util.KtorExperimentalAPI
+import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.serde.JsonNodeDeserializer
 import no.nav.helse.serde.JsonNodeSerializer
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.config.SaslConfigs
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -67,26 +63,23 @@ class AppComponentTest {
                 "KAFKA_PASSWORD" to password
         )) {
 
+            val sykmeldingCounterBefore = getCounterValue("sykmeldinger_totals")
+            val søknadCounterBefore = getCounterValue("soknader_totals")
+
             val sykmelding = objectMapper.readValue(sykmelding_json, JsonNode::class.java)
             produceOneMessage("sykmeldinger", sykmelding["id"].asText(), sykmelding)
 
             val søknad = objectMapper.readValue(søknad_json, JsonNode::class.java)
             produceOneMessage("soknader", søknad["id"].asText(), søknad)
 
-            val consumer = KafkaConsumer<String, JsonNode>(consumerProperties(), StringDeserializer(), JsonNodeDeserializer(objectMapper))
-            consumer.subscribe(listOf("sykmeldinger", "soknader"))
-
-            val messages = mutableListOf<JsonNode>()
             await()
                     .atMost(10, TimeUnit.SECONDS)
                     .untilAsserted {
-                        val records = consumer.poll(Duration.ofSeconds(1))
+                        val sykmeldingCounterAfter = getCounterValue("sykmeldinger_totals")
+                        val søknadCounterAfter = getCounterValue("soknader_totals")
 
-                        for (record in records) {
-                            messages.add(record.value())
-                        }
-
-                        assertEquals(2, messages.size)
+                        assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
+                        assertEquals(1, søknadCounterAfter - søknadCounterBefore)
                     }
         }
     }
@@ -105,15 +98,22 @@ class AppComponentTest {
                 put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
             }
 
-    private fun consumerProperties() =
-            Properties().apply {
-                put(ConsumerConfig.GROUP_ID_CONFIG, "component-test-consumer")
-                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
-                put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
+    private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =
+            (CollectorRegistry.defaultRegistry
+                    .findMetricSample(name, labelValues)
+                    ?.value ?: 0.0).toInt()
+
+    private fun CollectorRegistry.findMetricSample(name: String, labelValues: List<String>) =
+            findSamples(name).firstOrNull { sample ->
+                sample.labelValues.size == labelValues.size && sample.labelValues.containsAll(labelValues)
             }
+
+    private fun CollectorRegistry.findSamples(name: String) =
+            filteredMetricFamilySamples(setOf(name))
+                    .toList()
+                    .flatMap { metricFamily ->
+                        metricFamily.samples
+                    }
 }
 
 private val sykmelding_json = """

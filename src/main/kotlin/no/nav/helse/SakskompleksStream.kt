@@ -7,7 +7,9 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.sykmelding.SykmeldingConsumer
+import no.nav.helse.sykmelding.SykmeldingProbe
 import no.nav.helse.søknad.SøknadConsumer
+import no.nav.helse.søknad.SøknadProbe
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
@@ -30,8 +32,8 @@ fun Application.sakskompleksApplication() {
 
     val builder = StreamsBuilder()
 
-    SykmeldingConsumer(builder)
-    SøknadConsumer(builder)
+    SykmeldingConsumer(builder, SykmeldingProbe())
+    SøknadConsumer(builder, SøknadProbe())
 
 
     val streams = KafkaStreams(builder.build(), streamsConfig())

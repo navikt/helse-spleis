@@ -11,7 +11,7 @@ import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 import org.slf4j.LoggerFactory
 
-class SøknadConsumer(streamsBuilder: StreamsBuilder) {
+class SøknadConsumer(streamsBuilder: StreamsBuilder, private val probe: SøknadProbe) {
 
     init {
         build(streamsBuilder)
@@ -36,7 +36,7 @@ class SøknadConsumer(streamsBuilder: StreamsBuilder) {
     }
 
     private fun håndterSøknad(key: String, søknad: JsonNode) {
-        log.info("mottok søknad med key=$key")
+        probe.mottattSøknad(key, søknad)
         // TODO: finn eksisterende sak fra søknad
     }
 }
