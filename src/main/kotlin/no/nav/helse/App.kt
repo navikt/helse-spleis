@@ -32,11 +32,13 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
 
             put("database.jdbc-url", env["DATABASE_JDBC_URL"]
                     ?: String.format(
-                            "jdbc:postgresql://%s:%s/%s?user=%s",
+                            "jdbc:postgresql://%s:%s/%s%s",
                             property("database.host").getString(),
                             property("database.port").getString(),
                             property("database.name").getString(),
-                            propertyOrNull("database.username")?.getString()))
+                            propertyOrNull("database.username")?.getString()?.let {
+                                "?user=$it"
+                            } ?: ""))
 
             env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
         }
