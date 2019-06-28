@@ -23,6 +23,22 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
 
             env["NAV_TRUSTSTORE_PATH"]?.let { put("kafka.truststore-path", it) }
             env["NAV_TRUSTSTORE_PASSWORD"]?.let { put("kafka.truststore-password", it) }
+
+            env["DATABASE_HOST"]?.let { put("database.host", it) }
+            env["DATABASE_PORT"]?.let { put("database.port", it) }
+            env["DATABASE_NAME"]?.let { put("database.name", it) }
+            env["DATABASE_USERNAME"]?.let { put("database.username", it) }
+            env["DATABASE_PASSWORD"]?.let { put("database.password", it) }
+
+            put("database.jdbc-url", env["DATABASE_JDBC_URL"]
+                    ?: String.format(
+                            "jdbc:postgresql://%s:%s/%s?user=%s",
+                            property("database.host").getString(),
+                            property("database.port").getString(),
+                            property("database.name").getString(),
+                            propertyOrNull("database.username")?.getString()))
+
+            env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
         }
 
 @KtorExperimentalAPI

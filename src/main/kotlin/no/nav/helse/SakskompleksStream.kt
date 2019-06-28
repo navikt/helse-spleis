@@ -2,10 +2,12 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.zaxxer.hikari.HikariConfig
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.sykmelding.SykmeldingConsumer
 import no.nav.helse.sykmelding.SykmeldingProbe
 import no.nav.helse.søknad.SøknadConsumer
@@ -20,6 +22,26 @@ import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.util.*
 
+fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
+        HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            maximumPoolSize = 3
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+            username?.let { this.username = it }
+            password?.let { this.password = it }
+        }
+
+@KtorExperimentalAPI
+fun Application.createHikariConfigFromEnvironment() =
+        createHikariConfig(
+                jdbcUrl = environment.config.property("database.jdbc-url").getString(),
+                username = environment.config.propertyOrNull("database.user")?.getString(),
+                password = environment.config.propertyOrNull("database.password")?.getString()
+        )
+
 @KtorExperimentalAPI
 fun Application.sakskompleksApplication() {
 
@@ -30,11 +52,13 @@ fun Application.sakskompleksApplication() {
         }
     }
 
+    val hikariConfig = createHikariConfigFromEnvironment()
+    migrate(hikariConfig)
+
     val builder = StreamsBuilder()
 
     SykmeldingConsumer(builder, SykmeldingProbe())
     SøknadConsumer(builder, SøknadProbe())
-
 
     val streams = KafkaStreams(builder.build(), streamsConfig())
 

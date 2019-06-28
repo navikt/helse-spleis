@@ -5,6 +5,9 @@ val jacksonVersion = "2.9.8"
 val prometheusVersion = "0.6.0"
 //val kafkaVersion = "2.3.0"
 val kafkaVersion = "2.0.1"
+val flywayVersion = "6.0.0-beta"
+val hikariVersion = "3.3.1"
+val vaultJdbcVersion = "1.3.1"
 val junitJupiterVersion = "5.4.0"
 val mainClass = "no.nav.helse.AppKt"
 
@@ -34,6 +37,12 @@ dependencies {
 
     compile("io.prometheus:simpleclient_common:$prometheusVersion")
     compile("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+
+    compile("org.flywaydb:flyway-core:$flywayVersion")
+    compile("com.zaxxer:HikariCP:$hikariVersion")
+    compile("no.nav:vault-jdbc:$vaultJdbcVersion")
+
+    testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testCompile("org.awaitility:awaitility:3.1.6")
     testCompile("no.nav:kafka-embedded-env:2.1.1")
