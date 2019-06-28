@@ -22,7 +22,7 @@ import kotlin.random.Random
 @KtorExperimentalAPI
 private fun createTestApplicationConfig(config: Map<String, String> = emptyMap()) =
         createApplicationEnvironment(createConfigFromEnvironment(mapOf(
-                "server.port" to "${Random.nextInt(1000, 9999)}"
+                "HTTP_PORT" to "${Random.nextInt(1000, 9999)}"
         ) + config))
 
 @KtorExperimentalAPI
