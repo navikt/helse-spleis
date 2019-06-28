@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
@@ -15,10 +16,9 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
+import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -55,12 +55,30 @@ class AppComponentTest {
         }
     }
 
+    private lateinit var embeddedPostgres: EmbeddedPostgres
+    private lateinit var postgresConnection: Connection
+
+    @BeforeEach
+    fun `start postgres`() {
+        embeddedPostgres = EmbeddedPostgres.builder()
+                .start()
+
+        postgresConnection = embeddedPostgres.postgresDatabase.connection
+    }
+
+    @AfterEach
+    fun `stop postgres`() {
+        postgresConnection.close()
+        embeddedPostgres.close()
+    }
+
     @Test
     fun `skal ta imot innkommende sykmeldinger og søknader`() {
         testServer(config = mapOf(
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
                 "KAFKA_USERNAME" to username,
-                "KAFKA_PASSWORD" to password
+                "KAFKA_PASSWORD" to password,
+                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
             val sykmeldingCounterBefore = getCounterValue("sykmeldinger_totals")
