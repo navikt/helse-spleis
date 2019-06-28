@@ -16,7 +16,7 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
             put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
 
             put("kafka.app-id", "sykepenger-sakskompleks-v1")
-            put("kafka.bootstrap-servers", env.getValue("KAFKA_BOOTSTRAP_SERVERS"))
+            env["KAFKA_BOOTSTRAP_SERVERS"]?.let { put("kafka.bootstrap-servers", it) }
 
             env["KAFKA_USERNAME"]?.let { put("kafka.username", it) }
             env["KAFKA_PASSWORD"]?.let { put("kafka.password", it) }
