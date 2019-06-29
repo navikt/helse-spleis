@@ -7,6 +7,9 @@ import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.sakskompleks.SakskompleksDao
+import no.nav.helse.sakskompleks.SakskompleksService
+import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.sykmelding.SykmeldingConsumer
 import no.nav.helse.sykmelding.SykmeldingProbe
@@ -52,12 +55,13 @@ fun Application.sakskompleksApplication() {
         }
     }
 
-    val hikariConfig = createHikariConfigFromEnvironment()
-    migrate(hikariConfig)
+    migrate(createHikariConfigFromEnvironment())
+
+    val sakskompleksService = SakskompleksService(SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
 
-    SykmeldingConsumer(builder, SykmeldingProbe())
+    SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
     SøknadConsumer(builder, SøknadProbe())
 
     val streams = KafkaStreams(builder.build(), streamsConfig())

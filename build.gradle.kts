@@ -8,7 +8,9 @@ val kafkaVersion = "2.0.1"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
+val kotliqueryVersion = "1.3.0"
 val junitJupiterVersion = "5.4.0"
+val mockkVersion="1.9.3"
 val mainClass = "no.nav.helse.AppKt"
 
 plugins {
@@ -41,12 +43,15 @@ dependencies {
     compile("org.flywaydb:flyway-core:$flywayVersion")
     compile("com.zaxxer:HikariCP:$hikariVersion")
     compile("no.nav:vault-jdbc:$vaultJdbcVersion")
+    compile("com.github.seratch:kotliquery:$kotliqueryVersion")
 
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testCompile("org.awaitility:awaitility:3.1.6")
     testCompile("no.nav:kafka-embedded-env:2.1.1")
     testCompile("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
+
+    testCompile("io.mockk:mockk:$mockkVersion")
 
     testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

@@ -19,6 +19,14 @@ enum class Role {
 }
 
 @KtorExperimentalAPI
+fun Application.getDataSource(hikariConfig: HikariConfig) =
+        if (environment.config.isVaultEnabled()) {
+            dataSourceFromVault(hikariConfig, Role.User)
+        } else {
+            HikariDataSource(hikariConfig)
+        }
+
+@KtorExperimentalAPI
 fun Application.dataSourceFromVault(hikariConfig: HikariConfig, role: Role) =
         HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
                 hikariConfig,
