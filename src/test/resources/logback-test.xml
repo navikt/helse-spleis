@@ -7,6 +7,9 @@
         </layout>
     </appender>
 
+    <logger name="org.apache.kafka" level="ERROR"/>
+    <logger name="kafka" level="ERROR"/>
+
     <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
