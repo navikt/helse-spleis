@@ -62,7 +62,7 @@ fun Application.sakskompleksApplication() {
     val builder = StreamsBuilder()
 
     SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
-    SøknadConsumer(builder, SøknadProbe())
+    SøknadConsumer(builder, sakskompleksService, SøknadProbe())
 
     val streams = KafkaStreams(builder.build(), streamsConfig())
 

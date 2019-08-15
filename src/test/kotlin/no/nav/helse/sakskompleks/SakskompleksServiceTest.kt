@@ -49,6 +49,7 @@ class SakskompleksServiceTest {
     @Test
     fun `skal finne sak når søknaden er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
+                sykmeldinger = listOf(testSykmelding.sykmelding),
                 søknader = listOf(testSøknad)
         )
 
@@ -172,6 +173,20 @@ class SakskompleksServiceTest {
         verify(exactly = 1) {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
             sakskompleksDao.opprettSak(any())
+        }
+    }
+
+    @Test
+    fun `skal oppdatere sakskompleks`() {
+        val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        val etSakskompleks = etSakskompleks()
+
+        sakskompleksService.oppdaterSak(etSakskompleks)
+
+        verify(exactly = 1) {
+            sakskompleksDao.oppdaterSak(etSakskompleks)
         }
     }
 
