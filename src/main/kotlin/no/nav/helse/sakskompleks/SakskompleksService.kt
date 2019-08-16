@@ -15,8 +15,9 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             sakskompleksDao.finnSaker(sykmelding.aktørId)
                     .finnSak(sykmelding)
 
-    fun oppdaterSak(sakskompleks: Sakskompleks) {
-        sakskompleksDao.oppdaterSak(sakskompleks)
+    fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
+        val oppdatertSak = sak.copy(søknader = sak.søknader + søknad)
+        sakskompleksDao.oppdaterSak(oppdatertSak)
     }
 
     fun finnEllerOpprettSak(sykmelding: Sykmelding) =

@@ -49,8 +49,7 @@ class SøknadConsumer(
         sakskompleksService
             .finnSak(søknad)
             ?.let { sak ->
-                val oppdatertSak = sak.copy(søknader = sak.søknader + søknad)
-                sakskompleksService.oppdaterSak(oppdatertSak)
+                sakskompleksService.leggSøknadPåSak(sak, søknad)
                 probe.søknadKobletTilSakskompleks(søknad, sak)
             }
             ?: probe.søknadManglerSakskompleks(søknad)

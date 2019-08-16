@@ -183,10 +183,10 @@ class SakskompleksServiceTest {
 
         val etSakskompleks = etSakskompleks()
 
-        sakskompleksService.oppdaterSak(etSakskompleks)
+        sakskompleksService.leggSøknadPåSak(etSakskompleks, testSøknad)
 
         verify(exactly = 1) {
-            sakskompleksDao.oppdaterSak(etSakskompleks)
+            sakskompleksDao.oppdaterSak(etSakskompleks.copy(søknader = listOf(testSøknad)))
         }
     }
 
