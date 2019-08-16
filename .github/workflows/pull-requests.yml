@@ -1,4 +1,4 @@
-name: CI
+name: Bygg
 
 on: [pull_request]
 

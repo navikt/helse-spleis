@@ -1,4 +1,4 @@
-name: CI
+name: Bygg og deploy
 
 on:
   push:
