@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   push:
     branches:
     - master
@@ -33,7 +33,7 @@ jobs:
       run: ./gradlew test build
     - name: build docker image
       run: docker build . --pull -t ${DOCKER_IMAGE}:$(echo $GITHUB_SHA | cut -c1-7)
-      env: 
+      env:
         DOCKER_IMAGE: navikt/spsak
   release:
     runs-on: ubuntu-latest
@@ -44,11 +44,10 @@ jobs:
       run: |
         echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
         docker push ${DOCKER_IMAGE}:$(echo $GITHUB_SHA | cut -c1-7)
-      env: 
+      env:
         DOCKER_IMAGE: navikt/spsak
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      if: github.event == 'push'
   deploy:
     runs-on: ubuntu-latest
     needs: release
@@ -59,7 +58,7 @@ jobs:
         DOCKER_IMAGE: navikt/spsak
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        PREPROD_NAISERATOR=$(docker run -v $PWD/deploy/preprod.json: mikefarah/yq yq r /nais/preprod.yaml -j)
+        PREPROD_NAISERATOR=$(docker run -v $PWD/deploy/preprod.json:/nais/preprod.yaml mikefarah/yq yq r /nais/preprod.yaml -j)
         PREPROD_NAISERATOR=$(echo $PREPROD_NAISERATOR | jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c)
         PREPROD_DEPLOYMENT=$(cat deploy/deployreq.json | jq '.payload.kubernetes.resources += ['$PREPROD_NAISERATOR']')
         PREPROD_DEPLOYMENT=$(echo $PREPROD_DEPLOYMENT | jq '.environment = "dev-fss"')
@@ -70,4 +69,4 @@ jobs:
            -d "$PREPROD_DEPLOYMENT" \
            -H "Accept: application/vnd.github.ant-man-preview+json" \
            https://api.github.com/repos/navikt/helse-sykepenger-sakskompleks/deployments
-           
+
