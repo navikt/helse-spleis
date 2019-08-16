@@ -15,6 +15,11 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             sakskompleksDao.finnSaker(sykmelding.aktørId)
                     .finnSak(sykmelding)
 
+    fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
+        val oppdatertSak = sak.copy(søknader = sak.søknader + søknad)
+        sakskompleksDao.oppdaterSak(oppdatertSak)
+    }
+
     fun finnEllerOpprettSak(sykmelding: Sykmelding) =
             finnSak(sykmelding)?.let { sak ->
                 sak.copy(
@@ -43,8 +48,8 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             }
 
     private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
-            sakskompleks.søknader.any { søknad ->
-                søknad.id == id
+            sakskompleks.sykmeldinger.any { sykmelding ->
+                sykmelding.id == sykmeldingId
             }
 
     private fun Sykmelding.hørerSammenMed(sakskompleks: Sakskompleks) =

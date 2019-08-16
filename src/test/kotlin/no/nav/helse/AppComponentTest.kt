@@ -9,17 +9,27 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
+import no.nav.helse.sakskompleks.SakskompleksDao
+import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
+import no.nav.helse.sykmelding.domain.SykmeldingMessage
+import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.util.*
+import java.util.Properties
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -73,12 +83,15 @@ class AppComponentTest {
     }
 
     @Test
-    fun `skal ta imot innkommende sykmeldinger og søknader`() {
+    fun `kobler søknad til eksisterende sakskompleks`() {
+        val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
         testServer(config = mapOf(
-                "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-                "KAFKA_USERNAME" to username,
-                "KAFKA_PASSWORD" to password,
-                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
             val sykmeldingCounterBefore = getCounterValue("sykmeldinger_totals")
@@ -87,18 +100,58 @@ class AppComponentTest {
             val sykmelding = objectMapper.readTree("/sykmelding.json".readResource())
             produceOneMessage("privat-syfo-sm2013-automatiskBehandling", sykmelding["sykmelding"]["id"].asText(), sykmelding)
 
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val sykmeldingCounterAfter = getCounterValue("sykmeldinger_totals")
+
+                    assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
+                    assertNotNull(sakskompleksService.finnSak(SykmeldingMessage(sykmelding).sykmelding))
+                }
+
             val søknad = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
             produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
 
             await()
-                    .atMost(10, TimeUnit.SECONDS)
-                    .untilAsserted {
-                        val sykmeldingCounterAfter = getCounterValue("sykmeldinger_totals")
-                        val søknadCounterAfter = getCounterValue("soknader_totals")
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val søknadCounterAfter = getCounterValue("soknader_totals")
 
-                        assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
-                        assertEquals(1, søknadCounterAfter - søknadCounterBefore)
-                    }
+                    assertEquals(1, søknadCounterAfter - søknadCounterBefore)
+
+                    val sak = sakskompleksService.finnSak(Sykepengesøknad(søknad))
+                    assertEquals(listOf(SykmeldingMessage(sykmelding).sykmelding), sak?.sykmeldinger)
+                    assertEquals(listOf(Sykepengesøknad(søknad)), sak?.søknader)
+                }
+        }
+    }
+
+    @Test
+    fun `søknad uten tilhørende sykmelding ignoreres`() {
+        val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val søknadCounterBefore = getCounterValue("soknader_totals")
+            val søknad = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
+            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val søknadCounterAfter = getCounterValue("soknader_totals")
+
+                    assertEquals(1, søknadCounterAfter - søknadCounterBefore)
+
+                    val sak = sakskompleksService.finnSak(Sykepengesøknad(søknad))
+                    assertNull(sak)
+                }
         }
     }
 
