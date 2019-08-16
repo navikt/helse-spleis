@@ -4,9 +4,6 @@ on:
   push:
     branches:
     - master
-  pull_request:
-    branches:
-    - master
 
 jobs:
   build:
@@ -48,19 +45,38 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v1
-    - name: create deployment
+    - name: deploy to preprod
       env:
         DOCKER_IMAGE: navikt/spsak
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NAV_CLUSTER: dev-fss
+        NAISERATOR_FILE: deploy/preprod.json
       run: |
-        PREPROD_NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c deploy/preprod.json )
-        PREPROD_DEPLOYMENT=$(jq '.payload.kubernetes.resources += ['$PREPROD_NAISERATOR']' deploy/deployreq.json)
-        PREPROD_DEPLOYMENT=$(echo $PREPROD_DEPLOYMENT | jq '.environment = "dev-fss"')
-        PREPROD_DEPLOYMENT=$(echo $PREPROD_DEPLOYMENT | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
+        NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c $NAISERATOR_FILE )
+        DEPLOY_PAYLOAD=$(jq '.payload.kubernetes.resources += ['$NAISERATOR']' deploy/deployreq.json)
+        DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.environment = "'$NAV_CLUSTER'"')
+        DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
         curl -i -n --fail \
            -X POST \
            -u x-access-token:$GITHUB_TOKEN \
-           -d "$PREPROD_DEPLOYMENT" \
+           -d "$DEPLOY_PAYLOAD" \
            -H "Accept: application/vnd.github.ant-man-preview+json" \
-           https://api.github.com/repos/navikt/helse-sykepenger-sakskompleks/deployments
+           https://api.github.com/repos/$GITHUB_REPOSITORY/deployments
+    - name: deploy to prod
+        env:
+          DOCKER_IMAGE: navikt/spsak
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAV_CLUSTER: prod-fss
+          NAISERATOR_FILE: deploy/prod.json
+        run: |
+          NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c $NAISERATOR_FILE )
+          DEPLOY_PAYLOAD=$(jq '.payload.kubernetes.resources += ['$NAISERATOR']' deploy/deployreq.json)
+          DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.environment = "'$NAV_CLUSTER'"')
+          DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
+          curl -i -n --fail \
+             -X POST \
+             -u x-access-token:$GITHUB_TOKEN \
+             -d "$DEPLOY_PAYLOAD" \
+             -H "Accept: application/vnd.github.ant-man-preview+json" \
+             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments
 
