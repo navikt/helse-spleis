@@ -1,8 +1,11 @@
 package no.nav.helse.sakskompleks
 
 import no.nav.helse.sakskompleks.domain.Sakskompleks
+import no.nav.helse.sakskompleks.domain.tom
 import no.nav.helse.sykmelding.domain.Sykmelding
+import no.nav.helse.sykmelding.domain.sykmeldingGjelderFra
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
@@ -53,7 +56,8 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             }
 
     private fun Sykmelding.hørerSammenMed(sakskompleks: Sakskompleks) =
-            sakskompleks.sykmeldinger.any { sykmelding ->
-                sykmelding.id == id
-            }
+        // påfølgende eksisterende sakskompleks
+        ChronoUnit.DAYS.between(sakskompleks.tom(), sykmeldingGjelderFra()) < 16
+        // TODO: Sykmelding som gjelder før et sakskompleks
+        // TODO: Sykmeldinger som binder sammen to sakskompleks
 }

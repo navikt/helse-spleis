@@ -11,9 +11,11 @@ import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class SakskompleksServiceTest {
 
@@ -187,6 +189,53 @@ class SakskompleksServiceTest {
 
         verify(exactly = 1) {
             sakskompleksDao.oppdaterSak(etSakskompleks.copy(søknader = listOf(testSøknad)))
+        }
+    }
+
+    @Test
+    fun `sykmelding utenfor 16 dager av sakskompleks blir nytt sakskompleks`() {
+        val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        val førsteSykmelding = Sykmelding(objectMapper.readTree("/case-to-adskilte-sykmeldinger/1-sykmelding.json".readResource())["sykmelding"])
+        val andreSykmelding = Sykmelding(objectMapper.readTree("/case-to-adskilte-sykmeldinger/2-sykmelding.json".readResource())["sykmelding"])
+
+        every {
+            sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
+        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+
+        sakskompleksService.finnEllerOpprettSak(andreSykmelding)
+
+        verify(exactly = 1) {
+            sakskompleksDao.opprettSak(any())
+        }
+
+        verify(exactly = 0) {
+            sakskompleksDao.oppdaterSak(any())
+        }
+    }
+
+    @Test
+    fun `sykmelding innenfor 16 dager av sakskompleks blir koblet på sakskompleks`() {
+        val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        val førsteSykmelding = Sykmelding(objectMapper.readTree("/case-to-påfølgende-sykmeldinger/1-sykmelding.json".readResource())["sykmelding"])
+        val andreSykmelding = Sykmelding(objectMapper.readTree("/case-to-påfølgende-sykmeldinger/2-sykmelding.json".readResource())["sykmelding"])
+
+        every {
+            sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
+        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+
+
+        sakskompleksService.finnEllerOpprettSak(andreSykmelding)
+
+        verify(exactly = 0) {
+            sakskompleksDao.opprettSak(any())
+        }
+
+        verify(exactly = 1) {
+            sakskompleksDao.oppdaterSak(any())
         }
     }
 
