@@ -53,9 +53,8 @@ jobs:
         DOCKER_IMAGE: navikt/spsak
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        PREPROD_NAISERATOR=$(docker run -v $PWD/deploy/preprod.json:/nais/preprod.yaml mikefarah/yq yq r /nais/preprod.yaml -j)
-        PREPROD_NAISERATOR=$(echo $PREPROD_NAISERATOR | jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c)
-        PREPROD_DEPLOYMENT=$(cat deploy/deployreq.json | jq '.payload.kubernetes.resources += ['$PREPROD_NAISERATOR']')
+        PREPROD_NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c deploy/preprod.json )
+        PREPROD_DEPLOYMENT=$(jq '.payload.kubernetes.resources += ['$PREPROD_NAISERATOR']' deploy/deployreq.json)
         PREPROD_DEPLOYMENT=$(echo $PREPROD_DEPLOYMENT | jq '.environment = "dev-fss"')
         PREPROD_DEPLOYMENT=$(echo $PREPROD_DEPLOYMENT | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
         curl -i -n --fail \
