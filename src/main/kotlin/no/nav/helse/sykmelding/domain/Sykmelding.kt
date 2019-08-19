@@ -44,7 +44,7 @@ class SykmeldingDeserializer : StdDeserializer<Sykmelding>(Sykmelding::class.jav
 
 }
 
-fun Sykmelding.sykmeldingGjelderFra(): LocalDate? {
+fun Sykmelding.gjelderFra(): LocalDate? {
     return listOfNotNull(perioder.map { it.fom }.min(), syketilfelleStartDato).min()
 }
 

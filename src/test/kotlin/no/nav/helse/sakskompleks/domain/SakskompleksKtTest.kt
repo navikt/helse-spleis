@@ -26,8 +26,12 @@ class SakskompleksKtTest {
     fun `bruker datoer fra egenmeldingen om den er før sykmeldingen`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 19),
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27)
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
         )
 
         val søknad = søknad(
@@ -48,16 +52,20 @@ class SakskompleksKtTest {
             søknader = listOf(søknad)
         )
 
-        assertEquals(LocalDate.of(2019, 8 ,16) ,sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8 ,27) ,sakskompleks.tom())
+        assertEquals(LocalDate.of(2019, 8, 16), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
     }
 
     @Test
     fun `bruker syketilefelleStartDato om den peker på en dato tidligere enn sykmeldingen`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 1),
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27)
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
         )
 
         val søknad = søknad(
@@ -78,16 +86,20 @@ class SakskompleksKtTest {
             søknader = listOf(søknad)
         )
 
-        assertEquals(LocalDate.of(2019, 8 ,1) ,sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8 ,27) ,sakskompleks.tom())
+        assertEquals(LocalDate.of(2019, 8, 1), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
     }
 
     @Test
     fun `bruker syketilefelle | fom om vi ikke har andre tidligere datoer`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 19),
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27)
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
         )
 
         val søknad = søknad(
@@ -102,22 +114,26 @@ class SakskompleksKtTest {
             søknader = listOf(søknad)
         )
 
-        assertEquals(LocalDate.of(2019, 8 ,19) ,sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8 ,27) ,sakskompleks.tom())
+        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
     }
 
     @Test
     fun `arbeidGjennopptatt overstyrer sykmeldingsperiode om den er satt`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 19),
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27)
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
         )
 
         val søknad = søknad(
             fom = LocalDate.of(2019, 8, 19),
             tom = LocalDate.of(2019, 8, 27),
-            arbeidGjenopptatt = LocalDate.of(2019,8,26)
+            arbeidGjenopptatt = LocalDate.of(2019, 8, 26)
         )
 
         val sakskompleks = Sakskompleks(
@@ -127,16 +143,20 @@ class SakskompleksKtTest {
             søknader = listOf(søknad)
         )
 
-        assertEquals(LocalDate.of(2019, 8 ,19) ,sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8 ,26) ,sakskompleks.tom())
+        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 26), sakskompleks.tom())
     }
 
     @Test
     fun `testsykmelding overskriver felter riktig`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 19),
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27)
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
         )
 
         assertEquals(LocalDate.of(2019, 8, 19), sykmelding.syketilfelleStartDato)
@@ -159,8 +179,8 @@ class SakskompleksKtTest {
             ),
             arbeidGjenopptatt = LocalDate.of(2019, 8, 26)
         )
-        assertEquals(LocalDate.of(2019,8,19), søknad.fom)
-        assertEquals(LocalDate.of(2019,8,27), søknad.tom)
+        assertEquals(LocalDate.of(2019, 8, 19), søknad.fom)
+        assertEquals(LocalDate.of(2019, 8, 27), søknad.tom)
 
         assertEquals(1, søknad.egenmeldinger.size)
         assertEquals(LocalDate.of(2019, 8, 16), søknad.egenmeldinger[0].fom)
@@ -183,18 +203,24 @@ class SakskompleksKtTest {
 
 fun sykmelding(
     syketilfelleStartDato: LocalDate = LocalDate.of(2019, 6, 1),
-    fom: LocalDate = LocalDate.of(2019, 6, 1),
-    tom: LocalDate = LocalDate.of(2019, 6, 14)
+    perioder: List<Periode> = listOf(
+        periode(
+            fom = LocalDate.of(2019, 6, 1),
+            tom = LocalDate.of(2019, 6, 14)
+        )
+    )
 ): Sykmelding {
     val json = SakskompleksKtTest.objectMapper.readTree("/sykmelding.json".readResource())
 
     (json["sykmelding"] as ObjectNode).put("syketilfelleStartDato", syketilfelleStartDato.toString())
 
     (json["sykmelding"] as ObjectNode).replace(
-        "perioder", JsonNodeFactory.instance.arrayNode().add(
-            JsonNodeFactory.instance.objectNode()
-                .put("fom", fom.toString())
-                .put("tom", tom.toString())
+        "perioder", JsonNodeFactory.instance.arrayNode().addAll(
+            perioder.map {
+                JsonNodeFactory.instance.objectNode()
+                    .put("fom", it.fom.toString())
+                    .put("tom", it.tom.toString())
+            }
         )
     )
 
