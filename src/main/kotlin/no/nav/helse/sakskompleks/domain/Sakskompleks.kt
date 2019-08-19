@@ -23,10 +23,15 @@ fun Sakskompleks.fom() : LocalDate? = run {
 }
 
 fun Sakskompleks.tom(): LocalDate? = run {
-    val arbeidGjenopptatt = søknader.maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
+    val arbeidGjenopptatt = søknader.somIkkeErKorrigerte().maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
     val sisteTOMSøknad = søknader.maxBy { søknad -> søknad.tom }?.tom
     val sisteTOMSykmelding = sykmeldinger.flatMap { sykmelding -> sykmelding.perioder }.maxBy { it.tom }?.tom
 
     return arbeidGjenopptatt
         ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max()
+}
+
+fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
+    val korrigerteIder = mapNotNull { it.korrigerer }
+    return filter { it.id !in korrigerteIder }
 }

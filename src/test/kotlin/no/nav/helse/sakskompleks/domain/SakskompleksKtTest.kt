@@ -148,6 +148,43 @@ class SakskompleksKtTest {
     }
 
     @Test
+    fun `bruker ikke korrigerte søknader til av beregne arbeidGjenopptatt i søknader`() {
+        val sykmelding = sykmelding(
+            syketilfelleStartDato = LocalDate.of(2019, 8, 19),
+            perioder = listOf(
+                periode(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            )
+        )
+
+        val søknad = søknad(
+            id = "id1",
+            fom = LocalDate.of(2019, 8, 19),
+            tom = LocalDate.of(2019, 8, 27)
+        )
+
+        val korrigering = søknad(
+            id = "id2",
+            fom = LocalDate.of(2019, 8, 19),
+            tom = LocalDate.of(2019, 8, 26),
+            arbeidGjenopptatt = LocalDate.of(2019, 8, 26),
+            korrigerer = "id1"
+        )
+
+        val sakskompleks = Sakskompleks(
+            id = UUID.randomUUID(),
+            aktørId = "aktørId",
+            sykmeldinger = listOf(sykmelding),
+            søknader = listOf(søknad, korrigering)
+        )
+
+        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 26), sakskompleks.tom())
+    }
+
+    @Test
     fun `testsykmelding overskriver felter riktig`() {
         val sykmelding = sykmelding(
             syketilfelleStartDato = LocalDate.of(2019, 8, 19),
@@ -228,16 +265,20 @@ fun sykmelding(
 }
 
 fun søknad(
+    id: String = "68da259c-ff7f-47cf-8fa0-c348ae95e220",
     fom: LocalDate = LocalDate.of(2019, 8, 1),
     tom: LocalDate = LocalDate.of(2019, 8, 14),
     egenmeldinger: List<Periode> = emptyList(),
-    arbeidGjenopptatt: LocalDate? = null
+    arbeidGjenopptatt: LocalDate? = null,
+    korrigerer: String? = null
 ): Sykepengesøknad {
     val json =
         SakskompleksKtTest.objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()) as ObjectNode
 
+    json.put("id", id)
     json.put("fom", fom.toString())
     json.put("tom", tom.toString())
+    json.put("korrigerer", korrigerer)
 
     json.replace(
         "egenmeldinger", JsonNodeFactory.instance.arrayNode().addAll(

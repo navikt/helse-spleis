@@ -30,6 +30,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) {
     val egenmeldinger = jsonNode["egenmeldinger"]?.map { Periode(it) }
         ?: emptyList()
     val arbeidGjenopptatt = jsonNode["arbeidGjenopptatt"].safelyUnwrapDate()
+    val korrigerer get() = jsonNode["korrigerer"]?.asText()
 }
 
 class SykepengesøknadSerializer : StdSerializer<Sykepengesøknad>(Sykepengesøknad::class.java) {
