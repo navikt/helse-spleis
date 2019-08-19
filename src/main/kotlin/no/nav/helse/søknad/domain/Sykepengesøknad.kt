@@ -26,12 +26,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) {
     val aktørId = jsonNode["aktorId"].asText()!!
     val fom = jsonNode["fom"].asText().let { LocalDate.parse(it) }
     val tom = jsonNode["tom"].asText().let { LocalDate.parse(it) }
-    val egenmeldinger = jsonNode["egenmeldinger"]?.map {
-        Periode(
-            fom = LocalDate.parse(it["fom"].textValue()),
-            tom = LocalDate.parse(it["tom"].textValue())
-        )
-    }
+    val egenmeldinger = jsonNode["egenmeldinger"]?.map { Periode(it) }
         ?: emptyList()
     val arbeidGjenopptatt = jsonNode["arbeidGjenopptatt"].safelyUnwrapDate()
 }

@@ -25,12 +25,7 @@ data class Sykmelding(val jsonNode: JsonNode) {
     val aktørId = jsonNode["pasientAktoerId"].asText()!!
 
     val syketilfelleStartDato: LocalDate? = jsonNode["syketilfelleStartDato"].safelyUnwrapDate()
-    val perioder: List<Periode> = jsonNode["perioder"].map {
-        Periode(
-            fom = LocalDate.parse(it["fom"].textValue()),
-            tom = LocalDate.parse(it["tom"].textValue())
-        )
-    }
+    val perioder: List<Periode> = jsonNode["perioder"].map { Periode(it) }
 }
 
 class SykmeldingSerializer : StdSerializer<Sykmelding>(Sykmelding::class.java) {
@@ -55,7 +50,10 @@ fun Sykmelding.sykmeldingGjelderFra(): LocalDate? {
     return listOfNotNull(perioder.map { it.fom }.min(), syketilfelleStartDato).min()
 }
 
-data class Periode(
-    val fom: LocalDate,
-    val tom: LocalDate
-)
+@JsonSerialize(using = SykmeldingSerializer::class)
+@JsonDeserialize(using = SykmeldingDeserializer::class)
+data class Periode(val jsonNode: JsonNode) {
+    val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+    val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+}
+

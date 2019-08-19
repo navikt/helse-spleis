@@ -41,15 +41,9 @@ class SykmeldingTest {
 
     @Test
     fun `kan hente ut perioder fra sykmeldingen`() {
-        assertEquals(
-            listOf(
-                Periode(
-                    fom = LocalDate.of(2019, 6, 1),
-                    tom = LocalDate.of(2019, 6, 14)
-                )
-            ),
-            testSykmelding.perioder
-        )
+        assertEquals(1, testSykmelding.perioder.size)
+        assertEquals(LocalDate.of(2019,6,1), testSykmelding.perioder[0].fom)
+        assertEquals(LocalDate.of(2019,6,14), testSykmelding.perioder[0].tom)
     }
 
     @Test
