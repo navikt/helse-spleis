@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
 
@@ -47,12 +48,4 @@ class SykepengesøknadDeserializer : StdDeserializer<Sykepengesøknad>(Sykepenge
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
         Sykepengesøknad(objectMapper.readTree(parser))
 
-}
-
-fun JsonNode.safelyUnwrapDate(): LocalDate? {
-    return if (isNull) {
-        null
-    } else {
-        LocalDate.parse(textValue())
-    }
 }

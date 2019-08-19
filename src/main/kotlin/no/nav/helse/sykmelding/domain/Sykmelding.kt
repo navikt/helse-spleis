@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.søknad.domain.safelyUnwrapDate
+import no.nav.helse.serde.safelyUnwrapDate
 import java.time.LocalDate
 
 
@@ -21,11 +21,9 @@ import java.time.LocalDate
 data class Sykmelding(val jsonNode: JsonNode) {
 
     val id = jsonNode["id"].asText()!!
-
     val aktørId = jsonNode["pasientAktoerId"].asText()!!
-
-    val syketilfelleStartDato: LocalDate? = jsonNode["syketilfelleStartDato"].safelyUnwrapDate()
-    val perioder: List<Periode> = jsonNode["perioder"].map { Periode(it) }
+    val syketilfelleStartDato: LocalDate? get() = jsonNode["syketilfelleStartDato"].safelyUnwrapDate()
+    val perioder: List<Periode> get() = jsonNode["perioder"].map { Periode(it) }
 }
 
 class SykmeldingSerializer : StdSerializer<Sykmelding>(Sykmelding::class.java) {
