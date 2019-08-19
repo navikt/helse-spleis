@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.safelyUnwrapDate
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 
@@ -44,8 +45,8 @@ class SykmeldingDeserializer : StdDeserializer<Sykmelding>(Sykmelding::class.jav
 
 }
 
-fun Sykmelding.gjelderFra(): LocalDate? {
-    return listOfNotNull(perioder.map { it.fom }.min(), syketilfelleStartDato).min()
+fun Sykmelding.gjelderFra(): LocalDate {
+    return listOfNotNull(perioder.map { it.fom }.min(), syketilfelleStartDato).min() ?: throw RuntimeException("En sykmelding må ha en startdato")
 }
 
 @JsonSerialize(using = SykmeldingSerializer::class)

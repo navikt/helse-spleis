@@ -2,6 +2,7 @@ package no.nav.helse.sakskompleks.domain
 
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import java.lang.RuntimeException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -22,13 +23,13 @@ fun Sakskompleks.fom() : LocalDate? = run {
     return listOfNotNull(syketilfelleStart, tidligsteFOM, søknadEgenmelding).min()
 }
 
-fun Sakskompleks.tom(): LocalDate? = run {
+fun Sakskompleks.tom(): LocalDate = run {
     val arbeidGjenopptatt = søknader.somIkkeErKorrigerte().maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
     val sisteTOMSøknad = søknader.maxBy { søknad -> søknad.tom }?.tom
     val sisteTOMSykmelding = sykmeldinger.flatMap { sykmelding -> sykmelding.perioder }.maxBy { it.tom }?.tom
 
     return arbeidGjenopptatt
-        ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max()
+        ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max() ?: throw RuntimeException("Et sakskompleks må ha en sluttdato!")
 }
 
 fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
