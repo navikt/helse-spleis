@@ -3,7 +3,11 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.zaxxer.hikari.HikariConfig
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationStarted
+import io.ktor.application.ApplicationStopping
+import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
@@ -23,27 +27,27 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
-import java.util.*
+import java.util.Properties
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
-        HikariConfig().apply {
-            this.jdbcUrl = jdbcUrl
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-            username?.let { this.username = it }
-            password?.let { this.password = it }
-        }
+    HikariConfig().apply {
+        this.jdbcUrl = jdbcUrl
+        maximumPoolSize = 3
+        minimumIdle = 1
+        idleTimeout = 10001
+        connectionTimeout = 1000
+        maxLifetime = 30001
+        username?.let { this.username = it }
+        password?.let { this.password = it }
+    }
 
 @KtorExperimentalAPI
 fun Application.createHikariConfigFromEnvironment() =
-        createHikariConfig(
-                jdbcUrl = environment.config.property("database.jdbc-url").getString(),
-                username = environment.config.propertyOrNull("database.user")?.getString(),
-                password = environment.config.propertyOrNull("database.password")?.getString()
-        )
+    createHikariConfig(
+        jdbcUrl = environment.config.property("database.jdbc-url").getString(),
+        username = environment.config.propertyOrNull("database.user")?.getString(),
+        password = environment.config.propertyOrNull("database.password")?.getString()
+    )
 
 @KtorExperimentalAPI
 fun Application.sakskompleksApplication() {
@@ -51,7 +55,7 @@ fun Application.sakskompleksApplication() {
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
 
@@ -89,7 +93,10 @@ private fun Application.streamsConfig() = Properties().apply {
 
     environment.config.propertyOrNull("kafka.username")?.getString()?.let { username ->
         environment.config.propertyOrNull("kafka.password")?.getString()?.let { password ->
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
+            put(
+                SaslConfigs.SASL_JAAS_CONFIG,
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
+            )
         }
     }
 
@@ -117,7 +124,7 @@ private fun Application.addShutdownHook(streams: KafkaStreams) {
             streams.close()
         }
     }
-    streams.setUncaughtExceptionHandler{ _, ex ->
+    streams.setUncaughtExceptionHandler { _, ex ->
         log.error("Caught exception in stream, exiting", ex)
         streams.close()
     }

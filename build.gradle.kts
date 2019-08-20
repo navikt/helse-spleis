@@ -2,15 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktorVersion = "1.2.2"
 val jacksonVersion = "2.9.8"
-val prometheusVersion = "0.6.0"
-//val kafkaVersion = "2.3.0"
 val kafkaVersion = "2.0.1"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kotliqueryVersion = "1.3.0"
 val junitJupiterVersion = "5.4.0"
-val mockkVersion="1.9.3"
+val mockkVersion = "1.9.3"
+val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 plugins {
@@ -37,8 +36,8 @@ dependencies {
 
     compile("org.apache.kafka:kafka-streams:$kafkaVersion")
 
-    compile("io.prometheus:simpleclient_common:$prometheusVersion")
-    compile("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    compile("io.ktor:ktor-metrics-micrometer:$ktorVersion")
+    compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
     compile("org.flywaydb:flyway-core:$flywayVersion")
     compile("com.zaxxer:HikariCP:$hikariVersion")

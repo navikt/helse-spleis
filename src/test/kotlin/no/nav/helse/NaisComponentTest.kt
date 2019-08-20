@@ -6,6 +6,8 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
+import no.nav.helse.sakskompleks.domain.søknad
+import no.nav.helse.søknad.SøknadProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -27,9 +29,14 @@ class NaisComponentTest {
     @Test
     fun `should respond with metrics`() {
         testServer(environment = testEnv) {
+            val probe = SøknadProbe()
+            probe.mottattSøknad(søknad())
+
             handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
                 assertEquals(HttpStatusCode.OK, responseStatusCode)
-                assertTrue(responseBody.contains("process_cpu_seconds_total"))
+                val response = responseBody.reader().use { it.readText() }
+                assertTrue(response.contains("soknader_totals"))
+                assertTrue(response.contains("""logback_events_total{level="error",}"""))
             }
         }
     }
