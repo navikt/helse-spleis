@@ -29,7 +29,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) {
     val tom = jsonNode["tom"].asText().let { LocalDate.parse(it) }
     val egenmeldinger = jsonNode["egenmeldinger"]?.map { Periode(it) }
         ?: emptyList()
-    val arbeidGjenopptatt = jsonNode["arbeidGjenopptatt"].safelyUnwrapDate()
+    val arbeidGjenopptatt = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 }
 
