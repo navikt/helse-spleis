@@ -246,7 +246,7 @@ class SakskompleksServiceTest {
     }
 
     @Test
-    fun `1 dager mellom fredag og tirsdag`() {
+    fun `1 dag mellom fredag og tirsdag`() {
         assertEquals(
             1, kalenderdagerMellomMinusHelg(
                 LocalDate.of(2019, 8, 30),
@@ -266,7 +266,7 @@ class SakskompleksServiceTest {
     }
 
     @Test
-    fun `1 dager mellom søndag og tirsdag`() {
+    fun `1 dag mellom søndag og tirsdag`() {
         assertEquals(
             1, kalenderdagerMellomMinusHelg(
                 LocalDate.of(2019, 9, 1),
@@ -276,7 +276,7 @@ class SakskompleksServiceTest {
     }
 
     @Test
-    fun `1 dager mellom onsdag og fredag`() {
+    fun `1 dag mellom onsdag og fredag`() {
         assertEquals(
             1, kalenderdagerMellomMinusHelg(
                 LocalDate.of(2019, 9, 4),
