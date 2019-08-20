@@ -11,20 +11,24 @@ import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.time.LocalDate
+import java.util.UUID
 
 class SakskompleksServiceTest {
 
     companion object {
         private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val testSykmelding = SykmeldingMessage(objectMapper.readTree("/sykmelding.json".readResource()))
 
-        private val testSøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val testSøknad =
+            Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
     }
 
     @Test
@@ -49,8 +53,8 @@ class SakskompleksServiceTest {
     @Test
     fun `skal finne sak når søknaden er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
-                sykmeldinger = listOf(testSykmelding.sykmelding),
-                søknader = listOf(testSøknad)
+            sykmeldinger = listOf(testSykmelding.sykmelding),
+            søknader = listOf(testSøknad)
         )
 
         val sakskompleksDao = mockk<SakskompleksDao>()
@@ -92,7 +96,7 @@ class SakskompleksServiceTest {
     @Test
     fun `skal finne sak når sykmeldingen er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
-                sykmeldinger = listOf(testSykmelding.sykmelding)
+            sykmeldinger = listOf(testSykmelding.sykmelding)
         )
 
         val sakskompleksDao = mockk<SakskompleksDao>()
@@ -115,10 +119,10 @@ class SakskompleksServiceTest {
     @Test
     fun `skal oppdatere sak når aktøren har en sak`() {
         val sakForBruker = etSakskompleks(
-                sykmeldinger = listOf(testSykmelding.sykmelding)
+            sykmeldinger = listOf(testSykmelding.sykmelding)
         )
         val oppdatertSak = sakForBruker.copy(
-                sykmeldinger = sakForBruker.sykmeldinger + testSykmelding.sykmelding
+            sykmeldinger = sakForBruker.sykmeldinger + testSykmelding.sykmelding
         )
 
         val sakskompleksDao = mockk<SakskompleksDao>()
@@ -190,14 +194,137 @@ class SakskompleksServiceTest {
         }
     }
 
-    private fun etSakskompleks(id: UUID = UUID.randomUUID(),
-                               aktørId: String = "1234567890123",
-                               sykmeldinger: List<Sykmelding> = emptyList(),
-                               søknader: List<Sykepengesøknad> = emptyList()) =
-            Sakskompleks(
-                    id = id,
-                    aktørId = aktørId,
-                    sykmeldinger = sykmeldinger,
-                    søknader = søknader
+    @Test
+    fun `sykmelding utenfor 16 dager av sakskompleks blir nytt sakskompleks`() {
+        val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        val førsteSykmelding =
+            Sykmelding(objectMapper.readTree("/case-to-adskilte-sykmeldinger/1-sykmelding.json".readResource())["sykmelding"])
+        val andreSykmelding =
+            Sykmelding(objectMapper.readTree("/case-to-adskilte-sykmeldinger/2-sykmelding.json".readResource())["sykmelding"])
+
+        every {
+            sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
+        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+
+        sakskompleksService.finnEllerOpprettSak(andreSykmelding)
+
+        verify(exactly = 1) {
+            sakskompleksDao.opprettSak(any())
+        }
+
+        verify(exactly = 0) {
+            sakskompleksDao.oppdaterSak(any())
+        }
+    }
+
+    @Test
+    fun `sykmelding innenfor 16 dager av sakskompleks blir koblet på sakskompleks`() {
+        val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
+        val sakskompleksService = SakskompleksService(sakskompleksDao)
+
+        val førsteSykmelding =
+            Sykmelding(objectMapper.readTree("/case-to-påfølgende-sykmeldinger/1-sykmelding.json".readResource())["sykmelding"])
+        val andreSykmelding =
+            Sykmelding(objectMapper.readTree("/case-to-påfølgende-sykmeldinger/2-sykmelding.json".readResource())["sykmelding"])
+
+        every {
+            sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
+        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+
+
+        sakskompleksService.finnEllerOpprettSak(andreSykmelding)
+
+        verify(exactly = 0) {
+            sakskompleksDao.opprettSak(any())
+        }
+
+        verify(exactly = 1) {
+            sakskompleksDao.oppdaterSak(any())
+        }
+    }
+
+    @Test
+    fun `1 dag mellom fredag og tirsdag`() {
+        assertEquals(
+            1, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 8, 30),
+                LocalDate.of(2019, 9, 3)
             )
+        )
+    }
+
+    @Test
+    fun `2 dager mellom lørdag og tirsdag`() {
+        assertEquals(
+            2, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 8, 31),
+                LocalDate.of(2019, 9, 3)
+            )
+        )
+    }
+
+    @Test
+    fun `1 dag mellom søndag og tirsdag`() {
+        assertEquals(
+            1, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 9, 1),
+                LocalDate.of(2019, 9, 3)
+            )
+        )
+    }
+
+    @Test
+    fun `1 dag mellom onsdag og fredag`() {
+        assertEquals(
+            1, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 9, 4),
+                LocalDate.of(2019, 9, 6)
+            )
+        )
+    }
+
+    @Test
+    fun `2 dager mellom onsdag og lørdag`() {
+        assertEquals(
+            2, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 9, 4),
+                LocalDate.of(2019, 9, 7)
+            )
+        )
+    }
+
+    @Test
+    fun `3 dager mellom onsdag og søndag`() {
+        assertEquals(
+            3, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 9, 4),
+                LocalDate.of(2019, 9, 8)
+            )
+        )
+    }
+
+    @Test
+    fun `4 dager mellom onsdag og mandag`() {
+        assertEquals(
+            4, kalenderdagerMellomMinusHelg(
+                LocalDate.of(2019, 9, 4),
+                LocalDate.of(2019, 9, 9)
+            )
+        )
+    }
+
+    private fun etSakskompleks(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String = "1234567890123",
+        sykmeldinger: List<Sykmelding> = emptyList(),
+        søknader: List<Sykepengesøknad> = emptyList()
+    ) =
+        Sakskompleks(
+            id = id,
+            aktørId = aktørId,
+            sykmeldinger = sykmeldinger,
+            søknader = søknader
+        )
 }

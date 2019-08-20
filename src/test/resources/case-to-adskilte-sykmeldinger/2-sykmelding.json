@@ -1,7 +1,7 @@
 {
   "sykmelding": {
     "id": "71bd853d-36a1-49df-a34c-6e02cf727cfa",
-    "msgId": "bf74ad38-a008-4792-8c1a-ae3c01583b8b",
+    "msgId": "bf74ad38-a008-asdf-8c1a-ae3c01583b8b",
     "pasientAktoerId": "1234567890123",
     "medisinskVurdering": {
       "hovedDiagnose": {
@@ -23,8 +23,8 @@
     },
     "perioder": [
       {
-        "fom": "2019-06-01",
-        "tom": "2019-06-14",
+        "fom": "2019-08-01",
+        "tom": "2019-08-14",
         "aktivitetIkkeMulig": {
           "medisinskArsak": {
             "beskrivelse": null,
@@ -78,7 +78,7 @@
       "navn": "Sykmeldingsystemet",
       "versjon": "2019.1.10318.2"
     },
-    "syketilfelleStartDato": "2019-06-01"
+    "syketilfelleStartDato": "2019-08-01"
   },
   "personNrPasient": "12345678911",
   "personNrLege": "09876543219",
