@@ -1,11 +1,13 @@
 package no.nav.helse.søknad.domain
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class SykepengesøknadTest {
@@ -40,5 +42,14 @@ class SykepengesøknadTest {
     fun `serialisering av en annen søknad skal ikke være lik den deserialiserte json`() {
         val expectedJson = objectMapper.readTree("/sykmelding.json".readResource())["sykmelding"]
         assertNotEquals(expectedJson, testSøknadSerialisert)
+    }
+
+    @Test
+    fun `kan parse søknad uten arbeidGjenopptatt`() {
+        val json = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()) as ObjectNode
+        json.remove("arbeidGjenopptatt")
+
+        val søknad = Sykepengesøknad(json)
+        assertNull(søknad.arbeidGjenopptatt)
     }
 }
