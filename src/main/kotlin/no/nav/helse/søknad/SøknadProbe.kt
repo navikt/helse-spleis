@@ -15,6 +15,9 @@ class SøknadProbe {
 
         private val manglendeSakskompleksCounter = Counter.build("manglende_sakskompleks_totals", "Antall søknader vi har mottatt som vi ikke klarer å koble til et sakskompleks")
             .register()
+
+        private val søknadIgnorertCounter = Counter.build("soknader_ignorert_totals", "Antall søknader vi ignorerer")
+            .register()
     }
 
     fun søknadKobletTilSakskompleks(søknad: Sykepengesøknad, sakskompleks: Sakskompleks) {
@@ -24,6 +27,11 @@ class SøknadProbe {
     fun mottattSøknad(søknad: Sykepengesøknad) {
         log.info("mottok søknad med id=${søknad.id} for sykmelding=${søknad.sykmeldingId}")
         søknadCounter.inc()
+    }
+
+    fun søknadIgnorert(id: String, type: String, status: String) {
+        log.info("mottok søknad med id=$id av type=$type med status=$status som vi ignorerer")
+        søknadIgnorertCounter.inc()
     }
 
     fun søknadManglerSakskompleks(søknad: Sykepengesøknad) {

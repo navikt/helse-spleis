@@ -83,6 +83,60 @@ class AppComponentTest {
     }
 
     @Test
+    fun `behandler ikke søknad om utlandsopphold`() {
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val søknadCounterBefore = getCounterValue("soknader_totals")
+            val søknadIgnorertCounterBefore = getCounterValue("soknader_ignorert_totals")
+
+            val søknad = objectMapper.readTree("/søknad_om_utlandsopphold.json".readResource())
+            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val søknadCounterAfter = getCounterValue("soknader_totals")
+                    val søknadIgnorertCounterAfter = getCounterValue("soknader_ignorert_totals")
+
+                    assertEquals(0, søknadCounterAfter - søknadCounterBefore)
+                    assertEquals(1, søknadIgnorertCounterAfter - søknadIgnorertCounterBefore)
+                }
+        }
+    }
+
+    @Test
+    fun `behandler ikke søknad med status != SENDT`() {
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val søknadCounterBefore = getCounterValue("soknader_totals")
+            val søknadIgnorertCounterBefore = getCounterValue("soknader_ignorert_totals")
+
+            val søknad = objectMapper.readTree("/søknad_frilanser_ny.json".readResource())
+            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val søknadCounterAfter = getCounterValue("soknader_totals")
+                    val søknadIgnorertCounterAfter = getCounterValue("soknader_ignorert_totals")
+
+                    assertEquals(0, søknadCounterAfter - søknadCounterBefore)
+                    assertEquals(1, søknadIgnorertCounterAfter - søknadIgnorertCounterBefore)
+                }
+        }
+    }
+
+    @Test
     fun `kobler søknad til eksisterende sakskompleks`() {
         val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
         val sakskompleksService = SakskompleksService(sakskompleksDao)
