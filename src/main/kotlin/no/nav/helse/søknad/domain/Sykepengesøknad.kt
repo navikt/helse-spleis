@@ -21,15 +21,12 @@ import java.time.LocalDate
 data class Sykepengesøknad(val jsonNode: JsonNode) {
 
     val id = jsonNode["id"].asText()!!
-
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
-
     val aktørId = jsonNode["aktorId"].asText()!!
-    val fom = jsonNode["fom"].asText().let { LocalDate.parse(it) }
-    val tom = jsonNode["tom"].asText().let { LocalDate.parse(it) }
-    val egenmeldinger = jsonNode["egenmeldinger"]?.map { Periode(it) }
-        ?: emptyList()
-    val arbeidGjenopptatt = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
+    val fom get() = jsonNode["fom"].asText().let { LocalDate.parse(it) }
+    val tom get() = jsonNode["tom"].asText().let { LocalDate.parse(it) }
+    val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
+    val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 }
 
