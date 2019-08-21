@@ -35,12 +35,30 @@ class SøknadConsumer(
             topics, Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
+            .filter { _, jsonNode ->
+                skalTaInnSøknad(søknad = jsonNode, søknadProbe = probe)
+            }
             .mapValues { jsonNode ->
                 Sykepengesøknad(jsonNode)
             }
             .foreach(::håndterSøknad)
 
         return builder
+    }
+
+    private fun skalTaInnSøknad(søknad: JsonNode, søknadProbe: SøknadProbe): Boolean {
+        val id = søknad["id"].textValue()
+        val type = søknad["soknadstype"]?.textValue()
+            ?: søknad["type"]?.textValue()
+            ?: throw RuntimeException("Fant ikke type på søknad")
+        val status = søknad["status"].textValue()
+
+        return if (type in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE") && status == "SENDT") {
+            true
+        } else {
+            søknadProbe.søknadIgnorert(id, type, status)
+            false
+        }
     }
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
@@ -55,3 +73,4 @@ class SøknadConsumer(
             ?: probe.søknadManglerSakskompleks(søknad)
     }
 }
+
