@@ -3,7 +3,7 @@ name: Bygg og deploy branch til test
 on:
   push:
     branches:
-    - deploy-dev/*
+    - deploy-preprod/*
 
 jobs:
   build:
