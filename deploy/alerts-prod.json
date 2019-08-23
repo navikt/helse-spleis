@@ -20,7 +20,7 @@
         "alert": "sp-sak-har-ingen-aktive-pods",
         "expr": "up{app=~\"spsak\",job=\"kubernetes-pods\"} == 0",
         "for": "2m",
-        "description": "spsak manggler aktive pods i prod!",
+        "description": "spsak mangler aktive pods i produksjon!",
         "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
         "sla": "respond within 1h, during office hours",
         "severity": "danger"
