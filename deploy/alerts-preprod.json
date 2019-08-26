@@ -1,0 +1,30 @@
+{
+  "apiVersion": "nais.io/v1alpha1",
+  "kind": "Alert",
+  "metadata": {
+    "name": "spsak-alerts",
+    "labels": {
+      "team": "tbd"
+    }
+  },
+  "spec": {
+    "receivers": [
+      {
+        "slack": {
+          "channel": "#sp-sak"
+        }
+      }
+    ],
+    "alerts": [
+      {
+        "alert": "sp-sak-har-ingen-aktive-pods",
+        "expr": "up{app=~\"spsak\",job=\"kubernetes-pods\"} == 0",
+        "for": "2m",
+        "description": "spsak mangler aktive pods i preprod!",
+        "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
+        "sla": "respond within 1h, during office hours",
+        "severity": "danger"
+      }
+    ]
+  }
+}

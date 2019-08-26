@@ -51,9 +51,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NAV_CLUSTER: dev-fss
         NAISERATOR_FILE: deploy/preprod.json
+        ALERTS_FILE: deploy/alerts-preprod.json
       run: |
         NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c $NAISERATOR_FILE )
-        DEPLOY_PAYLOAD=$(jq '.payload.kubernetes.resources += ['$NAISERATOR']' deploy/deployreq.json)
+        ALERTS=$(jq '' -c $ALERTS_FILE)
+        DEPLOY_PAYLOAD=$(jq ".payload.kubernetes.resources += [$NAISERATOR, $ALERTS]" deploy/deployreq.json)
         DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.environment = "'$NAV_CLUSTER'"')
         DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
         curl -i -n --fail \
@@ -68,9 +70,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NAV_CLUSTER: prod-fss
         NAISERATOR_FILE: deploy/prod.json
+        ALERTS_FILE: deploy/alerts-prod.json
       run: |
         NAISERATOR=$(jq '.spec.image = "'$DOCKER_IMAGE':'$(echo $GITHUB_SHA | cut -c1-7)'"' -c $NAISERATOR_FILE )
-        DEPLOY_PAYLOAD=$(jq '.payload.kubernetes.resources += ['$NAISERATOR']' deploy/deployreq.json)
+        ALERTS=$(jq '' -c $ALERTS_FILE)
+        DEPLOY_PAYLOAD=$(jq ".payload.kubernetes.resources += [$NAISERATOR, $ALERTS]" deploy/deployreq.json)
         DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.environment = "'$NAV_CLUSTER'"')
         DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.ref = "'$(echo $GITHUB_SHA | cut -c1-7)'"')
         curl -i -n --fail \
