@@ -8,13 +8,11 @@
     }
   },
   "spec": {
-    "receivers": [
-      {
-        "slack": {
-          "channel": "#sp-sak"
-        }
+    "receivers": {
+      "slack": {
+        "channel": "#sp-sak"
       }
-    ],
+    },
     "alerts": [
       {
         "alert": "sp-sak-har-ingen-aktive-pods",
