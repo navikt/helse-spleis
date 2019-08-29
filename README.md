@@ -17,7 +17,7 @@ Interne henvendelser kan sendes via Slack i kanalen #område-helse.
 
 Sykmelding --> Søknad // Inntektsmelding = ny sak
 
-Søknad (uten at sykmelding er mottatt) --> = manuell sak  
+Søknad (uten at sykmelding er mottatt) = manuell sak  
 
 Inntektsmelding (uten at sykmelding er mottatt) = manuell sak
 
