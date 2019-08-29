@@ -12,3 +12,19 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 ## For NAV-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #område-helse.
+
+## Regler
+
+Sykmelding --> Søknad --> Inntektsmelding = MVP
+
+Sykmelding --> Inntektsmelding -- > Søknad =  MVP
+
+Søknad --> x = støttes ikke  
+
+Inntektsmelding --> x  Støttes ikke
+
+Sykmelding --> sykmelding     eller andre varianter av 2 av en dokumenttype = støttes ikke hvis de overlapper
+
+
+
+
