@@ -15,15 +15,13 @@ Interne henvendelser kan sendes via Slack i kanalen #område-helse.
 
 ## Regler
 
-Sykmelding --> Søknad --> Inntektsmelding = MVP
+Sykmelding --> Søknad // Inntektsmelding = ny sak
 
-Sykmelding --> Inntektsmelding -- > Søknad =  MVP
+Søknad (uten at sykmelding er mottatt) --> = manuell sak  
 
-Søknad --> x = støttes ikke  
+Inntektsmelding (uten at sykmelding er mottatt) = manuell sak
 
-Inntektsmelding --> x  Støttes ikke
-
-Sykmelding --> sykmelding     eller andre varianter av 2 av en dokumenttype = støttes ikke hvis de overlapper
+Sykmelding --> sykmelding eller andre varianter av 2 av en dokumenttype som overlapper = manuell sak
 
 
 
