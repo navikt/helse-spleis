@@ -47,7 +47,7 @@ dependencies {
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testCompile("org.awaitility:awaitility:3.1.6")
-    testCompile("no.nav:kafka-embedded-env:2.2.2")
+    testCompile("no.nav:kafka-embedded-env:2.2.3")
     testCompile("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
     testCompile("io.mockk:mockk:$mockkVersion")
