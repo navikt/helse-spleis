@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktorVersion = "1.2.2"
 val jacksonVersion = "2.9.8"
-val kafkaVersion = "2.0.1"
+val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
@@ -47,7 +47,7 @@ dependencies {
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testCompile("org.awaitility:awaitility:3.1.6")
-    testCompile("no.nav:kafka-embedded-env:2.1.1")
+    testCompile("no.nav:kafka-embedded-env:2.2.1")
     testCompile("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
     testCompile("io.mockk:mockk:$mockkVersion")
