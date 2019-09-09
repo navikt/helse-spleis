@@ -53,15 +53,11 @@ class SakskompleksDaoIntegrationTest {
     fun `skal finne sak for bruker`() {
         val sakForBruker = Sakskompleks(
                 id = UUID.randomUUID(),
-                aktørId = "123456789",
-                sykmeldinger = emptyList(),
-                søknader = emptyList()
+                aktørId = "123456789"
         )
         val sakForAnnenBruker = Sakskompleks(
                 id = UUID.randomUUID(),
-                aktørId = "987654321",
-                sykmeldinger = emptyList(),
-                søknader = emptyList()
+                aktørId = "987654321"
         )
 
         val dataSource = HikariDataSource(hikariConfig)
@@ -85,9 +81,7 @@ class SakskompleksDaoIntegrationTest {
 
         val sak = Sakskompleks(
                 id = UUID.randomUUID(),
-                aktørId = aktørId,
-                sykmeldinger = emptyList(),
-                søknader = emptyList()
+                aktørId = aktørId
         )
 
         val dataSource = HikariDataSource(hikariConfig)

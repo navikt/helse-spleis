@@ -2,6 +2,7 @@ package no.nav.helse.sakskompleks.domain
 
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import java.lang.RuntimeException
 import java.time.LocalDate
 import java.util.UUID
@@ -9,8 +10,9 @@ import java.util.UUID
 data class Sakskompleks(
     val id: UUID,
     val aktørId: String,
-    val sykmeldinger: List<Sykmelding>,
-    val søknader: List<Sykepengesøknad>
+    val sykmeldinger: List<Sykmelding> = emptyList(),
+    val søknader: List<Sykepengesøknad> = emptyList(),
+    val inntektsmeldinger: List<Inntektsmelding> = emptyList()
 )
 
 fun Sakskompleks.fom() : LocalDate? = run {

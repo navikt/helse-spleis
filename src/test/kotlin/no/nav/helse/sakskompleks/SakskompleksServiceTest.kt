@@ -11,6 +11,7 @@ import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -319,12 +320,14 @@ class SakskompleksServiceTest {
         id: UUID = UUID.randomUUID(),
         aktørId: String = "1234567890123",
         sykmeldinger: List<Sykmelding> = emptyList(),
+        inntektsmeldinger: List<Inntektsmelding> = emptyList(),
         søknader: List<Sykepengesøknad> = emptyList()
     ) =
         Sakskompleks(
             id = id,
             aktørId = aktørId,
             sykmeldinger = sykmeldinger,
+            inntektsmeldinger = inntektsmeldinger,
             søknader = søknader
         )
 }

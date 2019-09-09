@@ -49,6 +49,7 @@ class SakskompleksKtTest {
             id = UUID.randomUUID(),
             aktørId = "aktørId",
             sykmeldinger = listOf(sykmelding),
+            inntektsmeldinger = emptyList(),
             søknader = listOf(søknad)
         )
 
@@ -83,6 +84,7 @@ class SakskompleksKtTest {
             id = UUID.randomUUID(),
             aktørId = "aktørId",
             sykmeldinger = listOf(sykmelding),
+            inntektsmeldinger = emptyList(),
             søknader = listOf(søknad)
         )
 
@@ -111,6 +113,7 @@ class SakskompleksKtTest {
             id = UUID.randomUUID(),
             aktørId = "aktørId",
             sykmeldinger = listOf(sykmelding),
+            inntektsmeldinger = emptyList(),
             søknader = listOf(søknad)
         )
 

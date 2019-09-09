@@ -12,10 +12,15 @@ import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
 fun createConfigFromEnvironment(env: Map<String, String>) =
-        MapApplicationConfig().apply {
+     MapApplicationConfig().apply {
             put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
 
             put("kafka.app-id", "sykepenger-sakskompleks-v1")
+
+            put("sykmelding-kafka-topic", "privat-syfo-sm2013-automatiskBehandling")
+            put("soknad-kafka-topic", "syfo-soknad-v2")
+            put("inntektsmelding-kafka-topic", "privat-sykepenger-inntektsmelding")
+
             env["KAFKA_BOOTSTRAP_SERVERS"]?.let { put("kafka.bootstrap-servers", it) }
 
             env["KAFKA_USERNAME"]?.let { put("kafka.username", it) }

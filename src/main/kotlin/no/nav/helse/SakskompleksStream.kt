@@ -11,14 +11,13 @@ import io.ktor.application.log
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.sykmelding.SykmeldingConsumer
-import no.nav.helse.sykmelding.SykmeldingProbe
 import no.nav.helse.søknad.SøknadConsumer
-import no.nav.helse.søknad.SøknadProbe
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
@@ -65,8 +64,9 @@ fun Application.sakskompleksApplication() {
 
     val builder = StreamsBuilder()
 
-    SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
-    SøknadConsumer(builder, sakskompleksService, SøknadProbe())
+    SykmeldingConsumer(builder, environment.config.property("sykmelding-kafka-topic").getString(), sakskompleksService)
+    SøknadConsumer(builder, environment.config.property("soknad-kafka-topic").getString(), sakskompleksService)
+    InntektsmeldingConsumer(builder, environment.config.property("inntektsmelding-kafka-topic").getString(), sakskompleksService)
 
     val streams = KafkaStreams(builder.build(), streamsConfig())
 
