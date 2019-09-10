@@ -10,7 +10,7 @@
   "spec": {
     "receivers": {
       "slack": {
-        "channel": "#sp-sak"
+        "channel": "#spsak"
       }
     },
     "alerts": [
