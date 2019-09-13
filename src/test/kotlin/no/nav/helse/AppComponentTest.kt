@@ -44,12 +44,17 @@ class AppComponentTest {
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
 
+        // TODO kan disse hentes fra App.kt?
+        const val sykemeldingTopic = "privat-syfo-sm2013-automatiskBehandling"
+        const val soknadTopic = "syfo-soknad-v2"
+        const val inntektsmeldingTopic = "privat-sykepenger-inntektsmelding"
+
         private val embeddedEnvironment = KafkaEnvironment(
                 users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf("privat-syfo-sm2013-automatiskBehandling", "syfo-soknad-v2")
+                topicNames = listOf(sykemeldingTopic, soknadTopic, inntektsmeldingTopic)
         )
 
         @BeforeAll
