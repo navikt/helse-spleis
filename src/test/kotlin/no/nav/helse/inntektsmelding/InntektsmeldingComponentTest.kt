@@ -84,7 +84,7 @@ class InntektsmeldingComponentTest {
     }
 
     @Test
-    fun `behandler ikke søknad med status != SENDT`() {
+    fun `inntektsmelding som kommer først, resulterer ny sak og manuell oppgave`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
@@ -132,6 +132,16 @@ class InntektsmeldingComponentTest {
                 }
         }
     }
+
+    // TODO Inntektsmelding blir lagt til sakskompleks med kun sykmelding)
+
+    // TODO Inntektsmelding blir lagt til sakskompleks med kun søknad)
+
+    // TODO Inntektsmelding blir lagt til sakskompleks med både sykmelding i søknad, og det resulterer i at sakskomplekset sendes til behandling
+
+    // TODO Inntektsmelding som ikke kommer i tide, fører til manuell oppgave
+
+
 
     private fun produceOneMessage(topic: String, key: String, message: Inntektsmelding) {
         val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(inntektsmeldingObjectMapper))
