@@ -50,7 +50,7 @@ fun Application.createHikariConfigFromEnvironment() =
     )
 
 @KtorExperimentalAPI
-fun Application.sakskompleksApplication() {
+fun Application.sakskompleksApplication(): KafkaStreams {
 
     install(ContentNegotiation) {
         jackson {
@@ -68,16 +68,16 @@ fun Application.sakskompleksApplication() {
     SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
     SøknadConsumer(builder, sakskompleksService, SøknadProbe())
 
-    val streams = KafkaStreams(builder.build(), streamsConfig())
+    return KafkaStreams(builder.build(), streamsConfig()).apply {
+        addShutdownHook(this)
 
-    addShutdownHook(streams)
+        environment.monitor.subscribe(ApplicationStarted) {
+            start()
+        }
 
-    environment.monitor.subscribe(ApplicationStarted) {
-        streams.start()
-    }
-
-    environment.monitor.subscribe(ApplicationStopping) {
-        streams.close()
+        environment.monitor.subscribe(ApplicationStopping) {
+            close()
+        }
     }
 }
 
