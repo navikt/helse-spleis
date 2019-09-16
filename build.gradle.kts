@@ -44,6 +44,7 @@ dependencies {
     compile("no.nav:vault-jdbc:$vaultJdbcVersion")
     compile("com.github.seratch:kotliquery:$kotliqueryVersion")
 
+    testCompile("io.ktor:ktor-client-cio:$ktorVersion")
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testCompile("org.awaitility:awaitility:3.1.6")
