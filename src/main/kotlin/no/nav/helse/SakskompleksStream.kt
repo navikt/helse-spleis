@@ -128,12 +128,4 @@ private fun Application.addShutdownHook(streams: KafkaStreams) {
         log.error("Caught exception in stream, exiting", ex)
         streams.close()
     }
-    Thread.currentThread().setUncaughtExceptionHandler { _, ex ->
-        log.error("Caught exception, exiting", ex)
-        streams.close()
-    }
-
-    Runtime.getRuntime().addShutdownHook(Thread {
-        streams.close()
-    })
 }
