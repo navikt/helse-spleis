@@ -7,7 +7,16 @@ import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerTotalsCounterName
+import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
+import no.nav.helse.readResource
+import no.nav.helse.sakskompleks.SakskompleksDao
+import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.sakskompleksTotalsCounterName
+import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
+import no.nav.helse.sykmelding.SykmeldingConsumer.Companion.sykmeldingObjectMapper
+import no.nav.helse.sykmelding.domain.SykmeldingMessage
+import no.nav.helse.sykmelding.domain.gjelderFra
+import no.nav.helse.sykmelding.domain.gjelderTil
 import no.nav.helse.testServer
 import no.nav.inntektsmelding.kontrakt.serde.JacksonJsonConfig
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype.VIRKSOMHET
@@ -22,11 +31,9 @@ import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import java.math.BigDecimal
 import java.sql.Connection
-import java.time.LocalDate
-import java.time.Month
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -75,12 +82,97 @@ class InntektsmeldingComponentTest {
                 .start()
 
         postgresConnection = embeddedPostgres.postgresDatabase.connection
+
+        sakskompleksService = SakskompleksService(SakskompleksDao(embeddedPostgres.postgresDatabase))
     }
 
     @AfterEach
     fun `stop postgres`() {
         postgresConnection.close()
         embeddedPostgres.close()
+    }
+
+    private lateinit var sakskompleksService: SakskompleksService
+
+    private val enSykmeldingSomJson = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
+    private val enSykmelding = SykmeldingMessage(enSykmeldingSomJson).sykmelding
+
+    private val enInntektsmelding: Inntektsmelding
+        get() {
+            val inntektsmelding = Inntektsmelding(
+                inntektsmeldingId = "1",
+                arbeidstakerFnr = "12345678910",
+                arbeidstakerAktorId = enSykmelding.aktørId,
+                virksomhetsnummer = "123456789",
+                arbeidsgiverFnr = "10987654321",
+                arbeidsgiverAktorId = "1110987654321",
+                arbeidsgivertype = VIRKSOMHET,
+                arbeidsforholdId = "42",
+                beregnetInntekt = BigDecimal("10000.01"),
+                refusjon = Refusjon(),
+                endringIRefusjoner = emptyList(),
+                opphoerAvNaturalytelser = emptyList(),
+                gjenopptakelseNaturalytelser = emptyList(),
+                arbeidsgiverperioder = listOf(
+                    Periode(
+                        fom = enSykmelding.gjelderFra().minusDays(30),
+                        tom = enSykmelding.gjelderFra()
+                    )
+                ),
+                status = GYLDIG,
+                arkivreferanse = "ENARKIVREFERANSE"
+            )
+            return inntektsmelding
+        }
+
+    @Test
+    fun `Testdataene stemmer overens`() {
+        assertEquals(enSykmelding.aktørId, enInntektsmelding.arbeidstakerAktorId)
+        // TODO sjekk at det er samme arbeidsgiver på sykmeldingen og inntektsmeldingen - eller?
+
+        val sykmeldingPeriode = enSykmelding.gjelderFra().rangeTo(enSykmelding.gjelderTil())
+        assertTrue(sykmeldingPeriode.contains(enInntektsmelding.sisteDagIArbeidsgiverPeriode()!!))
+    }
+
+    @Test
+    fun `Inntektsmelding blir lagt til sakskompleks med kun sykmelding`() {
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "sykmelding-kafka-topic" to sykemeldingTopic,
+            "soknad-kafka-topic" to soknadTopic,
+            "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+            val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
+            val inntektsmeldingCounterBefore = getCounterValue(innteksmeldingerTotalsCounterName)
+
+            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val sakskompleksCounterAfter = getCounterValue(sakskompleksTotalsCounterName)
+
+                    assertNotNull(sakskompleksService.finnSak(enSykmelding))
+                    assertEquals(1, sakskompleksCounterAfter - sakskompleksCounterBefore)
+                }
+
+            produceOneMessage(inntektsmeldingTopic, enInntektsmelding.inntektsmeldingId, enInntektsmelding.toJsonNode())
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val inntektsmeldingCounterAfter = getCounterValue(innteksmeldingerTotalsCounterName)
+
+                    val lagretSak = sakskompleksService.finnSak(enInntektsmelding) ?: fail("Buhu - fant ikke sakskompleks :(")
+                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
+                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
+
+                    assertEquals(1, inntektsmeldingCounterAfter - inntektsmeldingCounterBefore)
+                }
+        }
     }
 
     @Test
@@ -97,31 +189,7 @@ class InntektsmeldingComponentTest {
 
             val inntektsmeldingCounterBefore = getCounterValue(innteksmeldingerTotalsCounterName)
 
-            val inntektsmelding = Inntektsmelding(
-                inntektsmeldingId = "1",
-                arbeidstakerFnr= "12345678910",
-                arbeidstakerAktorId= "1234567891011",
-                virksomhetsnummer= "123456789",
-                arbeidsgiverFnr= "10987654321",
-                arbeidsgiverAktorId= "1110987654321",
-                arbeidsgivertype= VIRKSOMHET,
-                arbeidsforholdId= "42",
-                beregnetInntekt= BigDecimal(10000.00),
-                refusjon= Refusjon(),
-                endringIRefusjoner= emptyList(),
-                opphoerAvNaturalytelser= emptyList(),
-                gjenopptakelseNaturalytelser= emptyList(),
-                arbeidsgiverperioder= listOf(
-                    Periode(
-                        fom = LocalDate.of(2019, Month.APRIL, 1),
-                        tom = LocalDate.of(2019, Month.APRIL, 16)
-                    )
-                ),
-                status = GYLDIG,
-                arkivreferanse = "ENARKIVREFERANSE"
-            )
-
-            produceOneMessage(inntektsmeldingTopic, inntektsmelding.inntektsmeldingId, inntektsmelding)
+            produceOneMessage(inntektsmeldingTopic, enInntektsmelding.inntektsmeldingId, enInntektsmelding.toJsonNode())
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
@@ -129,24 +197,21 @@ class InntektsmeldingComponentTest {
                     val inntektsmeldingCounterAfter = getCounterValue(innteksmeldingerTotalsCounterName)
 
                     assertEquals(1, inntektsmeldingCounterAfter - inntektsmeldingCounterBefore)
+                    //TODO sjekk at det opprettes ny sak og manuell oppgave
                 }
         }
     }
-
-    // TODO Inntektsmelding blir lagt til sakskompleks med kun sykmelding)
-
-    // TODO Inntektsmelding blir lagt til sakskompleks med kun søknad)
 
     // TODO Inntektsmelding blir lagt til sakskompleks med både sykmelding i søknad, og det resulterer i at sakskomplekset sendes til behandling
 
     // TODO Inntektsmelding som ikke kommer i tide, fører til manuell oppgave
 
+    private fun Inntektsmelding.toJsonNode(): JsonNode = inntektsmeldingObjectMapper.valueToTree(this)
 
-
-    private fun produceOneMessage(topic: String, key: String, message: Inntektsmelding) {
+    private fun produceOneMessage(topic: String, key: String, message: JsonNode) {
         val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(inntektsmeldingObjectMapper))
-        producer.send(ProducerRecord(topic, key, inntektsmeldingObjectMapper.valueToTree(message)))
-                .get(1, TimeUnit.SECONDS)
+        producer.send(ProducerRecord(topic, key, message))
+        producer.flush()
     }
 
     private fun producerProperties() =

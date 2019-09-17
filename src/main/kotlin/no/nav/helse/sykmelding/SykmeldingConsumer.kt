@@ -1,6 +1,7 @@
 package no.nav.helse.sykmelding
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -23,13 +24,13 @@ class SykmeldingConsumer(streamsBuilder: StreamsBuilder,
     }
 
     companion object {
-        private val objectMapper = jacksonObjectMapper()
+        val sykmeldingObjectMapper :ObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     fun build(builder: StreamsBuilder): StreamsBuilder {
-        builder.stream<String, JsonNode>(listOf(sykmeldingKafkaTopic), Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
+        builder.stream<String, JsonNode>(listOf(sykmeldingKafkaTopic), Consumed.with(Serdes.String(), JsonNodeSerde(sykmeldingObjectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST))
                 .mapValues { jsonNode ->
                     SykmeldingMessage(jsonNode)

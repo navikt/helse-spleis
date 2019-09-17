@@ -49,6 +49,8 @@ fun Sykmelding.gjelderFra(): LocalDate {
     return listOfNotNull(perioder.map { it.fom }.min(), syketilfelleStartDato).min() ?: throw RuntimeException("En sykmelding må ha en startdato")
 }
 
+fun Sykmelding.gjelderTil(): LocalDate = this.perioder.maxBy { it.tom }?.tom ?: throw RuntimeException("En sykmelding må ha en sluttdato")
+
 @JsonSerialize(using = SykmeldingSerializer::class)
 @JsonDeserialize(using = SykmeldingDeserializer::class)
 data class Periode(val jsonNode: JsonNode) {

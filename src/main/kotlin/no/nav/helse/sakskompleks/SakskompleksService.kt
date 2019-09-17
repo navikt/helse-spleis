@@ -1,5 +1,6 @@
 package no.nav.helse.sakskompleks
 
+import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.fom
 import no.nav.helse.sakskompleks.domain.tom
@@ -14,6 +15,8 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
+
+    private val sakskompleksProbe = SakskompleksProbe()
 
     fun finnSak(sykepengesøknad: Sykepengesøknad) =
         sakskompleksDao.finnSaker(sykepengesøknad.aktørId)
@@ -44,7 +47,10 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             )
         }?.also { sak ->
             sakskompleksDao.oppdaterSak(sak)
-        } ?: nyttSakskompleks(sykmelding).also { sakskompleksDao.opprettSak(it) }
+        } ?: nyttSakskompleks(sykmelding).also {
+            sakskompleksDao.opprettSak(it)
+            sakskompleksProbe.opprettetNyttSakskompleks(it)
+        }
 
     private fun nyttSakskompleks(sykmelding: Sykmelding) =
         Sakskompleks(
@@ -67,7 +73,7 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     private fun List<Sakskompleks>.finnSak(inntektsmelding: Inntektsmelding) =
         firstOrNull { sakskompleks ->
-            inntektsmelding.hørerSammenMed(sakskompleks)!!
+            inntektsmelding.hørerSammenMed(sakskompleks)
         }
 
     private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
@@ -79,13 +85,8 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
         kalenderdagerMellomMinusHelg(sakskompleks.tom(), gjelderFra()) < 16
 
     private fun Inntektsmelding.hørerSammenMed(sakskompleks: Sakskompleks): Boolean {
-        val sisteDagIArbeidsgiverPeriode = arbeidsgiverperioder.maxBy { it.tom }?.tom
         val saksPeriode = sakskompleks.fom()?.rangeTo(sakskompleks.tom())
-        return if (saksPeriode != null && sisteDagIArbeidsgiverPeriode != null) {
-            saksPeriode.contains(sisteDagIArbeidsgiverPeriode)
-        } else {
-            false
-        }
+        return this.sisteDagIArbeidsgiverPeriode()?.let { saksPeriode?.contains(it) } ?: false
     }
 }
 
