@@ -8,7 +8,7 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.common.serialization.Serializer
 import org.slf4j.LoggerFactory
 
-private val inntektsmeldingObjectMapper = JacksonJsonConfig.opprettObjectMapper()
+val inntektsmeldingObjectMapper = JacksonJsonConfig.opprettObjectMapper()
 
 fun InntektsmeldingSerde() =
         Serdes.serdeFrom(InntektsmeldingSerializer(inntektsmeldingObjectMapper), InnteksmeldingDeserializer(inntektsmeldingObjectMapper))

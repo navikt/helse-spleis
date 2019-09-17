@@ -24,14 +24,14 @@ class SøknadConsumer(
     }
 
     companion object {
-        private val objectMapper = jacksonObjectMapper()
+        val søknadObjectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     fun build(builder: StreamsBuilder): StreamsBuilder {
         builder.stream<String, JsonNode>(
-            listOf(søknadKafkaTopic), Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
+            listOf(søknadKafkaTopic), Consumed.with(Serdes.String(), JsonNodeSerde(søknadObjectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
             .filter { _, jsonNode ->

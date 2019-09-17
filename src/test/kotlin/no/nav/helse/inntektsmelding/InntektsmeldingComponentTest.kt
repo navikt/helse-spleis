@@ -1,13 +1,17 @@
 package no.nav.helse.inntektsmelding
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerTotalsCounterName
+import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingKobletTilSakCounterName
+import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerMottattCounterName
+import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.manglendeSakskompleksForInntektsmeldingCounterName
 import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
+import no.nav.helse.inntektsmelding.serde.inntektsmeldingObjectMapper
 import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.sakskompleksTotalsCounterName
@@ -17,8 +21,10 @@ import no.nav.helse.sykmelding.SykmeldingConsumer.Companion.sykmeldingObjectMapp
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.sykmelding.domain.gjelderFra
 import no.nav.helse.sykmelding.domain.gjelderTil
+import no.nav.helse.søknad.SøknadConsumer.Companion.søknadObjectMapper
+import no.nav.helse.søknad.SøknadProbe.Companion.søknadCounterName
+import no.nav.helse.søknad.domain.Sykepengesøknad
 import no.nav.helse.testServer
-import no.nav.inntektsmelding.kontrakt.serde.JacksonJsonConfig
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype.VIRKSOMHET
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -47,7 +53,7 @@ class InntektsmeldingComponentTest {
 
         // TODO kan disse hentes fra App.kt?
         const val sykemeldingTopic = "privat-syfo-sm2013-automatiskBehandling"
-        const val soknadTopic = "syfo-soknad-v2"
+        const val søknadTopic = "syfo-soknad-v2"
         const val inntektsmeldingTopic = "privat-sykepenger-inntektsmelding"
 
         private val embeddedEnvironment = KafkaEnvironment(
@@ -55,10 +61,8 @@ class InntektsmeldingComponentTest {
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf(sykemeldingTopic, inntektsmeldingTopic, soknadTopic)
+                topicNames = listOf(sykemeldingTopic, inntektsmeldingTopic, søknadTopic)
         )
-
-        private val inntektsmeldingObjectMapper = JacksonJsonConfig.opprettObjectMapper()
 
         @BeforeAll
         @JvmStatic
@@ -97,6 +101,9 @@ class InntektsmeldingComponentTest {
     private val enSykmeldingSomJson = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
     private val enSykmelding = SykmeldingMessage(enSykmeldingSomJson).sykmelding
 
+    private val enSøknadSomJson = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
+    private val enSøknad = Sykepengesøknad(enSøknadSomJson)
+
     private val enInntektsmelding: Inntektsmelding
         get() {
             val inntektsmelding = Inntektsmelding(
@@ -128,6 +135,7 @@ class InntektsmeldingComponentTest {
     @Test
     fun `Testdataene stemmer overens`() {
         assertEquals(enSykmelding.aktørId, enInntektsmelding.arbeidstakerAktorId)
+        assertEquals(enSøknad.aktørId, enInntektsmelding.arbeidstakerAktorId)
         // TODO sjekk at det er samme arbeidsgiver på sykmeldingen og inntektsmeldingen - eller?
 
         val sykmeldingPeriode = enSykmelding.gjelderFra().rangeTo(enSykmelding.gjelderTil())
@@ -141,14 +149,15 @@ class InntektsmeldingComponentTest {
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
             "sykmelding-kafka-topic" to sykemeldingTopic,
-            "soknad-kafka-topic" to soknadTopic,
+            "soknad-kafka-topic" to søknadTopic,
             "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
-            val inntektsmeldingCounterBefore = getCounterValue(innteksmeldingerTotalsCounterName)
+            val inntektsmeldingMotattCounterBefore = getCounterValue(innteksmeldingerMottattCounterName)
+            val inntektsmeldingKobletTilSakCounterBefore = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson)
+            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
@@ -164,52 +173,122 @@ class InntektsmeldingComponentTest {
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val inntektsmeldingCounterAfter = getCounterValue(innteksmeldingerTotalsCounterName)
+                    val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
+                    val inntektsmeldingKobletTilSakCounterAfter = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
                     val lagretSak = sakskompleksService.finnSak(enInntektsmelding) ?: fail("Buhu - fant ikke sakskompleks :(")
-                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
-                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
 
-                    assertEquals(1, inntektsmeldingCounterAfter - inntektsmeldingCounterBefore)
+                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
+
+                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
+                    assertEquals(listOf(enSykmelding), lagretSak.sykmeldinger)
+                    assertEquals(emptyList<Sykepengesøknad>(), lagretSak.søknader)
+
+                    assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMotattCounterBefore)
+                    assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
                 }
         }
     }
 
+    // TODO Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad, og det resulterer i at sakskomplekset sendes til behandling
     @Test
-    fun `inntektsmelding som kommer først, resulterer ny sak og manuell oppgave`() {
+    fun `Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
             "sykmelding-kafka-topic" to sykemeldingTopic,
-            "soknad-kafka-topic" to soknadTopic,
+            "soknad-kafka-topic" to søknadTopic,
             "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
+            val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
+            val søknadCounterBefore = getCounterValue(søknadCounterName)
+            val inntektsmeldingMottattCounterBefore = getCounterValue(innteksmeldingerMottattCounterName)
+            val inntektsmeldingKobletTilSakCounterBefore = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-            val inntektsmeldingCounterBefore = getCounterValue(innteksmeldingerTotalsCounterName)
+            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val sakskompleksCounterAfter = getCounterValue(sakskompleksTotalsCounterName)
+
+                    assertNotNull(sakskompleksService.finnSak(enSykmelding))
+                    assertEquals(1, sakskompleksCounterAfter - sakskompleksCounterBefore)
+                }
+
+            produceOneMessage(søknadTopic, enSøknadSomJson["id"].asText(), enSøknadSomJson, søknadObjectMapper)
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val søknadCounterAfter = getCounterValue(søknadCounterName)
+
+                    assertNotNull(sakskompleksService.finnSak(enSøknad))
+                    assertEquals(1, søknadCounterAfter - søknadCounterBefore)
+                }
 
             produceOneMessage(inntektsmeldingTopic, enInntektsmelding.inntektsmeldingId, enInntektsmelding.toJsonNode())
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val inntektsmeldingCounterAfter = getCounterValue(innteksmeldingerTotalsCounterName)
+                    val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
+                    val inntektsmeldingKobletTilSakCounterAfter = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-                    assertEquals(1, inntektsmeldingCounterAfter - inntektsmeldingCounterBefore)
-                    //TODO sjekk at det opprettes ny sak og manuell oppgave
+                    val lagretSak = sakskompleksService.finnSak(enInntektsmelding) ?: fail("Buhu - fant ikke sakskompleks :(")
+                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
+                    assertEquals(sakskompleksService.finnSak(enSøknad), lagretSak)
+
+                    assertEquals(listOf(enSykmelding), lagretSak.sykmeldinger)
+                    assertEquals(listOf(enSøknad), lagretSak.søknader)
+                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
+
+                    assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
+                    assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
                 }
         }
     }
 
-    // TODO Inntektsmelding blir lagt til sakskompleks med både sykmelding i søknad, og det resulterer i at sakskomplekset sendes til behandling
+    //TODO inntektsmelding som kommer først, resulterer i manuell oppgave
+    @Test
+    fun `inntektsmelding som kommer først, blir ignorert`() {
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "sykmelding-kafka-topic" to sykemeldingTopic,
+            "soknad-kafka-topic" to søknadTopic,
+            "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val inntektsmeldingMottattCounterBefore = getCounterValue(innteksmeldingerMottattCounterName)
+            val manglendeSakskompleksForInntektsmeldingCounterBefore = getCounterValue(manglendeSakskompleksForInntektsmeldingCounterName)
+
+            produceOneMessage(inntektsmeldingTopic, enInntektsmelding.inntektsmeldingId, enInntektsmelding.toJsonNode())
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
+                    val manglendeSakskompleksForInntektsmeldingCounterAfter = getCounterValue(manglendeSakskompleksForInntektsmeldingCounterName)
+
+                    assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
+                    assertEquals(1, manglendeSakskompleksForInntektsmeldingCounterAfter - manglendeSakskompleksForInntektsmeldingCounterBefore)
+
+                    assertNull(sakskompleksService.finnSak(enInntektsmelding))
+                }
+        }
+    }
 
     // TODO Inntektsmelding som ikke kommer i tide, fører til manuell oppgave
 
     private fun Inntektsmelding.toJsonNode(): JsonNode = inntektsmeldingObjectMapper.valueToTree(this)
 
-    private fun produceOneMessage(topic: String, key: String, message: JsonNode) {
-        val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(inntektsmeldingObjectMapper))
+    private fun produceOneMessage(topic: String, key: String, message: JsonNode, objectMapper: ObjectMapper = inntektsmeldingObjectMapper) {
+        val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(objectMapper))
         producer.send(ProducerRecord(topic, key, message))
         producer.flush()
     }

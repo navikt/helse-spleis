@@ -10,13 +10,17 @@ class SøknadProbe {
     companion object {
         private val log = LoggerFactory.getLogger(SøknadProbe::class.java)
 
-        private val søknadCounter = Counter.build("soknader_totals", "Antall søknader mottatt")
+        val søknadCounterName = "soknader_totals"
+        val søknadUtenSakskompleksCounterName = "manglende_sakskompleks_totals"
+        val søknaderIgnorertCounterName = "soknader_ignorert_totals"
+
+        private val søknadCounter = Counter.build(søknadCounterName, "Antall søknader mottatt")
                 .register()
 
-        private val manglendeSakskompleksCounter = Counter.build("manglende_sakskompleks_totals", "Antall søknader vi har mottatt som vi ikke klarer å koble til et sakskompleks")
+        private val manglendeSakskompleksCounter = Counter.build(søknadUtenSakskompleksCounterName, "Antall søknader vi har mottatt som vi ikke klarer å koble til et sakskompleks")
             .register()
 
-        private val søknadIgnorertCounter = Counter.build("soknader_ignorert_totals", "Antall søknader vi ignorerer")
+        private val søknadIgnorertCounter = Counter.build(søknaderIgnorertCounterName, "Antall søknader vi ignorerer")
             .register()
     }
 

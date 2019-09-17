@@ -1,9 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
@@ -13,6 +11,11 @@ import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
+import no.nav.helse.søknad.SøknadConsumer.Companion.søknadObjectMapper
+import no.nav.helse.sykmelding.SykmeldingConsumer.Companion.sykmeldingObjectMapper
+import no.nav.helse.sykmelding.SykmeldingProbe.Companion.sykmeldingCounterName
+import no.nav.helse.søknad.SøknadProbe.Companion.søknadCounterName
+import no.nav.helse.søknad.SøknadProbe.Companion.søknaderIgnorertCounterName
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -37,16 +40,12 @@ class AppComponentTest {
 
     companion object {
 
-        private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
 
         // TODO kan disse hentes fra App.kt?
         const val sykemeldingTopic = "privat-syfo-sm2013-automatiskBehandling"
-        const val soknadTopic = "syfo-soknad-v2"
+        const val søknadTopic = "syfo-soknad-v2"
         const val inntektsmeldingTopic = "privat-sykepenger-inntektsmelding"
 
         private val embeddedEnvironment = KafkaEnvironment(
@@ -54,7 +53,7 @@ class AppComponentTest {
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf(sykemeldingTopic, soknadTopic, inntektsmeldingTopic)
+                topicNames = listOf(sykemeldingTopic, søknadTopic, inntektsmeldingTopic)
         )
 
         @BeforeAll
@@ -96,17 +95,17 @@ class AppComponentTest {
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val søknadCounterBefore = getCounterValue("soknader_totals")
-            val søknadIgnorertCounterBefore = getCounterValue("soknader_ignorert_totals")
+            val søknadCounterBefore = getCounterValue(søknadCounterName)
+            val søknadIgnorertCounterBefore = getCounterValue(søknaderIgnorertCounterName)
 
-            val søknad = objectMapper.readTree("/søknad_om_utlandsopphold.json".readResource())
-            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+            val søknad = søknadObjectMapper.readTree("/søknad_om_utlandsopphold.json".readResource())
+            produceOneMessage(søknadTopic, søknad["id"].asText(), søknad)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val søknadCounterAfter = getCounterValue("soknader_totals")
-                    val søknadIgnorertCounterAfter = getCounterValue("soknader_ignorert_totals")
+                    val søknadCounterAfter = getCounterValue(søknadCounterName)
+                    val søknadIgnorertCounterAfter = getCounterValue(søknaderIgnorertCounterName)
 
                     assertEquals(0, søknadCounterAfter - søknadCounterBefore)
                     assertEquals(1, søknadIgnorertCounterAfter - søknadIgnorertCounterBefore)
@@ -123,17 +122,17 @@ class AppComponentTest {
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val søknadCounterBefore = getCounterValue("soknader_totals")
-            val søknadIgnorertCounterBefore = getCounterValue("soknader_ignorert_totals")
+            val søknadCounterBefore = getCounterValue(søknadCounterName)
+            val søknadIgnorertCounterBefore = getCounterValue(søknaderIgnorertCounterName)
 
-            val søknad = objectMapper.readTree("/søknad_frilanser_ny.json".readResource())
-            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+            val søknad = søknadObjectMapper.readTree("/søknad_frilanser_ny.json".readResource())
+            produceOneMessage(søknadTopic, søknad["id"].asText(), søknad)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val søknadCounterAfter = getCounterValue("soknader_totals")
-                    val søknadIgnorertCounterAfter = getCounterValue("soknader_ignorert_totals")
+                    val søknadCounterAfter = getCounterValue(søknadCounterName)
+                    val søknadIgnorertCounterAfter = getCounterValue(søknaderIgnorertCounterName)
 
                     assertEquals(0, søknadCounterAfter - søknadCounterBefore)
                     assertEquals(1, søknadIgnorertCounterAfter - søknadIgnorertCounterBefore)
@@ -153,28 +152,28 @@ class AppComponentTest {
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val sykmeldingCounterBefore = getCounterValue("sykmeldinger_totals")
-            val søknadCounterBefore = getCounterValue("soknader_totals")
+            val sykmeldingCounterBefore = getCounterValue(sykmeldingCounterName)
+            val søknadCounterBefore = getCounterValue(søknadCounterName)
 
-            val sykmelding = objectMapper.readTree("/sykmelding.json".readResource())
-            produceOneMessage("privat-syfo-sm2013-automatiskBehandling", sykmelding["sykmelding"]["id"].asText(), sykmelding)
+            val sykmelding = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
+            produceOneMessage(sykemeldingTopic, sykmelding["sykmelding"]["id"].asText(), sykmelding, sykmeldingObjectMapper)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val sykmeldingCounterAfter = getCounterValue("sykmeldinger_totals")
+                    val sykmeldingCounterAfter = getCounterValue(sykmeldingCounterName)
 
                     assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
                     assertNotNull(sakskompleksService.finnSak(SykmeldingMessage(sykmelding).sykmelding))
                 }
 
-            val søknad = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
-            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+            val søknad = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
+            produceOneMessage(søknadTopic, søknad["id"].asText(), søknad)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val søknadCounterAfter = getCounterValue("soknader_totals")
+                    val søknadCounterAfter = getCounterValue(søknadCounterName)
 
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
 
@@ -197,14 +196,14 @@ class AppComponentTest {
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val søknadCounterBefore = getCounterValue("soknader_totals")
-            val søknad = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
-            produceOneMessage("syfo-soknad-v2", søknad["id"].asText(), søknad)
+            val søknadCounterBefore = getCounterValue(søknadCounterName)
+            val søknad = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
+            produceOneMessage(søknadTopic, søknad["id"].asText(), søknad)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val søknadCounterAfter = getCounterValue("soknader_totals")
+                    val søknadCounterAfter = getCounterValue(søknadCounterName)
 
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
 
@@ -214,7 +213,7 @@ class AppComponentTest {
         }
     }
 
-    private fun produceOneMessage(topic: String, key: String, message: JsonNode) {
+    private fun produceOneMessage(topic: String, key: String, message: JsonNode, objectMapper: ObjectMapper = søknadObjectMapper) {
         val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(objectMapper))
         producer.send(ProducerRecord(topic, key, message))
                 .get(1, TimeUnit.SECONDS)
