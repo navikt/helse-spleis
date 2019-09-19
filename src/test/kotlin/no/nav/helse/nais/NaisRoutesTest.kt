@@ -5,14 +5,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import io.ktor.client.HttpClient
 import io.ktor.http.HttpMethod
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.AppComponentTest
 import no.nav.helse.handleRequest
-import no.nav.helse.randomPort
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.testServer
 import org.apache.kafka.clients.CommonClientConfigs
@@ -62,7 +59,6 @@ class NaisRoutesTest {
         @AfterAll
         @JvmStatic
         fun stop() {
-            println("after static")
             embeddedEnvironment.tearDown()
         }
     }
@@ -85,7 +81,7 @@ class NaisRoutesTest {
     }
 
     @Test
-    fun tesdt() {
+    fun `isalive flipper fra 200 til 503 når kafkastreamen dør`() {
         testServer(
             config = mapOf(
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
@@ -108,7 +104,6 @@ class NaisRoutesTest {
                 .atMost(Duration(10, TimeUnit.SECONDS))
                 .untilAsserted {
                     handleRequest(HttpMethod.Get, "/isalive") {
-                        print("\nSvar fra isAlive: $responseCode")
                         Assertions.assertTrue(
                             responseCode in 400 until 600,
                             "GET on /isalive should result in server error on faulty liveness check"
@@ -116,7 +111,6 @@ class NaisRoutesTest {
                     }
                 }
         }
-        print(" --- ute ---")
     }
 
     private fun produceOneMessage(topic: String, key: String, message: JsonNode) {

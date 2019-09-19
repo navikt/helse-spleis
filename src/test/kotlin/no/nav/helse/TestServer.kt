@@ -50,7 +50,6 @@ fun testServer(shutdownTimeoutMs: Long = 10000,
     } finally {
         stopper.cancel()
         stop(0, 0, TimeUnit.SECONDS)
-        println(" -- etter stop")
     }
 }
 
