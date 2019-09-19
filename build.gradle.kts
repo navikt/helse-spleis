@@ -14,7 +14,7 @@ val mainClass = "no.nav.helse.AppKt"
 
 plugins {
     `build-scan`
-    kotlin("jvm") version "1.3.40"
+    kotlin("jvm") version "1.3.50"
 }
 
 buildscript {
@@ -88,11 +88,11 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<KotlinCompile>("compileKotlin") {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.named<KotlinCompile>("compileTestKotlin") {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.withType<Test> {
