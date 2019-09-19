@@ -24,18 +24,17 @@ class InntektsmeldingConsumer(
             listOf(inntektsmeldingKafkaTopic), Consumed.with(Serdes.String(), InntektsmeldingSerde())
             .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
-            .foreach(::håndterInntektsmelding)
+            .peek{_, inntektsmelding -> probe.mottattInntektsmelding(inntektsmelding)}
+            .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
 
-    private fun håndterInntektsmelding(key: String, inntektsmelding: Inntektsmelding) {
-        probe.mottattInntektsmelding(inntektsmelding)
-
+    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
         sakskompleksService
             .finnSak(inntektsmelding)
             ?.let { sak ->
                 sakskompleksService.leggInntektsmeldingPåSak(sak, inntektsmelding)
                 probe.inntektsmeldingKobletTilSakskompleks(inntektsmelding, sak)
             }
-            ?: probe.inntektmeldingManglerSakskompleks(inntektsmelding) // TODO Opprett manuell oppgave
+            ?: probe.inntektmeldingManglerSakskompleks(inntektsmelding)
     }
 
 }

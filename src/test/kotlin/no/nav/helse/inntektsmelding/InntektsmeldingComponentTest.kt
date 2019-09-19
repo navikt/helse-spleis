@@ -7,12 +7,15 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
+import no.nav.helse.*
+import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.sykmeldingTopic
+import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingKobletTilSakCounterName
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerMottattCounterName
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.manglendeSakskompleksForInntektsmeldingCounterName
 import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
 import no.nav.helse.inntektsmelding.serde.inntektsmeldingObjectMapper
-import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.sakskompleksTotalsCounterName
 import no.nav.helse.sakskompleks.SakskompleksService
@@ -24,7 +27,6 @@ import no.nav.helse.sykmelding.domain.gjelderTil
 import no.nav.helse.søknad.SøknadConsumer.Companion.søknadObjectMapper
 import no.nav.helse.søknad.SøknadProbe.Companion.søknadCounterName
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import no.nav.helse.testServer
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype.VIRKSOMHET
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -51,17 +53,12 @@ class InntektsmeldingComponentTest {
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
 
-        // TODO kan disse hentes fra App.kt?
-        const val sykemeldingTopic = "privat-syfo-sm2013-automatiskBehandling"
-        const val søknadTopic = "syfo-soknad-v2"
-        const val inntektsmeldingTopic = "privat-sykepenger-inntektsmelding"
-
         private val embeddedEnvironment = KafkaEnvironment(
                 users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf(sykemeldingTopic, inntektsmeldingTopic, søknadTopic)
+                topicNames = listOf(sykmeldingTopic, inntektsmeldingTopic, søknadTopic)
         )
 
         @BeforeAll
@@ -136,7 +133,6 @@ class InntektsmeldingComponentTest {
     fun `Testdataene stemmer overens`() {
         assertEquals(enSykmelding.aktørId, enInntektsmelding.arbeidstakerAktorId)
         assertEquals(enSøknad.aktørId, enInntektsmelding.arbeidstakerAktorId)
-        // TODO sjekk at det er samme arbeidsgiver på sykmeldingen og inntektsmeldingen - eller?
 
         val sykmeldingPeriode = enSykmelding.gjelderFra().rangeTo(enSykmelding.gjelderTil())
         assertTrue(sykmeldingPeriode.contains(enInntektsmelding.sisteDagIArbeidsgiverPeriode()!!))
@@ -148,16 +144,13 @@ class InntektsmeldingComponentTest {
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
-            "sykmelding-kafka-topic" to sykemeldingTopic,
-            "soknad-kafka-topic" to søknadTopic,
-            "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
             val inntektsmeldingMotattCounterBefore = getCounterValue(innteksmeldingerMottattCounterName)
             val inntektsmeldingKobletTilSakCounterBefore = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
+            produceOneMessage(sykmeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
@@ -197,9 +190,6 @@ class InntektsmeldingComponentTest {
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
-            "sykmelding-kafka-topic" to sykemeldingTopic,
-            "soknad-kafka-topic" to søknadTopic,
-            "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
@@ -207,7 +197,7 @@ class InntektsmeldingComponentTest {
             val inntektsmeldingMottattCounterBefore = getCounterValue(innteksmeldingerMottattCounterName)
             val inntektsmeldingKobletTilSakCounterBefore = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-            produceOneMessage(sykemeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
+            produceOneMessage(sykmeldingTopic, enSykmelding.id, enSykmeldingSomJson, sykmeldingObjectMapper)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
@@ -251,16 +241,12 @@ class InntektsmeldingComponentTest {
         }
     }
 
-    //TODO inntektsmelding som kommer først, resulterer i manuell oppgave
     @Test
     fun `inntektsmelding som kommer først, blir ignorert`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
-            "sykmelding-kafka-topic" to sykemeldingTopic,
-            "soknad-kafka-topic" to søknadTopic,
-            "inntektsmelding-kafka-topic" to inntektsmeldingTopic,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -282,8 +268,6 @@ class InntektsmeldingComponentTest {
                 }
         }
     }
-
-    // TODO Inntektsmelding som ikke kommer i tide, fører til manuell oppgave
 
     private fun Inntektsmelding.toJsonNode(): JsonNode = inntektsmeldingObjectMapper.valueToTree(this)
 

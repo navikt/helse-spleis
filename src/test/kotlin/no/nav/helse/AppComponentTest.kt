@@ -7,6 +7,9 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
+import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.sykmeldingTopic
+import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
@@ -43,17 +46,12 @@ class AppComponentTest {
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
 
-        // TODO kan disse hentes fra App.kt?
-        const val sykemeldingTopic = "privat-syfo-sm2013-automatiskBehandling"
-        const val søknadTopic = "syfo-soknad-v2"
-        const val inntektsmeldingTopic = "privat-sykepenger-inntektsmelding"
-
         private val embeddedEnvironment = KafkaEnvironment(
                 users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
                 withSecurity = true,
-                topicNames = listOf(sykemeldingTopic, søknadTopic, inntektsmeldingTopic)
+                topicNames = listOf(sykmeldingTopic, søknadTopic, inntektsmeldingTopic)
         )
 
         @BeforeAll
@@ -156,7 +154,7 @@ class AppComponentTest {
             val søknadCounterBefore = getCounterValue(søknadCounterName)
 
             val sykmelding = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
-            produceOneMessage(sykemeldingTopic, sykmelding["sykmelding"]["id"].asText(), sykmelding, sykmeldingObjectMapper)
+            produceOneMessage(sykmeldingTopic, sykmelding["sykmelding"]["id"].asText(), sykmelding, sykmeldingObjectMapper)
 
             await()
                 .atMost(10, TimeUnit.SECONDS)

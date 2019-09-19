@@ -24,7 +24,7 @@ class SykmeldingConsumer(streamsBuilder: StreamsBuilder,
     }
 
     companion object {
-        val sykmeldingObjectMapper :ObjectMapper = jacksonObjectMapper()
+        val sykmeldingObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
