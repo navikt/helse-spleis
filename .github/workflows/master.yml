@@ -33,7 +33,7 @@ jobs:
         echo $DOCKER_IMAGE > .docker_image
         echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
     - name: test and build
-      run: ./gradlew test build
+      run: ./gradlew test build --stacktrace --debug
     - name: build docker image
       run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
     - name: push docker image
