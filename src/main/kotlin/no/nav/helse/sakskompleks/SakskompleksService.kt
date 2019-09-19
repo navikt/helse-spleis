@@ -1,18 +1,17 @@
 package no.nav.helse.sakskompleks
 
-import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
+import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.fom
 import no.nav.helse.sakskompleks.domain.tom
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.gjelderFra
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import java.lang.Integer.max
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
@@ -86,7 +85,7 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     private fun Inntektsmelding.hørerSammenMed(sakskompleks: Sakskompleks): Boolean {
         val saksPeriode = sakskompleks.fom()?.rangeTo(sakskompleks.tom())
-        return this.sisteDagIArbeidsgiverPeriode()?.let { saksPeriode?.contains(it) } ?: false
+        return sisteDagIArbeidsgiverPeriode?.let { saksPeriode?.contains(it) } ?: false
     }
 }
 

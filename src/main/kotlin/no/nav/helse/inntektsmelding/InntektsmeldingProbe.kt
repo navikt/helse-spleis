@@ -1,8 +1,8 @@
 package no.nav.helse.inntektsmelding
 
 import io.prometheus.client.Counter
+import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import org.slf4j.LoggerFactory
 
 class InntektsmeldingProbe {

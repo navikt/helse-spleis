@@ -7,15 +7,15 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.*
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer.Companion.inntektsmeldingObjectMapper
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingKobletTilSakCounterName
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerMottattCounterName
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.manglendeSakskompleksForInntektsmeldingCounterName
-import no.nav.helse.inntektsmelding.domain.sisteDagIArbeidsgiverPeriode
-import no.nav.helse.inntektsmelding.serde.inntektsmeldingObjectMapper
+import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.sakskompleksTotalsCounterName
 import no.nav.helse.sakskompleks.SakskompleksService
@@ -27,11 +27,7 @@ import no.nav.helse.sykmelding.domain.gjelderTil
 import no.nav.helse.søknad.SøknadConsumer.Companion.søknadObjectMapper
 import no.nav.helse.søknad.SøknadProbe.Companion.søknadCounterName
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype.VIRKSOMHET
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status.GYLDIG
+import no.nav.helse.testServer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -40,7 +36,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import java.math.BigDecimal
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -101,33 +96,8 @@ class InntektsmeldingComponentTest {
     private val enSøknadSomJson = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
     private val enSøknad = Sykepengesøknad(enSøknadSomJson)
 
-    private val enInntektsmelding: Inntektsmelding
-        get() {
-            val inntektsmelding = Inntektsmelding(
-                inntektsmeldingId = "1",
-                arbeidstakerFnr = "12345678910",
-                arbeidstakerAktorId = enSykmelding.aktørId,
-                virksomhetsnummer = "123456789",
-                arbeidsgiverFnr = "10987654321",
-                arbeidsgiverAktorId = "1110987654321",
-                arbeidsgivertype = VIRKSOMHET,
-                arbeidsforholdId = "42",
-                beregnetInntekt = BigDecimal("10000.01"),
-                refusjon = Refusjon(),
-                endringIRefusjoner = emptyList(),
-                opphoerAvNaturalytelser = emptyList(),
-                gjenopptakelseNaturalytelser = emptyList(),
-                arbeidsgiverperioder = listOf(
-                    Periode(
-                        fom = enSykmelding.gjelderFra().minusDays(30),
-                        tom = enSykmelding.gjelderFra()
-                    )
-                ),
-                status = GYLDIG,
-                arkivreferanse = "ENARKIVREFERANSE"
-            )
-            return inntektsmelding
-        }
+    private val enInntektsmeldingSomJson = inntektsmeldingObjectMapper.readTree("/inntektsmelding.json".readResource())
+    private val enInntektsmelding = Inntektsmelding(enInntektsmeldingSomJson)
 
     @Test
     fun `Testdataene stemmer overens`() {
@@ -135,7 +105,7 @@ class InntektsmeldingComponentTest {
         assertEquals(enSøknad.aktørId, enInntektsmelding.arbeidstakerAktorId)
 
         val sykmeldingPeriode = enSykmelding.gjelderFra().rangeTo(enSykmelding.gjelderTil())
-        assertTrue(sykmeldingPeriode.contains(enInntektsmelding.sisteDagIArbeidsgiverPeriode()!!))
+        assertTrue(sykmeldingPeriode.contains(enInntektsmelding.sisteDagIArbeidsgiverPeriode!!))
     }
 
     @Test
