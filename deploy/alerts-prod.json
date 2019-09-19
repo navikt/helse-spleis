@@ -10,7 +10,7 @@
   "spec": {
     "receivers": {
       "slack": {
-        "channel": "#spsak"
+        "channel": "#team-bømlo-alerts"
       }
     },
     "alerts": [
@@ -19,6 +19,24 @@
         "expr": "up{app=~\"spsak\",job=\"kubernetes-pods\"} == 0",
         "for": "2m",
         "description": "spsak mangler aktive pods i produksjon!",
+        "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
+        "sla": "respond within 1h, during office hours",
+        "severity": "danger"
+      },
+      {
+        "alert": "spsak-mottar-ikke-sykmeldinger",
+        "expr": "sum(increase(sykmeldinger_totals{app=\"spsak\"}[60m])) < 1 AND hour() > 8 AND hour() < 20",
+        "for": "5m",
+        "description": "spsak har ikke mottatt en eneste sykmelding siste timen",
+        "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
+        "sla": "respond within 1h, during office hours",
+        "severity": "danger"
+      },
+      {
+        "alert": "spsak-mottar-ikke-soknader",
+        "expr": "sum(increase(soknader_totals{app=\"spsak\"}[60m])) < 1 AND hour() > 8 AND hour() < 20",
+        "for": "5m",
+        "description": "spsak har ikke mottatt en eneste søknad siste timen",
         "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
         "sla": "respond within 1h, during office hours",
         "severity": "danger"

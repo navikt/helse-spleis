@@ -14,7 +14,7 @@ val mainClass = "no.nav.helse.AppKt"
 
 plugins {
     `build-scan`
-    kotlin("jvm") version "1.3.40"
+    kotlin("jvm") version "1.3.50"
 }
 
 buildscript {
@@ -59,9 +59,8 @@ dependencies {
 }
 
 repositories {
-    jcenter()
     mavenCentral()
-    maven("https://dl.bintray.com/kotlin/ktor")
+    maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
 }
 
@@ -90,11 +89,11 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<KotlinCompile>("compileKotlin") {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.named<KotlinCompile>("compileTestKotlin") {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.withType<Test> {
@@ -105,5 +104,5 @@ tasks.withType<Test> {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "5.4.1"
+    gradleVersion = "5.6.2"
 }
