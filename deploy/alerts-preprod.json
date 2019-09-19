@@ -10,7 +10,7 @@
   "spec": {
     "receivers": {
       "slack": {
-        "channel": "#spsak"
+        "channel": "#team-bømlo-alerts"
       }
     },
     "alerts": [
