@@ -3,11 +3,7 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.zaxxer.hikari.HikariConfig
-import io.ktor.application.Application
-import io.ktor.application.ApplicationStarted
-import io.ktor.application.ApplicationStopping
-import io.ktor.application.install
-import io.ktor.application.log
+import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
@@ -27,7 +23,8 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
-import java.util.Properties
+import java.time.Duration
+import java.util.*
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
     HikariConfig().apply {
@@ -50,7 +47,7 @@ fun Application.createHikariConfigFromEnvironment() =
     )
 
 @KtorExperimentalAPI
-fun Application.sakskompleksApplication() {
+fun Application.sakskompleksApplication(): KafkaStreams {
 
     install(ContentNegotiation) {
         jackson {
@@ -68,16 +65,16 @@ fun Application.sakskompleksApplication() {
     SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
     SøknadConsumer(builder, sakskompleksService, SøknadProbe())
 
-    val streams = KafkaStreams(builder.build(), streamsConfig())
+    return KafkaStreams(builder.build(), streamsConfig()).apply {
+        addShutdownHook(this)
 
-    addShutdownHook(streams)
+        environment.monitor.subscribe(ApplicationStarted) {
+            start()
+        }
 
-    environment.monitor.subscribe(ApplicationStarted) {
-        streams.start()
-    }
-
-    environment.monitor.subscribe(ApplicationStopping) {
-        streams.close()
+        environment.monitor.subscribe(ApplicationStopping) {
+            close(Duration.ofSeconds(10))
+        }
     }
 }
 
@@ -121,19 +118,11 @@ private fun Application.addShutdownHook(streams: KafkaStreams) {
         if (newState == KafkaStreams.State.ERROR) {
             // if the stream has died there is no reason to keep spinning
             log.warn("No reason to keep living, closing stream")
-            streams.close()
+            streams.close(Duration.ofSeconds(10))
         }
     }
     streams.setUncaughtExceptionHandler { _, ex ->
         log.error("Caught exception in stream, exiting", ex)
-        streams.close()
+        streams.close(Duration.ofSeconds(10))
     }
-    Thread.currentThread().setUncaughtExceptionHandler { _, ex ->
-        log.error("Caught exception, exiting", ex)
-        streams.close()
-    }
-
-    Runtime.getRuntime().addShutdownHook(Thread {
-        streams.close()
-    })
 }

@@ -14,15 +14,19 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.ServerSocket
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
-import kotlin.random.Random
+
+fun randomPort(): Int = ServerSocket(0).use {
+    it.localPort
+}
 
 @KtorExperimentalAPI
 private fun createTestApplicationConfig(config: Map<String, String> = emptyMap()) =
         createApplicationEnvironment(createConfigFromEnvironment(mapOf(
-                "HTTP_PORT" to "${Random.nextInt(1000, 9999)}"
+                "HTTP_PORT" to "${randomPort()}"
         ) + config))
 
 @KtorExperimentalAPI
