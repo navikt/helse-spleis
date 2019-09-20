@@ -10,7 +10,7 @@
   "spec": {
     "receivers": {
       "slack": {
-        "channel": "#sp-sak"
+        "channel": "#team-bømlo-alerts"
       }
     },
     "alerts": [
@@ -21,6 +21,24 @@
         "description": "spsak mangler aktive pods i preprod!",
         "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
         "sla": "respond within 1h, during office hours",
+        "severity": "danger"
+      },
+      {
+        "alert": "spsak-mottar-ikke-sykmeldinger",
+        "expr": "sum(increase(sykmeldinger_totals{app=\"spsak\"}[7d])) < 1",
+        "for": "5m",
+        "description": "spsak har ikke mottatt en sykmelding i test på 7 dager",
+        "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
+        "sla": "ingen",
+        "severity": "danger"
+      },
+      {
+        "alert": "spsak-mottar-ikke-soknader",
+        "expr": "sum(increase(soknader_totals{app=\"spsak\"}[7d])) < 1",
+        "for": "5m",
+        "description": "spsak har ikke mottatt en søknad i test på 7 dager",
+        "action": "Se `kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }}` for logger",
+        "sla": "ingen",
         "severity": "danger"
       }
     ]
