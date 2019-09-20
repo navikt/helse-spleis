@@ -203,6 +203,7 @@ class InntektsmeldingComponentTest {
                     assertEquals(listOf(enSykmelding), lagretSak.sykmeldinger)
                     assertEquals(listOf(enSøknad), lagretSak.søknader)
                     assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
+                    assertEquals(enInntektsmelding.jsonNode, lagretSak.inntektsmeldinger[0].jsonNode)
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
                     assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
