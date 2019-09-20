@@ -74,13 +74,13 @@ tasks.named<Jar>("jar") {
 
     manifest {
         attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations["compile"].joinToString(separator = " ") {
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
             it.name
         }
     }
 
     doLast {
-        configurations["compile"].forEach {
+        configurations.runtimeClasspath.get().forEach {
             val file = File("$buildDir/libs/${it.name}")
             if (!file.exists())
                 it.copyTo(file)
