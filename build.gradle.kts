@@ -44,10 +44,8 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    implementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.09.06-09-24-0426e")
-
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
-    
+
     testImplementation("org.awaitility:awaitility:3.1.6")
     testImplementation("no.nav:kafka-embedded-env:2.2.3")
     testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")

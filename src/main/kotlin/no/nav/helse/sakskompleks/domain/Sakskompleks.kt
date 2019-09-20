@@ -1,9 +1,9 @@
 package no.nav.helse.sakskompleks.domain
 
+import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.gjelderTil
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import java.lang.RuntimeException
 import java.time.LocalDate
 import java.util.UUID
