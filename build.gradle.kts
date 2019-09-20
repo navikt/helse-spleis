@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktorVersion = "1.2.2"
+val ktorVersion = "1.2.4"
 val jacksonVersion = "2.9.8"
 val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"
@@ -44,7 +44,8 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
+    testCompile("io.ktor:ktor-client-cio:$ktorVersion")
+    testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testImplementation("org.awaitility:awaitility:3.1.6")
     testImplementation("no.nav:kafka-embedded-env:2.2.3")

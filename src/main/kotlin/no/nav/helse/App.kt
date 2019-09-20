@@ -8,6 +8,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
+import org.apache.kafka.streams.KafkaStreams
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -65,7 +66,9 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     }
 
     module {
-        nais()
-        sakskompleksApplication()
+        val streams = sakskompleksApplication()
+        nais(
+                isAliveCheck = { streams.state().isRunning }
+        )
     }
 }
