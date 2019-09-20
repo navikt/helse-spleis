@@ -17,9 +17,9 @@ class SakskompleksDao(private val dataSource: DataSource) {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    fun finnSaker(aktørId: String) =
+    fun finnSaker(brukerAktørId: String) =
             using(sessionOf(dataSource)) { session ->
-                session.run(queryOf("SELECT data FROM SAKSKOMPLEKS WHERE bruker_aktor_id = ?", aktørId).map { row ->
+                session.run(queryOf("SELECT data FROM SAKSKOMPLEKS WHERE bruker_aktor_id = ?", brukerAktørId).map { row ->
                     objectMapper.readerFor(Sakskompleks::class.java)
                             .readValue<Sakskompleks>(row.bytes("data"))
                 }.asList)

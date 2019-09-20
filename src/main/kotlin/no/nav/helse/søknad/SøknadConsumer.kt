@@ -14,8 +14,9 @@ import org.apache.kafka.streams.kstream.Consumed
 
 class SøknadConsumer(
     streamsBuilder: StreamsBuilder,
+    private val søknadKafkaTopic: String,
     private val sakskompleksService: SakskompleksService,
-    private val probe: SøknadProbe
+    private val probe: SøknadProbe = SøknadProbe()
 ) {
 
     init {
@@ -23,16 +24,14 @@ class SøknadConsumer(
     }
 
     companion object {
-        private val topics = listOf("syfo-soknad-v2")
-
-        private val objectMapper = jacksonObjectMapper()
+        val søknadObjectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     fun build(builder: StreamsBuilder): StreamsBuilder {
         builder.stream<String, JsonNode>(
-            topics, Consumed.with(Serdes.String(), JsonNodeSerde(objectMapper))
+            listOf(søknadKafkaTopic), Consumed.with(Serdes.String(), JsonNodeSerde(søknadObjectMapper))
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
             .filter { _, jsonNode ->

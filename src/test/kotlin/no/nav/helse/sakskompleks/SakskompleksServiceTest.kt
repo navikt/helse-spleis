@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
@@ -316,15 +317,17 @@ class SakskompleksServiceTest {
     }
 
     private fun etSakskompleks(
-        id: UUID = UUID.randomUUID(),
-        aktørId: String = "1234567890123",
-        sykmeldinger: List<Sykmelding> = emptyList(),
-        søknader: List<Sykepengesøknad> = emptyList()
+            id: UUID = UUID.randomUUID(),
+            aktørId: String = "1234567890123",
+            sykmeldinger: List<Sykmelding> = emptyList(),
+            inntektsmeldinger: List<Inntektsmelding> = emptyList(),
+            søknader: List<Sykepengesøknad> = emptyList()
     ) =
         Sakskompleks(
             id = id,
             aktørId = aktørId,
             sykmeldinger = sykmeldinger,
+            inntektsmeldinger = inntektsmeldinger,
             søknader = søknader
         )
 }

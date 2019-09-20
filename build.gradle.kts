@@ -24,38 +24,38 @@ buildscript {
 }
 
 dependencies {
-    compile(kotlin("stdlib"))
-    compile("ch.qos.logback:logback-classic:1.2.3")
-    compile("net.logstash.logback:logstash-logback-encoder:5.2")
-    compile("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation(kotlin("stdlib"))
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("net.logstash.logback:logstash-logback-encoder:5.2")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
 
-    compile("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
 
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    compile("org.apache.kafka:kafka-streams:$kafkaVersion")
+    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
-    compile("io.ktor:ktor-metrics-micrometer:$ktorVersion")
-    compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
+    implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
-    compile("org.flywaydb:flyway-core:$flywayVersion")
-    compile("com.zaxxer:HikariCP:$hikariVersion")
-    compile("no.nav:vault-jdbc:$vaultJdbcVersion")
-    compile("com.github.seratch:kotliquery:$kotliqueryVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
+    implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
     testCompile("io.ktor:ktor-client-cio:$ktorVersion")
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
-    testCompile("org.awaitility:awaitility:3.1.6")
-    testCompile("no.nav:kafka-embedded-env:2.2.3")
-    testCompile("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
+    testImplementation("org.awaitility:awaitility:3.1.6")
+    testImplementation("no.nav:kafka-embedded-env:2.2.3")
+    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
-    testCompile("io.mockk:mockk:$mockkVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 
-    testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
 
 repositories {

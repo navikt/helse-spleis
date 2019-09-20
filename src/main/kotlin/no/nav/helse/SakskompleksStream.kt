@@ -7,14 +7,16 @@ import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.sykmeldingTopic
+import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.sykmelding.SykmeldingConsumer
-import no.nav.helse.sykmelding.SykmeldingProbe
 import no.nav.helse.søknad.SøknadConsumer
-import no.nav.helse.søknad.SøknadProbe
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
@@ -62,8 +64,9 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     val builder = StreamsBuilder()
 
-    SykmeldingConsumer(builder, sakskompleksService, SykmeldingProbe())
-    SøknadConsumer(builder, sakskompleksService, SøknadProbe())
+    SykmeldingConsumer(builder, sykmeldingTopic, sakskompleksService)
+    SøknadConsumer(builder, søknadTopic, sakskompleksService)
+    InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakskompleksService)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)

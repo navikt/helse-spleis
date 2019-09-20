@@ -8,7 +8,9 @@ class SykmeldingProbe {
     companion object {
         private val log = LoggerFactory.getLogger(SykmeldingProbe::class.java)
 
-        private val sykmeldingCounter = Counter.build("sykmeldinger_totals", "Antall sykmeldinger mottatt")
+        val sykmeldingCounterName = "sykmeldinger_totals"
+
+        private val sykmeldingCounter = Counter.build(sykmeldingCounterName, "Antall sykmeldinger mottatt")
                 .register()
     }
 
