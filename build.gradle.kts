@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktorVersion = "1.2.2"
+val ktorVersion = "1.2.4"
 val jacksonVersion = "2.9.8"
 val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"

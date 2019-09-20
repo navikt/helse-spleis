@@ -68,11 +68,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     module {
         val streams = sakskompleksApplication()
         nais(
-                isAliveCheck = createLivenessCheck(streams)
+                isAliveCheck = { streams.state().isRunning }
         )
     }
-}
-
-fun createLivenessCheck(streams: KafkaStreams): () -> Boolean = {
-    streams.state().isRunning
 }
