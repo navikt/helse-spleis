@@ -183,7 +183,6 @@ class InntektsmeldingComponentTest {
         }
     }
 
-    // TODO Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad, og det resulterer i at sakskomplekset sendes til behandling
     @Test
     fun `Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad`() {
         testServer(config = mapOf(
