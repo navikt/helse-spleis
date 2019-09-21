@@ -8,7 +8,6 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
-import org.apache.kafka.streams.KafkaStreams
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
