@@ -1,7 +1,5 @@
-Sykepenger sakskompleks
+Sykepenger - spleis [![Actions Status](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spleis/actions)
 =======================
-
-[![CircleCI](https://circleci.com/gh/navikt/helse-sykepenger-sakskompleks.svg?style=svg)](https://circleci.com/gh/navikt/helse-sykepenger-sakskompleks)
 
 Knytter sammen sykmelding(er), inntektsmelding(er) og søknad(er) i sykepengesaker.
 
