@@ -15,7 +15,7 @@ jobs:
         java-version: '11.x'
     - name: create docker tag
       env:
-        DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/spsak
+        DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/spleis
       run: |
         echo $DOCKER_IMAGE > .docker_image
         echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
