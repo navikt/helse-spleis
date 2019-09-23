@@ -1,15 +1,11 @@
 package no.nav.helse.util.unit
 
-import no.nav.helse.util.interval.Arbeidsdag
-import no.nav.helse.util.interval.Feriedag
-import no.nav.helse.util.interval.Helgedag
-import no.nav.helse.util.interval.Sykedag
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
+import no.nav.helse.util.interval.Interval
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
-import kotlin.IllegalArgumentException
 
 internal class DagTest {
 
@@ -17,7 +13,7 @@ internal class DagTest {
     internal fun sykedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val sykedag = Sykedag(dagSykedagenDekker, tidspunktRapportert)
+        val sykedag = Interval.sykedager(dagSykedagenDekker, tidspunktRapportert)
 
         assertEquals(dagSykedagenDekker, sykedag.startdato())
         assertEquals(dagSykedagenDekker, sykedag.sluttdato())
@@ -28,7 +24,7 @@ internal class DagTest {
     internal fun feriedag() {
         val dagFeriedagenDekker = LocalDate.of(2019,9,24)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val feriedag = Feriedag(dagFeriedagenDekker, tidspunktRapportert)
+        val feriedag = Interval.feriedag(dagFeriedagenDekker, tidspunktRapportert)
 
         assertEquals(dagFeriedagenDekker, feriedag.startdato())
         assertEquals(dagFeriedagenDekker, feriedag.sluttdato())
@@ -39,7 +35,7 @@ internal class DagTest {
     internal fun arbeidsdag() {
         val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val arbeidsdag = Arbeidsdag(arbeidsdagenGjelder, tidspunktRapportert)
+        val arbeidsdag = Interval.arbeidsdag(arbeidsdagenGjelder, tidspunktRapportert)
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
         assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
@@ -50,7 +46,7 @@ internal class DagTest {
     internal fun helgedag() {
         val helgedagenGjelder = LocalDate.of(2019,9,28)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val helgedag = Helgedag(helgedagenGjelder, tidspunktRapportert)
+        val helgedag = Interval.helgedag(helgedagenGjelder, tidspunktRapportert)
 
         assertEquals(helgedagenGjelder, helgedag.startdato())
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
@@ -61,6 +57,6 @@ internal class DagTest {
     internal fun ugyldigHelgedag() {
         val ikkeEnHelgedag = LocalDate.of(2019,9,25)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        assertThrows<IllegalArgumentException>{ Helgedag(ikkeEnHelgedag, tidspunktRapportert)}
+        assertThrows<IllegalArgumentException>{ Interval.helgedag(ikkeEnHelgedag, tidspunktRapportert)}
     }
 }
