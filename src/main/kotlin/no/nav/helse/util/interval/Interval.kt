@@ -9,10 +9,13 @@ interface Interval {
     fun antallSykedager(): Int
 
     companion object {
-        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime) = Sykedag(gjelder, rapportert)
-        fun helgedag(gjelder: LocalDate, rapportert: LocalDateTime) = Helgedag(gjelder, rapportert)
-        fun feriedag(gjelder: LocalDate, rapportert: LocalDateTime) = Feriedag(gjelder, rapportert)
-        fun arbeidsdag(gjelder: LocalDate, rapportert: LocalDateTime) = Arbeidsdag(gjelder, rapportert)
+        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Sykedag(gjelder, rapportert)
+        fun sykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Interval =
+            SimpleCompositeInterval.syk(fra, til, rapportert)
+
+        fun helgedag(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Helgedag(gjelder, rapportert)
+        fun feriedag(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Feriedag(gjelder, rapportert)
+        fun arbeidsdag(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Arbeidsdag(gjelder, rapportert)
     }
 
 //    operator fun plus(other: Interval)

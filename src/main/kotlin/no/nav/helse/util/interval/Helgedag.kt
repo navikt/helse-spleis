@@ -4,7 +4,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class Helgedag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert){
+internal class Helgedag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert){
 
     init {
         require(gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY) {"En helgedag må være lørdag eller søndag"}
