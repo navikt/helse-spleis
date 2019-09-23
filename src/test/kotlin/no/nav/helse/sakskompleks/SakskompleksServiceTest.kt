@@ -122,9 +122,7 @@ class SakskompleksServiceTest {
         val sakForBruker = etSakskompleks(
             sykmeldinger = listOf(testSykmelding.sykmelding)
         )
-        val oppdatertSak = sakForBruker.copy(
-            sykmeldinger = sakForBruker.sykmeldinger + testSykmelding.sykmelding
-        )
+        sakForBruker.leggerTil(testSykmelding.sykmelding)
 
         val sakskompleksDao = mockk<SakskompleksDao>()
 
@@ -133,18 +131,18 @@ class SakskompleksServiceTest {
         } returns listOf(sakForBruker)
 
         every {
-            sakskompleksDao.oppdaterSak(oppdatertSak)
+            sakskompleksDao.oppdaterSak(sakForBruker)
         } returns 1
 
         val sakskompleksService = SakskompleksService(sakskompleksDao)
 
         val sak = sakskompleksService.finnEllerOpprettSak(testSykmelding.sykmelding)
 
-        assertEquals(oppdatertSak, sak)
+        assertEquals(sakForBruker, sak)
 
         verify(exactly = 1) {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
-            sakskompleksDao.oppdaterSak(oppdatertSak)
+            sakskompleksDao.oppdaterSak(sakForBruker)
         }
         verify(exactly = 0) {
             sakskompleksDao.opprettSak(any())
@@ -162,8 +160,7 @@ class SakskompleksServiceTest {
         every {
             sakskompleksDao.opprettSak(match { sak ->
                 sak.aktørId == testSykmelding.sykmelding.aktørId
-                        && sak.sykmeldinger.size == 1 && sak.sykmeldinger[0] == testSykmelding.sykmelding
-                        && sak.søknader.isEmpty()
+                        && sak.har(testSykmelding.sykmelding)
             })
         } returns 1
 
@@ -172,7 +169,7 @@ class SakskompleksServiceTest {
         val sak = sakskompleksService.finnEllerOpprettSak(testSykmelding.sykmelding)
 
         assertEquals(testSykmelding.sykmelding.aktørId, sak.aktørId)
-        assertEquals(listOf(testSykmelding.sykmelding), sak.sykmeldinger)
+        assertTrue(sak.har(testSykmelding.sykmelding))
         assertTrue(sak.søknader.isEmpty())
 
         verify(exactly = 1) {

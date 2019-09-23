@@ -45,14 +45,10 @@ class InntektsmeldingComponentTest {
 
     companion object {
 
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
-
         private val embeddedEnvironment = KafkaEnvironment(
-                users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
-                withSecurity = true,
+                withSecurity = false,
                 topicNames = listOf(sykmeldingTopic, inntektsmeldingTopic, søknadTopic)
         )
 
@@ -112,8 +108,6 @@ class InntektsmeldingComponentTest {
     fun `Inntektsmelding blir lagt til sakskompleks med kun sykmelding`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
@@ -157,8 +151,6 @@ class InntektsmeldingComponentTest {
     fun `Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
@@ -215,8 +207,6 @@ class InntektsmeldingComponentTest {
     fun `inntektsmelding som kommer først, blir ignorert`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -250,9 +240,8 @@ class InntektsmeldingComponentTest {
     private fun producerProperties() =
             Properties().apply {
                 put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
                 put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
             }
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =
