@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.IllegalArgumentException
 
-internal class LeafIntervalTest {
+internal class DagTest {
 
     @Test
     internal fun sykedag() {

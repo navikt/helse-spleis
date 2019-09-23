@@ -6,4 +6,6 @@ interface Interval {
     fun startdato(): LocalDate
     fun sluttdato(): LocalDate
     fun antallSykedager(): Int
+
+//    operator fun plus(other: Interval)
 }
