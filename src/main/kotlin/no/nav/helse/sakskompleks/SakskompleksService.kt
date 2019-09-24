@@ -28,18 +28,18 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             .finnSak(inntektsmelding)
 
     fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
-        sak.leggerTil(søknad)
+        sak.leggTil(søknad)
         sakskompleksDao.oppdaterSak(sak)
     }
 
     fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
-        sak.leggerTil(inntektsmelding)
+        sak.leggTil(inntektsmelding)
         sakskompleksDao.oppdaterSak(sak)
     }
 
     fun finnEllerOpprettSak(sykmelding: Sykmelding) =
         finnSak(sykmelding)?.also { sak ->
-            sak.leggerTil(sykmelding)
+            sak.leggTil(sykmelding)
             sakskompleksDao.oppdaterSak(sak)
         } ?: nyttSakskompleks(sykmelding).also {
             sakskompleksDao.opprettSak(it)
@@ -49,9 +49,10 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
     private fun nyttSakskompleks(sykmelding: Sykmelding) =
         Sakskompleks(
             id = UUID.randomUUID(),
-            aktørId = sykmelding.aktørId,
-            sykmeldinger = mutableListOf(sykmelding)
-        )
+            aktørId = sykmelding.aktørId
+        ).also {
+            it.leggTil(sykmelding)
+        }
 
     private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =
         firstOrNull { sakskompleks ->

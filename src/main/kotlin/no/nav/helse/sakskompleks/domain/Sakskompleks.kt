@@ -1,46 +1,38 @@
 package no.nav.helse.sakskompleks.domain
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sakskompleks.*
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.gjelderTil
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import java.lang.IllegalStateException
-import java.lang.RuntimeException
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
-class Sakskompleks(
-        val id: UUID,
-        val aktørId: String,
-        private val sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
-        private val søknader: MutableList<Sykepengesøknad> = mutableListOf(),
-        private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
+class Sakskompleks constructor (
+    val id: UUID,
+    val aktørId: String,
+    private val sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
+    private val søknader: MutableList<Sykepengesøknad> = mutableListOf(),
+    private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf(),
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    var tilstand: Sakskomplekstilstand = StartTilstand()
 ) {
-    var tilstand: Sakskomplekstilstand = SykmeldingMottattTilstand()
 
-    fun leggerTil(søknad: Sykepengesøknad) {
-        tilstand.søknadMottatt()
+    fun leggTil(søknad: Sykepengesøknad) {
+        with(tilstand) { søknadMottatt() }
         søknader.add(søknad)
     }
 
-    fun leggerTil(inntektsmelding: Inntektsmelding) {
+    fun leggTil(inntektsmelding: Inntektsmelding) {
+        with(tilstand) { inntektsmeldingMottatt() }
         inntektsmeldinger.add(inntektsmelding)
     }
 
-    fun leggerTil(sykmelding: Sykmelding) {
+    fun leggTil(sykmelding: Sykmelding) {
+        with(tilstand) { sykmeldingMottatt() }
         sykmeldinger.add(sykmelding)
     }
 
-    internal inner class SykmeldingMottattTilstand: Sakskomplekstilstand {
-        override fun søknadMottatt() {
-            tilstand = SøknadMottattTilstand()
-        }
-    }
-
-    internal inner class SøknadMottattTilstand: Sakskomplekstilstand {
-
-    }
     fun fom() : LocalDate? = run {
         val syketilfelleStart = sykmeldinger.mapNotNull { sykmelding -> sykmelding.syketilfelleStartDato }.min()
         val tidligsteFOM: LocalDate? =
@@ -79,14 +71,53 @@ class Sakskompleks(
             inntektsmeldinger.any { enInntektsmelding ->
                 inntektsmelding == enInntektsmelding
             }
+
+
+}
+
+class StartTilstand: Sakskomplekstilstand {
+    override fun Sakskompleks.sykmeldingMottatt() {
+       tilstand = SykmeldingMottattTilstand()
+    }
+}
+
+class SykmeldingMottattTilstand: Sakskomplekstilstand {
+    override fun Sakskompleks.søknadMottatt() {
+        tilstand = SøknadMottattTilstand()
+    }
+
+    override fun Sakskompleks.inntektsmeldingMottatt() {
+        tilstand = InntektsmeldingMottattTilstand()
+    }
+}
+
+class SøknadMottattTilstand: Sakskomplekstilstand {
+    override fun Sakskompleks.inntektsmeldingMottatt() {
+        tilstand = KomplettSakTilstand()
+    }
+}
+
+class InntektsmeldingMottattTilstand: Sakskomplekstilstand {
+    override fun Sakskompleks.søknadMottatt() {
+        tilstand = KomplettSakTilstand()
+    }
+}
+
+class KomplettSakTilstand: Sakskomplekstilstand {
+
 }
 
 interface Sakskomplekstilstand {
 
-    fun søknadMottatt() {
+    fun Sakskompleks.sykmeldingMottatt() {
         throw IllegalStateException()
     }
-    fun inntektsmeldingMottatt() {
+
+    fun Sakskompleks.søknadMottatt() {
+        throw IllegalStateException()
+    }
+
+    fun Sakskompleks.inntektsmeldingMottatt() {
         throw IllegalStateException()
     }
 }

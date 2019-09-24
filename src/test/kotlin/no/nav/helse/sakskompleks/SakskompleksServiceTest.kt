@@ -54,8 +54,8 @@ class SakskompleksServiceTest {
     @Test
     fun `skal finne sak når søknaden er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
-            sykmeldinger = listOf(testSykmelding.sykmelding),
-            søknader = listOf(testSøknad)
+            sykmeldinger = mutableListOf(testSykmelding.sykmelding),
+            søknader = mutableListOf(testSøknad)
         )
 
         val sakskompleksDao = mockk<SakskompleksDao>()
@@ -97,7 +97,7 @@ class SakskompleksServiceTest {
     @Test
     fun `skal finne sak når sykmeldingen er tilknyttet en sak`() {
         val sakForBruker = etSakskompleks(
-            sykmeldinger = listOf(testSykmelding.sykmelding)
+            sykmeldinger = mutableListOf(testSykmelding.sykmelding)
         )
 
         val sakskompleksDao = mockk<SakskompleksDao>()
@@ -120,9 +120,9 @@ class SakskompleksServiceTest {
     @Test
     fun `skal oppdatere sak når aktøren har en sak`() {
         val sakForBruker = etSakskompleks(
-            sykmeldinger = listOf(testSykmelding.sykmelding)
+            sykmeldinger = mutableListOf(testSykmelding.sykmelding)
         )
-        sakForBruker.leggerTil(testSykmelding.sykmelding)
+        sakForBruker.leggTil(testSykmelding.sykmelding)
 
         val sakskompleksDao = mockk<SakskompleksDao>()
 
@@ -170,7 +170,6 @@ class SakskompleksServiceTest {
 
         assertEquals(testSykmelding.sykmelding.aktørId, sak.aktørId)
         assertTrue(sak.har(testSykmelding.sykmelding))
-        assertTrue(sak.søknader.isEmpty())
 
         verify(exactly = 1) {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
@@ -187,8 +186,11 @@ class SakskompleksServiceTest {
 
         sakskompleksService.leggSøknadPåSak(etSakskompleks, testSøknad)
 
+        val etSakskompleksMedSøknad = etSakskompleks()
+        etSakskompleksMedSøknad.leggTil(testSøknad)
+
         verify(exactly = 1) {
-            sakskompleksDao.oppdaterSak(etSakskompleks.copy(søknader = listOf(testSøknad)))
+            sakskompleksDao.oppdaterSak(etSakskompleksMedSøknad)
         }
     }
 
@@ -204,7 +206,7 @@ class SakskompleksServiceTest {
 
         every {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
-        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+        } returns listOf(etSakskompleks(sykmeldinger = mutableListOf(førsteSykmelding)))
 
         sakskompleksService.finnEllerOpprettSak(andreSykmelding)
 
@@ -229,7 +231,7 @@ class SakskompleksServiceTest {
 
         every {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
-        } returns listOf(etSakskompleks(sykmeldinger = listOf(førsteSykmelding)))
+        } returns listOf(etSakskompleks(sykmeldinger = mutableListOf(førsteSykmelding)))
 
 
         sakskompleksService.finnEllerOpprettSak(andreSykmelding)
@@ -314,11 +316,11 @@ class SakskompleksServiceTest {
     }
 
     private fun etSakskompleks(
-            id: UUID = UUID.randomUUID(),
-            aktørId: String = "1234567890123",
-            sykmeldinger: List<Sykmelding> = emptyList(),
-            inntektsmeldinger: List<Inntektsmelding> = emptyList(),
-            søknader: List<Sykepengesøknad> = emptyList()
+        id: UUID = UUID.randomUUID(),
+        aktørId: String = "1234567890123",
+        sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
+        inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf(),
+        søknader: MutableList<Sykepengesøknad> = mutableListOf()
     ) =
         Sakskompleks(
             id = id,

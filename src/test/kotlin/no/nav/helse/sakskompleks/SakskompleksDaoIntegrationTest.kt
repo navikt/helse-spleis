@@ -96,7 +96,7 @@ class SakskompleksDaoIntegrationTest {
         assertEquals(1, saker.size)
         assertEquals(sak, saker[0])
 
-        sak.leggerTil(testSykmelding.sykmelding)
+        sak.leggTil(testSykmelding.sykmelding)
 
         assertEquals(1, dao.oppdaterSak(sak))
 
