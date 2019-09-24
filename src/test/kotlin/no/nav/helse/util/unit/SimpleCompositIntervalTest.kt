@@ -66,4 +66,23 @@ internal class SimpleCompositIntervalTest {
         assertEquals(2, interval.antallSykedager())
     }
 
+    @Test
+    internal fun ukedagerMedOpphold() {
+        val interval = førsteTorsdag + førsteTirsdag
+
+        assertEquals(førsteTirsdag.startdato(), interval.startdato())
+        assertEquals(førsteTorsdag.sluttdato(), interval.sluttdato())
+        assertEquals(2, interval.antallSykedager())
+        assertEquals(3, interval.flatten().size)
+    }
+
+    @Test
+    internal fun mandagTilMandag() {
+        val interval = førsteMandag + andreMandag
+
+        assertEquals(førsteMandag.startdato(), interval.startdato())
+        assertEquals(andreMandag.sluttdato(), interval.sluttdato())
+        assertEquals(2, interval.antallSykedager())
+        assertEquals(8, interval.flatten().size)
+    }
 }

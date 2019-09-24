@@ -11,4 +11,6 @@ abstract class Dag internal constructor(private val dagen: LocalDate, private va
     override fun flatten(): List<Dag> {
         return listOf(this)
     }
+
+    override fun rapportertDato() = rapportertDato
 }
