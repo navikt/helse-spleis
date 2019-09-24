@@ -1,0 +1,69 @@
+package no.nav.helse.util.unit
+
+import no.nav.helse.util.interval.Helgedag
+import no.nav.helse.util.interval.Interval
+import no.nav.helse.util.interval.Sykedag
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+internal class SimpleCompositIntervalTest {
+
+    companion object {
+        private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
+
+        private val førsteMandag = Sykedag(
+            gjelder = LocalDate.of(2019,9,23),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteTirsdag = Sykedag(
+            gjelder = LocalDate.of(2019,9,24),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteOnsdag = Sykedag(
+            gjelder = LocalDate.of(2019,9,25),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteTorsdag = Sykedag(
+            gjelder = LocalDate.of(2019,9,26),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteFredag = Sykedag(
+            gjelder = LocalDate.of(2019,9,27),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteLørdag = Helgedag(
+            gjelder = LocalDate.of(2019,9,28),
+            rapportert = tidspunktRapportert
+        )
+        private val førsteSøndag = Helgedag(
+            gjelder = LocalDate.of(2019,9,29),
+            rapportert = tidspunktRapportert
+        )
+        private val andreMandag = Sykedag(
+            gjelder = LocalDate.of(2019,9,30),
+            rapportert = tidspunktRapportert
+        )
+
+    }
+
+    @Test
+    internal fun sammenhengedeUkedager() {
+        val interval = førsteTirsdag + førsteOnsdag
+
+        assertEquals(førsteTirsdag.startdato(), interval.startdato())
+        assertEquals(førsteOnsdag.sluttdato(), interval.sluttdato())
+        assertEquals(2, interval.antallSykedager())
+    }
+
+    @Test
+    internal fun sammenhengedeUkedagerBaklengs() {
+        val interval = førsteOnsdag + førsteTirsdag
+
+        assertEquals(førsteTirsdag.startdato(), interval.startdato())
+        assertEquals(førsteOnsdag.sluttdato(), interval.sluttdato())
+        assertEquals(2, interval.antallSykedager())
+    }
+
+}

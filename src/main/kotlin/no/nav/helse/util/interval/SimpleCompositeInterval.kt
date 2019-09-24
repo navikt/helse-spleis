@@ -6,7 +6,7 @@ import kotlin.streams.toList
 
 internal class SimpleCompositeInterval(
     private val interval: List<Interval>
-) : Interval {
+) : Interval() {
 
     override fun flatten(): List<Dag> {
         return interval.flatMap { it.flatten() }

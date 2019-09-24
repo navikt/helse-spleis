@@ -4,11 +4,21 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-interface Interval {
-    fun startdato(): LocalDate
-    fun sluttdato(): LocalDate
-    fun antallSykedager(): Int
-    fun flatten(): List<Dag>
+abstract class Interval {
+    abstract fun startdato(): LocalDate
+    abstract fun sluttdato(): LocalDate
+    abstract fun antallSykedager(): Int
+    abstract fun flatten(): List<Dag>
+    operator fun plus(other: Interval): Interval {
+        return SimpleCompositeInterval(listOf(this, other).sortedBy { it.startdato() })
+    }
+
+    fun pluss(other: Interval) = this + other
+    internal fun harOverlapp(other: Interval) = this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
+
+    private fun harGrenseInnenfor(other: Interval) =
+        this.startdato() in (other.startdato()..other.sluttdato())
+
 
     companion object {
         fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Sykedag(gjelder, rapportert)
@@ -26,6 +36,4 @@ interface Interval {
 
         fun feriedag(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Feriedag(gjelder, rapportert)
     }
-
-//    operator fun plus(other: Interval)
 }
