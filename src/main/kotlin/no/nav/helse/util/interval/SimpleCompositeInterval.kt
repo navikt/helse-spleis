@@ -8,11 +8,25 @@ internal class SimpleCompositeInterval(
     private val interval: List<Interval>
 ) : Interval {
 
+    override fun flatten(): List<Dag> {
+        return interval.flatMap { it.flatten() }
+    }
+
     companion object {
         fun syk(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): SimpleCompositeInterval {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return SimpleCompositeInterval(fra.datesUntil(til.plusDays(1)).map {
                 Sykedag(
+                    it,
+                    rapportert
+                )
+            }.toList())
+        }
+
+        fun ikkeSyk(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): SimpleCompositeInterval {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return SimpleCompositeInterval(fra.datesUntil(til.plusDays(1)).map {
+                Interval.ikkeSykedag(
                     it,
                     rapportert
                 )

@@ -1,5 +1,7 @@
 package no.nav.helse.util.unit
 
+import no.nav.helse.util.interval.Arbeidsdag
+import no.nav.helse.util.interval.Helgedag
 import no.nav.helse.util.interval.Interval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,7 +37,7 @@ internal class DagTest {
     internal fun arbeidsdag() {
         val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val arbeidsdag = Interval.arbeidsdag(arbeidsdagenGjelder, tidspunktRapportert)
+        val arbeidsdag = Interval.ikkeSykedag(arbeidsdagenGjelder, tidspunktRapportert)
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
         assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
@@ -46,7 +48,7 @@ internal class DagTest {
     internal fun helgedag() {
         val helgedagenGjelder = LocalDate.of(2019,9,28)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val helgedag = Interval.helgedag(helgedagenGjelder, tidspunktRapportert)
+        val helgedag = Interval.ikkeSykedag(helgedagenGjelder, tidspunktRapportert)
 
         assertEquals(helgedagenGjelder, helgedag.startdato())
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
@@ -57,6 +59,6 @@ internal class DagTest {
     internal fun ugyldigHelgedag() {
         val ikkeEnHelgedag = LocalDate.of(2019,9,25)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        assertThrows<IllegalArgumentException>{ Interval.helgedag(ikkeEnHelgedag, tidspunktRapportert)}
+        assertThrows<IllegalArgumentException>{ Helgedag(ikkeEnHelgedag, tidspunktRapportert)}
     }
 }
