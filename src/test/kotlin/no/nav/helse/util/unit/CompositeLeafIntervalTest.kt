@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class SimpleCompositIntervalTest {
+internal class CompositeLeafIntervalTest {
 
     companion object {
         private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
