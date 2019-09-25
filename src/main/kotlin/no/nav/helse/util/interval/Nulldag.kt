@@ -3,6 +3,7 @@ package no.nav.helse.util.interval
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class Arbeidsdag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert, 20) {
+internal class Nulldag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert, 0){
+
     override fun antallSykedager() = 0
 }

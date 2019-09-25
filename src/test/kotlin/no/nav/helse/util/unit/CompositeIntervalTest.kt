@@ -19,8 +19,8 @@ internal class CompositeIntervalTest {
         private val førsteLørdag = LocalDate.of(2019,9,28)
         private val førsteSøndag = LocalDate.of(2019,9,29)
         private val andreMandag = LocalDate.of(2019,9,30)
-
     }
+
 
     @Test
     internal fun toSykeperioderMedMellomrom() {

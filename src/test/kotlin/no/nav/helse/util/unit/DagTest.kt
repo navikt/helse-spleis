@@ -3,6 +3,7 @@ package no.nav.helse.util.unit
 import no.nav.helse.util.interval.Arbeidsdag
 import no.nav.helse.util.interval.Helgedag
 import no.nav.helse.util.interval.Interval
+import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
