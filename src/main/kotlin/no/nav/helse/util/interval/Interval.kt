@@ -43,12 +43,14 @@ abstract class Interval {
         if (this.sluttdato().isAfter(other.sluttdato())) this.sluttdato() else other.sluttdato()
 
     companion object {
-        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime): Dag = Sykedag(gjelder, rapportert)
+        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime): Dag =
+            if (gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY)
+                SykHelgedag(gjelder, rapportert) else Sykedag(gjelder, rapportert)
 
         fun sykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Interval {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeInterval(fra.datesUntil(til.plusDays(1)).map {
-                Sykedag(
+                sykedager(
                     it,
                     rapportert
                 )

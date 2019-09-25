@@ -3,6 +3,8 @@ package no.nav.helse.util.unit
 import no.nav.helse.util.interval.Arbeidsdag
 import no.nav.helse.util.interval.Helgedag
 import no.nav.helse.util.interval.Interval
+import no.nav.helse.util.interval.SykHelgedag
+import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -50,13 +52,32 @@ internal class DateRangeTest {
     }
 
     @Test
-    fun mandagTilMandag() {
-        val dager = Interval.ikkeSykedager(førsteMandag, andreMandag, tidspunktRapportert).flatten()
+    fun mandagTilMandagIkkeSyk() {
+        val interval = Interval.ikkeSykedager(førsteMandag, andreMandag, tidspunktRapportert)
+
+        assertEquals(0, interval.antallSykedager())
+
+        val dager = interval.flatten()
 
         assertEquals(8, dager.size)
         assert(dager[0] is Arbeidsdag)
         assert(dager[5] is Helgedag)
         assert(dager[6] is Helgedag)
         assert(dager[7] is Arbeidsdag)
+    }
+
+    @Test
+    fun mandagTilMandagSyk() {
+        val interval = Interval.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
+
+        assertEquals(8, interval.antallSykedager())
+
+        val dager = interval.flatten()
+
+        assertEquals(8, dager.size)
+        assert(dager[0] is Sykedag)
+        assert(dager[5] is SykHelgedag)
+        assert(dager[6] is SykHelgedag)
+        assert(dager[7] is Sykedag)
     }
 }
