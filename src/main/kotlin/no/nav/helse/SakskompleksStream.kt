@@ -20,6 +20,7 @@ import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
@@ -89,7 +90,7 @@ private fun Application.streamsConfig() = Properties().apply {
     put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndFailExceptionHandler::class.java)
 
     put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-    put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+    put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
 
     environment.config.propertyOrNull("kafka.username")?.getString()?.let { username ->
         environment.config.propertyOrNull("kafka.password")?.getString()?.let { password ->

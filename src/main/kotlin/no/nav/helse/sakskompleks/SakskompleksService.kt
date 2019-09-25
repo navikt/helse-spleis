@@ -2,8 +2,6 @@ package no.nav.helse.sakskompleks
 
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.fom
-import no.nav.helse.sakskompleks.domain.tom
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.gjelderFra
 import no.nav.helse.søknad.domain.Sykepengesøknad
@@ -30,21 +28,18 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
             .finnSak(inntektsmelding)
 
     fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
-        val oppdatertSak = sak.copy(søknader = sak.søknader + søknad)
-        sakskompleksDao.oppdaterSak(oppdatertSak)
+        sak.leggTil(søknad)
+        sakskompleksDao.oppdaterSak(sak)
     }
 
     fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
-        val oppdatertSak = sak.copy(inntektsmeldinger = sak.inntektsmeldinger + inntektsmelding)
-        sakskompleksDao.oppdaterSak(oppdatertSak)
+        sak.leggTil(inntektsmelding)
+        sakskompleksDao.oppdaterSak(sak)
     }
 
     fun finnEllerOpprettSak(sykmelding: Sykmelding) =
-        finnSak(sykmelding)?.let { sak ->
-            sak.copy(
-                sykmeldinger = sak.sykmeldinger + sykmelding
-            )
-        }?.also { sak ->
+        finnSak(sykmelding)?.also { sak ->
+            sak.leggTil(sykmelding)
             sakskompleksDao.oppdaterSak(sak)
         } ?: nyttSakskompleks(sykmelding).also {
             sakskompleksDao.opprettSak(it)
@@ -54,15 +49,14 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
     private fun nyttSakskompleks(sykmelding: Sykmelding) =
         Sakskompleks(
             id = UUID.randomUUID(),
-            aktørId = sykmelding.aktørId,
-            sykmeldinger = listOf(sykmelding),
-            inntektsmeldinger = emptyList(),
-            søknader = emptyList()
-        )
+            aktørId = sykmelding.aktørId
+        ).also {
+            it.leggTil(sykmelding)
+        }
 
     private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =
         firstOrNull { sakskompleks ->
-            sykepengesøknad.hørerSammenMed(sakskompleks)
+            sakskompleks.hørerSammenMed(sykepengesøknad)
         }
 
     private fun List<Sakskompleks>.finnSak(sykmelding: Sykmelding) =
@@ -73,11 +67,6 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
     private fun List<Sakskompleks>.finnSak(inntektsmelding: Inntektsmelding) =
         firstOrNull { sakskompleks ->
             inntektsmelding.hørerSammenMed(sakskompleks)
-        }
-
-    private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
-        sakskompleks.sykmeldinger.any { sykmelding ->
-            sykmelding.id == sykmeldingId
         }
 
     private fun Sykmelding.hørerSammenMed(sakskompleks: Sakskompleks) =

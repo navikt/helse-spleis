@@ -39,14 +39,10 @@ class NaisRoutesTest {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
-
         private val embeddedEnvironment = KafkaEnvironment(
-            users = listOf(JAASCredential(username, password)),
             autoStart = false,
             withSchemaRegistry = false,
-            withSecurity = true,
+            withSecurity = false,
             topicNames = listOf("privat-syfo-sm2013-automatiskBehandling", "syfo-soknad-v2")
         )
 
@@ -85,8 +81,6 @@ class NaisRoutesTest {
         testServer(
             config = mapOf(
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-                "KAFKA_USERNAME" to username,
-                "KAFKA_PASSWORD" to password,
                 "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
             ), shutdownTimeoutMs = 20000L
         ) {
@@ -126,11 +120,7 @@ class NaisRoutesTest {
     private fun producerProperties() =
         Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
             put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-            put(
-                SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${username}\" password=\"${password}\";"
-            )
         }
 }

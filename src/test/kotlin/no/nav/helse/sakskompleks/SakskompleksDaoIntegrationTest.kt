@@ -96,14 +96,12 @@ class SakskompleksDaoIntegrationTest {
         assertEquals(1, saker.size)
         assertEquals(sak, saker[0])
 
-        val nySak = sak.copy(
-                sykmeldinger = listOf(testSykmelding.sykmelding)
-        )
+        sak.leggTil(testSykmelding.sykmelding)
 
-        assertEquals(1, dao.oppdaterSak(nySak))
+        assertEquals(1, dao.oppdaterSak(sak))
 
         saker = dao.finnSaker(aktørId)
         assertEquals(1, saker.size)
-        assertEquals(nySak, saker[0])
+        assertEquals(sak, saker[0])
     }
 }

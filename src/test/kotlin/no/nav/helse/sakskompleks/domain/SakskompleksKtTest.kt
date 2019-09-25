@@ -48,9 +48,9 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
-            sykmeldinger = listOf(sykmelding),
-            inntektsmeldinger = emptyList(),
-            søknader = listOf(søknad)
+            sykmeldinger = mutableListOf(sykmelding),
+            inntektsmeldinger = mutableListOf(),
+            søknader = mutableListOf(søknad)
         )
 
         assertEquals(LocalDate.of(2019, 8, 16), sakskompleks.fom())
@@ -83,9 +83,9 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
-            sykmeldinger = listOf(sykmelding),
-            inntektsmeldinger = emptyList(),
-            søknader = listOf(søknad)
+            sykmeldinger = mutableListOf(sykmelding),
+            inntektsmeldinger = mutableListOf(),
+            søknader = mutableListOf(søknad)
         )
 
         assertEquals(LocalDate.of(2019, 8, 1), sakskompleks.fom())
@@ -112,9 +112,9 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
-            sykmeldinger = listOf(sykmelding),
-            inntektsmeldinger = emptyList(),
-            søknader = listOf(søknad)
+            sykmeldinger = mutableListOf(sykmelding),
+            inntektsmeldinger = mutableListOf(),
+            søknader = mutableListOf(søknad)
         )
 
         assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
@@ -142,8 +142,8 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
-            sykmeldinger = listOf(sykmelding),
-            søknader = listOf(søknad)
+            sykmeldinger = mutableListOf(sykmelding),
+            søknader = mutableListOf(søknad)
         )
 
         assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
@@ -179,8 +179,8 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
-            sykmeldinger = listOf(sykmelding),
-            søknader = listOf(søknad, korrigering)
+            sykmeldinger = mutableListOf(sykmelding),
+            søknader = mutableListOf(søknad, korrigering)
         )
 
         assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())

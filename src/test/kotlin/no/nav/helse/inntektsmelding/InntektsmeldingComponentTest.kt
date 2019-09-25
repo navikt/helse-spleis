@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
-import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.sykmeldingTopic
@@ -45,14 +44,10 @@ class InntektsmeldingComponentTest {
 
     companion object {
 
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
-
         private val embeddedEnvironment = KafkaEnvironment(
-                users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
-                withSecurity = true,
+                withSecurity = false,
                 topicNames = listOf(sykmeldingTopic, inntektsmeldingTopic, søknadTopic)
         )
 
@@ -112,8 +107,6 @@ class InntektsmeldingComponentTest {
     fun `Inntektsmelding blir lagt til sakskompleks med kun sykmelding`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
@@ -143,9 +136,8 @@ class InntektsmeldingComponentTest {
 
                     assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
 
-                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
-                    assertEquals(listOf(enSykmelding), lagretSak.sykmeldinger)
-                    assertEquals(emptyList<Sykepengesøknad>(), lagretSak.søknader)
+                    assertTrue(lagretSak.har(enInntektsmelding))
+                    assertTrue(lagretSak.har(enSykmelding))
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMotattCounterBefore)
                     assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
@@ -157,8 +149,6 @@ class InntektsmeldingComponentTest {
     fun `Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
             val sakskompleksCounterBefore = getCounterValue(sakskompleksTotalsCounterName)
@@ -200,10 +190,9 @@ class InntektsmeldingComponentTest {
                     assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
                     assertEquals(sakskompleksService.finnSak(enSøknad), lagretSak)
 
-                    assertEquals(listOf(enSykmelding), lagretSak.sykmeldinger)
-                    assertEquals(listOf(enSøknad), lagretSak.søknader)
-                    assertEquals(listOf(enInntektsmelding), lagretSak.inntektsmeldinger)
-                    assertEquals(enInntektsmelding.jsonNode, lagretSak.inntektsmeldinger[0].jsonNode)
+                    assertTrue(lagretSak.har(enSykmelding))
+                    assertTrue(lagretSak.har(enSøknad))
+                    assertTrue(lagretSak.har(enInntektsmelding))
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
                     assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
@@ -215,8 +204,6 @@ class InntektsmeldingComponentTest {
     fun `inntektsmelding som kommer først, blir ignorert`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -250,9 +237,8 @@ class InntektsmeldingComponentTest {
     private fun producerProperties() =
             Properties().apply {
                 put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
                 put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
             }
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =

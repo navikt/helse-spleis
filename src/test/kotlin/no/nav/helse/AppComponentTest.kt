@@ -28,9 +28,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,14 +41,10 @@ class AppComponentTest {
 
     companion object {
 
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
-
         private val embeddedEnvironment = KafkaEnvironment(
-                users = listOf(JAASCredential(username, password)),
                 autoStart = false,
                 withSchemaRegistry = false,
-                withSecurity = true,
+                withSecurity = false,
                 topicNames = listOf(sykmeldingTopic, søknadTopic, inntektsmeldingTopic)
         )
 
@@ -88,8 +82,6 @@ class AppComponentTest {
     fun `behandler ikke søknad om utlandsopphold`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -115,8 +107,6 @@ class AppComponentTest {
     fun `behandler ikke søknad med status != SENDT`() {
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -145,8 +135,6 @@ class AppComponentTest {
 
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -176,8 +164,9 @@ class AppComponentTest {
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
 
                     val sak = sakskompleksService.finnSak(Sykepengesøknad(søknad))
-                    assertEquals(listOf(SykmeldingMessage(sykmelding).sykmelding), sak?.sykmeldinger)
-                    assertEquals(listOf(Sykepengesøknad(søknad)), sak?.søknader)
+                    sak!!
+                    assertTrue(sak.har(SykmeldingMessage(sykmelding).sykmelding))
+                    assertTrue(sak.har(Sykepengesøknad(søknad)))
                 }
         }
     }
@@ -189,8 +178,6 @@ class AppComponentTest {
 
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
@@ -220,9 +207,8 @@ class AppComponentTest {
     private fun producerProperties() =
             Properties().apply {
                 put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
                 put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
             }
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =
