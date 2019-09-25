@@ -1,9 +1,7 @@
 package no.nav.helse.util.unit
 
-import no.nav.helse.util.interval.Arbeidsdag
 import no.nav.helse.util.interval.Helgedag
 import no.nav.helse.util.interval.Interval
-import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -27,7 +25,7 @@ internal class DagTest {
     internal fun feriedag() {
         val dagFeriedagenDekker = LocalDate.of(2019,9,24)
         val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        val feriedag = Interval.feriedag(dagFeriedagenDekker, tidspunktRapportert)
+        val feriedag = Interval.ferie(dagFeriedagenDekker, tidspunktRapportert)
 
         assertEquals(dagFeriedagenDekker, feriedag.startdato())
         assertEquals(dagFeriedagenDekker, feriedag.sluttdato())

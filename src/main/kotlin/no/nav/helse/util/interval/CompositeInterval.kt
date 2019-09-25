@@ -6,7 +6,7 @@ internal class CompositeInterval(
     interval: List<Interval?>
 ) : Interval() {
     override fun dag(dato: LocalDate): Dag {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return interval.map { it.dag(dato) }.firstOrNull { it !is Nulldag } ?: Nulldag(dato, rapportertDato())
     }
 
     private val interval = interval.filterNotNull()

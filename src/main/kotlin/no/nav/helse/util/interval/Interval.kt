@@ -11,13 +11,16 @@ abstract class Interval {
     abstract fun antallSykedager(): Int
     abstract fun flatten(): List<Dag>
     operator fun plus(other: Interval): Interval {
-//        førsteStartdato(other).datesUntil(sisteSluttdato(other)).map { this.beste(other, it)}
-
         if (this.startdato().isAfter(other.startdato())) return other + this
-        return CompositeInterval(listOf(this, gap(this, other), other))
+
+        val datesUntil = førsteStartdato(other).datesUntil(sisteSluttdato(other).plusDays(1)).toList()
+        val intervalEtterKonflikter =
+            datesUntil.map { this.beste(other, it) }.toList()
+
+        return CompositeInterval(intervalEtterKonflikter.map { it.tilDag() })
     }
 
-    private fun beste(other: Interval, dato: LocalDate): Interval {
+    private fun beste(other: Interval, dato: LocalDate): Dag {
         return listOf(this.dag(dato), other.dag(dato)).max()!!
     }
 
@@ -26,12 +29,6 @@ abstract class Interval {
     fun pluss(other: Interval) = this + other
     private fun harOverlapp(other: Interval) = this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
     internal abstract fun rapportertDato(): LocalDateTime
-
-    private fun gap(start: Interval, slutt: Interval): Interval? {
-        if (start.sluttdato().plusDays(1) >= slutt.startdato()) return null
-        val rapportertDato = listOf(start, slutt).maxBy { it.rapportertDato() }!!.rapportertDato()
-        return ikkeSykedager(start.sluttdato().plusDays(1), slutt.startdato().minusDays(1), rapportertDato)
-    }
 
     private fun harGrenseInnenfor(other: Interval) =
         this.startdato() in (other.startdato()..other.sluttdato())
@@ -43,34 +40,19 @@ abstract class Interval {
         if (this.sluttdato().isAfter(other.sluttdato())) this.sluttdato() else other.sluttdato()
 
     companion object {
-        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime): Dag =
-            if (gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY)
-                SykHelgedag(gjelder, rapportert) else Sykedag(gjelder, rapportert)
+        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime) =
+            if (erArbeidsdag(gjelder)) Sykedag(gjelder, rapportert) else SykHelgedag(gjelder, rapportert)
+
+        fun ferie(gjelder: LocalDate, rapportert: LocalDateTime) =
+            if (erArbeidsdag(gjelder)) Feriedag(gjelder, rapportert) else Helgedag(gjelder, rapportert)
+
+        fun ikkeSykedag(gjelder: LocalDate, rapportert: LocalDateTime) =
+            if (erArbeidsdag(gjelder)) Arbeidsdag(gjelder, rapportert) else Helgedag(gjelder, rapportert)
 
         fun sykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Interval {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeInterval(fra.datesUntil(til.plusDays(1)).map {
                 sykedager(
-                    it,
-                    rapportert
-                )
-            }.toList())
-        }
-
-        fun ferie(gjelder: LocalDate, rapportert: LocalDateTime): Dag {
-            return if (gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY)
-                Helgedag(gjelder, rapportert) else Feriedag(gjelder, rapportert)
-        }
-
-        fun ikkeSykedag(gjelder: LocalDate, rapportert: LocalDateTime): Dag {
-            return if (gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY)
-                Helgedag(gjelder, rapportert) else Arbeidsdag(gjelder, rapportert)
-        }
-
-        fun ikkeSykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Interval {
-            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
-            return CompositeInterval(fra.datesUntil(til.plusDays(1)).map {
-                ikkeSykedag(
                     it,
                     rapportert
                 )
@@ -87,7 +69,18 @@ abstract class Interval {
             }.toList())
         }
 
-        fun feriedag(gjelder: LocalDate, rapportert: LocalDateTime): Interval = Feriedag(gjelder, rapportert)
+        fun ikkeSykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Interval {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeInterval(fra.datesUntil(til.plusDays(1)).map {
+                ikkeSykedag(
+                    it,
+                    rapportert
+                )
+            }.toList())
+        }
+
+        private fun erArbeidsdag(dato: LocalDate) =
+            dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
 
     }
 }
