@@ -8,7 +8,7 @@ import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.time.LocalDate
 import java.util.*
 
-data class Sakskompleks constructor (
+data class Sakskompleks(
     val id: UUID,
     val aktørId: String,
     val sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
