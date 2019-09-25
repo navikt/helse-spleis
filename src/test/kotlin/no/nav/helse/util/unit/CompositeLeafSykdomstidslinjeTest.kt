@@ -1,14 +1,13 @@
 package no.nav.helse.util.unit
 
 import no.nav.helse.util.interval.Helgedag
-import no.nav.helse.util.interval.Interval
 import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class CompositeLeafIntervalTest {
+internal class CompositeLeafSykdomstidslinjeTest {
 
     companion object {
         private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)

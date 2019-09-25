@@ -2,16 +2,16 @@ package no.nav.helse.util.interval
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 abstract class Dag internal constructor(internal val dagen: LocalDate, internal val rapportertDato: LocalDateTime, private val prioritet: Int) :
-    Interval(), Comparable<Dag>{
+    Sykdomstidslinje(), Comparable<Dag>{
+    internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
     override fun startdato() = dagen
     override fun sluttdato() = dagen
-
     override fun flatten() = listOf(this)
-
     override fun rapportertDato() = rapportertDato
-
     override fun dag(dato: LocalDate) = if(dato == dagen) this else Nulldag(dagen, rapportertDato)
 
     override fun compareTo(other: Dag): Int {

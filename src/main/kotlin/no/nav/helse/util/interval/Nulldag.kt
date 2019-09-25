@@ -8,4 +8,6 @@ internal class Nulldag internal constructor(gjelder: LocalDate, rapportert: Loca
     override fun antallSykedager() = 0
 
     override fun tilDag() = ikkeSykedag(dagen, rapportertDato)
+
+    override fun toString() = formatter.format(dagen) + "\tNulldag"
 }

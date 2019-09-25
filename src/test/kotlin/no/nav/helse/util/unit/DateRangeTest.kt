@@ -2,7 +2,7 @@ package no.nav.helse.util.unit
 
 import no.nav.helse.util.interval.Arbeidsdag
 import no.nav.helse.util.interval.Helgedag
-import no.nav.helse.util.interval.Interval
+import no.nav.helse.util.interval.Sykdomstidslinje
 import no.nav.helse.util.interval.SykHelgedag
 import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,7 +30,7 @@ internal class DateRangeTest {
 
     @Test
     fun påfølgendeSykedager() {
-        val sykedager = Interval.sykedager(førsteTirsdag, førsteOnsdag, tidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(førsteTirsdag, førsteOnsdag, tidspunktRapportert)
 
         assertEquals(førsteTirsdag, sykedager.startdato())
         assertEquals(førsteOnsdag, sykedager.sluttdato())
@@ -39,12 +39,12 @@ internal class DateRangeTest {
 
     @Test
     fun sluttForStartFeiler() {
-        assertThrows<IllegalArgumentException> { Interval.sykedager(førsteOnsdag, førsteTirsdag, tidspunktRapportert) }
+        assertThrows<IllegalArgumentException> { Sykdomstidslinje.sykedager(førsteOnsdag, førsteTirsdag, tidspunktRapportert) }
     }
 
     @Test
     fun sammeDagErEnDag() {
-        val sykedager = Interval.sykedager(førsteTirsdag, førsteTirsdag, tidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(førsteTirsdag, førsteTirsdag, tidspunktRapportert)
 
         assertEquals(førsteTirsdag, sykedager.startdato())
         assertEquals(førsteTirsdag, sykedager.sluttdato())
@@ -53,7 +53,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagIkkeSyk() {
-        val interval = Interval.ikkeSykedager(førsteMandag, andreMandag, tidspunktRapportert)
+        val interval = Sykdomstidslinje.ikkeSykedager(førsteMandag, andreMandag, tidspunktRapportert)
 
         assertEquals(0, interval.antallSykedager())
 
@@ -68,7 +68,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagSyk() {
-        val interval = Interval.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
+        val interval = Sykdomstidslinje.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
 
         assertEquals(8, interval.antallSykedager())
 

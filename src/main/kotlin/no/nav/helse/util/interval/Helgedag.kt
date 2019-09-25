@@ -11,4 +11,6 @@ internal class Helgedag internal constructor(gjelder: LocalDate, rapportert: Loc
     }
 
     override fun antallSykedager() = 0
+
+    override fun toString() = formatter.format(dagen) + "\tHelg"
 }
