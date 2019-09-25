@@ -8,12 +8,12 @@ import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.time.LocalDate
 import java.util.*
 
-class Sakskompleks constructor (
+data class Sakskompleks constructor (
     val id: UUID,
     val aktørId: String,
-    private val sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
-    private val søknader: MutableList<Sykepengesøknad> = mutableListOf(),
-    private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf(),
+    val sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
+    val søknader: MutableList<Sykepengesøknad> = mutableListOf(),
+    val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf(),
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
     var tilstand: Sakskomplekstilstand = StartTilstand()
 ) {
@@ -72,16 +72,15 @@ class Sakskompleks constructor (
                 inntektsmelding == enInntektsmelding
             }
 
-
 }
 
-class StartTilstand: Sakskomplekstilstand {
+class StartTilstand: Sakskomplekstilstand() {
     override fun Sakskompleks.sykmeldingMottatt() {
        tilstand = SykmeldingMottattTilstand()
     }
 }
 
-class SykmeldingMottattTilstand: Sakskomplekstilstand {
+class SykmeldingMottattTilstand: Sakskomplekstilstand() {
     override fun Sakskompleks.søknadMottatt() {
         tilstand = SøknadMottattTilstand()
     }
@@ -91,35 +90,44 @@ class SykmeldingMottattTilstand: Sakskomplekstilstand {
     }
 }
 
-class SøknadMottattTilstand: Sakskomplekstilstand {
+class SøknadMottattTilstand: Sakskomplekstilstand() {
     override fun Sakskompleks.inntektsmeldingMottatt() {
         tilstand = KomplettSakTilstand()
     }
 }
 
-class InntektsmeldingMottattTilstand: Sakskomplekstilstand {
+class InntektsmeldingMottattTilstand: Sakskomplekstilstand() {
     override fun Sakskompleks.søknadMottatt() {
         tilstand = KomplettSakTilstand()
     }
 }
 
-class KomplettSakTilstand: Sakskomplekstilstand {
+class KomplettSakTilstand: Sakskomplekstilstand()
 
-}
+abstract class Sakskomplekstilstand {
 
-interface Sakskomplekstilstand {
-
-    fun Sakskompleks.sykmeldingMottatt() {
+    open fun Sakskompleks.sykmeldingMottatt() {
         throw IllegalStateException()
     }
 
-    fun Sakskompleks.søknadMottatt() {
+    open fun Sakskompleks.søknadMottatt() {
         throw IllegalStateException()
     }
 
-    fun Sakskompleks.inntektsmeldingMottatt() {
+    open fun Sakskompleks.inntektsmeldingMottatt() {
         throw IllegalStateException()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
+    }
+
 }
 
 fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {

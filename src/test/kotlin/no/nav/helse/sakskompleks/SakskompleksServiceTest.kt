@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
@@ -53,10 +52,7 @@ class SakskompleksServiceTest {
 
     @Test
     fun `skal finne sak når søknaden er tilknyttet en sak`() {
-        val sakForBruker = etSakskompleks(
-            sykmeldinger = mutableListOf(testSykmelding.sykmelding),
-            søknader = mutableListOf(testSøknad)
-        )
+        val sakForBruker = etSakskompleks(testSykmelding.sykmelding, testSøknad)
 
         val sakskompleksDao = mockk<SakskompleksDao>()
 
@@ -96,9 +92,7 @@ class SakskompleksServiceTest {
 
     @Test
     fun `skal finne sak når sykmeldingen er tilknyttet en sak`() {
-        val sakForBruker = etSakskompleks(
-            sykmeldinger = mutableListOf(testSykmelding.sykmelding)
-        )
+        val sakForBruker = etSakskompleks(testSykmelding.sykmelding)
 
         val sakskompleksDao = mockk<SakskompleksDao>()
 
@@ -119,10 +113,7 @@ class SakskompleksServiceTest {
 
     @Test
     fun `skal oppdatere sak når aktøren har en sak`() {
-        val sakForBruker = etSakskompleks(
-            sykmeldinger = mutableListOf(testSykmelding.sykmelding)
-        )
-        sakForBruker.leggTil(testSykmelding.sykmelding)
+        val sakForBruker = etSakskompleks(testSykmelding.sykmelding)
 
         val sakskompleksDao = mockk<SakskompleksDao>()
 
@@ -182,15 +173,12 @@ class SakskompleksServiceTest {
         val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
         val sakskompleksService = SakskompleksService(sakskompleksDao)
 
-        val etSakskompleks = etSakskompleks()
+        val etSakskompleks = etSakskompleks(testSykmelding.sykmelding)
 
         sakskompleksService.leggSøknadPåSak(etSakskompleks, testSøknad)
 
-        val etSakskompleksMedSøknad = etSakskompleks()
-        etSakskompleksMedSøknad.leggTil(testSøknad)
-
         verify(exactly = 1) {
-            sakskompleksDao.oppdaterSak(etSakskompleksMedSøknad)
+            sakskompleksDao.oppdaterSak(etSakskompleks)
         }
     }
 
@@ -206,7 +194,7 @@ class SakskompleksServiceTest {
 
         every {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
-        } returns listOf(etSakskompleks(sykmeldinger = mutableListOf(førsteSykmelding)))
+        } returns listOf(etSakskompleks(førsteSykmelding))
 
         sakskompleksService.finnEllerOpprettSak(andreSykmelding)
 
@@ -231,8 +219,7 @@ class SakskompleksServiceTest {
 
         every {
             sakskompleksDao.finnSaker(testSykmelding.sykmelding.aktørId)
-        } returns listOf(etSakskompleks(sykmeldinger = mutableListOf(førsteSykmelding)))
-
+        } returns listOf(etSakskompleks(førsteSykmelding))
 
         sakskompleksService.finnEllerOpprettSak(andreSykmelding)
 
@@ -316,17 +303,19 @@ class SakskompleksServiceTest {
     }
 
     private fun etSakskompleks(
+        sykmelding: Sykmelding? = null,
+        søknad: Sykepengesøknad? = null,
         id: UUID = UUID.randomUUID(),
-        aktørId: String = "1234567890123",
-        sykmeldinger: MutableList<Sykmelding> = mutableListOf(),
-        inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf(),
-        søknader: MutableList<Sykepengesøknad> = mutableListOf()
+        aktørId: String = "1234567890123"
     ) =
         Sakskompleks(
             id = id,
             aktørId = aktørId,
-            sykmeldinger = sykmeldinger,
-            inntektsmeldinger = inntektsmeldinger,
-            søknader = søknader
-        )
+            sykmeldinger = mutableListOf(),
+            inntektsmeldinger = mutableListOf(),
+            søknader = mutableListOf()
+        ).also {
+            sykmelding?.let { sykmelding -> it.leggTil(sykmelding) }
+            søknad?.let { søknad -> it.leggTil(søknad) }
+        }
 }
