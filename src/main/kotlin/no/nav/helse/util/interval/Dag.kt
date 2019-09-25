@@ -20,5 +20,7 @@ abstract class Dag internal constructor(internal val dagen: LocalDate, internal 
     }
 
     open fun tilDag() = this
+
+    override fun length() = 1
 }
 

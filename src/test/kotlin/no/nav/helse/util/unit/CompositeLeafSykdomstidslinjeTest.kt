@@ -1,6 +1,5 @@
 package no.nav.helse.util.unit
 
-import no.nav.helse.util.interval.Helgedag
 import no.nav.helse.util.interval.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,18 +25,6 @@ internal class CompositeLeafSykdomstidslinjeTest {
         )
         private val førsteTorsdag = Sykedag(
             gjelder = LocalDate.of(2019,9,26),
-            rapportert = tidspunktRapportert
-        )
-        private val førsteFredag = Sykedag(
-            gjelder = LocalDate.of(2019,9,27),
-            rapportert = tidspunktRapportert
-        )
-        private val førsteLørdag = Helgedag(
-            gjelder = LocalDate.of(2019,9,28),
-            rapportert = tidspunktRapportert
-        )
-        private val førsteSøndag = Helgedag(
-            gjelder = LocalDate.of(2019,9,29),
             rapportert = tidspunktRapportert
         )
         private val andreMandag = Sykedag(

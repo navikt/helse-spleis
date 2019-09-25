@@ -5,10 +5,13 @@ import java.time.LocalDate
 internal class CompositeSykdomstidslinje(
     sykdomstidslinjer: List<Sykdomstidslinje?>
 ) : Sykdomstidslinje() {
+    private val tidslinjer = sykdomstidslinjer.filterNotNull()
+
+    override fun length() = tidslinjer.sumBy { it.length() }
+
     override fun dag(dato: LocalDate) =
         tidslinjer.map { it.dag(dato) }.firstOrNull { it !is Nulldag } ?: Nulldag(dato, rapportertDato())
 
-    private val tidslinjer = sykdomstidslinjer.filterNotNull()
 
     override fun rapportertDato() = tidslinjer.maxBy { it.rapportertDato() }!!.rapportertDato()
 
