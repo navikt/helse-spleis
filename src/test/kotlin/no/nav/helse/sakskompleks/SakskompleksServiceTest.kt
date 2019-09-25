@@ -14,6 +14,7 @@ import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -111,6 +112,7 @@ class SakskompleksServiceTest {
         }
     }
 
+    @Disabled("The state machine in Sakskompleks doesn't support consecutive sykmeldinger yet")
     @Test
     fun `skal oppdatere sak når aktøren har en sak`() {
         val sakForBruker = etSakskompleks(testSykmelding.sykmelding)
@@ -207,6 +209,7 @@ class SakskompleksServiceTest {
         }
     }
 
+    @Disabled("The state machine in Sakskompleks doesn't support consecutive sykmeldinger yet")
     @Test
     fun `sykmelding innenfor 16 dager av sakskompleks blir koblet på sakskompleks`() {
         val sakskompleksDao = mockk<SakskompleksDao>(relaxed = true)
