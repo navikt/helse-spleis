@@ -34,6 +34,33 @@ class Sakskompleks {
 
         id = UUID.fromString(node["id"].textValue())
         aktørId = node["aktørId"].textValue()
+
+        tilstand = when (node["tilstand"].textValue()) {
+            "StartTilstand" -> StartTilstand
+            "SykmeldingMottattTilstand" -> SykmeldingMottattTilstand
+            "SøknadMottattTilstand" -> SøknadMottattTilstand
+            "InntektsmeldingMottattTilstand" -> InntektsmeldingMottattTilstand
+            "KomplettSakTilstand" -> KomplettSakTilstand
+            else -> throw RuntimeException("ukjent tilstand")
+        }
+
+        node["sykmeldinger"].map { jsonNode ->
+            Sykmelding(jsonNode)
+        }.let {
+            sykmeldinger.addAll(it)
+        }
+
+        node["inntektsmeldinger"].map { jsonNode ->
+            Inntektsmelding(jsonNode)
+        }.let {
+            inntektsmeldinger.addAll(it)
+        }
+
+        node["søknader"].map { jsonNode ->
+            Sykepengesøknad(jsonNode)
+        }.let {
+            søknader.addAll(it)
+        }
     }
 
     companion object {

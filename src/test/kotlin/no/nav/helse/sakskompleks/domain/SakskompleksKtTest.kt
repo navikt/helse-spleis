@@ -124,6 +124,9 @@ class SakskompleksKtTest {
             id = id,
             aktørId = "aktørId"
         )
+        sakskompleks.leggTil(testSykmelding.sykmelding)
+        sakskompleks.leggTil(testSøknad)
+        sakskompleks.leggTil(enInntektsmelding)
 
         val inMemento = sakskompleks.lagre()
 
