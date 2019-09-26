@@ -29,13 +29,13 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
     private fun opprettSak(memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
-                        memento.id.toString(), memento.aktørId, memento.json).asUpdate)
+                        memento.id.toString(), memento.aktørId, String(memento.json, Charsets.UTF_8)).asUpdate)
             }
 
     private fun oppdaterSak(memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("UPDATE SAKSKOMPLEKS SET data=(to_json(?::json)) WHERE id=?",
-                        memento.json, memento.id.toString()).asUpdate)
+                        String(memento.json, Charsets.UTF_8), memento.id.toString()).asUpdate)
             }
 
     override fun stateChange(newState: Sakskompleks.Observer.State, oldState: Sakskompleks.Observer.State) {
