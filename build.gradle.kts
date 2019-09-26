@@ -4,8 +4,10 @@ plugins {
     kotlin("jvm") version "1.3.50"
 }
 
-group = "no.nav.helse"
-version = System.getProperty("version") ?: "local-build"
+allprojects {
+    group = "no.nav.helse"
+    version = System.getProperty("version") ?: "local-build"
+}
 
 val junitJupiterVersion = "5.4.0"
 
