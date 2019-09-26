@@ -16,8 +16,8 @@ class SakskompleksProbe {
     }
 
     fun opprettetNyttSakskompleks(sakskompleks: Sakskompleks) {
-        log.info("Opprettet sakskompleks med id=${sakskompleks.id} " +
-                "for arbeidstaker med aktørId = ${sakskompleks.aktørId} ")
+        log.info("Opprettet sakskompleks med id=${sakskompleks.id()} " +
+                "for arbeidstaker med aktørId = ${sakskompleks.aktørId()} ")
         sakskompleksCounter.inc()
     }
 

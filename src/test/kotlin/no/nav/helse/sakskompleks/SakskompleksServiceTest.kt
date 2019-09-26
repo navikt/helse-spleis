@@ -152,7 +152,7 @@ class SakskompleksServiceTest {
 
         every {
             sakskompleksDao.opprettSak(match { sak ->
-                sak.aktørId == testSykmelding.sykmelding.aktørId
+                sak.aktørId() == testSykmelding.sykmelding.aktørId
                         && sak.har(testSykmelding.sykmelding)
             })
         } returns 1

@@ -33,7 +33,7 @@ class InntektsmeldingProbe {
     }
 
     fun inntektsmeldingKobletTilSakskompleks(inntektsmelding: Inntektsmelding, sak: Sakskompleks) {
-        log.info("Inntektsmelding med id ${inntektsmelding.inntektsmeldingId} ble koblet til sakskompleks med id ${sak.id}")
+        log.info("Inntektsmelding med id ${inntektsmelding.inntektsmeldingId} ble koblet til sakskompleks med id ${sak.id()}")
         inntektsmeldingKobletTilSakCounter.inc()
     }
 

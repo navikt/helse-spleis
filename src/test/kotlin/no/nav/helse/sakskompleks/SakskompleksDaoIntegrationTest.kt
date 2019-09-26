@@ -14,6 +14,7 @@ import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.util.*
@@ -75,6 +76,7 @@ class SakskompleksDaoIntegrationTest {
         assertEquals(sakForBruker, sakerForBruker[0])
     }
 
+    @Disabled("Dette bør testes gjennom å se at syketidslinjen har endret seg")
     @Test
     fun `skal oppdatere sak`() {
         val aktørId = "987654321"

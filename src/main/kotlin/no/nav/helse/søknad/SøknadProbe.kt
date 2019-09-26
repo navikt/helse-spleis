@@ -25,7 +25,7 @@ class SøknadProbe {
     }
 
     fun søknadKobletTilSakskompleks(søknad: Sykepengesøknad, sakskompleks: Sakskompleks) {
-        log.info("søknad med id=${søknad.id} ble koblet til sakskompleks med id=${sakskompleks.id}")
+        log.info("søknad med id=${søknad.id} ble koblet til sakskompleks med id=${sakskompleks.id()}")
     }
 
     fun mottattSøknad(søknad: Sykepengesøknad) {

@@ -28,12 +28,12 @@ class SakskompleksDao(private val dataSource: DataSource) {
     fun opprettSak(sakskompleks: Sakskompleks) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
-                        sakskompleks.id.toString(), sakskompleks.aktørId, objectMapper.writeValueAsString(sakskompleks)).asUpdate)
+                        sakskompleks.id().toString(), sakskompleks.aktørId(), objectMapper.writeValueAsString(sakskompleks)).asUpdate)
             }
 
     fun oppdaterSak(sakskompleks: Sakskompleks) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("UPDATE SAKSKOMPLEKS SET data=(to_json(?::json)) WHERE id=?",
-                        objectMapper.writeValueAsString(sakskompleks), sakskompleks.id.toString()).asUpdate)
+                        objectMapper.writeValueAsString(sakskompleks), sakskompleks.id().toString()).asUpdate)
             }
 }
