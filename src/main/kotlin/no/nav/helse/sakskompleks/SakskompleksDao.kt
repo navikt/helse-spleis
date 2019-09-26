@@ -24,26 +24,26 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
                     aktørId = brukerAktørId
             ).also { sak ->
                 sak.addObserver(this)
-                opprettSak(sak.state())
             }
 
-    private fun opprettSak(memento: Sakskompleks.Memento) =
+    private fun opprettSak(id: UUID, brukerAktørId: String, memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
-                        memento.id.toString(), memento.aktørId, memento.toString()).asUpdate)
+                        id.toString(), brukerAktørId, memento.toString()).asUpdate)
             }
 
-    private fun oppdaterSak(memento: Sakskompleks.Memento) =
+    private fun oppdaterSak(id: UUID, memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("UPDATE SAKSKOMPLEKS SET data=(to_json(?::json)) WHERE id=?",
-                        memento.toString(), memento.id.toString()).asUpdate)
+                        memento.toString(), id.toString()).asUpdate)
             }
 
     override fun stateChange(event: Sakskompleks.Observer.Event) {
-        when (event.type) {
-            is Sakskompleks.Observer.Event.Type.StateChange -> {
-                oppdaterSak(event.currentState)
+        when (event.previousType) {
+            is Sakskompleks.Observer.Event.Type.StartTilstand -> {
+                opprettSak(event.id, event.aktørId, event.currentState)
             }
+            else -> oppdaterSak(event.id, event.currentState)
         }
     }
 }

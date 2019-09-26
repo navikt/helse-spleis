@@ -5,6 +5,7 @@ import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
+import java.util.*
 
 class SakskompleksProbe: Sakskompleks.Observer {
 
@@ -29,24 +30,9 @@ class SakskompleksProbe: Sakskompleks.Observer {
                 .register()
     }
 
-    fun opprettetNyttSakskompleks(sakskompleks: Sakskompleks) {
-        log.info("Opprettet sakskompleks med id=${sakskompleks.state().id} " +
-                "for arbeidstaker med aktørId = ${sakskompleks.state().aktørId} ")
-        sakskompleksCounter.inc()
-    }
-
-    fun søknadKobletTilSakskompleks(søknad: Sykepengesøknad, sakskompleks: Sakskompleks) {
-        log.info("søknad med id=${søknad.id} ble koblet til sakskompleks med id=${sakskompleks.state().id}")
-    }
-
     fun søknadManglerSakskompleks(søknad: Sykepengesøknad) {
         log.error("mottok søknad med id=${søknad.id}, men vi har ikke et eksisterende sakskompleks. Vi burde ha et sakskompleks som inneholder en sykmeldingsId=${søknad.sykmeldingId}")
         manglendeSakskompleksCounter.inc()
-    }
-
-    fun inntektsmeldingKobletTilSakskompleks(inntektsmelding: Inntektsmelding, sak: Sakskompleks) {
-        log.info("Inntektsmelding med id ${inntektsmelding.inntektsmeldingId} ble koblet til sakskompleks med id ${sak.state().id}")
-        inntektsmeldingKobletTilSakCounter.inc()
     }
 
     fun inntektmeldingManglerSakskompleks(inntektsmelding: Inntektsmelding) {
@@ -54,16 +40,50 @@ class SakskompleksProbe: Sakskompleks.Observer {
         manglendeSakskompleksForInntektsmeldingCounter.inc()
     }
 
+    private fun opprettetNyttSakskompleks(sakskompleksId: UUID, aktørId: String) {
+        log.info("Opprettet sakskompleks med id=$sakskompleksId " +
+                "for arbeidstaker med aktørId = $aktørId ")
+        sakskompleksCounter.inc()
+    }
+
+    private fun søknadKobletTilSakskompleks(sakskompleksId: UUID) {
+        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en søknad")
+    }
+
+    private fun sykmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
+        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en sykmelding")
+    }
+
+    private fun inntektsmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
+        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en inntektsmelding")
+        inntektsmeldingKobletTilSakCounter.inc()
+    }
+
     override fun stateChange(event: Sakskompleks.Observer.Event) {
+        log.info("sakskompleks=${event.id} eventType=${event.type} previousEventType=${event.previousType}")
+
         when (event.type) {
-            is Sakskompleks.Observer.Event.Type.LeavingState -> {
-                log.info("sakskompleks=${event.currentState.id} går ut av tilstand=${event.currentState.tilstand}")
+            is Sakskompleks.Observer.Event.Type.InntektsmeldingMottatt -> {
+                inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            is Sakskompleks.Observer.Event.Type.StateChange -> {
-                log.info("sakskompleks=${event.currentState.id} går fra tilstand=${event.oldState?.tilstand} til tilstand=${event.currentState.tilstand}")
+            is Sakskompleks.Observer.Event.Type.SykmeldingMottatt -> {
+                when (event.previousType) {
+                    is Sakskompleks.Observer.Event.Type.StartTilstand -> {
+                        opprettetNyttSakskompleks(event.id, event.aktørId)
+                    }
+                    else -> {
+                        sykmeldingKobletTilSakskompleks(event.id)
+                    }
+                }
             }
-            is Sakskompleks.Observer.Event.Type.EnteringState -> {
-                log.info("sakskompleks=${event.currentState.id} gått inn i ny tilstand=${event.currentState.tilstand}")
+            is Sakskompleks.Observer.Event.Type.SøknadMottatt -> {
+                søknadKobletTilSakskompleks(event.id)
+            }
+            is Sakskompleks.Observer.Event.Type.KomplettSak -> {
+                log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
+            }
+            is Sakskompleks.Observer.Event.Type.TrengerManuellHåndtering -> {
+                log.info("sakskompleks med id ${event.id} trenger manuell behandling")
             }
         }
     }

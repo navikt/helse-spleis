@@ -9,7 +9,6 @@ import java.lang.Integer.max
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
@@ -20,7 +19,6 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
                     .also { sakskompleks ->
                         sakskompleks.addObserver(sakskompleksProbe)
                         sakskompleks.leggTil(sykmelding)
-                        sakskompleksProbe.opprettetNyttSakskompleks(sakskompleks)
                     }
 
     fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =
@@ -57,12 +55,10 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     private fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
         sak.leggTil(søknad)
-        sakskompleksProbe.søknadKobletTilSakskompleks(søknad, sak)
     }
 
     private fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
         sak.leggTil(inntektsmelding)
-        sakskompleksProbe.inntektsmeldingKobletTilSakskompleks(inntektsmelding, sak)
     }
 
     private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =

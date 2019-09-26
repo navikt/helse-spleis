@@ -208,7 +208,6 @@ class InntektsmeldingComponentTest {
                     assertTrue(sakerForBruker[0].har(enInntektsmelding))
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
-                    assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
                 }
         }
     }

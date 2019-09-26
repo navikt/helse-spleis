@@ -1,7 +1,6 @@
 package no.nav.helse.sakskompleks.domain
 
 import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -71,7 +70,16 @@ class Sakskompleks(private val id: UUID,
         observers.add(observer)
     }
 
-    private fun notifyObservers(event: Observer.Event) {
+    private fun notifyObservers(eventType: Observer.Event.Type, oldEventType: Observer.Event.Type, previousState: Memento) {
+        val event = Observer.Event(
+                type = eventType,
+                id = id,
+                aktørId = aktørId,
+                currentState = state(),
+                previousType = oldEventType,
+                previousState = previousState
+        )
+
         observers.forEach { observer ->
             observer.stateChange(event)
         }
@@ -112,15 +120,15 @@ class Sakskompleks(private val id: UUID,
     }
 
     fun leggTil(søknad: Sykepengesøknad) {
-        with(tilstand) { søknadMottatt(søknad) }
+        tilstand.søknadMottatt(søknad)
     }
 
     fun leggTil(inntektsmelding: Inntektsmelding) {
-        with(tilstand) { inntektsmeldingMottatt(inntektsmelding) }
+        tilstand.inntektsmeldingMottatt(inntektsmelding)
     }
 
     fun leggTil(sykmelding: Sykmelding) {
-        with(tilstand) { sykmeldingMottatt(sykmelding) }
+        tilstand.sykmeldingMottatt(sykmelding)
     }
 
     fun fom(): LocalDate? = run {
@@ -163,23 +171,14 @@ class Sakskompleks(private val id: UUID,
             inntektsmelding == enInntektsmelding
         }
 
-    data class Memento(val state: ByteArray) {
-
-        private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-
-        private val json: JsonNode get() = objectMapper.readTree(state)
-
-        val id: UUID get() = UUID.fromString(json["id"].textValue())
-
-        val aktørId: String get() = json["aktørId"].textValue()
-
-        val tilstand: String get() = json["tilstand"].textValue()
-
+    class Memento(internal val state: ByteArray) {
         override fun toString() = String(state, Charsets.UTF_8)
     }
 
     private inner class StartTilstand : Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.StartTilstand
+
         override fun sykmeldingMottatt(sykmelding: Sykmelding) {
             transition(SykmeldingMottattTilstand()) {
                 sykmeldinger.add(sykmelding)
@@ -188,6 +187,9 @@ class Sakskompleks(private val id: UUID,
     }
 
     private inner class SykmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.SykmeldingMottatt
+
         override fun søknadMottatt(søknad: Sykepengesøknad) {
             transition(SøknadMottattTilstand()) {
                 søknader.add(søknad)
@@ -202,6 +204,9 @@ class Sakskompleks(private val id: UUID,
     }
 
     private inner class SøknadMottattTilstand : Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.SøknadMottatt
+
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
             transition(KomplettSakTilstand()) {
                 inntektsmeldinger.add(inntektsmelding)
@@ -210,6 +215,9 @@ class Sakskompleks(private val id: UUID,
     }
 
     private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.InntektsmeldingMottatt
+
         override fun søknadMottatt(søknad: Sykepengesøknad) {
             transition(KomplettSakTilstand()) {
                 søknader.add(søknad)
@@ -217,19 +225,31 @@ class Sakskompleks(private val id: UUID,
         }
     }
 
-    private inner class KomplettSakTilstand : Sakskomplekstilstand()
+    private inner class KomplettSakTilstand : Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.KomplettSak
+    }
 
-    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand()
+    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand() {
+        override fun eventType() =
+                Observer.Event.Type.TrengerManuellHåndtering
+    }
 
     interface Observer {
         data class Event(val type: Type,
+                         val id: UUID,
+                         val aktørId: String,
                          val currentState: Memento,
-                         val oldState: Memento? = null) {
+                         val previousType: Type,
+                         val previousState: Memento) {
 
             sealed class Type {
-                object LeavingState: Type()
-                object StateChange: Type()
-                object EnteringState: Type()
+                object StartTilstand: Type()
+                object TrengerManuellHåndtering: Type()
+                object KomplettSak: Type()
+                object SykmeldingMottatt: Type()
+                object SøknadMottatt: Type()
+                object InntektsmeldingMottatt: Type()
             }
         }
 
@@ -241,22 +261,21 @@ class Sakskompleks(private val id: UUID,
         internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
             tilstand.leaving()
 
+            val oldType = tilstand.eventType()
             val oldState = state()
 
             tilstand = nyTilstand
             block()
 
-            notifyObservers(Observer.Event(
-                    type = Observer.Event.Type.StateChange,
-                    currentState = state(),
-                    oldState = oldState
-            ))
+            notifyObservers(tilstand.eventType(), oldType, oldState)
 
             tilstand.entering()
         }
 
         open fun name() =
                 this::javaClass.get().simpleName
+
+        abstract fun eventType(): Observer.Event.Type
 
         open fun sykmeldingMottatt(sykmelding: Sykmelding) {
             transition(TrengerManuellHåndteringTilstand())
@@ -271,11 +290,9 @@ class Sakskompleks(private val id: UUID,
         }
 
         open fun leaving() {
-            notifyObservers(Observer.Event(Observer.Event.Type.LeavingState, state()))
         }
 
         open fun entering() {
-            notifyObservers(Observer.Event(Observer.Event.Type.EnteringState, state()))
         }
     }
 }
