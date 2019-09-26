@@ -1,7 +1,5 @@
-package no.nav.helse.util.unit
+package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.util.interval.Sykdomstidslinje
-import no.nav.helse.util.interval.Nulldag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

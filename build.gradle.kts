@@ -7,6 +7,8 @@ plugins {
 group = "no.nav.helse"
 version = "1.0-SNAPSHOT"
 
+val junitJupiterVersion = "5.4.0"
+
 repositories {
     mavenCentral()
 }
@@ -20,12 +22,22 @@ subprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
+
+        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
     }
 
     tasks.withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
-
+    
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }
 dependencies {
     implementation(kotlin("stdlib-jdk8"))

@@ -1,3 +1,5 @@
+package no.nav.helse.sykdomstidslinje
+
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -63,19 +65,28 @@ abstract class Sykdomstidslinje {
 
     companion object {
         fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime) =
-            if (erArbeidsdag(gjelder)) Sykedag(gjelder, rapportert) else SykHelgedag(
+            if (erArbeidsdag(gjelder)) Sykedag(
+                gjelder,
+                rapportert
+            ) else SykHelgedag(
                 gjelder,
                 rapportert
             )
 
         fun ferie(gjelder: LocalDate, rapportert: LocalDateTime) =
-            if (erArbeidsdag(gjelder)) Feriedag(gjelder, rapportert) else Helgedag(
+            if (erArbeidsdag(gjelder)) Feriedag(
+                gjelder,
+                rapportert
+            ) else Helgedag(
                 gjelder,
                 rapportert
             )
 
         fun ikkeSykedag(gjelder: LocalDate, rapportert: LocalDateTime) =
-            if (erArbeidsdag(gjelder)) Arbeidsdag(gjelder, rapportert) else Helgedag(
+            if (erArbeidsdag(gjelder)) Arbeidsdag(
+                gjelder,
+                rapportert
+            ) else Helgedag(
                 gjelder,
                 rapportert
             )

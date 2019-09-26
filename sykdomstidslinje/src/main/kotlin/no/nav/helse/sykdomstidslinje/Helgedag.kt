@@ -1,3 +1,5 @@
+package no.nav.helse.sykdomstidslinje
+
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime

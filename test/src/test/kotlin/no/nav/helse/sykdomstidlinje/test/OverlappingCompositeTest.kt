@@ -1,6 +1,6 @@
-package no.nav.helse.util.unit
+package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.util.interval.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

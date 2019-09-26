@@ -1,3 +1,5 @@
+package no.nav.helse.sykdomstidslinje
+
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -10,7 +12,10 @@ abstract class Dag internal constructor(internal val dagen: LocalDate, internal 
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
     override fun rapportertDato() = rapportertDato
-    override fun dag(dato: LocalDate) = if(dato == dagen) this else Nulldag(dagen, rapportertDato)
+    override fun dag(dato: LocalDate) = if(dato == dagen) this else Nulldag(
+        dagen,
+        rapportertDato
+    )
 
     override fun compareTo(other: Dag): Int {
         val resultat = this.prioritet.compareTo(other.prioritet)

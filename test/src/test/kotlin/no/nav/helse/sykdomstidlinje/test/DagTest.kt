@@ -1,10 +1,8 @@
-package no.nav.helse.util.unit
+package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.util.interval.Helgedag
-import no.nav.helse.util.interval.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -52,12 +50,5 @@ internal class DagTest {
         assertEquals(helgedagenGjelder, helgedag.startdato())
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
         assertEquals(0, helgedag.antallSykedager())
-    }
-
-    @Test
-    internal fun ugyldigHelgedag() {
-        val ikkeEnHelgedag = LocalDate.of(2019,9,25)
-        val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        assertThrows<IllegalArgumentException>{ Helgedag(ikkeEnHelgedag, tidspunktRapportert)}
     }
 }
