@@ -34,15 +34,15 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `toJson gir en tilstand`() {
+    fun `state inneholder en tilstand`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
             aktørId = "aktørId"
         )
 
-        val memento = sakskompleks.lagre()
-        val node = objectMapper.readTree(memento.json)
+        val memento = sakskompleks.state()
+        val node = objectMapper.readTree(memento.state)
 
         assertNotNull(node["tilstand"])
         assertFalse(node["tilstand"].isNull)
@@ -50,22 +50,22 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `toJson gir aktørId og sakskompleksId`() {
+    fun `state inneholder aktørId og sakskompleksId`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
             aktørId = "aktørId"
         )
 
-        val memento = sakskompleks.lagre()
-        val node = objectMapper.readTree(memento.json)
+        val memento = sakskompleks.state()
+        val node = objectMapper.readTree(memento.state)
 
         assertEquals(id.toString(), node["id"].textValue())
         assertEquals("aktørId", node["aktørId"].textValue())
     }
 
     @Test
-    fun `toJson gir sykmeldinger`() {
+    fun `state inneholder sykmeldinger`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
@@ -74,15 +74,15 @@ class SakskompleksKtTest {
 
         sakskompleks.leggTil(testSykmelding.sykmelding)
 
-        val memento = sakskompleks.lagre()
-        val node = objectMapper.readTree(memento.json)
+        val memento = sakskompleks.state()
+        val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["sykmeldinger"].isArray)
         assertEquals(testSykmelding.sykmelding.id, node["sykmeldinger"][0]["id"].textValue())
     }
 
     @Test
-    fun `toJson gir inntektsmeldinger`() {
+    fun `state inneholder inntektsmeldinger`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
@@ -92,15 +92,15 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSykmelding.sykmelding)
         sakskompleks.leggTil(enInntektsmelding)
 
-        val memento = sakskompleks.lagre()
-        val node = objectMapper.readTree(memento.json)
+        val memento = sakskompleks.state()
+        val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["inntektsmeldinger"].isArray)
         assertEquals(enInntektsmelding.inntektsmeldingId, node["inntektsmeldinger"][0]["inntektsmeldingId"].textValue())
     }
 
     @Test
-    fun `toJson gir søknader`() {
+    fun `state inneholder søknader`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
@@ -110,15 +110,15 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSykmelding.sykmelding)
         sakskompleks.leggTil(testSøknad)
 
-        val memento = sakskompleks.lagre()
-        val node = objectMapper.readTree(memento.json)
+        val memento = sakskompleks.state()
+        val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["søknader"].isArray)
         assertEquals(testSøknad.id, node["søknader"][0]["id"].textValue())
     }
 
     @Test
-    fun `fromJson bygger opp likt objekt fra lagret tilstand`() {
+    fun `restore bygger opp likt objekt fra lagret state`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
             id = id,
@@ -128,12 +128,12 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSøknad)
         sakskompleks.leggTil(enInntektsmelding)
 
-        val inMemento = sakskompleks.lagre()
+        val inMemento = sakskompleks.state()
 
-        val nyttSakskompleks = Sakskompleks(inMemento.json)
-        val outMemento = nyttSakskompleks.lagre()
-        val inNode = objectMapper.readTree(inMemento.json)
-        val outNode = objectMapper.readTree(outMemento.json)
+        val nyttSakskompleks = Sakskompleks.restore(inMemento)
+        val outMemento = nyttSakskompleks.state()
+        val inNode = objectMapper.readTree(inMemento.state)
+        val outNode = objectMapper.readTree(outMemento.state)
 
         assertEquals(inNode, outNode)
     }

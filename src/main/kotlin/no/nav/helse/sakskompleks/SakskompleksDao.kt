@@ -12,7 +12,7 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
     fun finnSaker(brukerAktørId: String) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("SELECT data FROM SAKSKOMPLEKS WHERE bruker_aktor_id = ?", brukerAktørId).map { row ->
-                    Sakskompleks(row.bytes("data")).also { sakskompleks ->
+                    Sakskompleks.restore(Sakskompleks.Memento(row.bytes("data"))).also { sakskompleks ->
                         sakskompleks.addObserver(this)
                     }
                 }.asList)
@@ -24,19 +24,19 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
                     aktørId = brukerAktørId
             ).also { sak ->
                 sak.addObserver(this)
-                opprettSak(sak.lagre())
+                opprettSak(sak.state())
             }
 
     private fun opprettSak(memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
-                        memento.id.toString(), memento.aktørId, String(memento.json, Charsets.UTF_8)).asUpdate)
+                        memento.id.toString(), memento.aktørId, memento.toString()).asUpdate)
             }
 
     private fun oppdaterSak(memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("UPDATE SAKSKOMPLEKS SET data=(to_json(?::json)) WHERE id=?",
-                        String(memento.json, Charsets.UTF_8), memento.id.toString()).asUpdate)
+                        memento.toString(), memento.id.toString()).asUpdate)
             }
 
     override fun stateChange(event: Sakskompleks.Observer.Event) {

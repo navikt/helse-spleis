@@ -1,6 +1,7 @@
 package no.nav.helse.sakskompleks.domain
 
 import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -12,10 +13,8 @@ import java.io.StringWriter
 import java.time.LocalDate
 import java.util.*
 
-class Sakskompleks {
-    private val id: UUID
-
-    private val aktørId: String
+class Sakskompleks(private val id: UUID,
+                   private val aktørId: String) {
 
     private val sykmeldinger: MutableList<Sykmelding> = mutableListOf()
     private val søknader: MutableList<Sykepengesøknad> = mutableListOf()
@@ -24,50 +23,48 @@ class Sakskompleks {
 
     private val observers: MutableList<Observer> = mutableListOf()
 
-    constructor(id: UUID, aktørId: String) {
-        this.id = id
-        this.aktørId = aktørId
-    }
-
-    constructor(json: ByteArray) {
-        val node = fromJson(json)
-
-        id = UUID.fromString(node["id"].textValue())
-        aktørId = node["aktørId"].textValue()
-
-        tilstand = when (node["tilstand"].textValue()) {
-            StartTilstand().name() -> StartTilstand()
-            SykmeldingMottattTilstand().name() -> SykmeldingMottattTilstand()
-            SøknadMottattTilstand().name() -> SøknadMottattTilstand()
-            InntektsmeldingMottattTilstand().name() -> InntektsmeldingMottattTilstand()
-            KomplettSakTilstand().name() -> KomplettSakTilstand()
-            TrengerManuellHåndteringTilstand().name() -> TrengerManuellHåndteringTilstand()
-            else -> throw RuntimeException("ukjent tilstand")
-        }
-
-        node["sykmeldinger"].map { jsonNode ->
-            Sykmelding(jsonNode)
-        }.let {
-            sykmeldinger.addAll(it)
-        }
-
-        node["inntektsmeldinger"].map { jsonNode ->
-            Inntektsmelding(jsonNode)
-        }.let {
-            inntektsmeldinger.addAll(it)
-        }
-
-        node["søknader"].map { jsonNode ->
-            Sykepengesøknad(jsonNode)
-        }.let {
-            søknader.addAll(it)
-        }
-    }
-
     companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun restore(memento: Memento): Sakskompleks {
+            val node = objectMapper.readTree(memento.state)
+
+            val sakskompleks = Sakskompleks(
+                    id = UUID.fromString(node["id"].textValue()),
+                    aktørId = node["aktørId"].textValue()
+            )
+            sakskompleks.tilstand = when (node["tilstand"].textValue()) {
+                sakskompleks.StartTilstand().name() -> sakskompleks.StartTilstand()
+                sakskompleks.SykmeldingMottattTilstand().name() -> sakskompleks.SykmeldingMottattTilstand()
+                sakskompleks.SøknadMottattTilstand().name() -> sakskompleks.SøknadMottattTilstand()
+                sakskompleks.InntektsmeldingMottattTilstand().name() -> sakskompleks.InntektsmeldingMottattTilstand()
+                sakskompleks.KomplettSakTilstand().name() -> sakskompleks.KomplettSakTilstand()
+                sakskompleks.TrengerManuellHåndteringTilstand().name() -> sakskompleks.TrengerManuellHåndteringTilstand()
+                else -> throw RuntimeException("ukjent tilstand")
+            }
+
+            node["sykmeldinger"].map { jsonNode ->
+                Sykmelding(jsonNode)
+            }.let {
+                sakskompleks.sykmeldinger.addAll(it)
+            }
+
+            node["inntektsmeldinger"].map { jsonNode ->
+                Inntektsmelding(jsonNode)
+            }.let {
+                sakskompleks.inntektsmeldinger.addAll(it)
+            }
+
+            node["søknader"].map { jsonNode ->
+                Sykepengesøknad(jsonNode)
+            }.let {
+                sakskompleks.søknader.addAll(it)
+            }
+
+            return sakskompleks
+        }
     }
 
     internal fun addObserver(observer: Observer) {
@@ -80,13 +77,7 @@ class Sakskompleks {
         }
     }
 
-    fun id() = id
-    fun aktørId() = aktørId
-
-    private fun fromJson(json: ByteArray) =
-        objectMapper.readTree(json)
-
-    internal fun lagre(): Memento {
+    internal fun state(): Memento {
         val writer = StringWriter()
         val generator = JsonFactory().createGenerator(writer)
 
@@ -117,12 +108,7 @@ class Sakskompleks {
 
         generator.flush()
 
-        return Memento(
-                id = id,
-                aktørId = aktørId,
-                tilstand = tilstand.name(),
-                json = writer.toString().toByteArray(Charsets.UTF_8)
-        )
+        return Memento(state = writer.toString().toByteArray(Charsets.UTF_8))
     }
 
     fun leggTil(søknad: Sykepengesøknad) {
@@ -177,10 +163,21 @@ class Sakskompleks {
             inntektsmelding == enInntektsmelding
         }
 
-    data class Memento(val id: UUID,
-                       val aktørId: String,
-                       val tilstand: String,
-                       val json: ByteArray)
+    data class Memento(val state: ByteArray) {
+
+        private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+
+        private val json: JsonNode get() = objectMapper.readTree(state)
+
+        val id: UUID get() = UUID.fromString(json["id"].textValue())
+
+        val aktørId: String get() = json["aktørId"].textValue()
+
+        val tilstand: String get() = json["tilstand"].textValue()
+
+        override fun toString() = String(state, Charsets.UTF_8)
+    }
 
     private inner class StartTilstand : Sakskomplekstilstand() {
         override fun sykmeldingMottatt(sykmelding: Sykmelding) {
@@ -244,14 +241,14 @@ class Sakskompleks {
         internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
             tilstand.leaving()
 
-            val oldState = lagre()
+            val oldState = state()
 
             tilstand = nyTilstand
             block()
 
             notifyObservers(Observer.Event(
                     type = Observer.Event.Type.StateChange,
-                    currentState = lagre(),
+                    currentState = state(),
                     oldState = oldState
             ))
 
@@ -274,11 +271,11 @@ class Sakskompleks {
         }
 
         open fun leaving() {
-            notifyObservers(Observer.Event(Observer.Event.Type.LeavingState, lagre()))
+            notifyObservers(Observer.Event(Observer.Event.Type.LeavingState, state()))
         }
 
         open fun entering() {
-            notifyObservers(Observer.Event(Observer.Event.Type.EnteringState, lagre()))
+            notifyObservers(Observer.Event(Observer.Event.Type.EnteringState, state()))
         }
     }
 }

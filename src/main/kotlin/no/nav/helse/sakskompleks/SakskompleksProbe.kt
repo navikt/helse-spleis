@@ -30,13 +30,13 @@ class SakskompleksProbe: Sakskompleks.Observer {
     }
 
     fun opprettetNyttSakskompleks(sakskompleks: Sakskompleks) {
-        log.info("Opprettet sakskompleks med id=${sakskompleks.id()} " +
-                "for arbeidstaker med aktørId = ${sakskompleks.aktørId()} ")
+        log.info("Opprettet sakskompleks med id=${sakskompleks.state().id} " +
+                "for arbeidstaker med aktørId = ${sakskompleks.state().aktørId} ")
         sakskompleksCounter.inc()
     }
 
     fun søknadKobletTilSakskompleks(søknad: Sykepengesøknad, sakskompleks: Sakskompleks) {
-        log.info("søknad med id=${søknad.id} ble koblet til sakskompleks med id=${sakskompleks.id()}")
+        log.info("søknad med id=${søknad.id} ble koblet til sakskompleks med id=${sakskompleks.state().id}")
     }
 
     fun søknadManglerSakskompleks(søknad: Sykepengesøknad) {
@@ -45,7 +45,7 @@ class SakskompleksProbe: Sakskompleks.Observer {
     }
 
     fun inntektsmeldingKobletTilSakskompleks(inntektsmelding: Inntektsmelding, sak: Sakskompleks) {
-        log.info("Inntektsmelding med id ${inntektsmelding.inntektsmeldingId} ble koblet til sakskompleks med id ${sak.id()}")
+        log.info("Inntektsmelding med id ${inntektsmelding.inntektsmeldingId} ble koblet til sakskompleks med id ${sak.state().id}")
         inntektsmeldingKobletTilSakCounter.inc()
     }
 
@@ -57,13 +57,13 @@ class SakskompleksProbe: Sakskompleks.Observer {
     override fun stateChange(event: Sakskompleks.Observer.Event) {
         when (event.type) {
             is Sakskompleks.Observer.Event.Type.LeavingState -> {
-                log.info("sakskompleks går ut av tilstand ${event.currentState.tilstand}")
+                log.info("sakskompleks=${event.currentState.id} går ut av tilstand=${event.currentState.tilstand}")
             }
             is Sakskompleks.Observer.Event.Type.StateChange -> {
-                log.info("sakskompleks går fra state=${event.oldState?.tilstand} til state=${event.currentState.tilstand}")
+                log.info("sakskompleks=${event.currentState.id} går fra tilstand=${event.oldState?.tilstand} til tilstand=${event.currentState.tilstand}")
             }
             is Sakskompleks.Observer.Event.Type.EnteringState -> {
-                log.info("sakskompleks gått inn i ny tilstand ${event.currentState.tilstand}")
+                log.info("sakskompleks=${event.currentState.id} gått inn i ny tilstand=${event.currentState.tilstand}")
             }
         }
     }
