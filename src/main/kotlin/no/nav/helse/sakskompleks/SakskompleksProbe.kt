@@ -3,11 +3,10 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.søknad.SøknadProbe
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
 
-class SakskompleksProbe {
+class SakskompleksProbe: Sakskompleks.Observer {
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
@@ -53,5 +52,19 @@ class SakskompleksProbe {
     fun inntektmeldingManglerSakskompleks(inntektsmelding: Inntektsmelding) {
         log.error("Mottok inntektsmelding med id ${inntektsmelding.inntektsmeldingId}, men klarte ikke finne et et tilhørende sakskompleks :(")
         manglendeSakskompleksForInntektsmeldingCounter.inc()
+    }
+
+    override fun stateChange(event: Sakskompleks.Observer.Event) {
+        when (event.type) {
+            is Sakskompleks.Observer.Event.Type.LeavingState -> {
+                log.info("sakskompleks går ut av tilstand ${event.currentState.tilstand}")
+            }
+            is Sakskompleks.Observer.Event.Type.StateChange -> {
+                log.info("sakskompleks går fra state=${event.oldState?.tilstand} til state=${event.currentState.tilstand}")
+            }
+            is Sakskompleks.Observer.Event.Type.EnteringState -> {
+                log.info("sakskompleks gått inn i ny tilstand ${event.currentState.tilstand}")
+            }
+        }
     }
 }

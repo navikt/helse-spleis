@@ -20,7 +20,7 @@ class Sakskompleks {
     private val sykmeldinger: MutableList<Sykmelding> = mutableListOf()
     private val søknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
-    private var tilstand: Sakskomplekstilstand = StartTilstand
+    private var tilstand: Sakskomplekstilstand = StartTilstand()
 
     private val observers: MutableList<Observer> = mutableListOf()
 
@@ -36,11 +36,11 @@ class Sakskompleks {
         aktørId = node["aktørId"].textValue()
 
         tilstand = when (node["tilstand"].textValue()) {
-            "StartTilstand" -> StartTilstand
-            "SykmeldingMottattTilstand" -> SykmeldingMottattTilstand
-            "SøknadMottattTilstand" -> SøknadMottattTilstand
-            "InntektsmeldingMottattTilstand" -> InntektsmeldingMottattTilstand
-            "KomplettSakTilstand" -> KomplettSakTilstand
+            StartTilstand().name() -> StartTilstand()
+            SykmeldingMottattTilstand().name() -> SykmeldingMottattTilstand()
+            SøknadMottattTilstand().name() -> SøknadMottattTilstand()
+            InntektsmeldingMottattTilstand().name() -> InntektsmeldingMottattTilstand()
+            KomplettSakTilstand().name() -> KomplettSakTilstand()
             else -> throw RuntimeException("ukjent tilstand")
         }
 
@@ -73,17 +73,9 @@ class Sakskompleks {
         observers.add(observer)
     }
 
-    private fun tilstand(nyTilstand: Sakskomplekstilstand) {
-        val oldState = Observer.State(id, aktørId, lagre())
-
-        tilstand.leaving()
-        tilstand = nyTilstand
-        tilstand.arriving()
-
-        val newState = Observer.State(id, aktørId, lagre())
-
+    private fun notifyObservers(event: Observer.Event) {
         observers.forEach { observer ->
-            observer.stateChange(newState, oldState)
+            observer.stateChange(event)
         }
     }
 
@@ -100,7 +92,7 @@ class Sakskompleks {
         generator.writeStartObject()
         generator.writeStringField("id", id.toString())
         generator.writeStringField("aktørId", aktørId)
-        generator.writeStringField("tilstand", tilstand::class.java.simpleName)
+        generator.writeStringField("tilstand", tilstand.name())
 
         generator.writeArrayFieldStart("sykmeldinger")
         sykmeldinger.forEach { sykmelding ->
@@ -124,7 +116,12 @@ class Sakskompleks {
 
         generator.flush()
 
-        return Memento(id, aktørId, writer.toString().toByteArray(Charsets.UTF_8))
+        return Memento(
+                id = id,
+                aktørId = aktørId,
+                tilstand = tilstand.name(),
+                json = writer.toString().toByteArray(Charsets.UTF_8)
+        )
     }
 
     fun leggTil(søknad: Sykepengesøknad) {
@@ -181,79 +178,105 @@ class Sakskompleks {
 
     data class Memento(val id: UUID,
                        val aktørId: String,
+                       val tilstand: String,
                        val json: ByteArray)
 
-    private object StartTilstand : Sakskomplekstilstand() {
-        override fun Sakskompleks.sykmeldingMottatt(sykmelding: Sykmelding) {
-            sykmeldinger.add(sykmelding)
-            tilstand(SykmeldingMottattTilstand)
+    private inner class StartTilstand : Sakskomplekstilstand() {
+        override fun sykmeldingMottatt(sykmelding: Sykmelding) {
+            transition(SykmeldingMottattTilstand()) {
+                sykmeldinger.add(sykmelding)
+            }
         }
     }
 
-    private object SykmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun Sakskompleks.søknadMottatt(søknad: Sykepengesøknad) {
-            søknader.add(søknad)
-            tilstand(SøknadMottattTilstand)
+    private inner class SykmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            transition(SøknadMottattTilstand()) {
+                søknader.add(søknad)
+            }
         }
 
-        override fun Sakskompleks.inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            inntektsmeldinger.add(inntektsmelding)
-            tilstand(InntektsmeldingMottattTilstand)
+        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+            transition(InntektsmeldingMottattTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
         }
     }
 
-    private object SøknadMottattTilstand : Sakskomplekstilstand() {
-        override fun Sakskompleks.inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            inntektsmeldinger.add(inntektsmelding)
-            tilstand(KomplettSakTilstand)
+    private inner class SøknadMottattTilstand : Sakskomplekstilstand() {
+        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+            transition(KomplettSakTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
         }
     }
 
-    private object InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun Sakskompleks.søknadMottatt(søknad: Sykepengesøknad) {
-            søknader.add(søknad)
-            tilstand(KomplettSakTilstand)
+    private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            transition(KomplettSakTilstand()) {
+                søknader.add(søknad)
+            }
         }
     }
+
+    private inner class KomplettSakTilstand : Sakskomplekstilstand()
 
     interface Observer {
-        data class State(val id: UUID,
-                         val aktørId: String,
-                         val memento: Memento)
+        data class Event(val type: Type,
+                         val currentState: Memento,
+                         val oldState: Memento? = null) {
 
-        fun stateChange(newState: State, oldState: State)
+            sealed class Type {
+                object LeavingState: Type()
+                object StateChange: Type()
+                object EnteringState: Type()
+            }
+        }
+
+        fun stateChange(event: Event)
     }
 
-    private object KomplettSakTilstand : Sakskomplekstilstand()
+    private abstract inner class Sakskomplekstilstand {
 
-    abstract class Sakskomplekstilstand {
+        internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit) {
+            tilstand.leaving()
 
-        internal open fun Sakskompleks.sykmeldingMottatt(sykmelding: Sykmelding) {
+            val oldState = lagre()
+
+            tilstand = nyTilstand
+            block()
+
+            notifyObservers(Observer.Event(
+                    type = Observer.Event.Type.StateChange,
+                    currentState = lagre(),
+                    oldState = oldState
+            ))
+
+            tilstand.entering()
+        }
+
+        open fun name() =
+                this::javaClass.get().simpleName
+
+        open fun sykmeldingMottatt(sykmelding: Sykmelding) {
             throw IllegalStateException()
         }
 
-        internal open fun Sakskompleks.søknadMottatt(søknad: Sykepengesøknad) {
+        open fun søknadMottatt(søknad: Sykepengesøknad) {
             throw IllegalStateException()
         }
 
-        internal open fun Sakskompleks.inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+        open fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
             throw IllegalStateException()
         }
 
-        internal open fun leaving() {}
-
-        internal open fun arriving() {}
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            return true
+        open fun leaving() {
+            notifyObservers(Observer.Event(Observer.Event.Type.LeavingState, lagre()))
         }
 
-        override fun hashCode(): Int {
-            return javaClass.hashCode()
+        open fun entering() {
+            notifyObservers(Observer.Event(Observer.Event.Type.EnteringState, lagre()))
         }
-
     }
 }
 

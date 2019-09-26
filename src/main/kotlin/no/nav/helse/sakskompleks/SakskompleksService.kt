@@ -18,12 +18,14 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
     fun finnEllerOpprettSak(sykmelding: Sykmelding) =
             (finnSak(sykmelding) ?: sakskompleksDao.opprettSak(sykmelding.aktørId))
                     .also { sakskompleks ->
+                        sakskompleks.addObserver(sakskompleksProbe)
                         sakskompleks.leggTil(sykmelding)
                         sakskompleksProbe.opprettetNyttSakskompleks(sakskompleks)
                     }
 
     fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =
             finnSak(sykepengesøknad)?.also { sakskompleks ->
+                sakskompleks.addObserver(sakskompleksProbe)
                 leggSøknadPåSak(sakskompleks, sykepengesøknad)
             }.also {
                 if (it == null) {
@@ -33,6 +35,7 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
             finnSak(inntektsmelding)?.also { sakskompleks ->
+                sakskompleks.addObserver(sakskompleksProbe)
                 leggInntektsmeldingPåSak(sakskompleks, inntektsmelding)
             }.also {
                 if (it == null) {

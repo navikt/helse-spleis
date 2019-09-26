@@ -39,7 +39,11 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
                         String(memento.json, Charsets.UTF_8), memento.id.toString()).asUpdate)
             }
 
-    override fun stateChange(newState: Sakskompleks.Observer.State, oldState: Sakskompleks.Observer.State) {
-        oppdaterSak(newState.memento)
+    override fun stateChange(event: Sakskompleks.Observer.Event) {
+        when (event.type) {
+            is Sakskompleks.Observer.Event.Type.StateChange -> {
+                oppdaterSak(event.currentState)
+            }
+        }
     }
 }
