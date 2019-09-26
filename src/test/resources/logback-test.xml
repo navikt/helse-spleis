@@ -7,6 +7,12 @@
         </layout>
     </appender>
 
+    <logger name="kafka" level="ERROR" />
+    <logger name="org.apache.zookeeper" level="ERROR" />
+    <logger name="org.apache.kafka" level="ERROR" />
+    <logger name="org.flywaydb" level="WARN" />
+    <logger name="com.zaxxer" level="WARN" />
+
     <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
