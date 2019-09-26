@@ -41,6 +41,7 @@ class Sakskompleks {
             SøknadMottattTilstand().name() -> SøknadMottattTilstand()
             InntektsmeldingMottattTilstand().name() -> InntektsmeldingMottattTilstand()
             KomplettSakTilstand().name() -> KomplettSakTilstand()
+            TrengerManuellHåndteringTilstand().name() -> TrengerManuellHåndteringTilstand()
             else -> throw RuntimeException("ukjent tilstand")
         }
 
@@ -221,6 +222,8 @@ class Sakskompleks {
 
     private inner class KomplettSakTilstand : Sakskomplekstilstand()
 
+    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand()
+
     interface Observer {
         data class Event(val type: Type,
                          val currentState: Memento,
@@ -238,7 +241,7 @@ class Sakskompleks {
 
     private abstract inner class Sakskomplekstilstand {
 
-        internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit) {
+        internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
             tilstand.leaving()
 
             val oldState = lagre()
@@ -259,15 +262,15 @@ class Sakskompleks {
                 this::javaClass.get().simpleName
 
         open fun sykmeldingMottatt(sykmelding: Sykmelding) {
-            throw IllegalStateException()
+            transition(TrengerManuellHåndteringTilstand())
         }
 
         open fun søknadMottatt(søknad: Sykepengesøknad) {
-            throw IllegalStateException()
+            transition(TrengerManuellHåndteringTilstand())
         }
 
         open fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            throw IllegalStateException()
+            transition(TrengerManuellHåndteringTilstand())
         }
 
         open fun leaving() {
