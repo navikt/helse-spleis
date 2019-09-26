@@ -1,0 +1,3 @@
+rootProject.name = 'helse-sykdomstidslinje'
+include 'sykdomstidslinje'
+include 'test'
