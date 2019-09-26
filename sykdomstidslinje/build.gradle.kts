@@ -17,7 +17,7 @@ publishing {
         create<MavenPublication>("mavenJava") {
 
             pom {
-                name.set("github-package-registry-gradle")
+                name.set("helse-sykdomstidslinje")
                 description.set("Bibliotek for tidslinjer av intervaller relatert til sykefravær")
                 url.set("https://github.com/navikt/helse-sykdomstidslinje")
                 licenses {
