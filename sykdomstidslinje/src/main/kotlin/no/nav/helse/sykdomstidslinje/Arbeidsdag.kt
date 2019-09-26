@@ -6,5 +6,5 @@ import java.time.LocalDateTime
 internal class Arbeidsdag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert, 20) {
     override fun antallSykedager() = 0
 
-    override fun toString() = formatter.format(dagen) + "\tno.nav.helse.sykdomstidslinje.Arbeidsdag"
+    override fun toString() = formatter.format(dagen) + "\tArbeidsdag"
 }

@@ -24,7 +24,9 @@ internal class CompositeSykdomstidslinje(
 
     override fun sluttdato() = tidslinjer.last().sluttdato()
 
-    override fun antallSykedager() = tidslinjer.sumBy { it.antallSykedager() }
+    override fun antallSykedager() = tidslinjer.flatMap { it.flatten() }
+        .filter { it.tilDag() !is SykHelgedag }
+        .sumBy { it.antallSykedager() }
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
 }

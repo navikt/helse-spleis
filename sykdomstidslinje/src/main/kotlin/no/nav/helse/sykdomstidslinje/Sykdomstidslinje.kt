@@ -9,6 +9,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.streams.toList
 
+const val ARBEIDSGIVER_PERIODE: Int = 16
+
 abstract class Sykdomstidslinje {
     abstract fun startdato(): LocalDate
     abstract fun sluttdato(): LocalDate
@@ -62,6 +64,34 @@ abstract class Sykdomstidslinje {
 
     private fun harGrenseInnenfor(other: Sykdomstidslinje) =
         this.startdato() in (other.startdato()..other.sluttdato())
+
+    fun grupperPerioderMedMaksAvstand(): List<Sykdomstidslinje> {
+        val dager = flatten()
+
+        val resultat = mutableListOf<Sykdomstidslinje>()
+        var periode = mutableListOf<Dag>()
+        var ikkeSykDagTeller = 0
+        for (dag in dager) {
+            if (dag.antallSykedager() == 1) {
+                ikkeSykDagTeller = 0
+                periode.add(dag)
+            } else {
+                if (ikkeSykDagTeller == 0 && dag is Feriedag) {
+                    continue
+                }
+                ikkeSykDagTeller ++
+                if (ikkeSykDagTeller == 16) {
+                    resultat.add(CompositeSykdomstidslinje(periode))
+                    periode = mutableListOf()
+                }
+            }
+        }
+
+        if (periode.size != 0) {
+            resultat.add(CompositeSykdomstidslinje(periode))
+        }
+        return resultat
+    }
 
     companion object {
         fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime) =

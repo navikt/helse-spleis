@@ -9,5 +9,5 @@ internal class Nulldag internal constructor(gjelder: LocalDate, rapportert: Loca
 
     override fun tilDag() = ikkeSykedag(dagen, rapportertDato)
 
-    override fun toString() = formatter.format(dagen) + "\tno.nav.helse.sykdomstidslinje.Nulldag"
+    override fun toString() = formatter.format(dagen) + "\tNulldag"
 }
