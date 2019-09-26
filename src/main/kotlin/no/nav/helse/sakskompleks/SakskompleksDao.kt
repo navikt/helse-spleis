@@ -23,6 +23,7 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
                     id = UUID.randomUUID(),
                     aktørId = brukerAktørId
             ).also { sak ->
+                sak.addObserver(this)
                 opprettSak(sak.lagre())
             }
 
