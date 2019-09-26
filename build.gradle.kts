@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "no.nav.helse"
-version = "1.0-SNAPSHOT"
+version = System.getProperty("version") ?: "local-build"
 
 val junitJupiterVersion = "5.4.0"
 
@@ -31,7 +31,7 @@ subprojects {
     tasks.withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
-    
+
     tasks.withType<Test> {
         useJUnitPlatform()
         testLogging {

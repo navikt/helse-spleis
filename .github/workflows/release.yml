@@ -1,0 +1,22 @@
+name: release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11.x'
+      - name: test and build
+        run: ./gradlew -Pversion="1.$(echo $GITHUB_SHA | cut -c1-7)" build
+      - name: upload artifact
+        run: ./gradlew -Pversion="1.$(echo $GITHUB_SHA | cut -c1-7)" publish
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
