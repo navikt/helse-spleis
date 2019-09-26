@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "no.nav.helse"
-    version = System.getProperty("version") ?: "local-build"
+    version = properties["version"] ?: "local-build"
 }
 
 val junitJupiterVersion = "5.4.0"
