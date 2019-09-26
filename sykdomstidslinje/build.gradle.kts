@@ -6,7 +6,7 @@ plugins {
 publishing {
     repositories {
         maven {
-            url = uri("https://maven.pkg.github.com/navikt")
+            url = uri("https://maven.pkg.github.com/navikt/helse-sykdomstidslinje")
             credentials {
                 username = System.getenv("GITHUB_USERNAME")
                 password = System.getenv("GITHUB_PASSWORD")
@@ -18,8 +18,8 @@ publishing {
 
             pom {
                 name.set("github-package-registry-gradle")
-                description.set("A test project for the maven-publish plugin")
-                url.set("https://github.com/navikt/github-package-registry-gradle")
+                description.set("Bibliotek for tidslinjer av intervaller relatert til sykefravær")
+                url.set("https://github.com/navikt/helse-sykdomstidslinje")
                 licenses {
                     license {
                         name.set("MIT License")
@@ -28,9 +28,9 @@ publishing {
                 }
 
                 scm {
-                    connection.set("scm:git:https://github.com/navikt/github-package-registry-gradle.git")
-                    developerConnection.set("scm:git:https://github.com/navikt/github-package-registry-gradle.git")
-                    url.set("https://github.com/navikt/github-package-registry-gradle")
+                    connection.set("scm:git:https://github.com/navikt/helse-sykdomstidslinje.git")
+                    developerConnection.set("scm:git:https://github.com/navikt/helse-sykdomstidslinje.git")
+                    url.set("https://github.com/navikt/helse-sykdomstidslinje")
                 }
             }
             from(components["java"])
