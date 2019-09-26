@@ -40,6 +40,7 @@ class SøknadConsumer(
             .mapValues { jsonNode ->
                 Sykepengesøknad(jsonNode)
             }
+            .peek { _, søknad -> probe.mottattSøknad(søknad) }
             .foreach(::håndterSøknad)
 
         return builder
@@ -61,15 +62,7 @@ class SøknadConsumer(
     }
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
-        probe.mottattSøknad(søknad)
-
-        sakskompleksService
-            .finnSak(søknad)
-            ?.let { sak ->
-                sakskompleksService.leggSøknadPåSak(sak, søknad)
-                probe.søknadKobletTilSakskompleks(søknad, sak)
-            }
-            ?: probe.søknadManglerSakskompleks(søknad)
+        sakskompleksService.knyttSøknadTilSak(søknad)
     }
 }
 

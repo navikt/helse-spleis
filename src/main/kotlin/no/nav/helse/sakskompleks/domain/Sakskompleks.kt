@@ -1,7 +1,6 @@
 package no.nav.helse.sakskompleks.domain
 
 import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -23,12 +22,14 @@ class Sakskompleks {
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
     private var tilstand: Sakskomplekstilstand = StartTilstand
 
+    private val observers: MutableList<Observer> = mutableListOf()
+
     constructor(id: UUID, aktørId: String) {
         this.id = id
         this.aktørId = aktørId
     }
 
-    constructor(json: String) {
+    constructor(json: ByteArray) {
         val node = fromJson(json)
 
         id = UUID.fromString(node["id"].textValue())
@@ -41,13 +42,28 @@ class Sakskompleks {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private fun tilstand(newState: Sakskomplekstilstand) {
-        tilstand.leaving()
-        tilstand = newState
-        tilstand.arriving()
+    internal fun addObserver(observer: Observer) {
+        observers.add(observer)
     }
 
-    private fun fromJson(json: String) =
+    private fun tilstand(nyTilstand: Sakskomplekstilstand) {
+        val oldState = Observer.State(id, aktørId, lagre())
+
+        tilstand.leaving()
+        tilstand = nyTilstand
+        tilstand.arriving()
+
+        val newState = Observer.State(id, aktørId, lagre())
+
+        observers.forEach { observer ->
+            observer.stateChange(newState, oldState)
+        }
+    }
+
+    fun id() = id
+    fun aktørId() = aktørId
+
+    private fun fromJson(json: ByteArray) =
         objectMapper.readTree(json)
 
     internal fun lagre(): Memento {
@@ -136,41 +152,49 @@ class Sakskompleks {
             inntektsmelding == enInntektsmelding
         }
 
-    internal data class Memento(val id: UUID,
-                                val aktørId: String,
-                                val json: ByteArray)
+    data class Memento(val id: UUID,
+                       val aktørId: String,
+                       val json: ByteArray)
 
     private object StartTilstand : Sakskomplekstilstand() {
         override fun Sakskompleks.sykmeldingMottatt(sykmelding: Sykmelding) {
             sykmeldinger.add(sykmelding)
-            tilstand = SykmeldingMottattTilstand
+            tilstand(SykmeldingMottattTilstand)
         }
     }
 
     private object SykmeldingMottattTilstand : Sakskomplekstilstand() {
         override fun Sakskompleks.søknadMottatt(søknad: Sykepengesøknad) {
             søknader.add(søknad)
-            tilstand = SøknadMottattTilstand
+            tilstand(SøknadMottattTilstand)
         }
 
         override fun Sakskompleks.inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
             inntektsmeldinger.add(inntektsmelding)
-            tilstand = InntektsmeldingMottattTilstand
+            tilstand(InntektsmeldingMottattTilstand)
         }
     }
 
     private object SøknadMottattTilstand : Sakskomplekstilstand() {
         override fun Sakskompleks.inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
             inntektsmeldinger.add(inntektsmelding)
-            tilstand = KomplettSakTilstand
+            tilstand(KomplettSakTilstand)
         }
     }
 
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
         override fun Sakskompleks.søknadMottatt(søknad: Sykepengesøknad) {
             søknader.add(søknad)
-            tilstand = KomplettSakTilstand
+            tilstand(KomplettSakTilstand)
         }
+    }
+
+    interface Observer {
+        data class State(val id: UUID,
+                         val aktørId: String,
+                         val memento: Memento)
+
+        fun stateChange(newState: State, oldState: State)
     }
 
     private object KomplettSakTilstand : Sakskomplekstilstand()

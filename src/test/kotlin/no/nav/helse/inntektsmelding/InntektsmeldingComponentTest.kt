@@ -10,12 +10,12 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer.Companion.inntektsmeldingObjectMapper
-import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingKobletTilSakCounterName
 import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.innteksmeldingerMottattCounterName
-import no.nav.helse.inntektsmelding.InntektsmeldingProbe.Companion.manglendeSakskompleksForInntektsmeldingCounterName
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.readResource
 import no.nav.helse.sakskompleks.SakskompleksDao
+import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.innteksmeldingKobletTilSakCounterName
+import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.manglendeSakskompleksForInntektsmeldingCounterName
 import no.nav.helse.sakskompleks.SakskompleksProbe.Companion.sakskompleksTotalsCounterName
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
@@ -105,6 +105,8 @@ class InntektsmeldingComponentTest {
 
     @Test
     fun `Inntektsmelding blir lagt til sakskompleks med kun sykmelding`() {
+        val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
+
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
@@ -120,7 +122,9 @@ class InntektsmeldingComponentTest {
                 .untilAsserted {
                     val sakskompleksCounterAfter = getCounterValue(sakskompleksTotalsCounterName)
 
-                    assertNotNull(sakskompleksService.finnSak(enSykmelding))
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(1, sakerForBruker.size)
+
                     assertEquals(1, sakskompleksCounterAfter - sakskompleksCounterBefore)
                 }
 
@@ -132,12 +136,11 @@ class InntektsmeldingComponentTest {
                     val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
                     val inntektsmeldingKobletTilSakCounterAfter = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-                    val lagretSak = sakskompleksService.finnSak(enInntektsmelding) ?: fail("Buhu - fant ikke sakskompleks :(")
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(1, sakerForBruker.size)
 
-                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
-
-                    assertTrue(lagretSak.har(enInntektsmelding))
-                    assertTrue(lagretSak.har(enSykmelding))
+                    assertTrue(sakerForBruker[0].har(enInntektsmelding))
+                    assertTrue(sakerForBruker[0].har(enSykmelding))
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMotattCounterBefore)
                     assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
@@ -147,6 +150,8 @@ class InntektsmeldingComponentTest {
 
     @Test
     fun `Inntektsmelding blir lagt til sakskompleks med både sykmelding og søknad`() {
+        val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
+
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
@@ -163,7 +168,12 @@ class InntektsmeldingComponentTest {
                 .untilAsserted {
                     val sakskompleksCounterAfter = getCounterValue(sakskompleksTotalsCounterName)
 
-                    assertNotNull(sakskompleksService.finnSak(enSykmelding))
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(1, sakerForBruker.size)
+                    assertTrue(sakerForBruker[0].har(enSykmelding))
+                    assertFalse(sakerForBruker[0].har(enSøknad))
+                    assertFalse(sakerForBruker[0].har(enInntektsmelding))
+
                     assertEquals(1, sakskompleksCounterAfter - sakskompleksCounterBefore)
                 }
 
@@ -174,7 +184,12 @@ class InntektsmeldingComponentTest {
                 .untilAsserted {
                     val søknadCounterAfter = getCounterValue(søknadCounterName)
 
-                    assertNotNull(sakskompleksService.finnSak(enSøknad))
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(1, sakerForBruker.size)
+                    assertTrue(sakerForBruker[0].har(enSykmelding))
+                    assertTrue(sakerForBruker[0].har(enSøknad))
+                    assertFalse(sakerForBruker[0].har(enInntektsmelding))
+
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
                 }
 
@@ -186,13 +201,11 @@ class InntektsmeldingComponentTest {
                     val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
                     val inntektsmeldingKobletTilSakCounterAfter = getCounterValue(innteksmeldingKobletTilSakCounterName)
 
-                    val lagretSak = sakskompleksService.finnSak(enInntektsmelding) ?: fail("Buhu - fant ikke sakskompleks :(")
-                    assertEquals(sakskompleksService.finnSak(enSykmelding), lagretSak)
-                    assertEquals(sakskompleksService.finnSak(enSøknad), lagretSak)
-
-                    assertTrue(lagretSak.har(enSykmelding))
-                    assertTrue(lagretSak.har(enSøknad))
-                    assertTrue(lagretSak.har(enInntektsmelding))
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(1, sakerForBruker.size)
+                    assertTrue(sakerForBruker[0].har(enSykmelding))
+                    assertTrue(sakerForBruker[0].har(enSøknad))
+                    assertTrue(sakerForBruker[0].har(enInntektsmelding))
 
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
                     assertEquals(1, inntektsmeldingKobletTilSakCounterAfter - inntektsmeldingKobletTilSakCounterBefore)
@@ -202,6 +215,8 @@ class InntektsmeldingComponentTest {
 
     @Test
     fun `inntektsmelding som kommer først, blir ignorert`() {
+        val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
+
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
@@ -218,10 +233,11 @@ class InntektsmeldingComponentTest {
                     val inntektsmeldingMottattCounterAfter = getCounterValue(innteksmeldingerMottattCounterName)
                     val manglendeSakskompleksForInntektsmeldingCounterAfter = getCounterValue(manglendeSakskompleksForInntektsmeldingCounterName)
 
+                    val sakerForBruker = sakskompleksDao.finnSaker(enSykmelding.aktørId)
+                    assertEquals(0, sakerForBruker.size)
+
                     assertEquals(1, inntektsmeldingMottattCounterAfter - inntektsmeldingMottattCounterBefore)
                     assertEquals(1, manglendeSakskompleksForInntektsmeldingCounterAfter - manglendeSakskompleksForInntektsmeldingCounterBefore)
-
-                    assertNull(sakskompleksService.finnSak(enInntektsmelding))
                 }
         }
     }

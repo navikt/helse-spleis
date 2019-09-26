@@ -131,7 +131,6 @@ class AppComponentTest {
     @Test
     fun `kobler søknad til eksisterende sakskompleks`() {
         val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
-        val sakskompleksService = SakskompleksService(sakskompleksDao)
 
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
@@ -142,6 +141,7 @@ class AppComponentTest {
             val søknadCounterBefore = getCounterValue(søknadCounterName)
 
             val sykmelding = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
+            val sykmeldingMessage = SykmeldingMessage(sykmelding).sykmelding
             produceOneMessage(sykmeldingTopic, sykmelding["sykmelding"]["id"].asText(), sykmelding, sykmeldingObjectMapper)
 
             await()
@@ -150,7 +150,9 @@ class AppComponentTest {
                     val sykmeldingCounterAfter = getCounterValue(sykmeldingCounterName)
 
                     assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
-                    assertNotNull(sakskompleksService.finnSak(SykmeldingMessage(sykmelding).sykmelding))
+
+                    val sakerForBruker = sakskompleksDao.finnSaker(sykmeldingMessage.aktørId)
+                    assertEquals(1, sakerForBruker.size)
                 }
 
             val søknad = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
@@ -163,10 +165,11 @@ class AppComponentTest {
 
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
 
-                    val sak = sakskompleksService.finnSak(Sykepengesøknad(søknad))
-                    sak!!
-                    assertTrue(sak.har(SykmeldingMessage(sykmelding).sykmelding))
-                    assertTrue(sak.har(Sykepengesøknad(søknad)))
+                    val sakerForBruker = sakskompleksDao.finnSaker(sykmeldingMessage.aktørId)
+                    assertEquals(1, sakerForBruker.size)
+
+                    assertTrue(sakerForBruker[0].har(SykmeldingMessage(sykmelding).sykmelding))
+                    assertTrue(sakerForBruker[0].har(Sykepengesøknad(søknad)))
                 }
         }
     }
@@ -174,7 +177,6 @@ class AppComponentTest {
     @Test
     fun `søknad uten tilhørende sykmelding ignoreres`() {
         val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
-        val sakskompleksService = SakskompleksService(sakskompleksDao)
 
         testServer(config = mapOf(
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
@@ -192,8 +194,8 @@ class AppComponentTest {
 
                     assertEquals(1, søknadCounterAfter - søknadCounterBefore)
 
-                    val sak = sakskompleksService.finnSak(Sykepengesøknad(søknad))
-                    assertNull(sak)
+                    val sakerForBruker = sakskompleksDao.finnSaker(Sykepengesøknad(søknad).aktørId)
+                    assertEquals(0, sakerForBruker.size)
                 }
         }
     }

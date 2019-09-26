@@ -41,13 +41,7 @@ class InntektsmeldingConsumer(
             .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
 
     private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-        sakskompleksService
-            .finnSak(inntektsmelding)
-            ?.let { sak ->
-                sakskompleksService.leggInntektsmeldingPåSak(sak, inntektsmelding)
-                probe.inntektsmeldingKobletTilSakskompleks(inntektsmelding, sak)
-            }
-            ?: probe.inntektmeldingManglerSakskompleks(inntektsmelding)
+        sakskompleksService.knyttInntektsmeldingTilSak(inntektsmelding)
     }
 
 }
