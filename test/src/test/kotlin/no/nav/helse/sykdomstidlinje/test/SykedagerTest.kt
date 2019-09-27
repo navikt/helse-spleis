@@ -34,7 +34,7 @@ class SykedagerTest {
 
         println(sykedager)
 
-        assertEquals(6, sykedager.antallSykedager())
+        assertEquals(8, sykedager.antallSykedager())
     }
 
     @Test
@@ -129,16 +129,6 @@ class SykedagerTest {
 
         assertEquals(1, grupper.size)
         assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke2Mandag, grupper.first().sluttdato())
-    }
-
-    @Test
-    fun test() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke4Mandag, uke2Fredag, rapporteringsdato)
-
-        val grupper = (influensa + spysyka).grupperPerioderMedMaksAvstand()
-
-
+        assertEquals(uke1Søndag, grupper.first().sluttdato())
     }
 }
