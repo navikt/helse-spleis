@@ -1,4 +1,4 @@
-package no.nav.helse.sakskompleks.domain
+package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.readResource
+import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Periode
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.SykmeldingMessage
@@ -41,7 +42,7 @@ class SakskompleksKtTest {
             aktørId = "aktørId"
         )
 
-        val memento = sakskompleks.state()
+        val memento = sakskompleks.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertNotNull(node["tilstand"])
@@ -57,7 +58,7 @@ class SakskompleksKtTest {
             aktørId = "aktørId"
         )
 
-        val memento = sakskompleks.state()
+        val memento = sakskompleks.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertEquals(id.toString(), node["id"].textValue())
@@ -74,7 +75,7 @@ class SakskompleksKtTest {
 
         sakskompleks.leggTil(testSykmelding.sykmelding)
 
-        val memento = sakskompleks.state()
+        val memento = sakskompleks.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["sykmeldinger"].isArray)
@@ -92,7 +93,7 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSykmelding.sykmelding)
         sakskompleks.leggTil(enInntektsmelding)
 
-        val memento = sakskompleks.state()
+        val memento = sakskompleks.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["inntektsmeldinger"].isArray)
@@ -110,7 +111,7 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSykmelding.sykmelding)
         sakskompleks.leggTil(testSøknad)
 
-        val memento = sakskompleks.state()
+        val memento = sakskompleks.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertTrue(node["søknader"].isArray)
@@ -128,10 +129,10 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(testSøknad)
         sakskompleks.leggTil(enInntektsmelding)
 
-        val inMemento = sakskompleks.state()
+        val inMemento = sakskompleks.memento()
 
         val nyttSakskompleks = Sakskompleks.restore(inMemento)
-        val outMemento = nyttSakskompleks.state()
+        val outMemento = nyttSakskompleks.memento()
         val inNode = objectMapper.readTree(inMemento.state)
         val outNode = objectMapper.readTree(outMemento.state)
 

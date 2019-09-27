@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.sykmelding.domain.gjelderTil
@@ -12,8 +13,8 @@ import java.io.StringWriter
 import java.time.LocalDate
 import java.util.*
 
-class Sakskompleks(private val id: UUID,
-                   private val aktørId: String) {
+class Sakskompleks internal constructor(private val id: UUID,
+                                        private val aktørId: String) {
 
     private val sykmeldinger: MutableList<Sykmelding> = mutableListOf()
     private val søknader: MutableList<Sykepengesøknad> = mutableListOf()
@@ -22,6 +23,129 @@ class Sakskompleks(private val id: UUID,
 
     private val observers: MutableList<Observer> = mutableListOf()
 
+    fun leggTil(søknad: Sykepengesøknad) {
+        tilstand.søknadMottatt(søknad)
+    }
+
+    fun leggTil(inntektsmelding: Inntektsmelding) {
+        tilstand.inntektsmeldingMottatt(inntektsmelding)
+    }
+
+    fun leggTil(sykmelding: Sykmelding) {
+        tilstand.sykmeldingMottatt(sykmelding)
+    }
+
+    fun fom(): LocalDate? = run {
+        val syketilfelleStart = sykmeldinger.mapNotNull { sykmelding -> sykmelding.syketilfelleStartDato }.min()
+        val tidligsteFOM: LocalDate? =
+                sykmeldinger.flatMap { sykmelding -> sykmelding.perioder }.map { periode -> periode.fom }.min()
+        val søknadEgenmelding =
+                søknader.flatMap { søknad -> søknad.egenmeldinger }.map { egenmelding -> egenmelding.fom }.min()
+
+        return listOfNotNull(syketilfelleStart, tidligsteFOM, søknadEgenmelding).min()
+    }
+
+    fun tom(): LocalDate = run {
+        val arbeidGjenopptatt = søknader.somIkkeErKorrigerte().maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
+        val sisteTOMSøknad = søknader.maxBy { søknad -> søknad.tom }?.tom
+        val sisteTOMSykmelding = sykmeldinger.maxBy { sykmelding -> sykmelding.gjelderTil() }?.gjelderTil()
+
+        return arbeidGjenopptatt
+                ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max()
+                ?: throw RuntimeException("Et sakskompleks må ha en sluttdato!")
+    }
+
+    fun hørerSammenMed(sykepengesøknad: Sykepengesøknad) =
+            sykmeldinger.any { sykmelding ->
+                sykmelding.id == sykepengesøknad.sykmeldingId
+            }
+
+    private fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
+        val korrigerteIder = mapNotNull { it.korrigerer }
+        return filter { it.id !in korrigerteIder }
+    }
+
+    // Gang of four State pattern
+    private abstract inner class Sakskomplekstilstand {
+
+        internal fun transition(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+            tilstand.leaving()
+
+            val previousStateName = tilstand.name()
+            val previousMemento = memento()
+
+            tilstand = nyTilstand
+            block()
+
+            tilstand.entering()
+
+            notifyObservers(tilstand.name(), event, previousStateName, previousMemento)
+        }
+
+        fun name() = javaClass.simpleName
+
+        open fun sykmeldingMottatt(sykmelding: Sykmelding) {
+            transition(sykmelding, TrengerManuellHåndteringTilstand())
+        }
+
+        open fun søknadMottatt(søknad: Sykepengesøknad) {
+            transition(søknad, TrengerManuellHåndteringTilstand())
+        }
+
+        open fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+            transition(inntektsmelding, TrengerManuellHåndteringTilstand())
+        }
+
+        open fun leaving() {
+        }
+
+        open fun entering() {
+        }
+    }
+
+    private inner class StartTilstand : Sakskomplekstilstand() {
+        override fun sykmeldingMottatt(sykmelding: Sykmelding) {
+            transition(sykmelding, SykmeldingMottattTilstand()) {
+                sykmeldinger.add(sykmelding)
+            }
+        }
+    }
+
+    private inner class SykmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            transition(søknad, SøknadMottattTilstand()) {
+                søknader.add(søknad)
+            }
+        }
+
+        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+            transition(inntektsmelding, InntektsmeldingMottattTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
+        }
+    }
+
+    private inner class SøknadMottattTilstand : Sakskomplekstilstand() {
+        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
+            transition(inntektsmelding, KomplettSakTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
+        }
+    }
+
+    private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            transition(søknad, KomplettSakTilstand()) {
+                søknader.add(søknad)
+            }
+        }
+    }
+
+    private inner class KomplettSakTilstand : Sakskomplekstilstand()
+
+    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand()
+
+    // Gang of four Memento pattern
     companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
@@ -34,13 +158,14 @@ class Sakskompleks(private val id: UUID,
                     id = UUID.fromString(node["id"].textValue()),
                     aktørId = node["aktørId"].textValue()
             )
+
             sakskompleks.tilstand = when (node["tilstand"].textValue()) {
-                sakskompleks.StartTilstand().name() -> sakskompleks.StartTilstand()
-                sakskompleks.SykmeldingMottattTilstand().name() -> sakskompleks.SykmeldingMottattTilstand()
-                sakskompleks.SøknadMottattTilstand().name() -> sakskompleks.SøknadMottattTilstand()
-                sakskompleks.InntektsmeldingMottattTilstand().name() -> sakskompleks.InntektsmeldingMottattTilstand()
-                sakskompleks.KomplettSakTilstand().name() -> sakskompleks.KomplettSakTilstand()
-                sakskompleks.TrengerManuellHåndteringTilstand().name() -> sakskompleks.TrengerManuellHåndteringTilstand()
+                "StartTilstand" -> sakskompleks.StartTilstand()
+                "SykmeldingMottattTilstand" -> sakskompleks.SykmeldingMottattTilstand()
+                "SøknadMottattTilstand" -> sakskompleks.SøknadMottattTilstand()
+                "InntektsmeldingMottattTilstand" -> sakskompleks.InntektsmeldingMottattTilstand()
+                "KomplettSakTilstand" -> sakskompleks.KomplettSakTilstand()
+                "TrengerManuellHåndteringTilstand" -> sakskompleks.TrengerManuellHåndteringTilstand()
                 else -> throw RuntimeException("ukjent tilstand")
             }
 
@@ -70,14 +195,15 @@ class Sakskompleks(private val id: UUID,
         observers.add(observer)
     }
 
-    private fun notifyObservers(eventType: Observer.Event.Type, oldEventType: Observer.Event.Type, previousState: Memento) {
+    private fun notifyObservers(currentState: String, event: Event, previousState: String, previousMemento: Memento) {
         val event = Observer.Event(
-                type = eventType,
                 id = id,
                 aktørId = aktørId,
-                currentState = state(),
-                previousType = oldEventType,
-                previousState = previousState
+                currentState = currentState,
+                previousState = previousState,
+                eventName = event.name(),
+                currentMemento = memento(),
+                previousMemento = previousMemento
         )
 
         observers.forEach { observer ->
@@ -85,7 +211,7 @@ class Sakskompleks(private val id: UUID,
         }
     }
 
-    internal fun state(): Memento {
+    internal fun memento(): Memento {
         val writer = StringWriter()
         val generator = JsonFactory().createGenerator(writer)
 
@@ -119,185 +245,22 @@ class Sakskompleks(private val id: UUID,
         return Memento(state = writer.toString().toByteArray(Charsets.UTF_8))
     }
 
-    fun leggTil(søknad: Sykepengesøknad) {
-        tilstand.søknadMottatt(søknad)
-    }
-
-    fun leggTil(inntektsmelding: Inntektsmelding) {
-        tilstand.inntektsmeldingMottatt(inntektsmelding)
-    }
-
-    fun leggTil(sykmelding: Sykmelding) {
-        tilstand.sykmeldingMottatt(sykmelding)
-    }
-
-    fun fom(): LocalDate? = run {
-        val syketilfelleStart = sykmeldinger.mapNotNull { sykmelding -> sykmelding.syketilfelleStartDato }.min()
-        val tidligsteFOM: LocalDate? =
-            sykmeldinger.flatMap { sykmelding -> sykmelding.perioder }.map { periode -> periode.fom }.min()
-        val søknadEgenmelding =
-            søknader.flatMap { søknad -> søknad.egenmeldinger }.map { egenmelding -> egenmelding.fom }.min()
-
-        return listOfNotNull(syketilfelleStart, tidligsteFOM, søknadEgenmelding).min()
-    }
-
-    fun tom(): LocalDate = run {
-        val arbeidGjenopptatt = søknader.somIkkeErKorrigerte().maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
-        val sisteTOMSøknad = søknader.maxBy { søknad -> søknad.tom }?.tom
-        val sisteTOMSykmelding = sykmeldinger.maxBy { sykmelding -> sykmelding.gjelderTil() }?.gjelderTil()
-
-        return arbeidGjenopptatt
-            ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max()
-            ?: throw RuntimeException("Et sakskompleks må ha en sluttdato!")
-    }
-
-    fun hørerSammenMed(sykepengesøknad: Sykepengesøknad) =
-        sykmeldinger.any { sykmelding ->
-            sykmelding.id == sykepengesøknad.sykmeldingId
-        }
-
-    fun har(sykmelding: Sykmelding) =
-        sykmeldinger.any { enSykmelding ->
-            sykmelding == enSykmelding
-        }
-
-    fun har(sykepengesøknad: Sykepengesøknad) =
-        søknader.any { enSøknad ->
-            sykepengesøknad == enSøknad
-        }
-
-    fun har(inntektsmelding: Inntektsmelding) =
-        inntektsmeldinger.any { enInntektsmelding ->
-            inntektsmelding == enInntektsmelding
-        }
-
     class Memento(internal val state: ByteArray) {
         override fun toString() = String(state, Charsets.UTF_8)
     }
 
-    private inner class StartTilstand : Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.StartTilstand
-
-        override fun sykmeldingMottatt(sykmelding: Sykmelding) {
-            transition(SykmeldingMottattTilstand()) {
-                sykmeldinger.add(sykmelding)
-            }
-        }
-    }
-
-    private inner class SykmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.SykmeldingMottatt
-
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(SøknadMottattTilstand()) {
-                søknader.add(søknad)
-            }
-        }
-
-        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(InntektsmeldingMottattTilstand()) {
-                inntektsmeldinger.add(inntektsmelding)
-            }
-        }
-    }
-
-    private inner class SøknadMottattTilstand : Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.SøknadMottatt
-
-        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(KomplettSakTilstand()) {
-                inntektsmeldinger.add(inntektsmelding)
-            }
-        }
-    }
-
-    private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.InntektsmeldingMottatt
-
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(KomplettSakTilstand()) {
-                søknader.add(søknad)
-            }
-        }
-    }
-
-    private inner class KomplettSakTilstand : Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.KomplettSak
-    }
-
-    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand() {
-        override fun eventType() =
-                Observer.Event.Type.TrengerManuellHåndtering
-    }
-
     interface Observer {
-        data class Event(val type: Type,
-                         val id: UUID,
+        data class Event(val id: UUID,
                          val aktørId: String,
-                         val currentState: Memento,
-                         val previousType: Type,
-                         val previousState: Memento) {
-
-            sealed class Type {
-                object StartTilstand: Type()
-                object TrengerManuellHåndtering: Type()
-                object KomplettSak: Type()
-                object SykmeldingMottatt: Type()
-                object SøknadMottatt: Type()
-                object InntektsmeldingMottatt: Type()
-            }
+                         val currentState: String,
+                         val previousState: String,
+                         val eventName: String,
+                         val currentMemento: Memento,
+                         val previousMemento: Memento) {
         }
 
         fun stateChange(event: Event)
     }
-
-    private abstract inner class Sakskomplekstilstand {
-
-        internal fun transition(nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
-            tilstand.leaving()
-
-            val oldType = tilstand.eventType()
-            val oldState = state()
-
-            tilstand = nyTilstand
-            block()
-
-            notifyObservers(tilstand.eventType(), oldType, oldState)
-
-            tilstand.entering()
-        }
-
-        open fun name() =
-                this::javaClass.get().simpleName
-
-        abstract fun eventType(): Observer.Event.Type
-
-        open fun sykmeldingMottatt(sykmelding: Sykmelding) {
-            transition(TrengerManuellHåndteringTilstand())
-        }
-
-        open fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(TrengerManuellHåndteringTilstand())
-        }
-
-        open fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(TrengerManuellHåndteringTilstand())
-        }
-
-        open fun leaving() {
-        }
-
-        open fun entering() {
-        }
-    }
 }
 
-fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
-    val korrigerteIder = mapNotNull { it.korrigerer }
-    return filter { it.id !in korrigerteIder }
-}
+

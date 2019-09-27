@@ -60,15 +60,15 @@ class SakskompleksProbe: Sakskompleks.Observer {
     }
 
     override fun stateChange(event: Sakskompleks.Observer.Event) {
-        log.info("sakskompleks=${event.id} eventType=${event.type} previousEventType=${event.previousType}")
+        log.info("sakskompleks=${event.id} event=${event.eventName} state=${event.currentState} previousState=${event.previousState}")
 
-        when (event.type) {
-            is Sakskompleks.Observer.Event.Type.InntektsmeldingMottatt -> {
+        /*when (event.eventName) {
+            "Inntektsmelding" -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            is Sakskompleks.Observer.Event.Type.SykmeldingMottatt -> {
+            "Sykmelding" -> {
                 when (event.previousType) {
-                    is Sakskompleks.Observer.Event.Type.StartTilstand -> {
+                    is Sakskompleks.StateName.StartTilstand -> {
                         opprettetNyttSakskompleks(event.id, event.aktørId)
                     }
                     else -> {
@@ -76,15 +76,16 @@ class SakskompleksProbe: Sakskompleks.Observer {
                     }
                 }
             }
-            is Sakskompleks.Observer.Event.Type.SøknadMottatt -> {
+            "Sykepengesøknad" -> {
                 søknadKobletTilSakskompleks(event.id)
             }
-            is Sakskompleks.Observer.Event.Type.KomplettSak -> {
-                log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
-            }
-            is Sakskompleks.Observer.Event.Type.TrengerManuellHåndtering -> {
-                log.info("sakskompleks med id ${event.id} trenger manuell behandling")
-            }
         }
+
+        is Sakskompleks.StateName.KomplettSak -> {
+            log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
+        }
+        is Sakskompleks.StateName.TrengerManuellHåndtering -> {
+            log.info("sakskompleks med id ${event.id} trenger manuell behandling")
+        }*/
     }
 }

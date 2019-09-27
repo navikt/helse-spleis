@@ -1,4 +1,4 @@
-package no.nav.helse.util.unit
+package no.nav.helse.unit.util.unit
 
 import no.nav.helse.util.interval.Sykdomstidslinje
 import no.nav.helse.util.interval.Nulldag

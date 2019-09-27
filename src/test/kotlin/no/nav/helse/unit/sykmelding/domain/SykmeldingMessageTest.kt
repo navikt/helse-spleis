@@ -1,9 +1,10 @@
-package no.nav.helse.sykmelding.domain
+package no.nav.helse.unit.sykmelding.domain
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.readResource
+import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

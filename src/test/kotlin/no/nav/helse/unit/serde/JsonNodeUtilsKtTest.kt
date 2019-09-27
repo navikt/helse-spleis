@@ -1,8 +1,9 @@
-package no.nav.helse.serde
+package no.nav.helse.unit.serde
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.safelyUnwrapDate
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Event
 import no.nav.helse.serde.safelyUnwrapDate
 import java.lang.RuntimeException
 import java.time.LocalDate
@@ -19,7 +20,7 @@ import java.time.LocalDate
 
 @JsonSerialize(using = SykmeldingSerializer::class)
 @JsonDeserialize(using = SykmeldingDeserializer::class)
-data class Sykmelding(val jsonNode: JsonNode) {
+data class Sykmelding(val jsonNode: JsonNode): Event {
 
     val id = jsonNode["id"].asText()!!
     val aktørId = jsonNode["pasientAktoerId"].asText()!!
