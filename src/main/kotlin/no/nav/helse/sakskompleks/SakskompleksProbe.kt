@@ -1,8 +1,8 @@
 package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
+import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.søknad.domain.Sykepengesøknad
@@ -64,13 +64,13 @@ class SakskompleksProbe: SakskompleksObserver {
     override fun sakskompleksChanged(event: StateChangeEvent) {
         log.info("sakskompleks=${event.id} event=${event.eventName} state=${event.currentState} previousState=${event.previousState}")
 
-        /*when (event.eventName) {
-            "Inntektsmelding" -> {
+        when (event.eventName) {
+            Event.Type.Inntektsmelding -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            "Sykmelding" -> {
-                when (event.previousType) {
-                    is Sakskompleks.StateName.StartTilstand -> {
+            Event.Type.Sykmelding -> {
+                when (event.previousState) {
+                    "StartTilstand" -> {
                         opprettetNyttSakskompleks(event.id, event.aktørId)
                     }
                     else -> {
@@ -78,16 +78,18 @@ class SakskompleksProbe: SakskompleksObserver {
                     }
                 }
             }
-            "Sykepengesøknad" -> {
+            Event.Type.Sykepengesøknad -> {
                 søknadKobletTilSakskompleks(event.id)
             }
         }
 
-        is Sakskompleks.StateName.KomplettSak -> {
-            log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
+        when (event.previousState) {
+            "KomplettSakTilstand" -> {
+                log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
+            }
+            "TrengerManuellHåndteringTilstand" -> {
+                log.info("sakskompleks med id ${event.id} trenger manuell behandling")
+            }
         }
-        is Sakskompleks.StateName.TrengerManuellHåndtering -> {
-            log.info("sakskompleks med id ${event.id} trenger manuell behandling")
-        }*/
     }
 }
