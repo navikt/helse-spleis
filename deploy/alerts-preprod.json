@@ -15,7 +15,7 @@
     },
     "alerts": [
       {
-        "alert": "sp-sak-har-ingen-aktive-pods",
+        "alert": "spleis-har-ingen-aktive-pods",
         "expr": "up{app=~\"spleis\",job=\"kubernetes-pods\"} == 0",
         "for": "2m",
         "description": "spleis mangler aktive pods i preprod!",
