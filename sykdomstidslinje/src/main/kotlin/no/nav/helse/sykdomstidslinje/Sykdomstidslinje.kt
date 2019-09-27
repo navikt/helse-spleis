@@ -15,6 +15,7 @@ abstract class Sykdomstidslinje {
     abstract fun startdato(): LocalDate
     abstract fun sluttdato(): LocalDate
     abstract fun antallSykedager(): Int
+    abstract fun antallSykeVirkedager(): Int
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
 

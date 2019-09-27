@@ -61,11 +61,18 @@ internal class DateRangeTest {
     @Test
     fun mandagTilMandagSyk() {
         val interval = Sykdomstidslinje.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
-
         assertEquals(8, interval.antallSykedager())
 
         val dager = interval.flatten()
+        assertEquals(8, dager.size)
+    }
 
+    @Test
+    fun mandagTilMandagVirkedagerSyk() {
+        val interval = Sykdomstidslinje.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
+        assertEquals(6, interval.antallSykeVirkedager())
+
+        val dager = interval.flatten()
         assertEquals(8, dager.size)
     }
 }
