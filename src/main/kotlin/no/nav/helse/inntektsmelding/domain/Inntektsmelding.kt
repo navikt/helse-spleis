@@ -12,11 +12,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Event
 import java.time.LocalDate
 
 @JsonSerialize(using = InntektsmeldingSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode) {
+data class Inntektsmelding(val jsonNode: JsonNode): Event {
 
     val inntektsmeldingId = jsonNode["inntektsmeldingId"].asText() as String
 

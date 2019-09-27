@@ -9,50 +9,57 @@ import java.lang.Integer.max
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
 
     private val sakskompleksProbe = SakskompleksProbe()
 
-    fun finnSak(sykepengesøknad: Sykepengesøknad) =
+    fun finnEllerOpprettSak(sykmelding: Sykmelding) =
+            (finnSak(sykmelding) ?: sakskompleksDao.opprettSak(sykmelding.aktørId))
+                    .also { sakskompleks ->
+                        sakskompleks.addObserver(sakskompleksProbe)
+                        sakskompleks.leggTil(sykmelding)
+                    }
+
+    fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =
+            finnSak(sykepengesøknad)?.also { sakskompleks ->
+                sakskompleks.addObserver(sakskompleksProbe)
+                leggSøknadPåSak(sakskompleks, sykepengesøknad)
+            }.also {
+                if (it == null) {
+                    sakskompleksProbe.søknadManglerSakskompleks(sykepengesøknad)
+                }
+            }
+
+    fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
+            finnSak(inntektsmelding)?.also { sakskompleks ->
+                sakskompleks.addObserver(sakskompleksProbe)
+                leggInntektsmeldingPåSak(sakskompleks, inntektsmelding)
+            }.also {
+                if (it == null) {
+                    sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
+                }
+            }
+
+    private fun finnSak(sykepengesøknad: Sykepengesøknad) =
         sakskompleksDao.finnSaker(sykepengesøknad.aktørId)
             .finnSak(sykepengesøknad)
 
-    fun finnSak(sykmelding: Sykmelding) =
+    private fun finnSak(inntektsmelding: Inntektsmelding) =
+            sakskompleksDao.finnSaker(inntektsmelding.arbeidstakerAktorId)
+                    .finnSak(inntektsmelding)
+
+    private fun finnSak(sykmelding: Sykmelding) =
         sakskompleksDao.finnSaker(sykmelding.aktørId)
             .finnSak(sykmelding)
 
-    fun finnSak(inntektsmelding: Inntektsmelding) =
-        sakskompleksDao.finnSaker(inntektsmelding.arbeidstakerAktorId)
-            .finnSak(inntektsmelding)
-
-    fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
+    private fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
         sak.leggTil(søknad)
-        sakskompleksDao.oppdaterSak(sak)
     }
 
-    fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
+    private fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
         sak.leggTil(inntektsmelding)
-        sakskompleksDao.oppdaterSak(sak)
     }
-
-    fun finnEllerOpprettSak(sykmelding: Sykmelding) =
-        finnSak(sykmelding)?.also { sak ->
-            sak.leggTil(sykmelding)
-            sakskompleksDao.oppdaterSak(sak)
-        } ?: nyttSakskompleks(sykmelding).also {
-            sakskompleksDao.opprettSak(it)
-            sakskompleksProbe.opprettetNyttSakskompleks(it)
-        }
-
-    private fun nyttSakskompleks(sykmelding: Sykmelding) =
-        Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = sykmelding.aktørId
-        ).also {
-            it.leggTil(sykmelding)
-        }
 
     private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =
         firstOrNull { sakskompleks ->

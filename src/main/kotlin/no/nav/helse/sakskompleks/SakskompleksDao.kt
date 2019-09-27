@@ -1,39 +1,49 @@
 package no.nav.helse.sakskompleks
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.sakskompleks.domain.Sakskompleks
+import java.util.*
 import javax.sql.DataSource
 
-class SakskompleksDao(private val dataSource: DataSource) {
-
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
+class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observer {
 
     fun finnSaker(brukerAktørId: String) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("SELECT data FROM SAKSKOMPLEKS WHERE bruker_aktor_id = ?", brukerAktørId).map { row ->
-                    objectMapper.readerFor(Sakskompleks::class.java)
-                            .readValue<Sakskompleks>(row.bytes("data"))
+                    Sakskompleks.restore(Sakskompleks.Memento(row.bytes("data"))).also { sakskompleks ->
+                        sakskompleks.addObserver(this)
+                    }
                 }.asList)
             }
 
-    fun opprettSak(sakskompleks: Sakskompleks) =
-            using(sessionOf(dataSource)) { session ->
-                session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
-                        sakskompleks.id.toString(), sakskompleks.aktørId, objectMapper.writeValueAsString(sakskompleks)).asUpdate)
+    fun opprettSak(brukerAktørId: String) =
+            Sakskompleks(
+                    id = UUID.randomUUID(),
+                    aktørId = brukerAktørId
+            ).also { sak ->
+                sak.addObserver(this)
             }
 
-    fun oppdaterSak(sakskompleks: Sakskompleks) =
+    private fun opprettSak(id: UUID, brukerAktørId: String, memento: Sakskompleks.Memento) =
+            using(sessionOf(dataSource)) { session ->
+                session.run(queryOf("INSERT INTO SAKSKOMPLEKS(id, bruker_aktor_id, data) VALUES (?, ?, (to_json(?::json)))",
+                        id.toString(), brukerAktørId, memento.toString()).asUpdate)
+            }
+
+    private fun oppdaterSak(id: UUID, memento: Sakskompleks.Memento) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("UPDATE SAKSKOMPLEKS SET data=(to_json(?::json)) WHERE id=?",
-                        objectMapper.writeValueAsString(sakskompleks), sakskompleks.id.toString()).asUpdate)
+                        memento.toString(), id.toString()).asUpdate)
             }
+
+    override fun stateChange(event: Sakskompleks.Observer.Event) {
+        when (event.previousState) {
+            "StartTilstand" -> {
+                opprettSak(event.id, event.aktørId, event.currentMemento)
+            }
+            else -> oppdaterSak(event.id, event.currentMemento)
+        }
+    }
 }

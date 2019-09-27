@@ -1,7 +1,8 @@
-package no.nav.helse.sykmelding.domain
+package no.nav.helse.unit.sykmelding.domain
 
-import no.nav.helse.sakskompleks.domain.periode
-import no.nav.helse.sakskompleks.domain.sykmelding
+import no.nav.helse.sykmelding.domain.gjelderFra
+import no.nav.helse.unit.sakskompleks.domain.periode
+import no.nav.helse.unit.sakskompleks.domain.sykmelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
