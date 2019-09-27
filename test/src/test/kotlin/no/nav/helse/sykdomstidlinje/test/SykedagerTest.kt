@@ -11,6 +11,7 @@ class SykedagerTest {
     companion object {
         val uke1Mandag = LocalDate.of(2019, 9, 23)
         val uke1Fredag = LocalDate.of(2019, 9, 27)
+        val uke1Søndag = LocalDate.of(2019, 9, 29)
         val uke2Mandag = LocalDate.of(2019, 9, 30)
         val uke2Tirsdag = LocalDate.of(2019, 10, 1)
         val uke2Onsdag = LocalDate.of(2019, 10, 2)
@@ -118,5 +119,26 @@ class SykedagerTest {
         assertEquals(1, grupper.size)
         assertEquals(uke1Mandag, grupper.first().startdato())
         assertEquals(uke2Mandag, grupper.first().sluttdato())
+    }
+
+    @Test
+    fun kutterHelgISluttenAvGruppe() {
+        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
+
+        val grupper = (influensa).grupperPerioderMedMaksAvstand()
+
+        assertEquals(1, grupper.size)
+        assertEquals(uke1Mandag, grupper.first().startdato())
+        assertEquals(uke2Mandag, grupper.first().sluttdato())
+    }
+
+    @Test
+    fun test() {
+        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
+        val spysyka = Sykdomstidslinje.sykedager(uke4Mandag, uke2Fredag, rapporteringsdato)
+
+        val grupper = (influensa + spysyka).grupperPerioderMedMaksAvstand()
+
+
     }
 }

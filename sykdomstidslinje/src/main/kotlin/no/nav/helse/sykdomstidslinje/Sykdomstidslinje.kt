@@ -55,7 +55,8 @@ abstract class Sykdomstidslinje {
     private fun erDelAv(other: Sykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
-    private fun inneholder(other: Sykdomstidslinje) = this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
+    private fun inneholder(other: Sykdomstidslinje) =
+        this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
     private fun harBeggeGrenseneInnenfor(other: Sykdomstidslinje) =
         this.startdato() in other.startdato()..other.sluttdato() && this.sluttdato() in other.startdato()..other.sluttdato()
@@ -79,7 +80,7 @@ abstract class Sykdomstidslinje {
                 if (ikkeSykDagTeller == 0 && dag is Feriedag) {
                     continue
                 }
-                ikkeSykDagTeller ++
+                ikkeSykDagTeller++
                 if (ikkeSykDagTeller == 16) {
                     resultat.add(CompositeSykdomstidslinje(periode))
                     periode = mutableListOf()
@@ -91,6 +92,19 @@ abstract class Sykdomstidslinje {
             resultat.add(CompositeSykdomstidslinje(periode))
         }
         return resultat
+    }
+
+    fun antallSykedagerArbeidsperiode(): Int {
+        val stateMachine = ArbeidsdagStatemaskin()
+        for (dag in flatten()) {
+            when (dag) {
+                is Arbeidsdag -> stateMachine.state.visitArbeidsdag(dag)
+                is Sykedag -> stateMachine.state.visitSykdag(dag)
+                is Helgedag -> stateMachine.state.visitHelgdag(dag)
+                is SykHelgedag -> stateMachine.state.visitSykHelgedag(dag)
+            }
+        }
+        return stateMachine.sykedager
     }
 
     companion object {
@@ -155,4 +169,116 @@ abstract class Sykdomstidslinje {
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
 
     }
+
+    internal interface SykedagerTellerTilstand {
+        fun visitArbeidsdag(dag: Arbeidsdag)
+        fun visitSykdag(dag: Sykedag)
+        fun visitHelgdag(dag: Helgedag)
+        fun visitSykHelgedag(dag: SykHelgedag)
+    }
+
+    internal inner class ArbeidsdagStatemaskin {
+        var state: SykedagerTellerTilstand = Starttilstand()
+        var sykedager = 0
+
+        internal inner class Starttilstand : SykedagerTellerTilstand {
+            override fun visitArbeidsdag(dag: Arbeidsdag) {
+
+            }
+
+            override fun visitSykdag(dag: Sykedag) {
+                state = TellerSykedager()
+                state.visitSykdag(dag)
+            }
+
+            override fun visitHelgdag(dag: Helgedag) {
+                state = TellerHelg()
+                state.visitHelgdag(dag)
+            }
+
+            override fun visitSykHelgedag(dag: SykHelgedag) {
+                state = TellerSykedager()
+                state.visitSykHelgedag(dag)
+            }
+        }
+
+        internal inner class TellerSykedager : SykedagerTellerTilstand {
+            override fun visitArbeidsdag(dag: Arbeidsdag) {
+                state = TellerIkkeSykedager()
+                state.visitArbeidsdag(dag)
+            }
+
+            override fun visitSykdag(dag: Sykedag) {
+                sykedager ++
+            }
+
+            override fun visitHelgdag(dag: Helgedag) {
+                state = TellerHelg()
+                state.visitHelgdag(dag)
+            }
+
+            override fun visitSykHelgedag(dag: SykHelgedag) {
+                sykedager ++
+            }
+        }
+        internal inner class TellerIkkeSykedager(var ikkeSykedager: Int = 0) : SykedagerTellerTilstand {
+            override fun visitArbeidsdag(dag: Arbeidsdag) {
+                ikkeSykedager ++
+            }
+
+            override fun visitSykdag(dag: Sykedag) {
+                state = TellerSykedager()
+                state.visitSykdag(dag)
+            }
+
+            override fun visitHelgdag(dag: Helgedag) {
+                state = TellerHelg()
+                state.visitHelgdag(dag)
+            }
+
+            override fun visitSykHelgedag(dag: SykHelgedag) {
+                state = TellerSykedager()
+                state.visitSykHelgedag(dag)
+            }
+        }
+        internal inner class TellerFerie: SykedagerTellerTilstand {
+            override fun visitArbeidsdag(dag: Arbeidsdag) {
+
+            }
+
+            override fun visitSykdag(dag: Sykedag) {
+
+            }
+
+            override fun visitHelgdag(dag: Helgedag) {
+                state = TellerHelg()
+                state.visitHelgdag(dag)
+            }
+
+            override fun visitSykHelgedag(dag: SykHelgedag) {
+
+            }
+        }
+        internal inner class TellerHelg : SykedagerTellerTilstand {
+            override fun visitArbeidsdag(dag: Arbeidsdag) {
+                state = TellerIkkeSykedager(2)
+                state.visitArbeidsdag(dag)
+            }
+
+            override fun visitSykdag(dag: Sykedag) {
+                sykedager += 2
+                state = TellerSykedager()
+                state.visitSykdag(dag)
+            }
+
+            override fun visitHelgdag(dag: Helgedag) {
+
+            }
+
+            override fun visitSykHelgedag(dag: SykHelgedag) {
+
+            }
+        }
+    }
+
 }
