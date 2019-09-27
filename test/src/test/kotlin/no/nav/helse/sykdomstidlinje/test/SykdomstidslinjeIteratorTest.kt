@@ -3,7 +3,6 @@ package no.nav.helse.sykdomstidlinje.test
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -35,30 +34,28 @@ class SykdomstidslinjeIteratorTest {
     fun sammenhengendeSykdomGirEnArbeidsgiverperiode() {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringsdato)
 
-        val antallSykedager = tidslinje.syketilfeller().first().antallSykedager()
 
+        val tidslinjer = tidslinje.syketilfeller()
+        val antallSykedager = tidslinjer.first().antallSykedager()
+
+        assertEquals(1, tidslinjer.size)
         assertEquals(15, antallSykedager)
     }
 
     @Test
     fun sykdomInnenforEnUkeTellerAntallDager() {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
-
         assertEquals(5, tidslinje.syketilfeller().first().antallSykedager())
     }
 
 
     @Test
     fun testSykdagerOverHelg() {
-
         val sykedager = Sykdomstidslinje.sykedager(
             SykedagerTest.uke1Mandag,
             SykedagerTest.uke2Mandag,
             SykedagerTest.rapporteringsdato
         )
-
-        println(sykedager)
-
         assertEquals(8, sykedager.syketilfeller().first().antallSykedager())
     }
 
@@ -74,6 +71,7 @@ class SykdomstidslinjeIteratorTest {
         val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringsdato)
 
         assertEquals(6, sykedager.syketilfeller().first().antallSykedager())
+        assertEquals(5, sykedager.syketilfeller().first().antallSykeVirkedager())
     }
 
     @Test
@@ -91,14 +89,30 @@ class SykdomstidslinjeIteratorTest {
     }
 
     @Test
+    fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
+        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
+        val ferie = Sykdomstidslinje.ferie(uke2Onsdag, uke2Fredag, rapporteringsdato)
+        val spysyka = Sykdomstidslinje.sykedager(uke4Fredag, uke5Fredag, rapporteringsdato)
+
+        val grupper = (influensa + ferie + spysyka).syketilfeller()
+
+        assertEquals(2, grupper.size)
+        assertEquals(uke1Mandag, grupper[0].startdato())
+        assertEquals(uke2Mandag, grupper[0].sluttdato())
+
+        assertEquals(uke4Fredag, grupper[1].startdato())
+        assertEquals(uke5Fredag, grupper[1].sluttdato())
+    }
+
+    @Test
     fun fjernerLeadingOgTrailingDagerForTidslinjer() {
         val arbeidsdager1 = Sykdomstidslinje.ikkeSykedag(uke1Mandag, rapporteringsdato)
         val sykdom = Sykdomstidslinje.sykedager(uke2Mandag, uke2Fredag, rapporteringsdato)
         val arbeidsdager2 = Sykdomstidslinje.ikkeSykedag(uke3Mandag, rapporteringsdato)
 
-        val trim = (arbeidsdager1 + sykdom + arbeidsdager2).trim()
-        assertEquals(uke2Mandag, trim.startdato())
-        assertEquals(uke2Fredag, trim.sluttdato())
-        assertEquals(5, trim.antallSykedager())
+        val trimmedTimeline = (arbeidsdager1 + sykdom + arbeidsdager2).trim()
+        assertEquals(uke2Mandag, trimmedTimeline.startdato())
+        assertEquals(uke2Fredag, trimmedTimeline.sluttdato())
+        assertEquals(5, trimmedTimeline.antallSykedager())
     }
 }
