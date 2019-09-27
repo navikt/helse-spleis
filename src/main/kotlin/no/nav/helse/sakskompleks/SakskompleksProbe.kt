@@ -3,11 +3,13 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
+import no.nav.helse.sakskompleks.domain.SakskompleksObserver
+import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class SakskompleksProbe: Sakskompleks.Observer {
+class SakskompleksProbe: SakskompleksObserver {
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
@@ -59,7 +61,7 @@ class SakskompleksProbe: Sakskompleks.Observer {
         inntektsmeldingKobletTilSakCounter.inc()
     }
 
-    override fun stateChange(event: Sakskompleks.Observer.Event) {
+    override fun sakskompleksChanged(event: StateChangeEvent) {
         log.info("sakskompleks=${event.id} event=${event.eventName} state=${event.currentState} previousState=${event.previousState}")
 
         /*when (event.eventName) {

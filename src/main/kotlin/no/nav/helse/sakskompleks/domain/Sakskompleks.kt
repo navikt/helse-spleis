@@ -21,7 +21,7 @@ class Sakskompleks internal constructor(private val id: UUID,
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
     private var tilstand: Sakskomplekstilstand = StartTilstand()
 
-    private val observers: MutableList<Observer> = mutableListOf()
+    private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     fun leggTil(søknad: Sykepengesøknad) {
         tilstand.søknadMottatt(søknad)
@@ -191,12 +191,12 @@ class Sakskompleks internal constructor(private val id: UUID,
         }
     }
 
-    internal fun addObserver(observer: Observer) {
+    internal fun addObserver(observer: SakskompleksObserver) {
         observers.add(observer)
     }
 
     private fun notifyObservers(currentState: String, event: Event, previousState: String, previousMemento: Memento) {
-        val event = Observer.Event(
+        val event = SakskompleksObserver.StateChangeEvent(
                 id = id,
                 aktørId = aktørId,
                 currentState = currentState,
@@ -207,7 +207,7 @@ class Sakskompleks internal constructor(private val id: UUID,
         )
 
         observers.forEach { observer ->
-            observer.stateChange(event)
+            observer.sakskompleksChanged(event)
         }
     }
 
@@ -247,19 +247,6 @@ class Sakskompleks internal constructor(private val id: UUID,
 
     class Memento(internal val state: ByteArray) {
         override fun toString() = String(state, Charsets.UTF_8)
-    }
-
-    interface Observer {
-        data class Event(val id: UUID,
-                         val aktørId: String,
-                         val currentState: String,
-                         val previousState: String,
-                         val eventName: String,
-                         val currentMemento: Memento,
-                         val previousMemento: Memento) {
-        }
-
-        fun stateChange(event: Event)
     }
 }
 

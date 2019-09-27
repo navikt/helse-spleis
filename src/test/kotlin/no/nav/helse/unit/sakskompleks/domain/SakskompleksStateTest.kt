@@ -1,18 +1,20 @@
 package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
+import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import no.nav.helse.sykmelding.domain.Sykmelding
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class SakskompleksStateTest : Sakskompleks.Observer {
-    private lateinit var lastEvent: Sakskompleks.Observer.Event
+internal class SakskompleksStateTest : SakskompleksObserver {
+    private lateinit var lastEvent: SakskompleksObserver.StateChangeEvent
 
-    override fun stateChange(event: Sakskompleks.Observer.Event) {
+    override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
         lastEvent = event
     }
 
@@ -30,6 +32,7 @@ internal class SakskompleksStateTest : Sakskompleks.Observer {
 
         assertEquals("StartTilstand", lastEvent.previousState)
         assertEquals("SykmeldingMottattTilstand", lastEvent.currentState)
+        assertEquals(Event.Type.Sykmelding, lastEvent.eventName)
     }
 
     @Test
@@ -40,6 +43,7 @@ internal class SakskompleksStateTest : Sakskompleks.Observer {
 
         assertEquals("StartTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Event.Type.Sykepengesøknad, lastEvent.eventName)
     }
 
     @Test
@@ -50,6 +54,7 @@ internal class SakskompleksStateTest : Sakskompleks.Observer {
 
         assertEquals("StartTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Event.Type.Inntektsmelding, lastEvent.eventName)
     }
 
     @Test

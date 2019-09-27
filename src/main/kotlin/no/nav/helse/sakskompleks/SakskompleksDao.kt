@@ -4,10 +4,12 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.sakskompleks.domain.Sakskompleks
+import no.nav.helse.sakskompleks.domain.SakskompleksObserver
+import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
 import java.util.*
 import javax.sql.DataSource
 
-class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observer {
+class SakskompleksDao(private val dataSource: DataSource) : SakskompleksObserver {
 
     fun finnSaker(brukerAktørId: String) =
             using(sessionOf(dataSource)) { session ->
@@ -38,7 +40,7 @@ class SakskompleksDao(private val dataSource: DataSource) : Sakskompleks.Observe
                         memento.toString(), id.toString()).asUpdate)
             }
 
-    override fun stateChange(event: Sakskompleks.Observer.Event) {
+    override fun sakskompleksChanged(event: StateChangeEvent) {
         when (event.previousState) {
             "StartTilstand" -> {
                 opprettSak(event.id, event.aktørId, event.currentMemento)
