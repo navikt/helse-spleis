@@ -16,7 +16,7 @@ class SakskompleksProbe: SakskompleksObserver {
 
         val sakskompleksTotalsCounterName = "sakskompleks_totals"
         val søknadUtenSakskompleksCounterName = "manglende_sakskompleks_totals"
-        val innteksmeldingKobletTilSakCounterName = "inntektsmelding_koblet_til_sak_totals"
+        val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
         val manglendeSakskompleksForInntektsmeldingCounterName = "manglende_sakskompleks_for_inntektsmelding_totals"
 
         private val sakskompleksCounter = Counter.build(sakskompleksTotalsCounterName, "Antall sakskompleks opprettet")
@@ -25,7 +25,8 @@ class SakskompleksProbe: SakskompleksObserver {
         private val manglendeSakskompleksCounter = Counter.build(søknadUtenSakskompleksCounterName, "Antall søknader vi har mottatt som vi ikke klarer å koble til et sakskompleks")
                 .register()
 
-        private val inntektsmeldingKobletTilSakCounter = Counter.build(innteksmeldingKobletTilSakCounterName, "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
+        private val dokumenterKobletTilSakCounter = Counter.build(dokumenterKobletTilSakCounterName, "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
+                .labelNames("dokumentType")
                 .register()
 
         private val manglendeSakskompleksForInntektsmeldingCounter = Counter.build(manglendeSakskompleksForInntektsmeldingCounterName, "Antall inntektsmeldinger vi har mottatt som vi ikke klarer å koble til et sakskompleks")
@@ -58,25 +59,23 @@ class SakskompleksProbe: SakskompleksObserver {
 
     private fun inntektsmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
         log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en inntektsmelding")
-        inntektsmeldingKobletTilSakCounter.inc()
     }
 
     override fun sakskompleksChanged(event: StateChangeEvent) {
         log.info("sakskompleks=${event.id} event=${event.eventName} state=${event.currentState} previousState=${event.previousState}")
+
+        dokumenterKobletTilSakCounter.labels(event.eventName.name).inc()
 
         when (event.eventName) {
             Event.Type.Inntektsmelding -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
             Event.Type.Sykmelding -> {
-                when (event.previousState) {
-                    "StartTilstand" -> {
-                        opprettetNyttSakskompleks(event.id, event.aktørId)
-                    }
-                    else -> {
-                        sykmeldingKobletTilSakskompleks(event.id)
-                    }
+                if (event.previousState == "StartTilstand") {
+                    opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
+
+                sykmeldingKobletTilSakskompleks(event.id)
             }
             Event.Type.Sykepengesøknad -> {
                 søknadKobletTilSakskompleks(event.id)
