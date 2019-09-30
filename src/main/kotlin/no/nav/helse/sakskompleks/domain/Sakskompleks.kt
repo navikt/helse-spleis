@@ -191,26 +191,6 @@ class Sakskompleks internal constructor(private val id: UUID,
         }
     }
 
-    internal fun addObserver(observer: SakskompleksObserver) {
-        observers.add(observer)
-    }
-
-    private fun notifyObservers(currentState: String, event: Event, previousState: String, previousMemento: Memento) {
-        val event = SakskompleksObserver.StateChangeEvent(
-                id = id,
-                aktørId = aktørId,
-                currentState = currentState,
-                previousState = previousState,
-                eventName = event.name(),
-                currentMemento = memento(),
-                previousMemento = previousMemento
-        )
-
-        observers.forEach { observer ->
-            observer.sakskompleksChanged(event)
-        }
-    }
-
     internal fun memento(): Memento {
         val writer = StringWriter()
         val generator = JsonFactory().createGenerator(writer)
@@ -247,6 +227,27 @@ class Sakskompleks internal constructor(private val id: UUID,
 
     class Memento(internal val state: ByteArray) {
         override fun toString() = String(state, Charsets.UTF_8)
+    }
+
+    // Gang of four Observer pattern
+    internal fun addObserver(observer: SakskompleksObserver) {
+        observers.add(observer)
+    }
+
+    private fun notifyObservers(currentState: String, event: Event, previousState: String, previousMemento: Memento) {
+        val event = SakskompleksObserver.StateChangeEvent(
+            id = id,
+            aktørId = aktørId,
+            currentState = currentState,
+            previousState = previousState,
+            eventName = event.name(),
+            currentMemento = memento(),
+            previousMemento = previousMemento
+        )
+
+        observers.forEach { observer ->
+            observer.sakskompleksChanged(event)
+        }
     }
 }
 
