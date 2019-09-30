@@ -123,7 +123,7 @@ class SykedagerTest {
     fun kutterHelgISluttenAvGruppe() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
 
-        val grupper = (influensa).syketilfeller()
+        val grupper = influensa.syketilfeller()
 
         assertEquals(1, grupper.size)
         assertEquals(uke1Mandag, grupper.first().startdato())

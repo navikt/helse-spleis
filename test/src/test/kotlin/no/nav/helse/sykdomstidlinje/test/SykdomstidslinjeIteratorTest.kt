@@ -101,16 +101,4 @@ class SykdomstidslinjeIteratorTest {
         assertEquals(uke4Fredag, grupper[1].startdato())
         assertEquals(uke5Fredag, grupper[1].sluttdato())
     }
-
-    @Test
-    fun fjernerLeadingOgTrailingDagerForTidslinjer() {
-        val arbeidsdager1 = Sykdomstidslinje.ikkeSykedag(uke1Mandag, rapporteringshendelse)
-        val sykdom = Sykdomstidslinje.sykedager(uke2Mandag, uke2Fredag, rapporteringshendelse)
-        val arbeidsdager2 = Sykdomstidslinje.ikkeSykedag(uke3Mandag, rapporteringshendelse)
-
-        val trimmedTimeline = (arbeidsdager1 + sykdom + arbeidsdager2).trim()
-        assertEquals(uke2Mandag, trimmedTimeline.startdato())
-        assertEquals(uke2Fredag, trimmedTimeline.sluttdato())
-        assertEquals(5, trimmedTimeline.antallSykedagerUtenHelg())
-    }
 }
