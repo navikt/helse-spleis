@@ -5,7 +5,7 @@ import java.time.LocalDate
 internal class CompositeSykdomstidslinje(
     sykdomstidslinjer: List<Sykdomstidslinje?>
 ) : Sykdomstidslinje() {
-    override fun sisteHendelse() = tidslinjer.map { it.sisteHendelse() }.maxBy { it.rappertertDato() }!!
+    override fun sisteHendelse() = tidslinjer.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
 
     private val tidslinjer = sykdomstidslinjer.filterNotNull()
 

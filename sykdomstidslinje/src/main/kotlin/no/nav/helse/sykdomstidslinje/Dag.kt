@@ -14,7 +14,7 @@ abstract class Dag internal constructor(internal val dagen: LocalDate, internal 
 
     override fun compareTo(other: Dag): Int {
         val resultat = this.prioritet.compareTo(other.prioritet)
-        return if (resultat == 0) this.hendelse.rappertertDato().compareTo(other.hendelse.rappertertDato()) else resultat
+        return if (resultat == 0) this.hendelse.rapportertdato().compareTo(other.hendelse.rapportertdato()) else resultat
     }
 
     open fun tilDag() = this
