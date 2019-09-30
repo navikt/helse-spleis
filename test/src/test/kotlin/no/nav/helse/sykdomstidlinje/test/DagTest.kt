@@ -18,7 +18,7 @@ internal class DagTest {
 
         assertEquals(dagSykedagenDekker, sykedag.startdato())
         assertEquals(dagSykedagenDekker, sykedag.sluttdato())
-        assertEquals(1, sykedag.antallSykedager())
+        assertEquals(1, sykedag.antallSykedagerUtenHelg())
     }
 
     @Test
@@ -28,7 +28,7 @@ internal class DagTest {
 
         assertEquals(dagFeriedagenDekker, feriedag.startdato())
         assertEquals(dagFeriedagenDekker, feriedag.sluttdato())
-        assertEquals(0, feriedag.antallSykedager())
+        assertEquals(0, feriedag.antallSykedagerUtenHelg())
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class DagTest {
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
         assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
-        assertEquals(0, arbeidsdag.antallSykedager())
+        assertEquals(0, arbeidsdag.antallSykedagerUtenHelg())
     }
 
     @Test
@@ -48,6 +48,6 @@ internal class DagTest {
 
         assertEquals(helgedagenGjelder, helgedag.startdato())
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
-        assertEquals(0, helgedag.antallSykedager())
+        assertEquals(0, helgedag.antallSykedagerUtenHelg())
     }
 }

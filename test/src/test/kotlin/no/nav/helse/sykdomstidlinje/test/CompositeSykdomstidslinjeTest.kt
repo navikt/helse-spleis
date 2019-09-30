@@ -25,7 +25,7 @@ internal class CompositeSykdomstidslinjeTest {
 
         Assertions.assertEquals(førsteMandag, interval.startdato())
         Assertions.assertEquals(andreMandag, interval.sluttdato())
-        Assertions.assertEquals(6, interval.antallSykedager())
+        Assertions.assertEquals(6, interval.antallSykedagerUtenHelg())
         Assertions.assertEquals(8, interval.flatten().size)
     }
 }

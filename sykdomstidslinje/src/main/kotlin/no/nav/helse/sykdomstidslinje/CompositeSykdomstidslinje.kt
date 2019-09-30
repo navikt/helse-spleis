@@ -2,9 +2,15 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 
-internal class CompositeSykdomstidslinje(
+class CompositeSykdomstidslinje(
     sykdomstidslinjer: List<Sykdomstidslinje?>
 ) : Sykdomstidslinje() {
+    override fun accept(visitor: SykdomstidslinjeVisitor) {
+        visitor.preVisitComposite(this)
+        tidslinjer.forEach { it.accept(visitor) }
+        visitor.postVisitComposite(this)
+    }
+
     override fun sisteHendelse() = tidslinjer.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
 
     private val tidslinjer = sykdomstidslinjer.filterNotNull()
@@ -24,11 +30,11 @@ internal class CompositeSykdomstidslinje(
 
     override fun sluttdato() = tidslinjer.last().sluttdato()
 
-    override fun antallSykeVirkedager() = tidslinjer.flatMap { it.flatten() }
-        .sumBy { it.antallSykeVirkedager() }
+    override fun antallSykedagerMedHelg() = tidslinjer.flatMap { it.flatten() }
+        .sumBy { it.antallSykedagerMedHelg() }
 
-    override fun antallSykedager() = tidslinjer.flatMap { it.flatten() }
-        .sumBy { it.antallSykedager() }
+    override fun antallSykedagerUtenHelg() = tidslinjer.flatMap { it.flatten() }
+        .sumBy { it.antallSykedagerUtenHelg() }
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
 }

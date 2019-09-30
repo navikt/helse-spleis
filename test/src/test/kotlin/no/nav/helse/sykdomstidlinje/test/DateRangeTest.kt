@@ -29,7 +29,7 @@ internal class DateRangeTest {
 
         assertEquals(førsteTirsdag, sykedager.startdato())
         assertEquals(førsteOnsdag, sykedager.sluttdato())
-        assertEquals(2, sykedager.antallSykedager())
+        assertEquals(2, sykedager.antallSykedagerUtenHelg())
     }
 
     @Test
@@ -43,14 +43,14 @@ internal class DateRangeTest {
 
         assertEquals(førsteTirsdag, sykedager.startdato())
         assertEquals(førsteTirsdag, sykedager.sluttdato())
-        assertEquals(1, sykedager.antallSykedager())
+        assertEquals(1, sykedager.antallSykedagerUtenHelg())
     }
 
     @Test
     fun mandagTilMandagIkkeSyk() {
         val interval = Sykdomstidslinje.ikkeSykedager(førsteMandag, andreMandag, tidspunktRapportert)
 
-        assertEquals(0, interval.antallSykedager())
+        assertEquals(0, interval.antallSykedagerUtenHelg())
 
         val dager = interval.flatten()
 
@@ -60,7 +60,7 @@ internal class DateRangeTest {
     @Test
     fun mandagTilMandagSyk() {
         val interval = Sykdomstidslinje.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
-        assertEquals(8, interval.antallSykedager())
+        assertEquals(8, interval.antallSykedagerUtenHelg())
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)
@@ -69,7 +69,7 @@ internal class DateRangeTest {
     @Test
     fun mandagTilMandagVirkedagerSyk() {
         val interval = Sykdomstidslinje.sykedager(førsteMandag, andreMandag, tidspunktRapportert)
-        assertEquals(6, interval.antallSykeVirkedager())
+        assertEquals(6, interval.antallSykedagerMedHelg())
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)

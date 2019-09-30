@@ -11,12 +11,12 @@ import kotlin.streams.toList
 abstract class Sykdomstidslinje {
     abstract fun startdato(): LocalDate
     abstract fun sluttdato(): LocalDate
-    abstract fun antallSykedager(): Int
-    abstract fun antallSykeVirkedager(): Int
+    abstract fun antallSykedagerUtenHelg(): Int
+    abstract fun antallSykedagerMedHelg(): Int
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
+    abstract fun accept(visitor: SykdomstidslinjeVisitor)
     internal abstract fun sisteHendelse(): Sykdomshendelse
-
     internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
@@ -80,8 +80,8 @@ abstract class Sykdomstidslinje {
 
     fun trim(): Sykdomstidslinje {
         val days = flatten()
-            .dropWhile { it.antallSykedager() < 1 }
-            .dropLastWhile { it.antallSykedager() < 1 }
+            .dropWhile { it.antallSykedagerUtenHelg() < 1 }
+            .dropLastWhile { it.antallSykedagerUtenHelg() < 1 }
         return CompositeSykdomstidslinje(days)
     }
 

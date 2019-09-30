@@ -35,7 +35,7 @@ class SykdomstidslinjeIteratorTest {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
-        val antallSykedager = tidslinjer.first().antallSykedager()
+        val antallSykedager = tidslinjer.first().antallSykedagerUtenHelg()
 
         assertEquals(1, tidslinjer.size)
         assertEquals(15, antallSykedager)
@@ -44,7 +44,7 @@ class SykdomstidslinjeIteratorTest {
     @Test
     fun sykdomInnenforEnUkeTellerAntallDager() {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
-        assertEquals(5, tidslinje.syketilfeller().first().antallSykedager())
+        assertEquals(5, tidslinje.syketilfeller().first().antallSykedagerUtenHelg())
     }
 
     @Test
@@ -54,22 +54,22 @@ class SykdomstidslinjeIteratorTest {
             uke2Mandag,
             rapporteringshendelse
         )
-        assertEquals(8, sykedager.syketilfeller().first().antallSykedager())
+        assertEquals(8, sykedager.syketilfeller().first().antallSykedagerUtenHelg())
     }
 
     @Test
     fun sykmeldingMandagTilSøndagFørerTil7Dager() {
         val sykdager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringshendelse)
 
-        assertEquals(7, sykdager.syketilfeller().first().antallSykedager())
+        assertEquals(7, sykdager.syketilfeller().first().antallSykedagerUtenHelg())
     }
 
     @Test
     fun sykmeldingMandagTilLørdagFørerTil6Dager() {
         val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringshendelse)
 
-        assertEquals(6, sykedager.syketilfeller().first().antallSykedager())
-        assertEquals(5, sykedager.syketilfeller().first().antallSykeVirkedager())
+        assertEquals(6, sykedager.syketilfeller().first().antallSykedagerUtenHelg())
+        assertEquals(5, sykedager.syketilfeller().first().antallSykedagerMedHelg())
     }
 
     @Test
@@ -111,6 +111,6 @@ class SykdomstidslinjeIteratorTest {
         val trimmedTimeline = (arbeidsdager1 + sykdom + arbeidsdager2).trim()
         assertEquals(uke2Mandag, trimmedTimeline.startdato())
         assertEquals(uke2Fredag, trimmedTimeline.sluttdato())
-        assertEquals(5, trimmedTimeline.antallSykedager())
+        assertEquals(5, trimmedTimeline.antallSykedagerUtenHelg())
     }
 }
