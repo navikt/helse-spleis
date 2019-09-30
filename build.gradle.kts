@@ -44,6 +44,8 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
+    implementation("no.nav.helse:sykdomstidslinje:1.27e663a")
+
     testCompile("io.ktor:ktor-client-cio:$ktorVersion")
     testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
 
@@ -58,10 +60,20 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     mavenCentral()
     maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/helse-sykdomstidslinje")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 java {
