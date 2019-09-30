@@ -31,11 +31,7 @@ class SykedagerTest {
 
     @Test
     fun testSykdagerOverHelg() {
-
         val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-
-        println(sykedager)
-
         assertEquals(8, sykedager.antallSykedager())
     }
 

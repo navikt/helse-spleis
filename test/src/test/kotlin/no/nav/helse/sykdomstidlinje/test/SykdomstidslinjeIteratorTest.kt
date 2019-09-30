@@ -34,7 +34,6 @@ class SykdomstidslinjeIteratorTest {
     fun sammenhengendeSykdomGirEnArbeidsgiverperiode() {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringsdato)
 
-
         val tidslinjer = tidslinje.syketilfeller()
         val antallSykedager = tidslinjer.first().antallSykedager()
 
@@ -47,7 +46,6 @@ class SykdomstidslinjeIteratorTest {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
         assertEquals(5, tidslinje.syketilfeller().first().antallSykedager())
     }
-
 
     @Test
     fun testSykdagerOverHelg() {
