@@ -222,11 +222,11 @@ class Sakskompleks internal constructor(private val id: UUID,
 
         generator.flush()
 
-        return Memento(state = writer.toString().toByteArray(Charsets.UTF_8))
+        return Memento(state = writer.toString())
     }
 
-    class Memento(internal val state: ByteArray) {
-        override fun toString() = String(state, Charsets.UTF_8)
+    class Memento(internal val state: String) {
+        override fun toString() = state
     }
 
     // Gang of four Observer pattern

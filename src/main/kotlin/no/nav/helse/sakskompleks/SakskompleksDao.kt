@@ -14,7 +14,7 @@ class SakskompleksDao(private val dataSource: DataSource) : SakskompleksObserver
     fun finnSaker(brukerAktørId: String) =
             using(sessionOf(dataSource)) { session ->
                 session.run(queryOf("SELECT data FROM SAKSKOMPLEKS WHERE bruker_aktor_id = ?", brukerAktørId).map { row ->
-                    Sakskompleks.restore(Sakskompleks.Memento(row.bytes("data"))).also { sakskompleks ->
+                    Sakskompleks.restore(Sakskompleks.Memento(row.string("data"))).also { sakskompleks ->
                         sakskompleks.addObserver(this)
                     }
                 }.asList)
