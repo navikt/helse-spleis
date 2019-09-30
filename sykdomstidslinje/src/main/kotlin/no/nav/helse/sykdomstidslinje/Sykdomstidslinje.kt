@@ -74,7 +74,7 @@ abstract class Sykdomstidslinje {
 
     fun syketilfeller(): List<Sykdomstidslinje> {
         val stateMachine = ArbeidsdagStatemaskin(flatten())
-
+        stateMachine.process()
         return stateMachine.getSyketilfeller()
     }
 
@@ -156,13 +156,13 @@ abstract class Sykdomstidslinje {
         fun visitFerie(dag: Feriedag) {}
     }
 
-    internal class ArbeidsdagStatemaskin(dager: List<Dag>) {
+    internal class ArbeidsdagStatemaskin(private val dager: List<Dag>) {
         var state: SykedagerTellerTilstand = Starttilstand()
         var ikkeSykedager = 0
         private var syketilfelle = mutableListOf<Dag>()
         private val syketilfeller = mutableListOf<Sykdomstidslinje>()
 
-        init {
+        fun process() {
             for (dag in dager) {
                 nesteDag(dag)
             }
