@@ -1,13 +1,13 @@
+import no.nav.helse.sykdomstidlinje.test.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class CompositeSykdomstidslinjeTest {
 
     companion object {
-        private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
+        private val tidspunktRapportert = Testhendelse()
 
         private val førsteMandag = LocalDate.of(2019,9,23)
         private val førsteTirsdag = LocalDate.of(2019,9,24)

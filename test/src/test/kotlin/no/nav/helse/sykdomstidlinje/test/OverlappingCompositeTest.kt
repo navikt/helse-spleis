@@ -9,8 +9,8 @@ import java.time.LocalDateTime
 internal class OverlappingCompositeTest {
 
     companion object {
-        private val tidligereTidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        private val senereTidspunktRapportert = LocalDateTime.of(2019,9,17, 10, 45)
+        private val tidligereTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,16, 10, 45))
+        private val senereTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,17, 10, 45))
 
         private val førsteMandag = LocalDate.of(2019,9,23)
         private val førsteTirsdag = LocalDate.of(2019,9,24)

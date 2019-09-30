@@ -9,24 +9,24 @@ import java.time.LocalDateTime
 class SykedagerTest {
 
     companion object {
-        val uke1Mandag = LocalDate.of(2019, 9, 23)
-        val uke1Fredag = LocalDate.of(2019, 9, 27)
-        val uke1Søndag = LocalDate.of(2019, 9, 29)
-        val uke2Mandag = LocalDate.of(2019, 9, 30)
-        val uke2Tirsdag = LocalDate.of(2019, 10, 1)
-        val uke2Onsdag = LocalDate.of(2019, 10, 2)
-        val uke2Fredag = LocalDate.of(2019, 10, 4)
-        val uke3Mandag = LocalDate.of(2019, 10, 7)
-        val uke3Fredag = LocalDate.of(2019, 10, 11)
-        val uke4Mandag = LocalDate.of(2019, 10, 14)
-        val uke4Onsdag = LocalDate.of(2019, 10, 16)
-        val uke4Fredag = LocalDate.of(2019, 10, 18)
-        val uke5Mandag = LocalDate.of(2019, 10, 21)
-        val uke5Fredag = LocalDate.of(2019, 10, 25)
-        val uke6Fredag = LocalDate.of(2019, 11, 4)
-        val uke7Fredag = LocalDate.of(2019, 11, 11)
+        private val uke1Mandag = LocalDate.of(2019, 9, 23)
+        private val uke1Fredag = LocalDate.of(2019, 9, 27)
+        private val uke1Søndag = LocalDate.of(2019, 9, 29)
+        private val uke2Mandag = LocalDate.of(2019, 9, 30)
+        private val uke2Tirsdag = LocalDate.of(2019, 10, 1)
+        private val uke2Onsdag = LocalDate.of(2019, 10, 2)
+        private val uke2Fredag = LocalDate.of(2019, 10, 4)
+        private val uke3Mandag = LocalDate.of(2019, 10, 7)
+        private val uke3Fredag = LocalDate.of(2019, 10, 11)
+        private val uke4Mandag = LocalDate.of(2019, 10, 14)
+        private val uke4Onsdag = LocalDate.of(2019, 10, 16)
+        private val uke4Fredag = LocalDate.of(2019, 10, 18)
+        private val uke5Mandag = LocalDate.of(2019, 10, 21)
+        private val uke5Fredag = LocalDate.of(2019, 10, 25)
+        private val uke6Fredag = LocalDate.of(2019, 11, 4)
+        private val uke7Fredag = LocalDate.of(2019, 11, 11)
 
-        val rapporteringsdato = LocalDateTime.of(2019, 10, 14, 20, 0)
+        private val rapporteringsdato = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
     }
 
     @Test

@@ -4,12 +4,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class GapDaysTest {
 
     companion object {
-        private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
+        private val tidspunktRapportert = Testhendelse()
 
         private val mandag = LocalDate.of(2019,9,23)
         private val tirsdag = LocalDate.of(2019,9,24)

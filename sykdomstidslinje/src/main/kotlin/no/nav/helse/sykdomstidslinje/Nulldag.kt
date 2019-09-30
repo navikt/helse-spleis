@@ -1,15 +1,13 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 
-internal class Nulldag internal constructor(gjelder: LocalDate, rapportert: LocalDateTime): Dag(gjelder, rapportert, 0){
-
+internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse, 0){
     override fun antallSykedager() = 0
 
     override fun antallSykeVirkedager(): Int = 0
 
-    override fun tilDag() = ikkeSykedag(dagen, rapportertDato)
+    override fun tilDag() = ikkeSykedag(dagen, hendelse)
 
     override fun toString() = formatter.format(dagen) + "\tNulldag"
 }

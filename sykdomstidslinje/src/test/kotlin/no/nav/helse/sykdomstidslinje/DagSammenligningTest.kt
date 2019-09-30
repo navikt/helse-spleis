@@ -8,8 +8,8 @@ import java.time.LocalDateTime
 class DagSammenligningTest {
 
     companion object {
-        private val tidligsteTidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
-        private val senereTidspunktRapportert = LocalDateTime.of(2019,9,17, 11, 58)
+        private val tidligsteTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,16, 10, 45))
+        private val senereTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,17, 11, 58))
 
         private val førsteMandag = LocalDate.of(2019,9,23)
     }

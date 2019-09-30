@@ -9,30 +9,30 @@ import java.time.LocalDateTime
 class SykdomstidslinjeIteratorTest {
 
     companion object {
-        val uke1Mandag = LocalDate.of(2019, 9, 23)
-        val uke1Fredag = LocalDate.of(2019, 9, 27)
-        val uke1Lørdag = LocalDate.of(2019, 9, 28)
-        val uke1Søndag = LocalDate.of(2019, 9, 29)
-        val uke2Mandag = LocalDate.of(2019, 9, 30)
-        val uke2Tirsdag = LocalDate.of(2019, 10, 1)
-        val uke2Onsdag = LocalDate.of(2019, 10, 2)
-        val uke2Fredag = LocalDate.of(2019, 10, 4)
-        val uke3Mandag = LocalDate.of(2019, 10, 7)
-        val uke3Fredag = LocalDate.of(2019, 10, 11)
-        val uke4Mandag = LocalDate.of(2019, 10, 14)
-        val uke4Onsdag = LocalDate.of(2019, 10, 16)
-        val uke4Fredag = LocalDate.of(2019, 10, 18)
-        val uke5Mandag = LocalDate.of(2019, 10, 21)
-        val uke5Fredag = LocalDate.of(2019, 10, 25)
-        val uke6Fredag = LocalDate.of(2019, 11, 1)
-        val uke7Fredag = LocalDate.of(2019, 11, 8)
+        private val uke1Mandag = LocalDate.of(2019, 9, 23)
+        private val uke1Fredag = LocalDate.of(2019, 9, 27)
+        private val uke1Lørdag = LocalDate.of(2019, 9, 28)
+        private val uke1Søndag = LocalDate.of(2019, 9, 29)
+        private val uke2Mandag = LocalDate.of(2019, 9, 30)
+        private val uke2Tirsdag = LocalDate.of(2019, 10, 1)
+        private val uke2Onsdag = LocalDate.of(2019, 10, 2)
+        private val uke2Fredag = LocalDate.of(2019, 10, 4)
+        private val uke3Mandag = LocalDate.of(2019, 10, 7)
+        private val uke3Fredag = LocalDate.of(2019, 10, 11)
+        private val uke4Mandag = LocalDate.of(2019, 10, 14)
+        private val uke4Onsdag = LocalDate.of(2019, 10, 16)
+        private val uke4Fredag = LocalDate.of(2019, 10, 18)
+        private val uke5Mandag = LocalDate.of(2019, 10, 21)
+        private val uke5Fredag = LocalDate.of(2019, 10, 25)
+        private val uke6Fredag = LocalDate.of(2019, 11, 1)
+        private val uke7Fredag = LocalDate.of(2019, 11, 8)
 
-        val rapporteringsdato = LocalDateTime.of(2019, 10, 14, 20, 0)
+        private val rapporteringshendelse = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
     }
 
     @Test
     fun sammenhengendeSykdomGirEnArbeidsgiverperiode() {
-        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringsdato)
+        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
         val antallSykedager = tidslinjer.first().antallSykedager()
@@ -43,30 +43,30 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun sykdomInnenforEnUkeTellerAntallDager() {
-        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
+        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
         assertEquals(5, tidslinje.syketilfeller().first().antallSykedager())
     }
 
     @Test
     fun testSykdagerOverHelg() {
         val sykedager = Sykdomstidslinje.sykedager(
-            SykedagerTest.uke1Mandag,
-            SykedagerTest.uke2Mandag,
-            SykedagerTest.rapporteringsdato
+            uke1Mandag,
+            uke2Mandag,
+            rapporteringshendelse
         )
         assertEquals(8, sykedager.syketilfeller().first().antallSykedager())
     }
 
     @Test
     fun sykmeldingMandagTilSøndagFørerTil7Dager() {
-        val sykdager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
+        val sykdager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringshendelse)
 
         assertEquals(7, sykdager.syketilfeller().first().antallSykedager())
     }
 
     @Test
     fun sykmeldingMandagTilLørdagFørerTil6Dager() {
-        val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringsdato)
+        val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringshendelse)
 
         assertEquals(6, sykedager.syketilfeller().first().antallSykedager())
         assertEquals(5, sykedager.syketilfeller().first().antallSykeVirkedager())
@@ -74,8 +74,8 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun toSykmeldingerMedGapStørreEnn16DagerGirToArbeidsgiverPerioder() {
-        val spysyke = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
-        val malaria = Sykdomstidslinje.sykedager(uke5Mandag, uke7Fredag, rapporteringsdato)
+        val spysyke = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
+        val malaria = Sykdomstidslinje.sykedager(uke5Mandag, uke7Fredag, rapporteringshendelse)
 
         val syketilfeller = (spysyke + malaria).syketilfeller()
         assertEquals(2, syketilfeller.size)
@@ -88,9 +88,9 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        val ferie = Sykdomstidslinje.ferie(uke2Onsdag, uke2Fredag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke4Fredag, uke5Fredag, rapporteringsdato)
+        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringshendelse)
+        val ferie = Sykdomstidslinje.ferie(uke2Onsdag, uke2Fredag, rapporteringshendelse)
+        val spysyka = Sykdomstidslinje.sykedager(uke4Fredag, uke5Fredag, rapporteringshendelse)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
@@ -104,9 +104,9 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun fjernerLeadingOgTrailingDagerForTidslinjer() {
-        val arbeidsdager1 = Sykdomstidslinje.ikkeSykedag(uke1Mandag, rapporteringsdato)
-        val sykdom = Sykdomstidslinje.sykedager(uke2Mandag, uke2Fredag, rapporteringsdato)
-        val arbeidsdager2 = Sykdomstidslinje.ikkeSykedag(uke3Mandag, rapporteringsdato)
+        val arbeidsdager1 = Sykdomstidslinje.ikkeSykedag(uke1Mandag, rapporteringshendelse)
+        val sykdom = Sykdomstidslinje.sykedager(uke2Mandag, uke2Fredag, rapporteringshendelse)
+        val arbeidsdager2 = Sykdomstidslinje.ikkeSykedag(uke3Mandag, rapporteringshendelse)
 
         val trimmedTimeline = (arbeidsdager1 + sykdom + arbeidsdager2).trim()
         assertEquals(uke2Mandag, trimmedTimeline.startdato())

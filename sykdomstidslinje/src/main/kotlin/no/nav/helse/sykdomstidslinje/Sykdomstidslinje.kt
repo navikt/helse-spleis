@@ -2,14 +2,11 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.streams.toList
-
-const val ARBEIDSGIVER_PERIODE: Int = 16
 
 abstract class Sykdomstidslinje {
     abstract fun startdato(): LocalDate
@@ -18,14 +15,14 @@ abstract class Sykdomstidslinje {
     abstract fun antallSykeVirkedager(): Int
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
+    internal abstract fun sisteHendelse(): Sykdomshendelse
 
-    internal abstract fun dag(dato: LocalDate): Dag
-    internal abstract fun rapportertDato(): LocalDateTime
+    internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.startdato().isAfter(other.startdato())) return other + this
 
-        val datesUntil = førsteStartdato(other).datesUntil(sisteSluttdato(other).plusDays(1)).toList()
+        val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
         val intervalEtterKonflikter =
             datesUntil.map { this.beste(other, it) }.toList()
 
@@ -39,7 +36,7 @@ abstract class Sykdomstidslinje {
             else -> min(this.avstand(other), other.avstand(this))
         }
 
-    private fun beste(other: Sykdomstidslinje, dato: LocalDate) = listOf(this.dag(dato), other.dag(dato)).max()!!
+    private fun beste(other: Sykdomstidslinje, dato: LocalDate) = listOf(this.dag(dato, this.sisteHendelse()), other.dag(dato, other.sisteHendelse())).max()!!
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -81,59 +78,59 @@ abstract class Sykdomstidslinje {
     }
 
     companion object {
-        fun sykedager(gjelder: LocalDate, rapportert: LocalDateTime) =
+        fun sykedager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
-                rapportert
+                hendelse
             ) else SykHelgedag(
                 gjelder,
-                rapportert
+                hendelse
             )
 
-        fun ferie(gjelder: LocalDate, rapportert: LocalDateTime) =
+        fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Feriedag(
                 gjelder,
-                rapportert
+                hendelse
             ) else Helgedag(
                 gjelder,
-                rapportert
+                hendelse
             )
 
-        fun ikkeSykedag(gjelder: LocalDate, rapportert: LocalDateTime) =
+        fun ikkeSykedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Arbeidsdag(
                 gjelder,
-                rapportert
+                hendelse
             ) else Helgedag(
                 gjelder,
-                rapportert
+                hendelse
             )
 
-        fun sykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Sykdomstidslinje {
+        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedager(
                     it,
-                    rapportert
+                    hendelse
                 )
             }.toList())
         }
 
-        fun ferie(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Sykdomstidslinje {
+        fun ferie(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ferie(
                     it,
-                    rapportert
+                    hendelse
                 )
             }.toList())
         }
 
-        fun ikkeSykedager(fra: LocalDate, til: LocalDate, rapportert: LocalDateTime): Sykdomstidslinje {
+        fun ikkeSykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ikkeSykedag(
                     it,
-                    rapportert
+                    hendelse
                 )
             }.toList())
         }

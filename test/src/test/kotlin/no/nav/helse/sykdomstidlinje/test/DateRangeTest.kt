@@ -6,12 +6,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class DateRangeTest {
 
     companion object {
-        private val tidspunktRapportert = LocalDateTime.of(2019,9,16, 10, 45)
+        private val tidspunktRapportert = Testhendelse()
 
         private val førsteMandag = LocalDate.of(2019,9,23)
         private val førsteTirsdag = LocalDate.of(2019,9,24)
