@@ -16,7 +16,6 @@ import no.nav.helse.Event
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykmelding.domain.Fraværstype
 import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,7 +32,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
     val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Periode(it) } ?: emptyList()
-    val fraværsperioder get() = jsonNode["fravar"]?.map { Periode(it) } ?: emptyList()
+    val fraværsperioder get() = jsonNode["fravar"]?.map { FraværsPeriode(it) } ?: emptyList()
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
@@ -48,6 +47,20 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     val sykdomstidslinje get(): Sykdomstidslinje = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
+}
+
+data class FraværsPeriode(val jsonNode: JsonNode) {
+    val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+    val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+    val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
+}
+
+enum class Fraværstype {
+    FERIE,
+    PERMISJON,
+    UTLANDSOPPHOLD,
+    UTDANNING_FULLTID,
+    UTDANNING_DELTID
 }
 
 class SykepengesøknadSerializer : StdSerializer<Sykepengesøknad>(Sykepengesøknad::class.java) {
