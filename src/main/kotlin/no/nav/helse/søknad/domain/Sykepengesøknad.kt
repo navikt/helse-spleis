@@ -13,8 +13,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
+import no.nav.helse.person.domain.Sykdomshendelse
 import no.nav.helse.serde.safelyUnwrapDate
-import no.nav.helse.sykdomstidslinje.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.KildeHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
@@ -22,7 +23,7 @@ import java.time.LocalDateTime
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
+data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse, KildeHendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -36,8 +37,9 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
+    override fun organisasjonsnummer(): String = jsonNode["arbeidsgiver"].get("orgnummer").asText()
     override fun rapportertdato(): LocalDateTime = opprettet
-    override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
+    override fun compareTo(other: KildeHendelse): Int = opprettet.compareTo(other.rapportertdato())
 
     private val sykeperiodeTidslinje get(): Sykdomstidslinje = sykeperioder.map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
