@@ -19,28 +19,28 @@ class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`(){
-        val sykdomstidslinje = søknad.sykdomstidslinje
+        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
 
-        assertEquals(Sykedag::class, sykdomstidslinje.syketilfeller().dagForDato(sykeperiodFOM)::class)
-        assertEquals(SykHelgedag::class, sykdomstidslinje.syketilfeller().dagForDato(sykeperiodeTOM)::class)
-        assertEquals(sykeperiodeTOM, sykdomstidslinje.syketilfeller().last().sluttdato())
+        assertEquals(Sykedag::class, syketilfeller.dagForDato(sykeperiodFOM)::class)
+        assertEquals(SykHelgedag::class, syketilfeller.dagForDato(sykeperiodeTOM)::class)
+        assertEquals(sykeperiodeTOM, syketilfeller.last().sluttdato())
     }
 
     @Test
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`(){
-        val sykdomstidslinje = søknad.sykdomstidslinje
+        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
 
-        assertEquals(egenmeldingFom, sykdomstidslinje.syketilfeller().first().startdato())
-        assertEquals(Sykedag::class, sykdomstidslinje.syketilfeller().dagForDato(egenmeldingFom)::class)
-        assertEquals(SykHelgedag::class, sykdomstidslinje.syketilfeller().dagForDato(egenmeldingTom)::class)
+        assertEquals(egenmeldingFom, syketilfeller.first().startdato())
+        assertEquals(Sykedag::class, syketilfeller.dagForDato(egenmeldingFom)::class)
+        assertEquals(SykHelgedag::class, syketilfeller.dagForDato(egenmeldingTom)::class)
     }
 
     @Test
     fun `Tidslinjen får ferien fra søknaden`(){
-        val sykdomstidslinje = søknad.sykdomstidslinje
+        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
 
-        assertEquals(Feriedag::class, sykdomstidslinje.syketilfeller().dagForDato(ferieFom)::class)
-        assertEquals(Feriedag::class, sykdomstidslinje.syketilfeller().dagForDato(ferieTom)::class)
+        assertEquals(Feriedag::class, syketilfeller.dagForDato(ferieFom)::class)
+        assertEquals(Feriedag::class, syketilfeller.dagForDato(ferieTom)::class)
     }
 
     fun List<Sykdomstidslinje>.dagForDato(localDate: LocalDate) =

@@ -48,7 +48,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse, Kil
     private val ferieTidslinje get(): Sykdomstidslinje = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
-    val sykdomstidslinje get(): Sykdomstidslinje = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
+    override fun sykdomstidslinje() = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
 }
 
 data class FraværsPeriode(val jsonNode: JsonNode) {
