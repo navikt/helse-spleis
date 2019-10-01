@@ -1,12 +1,13 @@
 package no.nav.helse.person.domain
 
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.søknad.domain.Sykepengesøknad
 
 class Person {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
 
     fun add(søknad: Sykepengesøknad) {
-        val arbeidsgiver = findOrCreateArbeidsgiver()
+        val arbeidsgiver = findOrCreateArbeidsgiver(søknad)
     }
 
     private fun findOrCreateArbeidsgiver(søknad: Sykepengesøknad): Arbeidsgiver {
@@ -22,4 +23,6 @@ class Person {
 
 interface Sykdomshendelse {
     fun organisasjonsnummer(): String
+
+    fun sykdomstidslinje(): Sykdomstidslinje
 }
