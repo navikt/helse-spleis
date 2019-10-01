@@ -37,21 +37,13 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v1
-    - name: deploy to preprod
+    - name: deploy to dev
+      uses: navikt/deployment-cli/action@0.4.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NAV_CLUSTER: dev-fss
-        NAISERATOR_FILE: deploy/preprod.json
-        ALERTS_FILE: deploy/alerts-preprod.json
-      run: |
-        NAISERATOR=$(jq '.spec.image = "'$(cat .docker_image)':'$(cat .docker_tag)'"' -c $NAISERATOR_FILE )
-        ALERTS=$(jq '' -c $ALERTS_FILE)
-        DEPLOY_PAYLOAD=$(jq ".payload.kubernetes.resources += [$NAISERATOR, $ALERTS]" deploy/deployreq.json)
-        DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.environment = "'$NAV_CLUSTER'"')
-        DEPLOY_PAYLOAD=$(echo $DEPLOY_PAYLOAD | jq '.ref = "'$(cat .docker_tag)'"')
-        curl -i -n --fail \
-           -X POST \
-           -u x-access-token:$GITHUB_TOKEN \
-           -d "$DEPLOY_PAYLOAD" \
-           -H "Accept: application/vnd.github.ant-man-preview+json" \
-           https://api.github.com/repos/$GITHUB_REPOSITORY/deployments
+        AWAIT_SECONDS: 0
+      with:
+        cluster: dev-fss
+        team: tbd
+        resources: deploy/preprod.yaml
+        rawresources: deploy/alerts-preprod.yaml
