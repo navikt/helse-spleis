@@ -14,8 +14,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.serde.safelyUnwrapDate
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
@@ -26,9 +28,14 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event {
     val aktørId = jsonNode["aktorId"].asText()!!
     val fom get() = jsonNode["fom"].asText().let { LocalDate.parse(it) }
     val tom get() = jsonNode["tom"].asText().let { LocalDate.parse(it) }
+    val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
+    val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Periode(it) } ?: emptyList()
+    val fraværsperioder get() = jsonNode["fravar"]?.map { Periode(it) } ?: emptyList()
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
+
+    val sykdomsTidslinje get(): Sykdomstidslinje = sykeperioder.map { Sykdomstidslinje.sykedager(it.fom, it.tom, opprettet) }.reduce { resultat, tidslinje -> resultat + tidslinje }
 }
 
 class SykepengesøknadSerializer : StdSerializer<Sykepengesøknad>(Sykepengesøknad::class.java) {

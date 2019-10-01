@@ -46,8 +46,10 @@ dependencies {
 
     implementation("no.nav.helse:sykdomstidslinje:1.27e663a")
 
-    testCompile("io.ktor:ktor-client-cio:$ktorVersion")
-    testCompile("com.opentable.components:otj-pg-embedded:0.13.1")
+    testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
+
+    testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
+    testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testImplementation("org.awaitility:awaitility:3.1.6")
     testImplementation("no.nav:kafka-embedded-env:2.2.3")
