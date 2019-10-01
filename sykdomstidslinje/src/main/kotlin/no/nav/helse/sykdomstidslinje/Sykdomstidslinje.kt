@@ -16,8 +16,8 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
-    internal abstract fun sisteHendelse(): Sykdomshendelse
-    internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
+    internal abstract fun sisteHendelse(): KildeHendelse
+    internal abstract fun dag(dato: LocalDate, hendelse: KildeHendelse): Dag
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.startdato().isAfter(other.startdato())) return other + this
@@ -87,7 +87,7 @@ abstract class Sykdomstidslinje {
     }
 
     companion object {
-        fun sykedager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun sykedager(gjelder: LocalDate, hendelse: KildeHendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
                 hendelse
@@ -96,7 +96,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun ferie(gjelder: LocalDate, hendelse: KildeHendelse) =
             if (erArbeidsdag(gjelder)) Feriedag(
                 gjelder,
                 hendelse
@@ -105,7 +105,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun ikkeSykedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun ikkeSykedag(gjelder: LocalDate, hendelse: KildeHendelse) =
             if (erArbeidsdag(gjelder)) Arbeidsdag(
                 gjelder,
                 hendelse
@@ -114,7 +114,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: KildeHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedager(
@@ -124,7 +124,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun ferie(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun ferie(fra: LocalDate, til: LocalDate, hendelse: KildeHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ferie(
@@ -134,7 +134,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun ikkeSykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun ikkeSykedager(fra: LocalDate, til: LocalDate, hendelse: KildeHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ikkeSykedag(

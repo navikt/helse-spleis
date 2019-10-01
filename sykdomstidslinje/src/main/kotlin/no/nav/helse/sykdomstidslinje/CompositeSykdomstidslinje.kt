@@ -17,7 +17,7 @@ class CompositeSykdomstidslinje(
 
     override fun length() = tidslinjer.sumBy { it.length() }
 
-    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) =
+    override fun dag(dato: LocalDate, hendelse: KildeHendelse) =
         tidslinjer.map { it.dag(dato, hendelse) }.firstOrNull { it !is Nulldag } ?: Nulldag(
             dato,
             hendelse

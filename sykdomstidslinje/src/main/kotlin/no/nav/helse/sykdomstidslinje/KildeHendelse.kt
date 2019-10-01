@@ -2,6 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDateTime
 
-interface Sykdomshendelse : Comparable<Sykdomshendelse>{
+interface KildeHendelse : Comparable<KildeHendelse>{
     fun rapportertdato(): LocalDateTime
 }
