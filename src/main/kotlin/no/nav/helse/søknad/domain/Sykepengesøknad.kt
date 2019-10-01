@@ -14,14 +14,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.serde.safelyUnwrapDate
+import no.nav.helse.sykdomstidslinje.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykmelding.domain.Fraværstype
 import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-data class Sykepengesøknad(val jsonNode: JsonNode): Event {
+data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -35,7 +37,17 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event {
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
-    val sykdomsTidslinje get(): Sykdomstidslinje = sykeperioder.map { Sykdomstidslinje.sykedager(it.fom, it.tom, opprettet) }.reduce { resultat, tidslinje -> resultat + tidslinje }
+    override fun rapportertdato(): LocalDateTime = opprettet
+    override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
+
+    private val sykeperiodeTidslinje get(): Sykdomstidslinje = sykeperioder.map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+    private val egenmeldingsTidslinje get(): Sykdomstidslinje = egenmeldinger.map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+    private val ferieTidslinje get(): Sykdomstidslinje = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+
+    val sykdomstidslinje get(): Sykdomstidslinje = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
 }
 
 class SykepengesøknadSerializer : StdSerializer<Sykepengesøknad>(Sykepengesøknad::class.java) {

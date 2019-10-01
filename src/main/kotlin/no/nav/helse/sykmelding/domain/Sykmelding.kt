@@ -57,5 +57,13 @@ fun Sykmelding.gjelderTil(): LocalDate = this.perioder.maxBy { it.tom }?.tom ?: 
 data class Periode(val jsonNode: JsonNode) {
     val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
     val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+    val type: Fraværstype? = jsonNode["type"]?.textValue()?.let { enumValueOf<Fraværstype>(it) }
 }
 
+enum class Fraværstype {
+    FERIE,
+    PERMISJON,
+    UTLANDSOPPHOLD,
+    UTDANNING_FULLTID,
+    UTDANNING_DELTID
+}
