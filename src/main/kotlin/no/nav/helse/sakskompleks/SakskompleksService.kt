@@ -18,7 +18,9 @@ class SakskompleksService(private val behovProducer: BehovProducer,
             (finnSak(sykepengesøknad) ?: sakskompleksDao.opprettSak(sykepengesøknad.aktørId))
                     .also { sakskompleks ->
                         sakskompleks.addObserver(sakskompleksProbe)
-                        behovProducer.nyttBehov("sykepengeperioder")
+                        behovProducer.nyttBehov("sykepengeperioder", mapOf(
+                                "aktørId" to sykepengesøknad.aktørId
+                        ))
                         sakskompleks.leggTil(sykepengesøknad)
                     }
 

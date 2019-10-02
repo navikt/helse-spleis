@@ -20,10 +20,10 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
 
     }
 
-    fun nyttBehov(type: String): UUID =
-            Pakke(type).publiser(topic).first
+    fun nyttBehov(type: String, additionalParams: Map<String, Any> = emptyMap()): UUID =
+            Pakke(type, additionalParams).publiser(topic).first
 
-    inner class Pakke internal constructor(private val type: String) {
+    inner class Pakke internal constructor(private val type: String, private val additionalParams: Map<String, Any>) {
 
         private val id = UUID.randomUUID()
 
@@ -37,10 +37,10 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
 
         private fun key() = id.toString()
 
-        private fun value(): String = objectMapper.writeValueAsString(mapOf(
-                "behov" to type,
-                "id" to id.toString(),
-                "opprettet" to opprettet.toString()
+        private fun value(): String = objectMapper.writeValueAsString(additionalParams + mapOf(
+                "@behov" to type,
+                "@id" to id.toString(),
+                "@opprettet" to opprettet.toString()
         ))
 
         override fun toString() = "$type:$id"
