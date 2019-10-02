@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse, KildeHendelse {
+data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -37,6 +37,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse, Kil
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
+    override fun aktørId() = aktørId
     override fun organisasjonsnummer(): String = jsonNode["arbeidsgiver"].get("orgnummer").asText()
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: KildeHendelse): Int = opprettet.compareTo(other.rapportertdato())
