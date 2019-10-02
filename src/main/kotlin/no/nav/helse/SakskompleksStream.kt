@@ -7,9 +7,11 @@ import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
@@ -18,9 +20,12 @@ import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.sykmelding.SykmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
+import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
@@ -61,7 +66,9 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     migrate(createHikariConfigFromEnvironment())
 
-    val sakskompleksService = SakskompleksService(SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
+    val sakskompleksService = SakskompleksService(
+            behovProducer = BehovProducer(behovTopic, KafkaProducer(commonKafkaProperties(), StringSerializer(), StringSerializer())),
+            sakskompleksDao = SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
 
@@ -83,20 +90,23 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 }
 
 @KtorExperimentalAPI
-private fun Application.streamsConfig() = Properties().apply {
-    put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, environment.config.property("kafka.bootstrap-servers").getString())
+private fun Application.streamsConfig() = commonKafkaProperties().apply {
     put(StreamsConfig.APPLICATION_ID_CONFIG, environment.config.property("kafka.app-id").getString())
 
     put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndFailExceptionHandler::class.java)
+}
 
+@KtorExperimentalAPI
+private fun Application.commonKafkaProperties() = Properties().apply {
+    put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, environment.config.property("kafka.bootstrap-servers").getString())
     put(SaslConfigs.SASL_MECHANISM, "PLAIN")
     put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
 
     environment.config.propertyOrNull("kafka.username")?.getString()?.let { username ->
         environment.config.propertyOrNull("kafka.password")?.getString()?.let { password ->
             put(
-                SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
+                    SaslConfigs.SASL_JAAS_CONFIG,
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
             )
         }
     }

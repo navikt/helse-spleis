@@ -1,5 +1,6 @@
 package no.nav.helse.sakskompleks
 
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sykmelding.domain.Sykmelding
@@ -10,7 +11,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
+class SakskompleksService(private val behovProducer: BehovProducer,
+                          private val sakskompleksDao: SakskompleksDao) {
 
     private val sakskompleksProbe = SakskompleksProbe()
 
@@ -19,6 +21,8 @@ class SakskompleksService(private val sakskompleksDao: SakskompleksDao) {
                     .also { sakskompleks ->
                         sakskompleks.addObserver(sakskompleksProbe)
                         sakskompleks.leggTil(sykmelding)
+
+                        behovProducer.nyttBehov("sykepengeperioder")
                     }
 
     fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =

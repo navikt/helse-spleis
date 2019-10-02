@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
@@ -14,6 +15,9 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        private val log = LoggerFactory.getLogger(BehovProducer::class.java)
+
     }
 
     fun nyttBehov(type: String): UUID =
@@ -27,12 +31,13 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
 
         internal fun publiser(topic: String) =
                 id to producer.send(ProducerRecord(topic, key(), value()))
-                        .get()
+                        .get().also {
+                            log.info("produserte behov id=$id, recordMetadata=$it")
+                        }
 
         private fun key() = id.toString()
 
         private fun value(): String = objectMapper.writeValueAsString(mapOf(
-                "type" to "behov",
                 "behov" to type,
                 "id" to id.toString(),
                 "opprettet" to opprettet.toString()
