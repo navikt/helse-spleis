@@ -67,7 +67,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     migrate(createHikariConfigFromEnvironment())
 
     val sakskompleksService = SakskompleksService(
-            behovProducer = BehovProducer(behovTopic, KafkaProducer(commonKafkaProperties(), StringSerializer(), StringSerializer())),
+            behovProducer = BehovProducer(behovTopic, KafkaProducer(behovProducerConfig(), StringSerializer(), StringSerializer())),
             sakskompleksDao = SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
@@ -94,6 +94,12 @@ private fun Application.streamsConfig() = commonKafkaProperties().apply {
     put(StreamsConfig.APPLICATION_ID_CONFIG, environment.config.property("kafka.app-id").getString())
 
     put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndFailExceptionHandler::class.java)
+}
+
+@KtorExperimentalAPI
+private fun Application.behovProducerConfig() = commonKafkaProperties().apply {
+    put(ProducerConfig.ACKS_CONFIG, "all")
+    put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
 }
 
 @KtorExperimentalAPI
