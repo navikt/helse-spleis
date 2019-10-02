@@ -30,10 +30,22 @@ object TestConstants {
     val egenmeldingTom = LocalDate.of(2019, Month.SEPTEMBER, 15)
     val ferieFom = LocalDate.of(2019, Month.OCTOBER, 1)
     val ferieTom = LocalDate.of(2019, Month.OCTOBER, 4)
-    private val søknadDTO = SykepengesoknadDTO(
+
+    fun søknad(
+            status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
+            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
+            søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
+                    fom = sykeperiodFOM,
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
+            ), SoknadsperiodeDTO(
+                    fom = LocalDate.of(2019, Month.OCTOBER, 5),
+                    tom = sykeperiodeTOM
+            ))
+    ) = Sykepengesøknad(objectMapper.valueToTree(SykepengesoknadDTO(
             id = UUID.randomUUID().toString(),
             type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.SENDT,
+            status = status,
             aktorId = UUID.randomUUID().toString(),
             sykmeldingId = UUID.randomUUID().toString(),
             arbeidsgiver = ArbeidsgiverDTO(
@@ -42,8 +54,8 @@ object TestConstants {
             ),
             arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
             arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
-            fom = LocalDate.of(2019, Month.SEPTEMBER, 10),
-            tom = LocalDate.of(2019, Month.OCTOBER, 5),
+            fom = fom,
+            tom = tom,
             startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 10),
             arbeidGjenopptatt = LocalDate.of(2019, Month.OCTOBER, 6),
             opprettet = LocalDateTime.now(),
@@ -53,19 +65,13 @@ object TestConstants {
                     fom = egenmeldingFom,
                     tom = egenmeldingTom
             )),
-            soknadsperioder = listOf(SoknadsperiodeDTO(
-                    fom = sykeperiodFOM,
-                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
-            ), SoknadsperiodeDTO(
-                    fom = LocalDate.of(2019, Month.OCTOBER, 5),
-                    tom = sykeperiodeTOM
-            )),
+            soknadsperioder = søknadsperioder,
             fravar = listOf(FravarDTO(
                     fom = ferieFom,
                     tom = ferieTom,
                     type = FravarstypeDTO.FERIE
             ))
-    )
+    )))
 
-    val søknad = Sykepengesøknad(objectMapper.valueToTree(søknadDTO))
+    val søknad = søknad()
 }

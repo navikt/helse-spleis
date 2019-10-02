@@ -3,6 +3,7 @@ package no.nav.helse.unit.person
 import no.nav.helse.TestConstants.søknad
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import org.junit.jupiter.api.Test
 
@@ -22,5 +23,9 @@ internal class PersonTest {
         override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
             wasTriggered = true
         }
+    }
+
+    private fun inntektsmeldingMottattTilstand() : Sakskompleks {
+        TODO()
     }
 }
