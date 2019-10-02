@@ -3,8 +3,6 @@ package no.nav.helse.sakskompleks
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sykmelding.domain.Sykmelding
-import no.nav.helse.sykmelding.domain.gjelderFra
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
 import java.time.DayOfWeek
@@ -16,23 +14,18 @@ class SakskompleksService(private val behovProducer: BehovProducer,
 
     private val sakskompleksProbe = SakskompleksProbe()
 
-    fun finnEllerOpprettSak(sykmelding: Sykmelding) =
-            (finnSak(sykmelding) ?: sakskompleksDao.opprettSak(sykmelding.aktørId))
+    fun finnEllerOpprettSak(sykepengesøknad: Sykepengesøknad) =
+            (finnSak(sykepengesøknad) ?: sakskompleksDao.opprettSak(sykepengesøknad.aktørId))
                     .also { sakskompleks ->
                         sakskompleks.addObserver(sakskompleksProbe)
-                        sakskompleks.leggTil(sykmelding)
-
                         behovProducer.nyttBehov("sykepengeperioder")
+                        sakskompleks.leggTil(sykepengesøknad)
                     }
 
     fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =
-            finnSak(sykepengesøknad)?.also { sakskompleks ->
+            finnEllerOpprettSak(sykepengesøknad).also { sakskompleks ->
                 sakskompleks.addObserver(sakskompleksProbe)
                 leggSøknadPåSak(sakskompleks, sykepengesøknad)
-            }.also {
-                if (it == null) {
-                    sakskompleksProbe.søknadManglerSakskompleks(sykepengesøknad)
-                }
             }
 
     fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
@@ -53,10 +46,6 @@ class SakskompleksService(private val behovProducer: BehovProducer,
             sakskompleksDao.finnSaker(inntektsmelding.arbeidstakerAktorId)
                     .finnSak(inntektsmelding)
 
-    private fun finnSak(sykmelding: Sykmelding) =
-        sakskompleksDao.finnSaker(sykmelding.aktørId)
-            .finnSak(sykmelding)
-
     private fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
         sak.leggTil(søknad)
     }
@@ -70,18 +59,13 @@ class SakskompleksService(private val behovProducer: BehovProducer,
             sakskompleks.hørerSammenMed(sykepengesøknad)
         }
 
-    private fun List<Sakskompleks>.finnSak(sykmelding: Sykmelding) =
-        firstOrNull { sakskompleks ->
-            sykmelding.hørerSammenMed(sakskompleks)
-        }
-
     private fun List<Sakskompleks>.finnSak(inntektsmelding: Inntektsmelding) =
         firstOrNull { sakskompleks ->
             inntektsmelding.hørerSammenMed(sakskompleks)
         }
 
-    private fun Sykmelding.hørerSammenMed(sakskompleks: Sakskompleks) =
-        kalenderdagerMellomMinusHelg(sakskompleks.tom(), gjelderFra()) < 16
+    private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
+        kalenderdagerMellomMinusHelg(sakskompleks.tom(), this.fom) < 16
 
     private fun Inntektsmelding.hørerSammenMed(sakskompleks: Sakskompleks): Boolean {
         val saksPeriode = sakskompleks.fom()?.rangeTo(sakskompleks.tom())

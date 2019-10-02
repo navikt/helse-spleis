@@ -2,11 +2,11 @@ package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
+import no.nav.helse.TestConstants.søknad
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver
-import no.nav.helse.sykmelding.domain.Sykmelding
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -18,6 +18,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         lastEvent = event
     }
 
+    private val nySøknad = søknad(status = SoknadsstatusDTO.NY)
+    private val sendtSøknad = søknad(status = SoknadsstatusDTO.SENDT)
     private val aktørId = "1234567891011"
     private val sakskompleksId = UUID.randomUUID()
     private val sykmeldingId = UUID.randomUUID()
@@ -28,7 +30,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sykmelding`(){
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.leggTil(sykmelding())
+        sakskompleks.leggTil(nySøknad)
 
         assertEquals("StartTilstand", lastEvent.previousState)
         assertEquals("SykmeldingMottattTilstand", lastEvent.currentState)
@@ -81,7 +83,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sykmelding etter sykmelding`(){
         val sakskompleks = beInMottattSykmelding()
 
-        sakskompleks.leggTil(sykmelding())
+        sakskompleks.leggTil(nySøknad)
 
         assertEquals("SykmeldingMottattTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
@@ -91,7 +93,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta søknad etter søknad`() {
         val sakskompleks = beInMottattSøknad()
 
-        sakskompleks.leggTil(søknad())
+        sakskompleks.leggTil(sendtSøknad)
 
         assertEquals("SøknadMottattTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
@@ -111,7 +113,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sykmelding etter søknad`() {
         val sakskompleks = beInMottattSøknad()
 
-        sakskompleks.leggTil(sykmelding())
+        sakskompleks.leggTil(nySøknad)
 
         assertEquals("SøknadMottattTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
@@ -121,7 +123,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.leggTil(søknad())
+        sakskompleks.leggTil(sendtSøknad)
 
         assertEquals("InntektsmeldingMottattTilstand", lastEvent.previousState)
         assertEquals("KomplettSakTilstand", lastEvent.currentState)
@@ -131,7 +133,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sykmelding etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.leggTil(sykmelding())
+        sakskompleks.leggTil(nySøknad)
 
         assertEquals("InntektsmeldingMottattTilstand", lastEvent.previousState)
         assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
@@ -158,7 +160,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     private fun beInMottattSykmelding() =
             beInStartTilstand().apply {
-                leggTil(sykmelding())
+                leggTil(nySøknad)
             }
 
     private fun beInMottattSøknad() =
@@ -170,19 +172,6 @@ internal class SakskompleksStateTest : SakskompleksObserver {
             beInMottattSykmelding().apply {
                 leggTil(inntektsmelding())
             }
-
-    private fun sykmelding(): Sykmelding =
-        Sykmelding(objectMapper.valueToTree(mapOf(
-                "id" to sykmeldingId.toString(),
-                "pasientAktoerId" to aktørId
-        )))
-
-    private fun søknad() =
-            Sykepengesøknad(objectMapper.valueToTree(mapOf(
-                    "id" to søknadId.toString(),
-                    "aktorId" to aktørId,
-                    "sykmeldingId" to sykmeldingId.toString()
-            )))
 
     private fun inntektsmelding() =
             Inntektsmelding(objectMapper.valueToTree(mapOf(

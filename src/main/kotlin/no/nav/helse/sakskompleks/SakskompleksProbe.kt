@@ -5,7 +5,6 @@ import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
-import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -15,14 +14,10 @@ class SakskompleksProbe: SakskompleksObserver {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
 
         val sakskompleksTotalsCounterName = "sakskompleks_totals"
-        val søknadUtenSakskompleksCounterName = "manglende_sakskompleks_totals"
         val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
         val manglendeSakskompleksForInntektsmeldingCounterName = "manglende_sakskompleks_for_inntektsmelding_totals"
 
         private val sakskompleksCounter = Counter.build(sakskompleksTotalsCounterName, "Antall sakskompleks opprettet")
-                .register()
-
-        private val manglendeSakskompleksCounter = Counter.build(søknadUtenSakskompleksCounterName, "Antall søknader vi har mottatt som vi ikke klarer å koble til et sakskompleks")
                 .register()
 
         private val dokumenterKobletTilSakCounter = Counter.build(dokumenterKobletTilSakCounterName, "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
@@ -31,11 +26,6 @@ class SakskompleksProbe: SakskompleksObserver {
 
         private val manglendeSakskompleksForInntektsmeldingCounter = Counter.build(manglendeSakskompleksForInntektsmeldingCounterName, "Antall inntektsmeldinger vi har mottatt som vi ikke klarer å koble til et sakskompleks")
                 .register()
-    }
-
-    fun søknadManglerSakskompleks(søknad: Sykepengesøknad) {
-        log.error("mottok søknad med id=${søknad.id}, men vi har ikke et eksisterende sakskompleks. Vi burde ha et sakskompleks som inneholder en sykmeldingsId=${søknad.sykmeldingId}")
-        manglendeSakskompleksCounter.inc()
     }
 
     fun inntektmeldingManglerSakskompleks(inntektsmelding: Inntektsmelding) {

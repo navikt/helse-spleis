@@ -5,9 +5,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.TestConstants.søknad
 import no.nav.helse.nais.nais
 import no.nav.helse.søknad.SøknadProbe
-import no.nav.helse.unit.sakskompleks.domain.søknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

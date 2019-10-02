@@ -17,7 +17,6 @@ import no.nav.helse.sakskompleks.SakskompleksDao
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
-import no.nav.helse.sykmelding.SykmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -72,7 +71,6 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     val builder = StreamsBuilder()
 
-    SykmeldingConsumer(builder, sykmeldingTopic, sakskompleksService)
     SøknadConsumer(builder, søknadTopic, sakskompleksService)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakskompleksService)
 

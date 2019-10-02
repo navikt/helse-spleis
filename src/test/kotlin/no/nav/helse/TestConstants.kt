@@ -32,9 +32,16 @@ object TestConstants {
     val ferieTom = LocalDate.of(2019, Month.OCTOBER, 4)
 
     fun søknad(
+            id: String = UUID.randomUUID() .toString(),
             status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
+            arbeidGjenopptatt: LocalDate = LocalDate.of(2019, Month.OCTOBER, 6),
+            korrigerer: String? = null,
+            egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
+                    fom = egenmeldingFom,
+                    tom = egenmeldingTom
+            )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodFOM,
                     tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
@@ -43,7 +50,7 @@ object TestConstants {
                     tom = sykeperiodeTOM
             ))
     ) = Sykepengesøknad(objectMapper.valueToTree(SykepengesoknadDTO(
-            id = UUID.randomUUID().toString(),
+            id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = status,
             aktorId = UUID.randomUUID().toString(),
@@ -57,14 +64,12 @@ object TestConstants {
             fom = fom,
             tom = tom,
             startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 10),
-            arbeidGjenopptatt = LocalDate.of(2019, Month.OCTOBER, 6),
+            arbeidGjenopptatt = arbeidGjenopptatt,
+            korrigerer = korrigerer,
             opprettet = LocalDateTime.now(),
             sendtNav = LocalDateTime.now(),
             sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
-            egenmeldinger = listOf(PeriodeDTO(
-                    fom = egenmeldingFom,
-                    tom = egenmeldingTom
-            )),
+            egenmeldinger = egenmeldinger,
             soknadsperioder = søknadsperioder,
             fravar = listOf(FravarDTO(
                     fom = ferieFom,

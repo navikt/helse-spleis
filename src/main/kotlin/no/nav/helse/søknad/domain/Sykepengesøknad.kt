@@ -17,9 +17,10 @@ import no.nav.helse.person.domain.Sykdomshendelse
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.KildeHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykmelding.domain.Periode
 import java.time.LocalDate
 import java.time.LocalDateTime
+
+const val SØKNAD_SENDT = "SENDT"
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
@@ -27,6 +28,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
+    val status = jsonNode["status"].asText()!!
     val aktørId = jsonNode["aktorId"].asText()!!
     val fom get() = jsonNode["fom"].asText().let { LocalDate.parse(it) }
     val tom get() = jsonNode["tom"].asText().let { LocalDate.parse(it) }
@@ -50,6 +52,11 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     override fun sykdomstidslinje() = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
+}
+
+data class Periode(val jsonNode: JsonNode) {
+    val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+    val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
 }
 
 data class FraværsPeriode(val jsonNode: JsonNode) {

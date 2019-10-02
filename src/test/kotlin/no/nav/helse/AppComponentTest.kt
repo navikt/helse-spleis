@@ -5,21 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
-import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
+import no.nav.helse.TestConstants.søknad
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.sakskompleks.SakskompleksDao
-import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerializer
-import no.nav.helse.sykmelding.domain.SykmeldingMessage
 import no.nav.helse.søknad.SøknadConsumer.Companion.søknadObjectMapper
-import no.nav.helse.sykmelding.SykmeldingConsumer.Companion.sykmeldingObjectMapper
-import no.nav.helse.sykmelding.SykmeldingProbe.Companion.sykmeldingCounterName
 import no.nav.helse.søknad.SøknadProbe.Companion.søknadCounterName
 import no.nav.helse.søknad.SøknadProbe.Companion.søknaderIgnorertCounterName
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -28,12 +25,12 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -129,7 +126,7 @@ class AppComponentTest {
     }
 
     @Test
-    fun `kobler søknad til eksisterende sakskompleks`() {
+    fun `kobler sendt søknad til eksisterende sakskompleks`() {
         val sakskompleksDao = SakskompleksDao(embeddedPostgres.postgresDatabase)
 
         testServer(config = mapOf(
@@ -137,35 +134,34 @@ class AppComponentTest {
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val sykmeldingCounterBefore = getCounterValue(sykmeldingCounterName)
-            val søknadCounterBefore = getCounterValue(søknadCounterName)
+            val nySøknadCounterBefore = getCounterValue(søknadCounterName, listOf("NY"))
+            val sendtSøknadCounterBefore = getCounterValue(søknadCounterName, listOf("SENDT"))
 
-            val sykmelding = sykmeldingObjectMapper.readTree("/sykmelding.json".readResource())
-            val sykmeldingMessage = SykmeldingMessage(sykmelding).sykmelding
-            produceOneMessage(sykmeldingTopic, sykmelding["sykmelding"]["id"].asText(), sykmelding, sykmeldingObjectMapper)
+            val nySøknad = søknad(status = SoknadsstatusDTO.NY)
+            produceOneMessage(søknadTopic, nySøknad.id, søknadObjectMapper.valueToTree(nySøknad))
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val sykmeldingCounterAfter = getCounterValue(sykmeldingCounterName)
+                    val nySøknadCounterAfter = getCounterValue(søknadCounterName, listOf("NY"))
 
-                    assertEquals(1, sykmeldingCounterAfter - sykmeldingCounterBefore)
+                    assertEquals(1, nySøknadCounterAfter - nySøknadCounterBefore)
 
-                    val sakerForBruker = sakskompleksDao.finnSaker(sykmeldingMessage.aktørId)
+                    val sakerForBruker = sakskompleksDao.finnSaker(nySøknad.aktørId)
                     assertEquals(1, sakerForBruker.size)
                 }
 
-            val søknad = søknadObjectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
-            produceOneMessage(søknadTopic, søknad["id"].asText(), søknad)
+            val sendtSøknad = søknad(status = SoknadsstatusDTO.SENDT)
+            produceOneMessage(søknadTopic, sendtSøknad.id, søknadObjectMapper.valueToTree(sendtSøknad))
 
             await()
                 .atMost(10, TimeUnit.SECONDS)
                 .untilAsserted {
-                    val søknadCounterAfter = getCounterValue(søknadCounterName)
+                    val sendtSøknadCounterAfter = getCounterValue(søknadCounterName)
 
-                    assertEquals(1, søknadCounterAfter - søknadCounterBefore)
+                    assertEquals(1, sendtSøknadCounterAfter - sendtSøknadCounterBefore)
 
-                    val sakerForBruker = sakskompleksDao.finnSaker(sykmeldingMessage.aktørId)
+                    val sakerForBruker = sakskompleksDao.finnSaker(søknad.aktørId)
                     assertEquals(1, sakerForBruker.size)
 
                     /*assertTrue(sakerForBruker[0].har(SykmeldingMessage(sykmelding).sykmelding))

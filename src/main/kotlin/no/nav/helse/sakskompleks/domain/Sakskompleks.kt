@@ -6,58 +6,41 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sykmelding.domain.Sykmelding
-import no.nav.helse.sykmelding.domain.gjelderTil
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.søknad.domain.SØKNAD_SENDT
 import java.io.StringWriter
-import java.time.LocalDate
 import java.util.*
 
 class Sakskompleks internal constructor(private val id: UUID,
                                         private val aktørId: String) {
 
-    private val sykmeldinger: MutableList<Sykmelding> = mutableListOf()
-    private val søknader: MutableList<Sykepengesøknad> = mutableListOf()
+    private val nyeSøknader: MutableList<Sykepengesøknad> = mutableListOf()
+    private val sendteSøknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
     private var tilstand: Sakskomplekstilstand = StartTilstand()
+    private lateinit var sykdomstidslinje: Sykdomstidslinje
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     fun leggTil(søknad: Sykepengesøknad) {
-        tilstand.søknadMottatt(søknad)
+        if (søknad.status == SØKNAD_SENDT) {
+            tilstand.sendtSøknad(søknad)
+        } else {
+            tilstand.nySøknad(søknad)
+        }
     }
 
     fun leggTil(inntektsmelding: Inntektsmelding) {
         tilstand.inntektsmeldingMottatt(inntektsmelding)
     }
 
-    fun leggTil(sykmelding: Sykmelding) {
-        tilstand.sykmeldingMottatt(sykmelding)
-    }
-
-    fun fom(): LocalDate? = run {
-        val syketilfelleStart = sykmeldinger.mapNotNull { sykmelding -> sykmelding.syketilfelleStartDato }.min()
-        val tidligsteFOM: LocalDate? =
-                sykmeldinger.flatMap { sykmelding -> sykmelding.perioder }.map { periode -> periode.fom }.min()
-        val søknadEgenmelding =
-                søknader.flatMap { søknad -> søknad.egenmeldinger }.map { egenmelding -> egenmelding.fom }.min()
-
-        return listOfNotNull(syketilfelleStart, tidligsteFOM, søknadEgenmelding).min()
-    }
-
-    fun tom(): LocalDate = run {
-        val arbeidGjenopptatt = søknader.somIkkeErKorrigerte().maxBy { søknad -> søknad.tom }?.arbeidGjenopptatt
-        val sisteTOMSøknad = søknader.maxBy { søknad -> søknad.tom }?.tom
-        val sisteTOMSykmelding = sykmeldinger.maxBy { sykmelding -> sykmelding.gjelderTil() }?.gjelderTil()
-
-        return arbeidGjenopptatt
-                ?: listOfNotNull(sisteTOMSøknad, sisteTOMSykmelding).max()
-                ?: throw RuntimeException("Et sakskompleks må ha en sluttdato!")
-    }
+    fun fom() = sykdomstidslinje.startdato()
+    fun tom() = sykdomstidslinje.sluttdato()
 
     fun hørerSammenMed(sykepengesøknad: Sykepengesøknad) =
-            sykmeldinger.any { sykmelding ->
-                sykmelding.id == sykepengesøknad.sykmeldingId
+            nyeSøknader.any { nySøknad ->
+                nySøknad.id == sykepengesøknad.id
             }
 
     private fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
@@ -84,11 +67,11 @@ class Sakskompleks internal constructor(private val id: UUID,
 
         fun name() = javaClass.simpleName
 
-        open fun sykmeldingMottatt(sykmelding: Sykmelding) {
-            transition(sykmelding, TrengerManuellHåndteringTilstand())
+        open fun nySøknad(søknad: Sykepengesøknad) {
+            transition(søknad, TrengerManuellHåndteringTilstand())
         }
 
-        open fun søknadMottatt(søknad: Sykepengesøknad) {
+        open fun sendtSøknad(søknad: Sykepengesøknad) {
             transition(søknad, TrengerManuellHåndteringTilstand())
         }
 
@@ -104,17 +87,17 @@ class Sakskompleks internal constructor(private val id: UUID,
     }
 
     private inner class StartTilstand : Sakskomplekstilstand() {
-        override fun sykmeldingMottatt(sykmelding: Sykmelding) {
-            transition(sykmelding, SykmeldingMottattTilstand()) {
-                sykmeldinger.add(sykmelding)
+        override fun nySøknad(søknad: Sykepengesøknad) {
+            transition(søknad, NySøknadMottattTilstand()) {
+                nyeSøknader.add(søknad)
             }
         }
     }
 
-    private inner class SykmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(søknad, SøknadMottattTilstand()) {
-                søknader.add(søknad)
+    private inner class NySøknadMottattTilstand : Sakskomplekstilstand() {
+        override fun sendtSøknad(søknad: Sykepengesøknad) {
+            transition(søknad, SendtSøknadMottattTilstand()) {
+                sendteSøknader.add(søknad)
             }
         }
 
@@ -125,7 +108,7 @@ class Sakskompleks internal constructor(private val id: UUID,
         }
     }
 
-    private inner class SøknadMottattTilstand : Sakskomplekstilstand() {
+    private inner class SendtSøknadMottattTilstand : Sakskomplekstilstand() {
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
             transition(inntektsmelding, KomplettSakTilstand()) {
                 inntektsmeldinger.add(inntektsmelding)
@@ -134,9 +117,9 @@ class Sakskompleks internal constructor(private val id: UUID,
     }
 
     private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
+        override fun sendtSøknad(søknad: Sykepengesøknad) {
             transition(søknad, KomplettSakTilstand()) {
-                søknader.add(søknad)
+                sendteSøknader.add(søknad)
             }
         }
     }
@@ -161,31 +144,25 @@ class Sakskompleks internal constructor(private val id: UUID,
 
             sakskompleks.tilstand = when (node["tilstand"].textValue()) {
                 "StartTilstand" -> sakskompleks.StartTilstand()
-                "SykmeldingMottattTilstand" -> sakskompleks.SykmeldingMottattTilstand()
-                "SøknadMottattTilstand" -> sakskompleks.SøknadMottattTilstand()
+                "NySøknadMottattTilstand" -> sakskompleks.NySøknadMottattTilstand()
+                "SendtSøknadMottattTilstand" -> sakskompleks.SendtSøknadMottattTilstand()
                 "InntektsmeldingMottattTilstand" -> sakskompleks.InntektsmeldingMottattTilstand()
                 "KomplettSakTilstand" -> sakskompleks.KomplettSakTilstand()
                 "TrengerManuellHåndteringTilstand" -> sakskompleks.TrengerManuellHåndteringTilstand()
                 else -> throw RuntimeException("ukjent tilstand")
             }
 
-            node["sykmeldinger"].map { jsonNode ->
-                Sykmelding(jsonNode)
-            }.let {
-                sakskompleks.sykmeldinger.addAll(it)
-            }
-
-            node["inntektsmeldinger"].map { jsonNode ->
+            sakskompleks.inntektsmeldinger.addAll(node["inntektsmeldinger"].map { jsonNode ->
                 Inntektsmelding(jsonNode)
-            }.let {
-                sakskompleks.inntektsmeldinger.addAll(it)
-            }
+            })
 
-            node["søknader"].map { jsonNode ->
+            sakskompleks.nyeSøknader.addAll(node["nyeSøknader"].map { jsonNode ->
                 Sykepengesøknad(jsonNode)
-            }.let {
-                sakskompleks.søknader.addAll(it)
-            }
+            })
+
+            sakskompleks.sendteSøknader.addAll(node["sendteSøknader"].map {
+                jsonNode -> Sykepengesøknad(jsonNode)
+            })
 
             return sakskompleks
         }
@@ -200,9 +177,9 @@ class Sakskompleks internal constructor(private val id: UUID,
         generator.writeStringField("aktørId", aktørId)
         generator.writeStringField("tilstand", tilstand.name())
 
-        generator.writeArrayFieldStart("sykmeldinger")
-        sykmeldinger.forEach { sykmelding ->
-            objectMapper.writeValue(generator, sykmelding.jsonNode)
+        generator.writeArrayFieldStart("nyeSøknader")
+        nyeSøknader.forEach { søknad ->
+            objectMapper.writeValue(generator, søknad.jsonNode)
         }
         generator.writeEndArray()
 
@@ -212,8 +189,8 @@ class Sakskompleks internal constructor(private val id: UUID,
         }
         generator.writeEndArray()
 
-        generator.writeArrayFieldStart("søknader")
-        søknader.forEach { søknad ->
+        generator.writeArrayFieldStart("sendteSøknader")
+        sendteSøknader.forEach { søknad ->
             objectMapper.writeValue(generator, søknad.jsonNode)
         }
         generator.writeEndArray()
