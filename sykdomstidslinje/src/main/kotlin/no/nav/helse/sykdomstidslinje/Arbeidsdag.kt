@@ -7,9 +7,9 @@ class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: KildeHendels
         visitor.visitArbeidsdag(this)
     }
 
-    override fun antallSykedagerMedHelg() = 0
+    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
 
-    override fun antallSykedagerUtenHelg() = 0
+    override fun antallSykedagerHvorViTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tArbeidsdag"
 }

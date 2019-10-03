@@ -32,7 +32,7 @@ class SykedagerTest {
     @Test
     fun testSykdagerOverHelg() {
         val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        assertEquals(8, sykedager.antallSykedagerUtenHelg())
+        assertEquals(8, sykedager.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test

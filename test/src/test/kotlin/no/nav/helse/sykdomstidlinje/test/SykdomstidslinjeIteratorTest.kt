@@ -35,7 +35,7 @@ class SykdomstidslinjeIteratorTest {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
-        val antallSykedager = tidslinjer.first().antallSykedagerUtenHelg()
+        val antallSykedager = tidslinjer.first().antallSykedagerHvorViTellerMedHelg()
 
         assertEquals(1, tidslinjer.size)
         assertEquals(15, antallSykedager)
@@ -44,7 +44,7 @@ class SykdomstidslinjeIteratorTest {
     @Test
     fun sykdomInnenforEnUkeTellerAntallDager() {
         val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
-        assertEquals(5, tidslinje.syketilfeller().first().antallSykedagerUtenHelg())
+        assertEquals(5, tidslinje.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -54,22 +54,22 @@ class SykdomstidslinjeIteratorTest {
             uke2Mandag,
             rapporteringshendelse
         )
-        assertEquals(8, sykedager.syketilfeller().first().antallSykedagerUtenHelg())
+        assertEquals(8, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
     fun sykmeldingMandagTilSøndagFørerTil7Dager() {
         val sykdager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringshendelse)
 
-        assertEquals(7, sykdager.syketilfeller().first().antallSykedagerUtenHelg())
+        assertEquals(7, sykdager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
     fun sykmeldingMandagTilLørdagFørerTil6Dager() {
         val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringshendelse)
 
-        assertEquals(6, sykedager.syketilfeller().first().antallSykedagerUtenHelg())
-        assertEquals(5, sykedager.syketilfeller().first().antallSykedagerMedHelg())
+        assertEquals(6, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
+        assertEquals(5, sykedager.syketilfeller().first().antallSykedagerHvorViIkkeTellerMedHelg())
     }
 
     @Test

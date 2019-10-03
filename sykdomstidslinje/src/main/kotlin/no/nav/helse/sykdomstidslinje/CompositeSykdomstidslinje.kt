@@ -30,11 +30,11 @@ class CompositeSykdomstidslinje(
 
     override fun sluttdato() = tidslinjer.last().sluttdato()
 
-    override fun antallSykedagerMedHelg() = tidslinjer.flatMap { it.flatten() }
-        .sumBy { it.antallSykedagerMedHelg() }
+    override fun antallSykedagerHvorViIkkeTellerMedHelg() = tidslinjer.flatMap { it.flatten() }
+        .sumBy { it.antallSykedagerHvorViIkkeTellerMedHelg() }
 
-    override fun antallSykedagerUtenHelg() = tidslinjer.flatMap { it.flatten() }
-        .sumBy { it.antallSykedagerUtenHelg() }
+    override fun antallSykedagerHvorViTellerMedHelg() = tidslinjer.flatMap { it.flatten() }
+        .sumBy { it.antallSykedagerHvorViTellerMedHelg() }
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
 }

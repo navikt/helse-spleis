@@ -12,9 +12,9 @@ class Helgedag internal constructor(gjelder: LocalDate, hendelse: KildeHendelse)
         require(gjelder.dayOfWeek == DayOfWeek.SATURDAY || gjelder.dayOfWeek == DayOfWeek.SUNDAY) {"En ikkeSykedag må være lørdag eller søndag"}
     }
 
-    override fun antallSykedagerUtenHelg() = 0
+    override fun antallSykedagerHvorViTellerMedHelg() = 0
 
-    override fun antallSykedagerMedHelg() = 0
+    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tHelg"
 }
