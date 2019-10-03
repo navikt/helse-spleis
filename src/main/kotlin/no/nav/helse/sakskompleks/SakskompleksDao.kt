@@ -3,9 +3,9 @@ package no.nav.helse.sakskompleks
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.person.domain.Sakskompleks
+import no.nav.helse.person.domain.SakskompleksObserver
+import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import java.util.*
 import javax.sql.DataSource
 

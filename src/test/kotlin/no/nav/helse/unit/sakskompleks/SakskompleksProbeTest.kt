@@ -3,8 +3,8 @@ package no.nav.helse.unit.sakskompleks
 import io.prometheus.client.CollectorRegistry
 import no.nav.helse.Event
 import no.nav.helse.sakskompleks.SakskompleksProbe
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver
+import no.nav.helse.person.domain.Sakskompleks
+import no.nav.helse.person.domain.SakskompleksObserver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*

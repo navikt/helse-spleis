@@ -1,4 +1,4 @@
-package no.nav.helse.sakskompleks.domain
+package no.nav.helse.person.domain
 
 import no.nav.helse.Event
 import java.util.*

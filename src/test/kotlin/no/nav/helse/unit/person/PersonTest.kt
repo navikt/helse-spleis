@@ -3,8 +3,8 @@ package no.nav.helse.unit.person
 import no.nav.helse.TestConstants.søknad
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver
+import no.nav.helse.person.domain.Sakskompleks
+import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Test
 

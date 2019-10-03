@@ -2,7 +2,8 @@ package no.nav.helse.sakskompleks
 
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sakskompleks.domain.Sakskompleks
+import no.nav.helse.person.domain.Person
+import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
 import java.time.DayOfWeek

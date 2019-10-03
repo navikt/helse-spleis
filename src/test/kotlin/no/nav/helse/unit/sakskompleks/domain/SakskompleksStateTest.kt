@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.TestConstants.søknad
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver
+import no.nav.helse.person.domain.Sakskompleks
+import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

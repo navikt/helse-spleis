@@ -1,4 +1,4 @@
-package no.nav.helse.sakskompleks.domain
+package no.nav.helse.person.domain
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -12,8 +12,10 @@ import no.nav.helse.søknad.domain.SØKNAD_SENDT
 import java.io.StringWriter
 import java.util.*
 
-class Sakskompleks internal constructor(private val id: UUID,
-                                        private val aktørId: String) {
+class Sakskompleks internal constructor(
+    private val id: UUID,
+    private val aktørId: String
+) {
 
     private val nyeSøknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val sendteSøknader: MutableList<Sykepengesøknad> = mutableListOf()
@@ -241,13 +243,13 @@ class Sakskompleks internal constructor(private val id: UUID,
 
     private fun notifyObservers(currentState: TilstandType, event: Event, previousState: TilstandType, previousMemento: Memento) {
         val event = SakskompleksObserver.StateChangeEvent(
-            id = id,
-            aktørId = aktørId,
-            currentState = currentState,
-            previousState = previousState,
-            eventType = event.eventType(),
-            currentMemento = memento(),
-            previousMemento = previousMemento
+                id = id,
+                aktørId = aktørId,
+                currentState = currentState,
+                previousState = previousState,
+                eventType = event.eventType(),
+                currentMemento = memento(),
+                previousMemento = previousMemento
         )
 
         observers.forEach { observer ->

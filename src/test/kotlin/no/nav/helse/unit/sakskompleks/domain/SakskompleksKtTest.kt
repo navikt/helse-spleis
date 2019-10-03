@@ -1,16 +1,13 @@
 package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.søknad
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.readResource
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.person.domain.Sakskompleks
 import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -37,8 +34,8 @@ class SakskompleksKtTest {
     fun `state inneholder en tilstand`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
+                id = id,
+                aktørId = "aktørId"
         )
 
         val memento = sakskompleks.memento()
@@ -53,8 +50,8 @@ class SakskompleksKtTest {
     fun `state inneholder aktørId og sakskompleksId`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
+                id = id,
+                aktørId = "aktørId"
         )
 
         val memento = sakskompleks.memento()
@@ -68,8 +65,8 @@ class SakskompleksKtTest {
     fun `state inneholder inntektsmeldinger`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
+                id = id,
+                aktørId = "aktørId"
         )
 
         sakskompleks.leggTil(standardNySøknad)
@@ -86,8 +83,8 @@ class SakskompleksKtTest {
     fun `restore bygger opp likt objekt fra lagret state`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
+                id = id,
+                aktørId = "aktørId"
         )
         sakskompleks.leggTil(standardNySøknad)
         sakskompleks.leggTil(standardSendtSøknad)
@@ -135,8 +132,8 @@ class SakskompleksKtTest {
         )
 
         val sakskompleks = Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId"
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
         )
 
         sakskompleks.leggTil(sykmelding)
@@ -163,8 +160,8 @@ class SakskompleksKtTest {
         )
 
         val sakskompleks = Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId"
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
         )
 
         sakskompleks.leggTil(sykmelding)
@@ -203,8 +200,8 @@ class SakskompleksKtTest {
         )
 
         val sakskompleks = Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId"
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
         )
 
         sakskompleks.leggTil(sykmelding)
@@ -243,8 +240,8 @@ class SakskompleksKtTest {
         )
 
         val sakskompleks = Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId"
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
         )
 
         sakskompleks.leggTil(nySøknad)

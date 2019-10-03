@@ -1,8 +1,6 @@
 package no.nav.helse.person.domain
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sakskompleks.domain.Sakskompleks
-import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import no.nav.helse.sykdomstidslinje.KildeHendelse
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.util.*
@@ -29,8 +27,8 @@ class Person {
     internal inner class Arbeidsgiver(hendelse: Sykdomshendelse) {
         private val saker = mutableListOf<Sakskompleks>()
         fun add(søknad: Sykepengesøknad) {
-            val case = findOrCreateSakskompleks(søknad)
-            case.leggTil(søknad)
+            val sakskompleks = findOrCreateSakskompleks(søknad)
+            sakskompleks.leggTil(søknad)
         }
 
         fun addObserver(observer: PersonObserver) {
