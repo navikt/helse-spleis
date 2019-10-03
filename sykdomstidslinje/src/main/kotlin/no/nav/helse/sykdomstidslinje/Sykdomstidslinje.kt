@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.utbetalingstidslinje.UtbetalingsTidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -85,6 +86,8 @@ abstract class Sykdomstidslinje {
 
         return visitor.results()
     }
+
+    fun utbetalingstidslinje(dagsats: Double) = UtbetalingsTidslinje(dagsats).also{this.accept(it)}
 
     companion object {
         fun sykedager(gjelder: LocalDate, hendelse: KildeHendelse) =
