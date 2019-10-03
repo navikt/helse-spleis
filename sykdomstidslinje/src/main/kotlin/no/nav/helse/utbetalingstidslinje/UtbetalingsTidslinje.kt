@@ -11,7 +11,7 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
 
     private var state: State = ArbeidsgiverPeriode()
     private val dagerIArbeidsgiverPeriode = 16
-    private var dagNummer = 0
+    private var arbeidsgiverDagNummer = 0
 
     fun totalSum() = UtbetalingsDag.sum(utbetalingsDager)
 
@@ -23,6 +23,10 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
         state.visitSykHelgedag(sykHelgedag)
     }
 
+    private fun byttTilstand(){
+        arbeidsgiverDagNummer += 1
+        if(arbeidsgiverDagNummer > dagerIArbeidsgiverPeriode) state = TrygdenYterPeriode()
+    }
 
     private class UtbetalingsDag(private val dagsats: Double, private val dag: Dag){
 
@@ -32,30 +36,29 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
 
     }
 
-    private abstract inner class State : SykdomstidslinjeVisitor{
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-            utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykHelgedag))
-            byttTilstand()
-        }
+    private interface State : SykdomstidslinjeVisitor
 
-        protected fun byttTilstand(){
-            dagNummer += 1
-            if(dagNummer > dagerIArbeidsgiverPeriode) state = TrygdenYterPeriode()
-        }
-    }
-
-    private inner class ArbeidsgiverPeriode: State(){
-
+    private inner class ArbeidsgiverPeriode: State{
         override fun visitSykedag(sykedag: Sykedag){
             utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykedag))
             byttTilstand()
         }
+
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
+            utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykHelgedag))
+            byttTilstand()
+        }
     }
 
-    private inner class TrygdenYterPeriode(): State(){
+    private inner class TrygdenYterPeriode: State{
         override fun visitSykedag(sykedag: Sykedag){
             utbetalingsDager.add(UtbetalingsDag(dagsats, dag = sykedag))
         }
+
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
+            utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykHelgedag))
+        }
+
     }
 
 }
