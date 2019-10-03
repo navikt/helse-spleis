@@ -6,9 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.søknad.domain.Sykepengesøknad
-import no.nav.helse.søknad.domain.SØKNAD_SENDT
 import java.io.StringWriter
 import java.util.*
 
@@ -21,30 +19,20 @@ class Sakskompleks internal constructor(
     private val sendteSøknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
     private var tilstand: Sakskomplekstilstand = StartTilstand()
-    private lateinit var sykdomstidslinje: Sykdomstidslinje
+
+    private val sykdomstidslinje get() = nyeSøknader.plus(sendteSøknader)
+            .map(Sykepengesøknad::sykdomstidslinje)
+            .reduce { sum, sykdomstidslinje ->
+                sum + sykdomstidslinje
+            }
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
-
-    private fun oppdaterTidslinje() {
-        val combined = (nyeSøknader.map { it.sykdomstidslinje() } + sendteSøknader.map { it.sykdomstidslinje() })
-        sykdomstidslinje = combined
-            .reduce { sum, sykdomstidslinje -> sum + sykdomstidslinje }
-    }
-
     fun leggTil(søknad: Sykepengesøknad) {
-        if (søknad.status == SØKNAD_SENDT) {
-            sendteSøknader.add(søknad)
-            tilstand.sendtSøknad(søknad)
-        } else {
-            nyeSøknader.add(søknad)
-            tilstand.nySøknad(søknad)
-        }
-        oppdaterTidslinje()
+        tilstand.søknadMottatt(søknad)
     }
 
     fun leggTil(inntektsmelding: Inntektsmelding) {
-        inntektsmeldinger.add(inntektsmelding)
         tilstand.inntektsmeldingMottatt(inntektsmelding)
     }
 
@@ -73,6 +61,7 @@ class Sakskompleks internal constructor(
 
     // Gang of four State pattern
     private abstract inner class Sakskomplekstilstand {
+        abstract val type: TilstandType
 
         internal fun transition(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
             tilstand.leaving()
@@ -88,11 +77,7 @@ class Sakskompleks internal constructor(
             notifyObservers(tilstand.type, event, previousStateName, previousMemento)
         }
 
-        open fun nySøknad(søknad: Sykepengesøknad) {
-            transition(søknad, TrengerManuellHåndteringTilstand())
-        }
-
-        open fun sendtSøknad(søknad: Sykepengesøknad) {
+        open fun søknadMottatt(søknad: Sykepengesøknad) {
             transition(søknad, TrengerManuellHåndteringTilstand())
         }
 
@@ -106,13 +91,16 @@ class Sakskompleks internal constructor(
         open fun entering() {
         }
 
-        abstract val type: TilstandType
     }
 
     private inner class StartTilstand : Sakskomplekstilstand() {
-        override fun nySøknad(søknad: Sykepengesøknad) {
-            transition(søknad, NySøknadMottattTilstand()) {
-                nyeSøknader.add(søknad)
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            if (søknad.erNy() || søknad.erFremtidig()) {
+                transition(søknad, NySøknadMottattTilstand()) {
+                    nyeSøknader.add(søknad)
+                }
+            } else {
+                transition(søknad, TrengerManuellHåndteringTilstand())
             }
         }
 
@@ -120,14 +108,20 @@ class Sakskompleks internal constructor(
     }
 
     private inner class NySøknadMottattTilstand : Sakskomplekstilstand() {
-        override fun sendtSøknad(søknad: Sykepengesøknad) {
-            transition(søknad, SendtSøknadMottattTilstand()) {
-                oppdaterTidslinje()
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            if (søknad.erSendt()) {
+                transition(søknad, SendtSøknadMottattTilstand()) {
+                    sendteSøknader.add(søknad)
+                }
+            } else {
+                transition(søknad, TrengerManuellHåndteringTilstand())
             }
         }
 
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, InntektsmeldingMottattTilstand())
+            transition(inntektsmelding, InntektsmeldingMottattTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
         }
 
         override val type = TilstandType.NY_SØKNAD_MOTTATT
@@ -135,15 +129,23 @@ class Sakskompleks internal constructor(
 
     private inner class SendtSøknadMottattTilstand : Sakskomplekstilstand() {
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, KomplettSakTilstand())
+            transition(inntektsmelding, KomplettSakTilstand()) {
+                inntektsmeldinger.add(inntektsmelding)
+            }
         }
 
         override val type = TilstandType.SENDT_SØKNAD_MOTTATT
     }
 
     private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun sendtSøknad(søknad: Sykepengesøknad) {
-            transition(søknad, KomplettSakTilstand())
+        override fun søknadMottatt(søknad: Sykepengesøknad) {
+            if (søknad.erSendt()) {
+                transition(søknad, KomplettSakTilstand()) {
+                    sendteSøknader.add(søknad)
+                }
+            } else {
+                transition(søknad, TrengerManuellHåndteringTilstand())
+            }
         }
 
         override val type = TilstandType.INNTEKTSMELDING_MOTTATT
@@ -192,9 +194,7 @@ class Sakskompleks internal constructor(
                 jsonNode -> Sykepengesøknad(jsonNode)
             })
 
-            return sakskompleks.apply {
-                oppdaterTidslinje()
-            }
+            return sakskompleks
         }
     }
 

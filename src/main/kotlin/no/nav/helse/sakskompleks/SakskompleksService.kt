@@ -2,7 +2,6 @@ package no.nav.helse.sakskompleks
 
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
@@ -25,12 +24,6 @@ class SakskompleksService(private val behovProducer: BehovProducer,
                         sakskompleks.leggTil(sykepengesøknad)
                     }
 
-    fun knyttSøknadTilSak(sykepengesøknad: Sykepengesøknad) =
-            finnEllerOpprettSak(sykepengesøknad).also { sakskompleks ->
-                sakskompleks.addObserver(sakskompleksProbe)
-                leggSøknadPåSak(sakskompleks, sykepengesøknad)
-            }
-
     fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
             finnSak(inntektsmelding)?.also { sakskompleks ->
                 sakskompleks.addObserver(sakskompleksProbe)
@@ -48,10 +41,6 @@ class SakskompleksService(private val behovProducer: BehovProducer,
     private fun finnSak(inntektsmelding: Inntektsmelding) =
             sakskompleksDao.finnSaker(inntektsmelding.arbeidstakerAktorId)
                     .finnSak(inntektsmelding)
-
-    private fun leggSøknadPåSak(sak: Sakskompleks, søknad: Sykepengesøknad) {
-        sak.leggTil(søknad)
-    }
 
     private fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
         sak.leggTil(inntektsmelding)

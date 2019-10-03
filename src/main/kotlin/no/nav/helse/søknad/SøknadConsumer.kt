@@ -53,7 +53,7 @@ class SøknadConsumer(
             ?: throw RuntimeException("Fant ikke type på søknad")
         val status = søknad["status"].textValue()
 
-        return if (type in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE") && status == "SENDT") {
+        return if (type in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE") && (status == "SENDT" || status == "NY" || status == "FREMTIDIG")) {
             true
         } else {
             søknadProbe.søknadIgnorert(id, type, status)
@@ -62,7 +62,7 @@ class SøknadConsumer(
     }
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
-        sakskompleksService.knyttSøknadTilSak(søknad)
+        sakskompleksService.finnEllerOpprettSak(søknad)
     }
 }
 

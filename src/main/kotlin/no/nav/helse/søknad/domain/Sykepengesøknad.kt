@@ -41,6 +41,10 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
+    fun erSendt() = status == SØKNAD_SENDT
+    fun erNy() = status == SØKNAD_NY
+    fun erFremtidig() = status == SØKNAD_FREMTIDIG
+
     override fun aktørId() = aktørId
     override fun organisasjonsnummer(): String = jsonNode["arbeidsgiver"].get("orgnummer").asText()
     override fun rapportertdato(): LocalDateTime = opprettet
