@@ -3,6 +3,7 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.sakskompleks.domain.Sakskompleks
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver
 import no.nav.helse.sakskompleks.domain.SakskompleksObserver.StateChangeEvent
 import org.slf4j.LoggerFactory
@@ -52,31 +53,31 @@ class SakskompleksProbe: SakskompleksObserver {
     }
 
     override fun sakskompleksChanged(event: StateChangeEvent) {
-        log.info("sakskompleks=${event.id} event=${event.eventName} state=${event.currentState} previousState=${event.previousState}")
+        log.info("sakskompleks=${event.id} event=${event.eventType} state=${event.currentState} previousState=${event.previousState}")
 
-        dokumenterKobletTilSakCounter.labels(event.eventName.name).inc()
+        dokumenterKobletTilSakCounter.labels(event.eventType.name).inc()
 
-        when (event.eventName) {
+        when (event.eventType) {
             Event.Type.Inntektsmelding -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            Event.Type.Sykmelding -> {
-                if (event.previousState == "StartTilstand") {
+            Event.Type.NySykepengesøknad -> {
+                if (event.previousState == Sakskompleks.TilstandType.START) {
                     opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
 
                 sykmeldingKobletTilSakskompleks(event.id)
             }
-            Event.Type.Sykepengesøknad -> {
+            Event.Type.SendtSykepengesøknad -> {
                 søknadKobletTilSakskompleks(event.id)
             }
         }
 
         when (event.previousState) {
-            "KomplettSakTilstand" -> {
+            Sakskompleks.TilstandType.KOMPLETT_SAK -> {
                 log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
             }
-            "TrengerManuellHåndteringTilstand" -> {
+            Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING -> {
                 log.info("sakskompleks med id ${event.id} trenger manuell behandling")
             }
         }

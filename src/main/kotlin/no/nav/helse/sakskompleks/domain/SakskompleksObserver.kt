@@ -6,9 +6,9 @@ import java.util.*
 interface SakskompleksObserver {
     data class StateChangeEvent(val id: UUID,
                                 val aktørId: String,
-                                val currentState: String,
-                                val previousState: String,
-                                val eventName: Event.Type,
+                                val currentState: Sakskompleks.TilstandType,
+                                val previousState: Sakskompleks.TilstandType,
+                                val eventType: Event.Type,
                                 val currentMemento: Sakskompleks.Memento,
                                 val previousMemento: Sakskompleks.Memento) {
     }

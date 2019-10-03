@@ -21,12 +21,12 @@ internal class SakskompleksProbeTest {
     @Test
     fun `teller nye sakskompleks`() {
         val sakskompleksCounterBefore = getCounterValue(SakskompleksProbe.sakskompleksTotalsCounterName)
-        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykmelding.name))
+        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.NySykepengesøknad.name))
 
-        probe.sakskompleksChanged(changeEvent("SykmeldingMottattTilstand", "StartTilstand", Event.Type.Sykmelding))
+        probe.sakskompleksChanged(changeEvent(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Sakskompleks.TilstandType.START, Event.Type.NySykepengesøknad))
 
         val sakskompleksCounterAfter = getCounterValue(SakskompleksProbe.sakskompleksTotalsCounterName)
-        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykmelding.name))
+        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.NySykepengesøknad.name))
 
         assertCounter(sakskompleksCounterAfter, sakskompleksCounterBefore)
         assertCounter(sykmeldingerCounterAfter, sykmeldingerCounterBefore)
@@ -34,22 +34,22 @@ internal class SakskompleksProbeTest {
 
     @Test
     fun `teller nye sykmeldinger`() {
-        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykmelding.name))
+        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.NySykepengesøknad.name))
 
-        probe.sakskompleksChanged(changeEvent("SykmeldingMottattTilstand", "SykmeldingMottattTilstand", Event.Type.Sykmelding))
+        probe.sakskompleksChanged(changeEvent(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Event.Type.NySykepengesøknad))
 
-        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykmelding.name))
+        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.NySykepengesøknad.name))
 
         assertCounter(sykmeldingerCounterAfter, sykmeldingerCounterBefore)
     }
 
     @Test
     fun `teller nye søknader`() {
-        val søknadCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykepengesøknad.name))
+        val søknadCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.SendtSykepengesøknad.name))
 
-        probe.sakskompleksChanged(changeEvent("SøknadMottattTilstand", "SykmeldingMottattTilstand", Event.Type.Sykepengesøknad))
+        probe.sakskompleksChanged(changeEvent(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Event.Type.SendtSykepengesøknad))
 
-        val søknadCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Sykepengesøknad.name))
+        val søknadCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.SendtSykepengesøknad.name))
 
         assertCounter(søknadCounterAfter, søknadCounterBefore)
     }
@@ -58,7 +58,7 @@ internal class SakskompleksProbeTest {
     fun `teller nye inntektsmeldinger`() {
         val inntektsmeldingCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Inntektsmelding.name))
 
-        probe.sakskompleksChanged(changeEvent("KomplettSakTilstand", "SøknadMottattTilstand", Event.Type.Inntektsmelding))
+        probe.sakskompleksChanged(changeEvent(Sakskompleks.TilstandType.KOMPLETT_SAK, Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, Event.Type.Inntektsmelding))
 
         val inntektsmeldingCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(Event.Type.Inntektsmelding.name))
 
@@ -74,14 +74,14 @@ internal class SakskompleksProbeTest {
                     aktørId = aktørId
             )
 
-    private fun changeEvent(currentState: String, previousState: String, eventName: Event.Type) =
+    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: Event.Type) =
             sakskompleks().let { sakskompleks ->
                 SakskompleksObserver.StateChangeEvent(
                         id = id,
                         aktørId = aktørId,
                         currentState = currentState,
                         previousState = previousState,
-                        eventName = eventName,
+                        eventType = eventType,
                         currentMemento = sakskompleks.memento(),
                         previousMemento = sakskompleks.memento()
                 )

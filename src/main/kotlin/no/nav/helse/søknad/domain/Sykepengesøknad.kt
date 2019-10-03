@@ -21,10 +21,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 const val SØKNAD_SENDT = "SENDT"
+const val SØKNAD_NY = "NY"
+const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
+data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -44,14 +46,33 @@ data class Sykepengesøknad(val jsonNode: JsonNode): Event, Sykdomshendelse {
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: KildeHendelse): Int = opprettet.compareTo(other.rapportertdato())
 
-    private val sykeperiodeTidslinje get(): Sykdomstidslinje = sykeperioder.map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
-        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
-    private val egenmeldingsTidslinje get(): Sykdomstidslinje = egenmeldinger.map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
-        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
-    private val ferieTidslinje get(): Sykdomstidslinje = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+    private val sykeperiodeTidslinje
+        get(): List<Sykdomstidslinje> = sykeperioder.map {
+            Sykdomstidslinje.sykedager(it.fom, it.tom, this)
+        }
+    private val egenmeldingsTidslinje
+        get(): List<Sykdomstidslinje> = egenmeldinger.map {
+            Sykdomstidslinje.sykedager(it.fom, it.tom, this)
+        }
+    private val ferieTidslinje
+        get(): List<Sykdomstidslinje> = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map {
+            Sykdomstidslinje.ferie(it.fom, it.tom, this)
+        }
+    private val arbeidGjenopptattTidslinje
+        get(): List<Sykdomstidslinje> = arbeidGjenopptatt?.let {
+            listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this))
+        } ?: emptyList()
+
+    override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje)
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
-    override fun sykdomstidslinje() = sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje
+    override fun eventType(): Event.Type {
+        return when (status) {
+            SØKNAD_SENDT -> Event.Type.SendtSykepengesøknad
+            in arrayOf(SØKNAD_NY, SØKNAD_FREMTIDIG) -> Event.Type.NySykepengesøknad
+            else -> throw IllegalStateException("Kunne ikke mappe søknadstype $status til en event")
+        }
+    }
 }
 
 data class Periode(val jsonNode: JsonNode) {

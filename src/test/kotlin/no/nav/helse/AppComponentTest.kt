@@ -28,11 +28,13 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+@Disabled("Denne logikken er ikke implementert uten sykmeldinger")
 @KtorExperimentalAPI
 class AppComponentTest {
 

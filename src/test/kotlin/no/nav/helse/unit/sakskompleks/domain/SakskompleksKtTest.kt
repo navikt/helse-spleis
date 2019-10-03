@@ -65,23 +65,6 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `state inneholder sykmeldinger`() {
-        val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(standardNySøknad)
-
-        val memento = sakskompleks.memento()
-        val node = objectMapper.readTree(memento.state)
-
-        assertTrue(node["sykmeldinger"].isArray)
-        assertEquals(standardNySøknad.id, node["sykmeldinger"][0]["id"].textValue())
-    }
-
-    @Test
     fun `state inneholder inntektsmeldinger`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
@@ -97,24 +80,6 @@ class SakskompleksKtTest {
 
         assertTrue(node["inntektsmeldinger"].isArray)
         assertEquals(enInntektsmelding.inntektsmeldingId, node["inntektsmeldinger"][0]["inntektsmeldingId"].textValue())
-    }
-
-    @Test
-    fun `state inneholder søknader`() {
-        val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
-            id = id,
-            aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(standardNySøknad)
-        sakskompleks.leggTil(standardSendtSøknad)
-
-        val memento = sakskompleks.memento()
-        val node = objectMapper.readTree(memento.state)
-
-        assertTrue(node["søknader"].isArray)
-        assertEquals(standardSendtSøknad.id, node["søknader"][0]["id"].textValue())
     }
 
     @Test
@@ -142,17 +107,25 @@ class SakskompleksKtTest {
     fun `bruker datoer fra egenmeldingen om den er før sykmeldingen`() {
         val sykmelding = søknad(
             fom = LocalDate.of(2019, 8, 19),
+            tom = LocalDate.of(2019, 8, 27),
             søknadsperioder = listOf(
                 SoknadsperiodeDTO(
                     fom = LocalDate.of(2019, 8, 19),
                     tom = LocalDate.of(2019, 8, 27)
                 )
-            )
+            ),
+            egenmeldinger = emptyList()
         )
 
         val søknad = søknad(
             fom = LocalDate.of(2019, 8, 19),
             tom = LocalDate.of(2019, 8, 27),
+            søknadsperioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            ),
             egenmeldinger = listOf(
                 PeriodeDTO(
                     fom = LocalDate.of(2019, 8, 16),
@@ -170,47 +143,10 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(søknad)
 
         assertEquals(LocalDate.of(2019, 8, 16), sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
     }
 
     @Test
-    fun `bruker syketilefelleStartDato om den peker på en dato tidligere enn sykmeldingen`() {
-        val sykmelding = søknad(
-                status = SoknadsstatusDTO.NY,
-                fom = LocalDate.of(2019, 8, 1),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                )
-        )
-
-        val søknad = søknad(
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27),
-            egenmeldinger = listOf(
-                PeriodeDTO(
-                    fom = LocalDate.of(2019, 8, 16),
-                    tom = LocalDate.of(2019, 8, 18)
-                )
-            )
-        )
-
-        val sakskompleks = Sakskompleks(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(sykmelding)
-        sakskompleks.leggTil(søknad)
-
-        assertEquals(LocalDate.of(2019, 8, 1), sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
-    }
-
-    @Test
-    fun `bruker syketilefelle | fom om vi ikke har andre tidligere datoer`() {
+    fun `bruker syketilefelle fom om vi ikke har andre tidligere datoer`() {
         val sykmelding = søknad(
             fom = LocalDate.of(2019, 8, 19),
             søknadsperioder = listOf(
@@ -235,25 +171,35 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(søknad)
 
         assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8, 27), sakskompleks.tom())
     }
 
     @Test
     fun `arbeidGjennopptatt overstyrer sykmeldingsperiode om den er satt`() {
         val sykmelding = søknad(
             fom = LocalDate.of(2019, 8, 19),
+            tom = LocalDate.of(2019, 8, 27),
             søknadsperioder = listOf(
                 SoknadsperiodeDTO(
                     fom = LocalDate.of(2019, 8, 19),
                     tom = LocalDate.of(2019, 8, 27)
                 )
-            )
+            ),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
         )
 
         val søknad = søknad(
             fom = LocalDate.of(2019, 8, 19),
             tom = LocalDate.of(2019, 8, 27),
-            arbeidGjenopptatt = LocalDate.of(2019, 8, 26)
+            søknadsperioder = listOf(
+                SoknadsperiodeDTO(
+                    fom = LocalDate.of(2019, 8, 19),
+                    tom = LocalDate.of(2019, 8, 27)
+                )
+            ),
+            egenmeldinger = emptyList(),
+            arbeidGjenopptatt = LocalDate.of(2019, 8, 26),
+            fravær = emptyList()
         )
 
         val sakskompleks = Sakskompleks(
@@ -265,7 +211,7 @@ class SakskompleksKtTest {
         sakskompleks.leggTil(søknad)
 
         assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8, 26), sakskompleks.tom())
+        assertEquals(LocalDate.of(2019, 8, 25), sakskompleks.sisteSykdag())
     }
 
     @Disabled("denne må testes på nytt når sykdomstidslinjen er på plass")

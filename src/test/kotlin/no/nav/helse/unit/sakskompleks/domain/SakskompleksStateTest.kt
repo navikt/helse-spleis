@@ -27,14 +27,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     private val inntektsmeldingId = UUID.randomUUID()
 
     @Test
-    fun `motta sykmelding`(){
+    fun `motta ny søknad`(){
         val sakskompleks = beInStartTilstand()
 
         sakskompleks.leggTil(nySøknad)
 
-        assertEquals("StartTilstand", lastEvent.previousState)
-        assertEquals("SykmeldingMottattTilstand", lastEvent.currentState)
-        assertEquals(Event.Type.Sykmelding, lastEvent.eventName)
+        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.currentState)
+        assertEquals(Event.Type.NySykepengesøknad, lastEvent.eventType)
     }
 
     @Test
@@ -43,9 +43,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.leggTil(søknad())
 
-        assertEquals("StartTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
-        assertEquals(Event.Type.Sykepengesøknad, lastEvent.eventName)
+        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Event.Type.SendtSykepengesøknad, lastEvent.eventType)
     }
 
     @Test
@@ -54,89 +54,89 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.leggTil(inntektsmelding())
 
-        assertEquals("StartTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
-        assertEquals(Event.Type.Inntektsmelding, lastEvent.eventName)
+        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Event.Type.Inntektsmelding, lastEvent.eventType)
     }
 
     @Test
-    fun `motta søknad etter sykmelding`(){
-        val sakskompleks = beInMottattSykmelding()
+    fun `motta sendt søknad etter ny søknad`(){
+        val sakskompleks = beInNySøknad()
 
         sakskompleks.leggTil(søknad())
 
-        assertEquals("SykmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("SøknadMottattTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.currentState)
     }
 
     @Test
-    fun `motta inntektsmelding etter sykmelding`(){
-        val sakskompleks = beInMottattSykmelding()
+    fun `motta inntektsmelding etter ny søknad`(){
+        val sakskompleks = beInNySøknad()
 
         sakskompleks.leggTil(inntektsmelding())
 
-        assertEquals("SykmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("InntektsmeldingMottattTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.currentState)
     }
 
     @Test
-    fun `motta sykmelding etter sykmelding`(){
-        val sakskompleks = beInMottattSykmelding()
+    fun `motta ny søknad etter ny søknad`(){
+        val sakskompleks = beInNySøknad()
 
         sakskompleks.leggTil(nySøknad)
 
-        assertEquals("SykmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
     }
 
     @Test
-    fun `motta søknad etter søknad`() {
-        val sakskompleks = beInMottattSøknad()
+    fun `motta ny søknad etter sendt søknad`() {
+        val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.leggTil(sendtSøknad)
+        sakskompleks.leggTil(nySøknad)
 
-        assertEquals("SøknadMottattTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
     }
 
     @Test
-    fun `motta inntektsmelding etter søknad`() {
-        val sakskompleks = beInMottattSøknad()
+    fun `motta inntektsmelding etter sendt søknad`() {
+        val sakskompleks = beInSendtSøknad()
 
         sakskompleks.leggTil(inntektsmelding())
 
-        assertEquals("SøknadMottattTilstand", lastEvent.previousState)
-        assertEquals("KomplettSakTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastEvent.currentState)
     }
 
     @Test
-    fun `motta sykmelding etter søknad`() {
-        val sakskompleks = beInMottattSøknad()
+    fun `motta ny søknad etter søknad`() {
+        val sakskompleks = beInSendtSøknad()
 
         sakskompleks.leggTil(nySøknad)
 
-        assertEquals("SøknadMottattTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
     }
 
     @Test
-    fun `motta søknad etter inntektsmelding`() {
+    fun `motta sendt søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
         sakskompleks.leggTil(sendtSøknad)
 
-        assertEquals("InntektsmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("KomplettSakTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastEvent.currentState)
     }
 
     @Test
-    fun `motta sykmelding etter inntektsmelding`() {
+    fun `motta ny søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
         sakskompleks.leggTil(nySøknad)
 
-        assertEquals("InntektsmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
     }
 
     @Test
@@ -145,8 +145,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.leggTil(inntektsmelding())
 
-        assertEquals("InntektsmeldingMottattTilstand", lastEvent.previousState)
-        assertEquals("TrengerManuellHåndteringTilstand", lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
     }
 
     companion object {
@@ -158,18 +158,18 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 addObserver(this@SakskompleksStateTest)
             }
 
-    private fun beInMottattSykmelding() =
+    private fun beInNySøknad() =
             beInStartTilstand().apply {
                 leggTil(nySøknad)
             }
 
-    private fun beInMottattSøknad() =
-            beInMottattSykmelding().apply {
+    private fun beInSendtSøknad() =
+            beInNySøknad().apply {
                 leggTil(søknad())
             }
 
     private fun beInMottattInntektsmelding() =
-            beInMottattSykmelding().apply {
+            beInNySøknad().apply {
                 leggTil(inntektsmelding())
             }
 

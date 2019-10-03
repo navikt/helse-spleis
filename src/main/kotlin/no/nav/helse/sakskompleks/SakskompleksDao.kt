@@ -42,7 +42,7 @@ class SakskompleksDao(private val dataSource: DataSource) : SakskompleksObserver
 
     override fun sakskompleksChanged(event: StateChangeEvent) {
         when (event.previousState) {
-            "StartTilstand" -> {
+            Sakskompleks.TilstandType.START -> {
                 opprettSak(event.id, event.aktørId, event.currentMemento)
             }
             else -> oppdaterSak(event.id, event.currentMemento)

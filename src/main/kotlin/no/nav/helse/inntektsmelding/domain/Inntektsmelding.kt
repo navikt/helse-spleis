@@ -18,6 +18,7 @@ import java.time.LocalDate
 @JsonSerialize(using = InntektsmeldingSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
 data class Inntektsmelding(val jsonNode: JsonNode): Event {
+    override fun eventType() = Event.Type.Inntektsmelding
 
     val inntektsmeldingId = jsonNode["inntektsmeldingId"].asText() as String
 
