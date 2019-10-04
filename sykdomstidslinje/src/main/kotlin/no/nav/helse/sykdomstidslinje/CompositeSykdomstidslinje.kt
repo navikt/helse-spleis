@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelse.Sykdomshendelse
 import java.time.LocalDate
 
 class CompositeSykdomstidslinje(
@@ -17,7 +18,7 @@ class CompositeSykdomstidslinje(
 
     override fun length() = tidslinjer.sumBy { it.length() }
 
-    override fun dag(dato: LocalDate, hendelse: KildeHendelse) =
+    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) =
         tidslinjer.map { it.dag(dato, hendelse) }.firstOrNull { it !is Nulldag } ?: Nulldag(
             dato,
             hendelse

@@ -10,6 +10,7 @@ allprojects {
 }
 
 val junitJupiterVersion = "5.4.0"
+val jacksonVersion = "2.9.8"
 
 repositories {
     mavenCentral()
@@ -24,6 +25,9 @@ subprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
+
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

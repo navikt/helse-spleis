@@ -1,8 +1,9 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelse.Sykdomshendelse
 import java.time.LocalDate
 
-class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: KildeHendelse): Dag(gjelder, hendelse, 20) {
+class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse, 20) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitArbeidsdag(this)
     }
