@@ -21,6 +21,7 @@ internal class BesteDagTest {
         val sendtSøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
         val nulldag get() = Nulldag(2.mandag, Testhendelse())
+        val arbeidsdag get() = Arbeidsdag(2.mandag, Testhendelse())
         val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
         val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedager(2.mandag, inntektsmelding)
         val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
@@ -55,6 +56,12 @@ internal class BesteDagTest {
     fun `ferie vinner over utenlandsdag`() {
         assertWinner(ferieFraSøknad, utenlandsFraSendtSøknad, Feriedag::class, 1)
         assertWinner(utenlandsFraSendtSøknad, ferieFraSøknad, Feriedag::class, 1)
+    }
+
+    @Test
+    fun `arbeidsdag vinner over sykedag`() {
+        assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class, 1)
+        assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class, 1)
     }
 
     private fun <T : Dag> assertWinner(

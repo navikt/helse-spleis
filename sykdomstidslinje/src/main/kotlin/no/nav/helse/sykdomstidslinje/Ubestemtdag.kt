@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-class Ubestemtdag internal constructor(left: Dag, right:Dag): Dag(left.dagen, sykdomshendelse(left, right), 1000) {
+class Ubestemtdag internal constructor(left: Dag, right:Dag): Dag(left.dagen, sykdomshendelse(left, right)) {
 
     init { erstatter(left,right) }
 

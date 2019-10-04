@@ -9,10 +9,9 @@ import kotlin.reflect.KClass
 
 abstract class Dag internal constructor(
     internal val dagen: LocalDate,
-    internal val hendelse: Sykdomshendelse,
-    private val prioritet: Int
+    internal val hendelse: Sykdomshendelse
 ) :
-    Sykdomstidslinje(), Comparable<Dag> {
+    Sykdomstidslinje() {
     private val anyDag = null as KClass<Dag>?
     private val anyEvent = null as KClass<Sykdomshendelse>?
     private val søknad = Sykepengesøknad::class
@@ -22,6 +21,7 @@ abstract class Dag internal constructor(
     private val sykedag = Sykedag::class
     private val feriedag = Feriedag::class
     private val utenlandsdag = Utenlandsdag::class
+    private val arbeidsdag = Arbeidsdag::class
 
     internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
@@ -51,6 +51,8 @@ abstract class Dag internal constructor(
             helper.doesMatch(sykedag, anyEvent, feriedag, anyEvent) -> other.also { other.erstatter(this) }
             helper.doesMatch(feriedag, anyEvent, utenlandsdag, anyEvent) -> this.also { this.erstatter(other) }
             helper.doesMatch(utenlandsdag, anyEvent, feriedag, anyEvent) -> other.also { other.erstatter(this) }
+            helper.doesMatch(arbeidsdag, anyEvent, sykedag, anyEvent) -> this.also { this.erstatter(other) }
+            helper.doesMatch(sykedag, anyEvent, arbeidsdag, anyEvent) -> other.also { other.erstatter(this) }
             else -> Ubestemtdag(this, other)
         }
     }
@@ -61,11 +63,6 @@ abstract class Dag internal constructor(
                 this
             )
         }
-
-    override fun compareTo(other: Dag): Int {
-        val resultat = this.prioritet.compareTo(other.prioritet)
-        return if (resultat == 0) this.hendelse.rapportertdato().compareTo(other.hendelse.rapportertdato()) else resultat
-    }
 
     internal open fun tilDag() = this
 
