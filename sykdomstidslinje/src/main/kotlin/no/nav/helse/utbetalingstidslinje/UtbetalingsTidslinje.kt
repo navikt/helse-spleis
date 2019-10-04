@@ -1,11 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykHelgedag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Sykedag
+import no.nav.helse.sykdomstidslinje.*
 
-class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor{
+class UtbetalingsTidslinje(private val dagsats: Double) : SykdomstidslinjeVisitor {
 
     private val utbetalingsDager = mutableListOf<UtbetalingsDag>()
 
@@ -15,7 +12,7 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
 
     fun totalSum() = UtbetalingsDag.sum(utbetalingsDager)
 
-    override fun visitSykedag(sykedag: Sykedag){
+    override fun visitSykedag(sykedag: Sykedag) {
         state.visitSykedag(sykedag)
     }
 
@@ -23,14 +20,18 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
         state.visitSykHelgedag(sykHelgedag)
     }
 
-    private fun byttTilstand(){
-        arbeidsgiverDagNummer += 1
-        if(arbeidsgiverDagNummer > dagerIArbeidsgiverPeriode) state = TrygdenYterPeriode()
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
+        state.visitEgenmeldingsdag(egenmeldingsdag)
     }
 
-    private class UtbetalingsDag(private val dagsats: Double, private val dag: Dag){
+    private fun tellArbeidsgiverDager() {
+        arbeidsgiverDagNummer += 1
+        if (arbeidsgiverDagNummer >= dagerIArbeidsgiverPeriode) state = TrygdenYterPeriode()
+    }
 
-        companion object{
+    private class UtbetalingsDag(private val dagsats: Double, private val dag: Dag) {
+
+        companion object {
             internal fun sum(utbetalingsDager: List<UtbetalingsDag>) = utbetalingsDager.sumByDouble { it.dagsats }
         }
 
@@ -38,20 +39,25 @@ class UtbetalingsTidslinje(private val dagsats: Double): SykdomstidslinjeVisitor
 
     private interface State : SykdomstidslinjeVisitor
 
-    private inner class ArbeidsgiverPeriode: State{
-        override fun visitSykedag(sykedag: Sykedag){
+    private inner class ArbeidsgiverPeriode : State {
+        override fun visitSykedag(sykedag: Sykedag) {
             utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykedag))
-            byttTilstand()
+            tellArbeidsgiverDager()
         }
 
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
             utbetalingsDager.add(UtbetalingsDag(0.0, dag = sykHelgedag))
-            byttTilstand()
+            tellArbeidsgiverDager()
+        }
+
+        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
+            utbetalingsDager.add(UtbetalingsDag(0.0, dag = egenmeldingsdag))
+            tellArbeidsgiverDager()
         }
     }
 
-    private inner class TrygdenYterPeriode: State{
-        override fun visitSykedag(sykedag: Sykedag){
+    private inner class TrygdenYterPeriode : State {
+        override fun visitSykedag(sykedag: Sykedag) {
             utbetalingsDager.add(UtbetalingsDag(dagsats, dag = sykedag))
         }
 

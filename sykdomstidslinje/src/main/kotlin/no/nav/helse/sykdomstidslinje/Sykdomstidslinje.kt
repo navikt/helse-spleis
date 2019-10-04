@@ -88,7 +88,7 @@ abstract class Sykdomstidslinje {
         return visitor.results()
     }
 
-    fun utbetalingstidslinje(dagsats: Double) = UtbetalingsTidslinje(dagsats).also{this.accept(it)}
+    fun utbetalingstidslinje(dagsats: Double) = UtbetalingsTidslinje(dagsats).also { this.accept(it) }
 
     companion object {
         fun sykedager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
@@ -99,6 +99,8 @@ abstract class Sykdomstidslinje {
                 gjelder,
                 hendelse
             )
+
+        fun egenmeldingsdager(gjelder: LocalDate, hendelse: Sykdomshendelse) = Egenmeldingsdag(gjelder, hendelse)
 
         fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Feriedag(
@@ -122,6 +124,16 @@ abstract class Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedager(
+                    it,
+                    hendelse
+                )
+            }.toList())
+        }
+
+        fun egenmeldingsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                egenmeldingsdager(
                     it,
                     hendelse
                 )
