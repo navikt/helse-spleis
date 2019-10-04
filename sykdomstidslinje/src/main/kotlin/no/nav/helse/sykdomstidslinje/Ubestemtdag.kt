@@ -1,9 +1,9 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Sykdomshendelse
-import java.time.LocalDate
+class Ubestemtdag internal constructor(left: Dag, right:Dag): Dag(left.dagen, sykdomshendelse(left, right), 1000) {
 
-class Ubestemtdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse, 20) {
+    init { erstatter(left,right) }
+
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitUbestemt(this)
     }
@@ -12,5 +12,10 @@ class Ubestemtdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshend
 
     override fun antallSykedagerHvorViTellerMedHelg() = 0
 
-    override fun toString() = formatter.format(dagen) + "\tArbeidsdag"
+    override fun toString() = formatter.format(dagen) + "\tUbestemtdag"
 }
+
+private fun sykdomshendelse(
+    left: Dag,
+    right: Dag
+) = if (left.hendelse > right.hendelse) left.hendelse else right.hendelse

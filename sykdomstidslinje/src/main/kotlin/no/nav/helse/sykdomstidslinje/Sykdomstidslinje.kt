@@ -110,6 +110,15 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
+        fun utenlandsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            if (erArbeidsdag(gjelder)) Utenlandsdag(
+                gjelder,
+                hendelse
+            ) else Helgedag(
+                gjelder,
+                hendelse
+            )
+
         fun sykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
@@ -144,6 +153,16 @@ abstract class Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ikkeSykedag(
+                    it,
+                    hendelse
+                )
+            }.toList())
+        }
+
+        fun utenlandsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                utenlandsdag(
                     it,
                     hendelse
                 )
