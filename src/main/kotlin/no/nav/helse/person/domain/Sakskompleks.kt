@@ -29,10 +29,16 @@ class Sakskompleks internal constructor(
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     fun leggTil(søknad: Sykepengesøknad) {
+        if (søknad.erNy() || søknad.erFremtidig()) {
+            nyeSøknader.add(søknad)
+        } else if (søknad.erSendt()) {
+            sendteSøknader.add(søknad)
+        }
         tilstand.søknadMottatt(søknad)
     }
 
     fun leggTil(inntektsmelding: Inntektsmelding) {
+        inntektsmeldinger.add(inntektsmelding)
         tilstand.inntektsmeldingMottatt(inntektsmelding)
     }
 
@@ -95,13 +101,7 @@ class Sakskompleks internal constructor(
 
     private inner class StartTilstand : Sakskomplekstilstand() {
         override fun søknadMottatt(søknad: Sykepengesøknad) {
-            if (søknad.erNy() || søknad.erFremtidig()) {
-                transition(søknad, NySøknadMottattTilstand()) {
-                    nyeSøknader.add(søknad)
-                }
-            } else {
-                transition(søknad, TrengerManuellHåndteringTilstand())
-            }
+            transition(søknad, if (søknad.erNy() || søknad.erFremtidig()) NySøknadMottattTilstand() else TrengerManuellHåndteringTilstand())
         }
 
         override val type = TilstandType.START
@@ -109,19 +109,11 @@ class Sakskompleks internal constructor(
 
     private inner class NySøknadMottattTilstand : Sakskomplekstilstand() {
         override fun søknadMottatt(søknad: Sykepengesøknad) {
-            if (søknad.erSendt()) {
-                transition(søknad, SendtSøknadMottattTilstand()) {
-                    sendteSøknader.add(søknad)
-                }
-            } else {
-                transition(søknad, TrengerManuellHåndteringTilstand())
-            }
+            transition(søknad, if (søknad.erSendt()) SendtSøknadMottattTilstand() else TrengerManuellHåndteringTilstand())
         }
 
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, InntektsmeldingMottattTilstand()) {
-                inntektsmeldinger.add(inntektsmelding)
-            }
+            transition(inntektsmelding, InntektsmeldingMottattTilstand())
         }
 
         override val type = TilstandType.NY_SØKNAD_MOTTATT
@@ -129,9 +121,7 @@ class Sakskompleks internal constructor(
 
     private inner class SendtSøknadMottattTilstand : Sakskomplekstilstand() {
         override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, KomplettSakTilstand()) {
-                inntektsmeldinger.add(inntektsmelding)
-            }
+            transition(inntektsmelding, KomplettSakTilstand())
         }
 
         override val type = TilstandType.SENDT_SØKNAD_MOTTATT
@@ -139,13 +129,7 @@ class Sakskompleks internal constructor(
 
     private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
         override fun søknadMottatt(søknad: Sykepengesøknad) {
-            if (søknad.erSendt()) {
-                transition(søknad, KomplettSakTilstand()) {
-                    sendteSøknader.add(søknad)
-                }
-            } else {
-                transition(søknad, TrengerManuellHåndteringTilstand())
-            }
+            transition(søknad, if (søknad.erSendt()) KomplettSakTilstand() else TrengerManuellHåndteringTilstand())
         }
 
         override val type = TilstandType.INNTEKTSMELDING_MOTTATT

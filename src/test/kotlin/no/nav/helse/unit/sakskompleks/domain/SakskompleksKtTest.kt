@@ -101,6 +101,117 @@ class SakskompleksKtTest {
     }
 
     @Test
+    fun `bruker datoer fra egenmeldingen om den er før sykmeldingen`() {
+        val sykmelding = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                tom = LocalDate.of(2019, 8, 27),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = LocalDate.of(2019, 8, 19),
+                                tom = LocalDate.of(2019, 8, 27)
+                        )
+                ),
+                egenmeldinger = emptyList()
+        )
+
+        val søknad = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                tom = LocalDate.of(2019, 8, 27),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = LocalDate.of(2019, 8, 19),
+                                tom = LocalDate.of(2019, 8, 27)
+                        )
+                ),
+                egenmeldinger = listOf(
+                        PeriodeDTO(
+                                fom = LocalDate.of(2019, 8, 16),
+                                tom = LocalDate.of(2019, 8, 18)
+                        )
+                )
+        )
+
+        val sakskompleks = Sakskompleks(
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
+        )
+
+        sakskompleks.leggTil(sykmelding)
+        sakskompleks.leggTil(søknad)
+
+        assertEquals(LocalDate.of(2019, 8, 16), sakskompleks.fom())
+    }
+
+    @Test
+    fun `bruker syketilefelle fom om vi ikke har andre tidligere datoer`() {
+        val sykmelding = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = LocalDate.of(2019, 8, 19),
+                                tom = LocalDate.of(2019, 8, 27)
+                        )
+                )
+        )
+
+        val søknad = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                tom = LocalDate.of(2019, 8, 27)
+        )
+
+        val sakskompleks = Sakskompleks(
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
+        )
+
+        sakskompleks.leggTil(sykmelding)
+        sakskompleks.leggTil(søknad)
+
+        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
+    }
+
+    @Test
+    fun `arbeidGjennopptatt overstyrer sykmeldingsperiode om den er satt`() {
+        val sykmelding = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                tom = LocalDate.of(2019, 8, 27),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = LocalDate.of(2019, 8, 19),
+                                tom = LocalDate.of(2019, 8, 27)
+                        )
+                ),
+                egenmeldinger = emptyList(),
+                fravær = emptyList()
+        )
+
+        val søknad = søknad(
+                fom = LocalDate.of(2019, 8, 19),
+                tom = LocalDate.of(2019, 8, 27),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = LocalDate.of(2019, 8, 19),
+                                tom = LocalDate.of(2019, 8, 27)
+                        )
+                ),
+                egenmeldinger = emptyList(),
+                arbeidGjenopptatt = LocalDate.of(2019, 8, 26),
+                fravær = emptyList()
+        )
+
+        val sakskompleks = Sakskompleks(
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
+        )
+
+        sakskompleks.leggTil(sykmelding)
+        sakskompleks.leggTil(søknad)
+
+        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
+        assertEquals(LocalDate.of(2019, 8, 25), sakskompleks.sisteSykdag())
+    }
+
+    @Test
     fun `testsykmelding overskriver felter riktig`() {
         val nySøknad = søknad(
             fom = LocalDate.of(2019, 8, 19),
