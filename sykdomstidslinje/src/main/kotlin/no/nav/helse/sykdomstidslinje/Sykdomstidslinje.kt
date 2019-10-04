@@ -26,7 +26,7 @@ abstract class Sykdomstidslinje {
 
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
         val intervalEtterKonflikter =
-            datesUntil.map { this.beste(other, it) }.toList()
+            datesUntil.map { this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }.toList()
 
         return CompositeSykdomstidslinje(intervalEtterKonflikter.map { it.tilDag() })
     }
@@ -37,16 +37,6 @@ abstract class Sykdomstidslinje {
             harOverlapp(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
             else -> min(this.avstand(other), other.avstand(this))
         }
-
-    private fun beste(other: Sykdomstidslinje, dato: LocalDate): Dag {
-        val dag = this.dag(dato, this.sisteHendelse())
-        val otherDag = other.dag(dato, other.sisteHendelse())
-
-        val (best, loser) = if (dag > otherDag) dag to otherDag else otherDag to dag
-
-        best.erstatter(loser.dagerErstattet() + loser)
-        return best
-    }
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()

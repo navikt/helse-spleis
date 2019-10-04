@@ -10,10 +10,21 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
+import java.time.LocalDateTime
 
-data class Inntektsmelding(val jsonNode: JsonNode): Event {
-    override fun eventType() = Event.Type.Inntektsmelding
+data class Inntektsmelding(val jsonNode: JsonNode) : Event, Sykdomshendelse {
+
+    val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
+
+    val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
+    val rapportertDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["rapportertDato"].textValue())
+
+    val ferie
+        get() = jsonNode["ferie"].map {
+            Periode(it)
+        }
 
     val inntektsmeldingId = jsonNode["inntektsmeldingId"].asText() as String
 
@@ -23,13 +34,35 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event {
 
     val arbeidsgiverAktorId: String? get() = jsonNode["arbeidsgiverAktorId"]?.textValue()
 
-    val arbeidsgiverperioder get() = jsonNode["arbeidsgiverperioder"].map {
-        Periode(it)
-    }
+    val arbeidsgiverperioder
+        get() = jsonNode["arbeidsgiverperioder"].map {
+            Periode(it)
+        }
 
-    val sisteDagIArbeidsgiverPeriode get() = arbeidsgiverperioder.maxBy {
-        it.tom
-    }?.tom
+    val sisteDagIArbeidsgiverPeriode
+        get() = arbeidsgiverperioder.maxBy {
+            it.tom
+        }?.tom
+
+    override fun rapportertdato() = rapportertDato
+
+    override fun eventType() = Event.Type.Inntektsmelding
+
+    override fun aktørId(): String = arbeidstakerAktorId
+
+    override fun organisasjonsnummer(): String = virksomhetsnummer ?: arbeidsgiverFnr
+    ?: throw RuntimeException("Inntektsmelding mangler orgnummer og arbeidsgiver fnr")
+
+    override fun sykdomstidslinje(): Sykdomstidslinje {
+        val arbeidsgiverperiodetidslinjer = arbeidsgiverperioder
+            .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+        val ferietidslinjer = ferie
+            .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+        val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedager(gjelder = førsteFraværsdag, hendelse = this))
+
+        return (førsteFraværsdagTidslinje + arbeidsgiverperiodetidslinjer + ferietidslinjer)
+            .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+    }
 
     data class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
@@ -38,20 +71,20 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event {
 
 }
 
-class InntektsmeldingSerializer: StdSerializer<Inntektsmelding>(Inntektsmelding::class.java) {
+class InntektsmeldingSerializer : StdSerializer<Inntektsmelding>(Inntektsmelding::class.java) {
     override fun serialize(sykmelding: Inntektsmelding?, gen: JsonGenerator?, provider: SerializerProvider?) {
         gen?.writeObject(sykmelding?.jsonNode)
     }
 }
 
-class InntektsmeldingDeserializer: StdDeserializer<Inntektsmelding>(Inntektsmelding::class.java) {
+class InntektsmeldingDeserializer : StdDeserializer<Inntektsmelding>(Inntektsmelding::class.java) {
     companion object {
         private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
-            Inntektsmelding(objectMapper.readTree(parser))
+        Inntektsmelding(objectMapper.readTree(parser))
 
 }

@@ -10,6 +10,8 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     fun rapportertdato(): LocalDateTime
     fun organisasjonsnummer(): String
     fun sykdomstidslinje(): Sykdomstidslinje
+
+    override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())
 }
 
 interface Event {

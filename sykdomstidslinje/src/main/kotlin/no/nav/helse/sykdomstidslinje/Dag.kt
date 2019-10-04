@@ -22,6 +22,13 @@ abstract class Dag internal constructor(internal val dagen: LocalDate, internal 
     }
     fun dagerErstattet(): List<Dag> = erstatter
 
+    internal fun beste(other: Dag): Dag {
+        val (best, loser) = if (this > other) this to other else other to this
+
+        best.erstatter(loser.dagerErstattet() + loser)
+        return best
+    }
+
     override fun compareTo(other: Dag): Int {
         val resultat = this.prioritet.compareTo(other.prioritet)
         return if (resultat == 0) this.hendelse.rapportertdato().compareTo(other.hendelse.rapportertdato()) else resultat
