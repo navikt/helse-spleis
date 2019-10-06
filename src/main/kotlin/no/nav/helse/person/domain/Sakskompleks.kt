@@ -182,44 +182,6 @@ class Sakskompleks internal constructor(
         }
     }
 
-    internal fun memento(): Memento {
-        val writer = StringWriter()
-        val generator = JsonFactory().createGenerator(writer)
-
-        generator.writeStartObject()
-        generator.writeStringField("id", id.toString())
-        generator.writeStringField("aktørId", aktørId)
-        generator.writeStringField("tilstand", tilstand.type.name)
-
-        generator.writeArrayFieldStart("nyeSøknader")
-        nyeSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.jsonNode)
-        }
-        generator.writeEndArray()
-
-        generator.writeArrayFieldStart("inntektsmeldinger")
-        inntektsmeldinger.forEach { inntektsmelding ->
-            objectMapper.writeValue(generator, inntektsmelding.jsonNode)
-        }
-        generator.writeEndArray()
-
-        generator.writeArrayFieldStart("sendteSøknader")
-        sendteSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.jsonNode)
-        }
-        generator.writeEndArray()
-
-        generator.writeEndObject()
-
-        generator.flush()
-
-        return Memento(state = writer.toString())
-    }
-
-    class Memento(internal val state: String) {
-        override fun toString() = state
-    }
-
     // Gang of four Observer pattern
     internal fun addObserver(observer: SakskompleksObserver) {
         observers.add(observer)
@@ -238,6 +200,77 @@ class Sakskompleks internal constructor(
 
         observers.forEach { observer ->
             observer.sakskompleksChanged(event)
+        }
+    }
+
+    // memento pattern
+    internal fun memento(): Memento {
+        return MementoBuilder()
+                .id(id)
+                .aktørId(aktørId)
+                .tilstand(tilstand)
+                .nyeSøknader(nyeSøknader)
+                .inntektsmeldinger(inntektsmeldinger)
+                .sendteSøknader(sendteSøknader)
+                .build()
+    }
+
+    class Memento(internal val state: String) {
+        override fun toString() = state
+    }
+
+    private class MementoBuilder {
+
+        private val writer = StringWriter()
+        private val jsonGenerator = JsonFactory()
+                .createGenerator(writer)
+
+        init {
+            jsonGenerator.writeStartObject()
+        }
+
+        fun id(id: UUID) = apply {
+            jsonGenerator.writeStringField("id", id.toString())
+        }
+
+        fun aktørId(aktørId: String) = apply {
+            jsonGenerator.writeStringField("aktørId", aktørId)
+        }
+
+        fun tilstand(tilstand: Sakskomplekstilstand) = apply {
+            jsonGenerator.writeStringField("tilstand", tilstand.type.name)
+        }
+
+        fun nyeSøknader(søknader: List<Sykepengesøknad>) = apply {
+            jsonGenerator.writeArrayFieldStart("nyeSøknader")
+            søknader.forEach { søknad ->
+                objectMapper.writeValue(jsonGenerator, søknad.jsonNode)
+            }
+            jsonGenerator.writeEndArray()
+        }
+
+        fun sendteSøknader(søknader: List<Sykepengesøknad>) = apply {
+            jsonGenerator.writeArrayFieldStart("sendteSøknader")
+            søknader.forEach { søknad ->
+                objectMapper.writeValue(jsonGenerator, søknad.jsonNode)
+            }
+            jsonGenerator.writeEndArray()
+        }
+
+        fun inntektsmeldinger(søknader: List<Inntektsmelding>) = apply {
+            jsonGenerator.writeArrayFieldStart("inntektsmeldinger")
+            søknader.forEach { søknad ->
+                objectMapper.writeValue(jsonGenerator, søknad.jsonNode)
+            }
+            jsonGenerator.writeEndArray()
+        }
+
+        fun build(): Memento {
+            jsonGenerator.writeEndObject()
+            jsonGenerator.flush()
+            return Memento(
+                    state = writer.toString()
+            )
         }
     }
 }
