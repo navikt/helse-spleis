@@ -1,5 +1,6 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.utbetalingstidslinje.test
 
+import no.nav.helse.sykdomstidlinje.test.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdager
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedager
