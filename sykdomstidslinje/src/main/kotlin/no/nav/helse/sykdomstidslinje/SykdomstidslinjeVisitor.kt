@@ -9,6 +9,7 @@ interface SykdomstidslinjeVisitor {
     fun visitSykHelgedag(sykHelgedag: SykHelgedag) {}
     fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {}
     fun visitUbestemt(ubestemtdag: Ubestemtdag) {}
+    fun visitStudiedag(studiedag: Studiedag) {}
     fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
     fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
 }

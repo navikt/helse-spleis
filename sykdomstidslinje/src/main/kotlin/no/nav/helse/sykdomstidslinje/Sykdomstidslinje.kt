@@ -169,8 +169,26 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
+        fun studiedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            if (erArbeidsdag(gjelder)) Studiedag(
+                gjelder,
+                hendelse
+            ) else Helgedag(
+                gjelder,
+                hendelse
+            )
+
+        fun studiedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                studiedag(
+                    it,
+                    hendelse
+                )
+            }.toList())
+        }
+
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
-
     }
 }

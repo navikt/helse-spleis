@@ -50,4 +50,14 @@ internal class DagTest {
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
         assertEquals(0, helgedag.antallSykedagerHvorViTellerMedHelg())
     }
+
+    @Test
+    internal fun studiedag() {
+        val dagSykedagenDekker = LocalDate.of(2019,9,23)
+        val studiedag = Sykdomstidslinje.studiedag(dagSykedagenDekker, rapporterthendelse)
+
+        assertEquals(dagSykedagenDekker, studiedag.startdato())
+        assertEquals(dagSykedagenDekker, studiedag.sluttdato())
+        assertEquals(0, studiedag.antallSykedagerHvorViTellerMedHelg())
+    }
 }
