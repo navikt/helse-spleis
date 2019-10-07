@@ -45,7 +45,11 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
             listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this))
         } ?: emptyList()
 
-    override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje)
+    private val studiedagertidslinje = fraværsperioder.filter { it.type == Fraværstype.UTDANNING_FULLTID || it.type == Fraværstype.UTDANNING_DELTID }.map {
+        Sykdomstidslinje.studiedager(it.fom, it.tom, this)
+    }
+
+    override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     override fun eventType(): Event.Type {
