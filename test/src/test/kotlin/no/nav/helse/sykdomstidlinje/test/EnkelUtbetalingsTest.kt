@@ -3,7 +3,8 @@ package no.nav.helse.sykdomstidlinje.test
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdager
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedager
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.utenlandsdag
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,6 +55,52 @@ internal class EnkelUtbetalingsTest {
             utbetalingsTidslinje.totalSum(),
             "Forventet utbetaling skal være tre ganger dagsats siden tidslinjen har tre sykedager utenfor arbeidsgiverpoerioden"
         )
+        assertTrue(utbetalingsTidslinje.erAvklart())
+    }
+
+    @Test
+    internal fun `utenlandsopphold i arbeidsgiverperioden påvirker ikke totalsummen`() {
+        val sykdomstidslinje = utenlandsdag(1.juli, testKildeHendelse)
+
+        val utbetalingstidslinje = sykdomstidslinje.utbetalingstidslinje(1000.0)
+
+        assertEquals(
+            0.0,
+            utbetalingstidslinje.totalSum()
+        )
+
+        assertFalse(utbetalingstidslinje.erAvklart())
+    }
+
+    @Test
+    internal fun `utenlandsopphold i arbeidsgiverperioden telles ikke som en dag i arbeidsgiverperioden`() {
+        val sykdomstidslinje = sykedager(1.juli, 8.juli, testKildeHendelse) +
+                utenlandsdag(9.juli, testKildeHendelse) +
+                sykedager(10.juli, 18.juli, testKildeHendelse)
+
+        val utbetalingstidslinje = sykdomstidslinje.utbetalingstidslinje(1000.0)
+
+        assertEquals(
+            1000.0,
+            utbetalingstidslinje.totalSum()
+        )
+
+        assertFalse(utbetalingstidslinje.erAvklart())
+    }
+
+    @Test
+    internal fun `utenlandsopphold utbetales ikke når trygden yter`() {
+        val sykdomstidslinje = sykedager(1.juli, 17.juli, testKildeHendelse) +
+                utenlandsdag(18.juli, testKildeHendelse)
+
+        val utbetalingstidslinje = sykdomstidslinje.utbetalingstidslinje(1000.0)
+
+        assertEquals(
+            1000.0,
+            utbetalingstidslinje.totalSum()
+        )
+
+        assertFalse(utbetalingstidslinje.erAvklart())
     }
 
     private val Int.juli get() = LocalDate.of(2019, JULY, this)
