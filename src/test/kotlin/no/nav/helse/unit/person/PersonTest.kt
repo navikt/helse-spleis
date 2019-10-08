@@ -15,7 +15,7 @@ internal class PersonTest {
         val observer = TestObserver()
         Person().also {
             it.addObserver(observer)
-            it.add(søknad(status = SoknadsstatusDTO.NY))
+            it.håndterNySøknad(søknad(status = SoknadsstatusDTO.NY))
         }
         assertTrue(observer.personEndret)
         assertTrue(observer.wasTriggered)
