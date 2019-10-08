@@ -18,6 +18,8 @@ class Person: SakskompleksObserver {
 
     fun håndterSendtSøknad(søknad: Sykepengesøknad) {
         require(søknad.erSendt()) { "søknad må være sendt" }
+
+        findOrCreateArbeidsgiver(søknad).håndterSendtSøknad(søknad)
     }
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
@@ -50,6 +52,10 @@ class Person: SakskompleksObserver {
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
         fun håndterNySøknad(søknad: Sykepengesøknad) {
+            findOrCreateSakskompleks(søknad).leggTil(søknad)
+        }
+
+        fun håndterSendtSøknad(søknad: Sykepengesøknad) {
             findOrCreateSakskompleks(søknad).leggTil(søknad)
         }
 
