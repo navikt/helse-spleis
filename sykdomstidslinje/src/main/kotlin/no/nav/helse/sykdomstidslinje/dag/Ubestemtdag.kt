@@ -5,7 +5,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 class Ubestemtdag internal constructor(left: Dag, right: Dag): Dag(left.dagen,
     sykdomshendelse(left, right)
 ) {
-
     init { erstatter(left,right) }
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
