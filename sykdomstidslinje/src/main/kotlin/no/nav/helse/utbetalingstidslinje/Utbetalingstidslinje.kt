@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.dag.*
 
 class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisitor {
 

@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.dag.Nulldag
 import java.time.LocalDate
 
 class CompositeSykdomstidslinje(

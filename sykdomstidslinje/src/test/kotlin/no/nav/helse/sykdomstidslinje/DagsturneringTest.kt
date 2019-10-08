@@ -5,8 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Test
-import java.io.BufferedReader
 import java.lang.RuntimeException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -70,8 +70,11 @@ class DagsturneringTest {
             "OI-A" -> null // TODO: Implementer når vi har andre inntektskilder
             "DA" -> Sykdomstidslinje.utenlandsdag(baseDag, sendtSøknad)
             "Null" -> Nulldag(baseDag, sendtSøknad)
-            "Undecided" -> Ubestemtdag(Sykdomstidslinje.sykedager(baseDag, sendtSøknad), Sykdomstidslinje.ikkeSykedag(
-                baseDag, inntektsmelding))
+            "Undecided" -> Ubestemtdag(
+                Sykdomstidslinje.sykedager(baseDag, sendtSøknad), Sykdomstidslinje.ikkeSykedag(
+                    baseDag, inntektsmelding
+                )
+            )
             else -> throw RuntimeException("Unmapped event type $name")
         }
 

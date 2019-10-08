@@ -1,6 +1,7 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
 class Studiedag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse) {

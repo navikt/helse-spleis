@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.sykdomstidslinje.dag.*
+
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     var state: SykedagerTellerTilstand = Starttilstand()
     var ikkeSykedager = 0

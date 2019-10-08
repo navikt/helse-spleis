@@ -1,6 +1,10 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.sykdomstidslinje.dag
 
-class Ubestemtdag internal constructor(left: Dag, right:Dag): Dag(left.dagen, sykdomshendelse(left, right)) {
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+
+class Ubestemtdag internal constructor(left: Dag, right: Dag): Dag(left.dagen,
+    sykdomshendelse(left, right)
+) {
 
     init { erstatter(left,right) }
 

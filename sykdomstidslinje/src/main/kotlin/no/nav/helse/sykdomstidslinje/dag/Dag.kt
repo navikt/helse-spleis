@@ -1,8 +1,9 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.sykdomstidslinje.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -30,7 +31,10 @@ abstract class Dag internal constructor(
     override fun startdato() = dagen
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
-    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else Nulldag(dagen, hendelse)
+    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else Nulldag(
+        dagen,
+        hendelse
+    )
 
     internal fun erstatter(vararg dager: Dag) {
         dager.filterNot { it is Nulldag }
@@ -43,7 +47,10 @@ abstract class Dag internal constructor(
         val helper = Helper(this, other)
 
         return when {
-            helper.doesMatchBidirectional(sykedag, søknad, feriedag, inntektsmelding) -> Ubestemtdag(this, other)
+            helper.doesMatchBidirectional(sykedag, søknad, feriedag, inntektsmelding) -> Ubestemtdag(
+                this,
+                other
+            )
             helper.doesMatch(nulldag, anyEvent, anyDag, anyEvent) -> other
             helper.doesMatch(anyDag, anyEvent, nulldag, anyEvent) -> this
             helper.doesMatch(sykedag, anyEvent, sykedag, anyEvent) -> this.sisteDag(other)

@@ -1,11 +1,11 @@
 package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.sykdomstidslinje.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

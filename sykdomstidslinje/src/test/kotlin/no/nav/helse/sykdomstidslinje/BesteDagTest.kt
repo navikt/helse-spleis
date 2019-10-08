@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

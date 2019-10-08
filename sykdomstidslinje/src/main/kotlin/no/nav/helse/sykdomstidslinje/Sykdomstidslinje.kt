@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -90,7 +91,8 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun egenmeldingsdager(gjelder: LocalDate, hendelse: Sykdomshendelse) = Egenmeldingsdag(gjelder, hendelse)
+        fun egenmeldingsdager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            Egenmeldingsdag(gjelder, hendelse)
 
         fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Feriedag(

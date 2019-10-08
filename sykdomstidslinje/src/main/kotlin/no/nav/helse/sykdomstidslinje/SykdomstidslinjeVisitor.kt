@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.sykdomstidslinje.dag.*
+
 interface SykdomstidslinjeVisitor {
     fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {}
     fun visitFeriedag(feriedag: Feriedag) {}
