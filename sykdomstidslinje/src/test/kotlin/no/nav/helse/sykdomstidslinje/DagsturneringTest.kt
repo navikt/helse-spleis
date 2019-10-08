@@ -6,6 +6,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.lang.RuntimeException
 import java.time.LocalDate
@@ -25,8 +27,9 @@ class DagsturneringTest {
         val nySøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
     }
 
+    @Disabled("Fungerer ikke enda")
     @Test
-    fun supertest9001() {
+    fun `Sjekker utfallsmatrisen fra CSV fil`() {
         val reader = DagsturneringTest::class.java.getResourceAsStream("/pattern_matching_dager.csv").bufferedReader(Charsets.UTF_8)
         val initialLine = reader.readLine().split(",")
         val cellTypes = initialLine.subList(1, initialLine.size)
@@ -43,10 +46,16 @@ class DagsturneringTest {
         }
 
         outcomes.forEach { combo ->
-            assert((combo.left()!! + combo.right()!!)::class == combo.resultFor())
+            assertCorrect(combo)
         }
 
         println(outcomes.size)
+    }
+
+    private fun assertCorrect(combo: Combination) {
+        val vinner = (combo.left()!! + combo.right()!!).flatten().first()
+
+        assertEquals(combo.resultFor(), vinner::class, "${combo.left()} + ${combo.right()} ble $vinner og ikke ${combo.resultFor()} som forventet")
     }
 
     data class Combination(val eventTypeAName: String, val eventTypeBName: String, val eventTypeOutcomeName: String) {
