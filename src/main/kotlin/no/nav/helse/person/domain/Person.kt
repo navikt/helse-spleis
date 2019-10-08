@@ -23,7 +23,7 @@ class Person: SakskompleksObserver {
     }
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-
+        findOrCreateArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
     }
 
     override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
@@ -38,12 +38,17 @@ class Person: SakskompleksObserver {
     }
 
     private fun findOrCreateArbeidsgiver(hendelse: Sykdomshendelse) =
-            arbeidsgivere.getOrPut(hendelse.organisasjonsnummer()) {
-                Arbeidsgiver(hendelse).also {
-                    it.addObserver(this)
-                    personObservers.forEach { personObserver ->
-                        it.addObserver(personObserver)
-                    }
+            hendelse.organisasjonsnummer()?.let { orgnr ->
+                arbeidsgivere.getOrPut(orgnr) {
+                    arbeidsgiver(hendelse)
+                }
+            } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
+
+    private fun arbeidsgiver(hendelse: Sykdomshendelse) =
+            Arbeidsgiver(hendelse).also {
+                it.addObserver(this)
+                personObservers.forEach { personObserver ->
+                    it.addObserver(personObserver)
                 }
             }
 
@@ -57,6 +62,10 @@ class Person: SakskompleksObserver {
 
         fun håndterSendtSøknad(søknad: Sykepengesøknad) {
             findOrCreateSakskompleks(søknad).leggTil(søknad)
+        }
+
+        fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
+            findOrCreateSakskompleks(inntektsmelding).leggTil(inntektsmelding)
         }
 
         fun addObserver(observer: SakskompleksObserver) {
@@ -82,7 +91,7 @@ interface PersonObserver : SakskompleksObserver {
 
 interface Sykdomshendelse : KildeHendelse {
     fun aktørId(): String
-    fun organisasjonsnummer(): String
+    fun organisasjonsnummer(): String?
 
     fun sykdomstidslinje(): Sykdomstidslinje
 }

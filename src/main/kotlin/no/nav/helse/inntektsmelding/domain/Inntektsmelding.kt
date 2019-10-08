@@ -13,11 +13,31 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
+import no.nav.helse.person.domain.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.KildeHendelse
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @JsonSerialize(using = InntektsmeldingSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode): Event {
+data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
+    override fun compareTo(other: KildeHendelse): Int {
+        TODO("not implemented")
+    }
+
+    override fun rapportertdato(): LocalDateTime {
+        TODO("not implemented")
+    }
+
+    override fun aktørId() = arbeidstakerAktorId
+
+    override fun organisasjonsnummer() = virksomhetsnummer
+
+    override fun sykdomstidslinje(): Sykdomstidslinje {
+        TODO("not implemented")
+    }
+
     override fun eventType() = Event.Type.Inntektsmelding
 
     val inntektsmeldingId = jsonNode["inntektsmeldingId"].asText() as String

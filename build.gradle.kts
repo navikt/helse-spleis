@@ -46,6 +46,7 @@ dependencies {
 
     implementation("no.nav.helse:sykdomstidslinje:1.871aac1")
 
+    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.09.06-09-24-0426e")
     testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
 
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
