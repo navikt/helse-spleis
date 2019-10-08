@@ -18,7 +18,7 @@ class Sakskompleks internal constructor(
     private val nyeSøknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val sendteSøknader: MutableList<Sykepengesøknad> = mutableListOf()
     private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
-    private var tilstand: Sakskomplekstilstand = StartTilstand()
+    private var tilstand: Sakskomplekstilstand = StartTilstand
 
     private val sykdomstidslinje get() = nyeSøknader.plus(sendteSøknader)
             .map(Sykepengesøknad::sykdomstidslinje)
@@ -34,12 +34,12 @@ class Sakskompleks internal constructor(
         } else if (søknad.erSendt()) {
             sendteSøknader.add(søknad)
         }
-        tilstand.søknadMottatt(søknad)
+        tilstand.søknadMottatt(this, søknad)
     }
 
     fun leggTil(inntektsmelding: Inntektsmelding) {
         inntektsmeldinger.add(inntektsmelding)
-        tilstand.inntektsmeldingMottatt(inntektsmelding)
+        tilstand.inntektsmeldingMottatt(this, inntektsmelding)
     }
 
     fun fom() = sykdomstidslinje.startdato()
@@ -56,6 +56,20 @@ class Sakskompleks internal constructor(
         return filter { it.id !in korrigerteIder }
     }
 
+    private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+        tilstand.leaving()
+
+        val previousStateName = tilstand.type
+        val previousMemento = memento()
+
+        tilstand = nyTilstand
+        block()
+
+        tilstand.entering()
+
+        notifyObservers(tilstand.type, event, previousStateName, previousMemento)
+    }
+
     enum class TilstandType {
         START,
         NY_SØKNAD_MOTTATT,
@@ -66,80 +80,66 @@ class Sakskompleks internal constructor(
     }
 
     // Gang of four State pattern
-    private abstract inner class Sakskomplekstilstand {
-        abstract val type: TilstandType
+    private interface Sakskomplekstilstand {
+        val type: TilstandType
 
-        internal fun transition(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
-            tilstand.leaving()
-
-            val previousStateName = tilstand.type
-            val previousMemento = memento()
-
-            tilstand = nyTilstand
-            block()
-
-            tilstand.entering()
-
-            notifyObservers(tilstand.type, event, previousStateName, previousMemento)
+        fun søknadMottatt(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+            sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
         }
 
-        open fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(søknad, TrengerManuellHåndteringTilstand())
+        fun inntektsmeldingMottatt(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
+            sakskompleks.setTilstand(inntektsmelding, TrengerManuellHåndteringTilstand)
         }
 
-        open fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, TrengerManuellHåndteringTilstand())
+        fun leaving() {
         }
 
-        open fun leaving() {
-        }
-
-        open fun entering() {
+        fun entering() {
         }
 
     }
 
-    private inner class StartTilstand : Sakskomplekstilstand() {
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(søknad, if (søknad.erNy() || søknad.erFremtidig()) NySøknadMottattTilstand() else TrengerManuellHåndteringTilstand())
+    private object StartTilstand : Sakskomplekstilstand {
+        override fun søknadMottatt(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+            sakskompleks.setTilstand(søknad, if (søknad.erNy() || søknad.erFremtidig()) NySøknadMottattTilstand else TrengerManuellHåndteringTilstand)
         }
 
         override val type = TilstandType.START
     }
 
-    private inner class NySøknadMottattTilstand : Sakskomplekstilstand() {
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(søknad, if (søknad.erSendt()) SendtSøknadMottattTilstand() else TrengerManuellHåndteringTilstand())
+    private object NySøknadMottattTilstand : Sakskomplekstilstand {
+        override fun søknadMottatt(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+            sakskompleks.setTilstand(søknad, if (søknad.erSendt()) SendtSøknadMottattTilstand else TrengerManuellHåndteringTilstand)
         }
 
-        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, InntektsmeldingMottattTilstand())
+        override fun inntektsmeldingMottatt(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
+            sakskompleks.setTilstand(inntektsmelding, InntektsmeldingMottattTilstand)
         }
 
         override val type = TilstandType.NY_SØKNAD_MOTTATT
     }
 
-    private inner class SendtSøknadMottattTilstand : Sakskomplekstilstand() {
-        override fun inntektsmeldingMottatt(inntektsmelding: Inntektsmelding) {
-            transition(inntektsmelding, KomplettSakTilstand())
+    private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
+        override fun inntektsmeldingMottatt(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
+            sakskompleks.setTilstand(inntektsmelding, KomplettSakTilstand)
         }
 
         override val type = TilstandType.SENDT_SØKNAD_MOTTATT
     }
 
-    private inner class InntektsmeldingMottattTilstand : Sakskomplekstilstand() {
-        override fun søknadMottatt(søknad: Sykepengesøknad) {
-            transition(søknad, if (søknad.erSendt()) KomplettSakTilstand() else TrengerManuellHåndteringTilstand())
+    private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
+        override fun søknadMottatt(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+            sakskompleks.setTilstand(søknad, if (søknad.erSendt()) KomplettSakTilstand else TrengerManuellHåndteringTilstand)
         }
 
         override val type = TilstandType.INNTEKTSMELDING_MOTTATT
     }
 
-    private inner class KomplettSakTilstand : Sakskomplekstilstand() {
+    private object KomplettSakTilstand : Sakskomplekstilstand {
         override val type = TilstandType.KOMPLETT_SAK
     }
 
-    private inner class TrengerManuellHåndteringTilstand: Sakskomplekstilstand() {
+    private object TrengerManuellHåndteringTilstand: Sakskomplekstilstand {
         override val type = TilstandType.TRENGER_MANUELL_HÅNDTERING
     }
 
@@ -158,12 +158,12 @@ class Sakskompleks internal constructor(
             )
 
             sakskompleks.tilstand = when (TilstandType.valueOf(node["tilstand"].textValue())) {
-                TilstandType.START -> sakskompleks.StartTilstand()
-                TilstandType.NY_SØKNAD_MOTTATT -> sakskompleks.NySøknadMottattTilstand()
-                TilstandType.SENDT_SØKNAD_MOTTATT -> sakskompleks.SendtSøknadMottattTilstand()
-                TilstandType.INNTEKTSMELDING_MOTTATT -> sakskompleks.InntektsmeldingMottattTilstand()
-                TilstandType.KOMPLETT_SAK -> sakskompleks.KomplettSakTilstand()
-                TilstandType.TRENGER_MANUELL_HÅNDTERING -> sakskompleks.TrengerManuellHåndteringTilstand()
+                TilstandType.START -> StartTilstand
+                TilstandType.NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
+                TilstandType.SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
+                TilstandType.INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
+                TilstandType.KOMPLETT_SAK -> KomplettSakTilstand
+                TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
             }
 
             sakskompleks.inntektsmeldinger.addAll(node["inntektsmeldinger"].map { jsonNode ->
@@ -241,5 +241,3 @@ class Sakskompleks internal constructor(
         }
     }
 }
-
-
