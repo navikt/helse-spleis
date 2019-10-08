@@ -1,12 +1,12 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Event
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.hendelse.Sykepengesøknad
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -117,6 +117,10 @@ abstract class Dag internal constructor(
 
         private fun <T : Any> doesMatch(expectedClass: KClass<T>?, actual: Any) =
             expectedClass?.equals(actual::class) ?: true
+    }
+
+    companion object {
+        internal fun fromJson(node: JsonNode): Dag = TODO("Oversett json til dag")
     }
 }
 

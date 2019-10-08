@@ -1,6 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Nulldag
 import java.time.LocalDate
 
@@ -42,5 +44,11 @@ class CompositeSykdomstidslinje(
 
     override fun toJson(): String {
         return objectMapper.writeValueAsString(flatten().map { it.jsonRepresentation() })
+    }
+
+    companion object {
+        internal fun fromJson(node:JsonNode): CompositeSykdomstidslinje {
+            return CompositeSykdomstidslinje(node.map { Dag.fromJson(it) })
+        }
     }
 }

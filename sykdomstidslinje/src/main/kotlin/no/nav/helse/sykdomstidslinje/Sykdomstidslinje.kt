@@ -193,6 +193,15 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
+        fun fromJson(json: String): Sykdomstidslinje {
+            val node = objectMapper.readValue<JsonNode>(json)
+            return if (node.isArray) {
+                CompositeSykdomstidslinje.fromJson(node)
+            } else {
+                Dag.fromJson(node)
+            }
+        }
+
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
     }
