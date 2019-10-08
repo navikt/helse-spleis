@@ -31,7 +31,7 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `state inneholder en tilstand`() {
+    fun `memento inneholder en tilstand`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
@@ -47,7 +47,7 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `state inneholder aktørId og sakskompleksId`() {
+    fun `memento inneholder aktørId og sakskompleksId`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
@@ -62,33 +62,15 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `state inneholder inntektsmeldinger`() {
+    fun `restore bygger opp likt objekt fra lagret memento`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
                 aktørId = "aktørId"
         )
-
-        sakskompleks.leggTil(standardNySøknad)
-        sakskompleks.leggTil(enInntektsmelding)
-
-        val memento = sakskompleks.memento()
-        val node = objectMapper.readTree(memento.state)
-
-        assertTrue(node["inntektsmeldinger"].isArray)
-        assertEquals(enInntektsmelding.inntektsmeldingId, node["inntektsmeldinger"][0]["inntektsmeldingId"].textValue())
-    }
-
-    @Test
-    fun `restore bygger opp likt objekt fra lagret state`() {
-        val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
-                id = id,
-                aktørId = "aktørId"
-        )
-        sakskompleks.leggTil(standardNySøknad)
-        sakskompleks.leggTil(standardSendtSøknad)
-        sakskompleks.leggTil(enInntektsmelding)
+        sakskompleks.håndterNySøknad(standardNySøknad)
+        sakskompleks.håndterSendtSøknad(standardSendtSøknad)
+        sakskompleks.håndterInntektsmelding(enInntektsmelding)
 
         val inMemento = sakskompleks.memento()
 
@@ -98,168 +80,5 @@ class SakskompleksKtTest {
         val outNode = objectMapper.readTree(outMemento.state)
 
         assertEquals(inNode, outNode)
-    }
-
-    @Test
-    fun `bruker datoer fra egenmeldingen om den er før sykmeldingen`() {
-        val sykmelding = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                tom = LocalDate.of(2019, 8, 27),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                ),
-                egenmeldinger = emptyList()
-        )
-
-        val søknad = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                tom = LocalDate.of(2019, 8, 27),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                ),
-                egenmeldinger = listOf(
-                        PeriodeDTO(
-                                fom = LocalDate.of(2019, 8, 16),
-                                tom = LocalDate.of(2019, 8, 18)
-                        )
-                )
-        )
-
-        val sakskompleks = Sakskompleks(
-                id = UUID.randomUUID(),
-                aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(sykmelding)
-        sakskompleks.leggTil(søknad)
-
-        assertEquals(LocalDate.of(2019, 8, 16), sakskompleks.fom())
-    }
-
-    @Test
-    fun `bruker syketilefelle fom om vi ikke har andre tidligere datoer`() {
-        val sykmelding = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                )
-        )
-
-        val søknad = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                tom = LocalDate.of(2019, 8, 27)
-        )
-
-        val sakskompleks = Sakskompleks(
-                id = UUID.randomUUID(),
-                aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(sykmelding)
-        sakskompleks.leggTil(søknad)
-
-        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
-    }
-
-    @Test
-    fun `arbeidGjennopptatt overstyrer sykmeldingsperiode om den er satt`() {
-        val sykmelding = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                tom = LocalDate.of(2019, 8, 27),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                ),
-                egenmeldinger = emptyList(),
-                fravær = emptyList()
-        )
-
-        val søknad = søknad(
-                fom = LocalDate.of(2019, 8, 19),
-                tom = LocalDate.of(2019, 8, 27),
-                søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                                fom = LocalDate.of(2019, 8, 19),
-                                tom = LocalDate.of(2019, 8, 27)
-                        )
-                ),
-                egenmeldinger = emptyList(),
-                arbeidGjenopptatt = LocalDate.of(2019, 8, 26),
-                fravær = emptyList()
-        )
-
-        val sakskompleks = Sakskompleks(
-                id = UUID.randomUUID(),
-                aktørId = "aktørId"
-        )
-
-        sakskompleks.leggTil(sykmelding)
-        sakskompleks.leggTil(søknad)
-
-        assertEquals(LocalDate.of(2019, 8, 19), sakskompleks.fom())
-        assertEquals(LocalDate.of(2019, 8, 25), sakskompleks.sisteSykdag())
-    }
-
-    @Test
-    fun `testsykmelding overskriver felter riktig`() {
-        val nySøknad = søknad(
-            fom = LocalDate.of(2019, 8, 19),
-            søknadsperioder = listOf(
-                SoknadsperiodeDTO(
-                    fom = LocalDate.of(2019, 8, 19),
-                    tom = LocalDate.of(2019, 8, 27)
-                )
-            )
-        )
-
-        assertEquals(LocalDate.of(2019, 8, 19), nySøknad.fom)
-
-        assertEquals(1, nySøknad.sykeperioder.size)
-        assertEquals(LocalDate.of(2019, 8, 19), nySøknad.sykeperioder[0].fom)
-        assertEquals(LocalDate.of(2019, 8, 27), nySøknad.sykeperioder[0].tom)
-    }
-
-    @Test
-    fun `sendtSøknad overskriver felter riktig`() {
-        val søknad = søknad(
-            fom = LocalDate.of(2019, 8, 19),
-            tom = LocalDate.of(2019, 8, 27),
-            egenmeldinger = listOf(
-                PeriodeDTO(
-                    fom = LocalDate.of(2019, 8, 16),
-                    tom = LocalDate.of(2019, 8, 18)
-                )
-            ),
-            arbeidGjenopptatt = LocalDate.of(2019, 8, 26)
-        )
-        assertEquals(LocalDate.of(2019, 8, 19), søknad.fom)
-        assertEquals(LocalDate.of(2019, 8, 27), søknad.tom)
-
-        assertEquals(1, søknad.egenmeldinger.size)
-        assertEquals(LocalDate.of(2019, 8, 16), søknad.egenmeldinger[0].fom)
-        assertEquals(LocalDate.of(2019, 8, 18), søknad.egenmeldinger[0].tom)
-
-        assertEquals(LocalDate.of(2019, 8, 26), søknad.arbeidGjenopptatt)
-    }
-
-    @Test
-    fun `testPeriode kan mappes til Periode`() {
-        val periode = PeriodeDTO(
-            fom = LocalDate.of(2019, 8, 1),
-            tom = LocalDate.of(2019, 8, 10)
-        )
-        assertEquals(LocalDate.of(2019, 8, 1), periode.fom)
-        assertEquals(LocalDate.of(2019, 8, 10), periode.tom)
     }
 }

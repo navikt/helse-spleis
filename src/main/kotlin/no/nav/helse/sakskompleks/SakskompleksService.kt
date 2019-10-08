@@ -2,6 +2,7 @@ package no.nav.helse.sakskompleks
 
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
@@ -15,54 +16,33 @@ class SakskompleksService(private val behovProducer: BehovProducer,
     private val sakskompleksProbe = SakskompleksProbe()
 
     fun finnEllerOpprettSak(sykepengesøknad: Sykepengesøknad) =
-            (finnSak(sykepengesøknad) ?: sakskompleksDao.opprettSak(sykepengesøknad.aktørId))
-                    .also { sakskompleks ->
-                        sakskompleks.addObserver(sakskompleksProbe)
+            (finnPerson(sykepengesøknad.aktørId) ?: nyPerson(sykepengesøknad.aktørId))
+                    .also { person ->
+                        person.addObserver(sakskompleksProbe)
                         behovProducer.nyttBehov("sykepengeperioder", mapOf(
                                 "aktørId" to sykepengesøknad.aktørId
                         ))
-                        sakskompleks.leggTil(sykepengesøknad)
+                        if (sykepengesøknad.erSendt()) {
+                            person.håndterSendtSøknad(sykepengesøknad)
+                        } else if (sykepengesøknad.erNy() || sykepengesøknad.erFremtidig()) {
+                            person.håndterNySøknad(sykepengesøknad)
+                        }
                     }
 
     fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
-            finnSak(inntektsmelding)?.also { sakskompleks ->
-                sakskompleks.addObserver(sakskompleksProbe)
-                leggInntektsmeldingPåSak(sakskompleks, inntektsmelding)
+            finnPerson(inntektsmelding.aktørId())?.also { person ->
+                person.addObserver(sakskompleksProbe)
+                person.håndterInntektsmelding(inntektsmelding)
             }.also {
                 if (it == null) {
                     sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
                 }
             }
 
-    private fun finnSak(sykepengesøknad: Sykepengesøknad) =
-        sakskompleksDao.finnSaker(sykepengesøknad.aktørId)
-            .finnSak(sykepengesøknad)
+    private fun nyPerson(aktørId: String) = Person()
 
-    private fun finnSak(inntektsmelding: Inntektsmelding) =
-            sakskompleksDao.finnSaker(inntektsmelding.arbeidstakerAktorId)
-                    .finnSak(inntektsmelding)
+    private fun finnPerson(aktørId: String): Person? = null
 
-    private fun leggInntektsmeldingPåSak(sak: Sakskompleks, inntektsmelding: Inntektsmelding) {
-        sak.leggTil(inntektsmelding)
-    }
-
-    private fun List<Sakskompleks>.finnSak(sykepengesøknad: Sykepengesøknad) =
-        firstOrNull { sakskompleks ->
-            sakskompleks.hørerSammenMed(sykepengesøknad)
-        }
-
-    private fun List<Sakskompleks>.finnSak(inntektsmelding: Inntektsmelding) =
-        firstOrNull { sakskompleks ->
-            inntektsmelding.hørerSammenMed(sakskompleks)
-        }
-
-    private fun Sykepengesøknad.hørerSammenMed(sakskompleks: Sakskompleks) =
-        kalenderdagerMellomMinusHelg(sakskompleks.tom(), this.fom) < 16
-
-    private fun Inntektsmelding.hørerSammenMed(sakskompleks: Sakskompleks): Boolean {
-        val saksPeriode = sakskompleks.fom()?.rangeTo(sakskompleks.tom())
-        return sisteDagIArbeidsgiverPeriode?.let { saksPeriode?.contains(it) } ?: false
-    }
 }
 
 /* Siden lørdag og søndag er tradisjonelle fridager, regner vi at arbeidet ble gjenopptatt på mandag når vi

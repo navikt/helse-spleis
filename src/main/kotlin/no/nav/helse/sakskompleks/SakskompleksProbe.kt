@@ -3,13 +3,14 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class SakskompleksProbe: SakskompleksObserver {
+class SakskompleksProbe: PersonObserver {
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)

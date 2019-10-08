@@ -11,7 +11,7 @@ class Person: SakskompleksObserver {
 
     private val personObservers = mutableListOf<PersonObserver>()
     fun håndterNySøknad(søknad: Sykepengesøknad) {
-        require(søknad.erNy()) { "søknad må være ny" }
+        require(søknad.erNy() || søknad.erFremtidig()) { "søknad må være ny" }
 
         findOrCreateArbeidsgiver(søknad).håndterNySøknad(søknad)
     }
@@ -92,7 +92,7 @@ class Person: SakskompleksObserver {
 
 interface PersonObserver : SakskompleksObserver {
 
-    fun personEndret(person: Person)
+    fun personEndret(person: Person) {}
 }
 
 interface Sykdomshendelse : KildeHendelse {
