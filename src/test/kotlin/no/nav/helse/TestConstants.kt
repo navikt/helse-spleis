@@ -53,7 +53,7 @@ object TestConstants {
                     fom = ferieFom,
                     tom = ferieTom,
                     type = FravarstypeDTO.FERIE)),
-            arbeidsgiver: ArbeidsgiverDTO = ArbeidsgiverDTO(
+            arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )

@@ -46,7 +46,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     fun erFremtidig() = status == SØKNAD_FREMTIDIG
 
     override fun aktørId() = aktørId
-    override fun organisasjonsnummer(): String = jsonNode["arbeidsgiver"].get("orgnummer").asText()
+    override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: KildeHendelse): Int = opprettet.compareTo(other.rapportertdato())
 
