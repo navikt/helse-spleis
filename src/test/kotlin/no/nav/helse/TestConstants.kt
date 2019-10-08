@@ -52,17 +52,18 @@ object TestConstants {
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
                     tom = ferieTom,
-                    type = FravarstypeDTO.FERIE))
+                    type = FravarstypeDTO.FERIE)),
+            arbeidsgiver: ArbeidsgiverDTO = ArbeidsgiverDTO(
+                    navn = "enArbeidsgiver",
+                    orgnummer = "123456789"
+            )
     ) = Sykepengesøknad(objectMapper.valueToTree(SykepengesoknadDTO(
             id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = status,
             aktorId = UUID.randomUUID().toString(),
             sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                    navn = "enArbeidsgiver",
-                    orgnummer = "123456789"
-            ),
+            arbeidsgiver = arbeidsgiver,
             arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
             arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
             fom = fom,

@@ -9,6 +9,7 @@ import no.nav.helse.person.domain.*
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,6 +52,26 @@ internal class PersonTest {
         assertTrue(observer.personEndret)
         assertTrue(observer.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, observer.sakskomplekstilstand)
+    }
+
+    @Test internal fun `inntektsmelding med sak trigger sakskompleks endret-hendelse`() {
+        val orgnr = "123456789"
+        val observer = TestObserver()
+        Person().also {
+            it.håndterNySøknad(søknad(
+                    status = SoknadsstatusDTO.NY,
+                    arbeidsgiver = ArbeidsgiverDTO(
+                            orgnummer = orgnr
+                    )))
+
+            it.addObserver(observer)
+            it.håndterInntektsmelding(inntektsmelding(
+                    virksomhetsnummer = orgnr
+            ))
+        }
+        assertTrue(observer.personEndret)
+        assertTrue(observer.wasTriggered)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, observer.sakskomplekstilstand)
     }
 
     @Test internal fun `inntektsmelding uten virksomhetsnummer kaster exception`() {

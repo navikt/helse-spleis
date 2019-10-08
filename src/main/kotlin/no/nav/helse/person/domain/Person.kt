@@ -57,15 +57,19 @@ class Person: SakskompleksObserver {
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
         fun håndterNySøknad(søknad: Sykepengesøknad) {
-            findOrCreateSakskompleks(søknad).leggTil(søknad)
+            if (saker.none { it.håndterNySøknad(søknad) }) {
+                nyttSakskompleks(søknad).håndterNySøknad(søknad)
+            }
         }
 
         fun håndterSendtSøknad(søknad: Sykepengesøknad) {
-            findOrCreateSakskompleks(søknad).leggTil(søknad)
+            nyttSakskompleks(søknad).leggTil(søknad)
         }
 
         fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-            findOrCreateSakskompleks(inntektsmelding).leggTil(inntektsmelding)
+            if (saker.none { it.håndterInntektsmelding(inntektsmelding) }) {
+                nyttSakskompleks(inntektsmelding).håndterInntektsmelding(inntektsmelding)
+            }
         }
 
         fun addObserver(observer: SakskompleksObserver) {
@@ -73,7 +77,7 @@ class Person: SakskompleksObserver {
             saker.forEach { it.addObserver(observer) }
         }
 
-        private fun findOrCreateSakskompleks(hendelse: Sykdomshendelse) : Sakskompleks {
+        private fun nyttSakskompleks(hendelse: Sykdomshendelse) : Sakskompleks {
             return Sakskompleks(UUID.randomUUID(), hendelse.aktørId()).also {
                 sakskompleksObservers.forEach(it::addObserver)
                 saker.add(it)
