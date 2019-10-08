@@ -8,6 +8,7 @@ class InntektsmeldingProbe {
 
     companion object {
         private val log = LoggerFactory.getLogger(InntektsmeldingProbe::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
         val innteksmeldingerMottattCounterName = "inntektsmeldinger_mottatt_totals"
 
@@ -20,6 +21,7 @@ class InntektsmeldingProbe {
                 "for arbeidstaker med aktørId = ${inntektsmelding.arbeidstakerAktorId} " +
                 "fra arbeidsgiver med virksomhetsnummer ${inntektsmelding.virksomhetsnummer} " +
                 "evt. arbeidsgiverAktørId = ${inntektsmelding.arbeidsgiverAktorId}")
+        sikkerLogg.info("${inntektsmelding.jsonNode}")
         inntektsmeldingMottattCounter.inc()
     }
 

@@ -8,6 +8,7 @@ class SøknadProbe {
 
     companion object {
         private val log = LoggerFactory.getLogger(SøknadProbe::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
         val søknadCounterName = "nye_soknader_totals"
         val søknaderIgnorertCounterName = "soknader_ignorert_totals"
@@ -22,6 +23,7 @@ class SøknadProbe {
 
     fun mottattSøknad(søknad: Sykepengesøknad) {
         log.info("mottok søknad med id=${søknad.id} for sykmelding=${søknad.sykmeldingId}")
+        sikkerLogg.info("${søknad.jsonNode}")
         søknadCounter.labels(søknad.status).inc()
     }
 
