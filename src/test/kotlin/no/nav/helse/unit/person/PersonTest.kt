@@ -6,6 +6,7 @@ import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class PersonTest {
@@ -16,11 +17,18 @@ internal class PersonTest {
             it.addObserver(observer)
             it.add(søknad(status = SoknadsstatusDTO.NY))
         }
-        assert(observer.wasTriggered)
+        assertTrue(observer.personEndret)
+        assertTrue(observer.wasTriggered)
     }
 
     private class TestObserver: PersonObserver {
         internal var wasTriggered = false
+        internal var personEndret = false
+
+        override fun personEndret(person: Person) {
+            personEndret = true
+        }
+
         override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
             wasTriggered = true
         }
