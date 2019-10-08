@@ -34,6 +34,12 @@ class Sakskompleks internal constructor(
         }
     }
 
+    internal fun håndterSendtSøknad(søknad: Sykepengesøknad): Boolean {
+        return passerMed(søknad).also {
+            if (it) leggTil(søknad)
+        }
+    }
+
     internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
             passerMed(inntektsmelding).also {
                 if (it) leggTil(inntektsmelding)

@@ -63,7 +63,9 @@ class Person: SakskompleksObserver {
         }
 
         fun håndterSendtSøknad(søknad: Sykepengesøknad) {
-            nyttSakskompleks(søknad).leggTil(søknad)
+            if (saker.none { it.håndterSendtSøknad(søknad) }) {
+                nyttSakskompleks(søknad).leggTil(søknad)
+            }
         }
 
         fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {

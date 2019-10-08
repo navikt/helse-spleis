@@ -84,6 +84,29 @@ internal class PersonTest {
         }
     }
 
+    @Test internal fun `sendt søknad trigger sakskompleks endret-hendelse`() {
+        val orgnr = "123456789"
+        val observer = TestObserver()
+        Person().also {
+            it.håndterNySøknad(søknad(
+                    status = SoknadsstatusDTO.NY,
+                    arbeidsgiver = ArbeidsgiverDTO(
+                            orgnummer = orgnr
+                    )))
+
+            it.addObserver(observer)
+            it.håndterSendtSøknad(søknad(
+                    status = SoknadsstatusDTO.SENDT,
+                    arbeidsgiver = ArbeidsgiverDTO(
+                            orgnummer = orgnr
+                    )
+            ))
+        }
+        assertTrue(observer.personEndret)
+        assertTrue(observer.wasTriggered)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, observer.sakskomplekstilstand)
+    }
+
     private class TestObserver: PersonObserver {
         internal var wasTriggered = false
         internal var personEndret = false
