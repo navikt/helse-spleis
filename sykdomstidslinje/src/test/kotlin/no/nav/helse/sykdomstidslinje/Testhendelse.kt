@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import java.time.LocalDateTime
 
@@ -26,7 +28,7 @@ internal class Testhendelse(private val rapportertdato: LocalDateTime = LocalDat
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
 
-    override fun toJson(): String {
-        return "{}"
+    override fun toJson(): JsonNode {
+        return objectMapper.readValue("{}")
     }
 }

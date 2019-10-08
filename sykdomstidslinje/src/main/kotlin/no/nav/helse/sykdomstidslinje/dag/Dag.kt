@@ -31,7 +31,7 @@ abstract class Dag internal constructor(
 
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
-    internal open fun dagType(): JsonDagType = TODO("Implementer dagType for ${this::class}")
+    internal abstract fun dagType(): JsonDagType
     internal open fun jsonRepresentation(): JsonDag {
         val hendelseType = (hendelse as Event).eventType()
         val hendelseJson = hendelse.toJson()

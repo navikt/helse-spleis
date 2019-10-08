@@ -16,6 +16,8 @@ class Ubestemtdag internal constructor(left: Dag, right: Dag): Dag(left.dagen,
     override fun antallSykedagerHvorViTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tUbestemtdag"
+
+    override fun dagType() = JsonDagType.UBESTEMTDAG
 }
 
 private fun sykdomshendelse(

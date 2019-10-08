@@ -13,4 +13,6 @@ class Egenmeldingsdag internal constructor(gjelder: LocalDate, hendelse: Sykdoms
     override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tEgenmeldingsdag"
+
+    override fun dagType() = JsonDagType.EGENMELDINGSDAG
 }

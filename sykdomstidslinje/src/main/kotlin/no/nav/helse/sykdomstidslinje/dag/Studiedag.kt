@@ -14,4 +14,6 @@ class Studiedag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendel
     override fun antallSykedagerHvorViTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tStudiedag"
+
+    override fun dagType() = JsonDagType.STUDIEDAG
 }

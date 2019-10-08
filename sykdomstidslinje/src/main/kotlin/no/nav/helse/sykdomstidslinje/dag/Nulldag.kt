@@ -14,4 +14,6 @@ internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdom
     override fun tilDag() = ikkeSykedag(dagen, hendelse)
 
     override fun toString() = formatter.format(dagen) + "\tNulldag"
+
+    override fun dagType() = JsonDagType.NULLDAG
 }

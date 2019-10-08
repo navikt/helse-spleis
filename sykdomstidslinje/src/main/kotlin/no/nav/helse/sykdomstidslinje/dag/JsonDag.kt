@@ -17,6 +17,14 @@ internal data class JsonHendelse(
 
 enum class JsonDagType {
     ARBEIDSDAG,
+    EGENMELDINGSDAG,
+    FERIEDAG,
     HELGEDAG,
+    NULLDAG,
+    PERMISJONSDAG,
+    STUDIEDAG,
     SYKEDAG,
+    SYK_HELGEDAG,
+    UBESTEMTDAG,
+    UTENLANDSDAG
 }
