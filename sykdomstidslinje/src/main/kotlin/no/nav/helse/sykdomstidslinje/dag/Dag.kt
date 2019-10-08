@@ -1,5 +1,8 @@
 package no.nav.helse.sykdomstidslinje.dag
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.hendelse.Event
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.hendelse.Sykepengesøknad
@@ -26,7 +29,15 @@ abstract class Dag internal constructor(
 
     internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    private val erstatter: MutableList<Dag> = mutableListOf()
+    internal val erstatter: MutableList<Dag> = mutableListOf()
+
+    internal open fun dagType(): JsonDagType = TODO("Implementer dagType for ${this::class}")
+    internal open fun jsonRepresentation(): JsonDag {
+        val hendelseType = (hendelse as Event).eventType()
+        val hendelseJson = hendelse.toJson()
+        return JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name,hendelseJson), erstatter.map { it.jsonRepresentation() })
+    }
+    override fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     override fun startdato() = dagen
     override fun sluttdato() = dagen

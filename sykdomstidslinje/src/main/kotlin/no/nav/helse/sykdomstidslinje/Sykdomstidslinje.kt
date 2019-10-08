@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -19,6 +21,7 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
+    abstract fun toJson(): String
     internal abstract fun sisteHendelse(): Sykdomshendelse
     internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
 
@@ -193,4 +196,6 @@ abstract class Sykdomstidslinje {
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
     }
+
+    override fun equals(other: Any?): Boolean = other is Sykdomstidslinje && flatten() == other.flatten()
 }

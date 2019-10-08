@@ -39,4 +39,8 @@ class CompositeSykdomstidslinje(
         .sumBy { it.antallSykedagerHvorViTellerMedHelg() }
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
+
+    override fun toJson(): String {
+        return objectMapper.writeValueAsString(flatten().map { it.jsonRepresentation() })
+    }
 }

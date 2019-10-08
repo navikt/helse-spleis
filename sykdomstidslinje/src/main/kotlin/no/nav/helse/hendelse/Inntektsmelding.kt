@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -69,6 +70,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Event, Sykdomshendelse {
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
     }
 
+    override fun toJson(): JsonNode = jsonNode
 }
 
 class InntektsmeldingSerializer : StdSerializer<Inntektsmelding>(Inntektsmelding::class.java) {

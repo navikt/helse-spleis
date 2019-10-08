@@ -10,6 +10,7 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     fun rapportertdato(): LocalDateTime
     fun organisasjonsnummer(): String
     fun sykdomstidslinje(): Sykdomstidslinje
+    fun toJson(): JsonNode
 
     override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())
 }

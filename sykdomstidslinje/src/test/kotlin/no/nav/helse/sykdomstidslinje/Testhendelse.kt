@@ -25,4 +25,8 @@ internal class Testhendelse(private val rapportertdato: LocalDateTime = LocalDat
     override fun compareTo(other: Sykdomshendelse): Int {
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
+
+    override fun toJson(): String {
+        return "{}"
+    }
 }

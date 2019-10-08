@@ -2,6 +2,7 @@ package no.nav.helse.hendelse
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -59,6 +60,8 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
             else -> throw IllegalStateException("Kunne ikke mappe søknadstype $status til en event")
         }
     }
+
+    override fun toJson(): JsonNode = jsonNode
 }
 
 data class Periode(val jsonNode: JsonNode) {
