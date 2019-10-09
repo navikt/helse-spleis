@@ -13,7 +13,10 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
-    val rapportertDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["rapportertDato"].textValue())
+
+    // TODO: mottattDato er ikke endel av kontrakten enda
+    // val rapportertDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["mottattDato"].textValue())
+    val rapportertDato = LocalDateTime.now()
 
     val ferie
         get() = jsonNode["ferieperioder"]?.map {
@@ -51,9 +54,11 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
             .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
         val ferietidslinjer = ferie
             .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
-        val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedager(gjelder = førsteFraværsdag, hendelse = this))
 
-        return (førsteFraværsdagTidslinje + arbeidsgiverperiodetidslinjer + ferietidslinjer)
+        // TODO: førsteFraværsdag er ikke med i kontrakten enda
+        // val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedager(gjelder = førsteFraværsdag, hendelse = this))
+
+        return (/*førsteFraværsdagTidslinje + */arbeidsgiverperiodetidslinjer + ferietidslinjer)
             .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
     }
 
