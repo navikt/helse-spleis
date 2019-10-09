@@ -63,14 +63,8 @@ abstract class Dag internal constructor(
         val helper = Helper(this, other)
 
         return when {
-            helper.doesMatchBidirectional(sykedag, nySøknad, feriedag, inntektsmelding) -> Ubestemtdag(
-                this,
-                other
-            )
-            helper.doesMatchBidirectional(sykedag, sendtSøknad, feriedag, inntektsmelding) -> Ubestemtdag(
-                this,
-                other
-            )
+            helper.doesMatchBidirectional(sykedag, nySøknad, feriedag, inntektsmelding) -> Ubestemtdag(this, other)
+            helper.doesMatchBidirectional(sykedag, sendtSøknad, feriedag, inntektsmelding) -> Ubestemtdag(this, other)
             helper.doesMatchBidirectional(arbeidsdag, inntektsmelding, sykedag, sendtSøknad) -> Ubestemtdag(this, other)
             helper.doesMatchBidirectional(sykedag, sendtSøknad, arbeidsdag, sendtSøknad) -> Ubestemtdag(this, other)
 

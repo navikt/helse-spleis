@@ -6,12 +6,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
- import java.time.LocalDate
+import java.time.LocalDate
 
 class DagsturneringTest {
     companion object {
@@ -23,48 +22,61 @@ class DagsturneringTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        private val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val sendtSøknad =
+            SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
         private val nySøknad = NySykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
     }
 
-    @Disabled("Ikke ferdig implementert gjennom")
+    @Disabled("Ikke ferdig implementert")
     @Test
     fun `Sjekker utfallsmatrisen fra CSV fil`() {
+        val outcomes = readTestcases()
+        val resultat = outcomes
+            .map(TestCase::toResult)
+            .onEach { println(it.message) }
+
+        assertEquals(0, resultat.filterNot { it.passed }.size)
+        assertEquals(outcomes.size, resultat.size)
+    }
+
+    private fun readTestcases(): List<TestCase> {
+
         val reader = DagsturneringTest::class.java.getResourceAsStream("/pattern_matching_dager_epic_1.csv")
             .bufferedReader(Charsets.UTF_8)
         val initialLine = reader.readLine().split(",")
         val cellTypes = initialLine.subList(1, initialLine.size)
-        val outcomes = reader
+
+        return reader
             .readLines()
             .mapIndexed { row, rowText ->
-                rowText.split(",").subList(1, row+2)
-                    .mapIndexed { column, cell -> Combination(cellTypes[row], cellTypes[column], cell) }
+                rowText.split(",").subList(1, row + 2)
+                    .mapIndexed { column, cell -> TestCase(cellTypes[row], cellTypes[column], cell) }
             }
             .flatten()
-        outcomes.forEach { combo ->
-            print("\n${combo.eventTypeAName} + ${combo.eventTypeBName} = ${combo.eventTypeOutcomeName}")
-            assertCorrect(combo)
-            print(" passed")
+            .filter { it.resultEventName != "X" }
+            .filter { it.columnEventName != "Le-Areg" && it.rowEventName != "Le-Areg"}
+            .filter { it.columnEventName != "OI-Int" && it.rowEventName != "OI-Int"}
+            .filter { it.columnEventName != "OI-A" && it.rowEventName != "OI-A"}
+    }
+
+    data class Resultat(val passed: Boolean, val message: String)
+
+    data class TestCase(val columnEventName: String, val rowEventName: String, val resultEventName: String) {
+        fun toResult(): Resultat {
+            val vinner = (this.left() + this.right()).flatten().first()
+
+            return if (vinner::class == resultFor()) {
+                Resultat(true, "${this.left()} + ${this.right()} = $resultEventName")
+            } else {
+                Resultat(
+                    false,
+                    "${this.left()} + ${this.right()} ble $vinner og ikke ${this.resultFor().simpleName} som forventet"
+                )
+            }
         }
 
-        println(outcomes.size)
-    }
-
-    private fun assertCorrect(combo: Combination) {
-        val vinner = (combo.left()!! + combo.right()!!).flatten().first()
-
-        assertEquals(
-            combo.resultFor(),
-            vinner::class,
-            "${combo.left()} + ${combo.right()} ble $vinner og ikke ${combo.resultFor().simpleName} som forventet"
-        )
-    }
-
-    data class Combination(val eventTypeAName: String, val eventTypeBName: String, val eventTypeOutcomeName: String) {
-
         fun basedag(typeA: String, typeB: String): LocalDate? = when {
-            erHelg(typeA) && erHelg(typeB) -> lørdag
-            erHelg(typeA) || erHelg(typeB) -> null
+            erHelg(typeA) || erHelg(typeB) -> lørdag
             else -> mandag
         }
 
@@ -74,7 +86,7 @@ class DagsturneringTest {
             else -> false
         }
 
-        fun nameToEventType(name: String, dato: LocalDate): Dag? = when (name) {
+        fun nameToEventType(name: String, dato: LocalDate): Dag = when (name) {
             "WD-I" -> Fylldag(dato, sendtSøknad)
             "WD-A" -> Sykdomstidslinje.ikkeSykedag(dato, sendtSøknad)
             "WD-IM" -> Sykdomstidslinje.ikkeSykedag(dato, inntektsmelding)
@@ -83,17 +95,19 @@ class DagsturneringTest {
             "GS-A" -> Sykdomstidslinje.sykedager(dato, sendtSøknad)
             "V-A" -> Sykdomstidslinje.ferie(dato, sendtSøknad)
             "V-IM" -> Sykdomstidslinje.ferie(dato, inntektsmelding)
-            "W" -> null // TODO: Weekend
-            "Le-Areg" -> null // TODO: Implementer når vi har permisjon
-            "Le-A" -> null // TODO: Implementer når vi har permisjon
-            "SW" -> null // TODO: Sick workday
+            "W" -> Helgedag(lørdag, sendtSøknad)
+//            "Le-Areg" -> Permisjonsdag(dato, ) // TODO: Implementer når vi har permisjon
+            "Le-A" -> Permisjonsdag(dato, sendtSøknad) // TODO: Implementer når vi har permisjon
+            "SW" -> SykHelgedag(lørdag, nySøknad)
             "SRD-IM" -> Sykdomstidslinje.egenmeldingsdager(dato, inntektsmelding)
             "SRD-A" -> Sykdomstidslinje.egenmeldingsdager(dato, sendtSøknad)
-            "EDU" -> null // TODO: Implementer når vi har utdannelsesdager
-            "OI-Int" -> null // TODO: Implementer når vi har andre inntektskilder
-            "OI-A" -> null // TODO: Implementer når vi har andre inntektskilder
+            "EDU" -> Utdanningsdag(dato, sendtSøknad)
+//            "OI-Int" -> null // TODO: Implementer når vi har andre inntektskilder
+//            "OI-A" -> Ubestemtdag(dato, sendtSøknad)
             "DA" -> Sykdomstidslinje.utenlandsdag(dato, sendtSøknad)
             "Null" -> Nulldag(dato, sendtSøknad)
+            "Le" -> Permisjonsdag(dato, sendtSøknad)
+            "SW-SM" -> SykHelgedag(dato, nySøknad)
             "Undecided" -> Ubestemtdag(
                 Sykdomstidslinje.sykedager(dato, sendtSøknad), Sykdomstidslinje.ikkeSykedag(
                     dato, inntektsmelding
@@ -102,22 +116,22 @@ class DagsturneringTest {
             else -> throw RuntimeException("Unmapped event type $name")
         }
 
-        fun left() = nameToEventType(eventTypeAName, basedag(eventTypeAName, eventTypeBName)!!)
-        fun right() = nameToEventType(eventTypeBName, basedag(eventTypeAName, eventTypeBName)!!)
+        fun left() = nameToEventType(columnEventName, basedag(columnEventName, rowEventName)!!)
+        fun right() = nameToEventType(rowEventName, basedag(columnEventName, rowEventName)!!)
 
         private fun latest() = if (left()!!.hendelse > right()!!.hendelse) {
             left()
         } else {
             right()
-        }!!
+        }
 
-        fun resultFor() = when (eventTypeOutcomeName) {
+        fun resultFor() = when (resultEventName.toUpperCase()) {
             "WD-I" -> Fylldag::class
             "WD" -> Arbeidsdag::class
             "S" -> Sykedag::class
             "L" -> latest()::class
+            "LE" -> Permisjonsdag::class
             "V" -> Feriedag::class
-            "X" -> throw RuntimeException("This should never happen")
             "U" -> Ubestemtdag::class
             "SW" -> SykHelgedag::class
             "DOI" -> TODO("Dager med andre inntektskilder, implementer meg!")
@@ -125,7 +139,12 @@ class DagsturneringTest {
             "DA" -> Utenlandsdag::class
             "GS" -> Sykedag::class
             "SRD" -> Egenmeldingsdag::class
-            else -> throw RuntimeException("Unmapped event type $eventTypeOutcomeName")
+            "W" -> Helgedag::class
+            "SW-SM" -> SykHelgedag::class
+            else -> throw RuntimeException("Unmapped event type $resultEventName")
         }
     }
+
+
 }
+
