@@ -1,17 +1,8 @@
-package no.nav.helse.søknad.domain
+package no.nav.helse.hendelse
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.person.domain.Sykdomshendelse
 import no.nav.helse.serde.safelyUnwrapDate
@@ -20,13 +11,13 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-const val SØKNAD_SENDT = "SENDT"
-const val SØKNAD_NY = "NY"
-const val SØKNAD_FREMTIDIG = "FREMTIDIG"
+private const val SØKNAD_SENDT = "SENDT"
+private const val SØKNAD_NY = "NY"
+private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
-@JsonSerialize(using = SykepengesøknadSerializer::class)
+@JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -40,10 +31,6 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     val fraværsperioder get() = jsonNode["fravar"]?.map { FraværsPeriode(it) } ?: emptyList()
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
-
-    fun erSendt() = status == SØKNAD_SENDT
-    fun erNy() = status == SØKNAD_NY
-    fun erFremtidig() = status == SØKNAD_FREMTIDIG
 
     override fun aktørId() = aktørId
     override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
@@ -68,7 +55,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
         } ?: emptyList()
 
     override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje)
-        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+            .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     override fun eventType(): Event.Type {
         return when (status) {
@@ -76,6 +63,20 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
             in arrayOf(SØKNAD_NY, SØKNAD_FREMTIDIG) -> Event.Type.NySykepengesøknad
             else -> throw IllegalStateException("Kunne ikke mappe søknadstype $status til en event")
         }
+    }
+
+    override fun toJson(): String = jsonNode.toString()
+}
+
+class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+    init {
+        require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
+    }
+}
+
+class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+    init {
+        require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }
 }
 
@@ -96,22 +97,4 @@ enum class Fraværstype {
     UTLANDSOPPHOLD,
     UTDANNING_FULLTID,
     UTDANNING_DELTID
-}
-
-class SykepengesøknadSerializer : StdSerializer<Sykepengesøknad>(Sykepengesøknad::class.java) {
-    override fun serialize(søknad: Sykepengesøknad?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        gen?.writeObject(søknad?.jsonNode)
-    }
-}
-
-class SykepengesøknadDeserializer : StdDeserializer<Sykepengesøknad>(Sykepengesøknad::class.java) {
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
-    override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
-        Sykepengesøknad(objectMapper.readTree(parser))
-
 }

@@ -2,11 +2,11 @@ package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
-import no.nav.helse.TestConstants.søknad
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.TestConstants.nySøknad
+import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -18,8 +18,6 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         lastEvent = event
     }
 
-    private val nySøknad = søknad(status = SoknadsstatusDTO.NY)
-    private val sendtSøknad = søknad(status = SoknadsstatusDTO.SENDT)
     private val aktørId = "1234567891011"
     private val sakskompleksId = UUID.randomUUID()
     private val sykmeldingId = UUID.randomUUID()
@@ -27,10 +25,10 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     private val inntektsmeldingId = UUID.randomUUID()
 
     @Test
-    fun `motta ny søknad`(){
+    fun `motta ny søknad`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterNySøknad(nySøknad)
+        sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.currentState)
@@ -41,9 +39,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta søknad`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterSendtSøknad(søknad(
-                status = SoknadsstatusDTO.SENDT
-        ))
+        sakskompleks.håndterSendtSøknad(sendtSøknad())
 
         assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
@@ -62,17 +58,17 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta sendt søknad etter ny søknad`(){
+    fun `motta sendt søknad etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterSendtSøknad(søknad())
+        sakskompleks.håndterSendtSøknad(sendtSøknad())
 
         assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.currentState)
     }
 
     @Test
-    fun `motta inntektsmelding etter ny søknad`(){
+    fun `motta inntektsmelding etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
@@ -82,10 +78,10 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta ny søknad etter ny søknad`(){
+    fun `motta ny søknad etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad)
+        sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
@@ -95,7 +91,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter sendt søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad)
+        sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
@@ -115,7 +111,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad)
+        sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
@@ -125,7 +121,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sendt søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterSendtSøknad(sendtSøknad)
+        sakskompleks.håndterSendtSøknad(sendtSøknad())
 
         assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastEvent.currentState)
@@ -135,7 +131,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterNySøknad(nySøknad)
+        sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
@@ -162,12 +158,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     private fun beInNySøknad() =
             beInStartTilstand().apply {
-                håndterNySøknad(nySøknad)
+                håndterNySøknad(nySøknad())
             }
 
     private fun beInSendtSøknad() =
             beInNySøknad().apply {
-                håndterSendtSøknad(søknad())
+                håndterSendtSøknad(sendtSøknad())
             }
 
     private fun beInMottattInntektsmelding() =

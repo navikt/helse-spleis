@@ -1,7 +1,7 @@
 package no.nav.helse.søknad
 
 import io.prometheus.client.Counter
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.hendelse.Sykepengesøknad
 import org.slf4j.LoggerFactory
 
 class SøknadProbe {
@@ -18,12 +18,12 @@ class SøknadProbe {
                 .register()
 
         private val søknadIgnorertCounter = Counter.build(søknaderIgnorertCounterName, "Antall søknader vi ignorerer")
-            .register()
+                .register()
     }
 
     fun mottattSøknad(søknad: Sykepengesøknad) {
         log.info("mottok søknad med id=${søknad.id} for sykmelding=${søknad.sykmeldingId}")
-        sikkerLogg.info("${søknad.jsonNode}")
+        sikkerLogg.info(søknad.toJson())
         søknadCounter.labels(søknad.status).inc()
     }
 

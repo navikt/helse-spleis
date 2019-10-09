@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.Sykepengesøknad
 import java.io.StringWriter
 import java.util.*
 
@@ -29,7 +31,7 @@ class Sakskompleks internal constructor(
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
-    internal fun håndterNySøknad(søknad: Sykepengesøknad): Boolean {
+    internal fun håndterNySøknad(søknad: NySykepengesøknad): Boolean {
         return passerMed(søknad).also {
             if (it) {
                 nyeSøknader.add(søknad)
@@ -38,7 +40,7 @@ class Sakskompleks internal constructor(
         }
     }
 
-    internal fun håndterSendtSøknad(søknad: Sykepengesøknad): Boolean {
+    internal fun håndterSendtSøknad(søknad: SendtSykepengesøknad): Boolean {
         return passerMed(søknad).also {
             if (it) {
                 sendteSøknader.add(søknad)
@@ -61,18 +63,6 @@ class Sakskompleks internal constructor(
 
     fun fom() = sykdomstidslinje.startdato()
     fun tom() = sykdomstidslinje.sluttdato()
-
-    fun sisteSykdag() = sykdomstidslinje.syketilfeller().last().sluttdato()
-
-    fun hørerSammenMed(sykepengesøknad: Sykepengesøknad) =
-            nyeSøknader.any { nySøknad ->
-                nySøknad.id == sykepengesøknad.id
-            }
-
-    private fun List<Sykepengesøknad>.somIkkeErKorrigerte(): List<Sykepengesøknad> {
-        val korrigerteIder = mapNotNull { it.korrigerer }
-        return filter { it.id !in korrigerteIder }
-    }
 
     private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -103,11 +93,11 @@ class Sakskompleks internal constructor(
 
         val type: TilstandType
 
-        fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+        fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: NySykepengesøknad) {
             sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
         }
 
-        fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+        fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
             sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
         }
 
@@ -125,7 +115,7 @@ class Sakskompleks internal constructor(
 
     private object StartTilstand : Sakskomplekstilstand {
 
-        override fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+        override fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: NySykepengesøknad) {
             sakskompleks.setTilstand(søknad, NySøknadMottattTilstand)
         }
 
@@ -135,7 +125,7 @@ class Sakskompleks internal constructor(
 
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
-        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
             sakskompleks.setTilstand(søknad, SendtSøknadMottattTilstand)
         }
 
@@ -159,7 +149,7 @@ class Sakskompleks internal constructor(
 
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
-        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: Sykepengesøknad) {
+        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
             sakskompleks.setTilstand(søknad, KomplettSakTilstand)
         }
 
@@ -206,11 +196,11 @@ class Sakskompleks internal constructor(
             })
 
             sakskompleks.nyeSøknader.addAll(node["nyeSøknader"].map { jsonNode ->
-                Sykepengesøknad(jsonNode)
+                NySykepengesøknad(jsonNode)
             })
 
             sakskompleks.sendteSøknader.addAll(node["sendteSøknader"].map { jsonNode ->
-                Sykepengesøknad(jsonNode)
+                SendtSykepengesøknad(jsonNode)
             })
 
             return sakskompleks
@@ -229,19 +219,19 @@ class Sakskompleks internal constructor(
 
         generator.writeArrayFieldStart("nyeSøknader")
         nyeSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.jsonNode)
+            generator.writeRaw(søknad.toJson())
         }
         generator.writeEndArray()
 
         generator.writeArrayFieldStart("inntektsmeldinger")
         inntektsmeldinger.forEach { inntektsmelding ->
-            objectMapper.writeValue(generator, inntektsmelding.jsonNode)
+            generator.writeRaw(inntektsmelding.toJson())
         }
         generator.writeEndArray()
 
         generator.writeArrayFieldStart("sendteSøknader")
         sendteSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.jsonNode)
+            generator.writeRaw(søknad.toJson())
         }
         generator.writeEndArray()
 

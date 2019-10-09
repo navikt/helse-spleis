@@ -1,17 +1,8 @@
-package no.nav.helse.inntektsmelding.domain
+package no.nav.helse.hendelse
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Event
 import no.nav.helse.person.domain.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.KildeHendelse
@@ -19,9 +10,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@JsonSerialize(using = InntektsmeldingSerializer::class)
+@JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
 data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
+    override fun toJson() = jsonNode.toString()
+
     override fun compareTo(other: KildeHendelse): Int {
         TODO("not implemented")
     }
@@ -63,20 +56,3 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
 
 }
 
-class InntektsmeldingSerializer: StdSerializer<Inntektsmelding>(Inntektsmelding::class.java) {
-    override fun serialize(sykmelding: Inntektsmelding?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        gen?.writeObject(sykmelding?.jsonNode)
-    }
-}
-
-class InntektsmeldingDeserializer: StdDeserializer<Inntektsmelding>(Inntektsmelding::class.java) {
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
-    override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
-            Inntektsmelding(objectMapper.readTree(parser))
-
-}

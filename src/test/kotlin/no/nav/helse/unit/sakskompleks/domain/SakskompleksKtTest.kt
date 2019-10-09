@@ -3,28 +3,24 @@ package no.nav.helse.unit.sakskompleks.domain
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.søknad
+import no.nav.helse.TestConstants.nySøknad
+import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.readResource
 import no.nav.helse.person.domain.Sakskompleks
-import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class SakskompleksKtTest {
     companion object {
         val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val standardNySøknad = søknad(status = SoknadsstatusDTO.NY)
-        private val standardSendtSøknad = søknad(status = SoknadsstatusDTO.SENDT)
+        private val standardNySøknad = nySøknad()
+        private val standardSendtSøknad = sendtSøknad()
 
         private val enInntektsmeldingSomJson = InntektsmeldingConsumer.inntektsmeldingObjectMapper.readTree("/inntektsmelding.json".readResource())
         private val enInntektsmelding = Inntektsmelding(enInntektsmeldingSomJson)

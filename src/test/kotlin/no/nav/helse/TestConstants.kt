@@ -1,23 +1,16 @@
 package no.nav.helse
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverForskuttererDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidssituasjonDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -35,7 +28,7 @@ internal object TestConstants {
     val ferieFom = LocalDate.of(2019, Month.OCTOBER, 1)
     val ferieTom = LocalDate.of(2019, Month.OCTOBER, 4)
 
-    fun søknad(
+    private fun søknad(
             id: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
@@ -61,7 +54,7 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )
-    ) = Sykepengesøknad(objectMapper.valueToTree(SykepengesoknadDTO(
+    ) = objectMapper.valueToTree<JsonNode>(SykepengesoknadDTO(
             id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = status,
@@ -81,11 +74,34 @@ internal object TestConstants {
             egenmeldinger = egenmeldinger,
             soknadsperioder = søknadsperioder,
             fravar = fravær
-    )))
+    )).let {
+        when (status) {
+            SoknadsstatusDTO.NY -> NySykepengesøknad(it)
+            SoknadsstatusDTO.FREMTIDIG -> NySykepengesøknad(it)
+            SoknadsstatusDTO.SENDT -> SendtSykepengesøknad(it)
+            else -> throw IllegalArgumentException("Kan ikke håndtere søknadstatus: $status")
+        }
+    }
 
-    val søknad = søknad()
+    fun sendtSøknad(
+            arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
+                    navn = "enArbeidsgiver",
+                    orgnummer = "123456789"
+            )) =
+            søknad(arbeidsgiver = arbeidsgiver
+            ) as SendtSykepengesøknad
 
-    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.inntektsmelding.domain.Inntektsmelding(objectMapper.valueToTree(Inntektsmelding(
+    fun nySøknad(
+            arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
+                    navn = "enArbeidsgiver",
+                    orgnummer = "123456789"
+            )) =
+            søknad(
+                    status = SoknadsstatusDTO.NY,
+                    arbeidsgiver = arbeidsgiver
+            ) as NySykepengesøknad
+
+    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(objectMapper.valueToTree(Inntektsmelding(
             inntektsmeldingId = "",
             arbeidstakerFnr = "",
             arbeidstakerAktorId = "",

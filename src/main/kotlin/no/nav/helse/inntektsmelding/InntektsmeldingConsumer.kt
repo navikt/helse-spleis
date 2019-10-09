@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.sakskompleks.SakskompleksService
 import no.nav.helse.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
@@ -12,7 +12,7 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 
-class InntektsmeldingConsumer(
+internal class InntektsmeldingConsumer(
     streamsBuilder: StreamsBuilder,
     private val inntektsmeldingKafkaTopic: String,
     private val sakskompleksService: SakskompleksService,

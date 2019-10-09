@@ -1,29 +1,40 @@
 package no.nav.helse.sakskompleks
 
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.UtenforOmfangException
-import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-class SakskompleksService(private val behovProducer: BehovProducer,
-                          private val sakskompleksDao: SakskompleksDao,
-                          private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe()) {
+internal class SakskompleksService(private val behovProducer: BehovProducer,
+                                   private val sakskompleksDao: SakskompleksDao,
+                                   private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe()) {
 
-    fun håndterSøknad(sykepengesøknad: Sykepengesøknad) =
+    fun håndterNySøknad(sykepengesøknad: NySykepengesøknad) =
             try {
                 (finnPerson(sykepengesøknad.aktørId) ?: nyPerson(sykepengesøknad.aktørId))
                         .also { person ->
                             person.addObserver(sakskompleksProbe)
-                            if (sykepengesøknad.erSendt()) {
-                                person.håndterSendtSøknad(sykepengesøknad)
-                            } else if (sykepengesøknad.erNy() || sykepengesøknad.erFremtidig()) {
-                                person.håndterNySøknad(sykepengesøknad)
-                            }
+                            person.håndterNySøknad(sykepengesøknad)
+                            behovProducer.nyttBehov("sykepengeperioder", mapOf(
+                                    "aktørId" to sykepengesøknad.aktørId
+                            ))
+                        }
+            } catch (err: UtenforOmfangException) {
+                sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
+            }
+
+    fun håndterSendtSøknad(sykepengesøknad: SendtSykepengesøknad) =
+            try {
+                (finnPerson(sykepengesøknad.aktørId) ?: nyPerson(sykepengesøknad.aktørId))
+                        .also { person ->
+                            person.addObserver(sakskompleksProbe)
+                            person.håndterSendtSøknad(sykepengesøknad)
                             behovProducer.nyttBehov("sykepengeperioder", mapOf(
                                     "aktørId" to sykepengesøknad.aktørId
                             ))
@@ -38,7 +49,7 @@ class SakskompleksService(private val behovProducer: BehovProducer,
                 person.håndterInntektsmelding(inntektsmelding)
             }.also {
                 if (it == null) {
-                     sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
+                    sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
                 }
             }
 

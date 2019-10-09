@@ -2,10 +2,12 @@ package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
 import no.nav.helse.Event
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.person.domain.*
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.person.domain.UtenforOmfangException
 import org.slf4j.LoggerFactory
 import java.util.*
 

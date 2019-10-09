@@ -4,9 +4,9 @@ import no.nav.helse.TestConstants.egenmeldingFom
 import no.nav.helse.TestConstants.egenmeldingTom
 import no.nav.helse.TestConstants.ferieFom
 import no.nav.helse.TestConstants.ferieTom
+import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykeperiodFOM
 import no.nav.helse.TestConstants.sykeperiodeTOM
-import no.nav.helse.TestConstants.søknad
 import no.nav.helse.sykdomstidslinje.Feriedag
 import no.nav.helse.sykdomstidslinje.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -19,7 +19,7 @@ class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`(){
-        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
+        val syketilfeller = sendtSøknad().sykdomstidslinje().syketilfeller()
 
         assertEquals(Sykedag::class, syketilfeller.dagForDato(sykeperiodFOM)::class)
         assertEquals(SykHelgedag::class, syketilfeller.dagForDato(sykeperiodeTOM)::class)
@@ -28,7 +28,7 @@ class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`(){
-        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
+        val syketilfeller = sendtSøknad().sykdomstidslinje().syketilfeller()
 
         assertEquals(egenmeldingFom, syketilfeller.first().startdato())
         assertEquals(Sykedag::class, syketilfeller.dagForDato(egenmeldingFom)::class)
@@ -37,7 +37,7 @@ class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får ferien fra søknaden`(){
-        val syketilfeller = søknad.sykdomstidslinje().syketilfeller()
+        val syketilfeller = sendtSøknad().sykdomstidslinje().syketilfeller()
 
         assertEquals(Feriedag::class, syketilfeller.dagForDato(ferieFom)::class)
         assertEquals(Feriedag::class, syketilfeller.dagForDato(ferieTom)::class)

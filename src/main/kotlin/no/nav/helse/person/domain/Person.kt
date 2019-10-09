@@ -1,24 +1,21 @@
 package no.nav.helse.person.domain
 
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.KildeHendelse
-import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.util.*
 
-class Person: SakskompleksObserver {
+class Person : SakskompleksObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
 
     private val personObservers = mutableListOf<PersonObserver>()
-    fun håndterNySøknad(søknad: Sykepengesøknad) {
-        require(søknad.erNy() || søknad.erFremtidig()) { "søknad må være ny" }
-
+    fun håndterNySøknad(søknad: NySykepengesøknad) {
         findOrCreateArbeidsgiver(søknad).håndterNySøknad(søknad)
     }
 
-    fun håndterSendtSøknad(søknad: Sykepengesøknad) {
-        require(søknad.erSendt()) { "søknad må være sendt" }
-
+    fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
         findOrCreateArbeidsgiver(søknad).håndterSendtSøknad(søknad)
     }
 
@@ -56,13 +53,13 @@ class Person: SakskompleksObserver {
         private val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
-        fun håndterNySøknad(søknad: Sykepengesøknad) {
+        fun håndterNySøknad(søknad: NySykepengesøknad) {
             if (saker.none { it.håndterNySøknad(søknad) }) {
                 nyttSakskompleks(søknad).håndterNySøknad(søknad)
             }
         }
 
-        fun håndterSendtSøknad(søknad: Sykepengesøknad) {
+        fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
             if (saker.none { it.håndterSendtSøknad(søknad) }) {
                 nyttSakskompleks(søknad).håndterSendtSøknad(søknad)
             }
@@ -79,7 +76,7 @@ class Person: SakskompleksObserver {
             saker.forEach { it.addObserver(observer) }
         }
 
-        private fun nyttSakskompleks(hendelse: Sykdomshendelse) : Sakskompleks {
+        private fun nyttSakskompleks(hendelse: Sykdomshendelse): Sakskompleks {
             return Sakskompleks(UUID.randomUUID(), hendelse.aktørId()).also {
                 sakskompleksObservers.forEach(it::addObserver)
                 saker.add(it)
@@ -91,7 +88,6 @@ class Person: SakskompleksObserver {
 }
 
 interface PersonObserver : SakskompleksObserver {
-
     fun personEndret(person: Person) {}
 }
 
@@ -100,4 +96,6 @@ interface Sykdomshendelse : KildeHendelse {
     fun organisasjonsnummer(): String?
 
     fun sykdomstidslinje(): Sykdomstidslinje
+
+    fun toJson(): String
 }
