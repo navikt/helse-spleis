@@ -3,8 +3,7 @@ package no.nav.helse.person.domain
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.sykdomstidslinje.KildeHendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelse.Sykdomshendelse
 import java.util.*
 
 class Person : SakskompleksObserver {
@@ -89,13 +88,4 @@ class Person : SakskompleksObserver {
 
 interface PersonObserver : SakskompleksObserver {
     fun personEndret(person: Person) {}
-}
-
-interface Sykdomshendelse : KildeHendelse {
-    fun aktørId(): String
-    fun organisasjonsnummer(): String?
-
-    fun sykdomstidslinje(): Sykdomstidslinje
-
-    fun toJson(): String
 }

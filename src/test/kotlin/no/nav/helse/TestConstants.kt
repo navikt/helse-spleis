@@ -88,7 +88,8 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )) =
-            søknad(arbeidsgiver = arbeidsgiver
+            søknad(
+                    arbeidsgiver = arbeidsgiver
             ) as SendtSykepengesøknad
 
     fun nySøknad(

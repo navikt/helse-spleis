@@ -1,7 +1,7 @@
 package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
-import no.nav.helse.Event
+import no.nav.helse.hendelse.Event
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.domain.PersonObserver

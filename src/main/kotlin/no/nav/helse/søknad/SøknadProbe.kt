@@ -23,7 +23,7 @@ class SøknadProbe {
 
     fun mottattSøknad(søknad: Sykepengesøknad) {
         log.info("mottok søknad med id=${søknad.id} for sykmelding=${søknad.sykmeldingId}")
-        sikkerLogg.info(søknad.toJson())
+        sikkerLogg.info(søknad.toJson().toString())
         søknadCounter.labels(søknad.status).inc()
     }
 

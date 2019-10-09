@@ -1,6 +1,6 @@
 package no.nav.helse.person.domain
 
-import no.nav.helse.Event
+import no.nav.helse.hendelse.Event
 import java.util.*
 
 interface SakskompleksObserver {

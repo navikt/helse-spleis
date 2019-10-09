@@ -4,11 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.Event
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.hendelse.*
 import java.io.StringWriter
 import java.util.*
 
@@ -219,19 +215,19 @@ class Sakskompleks internal constructor(
 
         generator.writeArrayFieldStart("nyeSøknader")
         nyeSøknader.forEach { søknad ->
-            generator.writeRaw(søknad.toJson())
+            objectMapper.writeValue(generator, søknad.toJson())
         }
         generator.writeEndArray()
 
         generator.writeArrayFieldStart("inntektsmeldinger")
         inntektsmeldinger.forEach { inntektsmelding ->
-            generator.writeRaw(inntektsmelding.toJson())
+            objectMapper.writeValue(generator, inntektsmelding.toJson())
         }
         generator.writeEndArray()
 
         generator.writeArrayFieldStart("sendteSøknader")
         sendteSøknader.forEach { søknad ->
-            generator.writeRaw(søknad.toJson())
+            objectMapper.writeValue(generator, søknad.toJson())
         }
         generator.writeEndArray()
 

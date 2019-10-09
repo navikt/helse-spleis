@@ -1,9 +1,9 @@
 package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.Event
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.hendelse.Event
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
