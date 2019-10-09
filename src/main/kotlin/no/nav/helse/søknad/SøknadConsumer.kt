@@ -40,7 +40,7 @@ internal class SøknadConsumer(
                     skalTaInnSøknad(søknad = jsonNode, søknadProbe = probe)
                 }
                 .mapValues { jsonNode ->
-                    when (jsonNode["type"].textValue()) {
+                    when (jsonNode["status"].textValue()) {
                         "NY" -> NySykepengesøknad(jsonNode)
                         "FREMTIDIG" -> NySykepengesøknad(jsonNode)
                         "SENDT" -> SendtSykepengesøknad(jsonNode)
