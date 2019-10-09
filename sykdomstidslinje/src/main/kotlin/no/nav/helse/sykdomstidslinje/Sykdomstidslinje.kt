@@ -25,7 +25,7 @@ abstract class Sykdomstidslinje {
     internal abstract fun sisteHendelse(): Sykdomshendelse
     internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
 
-    open operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
+    operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.startdato().isAfter(other.startdato())) return other + this
 
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
