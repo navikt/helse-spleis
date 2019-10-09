@@ -17,7 +17,7 @@ internal class SykepengesøknadDeserializer : StdDeserializer<Sykepengesøknad>(
 
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
             objectMapper.readTree<JsonNode>(parser).let {
-                when (it["type"].textValue()) {
+                when (it["status"].textValue()) {
                     "NY" -> NySykepengesøknad(it)
                     "FREMTIDIG" -> NySykepengesøknad(it)
                     "SENDT" -> SendtSykepengesøknad(it)
