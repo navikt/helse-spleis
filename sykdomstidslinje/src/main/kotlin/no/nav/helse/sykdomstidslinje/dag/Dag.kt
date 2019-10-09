@@ -1,10 +1,7 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelse.Event
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.Sykdomshendelse
-import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
@@ -18,7 +15,8 @@ abstract class Dag internal constructor(
     Sykdomstidslinje() {
     private val anyDag = null as KClass<Dag>?
     private val anyEvent = null as KClass<Sykdomshendelse>?
-    private val søknad = Sykepengesøknad::class
+    private val nySøknad = NySykepengesøknad::class
+    private val sendtSøknad = SendtSykepengesøknad::class
     private val inntektsmelding = Inntektsmelding::class
 
     private val nulldag = Nulldag::class
@@ -58,7 +56,11 @@ abstract class Dag internal constructor(
         val helper = Helper(this, other)
 
         return when {
-            helper.doesMatchBidirectional(sykedag, søknad, feriedag, inntektsmelding) -> Ubestemtdag(
+            helper.doesMatchBidirectional(sykedag, nySøknad, feriedag, inntektsmelding) -> Ubestemtdag(
+                this,
+                other
+            )
+            helper.doesMatchBidirectional(sykedag, sendtSøknad, feriedag, inntektsmelding) -> Ubestemtdag(
                 this,
                 other
             )

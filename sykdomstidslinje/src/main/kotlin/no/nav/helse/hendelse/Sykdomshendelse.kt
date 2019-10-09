@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     fun aktørId(): String
     fun rapportertdato(): LocalDateTime
-    fun organisasjonsnummer(): String
+    fun organisasjonsnummer(): String?
     fun sykdomstidslinje(): Sykdomstidslinje
     fun toJson(): JsonNode
 

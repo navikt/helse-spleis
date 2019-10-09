@@ -1,16 +1,20 @@
 package no.nav.helse.hendelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-const val SØKNAD_SENDT = "SENDT"
-const val SØKNAD_NY = "NY"
-const val SØKNAD_FREMTIDIG = "FREMTIDIG"
+private const val SØKNAD_SENDT = "SENDT"
+private const val SØKNAD_NY = "NY"
+private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
-data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
+@JsonSerialize(using = SykdomsheldelseSerializer::class)
+@JsonDeserialize(using = SykepengesøknadDeserializer::class)
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdomshendelse {
+
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!
@@ -25,7 +29,7 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
     override fun aktørId() = aktørId
-    override fun organisasjonsnummer(): String = jsonNode["arbeidsgiver"].get("orgnummer").asText()
+    override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
 
@@ -62,6 +66,18 @@ data class Sykepengesøknad(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     }
 
     override fun toJson(): JsonNode = jsonNode
+}
+
+class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+    init {
+        require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
+    }
+}
+
+class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+    init {
+        require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
+    }
 }
 
 data class Periode(val jsonNode: JsonNode) {

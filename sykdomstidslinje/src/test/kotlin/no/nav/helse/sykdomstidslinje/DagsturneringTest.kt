@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,8 +25,8 @@ class DagsturneringTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        val sendtSøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
-        val nySøknad = Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
+        val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        val nySøknad = NySykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
     }
 
     @Disabled("Fungerer ikke enda")

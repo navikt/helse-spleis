@@ -1,22 +1,15 @@
 package no.nav.helse.hendelse
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class Inntektsmelding(val jsonNode: JsonNode) : Event, Sykdomshendelse {
-
+@JsonSerialize(using = SykdomsheldelseSerializer::class)
+@JsonDeserialize(using = InntektsmeldingDeserializer::class)
+data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
@@ -51,8 +44,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Event, Sykdomshendelse {
 
     override fun aktørId(): String = arbeidstakerAktorId
 
-    override fun organisasjonsnummer(): String = virksomhetsnummer ?: arbeidsgiverFnr
-    ?: throw RuntimeException("Inntektsmelding mangler orgnummer og arbeidsgiver fnr")
+    override fun organisasjonsnummer(): String? = virksomhetsnummer
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
         val arbeidsgiverperiodetidslinjer = arbeidsgiverperioder
@@ -73,20 +65,3 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Event, Sykdomshendelse {
     override fun toJson(): JsonNode = jsonNode
 }
 
-class InntektsmeldingSerializer : StdSerializer<Inntektsmelding>(Inntektsmelding::class.java) {
-    override fun serialize(sykmelding: Inntektsmelding?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        gen?.writeObject(sykmelding?.jsonNode)
-    }
-}
-
-class InntektsmeldingDeserializer : StdDeserializer<Inntektsmelding>(Inntektsmelding::class.java) {
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
-    override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
-        Inntektsmelding(objectMapper.readTree(parser))
-
-}
