@@ -19,16 +19,16 @@ internal class BesteDagTest {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
+        private val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
-        val nulldag get() = Nulldag(2.mandag, Testhendelse())
-        val arbeidsdag get() = Arbeidsdag(2.mandag, Testhendelse())
-        val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
-        val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedager(2.mandag, inntektsmelding)
-        val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
-        val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedager(2.mandag, sendtSøknad)
-        val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(2.mandag, sendtSøknad)
+        private val nulldag get() = Nulldag(2.mandag, Testhendelse())
+        private val arbeidsdag get() = Arbeidsdag(2.mandag, Testhendelse())
+        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
+        private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedager(2.mandag, inntektsmelding)
+        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
+        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedager(2.mandag, sendtSøknad)
+        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(2.mandag, sendtSøknad)
     }
 
     @Test

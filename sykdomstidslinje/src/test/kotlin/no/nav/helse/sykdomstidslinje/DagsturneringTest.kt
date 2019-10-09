@@ -15,16 +15,16 @@ import org.junit.jupiter.api.Test
 
 class DagsturneringTest {
     companion object {
-        val mandag = LocalDate.of(2019, 7, 1)
-        val lørdag = LocalDate.of(2019, 7, 6)
+        private val mandag = LocalDate.of(2019, 7, 1)
+        private val lørdag = LocalDate.of(2019, 7, 6)
 
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
-        val nySøknad = NySykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
+        private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
+        private val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val nySøknad = NySykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_ny.json".readResource()))
     }
 
     @Disabled("Ikke ferdig implementert gjennom")
