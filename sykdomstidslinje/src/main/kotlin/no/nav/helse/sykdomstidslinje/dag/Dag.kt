@@ -4,6 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.objectMapper
+import no.nav.helse.hendelse.Event
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -24,6 +29,7 @@ abstract class Dag internal constructor(
     private val feriedag = Feriedag::class
     private val utenlandsdag = Utenlandsdag::class
     private val arbeidsdag = Arbeidsdag::class
+    private val fylldag = Fylldag::class
 
     internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
@@ -33,8 +39,9 @@ abstract class Dag internal constructor(
     internal open fun jsonRepresentation(): JsonDag {
         val hendelseType = (hendelse as Event).eventType()
         val hendelseJson = hendelse.toJson()
-        return JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name,hendelseJson), erstatter.map { it.jsonRepresentation() })
+        return JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.map { it.jsonRepresentation() })
     }
+
     override fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     override fun startdato() = dagen
@@ -64,6 +71,9 @@ abstract class Dag internal constructor(
                 this,
                 other
             )
+            helper.doesMatchBidirectional(arbeidsdag, inntektsmelding, sykedag, sendtSøknad) -> Ubestemtdag(this, other)
+            helper.doesMatchBidirectional(sykedag, sendtSøknad, arbeidsdag, sendtSøknad) -> Ubestemtdag(this, other)
+
             helper.doesMatch(nulldag, anyEvent, anyDag, anyEvent) -> other
             helper.doesMatch(anyDag, anyEvent, nulldag, anyEvent) -> this
             helper.doesMatch(sykedag, anyEvent, sykedag, anyEvent) -> this.sisteDag(other)
@@ -73,6 +83,13 @@ abstract class Dag internal constructor(
             helper.doesMatch(utenlandsdag, anyEvent, feriedag, anyEvent) -> other.also { other.erstatter(this) }
             helper.doesMatch(arbeidsdag, anyEvent, sykedag, anyEvent) -> this.also { this.erstatter(other) }
             helper.doesMatch(sykedag, anyEvent, arbeidsdag, anyEvent) -> other.also { other.erstatter(this) }
+            helper.doesMatch(arbeidsdag, anyEvent, arbeidsdag, anyEvent) -> this.sisteDag(other)
+
+            helper.doesMatch(fylldag, anyEvent, arbeidsdag, anyEvent) -> other
+            helper.doesMatch(arbeidsdag, anyEvent, fylldag, anyEvent) -> this
+            helper.doesMatch(fylldag, anyEvent, sykedag, anyEvent) -> other
+            helper.doesMatch(sykedag, anyEvent, fylldag, anyEvent) -> this
+            helper.doesMatch(fylldag, anyEvent, fylldag, anyEvent) -> this.sisteDag(other)
             else -> Ubestemtdag(this, other)
         }
     }

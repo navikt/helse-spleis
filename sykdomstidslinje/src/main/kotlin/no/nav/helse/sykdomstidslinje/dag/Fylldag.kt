@@ -4,16 +4,16 @@ import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class Perminsjonsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse) {
+class Fylldag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse) {
+    override fun dagType(): JsonDagType = JsonDagType.FYLLDAG
+
     override fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.visitPermisjonsdag(this)
+        visitor.visitFylldag(this)
     }
 
     override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
 
     override fun antallSykedagerHvorViTellerMedHelg() = 0
 
-    override fun toString() = formatter.format(dagen) + "\tStudiedag"
-
-    override fun dagType() = JsonDagType.PERMISJONSDAG
+    override fun toString() = formatter.format(dagen) + ":Fylldag"
 }

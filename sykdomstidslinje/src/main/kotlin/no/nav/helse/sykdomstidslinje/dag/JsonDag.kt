@@ -26,5 +26,6 @@ enum class JsonDagType {
     SYKEDAG,
     SYK_HELGEDAG,
     UBESTEMTDAG,
-    UTENLANDSDAG
+    UTENLANDSDAG,
+    FYLLDAG
 }
