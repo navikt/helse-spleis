@@ -16,9 +16,9 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val rapportertDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["rapportertDato"].textValue())
 
     val ferie
-        get() = jsonNode["ferie"].map {
+        get() = jsonNode["ferieperioder"]?.map {
             Periode(it)
-        }
+        } ?: emptyList()
 
     val inntektsmeldingId = jsonNode["inntektsmeldingId"].asText() as String
 
