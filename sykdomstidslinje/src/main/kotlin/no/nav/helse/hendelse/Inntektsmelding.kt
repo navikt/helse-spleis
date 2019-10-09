@@ -29,9 +29,9 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     val arbeidsgiverAktorId: String? get() = jsonNode["arbeidsgiverAktorId"]?.textValue()
 
     val arbeidsgiverperioder
-        get() = jsonNode["arbeidsgiverperioder"].map {
+        get() = jsonNode["arbeidsgiverperioder"]?.map {
             Periode(it)
-        }
+        } ?: emptyList()
 
     val sisteDagIArbeidsgiverPeriode
         get() = arbeidsgiverperioder.maxBy {
