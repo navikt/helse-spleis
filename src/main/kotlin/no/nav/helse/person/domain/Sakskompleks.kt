@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
 
@@ -13,24 +14,15 @@ class Sakskompleks internal constructor(
         private val aktørId: String
 ) {
 
-    private val nyeSøknader: MutableList<Sykepengesøknad> = mutableListOf()
-    private val sendteSøknader: MutableList<Sykepengesøknad> = mutableListOf()
-    private val inntektsmeldinger: MutableList<Inntektsmelding> = mutableListOf()
     private var tilstand: Sakskomplekstilstand = StartTilstand
 
-    private val sykdomstidslinje
-        get() = nyeSøknader.plus(sendteSøknader)
-                .map(Sykepengesøknad::sykdomstidslinje)
-                .reduce { sum, sykdomstidslinje ->
-                    sum + sykdomstidslinje
-                }
+    private var sykdomstidslinje: Sykdomstidslinje? = null
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     internal fun håndterNySøknad(søknad: NySykepengesøknad): Boolean {
         return passerMed(søknad).also {
             if (it) {
-                nyeSøknader.add(søknad)
                 tilstand.håndterNySøknad(this, søknad)
             }
         }
@@ -39,7 +31,6 @@ class Sakskompleks internal constructor(
     internal fun håndterSendtSøknad(søknad: SendtSykepengesøknad): Boolean {
         return passerMed(søknad).also {
             if (it) {
-                sendteSøknader.add(søknad)
                 tilstand.håndterSendtSøknad(this, søknad)
             }
         }
@@ -48,7 +39,6 @@ class Sakskompleks internal constructor(
     internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
             passerMed(inntektsmelding).also {
                 if (it) {
-                    inntektsmeldinger.add(inntektsmelding)
                     tilstand.håndterInntektsmelding(this, inntektsmelding)
                 }
             }
@@ -56,9 +46,6 @@ class Sakskompleks internal constructor(
     private fun passerMed(hendelse: Sykdomshendelse): Boolean {
         return true
     }
-
-    fun fom() = sykdomstidslinje.startdato()
-    fun tom() = sykdomstidslinje.sluttdato()
 
     private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -109,24 +96,36 @@ class Sakskompleks internal constructor(
 
     }
 
+    private fun slåSammenSykdomstidslinje(hendelse: Sykdomshendelse) {
+        this.sykdomstidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje())
+                ?: hendelse.sykdomstidslinje()
+    }
+
     private object StartTilstand : Sakskomplekstilstand {
 
         override fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: NySykepengesøknad) {
-            sakskompleks.setTilstand(søknad, NySøknadMottattTilstand)
+            sakskompleks.setTilstand(søknad, NySøknadMottattTilstand) {
+                sakskompleks.sykdomstidslinje = søknad.sykdomstidslinje()
+            }
         }
 
-        override val type = TilstandType.START
+        override val type = Sakskompleks.TilstandType.START
 
     }
 
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
-            sakskompleks.setTilstand(søknad, SendtSøknadMottattTilstand)
+            sakskompleks.setTilstand(søknad, SendtSøknadMottattTilstand) {
+                sakskompleks.slåSammenSykdomstidslinje(søknad)
+            }
         }
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
-            sakskompleks.setTilstand(inntektsmelding, InntektsmeldingMottattTilstand)
+            sakskompleks.setTilstand(inntektsmelding, InntektsmeldingMottattTilstand) {
+                // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
+                // sakskompleks.slåSammenSykdomstidslinje(inntektsmelding)
+            }
         }
 
         override val type = TilstandType.NY_SØKNAD_MOTTATT
@@ -136,7 +135,10 @@ class Sakskompleks internal constructor(
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
-            sakskompleks.setTilstand(inntektsmelding, KomplettSakTilstand)
+            sakskompleks.setTilstand(inntektsmelding, KomplettSakTilstand) {
+                // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
+                // sakskompleks.slåSammenSykdomstidslinje(inntektsmelding)
+            }
         }
 
         override val type = TilstandType.SENDT_SØKNAD_MOTTATT
@@ -146,7 +148,9 @@ class Sakskompleks internal constructor(
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
-            sakskompleks.setTilstand(søknad, KomplettSakTilstand)
+            sakskompleks.setTilstand(søknad, KomplettSakTilstand) {
+                sakskompleks.slåSammenSykdomstidslinje(søknad)
+            }
         }
 
         override val type = TilstandType.INNTEKTSMELDING_MOTTATT
@@ -187,17 +191,9 @@ class Sakskompleks internal constructor(
                 TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
             }
 
-            sakskompleks.inntektsmeldinger.addAll(node["inntektsmeldinger"].map { jsonNode ->
-                Inntektsmelding(jsonNode)
-            })
-
-            sakskompleks.nyeSøknader.addAll(node["nyeSøknader"].map { jsonNode ->
-                NySykepengesøknad(jsonNode)
-            })
-
-            sakskompleks.sendteSøknader.addAll(node["sendteSøknader"].map { jsonNode ->
-                SendtSykepengesøknad(jsonNode)
-            })
+            node["sykdomstidslinje"]?.let {
+                sakskompleks.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString())
+            }
 
             return sakskompleks
         }
@@ -213,23 +209,11 @@ class Sakskompleks internal constructor(
         generator.writeStringField("aktørId", aktørId)
         generator.writeStringField("tilstand", tilstand.type.name)
 
-        generator.writeArrayFieldStart("nyeSøknader")
-        nyeSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.toJson())
+        sykdomstidslinje?.also {
+            generator.writeFieldName("sykdomstidslinje")
+            generator.writeRaw(":")
+            generator.writeRaw(it.toJson())
         }
-        generator.writeEndArray()
-
-        generator.writeArrayFieldStart("inntektsmeldinger")
-        inntektsmeldinger.forEach { inntektsmelding ->
-            objectMapper.writeValue(generator, inntektsmelding.toJson())
-        }
-        generator.writeEndArray()
-
-        generator.writeArrayFieldStart("sendteSøknader")
-        sendteSøknader.forEach { søknad ->
-            objectMapper.writeValue(generator, søknad.toJson())
-        }
-        generator.writeEndArray()
 
         generator.writeEndObject()
 
