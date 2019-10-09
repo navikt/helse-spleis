@@ -5,7 +5,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
 class Fylldag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse) {
-    override fun dagType(): JsonDagType = JsonDagType.FYLLDAG
+    override fun dagType(): JsonDagType = TODO()
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitFylldag(this)

@@ -9,23 +9,23 @@ internal class CompositeLeafSykdomstidslinjeTest {
     companion object {
         private val tidspunktRapportert = Testhendelse()
 
-        private val førsteMandag = Sykdomstidslinje.sykedager(
+        private val førsteMandag = Sykdomstidslinje.sykedag(
             gjelder = LocalDate.of(2019, 9, 23),
             hendelse = tidspunktRapportert
         )
-        private val førsteTirsdag = Sykdomstidslinje.sykedager(
+        private val førsteTirsdag = Sykdomstidslinje.sykedag(
             gjelder = LocalDate.of(2019, 9, 24),
             hendelse = tidspunktRapportert
         )
-        private val førsteOnsdag = Sykdomstidslinje.sykedager(
+        private val førsteOnsdag = Sykdomstidslinje.sykedag(
             gjelder = LocalDate.of(2019, 9, 25),
             hendelse = tidspunktRapportert
         )
-        private val førsteTorsdag = Sykdomstidslinje.sykedager(
+        private val førsteTorsdag = Sykdomstidslinje.sykedag(
             gjelder = LocalDate.of(2019, 9, 26),
             hendelse = tidspunktRapportert
         )
-        private val andreMandag = Sykdomstidslinje.sykedager(
+        private val andreMandag = Sykdomstidslinje.sykedag(
             gjelder = LocalDate.of(2019, 9, 30),
             hendelse = tidspunktRapportert
         )

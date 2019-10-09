@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -25,9 +24,9 @@ internal class BesteDagTest {
         private val nulldag get() = Nulldag(2.mandag, Testhendelse())
         private val arbeidsdag get() = Arbeidsdag(2.mandag, Testhendelse())
         private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
-        private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedager(2.mandag, inntektsmelding)
+        private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedag(2.mandag, inntektsmelding)
         private val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
-        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedager(2.mandag, sendtSøknad)
+        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(2.mandag, sendtSøknad)
         private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(2.mandag, sendtSøknad)
     }
 

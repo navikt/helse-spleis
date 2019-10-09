@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import no.nav.helse.sykdomstidslinje.dag.Nulldag
 import java.time.LocalDate
 
@@ -42,13 +42,13 @@ class CompositeSykdomstidslinje(
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
 
-    override fun toJson(): String {
-        return objectMapper.writeValueAsString(flatten().map { it.jsonRepresentation() })
-    }
+    override fun jsonRepresentation(): List<JsonDag> = flatten().flatMap { it.jsonRepresentation() }
+
+    override fun equals(other: Any?): Boolean = other is CompositeSykdomstidslinje && tidslinjer == other.tidslinjer
 
     companion object {
-        internal fun fromJson(node:JsonNode): CompositeSykdomstidslinje {
-            return CompositeSykdomstidslinje(node.map { Dag.fromJson(it) })
+        internal fun fromJsonRepresentation(jsonDager: List<JsonDag>): CompositeSykdomstidslinje {
+            return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it) })
         }
     }
 }

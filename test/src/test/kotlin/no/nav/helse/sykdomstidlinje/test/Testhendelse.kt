@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 internal class Testhendelse(private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45)) :
     Sykdomshendelse, Event {
     override fun eventType(): Event.Type {
-        return Event.Type.Inntektsmelding
+        TODO("not implemented")
     }
 
     override fun organisasjonsnummer(): String {

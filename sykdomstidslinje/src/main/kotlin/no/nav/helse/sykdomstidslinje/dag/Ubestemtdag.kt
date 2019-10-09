@@ -1,11 +1,13 @@
 package no.nav.helse.sykdomstidslinje.dag
 
+import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import java.time.LocalDate
 
-class Ubestemtdag internal constructor(left: Dag, right: Dag): Dag(left.dagen,
-    sykdomshendelse(left, right)
-) {
-    init { erstatter(left,right) }
+class Ubestemtdag internal constructor(dato: LocalDate, hendelse: Sykdomshendelse): Dag(dato, hendelse) {
+    internal constructor(left: Dag, right: Dag) : this(left.dagen, sykdomshendelse(left, right)) {
+        erstatter(left,right)
+    }
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitUbestemt(this)

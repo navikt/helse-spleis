@@ -14,7 +14,7 @@ internal class DagTest {
     @Test
     internal fun sykedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val sykedag = Sykdomstidslinje.sykedager(dagSykedagenDekker, rapporterthendelse)
+        val sykedag = Sykdomstidslinje.sykedag(dagSykedagenDekker, rapporterthendelse)
 
         assertEquals(dagSykedagenDekker, sykedag.startdato())
         assertEquals(dagSykedagenDekker, sykedag.sluttdato())

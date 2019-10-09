@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse){
@@ -15,5 +16,5 @@ internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdom
 
     override fun toString() = formatter.format(dagen) + "\tNulldag"
 
-    override fun dagType() = JsonDagType.NULLDAG
+    override fun dagType() = throw RuntimeException("Not implemented, should never be serialized")
 }

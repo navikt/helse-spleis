@@ -90,17 +90,17 @@ class DagsturneringTest {
             "WD-I" -> Fylldag(dato, sendtSøknad)
             "WD-A" -> Sykdomstidslinje.ikkeSykedag(dato, sendtSøknad)
             "WD-IM" -> Sykdomstidslinje.ikkeSykedag(dato, inntektsmelding)
-            "S" -> Sykdomstidslinje.sykedager(dato, nySøknad)
-            "GS" -> Sykdomstidslinje.sykedager(dato, nySøknad)
-            "GS-A" -> Sykdomstidslinje.sykedager(dato, sendtSøknad)
+            "S" -> Sykdomstidslinje.sykedag(dato, nySøknad)
+            "GS" -> Sykdomstidslinje.sykedag(dato, nySøknad)
+            "GS-A" -> Sykdomstidslinje.sykedag(dato, sendtSøknad)
             "V-A" -> Sykdomstidslinje.ferie(dato, sendtSøknad)
             "V-IM" -> Sykdomstidslinje.ferie(dato, inntektsmelding)
             "W" -> Helgedag(lørdag, sendtSøknad)
 //            "Le-Areg" -> Permisjonsdag(dato, ) // TODO: Implementer når vi har permisjon
             "Le-A" -> Permisjonsdag(dato, sendtSøknad) // TODO: Implementer når vi har permisjon
             "SW" -> SykHelgedag(lørdag, nySøknad)
-            "SRD-IM" -> Sykdomstidslinje.egenmeldingsdager(dato, inntektsmelding)
-            "SRD-A" -> Sykdomstidslinje.egenmeldingsdager(dato, sendtSøknad)
+            "SRD-IM" -> Sykdomstidslinje.egenmeldingsdag(dato, inntektsmelding)
+            "SRD-A" -> Sykdomstidslinje.egenmeldingsdag(dato, sendtSøknad)
             "EDU" -> Utdanningsdag(dato, sendtSøknad)
 //            "OI-Int" -> null // TODO: Implementer når vi har andre inntektskilder
 //            "OI-A" -> Ubestemtdag(dato, sendtSøknad)
@@ -109,7 +109,7 @@ class DagsturneringTest {
             "Le" -> Permisjonsdag(dato, sendtSøknad)
             "SW-SM" -> SykHelgedag(dato, nySøknad)
             "Undecided" -> Ubestemtdag(
-                Sykdomstidslinje.sykedager(dato, sendtSøknad), Sykdomstidslinje.ikkeSykedag(
+                Sykdomstidslinje.sykedag(dato, sendtSøknad), Sykdomstidslinje.ikkeSykedag(
                     dato, inntektsmelding
                 )
             )

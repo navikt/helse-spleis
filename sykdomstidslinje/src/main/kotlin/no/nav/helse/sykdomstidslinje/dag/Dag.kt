@@ -3,12 +3,6 @@ package no.nav.helse.sykdomstidslinje.dag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.objectMapper
-import no.nav.helse.hendelse.Event
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.Sykdomshendelse
-import no.nav.helse.hendelse.Sykepengesøknad
-import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -36,19 +30,17 @@ abstract class Dag internal constructor(
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
     internal abstract fun dagType(): JsonDagType
-    internal open fun jsonRepresentation(): JsonDag {
+    override fun jsonRepresentation(): List<JsonDag> {
         val hendelseType = (hendelse as Event).eventType()
         val hendelseJson = hendelse.toJson()
-        return JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.map { it.jsonRepresentation() })
+        return listOf(JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.flatMap { it.jsonRepresentation() }))
     }
-
-    override fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     override fun startdato() = dagen
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else Nulldag(
-        dagen,
+        dato,
         hendelse
     )
 
@@ -101,6 +93,11 @@ abstract class Dag internal constructor(
 
     override fun sisteHendelse() = this.hendelse
 
+    override fun equals(other: Any?): Boolean {
+        return other is Dag && this::class == other::class && other.dagen == dagen && other.erstatter == erstatter
+                && other.hendelse == hendelse
+    }
+
     private class Helper(private val left: Dag, private val right: Dag) {
         fun <S : Dag, T : Sykdomshendelse, U : Dag, V : Sykdomshendelse> doesMatch(
             leftClass: KClass<S>?,
@@ -133,7 +130,9 @@ abstract class Dag internal constructor(
     }
 
     companion object {
-        internal fun fromJson(node: JsonNode): Dag = TODO("Oversett json til dag")
+        internal fun fromJsonRepresentation(jsonDag: JsonDag): Dag = jsonDag.type.creator(jsonDag).also {
+            it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag -> fromJsonRepresentation(erstatterJsonDag) })
+        }
     }
 }
 

@@ -56,7 +56,7 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
             .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
 
         // TODO: førsteFraværsdag er ikke med i kontrakten enda
-        // val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedager(gjelder = førsteFraværsdag, hendelse = this))
+        // val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedag(gjelder = førsteFraværsdag, hendelse = this))
 
         return (/*førsteFraværsdagTidslinje + */arbeidsgiverperiodetidslinjer + ferietidslinjer)
             .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
@@ -68,5 +68,9 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     }
 
     override fun toJson(): JsonNode = jsonNode
+
+    override fun equals(other: Any?): Boolean {
+        return other is Inntektsmelding && other.jsonNode == jsonNode
+    }
 }
 

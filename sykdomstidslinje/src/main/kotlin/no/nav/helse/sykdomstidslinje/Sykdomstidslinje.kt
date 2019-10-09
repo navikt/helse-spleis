@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -21,9 +20,10 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
-    abstract fun toJson(): String
+    internal abstract fun jsonRepresentation(): List<JsonDag>
     internal abstract fun sisteHendelse(): Sykdomshendelse
     internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
+    fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.startdato().isAfter(other.startdato())) return other + this
@@ -85,7 +85,7 @@ abstract class Sykdomstidslinje {
     fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje(dagsats).also { this.accept(it) }
 
     companion object {
-        fun sykedager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun sykedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
                 hendelse
@@ -94,7 +94,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun egenmeldingsdager(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun egenmeldingsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
             Egenmeldingsdag(gjelder, hendelse)
 
         fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
@@ -127,7 +127,7 @@ abstract class Sykdomstidslinje {
         fun sykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
-                sykedager(
+                sykedag(
                     it,
                     hendelse
                 )
@@ -137,7 +137,7 @@ abstract class Sykdomstidslinje {
         fun egenmeldingsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
-                egenmeldingsdager(
+                egenmeldingsdag(
                     it,
                     hendelse
                 )
@@ -193,18 +193,49 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
+        fun permisjonsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            if (erArbeidsdag(gjelder)) Permisjonsdag(
+                gjelder,
+                hendelse
+            ) else Helgedag(
+                gjelder,
+                hendelse
+            )
+
+        fun permisjonsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                permisjonsdag(
+                    it,
+                    hendelse
+                )
+            }.toList())
+        }
+
+        fun utdanningsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            if (erArbeidsdag(gjelder)) Utdanningsdag(
+                gjelder,
+                hendelse
+            ) else Helgedag(
+                gjelder,
+                hendelse
+            )
+
+        fun utdanningsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                utdanningsdag(
+                    it,
+                    hendelse
+                )
+            }.toList())
+        }
+
         fun fromJson(json: String): Sykdomstidslinje {
-            val node = objectMapper.readValue<JsonNode>(json)
-            return if (node.isArray) {
-                CompositeSykdomstidslinje.fromJson(node)
-            } else {
-                Dag.fromJson(node)
-            }
+            return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))
         }
 
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
     }
-
-    override fun equals(other: Any?): Boolean = other is Sykdomstidslinje && flatten() == other.flatten()
 }
