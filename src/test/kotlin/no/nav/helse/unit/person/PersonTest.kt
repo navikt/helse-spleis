@@ -1,21 +1,14 @@
 package no.nav.helse.unit.person
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.søknad
-import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.person.domain.*
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class PersonTest {
 
@@ -154,30 +147,4 @@ internal class PersonTest {
     private fun inntektsmeldingMottattTilstand() : Sakskompleks {
         TODO()
     }
-
-   private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-    private fun inntektsmelding(virksomhetsnummer: String? = null) = Inntektsmelding(objectMapper.valueToTree(Inntektsmeldingkontrakt(
-            inntektsmeldingId = "",
-            arbeidstakerFnr = "",
-            arbeidstakerAktorId = "",
-            virksomhetsnummer = virksomhetsnummer,
-            arbeidsgiverFnr = null,
-            arbeidsgiverAktorId = null,
-            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-            arbeidsforholdId = null,
-            beregnetInntekt = null,
-            refusjon = Refusjon(
-                    beloepPrMnd = null,
-                    opphoersdato = null
-            ),
-            endringIRefusjoner = emptyList(),
-            opphoerAvNaturalytelser = emptyList(),
-            gjenopptakelseNaturalytelser = emptyList(),
-            arbeidsgiverperioder = emptyList(),
-            status = Status.GYLDIG,
-            arkivreferanse = ""
-    )))
 }

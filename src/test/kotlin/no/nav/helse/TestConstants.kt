@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.søknad.domain.Sykepengesøknad
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverForskuttererDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidssituasjonDTO
@@ -19,7 +23,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.util.*
 
-object TestConstants {
+internal object TestConstants {
     private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -32,7 +36,7 @@ object TestConstants {
     val ferieTom = LocalDate.of(2019, Month.OCTOBER, 4)
 
     fun søknad(
-            id: String = UUID.randomUUID() .toString(),
+            id: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
@@ -80,4 +84,26 @@ object TestConstants {
     )))
 
     val søknad = søknad()
+
+    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.inntektsmelding.domain.Inntektsmelding(objectMapper.valueToTree(Inntektsmelding(
+            inntektsmeldingId = "",
+            arbeidstakerFnr = "",
+            arbeidstakerAktorId = "",
+            virksomhetsnummer = virksomhetsnummer,
+            arbeidsgiverFnr = null,
+            arbeidsgiverAktorId = null,
+            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+            arbeidsforholdId = null,
+            beregnetInntekt = null,
+            refusjon = Refusjon(
+                    beloepPrMnd = null,
+                    opphoersdato = null
+            ),
+            endringIRefusjoner = emptyList(),
+            opphoerAvNaturalytelser = emptyList(),
+            gjenopptakelseNaturalytelser = emptyList(),
+            arbeidsgiverperioder = emptyList(),
+            status = Status.GYLDIG,
+            arkivreferanse = ""
+    )))
 }

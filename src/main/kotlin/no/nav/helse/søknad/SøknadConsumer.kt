@@ -62,7 +62,7 @@ class SøknadConsumer(
     }
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
-        sakskompleksService.finnEllerOpprettSak(søknad)
+        sakskompleksService.håndterSøknad(søknad)
     }
 }
 

@@ -41,7 +41,7 @@ class InntektsmeldingConsumer(
             .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
 
     private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-        sakskompleksService.knyttInntektsmeldingTilSak(inntektsmelding)
+        sakskompleksService.håndterInntektsmelding(inntektsmelding)
     }
 
 }

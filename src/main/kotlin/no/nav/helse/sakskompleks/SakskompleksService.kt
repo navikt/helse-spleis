@@ -3,7 +3,7 @@ package no.nav.helse.sakskompleks
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
 import no.nav.helse.person.domain.Person
-import no.nav.helse.person.domain.Sakskompleks
+import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.søknad.domain.Sykepengesøknad
 import java.lang.Integer.max
 import java.time.DayOfWeek
@@ -11,31 +11,34 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class SakskompleksService(private val behovProducer: BehovProducer,
-                          private val sakskompleksDao: SakskompleksDao) {
+                          private val sakskompleksDao: SakskompleksDao,
+                          private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe()) {
 
-    private val sakskompleksProbe = SakskompleksProbe()
-
-    fun finnEllerOpprettSak(sykepengesøknad: Sykepengesøknad) =
-            (finnPerson(sykepengesøknad.aktørId) ?: nyPerson(sykepengesøknad.aktørId))
-                    .also { person ->
-                        person.addObserver(sakskompleksProbe)
-                        behovProducer.nyttBehov("sykepengeperioder", mapOf(
-                                "aktørId" to sykepengesøknad.aktørId
-                        ))
-                        if (sykepengesøknad.erSendt()) {
-                            person.håndterSendtSøknad(sykepengesøknad)
-                        } else if (sykepengesøknad.erNy() || sykepengesøknad.erFremtidig()) {
-                            person.håndterNySøknad(sykepengesøknad)
+    fun håndterSøknad(sykepengesøknad: Sykepengesøknad) =
+            try {
+                (finnPerson(sykepengesøknad.aktørId) ?: nyPerson(sykepengesøknad.aktørId))
+                        .also { person ->
+                            person.addObserver(sakskompleksProbe)
+                            if (sykepengesøknad.erSendt()) {
+                                person.håndterSendtSøknad(sykepengesøknad)
+                            } else if (sykepengesøknad.erNy() || sykepengesøknad.erFremtidig()) {
+                                person.håndterNySøknad(sykepengesøknad)
+                            }
+                            behovProducer.nyttBehov("sykepengeperioder", mapOf(
+                                    "aktørId" to sykepengesøknad.aktørId
+                            ))
                         }
-                    }
+            } catch (err: UtenforOmfangException) {
+                sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
+            }
 
-    fun knyttInntektsmeldingTilSak(inntektsmelding: Inntektsmelding) =
+    fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
             finnPerson(inntektsmelding.aktørId())?.also { person ->
                 person.addObserver(sakskompleksProbe)
                 person.håndterInntektsmelding(inntektsmelding)
             }.also {
                 if (it == null) {
-                    sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
+                     sakskompleksProbe.inntektmeldingManglerSakskompleks(inntektsmelding)
                 }
             }
 

@@ -3,14 +3,13 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import no.nav.helse.Event
 import no.nav.helse.inntektsmelding.domain.Inntektsmelding
-import no.nav.helse.person.domain.PersonObserver
-import no.nav.helse.person.domain.Sakskompleks
-import no.nav.helse.person.domain.SakskompleksObserver
+import no.nav.helse.person.domain.*
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.søknad.domain.Sykepengesøknad
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class SakskompleksProbe: PersonObserver {
+class SakskompleksProbe : PersonObserver {
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
@@ -82,5 +81,13 @@ class SakskompleksProbe: PersonObserver {
                 log.info("sakskompleks med id ${event.id} trenger manuell behandling")
             }
         }
+    }
+
+    fun utenforOmfang(err: UtenforOmfangException, sykepengesøknad: Sykepengesøknad) {
+        log.info("Utenfor omfang: ${err.message} for søknad med id: ${sykepengesøknad.id}.")
+    }
+
+    fun utenforOmfang(err: UtenforOmfangException, inntektsmelding: Inntektsmelding) {
+        log.info("Utenfor omfang: ${err.message} for inntektsmelding med id: ${inntektsmelding.inntektsmeldingId}.")
     }
 }
