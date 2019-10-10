@@ -1,9 +1,11 @@
 package no.nav.helse.person.domain
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.sykdomstidslinje.objectMapper
 import java.util.*
 
 class Person(val aktørId: String) : SakskompleksObserver {
@@ -28,6 +30,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
         }
     }
 
+
     fun addObserver(observer: PersonObserver) {
         personObservers.add(observer)
         arbeidsgivere.values.forEach { it.addObserver(observer) }
@@ -49,7 +52,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
             }
 
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
-        private val saker = mutableListOf<Sakskompleks>()
+        internal val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
         fun håndterNySøknad(søknad: NySykepengesøknad) {
@@ -88,8 +91,27 @@ class Person(val aktørId: String) : SakskompleksObserver {
         }
     }
 
+    fun toJson(): String {
+        return objectMapper.writeValueAsString(jsonRepresentation())
+    }
+
     fun jsonRepresentation(): PersonJson {
         return PersonJson(aktørId = aktørId, arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() })
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Person
+
+        if (aktørId != other.aktørId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return aktørId.hashCode()
     }
 
     data class ArbeidsgiverJson(
@@ -102,6 +124,17 @@ class Person(val aktørId: String) : SakskompleksObserver {
             val aktørId: String,
             val arbeidsgivere: List<ArbeidsgiverJson>
     )
+
+    companion object {
+        fun fromJson(json: String): Person {
+            val personJson: PersonJson = objectMapper.readValue(json)
+            return Person(personJson.aktørId).apply { arbeidsgivere.putAll(personJson.arbeidsgivere.map { it.organisasjonsnummer to fromArbeidsgiverJson(it) }) }
+        }
+
+        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson):Arbeidsgiver{
+            return Arbeidsgiver(organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer, id = arbeidsgiverJson.id).apply { saker.addAll(arbeidsgiverJson.saker.map {  TODO("Legg til fromjson på sakskompleks")}) }
+        }
+    }
 }
 
 interface PersonObserver : SakskompleksObserver {
