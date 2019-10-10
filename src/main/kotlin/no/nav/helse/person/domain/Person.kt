@@ -37,19 +37,19 @@ class Person(val aktørId: String) : SakskompleksObserver {
     }
 
     private fun findOrCreateArbeidsgiver(hendelse: Sykdomshendelse) =
-            hendelse.organisasjonsnummer()?.let { orgnr ->
-                arbeidsgivere.getOrPut(orgnr) {
-                    arbeidsgiver(orgnr)
-                }
-            } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
+        hendelse.organisasjonsnummer()?.let { orgnr ->
+            arbeidsgivere.getOrPut(orgnr) {
+                arbeidsgiver(orgnr)
+            }
+        } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
-            Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
-                it.addObserver(this)
-                personObservers.forEach { personObserver ->
-                    it.addObserver(personObserver)
-                }
+        Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
+            it.addObserver(this)
+            personObservers.forEach { personObserver ->
+                it.addObserver(personObserver)
             }
+        }
 
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
         internal val saker = mutableListOf<Sakskompleks>()
@@ -57,19 +57,19 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         fun håndterNySøknad(søknad: NySykepengesøknad) {
             if (saker.none { it.håndterNySøknad(søknad) }) {
-                nyttSakskompleks(søknad).håndterNySøknad(søknad)
+                nyttSakskompleks().håndterNySøknad(søknad)
             }
         }
 
         fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
             if (saker.none { it.håndterSendtSøknad(søknad) }) {
-                nyttSakskompleks(søknad).håndterSendtSøknad(søknad)
+                nyttSakskompleks().håndterSendtSøknad(søknad)
             }
         }
 
         fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
             if (saker.none { it.håndterInntektsmelding(inntektsmelding) }) {
-                nyttSakskompleks(inntektsmelding).håndterInntektsmelding(inntektsmelding)
+                nyttSakskompleks().håndterInntektsmelding(inntektsmelding)
             }
         }
 
@@ -78,8 +78,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
             saker.forEach { it.addObserver(observer) }
         }
 
-        private fun nyttSakskompleks(hendelse: Sykdomshendelse): Sakskompleks {
-            return Sakskompleks(UUID.randomUUID(), hendelse.aktørId()).also {
+        private fun nyttSakskompleks(): Sakskompleks {
+            return Sakskompleks(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
                 sakskompleksObservers.forEach(it::addObserver)
                 saker.add(it)
             }
@@ -87,7 +87,11 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
 
         fun jsonRepresentation(): ArbeidsgiverJson {
-            return ArbeidsgiverJson(organisasjonsnummer = organisasjonsnummer, saker = saker.map { it.jsonRepresentation() }, id = id)
+            return ArbeidsgiverJson(
+                organisasjonsnummer = organisasjonsnummer,
+                saker = saker.map { it.jsonRepresentation() },
+                id = id
+            )
         }
     }
 
@@ -96,7 +100,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
     }
 
     fun jsonRepresentation(): PersonJson {
-        return PersonJson(aktørId = aktørId, arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() })
+        return PersonJson(
+            aktørId = aktørId,
+            arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -115,24 +122,33 @@ class Person(val aktørId: String) : SakskompleksObserver {
     }
 
     data class ArbeidsgiverJson(
-            val organisasjonsnummer: String,
-            val saker: List<Sakskompleks.SakskompleksJson>,
-            val id: UUID
+        val organisasjonsnummer: String,
+        val saker: List<Sakskompleks.SakskompleksJson>,
+        val id: UUID
     )
 
     data class PersonJson(
-            val aktørId: String,
-            val arbeidsgivere: List<ArbeidsgiverJson>
+        val aktørId: String,
+        val arbeidsgivere: List<ArbeidsgiverJson>
     )
 
     companion object {
         fun fromJson(json: String): Person {
             val personJson: PersonJson = objectMapper.readValue(json)
-            return Person(personJson.aktørId).apply { arbeidsgivere.putAll(personJson.arbeidsgivere.map { it.organisasjonsnummer to fromArbeidsgiverJson(it) }) }
+            return Person(personJson.aktørId)
+                .apply {
+                    arbeidsgivere.putAll(personJson.arbeidsgivere
+                        .map { it.organisasjonsnummer to fromArbeidsgiverJson(it) })
+                }
         }
 
-        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson):Arbeidsgiver{
-            return Arbeidsgiver(organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer, id = arbeidsgiverJson.id).apply { saker.addAll(arbeidsgiverJson.saker.map {  TODO("Legg til fromjson på sakskompleks")}) }
+        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson): Arbeidsgiver {
+            return Arbeidsgiver(
+                organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer,
+                id = arbeidsgiverJson.id
+            ).apply {
+                saker.addAll(arbeidsgiverJson.saker.map { Sakskompleks.fromJson(it) })
+            }
         }
     }
 }

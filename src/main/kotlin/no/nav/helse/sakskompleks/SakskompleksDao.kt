@@ -23,7 +23,8 @@ class SakskompleksDao(private val dataSource: DataSource) : SakskompleksObserver
     fun opprettSak(brukerAktørId: String) =
             Sakskompleks(
                     id = UUID.randomUUID(),
-                    aktørId = brukerAktørId
+                    aktørId = brukerAktørId,
+                organisasjonsnummer = ""
             ).also { sak ->
                 sak.addObserver(this)
             }

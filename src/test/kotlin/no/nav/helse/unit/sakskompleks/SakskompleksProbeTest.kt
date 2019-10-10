@@ -66,41 +66,42 @@ internal class SakskompleksProbeTest {
     }
 
     private fun assertCounter(after: Int, before: Int) =
-            assertEquals(1, after - before)
+        assertEquals(1, after - before)
 
     private fun sakskompleks() =
-            Sakskompleks(
-                    id = id,
-                    aktørId = aktørId
-            )
+        Sakskompleks(
+            id = id,
+            aktørId = aktørId,
+            organisasjonsnummer = "orgnummer"
+        )
 
     private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: Event.Type) =
-            sakskompleks().let { sakskompleks ->
-                SakskompleksObserver.StateChangeEvent(
-                        id = id,
-                        aktørId = aktørId,
-                        currentState = currentState,
-                        previousState = previousState,
-                        eventType = eventType,
-                        currentMemento = sakskompleks.memento(),
-                        previousMemento = sakskompleks.memento()
-                )
-            }
+        sakskompleks().let { sakskompleks ->
+            SakskompleksObserver.StateChangeEvent(
+                id = id,
+                aktørId = aktørId,
+                currentState = currentState,
+                previousState = previousState,
+                eventType = eventType,
+                currentMemento = sakskompleks.memento(),
+                previousMemento = sakskompleks.memento()
+            )
+        }
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =
-            (CollectorRegistry.defaultRegistry
-                    .findMetricSample(name, labelValues)
-                    ?.value ?: 0.0).toInt()
+        (CollectorRegistry.defaultRegistry
+            .findMetricSample(name, labelValues)
+            ?.value ?: 0.0).toInt()
 
     private fun CollectorRegistry.findMetricSample(name: String, labelValues: List<String>) =
-            findSamples(name).firstOrNull { sample ->
-                sample.labelValues.size == labelValues.size && sample.labelValues.containsAll(labelValues)
-            }
+        findSamples(name).firstOrNull { sample ->
+            sample.labelValues.size == labelValues.size && sample.labelValues.containsAll(labelValues)
+        }
 
     private fun CollectorRegistry.findSamples(name: String) =
-            filteredMetricFamilySamples(setOf(name))
-                    .toList()
-                    .flatMap { metricFamily ->
-                        metricFamily.samples
-                    }
+        filteredMetricFamilySamples(setOf(name))
+            .toList()
+            .flatMap { metricFamily ->
+                metricFamily.samples
+            }
 }
