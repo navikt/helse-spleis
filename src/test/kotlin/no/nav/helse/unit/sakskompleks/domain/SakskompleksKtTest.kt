@@ -32,7 +32,8 @@ class SakskompleksKtTest {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
-                aktørId = "aktørId"
+                aktørId = "aktørId",
+            organisasjonsnummer = "orgnummer"
         )
 
         val memento = sakskompleks.memento()
@@ -48,7 +49,8 @@ class SakskompleksKtTest {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
-                aktørId = "aktørId"
+                aktørId = "aktørId",
+            organisasjonsnummer = "orgnummer"
         )
 
         val memento = sakskompleks.memento()
@@ -56,6 +58,7 @@ class SakskompleksKtTest {
 
         assertEquals(id.toString(), node["id"].textValue())
         assertEquals("aktørId", node["aktørId"].textValue())
+        assertEquals("orgnummer", node["organisasjonsnummer"].textValue())
     }
 
     @Test
@@ -63,7 +66,8 @@ class SakskompleksKtTest {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
                 id = id,
-                aktørId = "aktørId"
+                aktørId = "aktørId",
+            organisasjonsnummer = "orgnummer"
         )
         sakskompleks.håndterNySøknad(standardNySøknad)
         sakskompleks.håndterSendtSøknad(standardSendtSøknad)

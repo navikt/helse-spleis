@@ -19,6 +19,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     private val aktørId = "1234567891011"
+    private val organisasjonsnummer = "123456789"
     private val sakskompleksId = UUID.randomUUID()
     private val sykmeldingId = UUID.randomUUID()
     private val søknadId = UUID.randomUUID()
@@ -151,10 +152,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         private val objectMapper = jacksonObjectMapper()
     }
 
-    private fun beInStartTilstand() =
-            Sakskompleks(aktørId = aktørId, id = sakskompleksId).apply {
-                addObserver(this@SakskompleksStateTest)
-            }
+    private fun beInStartTilstand(): Sakskompleks {
+        return Sakskompleks(aktørId = aktørId, id = sakskompleksId, organisasjonsnummer = organisasjonsnummer).apply {
+            addObserver(this@SakskompleksStateTest)
+        }
+    }
 
     private fun beInNySøknad() =
             beInStartTilstand().apply {
@@ -175,6 +177,6 @@ internal class SakskompleksStateTest : SakskompleksObserver {
             Inntektsmelding(objectMapper.valueToTree(mapOf(
                     "inntektsmeldingId" to inntektsmeldingId.toString(),
                     "arbeidstakerAktorId" to aktørId,
-                    "virksomhetsnummer" to "123456789"
+                    "virksomhetsnummer" to organisasjonsnummer
             )))
 }
