@@ -35,12 +35,15 @@ abstract class Sykdomstidslinje {
         return CompositeSykdomstidslinje(intervalEtterKonflikter.map { it.tilDag() })
     }
 
-    fun antallDagerMellom(other: Sykdomstidslinje) =
+    internal fun antallDagerMellom(other: Sykdomstidslinje) =
         when {
             inneholder(other) -> -min(this.length(), other.length())
             harOverlapp(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
             else -> min(this.avstand(other), other.avstand(this))
         }
+
+    fun overlapperMed(other: Sykdomstidslinje) =
+        this.antallDagerMellom(other) < 0
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()

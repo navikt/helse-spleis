@@ -1,6 +1,5 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -19,8 +18,16 @@ class GapDaysTest {
 
     @Test
     internal fun tidslinjerMedAvstandMellom() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(mandag, tirsdag, tidspunktRapportert)
-        val andreTidslinje = Sykdomstidslinje.sykedager(fredag, andreMandag, tidspunktRapportert)
+        val førsteTidslinje = Sykdomstidslinje.sykedager(
+            mandag,
+            tirsdag,
+            tidspunktRapportert
+        )
+        val andreTidslinje = Sykdomstidslinje.sykedager(
+            fredag,
+            andreMandag,
+            tidspunktRapportert
+        )
 
         assertEquals(2, førsteTidslinje.antallDagerMellom(andreTidslinje))
         assertEquals(2, andreTidslinje.antallDagerMellom(førsteTidslinje))
@@ -28,8 +35,16 @@ class GapDaysTest {
 
     @Test
     internal fun tidslinjerSammenhengende() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(mandag, tirsdag, tidspunktRapportert)
-        val andreTidslinje = Sykdomstidslinje.sykedager(onsdag, fredag, tidspunktRapportert)
+        val førsteTidslinje = Sykdomstidslinje.sykedager(
+            mandag,
+            tirsdag,
+            tidspunktRapportert
+        )
+        val andreTidslinje = Sykdomstidslinje.sykedager(
+            onsdag,
+            fredag,
+            tidspunktRapportert
+        )
 
         assertEquals(0, førsteTidslinje.antallDagerMellom(andreTidslinje))
         assertEquals(0, andreTidslinje.antallDagerMellom(førsteTidslinje))
@@ -37,8 +52,16 @@ class GapDaysTest {
 
     @Test
     internal fun overlappendeTidslinjer() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(mandag, onsdag, tidspunktRapportert)
-        val andreTidslinje = Sykdomstidslinje.sykedager(tirsdag, fredag, tidspunktRapportert)
+        val førsteTidslinje = Sykdomstidslinje.sykedager(
+            mandag,
+            onsdag,
+            tidspunktRapportert
+        )
+        val andreTidslinje = Sykdomstidslinje.sykedager(
+            tirsdag,
+            fredag,
+            tidspunktRapportert
+        )
 
         assertEquals(-2, førsteTidslinje.antallDagerMellom(andreTidslinje))
         assertEquals(-2, andreTidslinje.antallDagerMellom(førsteTidslinje))
@@ -46,8 +69,16 @@ class GapDaysTest {
 
     @Test
     internal fun denEneSomDelAvDenAndre() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(mandag, andreMandag, tidspunktRapportert)
-        val andreTidslinje = Sykdomstidslinje.sykedager(onsdag, fredag, tidspunktRapportert)
+        val førsteTidslinje = Sykdomstidslinje.sykedager(
+            mandag,
+            andreMandag,
+            tidspunktRapportert
+        )
+        val andreTidslinje = Sykdomstidslinje.sykedager(
+            onsdag,
+            fredag,
+            tidspunktRapportert
+        )
 
         assertEquals(-3, førsteTidslinje.antallDagerMellom(andreTidslinje))
         assertEquals(-3, andreTidslinje.antallDagerMellom(førsteTidslinje))

@@ -2,6 +2,8 @@ package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -100,6 +102,33 @@ internal class OverlappingCompositeTest {
 
         assertInterval(førsteOnsdag, andreMandag, 4, 6)
     }
+
+
+    @Test
+    internal fun `sykdomstidslinjer som er kant i kant overlapper ikke`(){
+        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
+        val ferie = Sykdomstidslinje.ferie(førsteTorsdag, andreMandag, senereTidspunktRapportert)
+
+        assertFalse(sykedager.overlapperMed(ferie))
+    }
+
+
+    @Test
+    internal fun `sykdomstidslinjer overlapper`(){
+        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
+        val ferie = Sykdomstidslinje.ferie(førsteOnsdag, andreMandag, senereTidspunktRapportert)
+
+        assertTrue(sykedager.overlapperMed(ferie))
+    }
+
+    @Test
+    internal fun `sykdomstidslinjer med et gap på en hel dag overlapper ikke`(){
+        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
+        val ferie = Sykdomstidslinje.ferie(førsteTorsdag, andreMandag, senereTidspunktRapportert)
+
+        assertFalse(sykedager.overlapperMed(ferie))
+    }
+
 
     private fun assertInterval(startdag: LocalDate, sluttdag: LocalDate, antallSykedager: Int, forventetLengde: Int) {
         Assertions.assertEquals(startdag, sykdomstidslinje.startdato())
