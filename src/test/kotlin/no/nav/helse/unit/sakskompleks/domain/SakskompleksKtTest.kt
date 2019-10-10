@@ -11,7 +11,6 @@ import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.util.*
 
 class SakskompleksKtTest {
@@ -78,5 +77,14 @@ class SakskompleksKtTest {
 
         assertEquals(inNode, outNode)
 
+    }
+
+    @Test
+    fun `nytt sakskompleks godtar ny søknad`(){
+        val sakskompleks = Sakskompleks(
+                id = UUID.randomUUID(),
+                aktørId = "aktørId"
+        )
+        assertTrue(sakskompleks.håndterNySøknad(nySøknad()))
     }
 }
