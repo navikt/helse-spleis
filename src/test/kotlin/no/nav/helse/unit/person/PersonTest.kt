@@ -15,7 +15,7 @@ internal class PersonTest {
     @Test
     internal fun `ny søknad fører til at sakskompleks trigger en sakskompleks endret hendelse`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             it.håndterNySøknad(nySøknad())
         }
@@ -27,7 +27,7 @@ internal class PersonTest {
     @Test
     internal fun `sendt søknad uten sak trigger sakskompleks endret-hendelse`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             it.håndterSendtSøknad(sendtSøknad())
         }
@@ -39,7 +39,7 @@ internal class PersonTest {
     @Test
     internal fun `inntektsmelding uten sak trigger sakskompleks endret-hendelse`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             it.håndterInntektsmelding(inntektsmelding(
                     virksomhetsnummer = "123456789"
@@ -54,7 +54,7 @@ internal class PersonTest {
     internal fun `inntektsmelding med sak trigger sakskompleks endret-hendelse`() {
         val orgnr = "123456789"
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.håndterNySøknad(nySøknad(
                     arbeidsgiver = ArbeidsgiverDTO(
                             orgnummer = orgnr
@@ -73,7 +73,7 @@ internal class PersonTest {
     @Test
     internal fun `inntektsmelding uten virksomhetsnummer kaster exception`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             assertThrows<UtenforOmfangException> {
                 it.håndterInntektsmelding(inntektsmelding())
@@ -84,7 +84,7 @@ internal class PersonTest {
     @Test
     internal fun `søknad uten arbeidsgiver kaster exception`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             assertThrows<UtenforOmfangException> {
                 it.håndterNySøknad(nySøknad(
@@ -97,7 +97,7 @@ internal class PersonTest {
     @Test
     internal fun `søknad uten organisasjonsnummer kaster exception`() {
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.addObserver(observer)
             assertThrows<UtenforOmfangException> {
                 it.håndterNySøknad(nySøknad(
@@ -114,7 +114,7 @@ internal class PersonTest {
     internal fun `sendt søknad trigger sakskompleks endret-hendelse`() {
         val orgnr = "123456789"
         val observer = TestObserver()
-        Person().also {
+        Person(aktørId = "id").also {
             it.håndterNySøknad(nySøknad(
                     arbeidsgiver = ArbeidsgiverDTO(
                             orgnummer = orgnr

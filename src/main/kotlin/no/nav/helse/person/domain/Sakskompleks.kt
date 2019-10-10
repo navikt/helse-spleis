@@ -1,6 +1,7 @@
 package no.nav.helse.person.domain
 
 import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -222,6 +223,9 @@ class Sakskompleks internal constructor(
         return Memento(state = writer.toString())
     }
 
+    fun jsonRepresentation(): SakskompleksJson{
+        return SakskompleksJson(id = id, aktørId = aktørId, tilstandType = tilstand.type, sykdomstidslinje = objectMapper.readTree(sykdomstidslinje?.toJson()))
+    }
     class Memento(internal val state: String) {
         override fun toString() = state
 
@@ -247,4 +251,10 @@ class Sakskompleks internal constructor(
             observer.sakskompleksChanged(event)
         }
     }
+    data class SakskompleksJson(
+            val id: UUID,
+            val aktørId: String,
+            val tilstandType: TilstandType,
+            val sykdomstidslinje: JsonNode
+    )
 }

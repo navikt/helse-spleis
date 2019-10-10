@@ -6,7 +6,7 @@ import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykdomshendelse
 import java.util.*
 
-class Person : SakskompleksObserver {
+class Person(val aktørId: String) : SakskompleksObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
 
     private val personObservers = mutableListOf<PersonObserver>()
@@ -36,19 +36,19 @@ class Person : SakskompleksObserver {
     private fun findOrCreateArbeidsgiver(hendelse: Sykdomshendelse) =
             hendelse.organisasjonsnummer()?.let { orgnr ->
                 arbeidsgivere.getOrPut(orgnr) {
-                    arbeidsgiver(hendelse)
+                    arbeidsgiver(orgnr)
                 }
             } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
 
-    private fun arbeidsgiver(hendelse: Sykdomshendelse) =
-            Arbeidsgiver(hendelse).also {
+    private fun arbeidsgiver(organisasjonsnummer: String) =
+            Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
                 it.addObserver(this)
                 personObservers.forEach { personObserver ->
                     it.addObserver(personObserver)
                 }
             }
 
-    internal inner class Arbeidsgiver(hendelse: Sykdomshendelse) {
+    internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
         private val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
@@ -82,8 +82,26 @@ class Person : SakskompleksObserver {
             }
         }
 
-        private val organisasjonsnummer = hendelse.organisasjonsnummer()
+
+        fun jsonRepresentation(): ArbeidsgiverJson {
+            return ArbeidsgiverJson(organisasjonsnummer = organisasjonsnummer, saker = saker.map { it.jsonRepresentation() }, id = id)
+        }
     }
+
+    fun jsonRepresentation(): PersonJson {
+        return PersonJson(aktørId = aktørId, arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() })
+    }
+
+    data class ArbeidsgiverJson(
+            val organisasjonsnummer: String,
+            val saker: List<Sakskompleks.SakskompleksJson>,
+            val id: UUID
+    )
+
+    data class PersonJson(
+            val aktørId: String,
+            val arbeidsgivere: List<ArbeidsgiverJson>
+    )
 }
 
 interface PersonObserver : SakskompleksObserver {

@@ -71,13 +71,12 @@ class SakskompleksKtTest {
 
         val inMemento = sakskompleks.memento()
 
-        assertThrows<NotImplementedError> {
-            val nyttSakskompleks = Sakskompleks.restore(inMemento)
-            val outMemento = nyttSakskompleks.memento()
-            val inNode = objectMapper.readTree(inMemento.state)
-            val outNode = objectMapper.readTree(outMemento.state)
+        val nyttSakskompleks = Sakskompleks.restore(inMemento)
+        val outMemento = nyttSakskompleks.memento()
+        val inNode = objectMapper.readTree(inMemento.state)
+        val outNode = objectMapper.readTree(outMemento.state)
 
-            assertEquals(inNode, outNode)
-        }
+        assertEquals(inNode, outNode)
+
     }
 }

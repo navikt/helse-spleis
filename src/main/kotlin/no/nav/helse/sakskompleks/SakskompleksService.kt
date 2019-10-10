@@ -53,7 +53,7 @@ internal class SakskompleksService(private val behovProducer: BehovProducer,
                 }
             }
 
-    private fun nyPerson(aktørId: String) = Person()
+    private fun nyPerson(aktørId: String) = Person(aktørId = aktørId)
 
     private fun finnPerson(aktørId: String): Person? = null
 
