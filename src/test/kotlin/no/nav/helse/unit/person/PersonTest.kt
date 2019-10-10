@@ -123,8 +123,8 @@ internal class PersonTest {
         val observer = TestObserver()
         Person(aktørId = "id").also {
             it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.addObserver(observer)
+            it.håndterNySøknad(nySøknad(fom = 21.juli, tom=30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=21.juli, tom=30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(observer.personEndret)
         assertTrue(observer.wasTriggered)
