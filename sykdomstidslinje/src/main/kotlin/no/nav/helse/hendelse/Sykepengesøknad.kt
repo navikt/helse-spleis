@@ -24,7 +24,14 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdoms
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
     val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Periode(it) } ?: emptyList()
-    val fraværsperioder get() = jsonNode["fravar"]?.map { FraværsPeriode(it) } ?: emptyList()
+    val fraværsperioder get() = jsonNode["fravar"]?.filterNot {
+        Fraværstype.valueOf(it["type"].textValue()) in listOf(Fraværstype.UTDANNING_FULLTID, Fraværstype.UTDANNING_DELTID)
+    }?.map { FraværsPeriode(it) } ?: emptyList()
+
+    val utdanningsperioder get() = jsonNode["fravar"]?.filter {
+        Fraværstype.valueOf(it["type"].textValue()) in listOf(Fraværstype.UTDANNING_FULLTID, Fraværstype.UTDANNING_DELTID)
+    }?.map { Utdanningsfraværsperiode(it) } ?: emptyList()
+
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
@@ -50,8 +57,8 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdoms
             listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this))
         } ?: emptyList()
 
-    private val studiedagertidslinje = fraværsperioder.filter { it.type == Fraværstype.UTDANNING_FULLTID || it.type == Fraværstype.UTDANNING_DELTID }.map {
-        Sykdomstidslinje.studiedager(it.fom, it.tom, this)
+    private val studiedagertidslinje = utdanningsperioder.map {
+        Sykdomstidslinje.studiedager(it.fom, tom, this)
     }
 
     override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
@@ -88,6 +95,11 @@ data class Periode(val jsonNode: JsonNode) {
 data class FraværsPeriode(val jsonNode: JsonNode) {
     val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
     val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+    val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
+}
+
+data class Utdanningsfraværsperiode(val jsonNode: JsonNode) {
+    val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
     val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
 }
 
