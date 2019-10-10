@@ -7,8 +7,10 @@ import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.juli
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.readResource
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -32,7 +34,7 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
                 id = id,
                 aktørId = "aktørId",
-            organisasjonsnummer = "orgnummer"
+                organisasjonsnummer = "orgnummer"
         )
 
         val memento = sakskompleks.memento()
@@ -49,7 +51,7 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
                 id = id,
                 aktørId = "aktørId",
-            organisasjonsnummer = "orgnummer"
+                organisasjonsnummer = "orgnummer"
         )
 
         val memento = sakskompleks.memento()
@@ -66,7 +68,7 @@ class SakskompleksKtTest {
         val sakskompleks = Sakskompleks(
                 id = id,
                 aktørId = "aktørId",
-            organisasjonsnummer = "orgnummer"
+                organisasjonsnummer = "orgnummer"
         )
         sakskompleks.håndterNySøknad(standardNySøknad)
         sakskompleks.håndterSendtSøknad(standardSendtSøknad)
@@ -84,11 +86,25 @@ class SakskompleksKtTest {
     }
 
     @Test
-    fun `nytt sakskompleks godtar ny søknad`(){
+    fun `nytt sakskompleks godtar ny søknad`() {
         val sakskompleks = Sakskompleks(
                 id = UUID.randomUUID(),
-                aktørId = "aktørId"
+                aktørId = "aktørId",
+                organisasjonsnummer = ""
         )
         assertTrue(sakskompleks.håndterNySøknad(nySøknad()))
+    }
+
+    @Test
+    fun `eksisterende sakskompleks godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
+        val sakskompleks = Sakskompleks(
+                id = UUID.randomUUID(),
+                aktørId = "aktørId",
+                organisasjonsnummer = ""
+        )
+        sakskompleks.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+
+        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknad(fom = 21.juli, tom = 25.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
+
     }
 }

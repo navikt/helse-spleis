@@ -84,20 +84,79 @@ internal object TestConstants {
     }
 
     fun sendtSøknad(
+            id: String = UUID.randomUUID().toString(),
+            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
+            arbeidGjenopptatt: LocalDate? = null,
+            korrigerer: String? = null,
+            egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
+                    fom = egenmeldingFom,
+                    tom = egenmeldingTom
+            )),
+            søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
+                    fom = sykeperiodFOM,
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
+            ), SoknadsperiodeDTO(
+                    fom = LocalDate.of(2019, Month.OCTOBER, 5),
+                    tom = sykeperiodeTOM
+            )),
+            fravær: List<FravarDTO> = listOf(FravarDTO(
+                    fom = ferieFom,
+                    tom = ferieTom,
+                    type = FravarstypeDTO.FERIE)),
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )) =
+            )
+    ) =
             søknad(
+                    id = id,
+                    fom = fom,
+                    tom = tom,
+                    arbeidGjenopptatt = arbeidGjenopptatt,
+                    korrigerer = korrigerer,
+                    egenmeldinger = egenmeldinger,
+                    søknadsperioder = søknadsperioder,
+                    fravær = fravær,
+                    status = SoknadsstatusDTO.SENDT,
                     arbeidsgiver = arbeidsgiver
             ) as SendtSykepengesøknad
 
     fun nySøknad(
+            id: String = UUID.randomUUID().toString(),
+            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
+            arbeidGjenopptatt: LocalDate? = null,
+            korrigerer: String? = null,
+            egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
+                    fom = egenmeldingFom,
+                    tom = egenmeldingTom
+            )),
+            søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
+                    fom = sykeperiodFOM,
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
+            ), SoknadsperiodeDTO(
+                    fom = LocalDate.of(2019, Month.OCTOBER, 5),
+                    tom = sykeperiodeTOM
+            )),
+            fravær: List<FravarDTO> = listOf(FravarDTO(
+                    fom = ferieFom,
+                    tom = ferieTom,
+                    type = FravarstypeDTO.FERIE)),
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )) =
+            )
+    ) =
             søknad(
+                    id = id,
+                    fom = fom,
+                    tom = tom,
+                    arbeidGjenopptatt = arbeidGjenopptatt,
+                    korrigerer = korrigerer,
+                    egenmeldinger = egenmeldinger,
+                    søknadsperioder = søknadsperioder,
+                    fravær = fravær,
                     status = SoknadsstatusDTO.NY,
                     arbeidsgiver = arbeidsgiver
             ) as NySykepengesøknad
@@ -123,4 +182,8 @@ internal object TestConstants {
             status = Status.GYLDIG,
             arkivreferanse = ""
     )))
+
+
 }
+val Int.juli
+    get() = LocalDate.of(2019, Month.JULY, this)

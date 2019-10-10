@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
@@ -24,7 +23,7 @@ class Sakskompleks internal constructor(
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     internal fun håndterNySøknad(søknad: NySykepengesøknad): Boolean {
-        return passerMed(søknad).also {
+        return overlapperMed(søknad).also {
             if (it) {
                 tilstand.håndterNySøknad(this, søknad)
             }
@@ -32,7 +31,7 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterSendtSøknad(søknad: SendtSykepengesøknad): Boolean {
-        return passerMed(søknad).also {
+        return overlapperMed(søknad).also {
             if (it) {
                 tilstand.håndterSendtSøknad(this, søknad)
             }
@@ -40,15 +39,17 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
-        passerMed(inntektsmelding).also {
+        // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
+        // passerMed(inntektsmelding).also {
+        true.also {
             if (it) {
                 tilstand.håndterInntektsmelding(this, inntektsmelding)
             }
         }
 
-    private fun passerMed(hendelse: Sykdomshendelse): Boolean {
-        return true
-    }
+    private fun overlapperMed(hendelse: Sykdomshendelse) =
+            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+
 
     private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
