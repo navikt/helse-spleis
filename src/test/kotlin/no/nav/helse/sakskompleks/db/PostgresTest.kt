@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.createHikariConfig
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -36,7 +36,7 @@ class PostgresTest {
     @Test
     fun `migreringer skal kjøre på en tom database`() {
         val migrations = runMigration(HikariDataSource(hikariConfig))
-        assertEquals(1, migrations)
+        assertTrue(migrations > 0, "Ingen migreringer ble kjørt")
     }
 
     @Test
