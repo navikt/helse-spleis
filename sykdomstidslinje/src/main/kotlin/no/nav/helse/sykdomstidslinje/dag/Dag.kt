@@ -42,9 +42,10 @@ abstract class Dag internal constructor(
         hendelse
     )
 
-    internal fun erstatter(vararg dager: Dag) {
+    internal fun erstatter(vararg dager: Dag): Dag {
         dager.filterNot { it is ImplisittArbeidsdag }
             .forEach { erstatter.addAll(it.erstatter + it) }
+        return this
     }
 
     fun dagerErstattet(): List<Dag> = erstatter
