@@ -119,6 +119,20 @@ internal class PersonTest {
     }
 
     @Test
+    internal fun `oppretter ny sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
+        val observer = TestObserver()
+        Person(aktørId = "id").also {
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.addObserver(observer)
+        }
+        assertTrue(observer.personEndret)
+        assertTrue(observer.wasTriggered)
+        assertEquals(Sakskompleks.TilstandType.START, observer.forrigeSakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, observer.sakskomplekstilstand)
+    }
+
+    @Test
     internal fun `ny sak trenger manuell behandling når vi mottar den sendte søknaden først`() {
         val observer = TestObserver()
         Person(aktørId = "id").also {
