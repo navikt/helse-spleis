@@ -15,4 +15,6 @@ class Utenlandsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshen
     override fun toString() = formatter.format(dagen) + "\tUtenlandsdag"
 
     override fun dagType() = JsonDagType.UTENLANDSDAG
+
+    override fun nøkkel(): Nøkkel = Nøkkel.DA
 }

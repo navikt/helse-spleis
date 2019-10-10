@@ -17,12 +17,11 @@ abstract class Dag internal constructor(
     private val sendtSøknad = SendtSykepengesøknad::class
     private val inntektsmelding = Inntektsmelding::class
 
-    private val nulldag = Nulldag::class
+    private val nulldag = ImplisittArbeidsdag::class
     private val sykedag = Sykedag::class
     private val feriedag = Feriedag::class
     private val utenlandsdag = Utenlandsdag::class
     private val arbeidsdag = Arbeidsdag::class
-    private val fylldag = Fylldag::class
 
     internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
@@ -38,13 +37,13 @@ abstract class Dag internal constructor(
     override fun startdato() = dagen
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
-    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else Nulldag(
+    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else ImplisittArbeidsdag(
         dato,
         hendelse
     )
 
     internal fun erstatter(vararg dager: Dag) {
-        dager.filterNot { it is Nulldag }
+        dager.filterNot { it is ImplisittArbeidsdag }
             .forEach { erstatter.addAll(it.erstatter + it) }
     }
 
@@ -70,11 +69,6 @@ abstract class Dag internal constructor(
             helper.doesMatch(sykedag, anyEvent, arbeidsdag, anyEvent) -> other.also { other.erstatter(this) }
             helper.doesMatch(arbeidsdag, anyEvent, arbeidsdag, anyEvent) -> this.sisteDag(other)
 
-            helper.doesMatch(fylldag, anyEvent, arbeidsdag, anyEvent) -> other
-            helper.doesMatch(arbeidsdag, anyEvent, fylldag, anyEvent) -> this
-            helper.doesMatch(fylldag, anyEvent, sykedag, anyEvent) -> other
-            helper.doesMatch(sykedag, anyEvent, fylldag, anyEvent) -> this
-            helper.doesMatch(fylldag, anyEvent, fylldag, anyEvent) -> this.sisteDag(other)
             else -> Ubestemtdag(this, other)
         }
     }
@@ -91,6 +85,28 @@ abstract class Dag internal constructor(
     override fun length() = 1
 
     override fun sisteHendelse() = this.hendelse
+
+    internal enum class Nøkkel{
+        WD_I,
+        WD_A,
+        WD_IM,
+        S,
+        V_A,
+        V_IM,
+        W,
+        Le_Areg,
+        Le_A,
+        SW,
+        SRD_IM,
+        SRD_A,
+        EDU,
+        OI_Int,
+        OI_A,
+        DA,
+        Undecided,
+    }
+
+    internal abstract fun nøkkel(): Nøkkel
 
     private class Helper(private val left: Dag, private val right: Dag) {
         fun <S : Dag, T : Sykdomshendelse, U : Dag, V : Sykdomshendelse> doesMatch(
@@ -129,4 +145,3 @@ abstract class Dag internal constructor(
         }
     }
 }
-

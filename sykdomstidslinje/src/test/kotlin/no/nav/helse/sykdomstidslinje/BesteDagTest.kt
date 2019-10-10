@@ -21,7 +21,7 @@ internal class BesteDagTest {
         private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
         private val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
-        private val nulldag get() = Nulldag(2.mandag, Testhendelse())
+        private val nulldag get() = ImplisittArbeidsdag(2.mandag, Testhendelse())
         private val arbeidsdag get() = Arbeidsdag(2.mandag, Testhendelse())
         private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
         private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedag(2.mandag, inntektsmelding)

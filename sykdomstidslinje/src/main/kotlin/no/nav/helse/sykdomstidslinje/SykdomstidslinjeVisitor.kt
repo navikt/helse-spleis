@@ -4,7 +4,6 @@ import no.nav.helse.sykdomstidslinje.dag.*
 
 interface SykdomstidslinjeVisitor {
     fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {}
-    fun visitFylldag(fylldag: Fylldag) {}
     fun visitFeriedag(feriedag: Feriedag) {}
     fun visitHelgedag(helgedag: Helgedag) {}
     fun visitSykedag(sykedag: Sykedag) {}
@@ -14,8 +13,6 @@ interface SykdomstidslinjeVisitor {
     fun visitUbestemt(ubestemtdag: Ubestemtdag) {}
     fun visitStudiedag(studiedag: Studiedag) {}
     fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) {}
-    fun visitUtdannelsedag(utdanningsdag: Utdanningsdag) {}
     fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
     fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
-
 }

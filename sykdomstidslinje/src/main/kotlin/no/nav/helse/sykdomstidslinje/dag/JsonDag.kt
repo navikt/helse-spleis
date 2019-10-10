@@ -32,6 +32,5 @@ enum class JsonDagType(internal val creator: (JsonDag) -> Dag) {
     SYKEDAG( { Sykedag(it.dato, it.hendelse.toHendelse()) }),
     SYK_HELGEDAG({ SykHelgedag(it.dato, it.hendelse.toHendelse()) }),
     UBESTEMTDAG({ Ubestemtdag(it.dato, it.hendelse.toHendelse()) }),
-    UTENLANDSDAG({ Utenlandsdag(it.dato, it.hendelse.toHendelse()) }),
-    UTDANNELSESDAG({ Utdanningsdag(it.dato, it.hendelse.toHendelse()) })
+    UTENLANDSDAG({ Utenlandsdag(it.dato, it.hendelse.toHendelse()) })
 }

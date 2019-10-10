@@ -215,25 +215,6 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun utdanningsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
-            if (erArbeidsdag(gjelder)) Utdanningsdag(
-                gjelder,
-                hendelse
-            ) else Helgedag(
-                gjelder,
-                hendelse
-            )
-
-        fun utdanningsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
-            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
-            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
-                utdanningsdag(
-                    it,
-                    hendelse
-                )
-            }.toList())
-        }
-
         fun fromJson(json: String): Sykdomstidslinje {
             return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))
         }

@@ -70,9 +70,8 @@ class SykdomstidslinjeJsonTest {
         val ubestemtdag = permisjonsdagForUbestemt + sykedagForUbestemt
         val studiedag = Sykdomstidslinje.studiedag(LocalDate.of(2019, 10, 17), søknadSendt)
         val utenlandsdag = Sykdomstidslinje.utenlandsdag(LocalDate.of(2019, 10, 22), søknadSendt)
-        val utdanningsdag = Sykdomstidslinje.utdanningsdag(LocalDate.of(2019, 10, 23), søknadSendt)
 
-        val tidslinje =  egenmeldingsdag + sykedag + feriedag + permisjonsdager + sykedager + ubestemtdag + studiedag + utenlandsdag + utdanningsdag
+        val tidslinje =  egenmeldingsdag + sykedag + feriedag + permisjonsdager + sykedager + ubestemtdag + studiedag + utenlandsdag
 
         val json = tidslinje.toJson()
 

@@ -87,7 +87,6 @@ class DagsturneringTest {
         }
 
         fun nameToEventType(name: String, dato: LocalDate): Dag = when (name) {
-            "WD-I" -> Fylldag(dato, sendtSøknad)
             "WD-A" -> Sykdomstidslinje.ikkeSykedag(dato, sendtSøknad)
             "WD-IM" -> Sykdomstidslinje.ikkeSykedag(dato, inntektsmelding)
             "S" -> Sykdomstidslinje.sykedag(dato, nySøknad)
@@ -101,11 +100,10 @@ class DagsturneringTest {
             "SW" -> SykHelgedag(lørdag, nySøknad)
             "SRD-IM" -> Sykdomstidslinje.egenmeldingsdag(dato, inntektsmelding)
             "SRD-A" -> Sykdomstidslinje.egenmeldingsdag(dato, sendtSøknad)
-            "EDU" -> Utdanningsdag(dato, sendtSøknad)
 //            "OI-Int" -> null // TODO: Implementer når vi har andre inntektskilder
 //            "OI-A" -> Ubestemtdag(dato, sendtSøknad)
             "DA" -> Sykdomstidslinje.utenlandsdag(dato, sendtSøknad)
-            "Null" -> Nulldag(dato, sendtSøknad)
+            "Null" -> ImplisittArbeidsdag(dato, sendtSøknad)
             "Le" -> Permisjonsdag(dato, sendtSøknad)
             "SW-SM" -> SykHelgedag(dato, nySøknad)
             "Undecided" -> Ubestemtdag(
@@ -119,14 +117,13 @@ class DagsturneringTest {
         fun left() = nameToEventType(columnEventName, basedag(columnEventName, rowEventName)!!)
         fun right() = nameToEventType(rowEventName, basedag(columnEventName, rowEventName)!!)
 
-        private fun latest() = if (left()!!.hendelse > right()!!.hendelse) {
+        private fun latest() = if (left().hendelse > right().hendelse) {
             left()
         } else {
             right()
         }
 
         fun resultFor() = when (resultEventName.toUpperCase()) {
-            "WD-I" -> Fylldag::class
             "WD" -> Arbeidsdag::class
             "S" -> Sykedag::class
             "L" -> latest()::class

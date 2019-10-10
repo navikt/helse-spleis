@@ -2,10 +2,9 @@ package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import java.lang.RuntimeException
 import java.time.LocalDate
 
-internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse){
+internal class ImplisittArbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse){
     override fun accept(visitor: SykdomstidslinjeVisitor) {}
 
     override fun antallSykedagerHvorViTellerMedHelg() = 0
@@ -17,4 +16,6 @@ internal class Nulldag internal constructor(gjelder: LocalDate, hendelse: Sykdom
     override fun toString() = formatter.format(dagen) + "\tNulldag"
 
     override fun dagType() = throw RuntimeException("Not implemented, should never be serialized")
+
+    override fun nøkkel(): Nøkkel = Nøkkel.WD_I
 }
