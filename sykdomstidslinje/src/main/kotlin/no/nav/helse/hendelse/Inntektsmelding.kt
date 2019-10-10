@@ -68,9 +68,5 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
     }
 
     override fun toJson(): JsonNode = jsonNode
-
-    override fun equals(other: Any?): Boolean {
-        return other is Inntektsmelding && other.jsonNode == jsonNode
-    }
 }
 

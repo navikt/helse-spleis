@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
@@ -92,11 +91,6 @@ abstract class Dag internal constructor(
     override fun length() = 1
 
     override fun sisteHendelse() = this.hendelse
-
-    override fun equals(other: Any?): Boolean {
-        return other is Dag && this::class == other::class && other.dagen == dagen && other.erstatter == erstatter
-                && other.hendelse == hendelse
-    }
 
     private class Helper(private val left: Dag, private val right: Dag) {
         fun <S : Dag, T : Sykdomshendelse, U : Dag, V : Sykdomshendelse> doesMatch(

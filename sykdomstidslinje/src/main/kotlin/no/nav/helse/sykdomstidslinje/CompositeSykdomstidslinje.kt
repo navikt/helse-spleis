@@ -44,8 +44,6 @@ class CompositeSykdomstidslinje(
 
     override fun jsonRepresentation(): List<JsonDag> = flatten().flatMap { it.jsonRepresentation() }
 
-    override fun equals(other: Any?): Boolean = other is CompositeSykdomstidslinje && tidslinjer == other.tidslinjer
-
     companion object {
         internal fun fromJsonRepresentation(jsonDager: List<JsonDag>): CompositeSykdomstidslinje {
             return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it) })

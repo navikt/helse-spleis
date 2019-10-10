@@ -66,10 +66,6 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdoms
     }
 
     override fun toJson(): JsonNode = jsonNode
-
-    override fun equals(other: Any?): Boolean {
-        return other is Sykepengesøknad && other.jsonNode == jsonNode
-    }
 }
 
 class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
