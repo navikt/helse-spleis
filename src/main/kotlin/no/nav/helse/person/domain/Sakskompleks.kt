@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
@@ -171,6 +172,22 @@ class Sakskompleks internal constructor(
     // Gang of four Memento pattern
     companion object {
 
+        fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
+            return Sakskompleks(id = sakskompleksJson.id, aktørId = sakskompleksJson.aktørId).apply {
+                tilstand = tilstandFraEnum(sakskompleksJson.tilstandType)
+                sykdomstidslinje = Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(sakskompleksJson.sykdomstidslinje))
+            }
+        }
+
+        private fun tilstandFraEnum(tilstand: TilstandType) = when (tilstand) {
+            TilstandType.START -> StartTilstand
+            TilstandType.NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
+            TilstandType.SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
+            TilstandType.INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
+            TilstandType.KOMPLETT_SAK -> KomplettSakTilstand
+            TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
+        }
+
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -183,14 +200,7 @@ class Sakskompleks internal constructor(
                     aktørId = node["aktørId"].textValue()
             )
 
-            sakskompleks.tilstand = when (TilstandType.valueOf(node["tilstand"].textValue())) {
-                TilstandType.START -> StartTilstand
-                TilstandType.NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
-                TilstandType.SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
-                TilstandType.INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
-                TilstandType.KOMPLETT_SAK -> KomplettSakTilstand
-                TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
-            }
+            sakskompleks.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
 
             node["sykdomstidslinje"]?.let {
                 sakskompleks.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString())
@@ -223,9 +233,10 @@ class Sakskompleks internal constructor(
         return Memento(state = writer.toString())
     }
 
-    fun jsonRepresentation(): SakskompleksJson{
+    fun jsonRepresentation(): SakskompleksJson {
         return SakskompleksJson(id = id, aktørId = aktørId, tilstandType = tilstand.type, sykdomstidslinje = objectMapper.readTree(sykdomstidslinje?.toJson()))
     }
+
     class Memento(internal val state: String) {
         override fun toString() = state
 
@@ -251,6 +262,7 @@ class Sakskompleks internal constructor(
             observer.sakskompleksChanged(event)
         }
     }
+
     data class SakskompleksJson(
             val id: UUID,
             val aktørId: String,

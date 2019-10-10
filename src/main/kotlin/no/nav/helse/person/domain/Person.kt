@@ -131,8 +131,13 @@ class Person(val aktørId: String) : SakskompleksObserver {
             return Person(personJson.aktørId).apply { arbeidsgivere.putAll(personJson.arbeidsgivere.map { it.organisasjonsnummer to fromArbeidsgiverJson(it) }) }
         }
 
-        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson):Arbeidsgiver{
-            return Arbeidsgiver(organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer, id = arbeidsgiverJson.id).apply { saker.addAll(arbeidsgiverJson.saker.map {  TODO("Legg til fromjson på sakskompleks")}) }
+        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson): Arbeidsgiver {
+            return Arbeidsgiver(
+                    organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer,
+                    id = arbeidsgiverJson.id
+            ).apply {
+                saker.addAll(arbeidsgiverJson.saker.map { Sakskompleks.fromJson(it) })
+            }
         }
     }
 }
