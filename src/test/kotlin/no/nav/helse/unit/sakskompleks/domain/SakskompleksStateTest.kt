@@ -1,29 +1,31 @@
 package no.nav.helse.unit.sakskompleks.domain
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.hendelse.Event
-import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class SakskompleksStateTest : SakskompleksObserver {
-    private lateinit var lastEvent: SakskompleksObserver.StateChangeEvent
+    private lateinit var lastStateEvent: SakskompleksObserver.StateChangeEvent
+    private lateinit var lastNeedEvent: SakskompleksObserver.NeedEvent
 
     override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
-        lastEvent = event
+        lastStateEvent = event
+    }
+
+    override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+        lastNeedEvent = event
     }
 
     private val aktørId = "1234567891011"
     private val organisasjonsnummer = "123456789"
     private val sakskompleksId = UUID.randomUUID()
-    private val sykmeldingId = UUID.randomUUID()
-    private val søknadId = UUID.randomUUID()
-    private val inntektsmeldingId = UUID.randomUUID()
 
     @Test
     fun `motta ny søknad`() {
@@ -31,9 +33,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterNySøknad(nySøknad())
 
-        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.currentState)
-        assertEquals(Event.Type.NySykepengesøknad, lastEvent.eventType)
+        assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
+        assertEquals(Event.Type.NySykepengesøknad, lastStateEvent.eventType)
     }
 
     @Test
@@ -42,9 +44,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterSendtSøknad(sendtSøknad())
 
-        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
-        assertEquals(Event.Type.SendtSykepengesøknad, lastEvent.eventType)
+        assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(Event.Type.SendtSykepengesøknad, lastStateEvent.eventType)
     }
 
     @Test
@@ -53,9 +55,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
-        assertEquals(Sakskompleks.TilstandType.START, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
-        assertEquals(Event.Type.Inntektsmelding, lastEvent.eventType)
+        assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(Event.Type.Inntektsmelding, lastStateEvent.eventType)
     }
 
     @Test
@@ -64,8 +66,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterSendtSøknad(sendtSøknad())
 
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastStateEvent.currentState)
     }
 
     @Test
@@ -74,8 +76,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastStateEvent.currentState)
     }
 
     @Test
@@ -84,8 +86,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterNySøknad(nySøknad())
 
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
     }
 
     @Test
@@ -94,8 +96,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterNySøknad(nySøknad())
 
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
     }
 
     @Test
@@ -104,8 +106,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.currentState)
     }
 
     @Test
@@ -114,8 +116,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterNySøknad(nySøknad())
 
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
     }
 
     @Test
@@ -124,8 +126,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterSendtSøknad(sendtSøknad())
 
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.currentState)
     }
 
     @Test
@@ -134,8 +136,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterNySøknad(nySøknad())
 
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
     }
 
     @Test
@@ -144,8 +146,19 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastEvent.previousState)
-        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastEvent.currentState)
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `når saken er komplett, ber vi om sykepengehistorikk`() {
+        val sakskompleks = beInMottattInntektsmelding()
+
+        sakskompleks.håndterSendtSøknad(sendtSøknad())
+
+        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.currentState)
+        assertNotNull(lastNeedEvent)
     }
 
     companion object {
@@ -153,30 +166,28 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     private fun beInStartTilstand(): Sakskompleks {
-        return Sakskompleks(aktørId = aktørId, id = sakskompleksId, organisasjonsnummer = organisasjonsnummer).apply {
-            addObserver(this@SakskompleksStateTest)
+        return Sakskompleks(
+            aktørId = aktørId,
+            id = sakskompleksId,
+            organisasjonsnummer = organisasjonsnummer
+        ).apply {
+            addSakskompleksObserver(this@SakskompleksStateTest)
         }
     }
 
     private fun beInNySøknad() =
-            beInStartTilstand().apply {
-                håndterNySøknad(nySøknad())
-            }
+        beInStartTilstand().apply {
+            håndterNySøknad(nySøknad())
+        }
 
     private fun beInSendtSøknad() =
-            beInNySøknad().apply {
-                håndterSendtSøknad(sendtSøknad())
-            }
+        beInNySøknad().apply {
+            håndterSendtSøknad(sendtSøknad())
+        }
 
     private fun beInMottattInntektsmelding() =
-            beInNySøknad().apply {
-                håndterInntektsmelding(inntektsmelding())
-            }
+        beInNySøknad().apply {
+            håndterInntektsmelding(inntektsmelding())
+        }
 
-    private fun inntektsmelding() =
-            Inntektsmelding(objectMapper.valueToTree(mapOf(
-                    "inntektsmeldingId" to inntektsmeldingId.toString(),
-                    "arbeidstakerAktorId" to aktørId,
-                    "virksomhetsnummer" to organisasjonsnummer
-            )))
 }

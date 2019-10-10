@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
+import no.nav.helse.person.domain.SakskompleksObserver.*
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
@@ -39,7 +41,7 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
-        // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
+    // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
         // passerMed(inntektsmelding).also {
         true.also {
             if (it) {
@@ -48,7 +50,7 @@ class Sakskompleks internal constructor(
         }
 
     private fun overlapperMed(hendelse: Sykdomshendelse) =
-            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+        this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
 
     private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
@@ -60,9 +62,9 @@ class Sakskompleks internal constructor(
         tilstand = nyTilstand
         block()
 
-        tilstand.entering()
+        tilstand.entering(this)
 
-        notifyObservers(tilstand.type, event, previousStateName, previousMemento)
+        notifyStateObservers(tilstand.type, event, previousStateName, previousMemento)
     }
 
     enum class TilstandType {
@@ -95,7 +97,7 @@ class Sakskompleks internal constructor(
         fun leaving() {
         }
 
-        fun entering() {
+        fun entering(sakskompleks: Sakskompleks) {
         }
 
     }
@@ -164,6 +166,9 @@ class Sakskompleks internal constructor(
     private object KomplettSakTilstand : Sakskomplekstilstand {
         override val type = TilstandType.KOMPLETT_SAK
 
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
+        }
     }
 
     private object TrengerManuellHåndteringTilstand : Sakskomplekstilstand {
@@ -257,28 +262,40 @@ class Sakskompleks internal constructor(
     }
 
     // Gang of four Observer pattern
-    internal fun addObserver(observer: SakskompleksObserver) {
+    internal fun addSakskompleksObserver(observer: SakskompleksObserver) {
         observers.add(observer)
     }
 
-    private fun notifyObservers(
+    private fun notifyStateObservers(
         currentState: TilstandType,
-        event: Event,
+        tidslinjeEvent: Event,
         previousState: TilstandType,
         previousMemento: Memento
     ) {
-        val event = SakskompleksObserver.StateChangeEvent(
+        val event = StateChangeEvent(
             id = id,
             aktørId = aktørId,
             currentState = currentState,
             previousState = previousState,
-            eventType = event.eventType(),
+            eventType = tidslinjeEvent.eventType(),
             currentMemento = memento(),
             previousMemento = previousMemento
         )
 
         observers.forEach { observer ->
             observer.sakskompleksChanged(event)
+        }
+    }
+
+    private fun notifyNeedObservers(needType: NeedType) {
+        val needEvent = NeedEvent(
+            sakskompleksId = id,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            type = needType)
+
+        observers.forEach { observer ->
+            observer.sakskompleksHasNeed(needEvent)
         }
     }
 

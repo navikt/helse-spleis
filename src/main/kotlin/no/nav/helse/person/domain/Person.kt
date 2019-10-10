@@ -75,12 +75,12 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         fun addObserver(observer: SakskompleksObserver) {
             sakskompleksObservers.add(observer)
-            saker.forEach { it.addObserver(observer) }
+            saker.forEach { it.addSakskompleksObserver(observer) }
         }
 
         private fun nyttSakskompleks(): Sakskompleks {
             return Sakskompleks(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
-                sakskompleksObservers.forEach(it::addObserver)
+                sakskompleksObservers.forEach(it::addSakskompleksObserver)
                 saker.add(it)
             }
         }

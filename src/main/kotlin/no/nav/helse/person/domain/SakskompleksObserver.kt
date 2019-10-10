@@ -10,8 +10,17 @@ interface SakskompleksObserver {
                                 val previousState: Sakskompleks.TilstandType,
                                 val eventType: Event.Type,
                                 val currentMemento: Sakskompleks.Memento,
-                                val previousMemento: Sakskompleks.Memento) {
+                                val previousMemento: Sakskompleks.Memento)
+
+    enum class NeedType {
+        TRENGER_SYKEPENGEHISTORIKK
     }
 
+    data class NeedEvent(val sakskompleksId: UUID,
+                         val aktørId: String,
+                         val organisasjonsnummer: String,
+                         val type: NeedType)
+
     fun sakskompleksChanged(event: StateChangeEvent)
+    fun sakskompleksHasNeed(event: NeedEvent) {}
 }
