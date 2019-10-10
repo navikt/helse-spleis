@@ -35,6 +35,7 @@ internal class PersonTest {
         }
         assertTrue(observer.personEndret)
         assertTrue(observer.wasTriggered)
+        assertEquals(Sakskompleks.TilstandType.START, observer.forrigeSakskomplekstilstand)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, observer.sakskomplekstilstand)
     }
 
