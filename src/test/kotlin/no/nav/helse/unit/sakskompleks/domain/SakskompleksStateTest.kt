@@ -4,7 +4,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
-import no.nav.helse.hendelse.Event
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import org.junit.jupiter.api.Assertions.*
@@ -35,7 +37,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
-        assertEquals(Event.Type.NySykepengesøknad, lastStateEvent.eventType)
+        assertTrue(lastStateEvent.sykdomshendelse is NySykepengesøknad)
     }
 
     @Test
@@ -46,7 +48,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
-        assertEquals(Event.Type.SendtSykepengesøknad, lastStateEvent.eventType)
+        assertTrue(lastStateEvent.sykdomshendelse is SendtSykepengesøknad)
     }
 
     @Test
@@ -57,7 +59,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
-        assertEquals(Event.Type.Inntektsmelding, lastStateEvent.eventType)
+        assertTrue(lastStateEvent.sykdomshendelse is Inntektsmelding)
     }
 
     @Test

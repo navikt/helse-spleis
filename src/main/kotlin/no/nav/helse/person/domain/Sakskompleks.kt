@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.*
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.person.domain.SakskompleksObserver.*
 import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -53,7 +56,7 @@ class Sakskompleks internal constructor(
         this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
 
-    private fun setTilstand(event: Event, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+    private fun setTilstand(event: Sykdomshendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
 
         val previousStateName = tilstand.type
@@ -268,7 +271,7 @@ class Sakskompleks internal constructor(
 
     private fun notifyStateObservers(
         currentState: TilstandType,
-        tidslinjeEvent: Event,
+        tidslinjeEvent: Sykdomshendelse,
         previousState: TilstandType,
         previousMemento: Memento
     ) {
@@ -277,7 +280,7 @@ class Sakskompleks internal constructor(
             aktørId = aktørId,
             currentState = currentState,
             previousState = previousState,
-            eventType = tidslinjeEvent.eventType(),
+            sykdomshendelse = tidslinjeEvent,
             currentMemento = memento(),
             previousMemento = previousMemento
         )

@@ -1,8 +1,9 @@
 package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
-import no.nav.helse.hendelse.Event
 import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.Sakskompleks
@@ -55,22 +56,22 @@ class SakskompleksProbe : PersonObserver {
     }
 
     override fun sakskompleksChanged(event: StateChangeEvent) {
-        log.info("sakskompleks=${event.id} event=${event.eventType} state=${event.currentState} previousState=${event.previousState}")
+        log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.hendelsetype().name} state=${event.currentState} previousState=${event.previousState}")
 
-        dokumenterKobletTilSakCounter.labels(event.eventType.name).inc()
+        dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
 
-        when (event.eventType) {
-            Event.Type.Inntektsmelding -> {
+        when (event.sykdomshendelse) {
+            is Inntektsmelding -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            Event.Type.NySykepengesøknad -> {
+            is NySykepengesøknad -> {
                 if (event.previousState == Sakskompleks.TilstandType.START) {
                     opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
 
                 sykmeldingKobletTilSakskompleks(event.id)
             }
-            Event.Type.SendtSykepengesøknad -> {
+            is SendtSykepengesøknad -> {
                 søknadKobletTilSakskompleks(event.id)
             }
         }

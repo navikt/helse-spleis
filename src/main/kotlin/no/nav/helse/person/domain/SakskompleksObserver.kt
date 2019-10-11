@@ -1,6 +1,6 @@
 package no.nav.helse.person.domain
 
-import no.nav.helse.hendelse.Event
+import no.nav.helse.hendelse.Sykdomshendelse
 import java.util.*
 
 interface SakskompleksObserver {
@@ -8,7 +8,7 @@ interface SakskompleksObserver {
                                 val aktørId: String,
                                 val currentState: Sakskompleks.TilstandType,
                                 val previousState: Sakskompleks.TilstandType,
-                                val eventType: Event.Type,
+                                val sykdomshendelse: Sykdomshendelse,
                                 val currentMemento: Sakskompleks.Memento,
                                 val previousMemento: Sakskompleks.Memento)
 
