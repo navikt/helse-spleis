@@ -1,8 +1,10 @@
-CREATE TABLE IF NOT EXISTS SAKSKOMPLEKS
+CREATE TABLE person
 (
-  id                    CHAR(36)                 NOT NULL,
-  bruker_aktor_id       VARCHAR(32)              NOT NULL,
-  data                  JSONB                    NOT NULL,
-  opprettet             TIMESTAMP WITH TIME ZONE NOT NULL default (now() at time zone 'utc'),
-  PRIMARY KEY (id)
+    id        BIGSERIAL,
+    aktor_id  VARCHAR(32)              NOT NULL,
+    data      JSONB                    NOT NULL,
+    opprettet TIMESTAMP WITH TIME ZONE NOT NULL default (now() at time zone 'utc'),
+    PRIMARY KEY (id)
 );
+
+create index "index_aktor_id" on person using btree (aktor_id);

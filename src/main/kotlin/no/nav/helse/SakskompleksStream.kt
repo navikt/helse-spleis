@@ -12,8 +12,8 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.person.PersonDao
 import no.nav.helse.person.PersonMediator
+import no.nav.helse.person.PersonPostgresRepository
 import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.søknad.SøknadConsumer
@@ -65,7 +65,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     val sakskompleksService = PersonMediator(
             behovProducer = BehovProducer(behovTopic, KafkaProducer(behovProducerConfig(), StringSerializer(), StringSerializer())),
-            personRepository = PersonDao(getDataSource(createHikariConfigFromEnvironment())))
+            personRepository = PersonPostgresRepository(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
 
