@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittArbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 
@@ -22,10 +22,10 @@ class CompositeSykdomstidslinje(
     override fun length() = tidslinjer.sumBy { it.length() }
 
     override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) =
-        tidslinjer.map { it.dag(dato, hendelse) }.firstOrNull { it !is ImplisittArbeidsdag } ?: ImplisittArbeidsdag(
-            dato,
-            hendelse
-        )
+        tidslinjer
+            .map { it.dag(dato, hendelse) }
+            .firstOrNull { it !is ImplisittDag }
+            ?: implisittDag(dato, hendelse)
 
 
     override fun flatten() = tidslinjer.flatMap { it.flatten() }

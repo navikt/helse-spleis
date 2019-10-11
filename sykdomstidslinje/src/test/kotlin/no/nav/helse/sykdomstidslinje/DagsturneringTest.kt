@@ -103,7 +103,7 @@ class DagsturneringTest {
 //            "OI-Int" -> null // TODO: Implementer når vi har andre inntektskilder
 //            "OI-A" -> Ubestemtdag(dato, sendtSøknad)
             "DA" -> Sykdomstidslinje.utenlandsdag(dato, sendtSøknad)
-            "Null" -> ImplisittArbeidsdag(dato, sendtSøknad)
+            "Null" -> ImplisittDag(dato, sendtSøknad)
             "Le" -> Permisjonsdag(dato, sendtSøknad)
             "SW-SM" -> SykHelgedag(dato, nySøknad)
             "Undecided" -> Ubestemtdag(

@@ -3,16 +3,18 @@ package no.nav.helse.tournament
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 
+val dagTurnering = DagTurnering()
+
 class DagTurnering(val source: String = "/dagturnering.csv") {
 
     internal val strategies: Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> = readStrategies()
 
-    fun slåss(left: Dag, right: Dag): Dag {
-        val leftKey = left.nøkkel()
-        val rightKey = right.nøkkel()
+    fun slåss(venstre: Dag, høyre: Dag): Dag {
+        val leftKey = venstre.nøkkel()
+        val rightKey = høyre.nøkkel()
 
-        return strategies[leftKey]?.get(rightKey)?.decide(left, right)
-            ?: strategies[rightKey]?.get(leftKey)?.decide(right, left)
+        return strategies[leftKey]?.get(rightKey)?.decide(venstre, høyre)
+            ?: strategies[rightKey]?.get(leftKey)?.decide(høyre, venstre)
             ?: throw RuntimeException("Fant ikke strategi for $leftKey + $rightKey")
 
     }
@@ -72,9 +74,9 @@ internal object Column : Strategy() {
 
 internal object Latest : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
-        if (row.sisteHendelse() > (column.sisteHendelse())) row else column
+        if (row.sisteHendelse() >= (column.sisteHendelse())) row.erstatter(column) else column.erstatter(row)
 }
 
 internal object Impossible : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = throw RuntimeException("there was never a thing here.")
+    override fun decide(row: Dag, column: Dag): Dag = throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
 }

@@ -104,7 +104,7 @@ abstract class Sykdomstidslinje {
             if (erArbeidsdag(gjelder)) Feriedag(
                 gjelder,
                 hendelse
-            ) else Helgedag(
+            ) else ImplisittDag(
                 gjelder,
                 hendelse
             )
@@ -113,7 +113,7 @@ abstract class Sykdomstidslinje {
             if (erArbeidsdag(gjelder)) Arbeidsdag(
                 gjelder,
                 hendelse
-            ) else Helgedag(
+            ) else ImplisittDag(
                 gjelder,
                 hendelse
             )
@@ -122,7 +122,7 @@ abstract class Sykdomstidslinje {
             if (erArbeidsdag(gjelder)) Utenlandsdag(
                 gjelder,
                 hendelse
-            ) else Helgedag(
+            ) else ImplisittDag(
                 gjelder,
                 hendelse
             )
@@ -181,7 +181,7 @@ abstract class Sykdomstidslinje {
             if (erArbeidsdag(gjelder)) Studiedag(
                 gjelder,
                 hendelse
-            ) else Helgedag(
+            ) else ImplisittDag(
                 gjelder,
                 hendelse
             )
@@ -200,7 +200,7 @@ abstract class Sykdomstidslinje {
             if (erArbeidsdag(gjelder)) Permisjonsdag(
                 gjelder,
                 hendelse
-            ) else Helgedag(
+            ) else ImplisittDag(
                 gjelder,
                 hendelse
             )
@@ -221,5 +221,14 @@ abstract class Sykdomstidslinje {
 
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
+
+        internal fun implisittDag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+            if (erArbeidsdag(gjelder)) ImplisittDag(
+                gjelder,
+                hendelse
+            ) else ImplisittDag(
+                gjelder,
+                hendelse
+            )
     }
 }

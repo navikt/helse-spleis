@@ -11,7 +11,7 @@ class Egenmeldingsdag internal constructor(gjelder: LocalDate, hendelse: Sykdoms
         visitor.visitEgenmeldingsdag(this)
     }
 
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
+    override fun antallSykedagerHvorViTellerMedHelg() = 1
     override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
 
     override fun toString() = formatter.format(dagen) + "\tEgenmeldingsdag"

@@ -46,7 +46,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
         }
     private val egenmeldingsTidslinje
         get(): List<Sykdomstidslinje> = egenmeldinger.map {
-            Sykdomstidslinje.sykedager(it.fom, it.tom, this)
+            Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this)
         }
     private val ferieTidslinje
         get(): List<Sykdomstidslinje> = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map {

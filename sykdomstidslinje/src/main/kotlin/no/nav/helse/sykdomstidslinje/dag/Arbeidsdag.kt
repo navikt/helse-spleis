@@ -23,6 +23,6 @@ class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshende
         when(hendelse) {
             is SendtSykepengesøknad -> Nøkkel.WD_A
             is Inntektsmelding -> Nøkkel.WD_IM
-            else -> throw RuntimeException("Hendelse er ikke støttet")
+            else -> throw RuntimeException("Hendelse ${hendelse.hendelsetype()} er ikke støttet")
         }
 }

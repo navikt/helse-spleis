@@ -28,6 +28,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         state.visitSykedag(sykedag)
     }
 
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
+        syketilfelle.add(egenmeldingsdag)
+        state.visitEgenmeldingsdag(egenmeldingsdag)
+    }
+
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
         syketilfelle.add(sykHelgedag)
         state.visitSykHelgedag(sykHelgedag)
@@ -49,6 +54,7 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         fun visitHelgedag(dag: Helgedag) {}
         fun visitSykHelgedag(dag: SykHelgedag) {}
         fun visitFeriedag(dag: Feriedag) {}
+        fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {}
     }
 
     internal inner class Starttilstand : SykedagerTellerTilstand {
@@ -60,6 +66,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         override fun visitSykHelgedag(dag: SykHelgedag) {
             state = TellerSykedager()
             state.visitSykHelgedag(dag)
+        }
+
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {
+            state = TellerSykedager()
+            state.visitEgenmeldingsdag(dag)
         }
     }
 
@@ -96,6 +107,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         override fun visitSykedag(dag: Sykedag) {
             state = TellerSykedager()
             state.visitSykedag(dag)
+        }
+
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {
+            state = TellerSykedager()
+            state.visitEgenmeldingsdag(dag)
         }
 
         override fun visitHelgedag(dag: Helgedag) {

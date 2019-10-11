@@ -4,6 +4,7 @@ import no.nav.helse.sykdomstidslinje.dag.*
 
 interface SykdomstidslinjeVisitor {
     fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {}
+    fun visitImplisittArbeidsdag(impliosittAbeidsdag: Arbeidsdag) {}
     fun visitFeriedag(feriedag: Feriedag) {}
     fun visitHelgedag(helgedag: Helgedag) {}
     fun visitSykedag(sykedag: Sykedag) {}
