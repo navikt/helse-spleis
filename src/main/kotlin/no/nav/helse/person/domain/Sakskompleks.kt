@@ -182,7 +182,7 @@ class Sakskompleks internal constructor(
     // Gang of four Memento pattern
     companion object {
 
-        fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
+        internal fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
             return Sakskompleks(
                 id = sakskompleksJson.id,
                 aktørId = sakskompleksJson.aktørId,
@@ -206,7 +206,7 @@ class Sakskompleks internal constructor(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        fun restore(memento: Memento): Sakskompleks {
+        internal fun restore(memento: Memento): Sakskompleks {
             val node = objectMapper.readTree(memento.state)
 
             val sakskompleks = Sakskompleks(
@@ -249,7 +249,7 @@ class Sakskompleks internal constructor(
         return Memento(state = writer.toString())
     }
 
-    fun jsonRepresentation(): SakskompleksJson {
+    internal fun jsonRepresentation(): SakskompleksJson {
         return SakskompleksJson(
             id = id,
             aktørId = aktørId,
@@ -302,7 +302,7 @@ class Sakskompleks internal constructor(
         }
     }
 
-    data class SakskompleksJson(
+    internal data class SakskompleksJson(
         val id: UUID,
         val aktørId: String,
         val organisasjonsnummer: String,

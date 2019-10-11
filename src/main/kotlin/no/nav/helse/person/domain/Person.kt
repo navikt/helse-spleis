@@ -86,7 +86,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
         }
 
 
-        fun jsonRepresentation(): ArbeidsgiverJson {
+        internal fun jsonRepresentation(): ArbeidsgiverJson {
             return ArbeidsgiverJson(
                 organisasjonsnummer = organisasjonsnummer,
                 saker = saker.map { it.jsonRepresentation() },
@@ -99,35 +99,20 @@ class Person(val aktørId: String) : SakskompleksObserver {
         return objectMapper.writeValueAsString(jsonRepresentation())
     }
 
-    fun jsonRepresentation(): PersonJson {
+    private fun jsonRepresentation(): PersonJson {
         return PersonJson(
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
         )
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Person
-
-        if (aktørId != other.aktørId) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return aktørId.hashCode()
-    }
-
-    data class ArbeidsgiverJson(
+    internal data class ArbeidsgiverJson(
         val organisasjonsnummer: String,
         val saker: List<Sakskompleks.SakskompleksJson>,
         val id: UUID
     )
 
-    data class PersonJson(
+    private data class PersonJson(
         val aktørId: String,
         val arbeidsgivere: List<ArbeidsgiverJson>
     )
@@ -139,7 +124,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
                 .apply {
                     arbeidsgivere.putAll(personJson.arbeidsgivere
                         .map { it.organisasjonsnummer to fromArbeidsgiverJson(it).also { arbeidsgiver ->
-                            //arbeidsgiver.addObserver(this)
+                            arbeidsgiver.addObserver(this)
                         } })
                 }
         }
