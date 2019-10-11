@@ -9,12 +9,11 @@ import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.sakskompleks.SakskompleksDao
-import no.nav.helse.sakskompleks.SakskompleksService
+import no.nav.helse.person.PersonDao
+import no.nav.helse.person.PersonMediator
 import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.søknad.SøknadConsumer
@@ -23,7 +22,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
-import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
@@ -65,9 +63,9 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     migrate(createHikariConfigFromEnvironment())
 
-    val sakskompleksService = SakskompleksService(
+    val sakskompleksService = PersonMediator(
             behovProducer = BehovProducer(behovTopic, KafkaProducer(behovProducerConfig(), StringSerializer(), StringSerializer())),
-            sakskompleksDao = SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
+            personRepository = PersonDao(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
 

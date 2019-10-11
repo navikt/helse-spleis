@@ -1,0 +1,10 @@
+package no.nav.helse.person
+
+import no.nav.helse.person.domain.Person
+
+internal interface PersonRepository {
+
+    fun hentPerson(aktørId: String): Person?
+    fun lagrePerson(person: Person)
+
+}

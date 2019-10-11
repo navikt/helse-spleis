@@ -30,6 +30,7 @@ internal object TestConstants {
 
     private fun søknad(
             id: String = UUID.randomUUID().toString(),
+            aktørId: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
@@ -58,7 +59,7 @@ internal object TestConstants {
             id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = status,
-            aktorId = UUID.randomUUID().toString(),
+            aktorId = aktørId,
             sykmeldingId = UUID.randomUUID().toString(),
             arbeidsgiver = arbeidsgiver,
             arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
@@ -85,6 +86,7 @@ internal object TestConstants {
 
     fun sendtSøknad(
             id: String = UUID.randomUUID().toString(),
+            aktørId: String = UUID.randomUUID().toString(),
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
             arbeidGjenopptatt: LocalDate? = null,
@@ -111,6 +113,7 @@ internal object TestConstants {
     ) =
             søknad(
                     id = id,
+                    aktørId = aktørId,
                     fom = fom,
                     tom = tom,
                     arbeidGjenopptatt = arbeidGjenopptatt,
@@ -124,6 +127,7 @@ internal object TestConstants {
 
     fun nySøknad(
             id: String = UUID.randomUUID().toString(),
+            aktørId: String = UUID.randomUUID().toString(),
             fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
             arbeidGjenopptatt: LocalDate? = null,
@@ -150,6 +154,7 @@ internal object TestConstants {
     ) =
             søknad(
                     id = id,
+                    aktørId = aktørId,
                     fom = fom,
                     tom = tom,
                     arbeidGjenopptatt = arbeidGjenopptatt,

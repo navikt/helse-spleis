@@ -1,20 +1,21 @@
-package no.nav.helse.sakskompleks
+package no.nav.helse.person
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.sakskompleks.SakskompleksProbe
 import org.junit.jupiter.api.Test
 
-internal class SakskompleksServiceTest {
+internal class PersonMediatorTest {
 
     @Test
     fun `skal håndtere feil ved søknad uten virksomhetsnummer for arbeidsgiver`() {
         val probe = mockk<SakskompleksProbe>(relaxed = true)
-        val sakskompleksService = SakskompleksService(
+        val sakskompleksService = PersonMediator(
                 sakskompleksProbe = probe,
                 behovProducer = mockk(),
-                sakskompleksDao = mockk())
+                personRepository = mockk())
 
         sakskompleksService.håndterNySøknad(nySøknad(arbeidsgiver = null))
 

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykepengesøknad
-import no.nav.helse.sakskompleks.SakskompleksService
+import no.nav.helse.person.PersonMediator
 import no.nav.helse.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -17,7 +17,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class SøknadConsumer(
         streamsBuilder: StreamsBuilder,
         private val søknadKafkaTopic: String,
-        private val sakskompleksService: SakskompleksService,
+        private val personMediator: PersonMediator,
         private val probe: SøknadProbe = SøknadProbe()
 ) {
 
@@ -70,8 +70,8 @@ internal class SøknadConsumer(
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
         when (søknad) {
-            is NySykepengesøknad -> sakskompleksService.håndterNySøknad(søknad)
-            is SendtSykepengesøknad -> sakskompleksService.håndterSendtSøknad(søknad)
+            is NySykepengesøknad -> personMediator.håndterNySøknad(søknad)
+            is SendtSykepengesøknad -> personMediator.håndterSendtSøknad(søknad)
         }
     }
 }

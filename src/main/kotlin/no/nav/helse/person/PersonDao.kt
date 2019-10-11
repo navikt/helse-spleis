@@ -4,14 +4,15 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.domain.Person
-import no.nav.helse.person.domain.PersonObserver
-import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import javax.sql.DataSource
 
-class PersonDao(private val dataSource: DataSource) : PersonObserver {
-    fun finnEllerOpprettPerson(aktørId: String): Person = (finnPerson(aktørId)
-            ?: opprettPerson(aktørId)).also { person ->
-        person.addObserver(this)
+class PersonDao(private val dataSource: DataSource) : PersonRepository {
+    override fun hentPerson(aktørId: String): Person? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun lagrePerson(person: Person) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun opprettPerson(aktørId: String): Person {
@@ -35,11 +36,5 @@ class PersonDao(private val dataSource: DataSource) : PersonObserver {
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf("UPDATE person (aktor_id, data) SET VALUES (?, (to_json(?::json))) WHERE aktor_id = ?", person.toJson(), person.aktørId).asUpdate)
         }
-    }
-
-    override fun sakskompleksChanged(event: StateChangeEvent) {}
-
-    override fun personEndret(person: Person) {
-        oppdaterPerson(person = person)
     }
 }
