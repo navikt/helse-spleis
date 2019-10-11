@@ -4,15 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDateTime
 
-data class SykepengeHistorikk(val aktørId: String) : Sykdomshendelse {
+data class SykepengeHistorikk(val json: JsonNode) : Sykdomshendelse {
     val rapportertDato = LocalDateTime.now()
+    val aktørId = json["aktørId"]?.textValue()
 
     override fun hendelsetype(): Sykdomshendelse.Type {
         return Sykdomshendelse.Type.SykepengeHistorikk
     }
 
     override fun aktørId(): String {
-        return aktørId
+        return aktørId()
     }
 
     override fun rapportertdato(): LocalDateTime {
