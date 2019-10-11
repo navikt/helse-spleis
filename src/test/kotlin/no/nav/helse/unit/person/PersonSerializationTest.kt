@@ -2,6 +2,8 @@ package no.nav.helse.unit.person
 
 import no.nav.helse.TestConstants
 import no.nav.helse.person.domain.Person
+import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.readResource
 import no.nav.helse.sykdomstidslinje.objectMapper
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -28,4 +30,28 @@ internal class PersonSerializationTest {
         assertEquals(objectMapper.readTree(personJson), objectMapper.readTree(serializedPerson))
     }
 
+    @Test
+    fun `restoring adds the sakskompleks observer for the person`() {
+        val initialPerson = Person("abde")
+        initialPerson.håndterNySøknad(TestConstants.nySøknad())
+        val personJson = initialPerson.toJson()
+
+        val testObserver = TestObserver()
+        val restoredPerson = Person.fromJson(personJson)
+        restoredPerson.addObserver(testObserver)
+        restoredPerson.håndterSendtSøknad(TestConstants.sendtSøknad())
+        assertEquals(1, testObserver.personUpdates)
+    }
+
+    class TestObserver : PersonObserver {
+        var personUpdates: Int = 0
+
+        override fun personEndret(person: Person) {
+            personUpdates++
+        }
+
+        override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+
+        }
+    }
 }

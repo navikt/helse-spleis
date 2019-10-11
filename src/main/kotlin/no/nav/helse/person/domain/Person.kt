@@ -138,7 +138,9 @@ class Person(val aktørId: String) : SakskompleksObserver {
             return Person(personJson.aktørId)
                 .apply {
                     arbeidsgivere.putAll(personJson.arbeidsgivere
-                        .map { it.organisasjonsnummer to fromArbeidsgiverJson(it) })
+                        .map { it.organisasjonsnummer to fromArbeidsgiverJson(it).also { arbeidsgiver ->
+                            //arbeidsgiver.addObserver(this)
+                        } })
                 }
         }
 
