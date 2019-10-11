@@ -29,7 +29,7 @@ abstract class Dag internal constructor(
 
     internal abstract fun dagType(): JsonDagType
     override fun jsonRepresentation(): List<JsonDag> {
-        val hendelseType = (hendelse as Event).eventType()
+        val hendelseType = hendelse.hendelsetype()
         val hendelseJson = hendelse.toJson()
         return listOf(JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.flatMap { it.jsonRepresentation() }))
     }

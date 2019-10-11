@@ -15,10 +15,10 @@ internal data class JsonHendelse(
     val type: String,
     val json: JsonNode
 ) {
-    fun toHendelse(): Sykdomshendelse = when (enumValueOf<Event.Type>(type)) {
-        Event.Type.Inntektsmelding -> Inntektsmelding(json)
-        Event.Type.NySykepengesøknad-> NySykepengesøknad(json)
-        Event.Type.SendtSykepengesøknad -> SendtSykepengesøknad(json)
+    fun toHendelse(): Sykdomshendelse = when (enumValueOf<Sykdomshendelse.Type>(type)) {
+        Sykdomshendelse.Type.Inntektsmelding -> Inntektsmelding(json)
+        Sykdomshendelse.Type.NySykepengesøknad-> NySykepengesøknad(json)
+        Sykdomshendelse.Type.SendtSykepengesøknad -> SendtSykepengesøknad(json)
     }
 }
 

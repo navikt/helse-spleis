@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
+data class Inntektsmelding(val jsonNode: JsonNode): Sykdomshendelse {
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
@@ -43,7 +43,7 @@ data class Inntektsmelding(val jsonNode: JsonNode): Event, Sykdomshendelse {
 
     override fun rapportertdato() = rapportertDato
 
-    override fun eventType() = Event.Type.Inntektsmelding
+    override fun hendelsetype() = Sykdomshendelse.Type.Inntektsmelding
 
     override fun aktørId(): String = arbeidstakerAktorId
 

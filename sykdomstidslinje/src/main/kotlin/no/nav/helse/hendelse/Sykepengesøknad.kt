@@ -13,7 +13,7 @@ private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdomshendelse {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -64,14 +64,6 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Event, Sykdoms
     override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
         .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
-    override fun eventType(): Event.Type {
-        return when (status) {
-            SØKNAD_SENDT -> Event.Type.SendtSykepengesøknad
-            in arrayOf(SØKNAD_NY, SØKNAD_FREMTIDIG) -> Event.Type.NySykepengesøknad
-            else -> throw IllegalStateException("Kunne ikke mappe søknadstype $status til en event")
-        }
-    }
-
     override fun toJson(): JsonNode = jsonNode
 }
 
@@ -79,12 +71,18 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
+
+    override fun hendelsetype() =
+        Sykdomshendelse.Type.NySykepengesøknad
 }
 
 class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }
+
+    override fun hendelsetype() =
+        Sykdomshendelse.Type.SendtSykepengesøknad
 }
 
 data class Periode(val jsonNode: JsonNode) {
