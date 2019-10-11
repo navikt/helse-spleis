@@ -1,12 +1,13 @@
 package no.nav.helse.unit.sakskompleks.domain
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.TestConstants.sykepengeHistorikk
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.SykepengeHistorikk
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import org.junit.jupiter.api.Assertions.*
@@ -41,7 +42,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta søknad`() {
+    fun `motta sendt søknad på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
         sakskompleks.håndterSendtSøknad(sendtSøknad())
@@ -52,7 +53,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta inntektsmelding`() {
+    fun `motta inntektsmelding på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
         sakskompleks.håndterInntektsmelding(inntektsmelding())
@@ -60,6 +61,17 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is Inntektsmelding)
+    }
+
+    @Test
+    fun `motta sykdomshistorikk på feil tidspunkt`() {
+        val sakskompleks = beInStartTilstand()
+
+        sakskompleks.håndterSykepengeHistorikk(sykepengeHistorikk())
+
+        assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertTrue(lastStateEvent.sykdomshendelse is SykepengeHistorikk)
     }
 
     @Test
@@ -163,8 +175,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertNotNull(lastNeedEvent)
     }
 
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
+    @Test
+    fun `motta sykepengehistorikk når saken er komplett`() {
+        val sakskompleks = beInKomplettTidslinje()
+
+        sakskompleks.håndterSykepengeHistorikk(sykepengeHistorikk())
+
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT, lastStateEvent.currentState)
     }
 
     private fun beInStartTilstand(): Sakskompleks {
@@ -192,4 +210,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
             håndterInntektsmelding(inntektsmelding())
         }
 
+    private fun beInKomplettTidslinje() =
+        beInMottattInntektsmelding().apply {
+            håndterSendtSøknad(sendtSøknad())
+        }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.SykepengeHistorikk
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -187,6 +188,11 @@ internal object TestConstants {
             status = Status.GYLDIG,
             arkivreferanse = ""
     )))
+
+    fun sykepengeHistorikk(): SykepengeHistorikk {
+        val historikk = {"aktørId" to "12345678910"}
+        return SykepengeHistorikk(objectMapper.valueToTree(historikk))
+    }
 
 
 }

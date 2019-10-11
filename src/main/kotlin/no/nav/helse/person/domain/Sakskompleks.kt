@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.*
 import no.nav.helse.person.domain.SakskompleksObserver.*
 import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -52,6 +49,10 @@ class Sakskompleks internal constructor(
             }
         }
 
+    internal fun håndterSykepengeHistorikk(sykepengeHistorikk: SykepengeHistorikk){
+        tilstand.håndterSykepengehistorikk(this, sykepengeHistorikk)
+    }
+
     private fun overlapperMed(hendelse: Sykdomshendelse) =
         this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
@@ -76,6 +77,7 @@ class Sakskompleks internal constructor(
         SENDT_SØKNAD_MOTTATT,
         INNTEKTSMELDING_MOTTATT,
         KOMPLETT_SAK,
+        SYKEPENGEHISTORIKK_MOTTATT,
         TRENGER_MANUELL_HÅNDTERING
 
     }
@@ -85,6 +87,7 @@ class Sakskompleks internal constructor(
 
         val type: TilstandType
 
+        // Default implementasjoner av transisjonene
         fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: NySykepengesøknad) {
             sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
         }
@@ -95,6 +98,10 @@ class Sakskompleks internal constructor(
 
         fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
             sakskompleks.setTilstand(inntektsmelding, TrengerManuellHåndteringTilstand)
+        }
+
+        fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengeHistorikk: SykepengeHistorikk) {
+            sakskompleks.setTilstand(sykepengeHistorikk, TrengerManuellHåndteringTilstand)
         }
 
         fun leaving() {
@@ -172,11 +179,20 @@ class Sakskompleks internal constructor(
         override fun entering(sakskompleks: Sakskompleks) {
             sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
         }
+
+        override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengeHistorikk: SykepengeHistorikk) {
+            sakskompleks.setTilstand(sykepengeHistorikk, SykepengehistorikkMottattTilstand)
+        }
+
     }
 
     private object TrengerManuellHåndteringTilstand : Sakskomplekstilstand {
         override val type = TilstandType.TRENGER_MANUELL_HÅNDTERING
 
+    }
+
+    private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand{
+        override val type = TilstandType.SYKEPENGEHISTORIKK_MOTTATT
     }
 
     // Gang of four Memento pattern
@@ -199,6 +215,7 @@ class Sakskompleks internal constructor(
             TilstandType.SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
             TilstandType.INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
             TilstandType.KOMPLETT_SAK -> KomplettSakTilstand
+            TilstandType.SYKEPENGEHISTORIKK_MOTTATT -> SykepengehistorikkMottattTilstand
             TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
         }
 
