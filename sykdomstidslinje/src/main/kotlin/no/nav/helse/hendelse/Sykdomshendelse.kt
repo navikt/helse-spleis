@@ -9,7 +9,8 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     enum class Type {
         SendtSykepengesøknad,
         NySykepengesøknad,
-        Inntektsmelding
+        Inntektsmelding,
+        SykepengeHistorikk
     }
 
     fun hendelsetype(): Type
