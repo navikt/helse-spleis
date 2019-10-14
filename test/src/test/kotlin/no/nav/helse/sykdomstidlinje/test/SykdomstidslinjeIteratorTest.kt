@@ -1,39 +1,23 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 
 class SykdomstidslinjeIteratorTest {
 
     companion object {
-        private val uke1Mandag = LocalDate.of(2019, 9, 23)
-        private val uke1Fredag = LocalDate.of(2019, 9, 27)
-        private val uke1Lørdag = LocalDate.of(2019, 9, 28)
-        private val uke1Søndag = LocalDate.of(2019, 9, 29)
-        private val uke2Mandag = LocalDate.of(2019, 9, 30)
-        private val uke2Tirsdag = LocalDate.of(2019, 10, 1)
-        private val uke2Onsdag = LocalDate.of(2019, 10, 2)
-        private val uke2Fredag = LocalDate.of(2019, 10, 4)
-        private val uke3Mandag = LocalDate.of(2019, 10, 7)
-        private val uke3Fredag = LocalDate.of(2019, 10, 11)
-        private val uke4Mandag = LocalDate.of(2019, 10, 14)
-        private val uke4Onsdag = LocalDate.of(2019, 10, 16)
-        private val uke4Fredag = LocalDate.of(2019, 10, 18)
-        private val uke5Mandag = LocalDate.of(2019, 10, 21)
-        private val uke5Fredag = LocalDate.of(2019, 10, 25)
-        private val uke6Fredag = LocalDate.of(2019, 11, 1)
-        private val uke7Fredag = LocalDate.of(2019, 11, 8)
-
-        private val rapporteringshendelse = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
+        private val rapporteringshendelse = Testhendelse(LocalDateTime.of(2019, 7, 31, 20, 0))
     }
 
     @Test
-    fun sammenhengendeSykdomGirEnArbeidsgiverperiode() {
-        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringshendelse)
+    fun `sammenhengendeSykdom gir en arbeidsgiverperiode`() {
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 3.mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
         val antallSykedager = tidslinjer.first().antallSykedagerHvorViTellerMedHelg()
@@ -43,31 +27,31 @@ class SykdomstidslinjeIteratorTest {
     }
 
     @Test
-    fun sykdomInnenforEnUkeTellerAntallDager() {
-        val tidslinje = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
+    fun `sykdom innenfor en uke teller antall dager`() {
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, rapporteringshendelse)
         assertEquals(5, tidslinje.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
-    fun testSykdagerOverHelg() {
+    fun `test sykdager over helg`() {
         val sykedager = Sykdomstidslinje.sykedager(
-            uke1Mandag,
-            uke2Mandag,
+            1.mandag,
+            2.mandag,
             rapporteringshendelse
         )
         assertEquals(8, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
-    fun sykmeldingMandagTilSøndagFørerTil7Dager() {
-        val sykdager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringshendelse)
+    fun `sykmelding mandag til søndag fører til 7 dager hvor vi teller med helg`() {
+        val sykdager = Sykdomstidslinje.sykedager(1.mandag, 1.søndag, rapporteringshendelse)
 
         assertEquals(7, sykdager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
     fun sykmeldingMandagTilLørdagFørerTil6Dager() {
-        val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke1Lørdag, rapporteringshendelse)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.lørdag, rapporteringshendelse)
 
         assertEquals(6, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
         assertEquals(5, sykedager.syketilfeller().first().antallSykedagerHvorViIkkeTellerMedHelg())
@@ -76,32 +60,42 @@ class SykdomstidslinjeIteratorTest {
     @Disabled
     @Test
     fun toSykmeldingerMedGapStørreEnn16DagerGirToArbeidsgiverPerioder() {
-        val spysyke = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
-        val malaria = Sykdomstidslinje.sykedager(uke5Mandag, uke7Fredag, rapporteringshendelse)
+        val spysyke = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, rapporteringshendelse)
+        val malaria = Sykdomstidslinje.sykedager(5.mandag, 7.fredag, rapporteringshendelse)
 
         val syketilfeller = (spysyke + malaria).syketilfeller()
         assertEquals(2, syketilfeller.size)
-        assertEquals(uke1Mandag, syketilfeller[0].startdato())
-        assertEquals(uke1Fredag, syketilfeller[0].sluttdato())
+        assertEquals(1.mandag, syketilfeller[0].startdato())
+        assertEquals(1.fredag, syketilfeller[0].sluttdato())
 
-        assertEquals(uke5Mandag, syketilfeller[1].startdato())
-        assertEquals(uke7Fredag, syketilfeller[1].sluttdato())
+        assertEquals(5.mandag, syketilfeller[1].startdato())
+        assertEquals(7.fredag, syketilfeller[1].sluttdato())
     }
 
     @Disabled
     @Test
     fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringshendelse)
-        val ferie = Sykdomstidslinje.ferie(uke2Onsdag, uke2Fredag, rapporteringshendelse)
-        val spysyka = Sykdomstidslinje.sykedager(uke4Fredag, uke5Fredag, rapporteringshendelse)
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, rapporteringshendelse)
+        val ferie = Sykdomstidslinje.ferie(2.onsdag, 2.fredag, rapporteringshendelse)
+        val spysyka = Sykdomstidslinje.sykedager(4.fredag, 5.fredag, rapporteringshendelse)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(uke1Mandag, grupper[0].startdato())
-        assertEquals(uke2Mandag, grupper[0].sluttdato())
+        assertEquals(1.mandag, grupper[0].startdato())
+        assertEquals(2.mandag, grupper[0].sluttdato())
 
-        assertEquals(uke4Fredag, grupper[1].startdato())
-        assertEquals(uke5Fredag, grupper[1].sluttdato())
+        assertEquals(4.fredag, grupper[1].startdato())
+        assertEquals(5.fredag, grupper[1].sluttdato())
     }
+
+    private val Int.juli get() = LocalDate.of(2019, Month.JULY, this)
+
+    private val Int.mandag get() = LocalDate.of(2019, Month.JULY, 7*(this - 1) + 1 )
+    private val Int.tirsdag get() = this.mandag.plusDays(1)
+    private val Int.onsdag get() = this.mandag.plusDays(2)
+    private val Int.torsdag get() = this.mandag.plusDays(3)
+    private val Int.fredag get() = this.mandag.plusDays(4)
+    private val Int.lørdag get() = this.mandag.plusDays(5)
+    private val Int.søndag get() = this.mandag.plusDays(6)
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
@@ -80,7 +81,6 @@ class SykedagerTest {
         assertEquals(uke5Fredag, grupper[1].sluttdato())
     }
 
-    @Disabled
     @Test
     fun søknadMedPåfølgendeFerieUtenGapKoblesSammenMedNySøknadInnenfor16Dager() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
@@ -111,7 +111,6 @@ class SykedagerTest {
         assertEquals(uke5Fredag, grupper[1].sluttdato())
     }
 
-    @Disabled
     @Test
     fun søknadMedTrailingFerieGirBareSøknad() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)

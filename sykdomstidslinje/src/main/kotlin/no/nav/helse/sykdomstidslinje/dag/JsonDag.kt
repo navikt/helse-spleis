@@ -17,7 +17,7 @@ internal data class JsonHendelse(
 ) {
     fun toHendelse(): Sykdomshendelse = when (enumValueOf<Sykdomshendelse.Type>(type)) {
         Sykdomshendelse.Type.Inntektsmelding -> Inntektsmelding(json)
-        Sykdomshendelse.Type.NySykepengesøknad-> NySykepengesøknad(json)
+        Sykdomshendelse.Type.NySykepengesøknad -> NySykepengesøknad(json)
         Sykdomshendelse.Type.SendtSykepengesøknad -> SendtSykepengesøknad(json)
         Sykdomshendelse.Type.SykepengeHistorikk -> SykepengeHistorikk(json)
     }
@@ -27,10 +27,10 @@ enum class JsonDagType(internal val creator: (JsonDag) -> Dag) {
     ARBEIDSDAG({ Arbeidsdag(it.dato, it.hendelse.toHendelse()) }),
     EGENMELDINGSDAG({ Egenmeldingsdag(it.dato, it.hendelse.toHendelse()) }),
     FERIEDAG({ Feriedag(it.dato, it.hendelse.toHendelse()) }),
-    HELGEDAG({ Helgedag(it.dato, it.hendelse.toHendelse())}),
+    IMPLISITT_DAG({ ImplisittDag(it.dato, it.hendelse.toHendelse()) }),
     PERMISJONSDAG({ Permisjonsdag(it.dato, it.hendelse.toHendelse()) }),
     STUDIEDAG({ Studiedag(it.dato, it.hendelse.toHendelse()) }),
-    SYKEDAG( { Sykedag(it.dato, it.hendelse.toHendelse()) }),
+    SYKEDAG({ Sykedag(it.dato, it.hendelse.toHendelse()) }),
     SYK_HELGEDAG({ SykHelgedag(it.dato, it.hendelse.toHendelse()) }),
     UBESTEMTDAG({ Ubestemtdag(it.dato, it.hendelse.toHendelse()) }),
     UTENLANDSDAG({ Utenlandsdag(it.dato, it.hendelse.toHendelse()) })

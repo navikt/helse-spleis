@@ -94,7 +94,6 @@ class DagsturneringTest {
             "GS-A" -> Sykdomstidslinje.sykedag(dato, sendtSøknad)
             "V-A" -> Sykdomstidslinje.ferie(dato, sendtSøknad)
             "V-IM" -> Sykdomstidslinje.ferie(dato, inntektsmelding)
-            "W" -> Helgedag(lørdag, sendtSøknad)
 //            "Le-Areg" -> Permisjonsdag(dato, ) // TODO: Implementer når vi har permisjon
             "Le-A" -> Permisjonsdag(dato, sendtSøknad) // TODO: Implementer når vi har permisjon
             "SW" -> SykHelgedag(lørdag, nySøknad)
@@ -136,7 +135,6 @@ class DagsturneringTest {
             "DA" -> Utenlandsdag::class
             "GS" -> Sykedag::class
             "SRD" -> Egenmeldingsdag::class
-            "W" -> Helgedag::class
             "SW-SM" -> SykHelgedag::class
             else -> throw RuntimeException("Unmapped event type $resultEventName")
         }

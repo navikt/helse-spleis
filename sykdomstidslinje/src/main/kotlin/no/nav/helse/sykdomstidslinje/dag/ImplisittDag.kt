@@ -4,7 +4,7 @@ import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-internal class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) :
+class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) :
     Dag(gjelder, hendelse) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {}
 
@@ -12,11 +12,9 @@ internal class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: S
 
     override fun antallSykedagerHvorViIkkeTellerMedHelg(): Int = 0
 
-    override fun tilDag() = ikkeSykedag(dagen, hendelse)
+    override fun toString() = formatter.format(dagen) + "\tImplisitt dag"
 
-    override fun toString() = formatter.format(dagen) + "\tImplisitt arbeidsdag"
+    override fun dagType(): JsonDagType = JsonDagType.IMPLISITT_DAG
 
-    override fun dagType() = throw RuntimeException("Not implemented, should never be serialized")
-
-    override fun nøkkel(): Nøkkel = Nøkkel.WD_I
+    override fun nøkkel(): Nøkkel = Nøkkel.I
 }

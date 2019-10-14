@@ -51,7 +51,8 @@ class DagTurnering(val source: String = "/dagturnering.csv") {
             "R" -> Row
             "C" -> Column
             "X" -> Impossible
-            "L" -> Latest
+            "LR" -> LatestOrRow
+            "LC" -> LatestOrColumn
             else -> throw RuntimeException("$cellValue is not a known strategy for deciding between days")
         }
 }
@@ -72,9 +73,14 @@ internal object Column : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = column.erstatter(row)
 }
 
-internal object Latest : Strategy() {
+internal object LatestOrRow : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
         if (row.sisteHendelse() >= (column.sisteHendelse())) row.erstatter(column) else column.erstatter(row)
+}
+
+internal object LatestOrColumn : Strategy() {
+    override fun decide(row: Dag, column: Dag): Dag =
+        if (row.sisteHendelse() > (column.sisteHendelse())) row.erstatter(column) else column.erstatter(row)
 }
 
 internal object Impossible : Strategy() {

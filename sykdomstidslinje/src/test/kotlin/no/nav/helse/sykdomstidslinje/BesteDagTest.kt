@@ -7,7 +7,6 @@ import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -20,9 +19,10 @@ internal class BesteDagTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        private val sendtSøknad = SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val sendtSøknad =
+            SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
-        private val nulldag get() = ImplisittDag(2.mandag, inntektsmelding)
+        private val implisittDag get() = ImplisittDag(2.mandag, inntektsmelding)
         private val arbeidsdag get() = Arbeidsdag(2.mandag, sendtSøknad)
         private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
         private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedag(2.mandag, inntektsmelding)
@@ -39,8 +39,8 @@ internal class BesteDagTest {
 
     @Test
     fun `nulldag taper mot en gitt dag`() {
-        assertWinner(nulldag, sykdomFraSendtSøknad, Sykedag::class, 0)
-        assertWinner(sykdomFraSendtSøknad, nulldag, Sykedag::class, 0)
+        assertWinner(implisittDag, sykdomFraSendtSøknad, Sykedag::class, 0)
+        assertWinner(sykdomFraSendtSøknad, implisittDag, Sykedag::class, 0)
     }
 
     @Test
@@ -54,14 +54,16 @@ internal class BesteDagTest {
         assertWinner(sykdomFraInntektsmelding, ferieFraSøknad, Feriedag::class, 1)
     }
 
-    @Disabled
     @Test
-    fun `ferie vinner over utenlandsdag`() {
-        assertWinner(ferieFraSøknad, utenlandsFraSendtSøknad, Feriedag::class, 1)
-        assertWinner(utenlandsFraSendtSøknad, ferieFraSøknad, Feriedag::class, 1)
+    fun `sammenligning med utenlandsdag git altid ubestemtdag`() {
+        assertWinnerBidirectional(implisittDag, utenlandsFraSendtSøknad, Ubestemtdag::class, 1)
+        assertWinnerBidirectional(arbeidsdag, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(sykdomFraSendtSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(sykdomFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(ferieFraSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(ferieFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
     }
 
-    @Disabled
     @Test
     fun `arbeidsdag vinner over sykedag`() {
         assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class, 1)
@@ -77,6 +79,16 @@ internal class BesteDagTest {
         val winner = dag1.beste(dag2)
         assertEquals(expectedWinnerClass, winner::class)
         assertEquals(antallDagerErstattet, winner.dagerErstattet().size)
+    }
+
+    private fun <T : Dag> assertWinnerBidirectional(
+        dag1: Dag,
+        dag2: Dag,
+        expectedWinnerClass: KClass<T>,
+        antallDagerErstattet: Int
+    ) {
+        assertWinner(dag1, dag2, expectedWinnerClass, antallDagerErstattet)
+        assertWinner(dag2, dag1, expectedWinnerClass, antallDagerErstattet)
     }
 }
 

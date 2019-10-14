@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

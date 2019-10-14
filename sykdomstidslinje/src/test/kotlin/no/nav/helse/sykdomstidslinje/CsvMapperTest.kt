@@ -11,6 +11,6 @@ class CsvMapperTest {
     @Test
     internal fun `kan hente ut nøkkel fra dag`(){
         val nøkkel = ImplisittDag(LocalDate.of(2019,10,10), sendtSøknad()).nøkkel()
-        assertEquals(Dag.Nøkkel.WD_I, nøkkel)
+        assertEquals(Dag.Nøkkel.I, nøkkel)
     }
 }

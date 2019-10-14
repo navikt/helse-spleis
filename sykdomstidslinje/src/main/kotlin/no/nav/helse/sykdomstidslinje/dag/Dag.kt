@@ -67,13 +67,12 @@ abstract class Dag internal constructor(
     override fun sisteHendelse() = this.hendelse
 
     internal enum class Nøkkel{
-        WD_I,
+        I,
         WD_A,
         WD_IM,
         S,
         V_A,
         V_IM,
-        W,
         Le_Areg,
         Le_A,
         SW,

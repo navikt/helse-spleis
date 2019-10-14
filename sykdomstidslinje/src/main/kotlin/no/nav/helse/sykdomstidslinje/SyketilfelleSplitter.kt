@@ -18,11 +18,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         state.visitFeriedag(feriedag)
     }
 
-    override fun visitHelgedag(helgedag: Helgedag) {
-        syketilfelle.add(helgedag)
-        state.visitHelgedag(helgedag)
-    }
-
     override fun visitSykedag(sykedag: Sykedag) {
         syketilfelle.add(sykedag)
         state.visitSykedag(sykedag)
@@ -51,7 +46,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     internal interface SykedagerTellerTilstand {
         fun visitArbeidsdag(dag: Arbeidsdag) {}
         fun visitSykedag(dag: Sykedag) {}
-        fun visitHelgedag(dag: Helgedag) {}
         fun visitSykHelgedag(dag: SykHelgedag) {}
         fun visitFeriedag(dag: Feriedag) {}
         fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {}
@@ -88,11 +82,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
             state.visitArbeidsdag(dag)
         }
 
-        override fun visitHelgedag(dag: Helgedag) {
-            state = TellerHelg()
-            state.visitHelgedag(dag)
-        }
-
         override fun visitFeriedag(dag: Feriedag) {
             state = FeriePåfølgendeSykdom()
             state.visitFeriedag(dag)
@@ -112,11 +101,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {
             state = TellerSykedager()
             state.visitEgenmeldingsdag(dag)
-        }
-
-        override fun visitHelgedag(dag: Helgedag) {
-            state = TellerHelg()
-            state.visitHelgedag(dag)
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
@@ -151,11 +135,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         override fun visitSykHelgedag(dag: SykHelgedag) {
             state = TellerHelg()
             state.visitSykHelgedag(dag)
-        }
-
-        override fun visitHelgedag(dag: Helgedag) {
-            state = TellerIkkeSykedager()
-            state.visitHelgedag(dag)
         }
     }
 

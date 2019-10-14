@@ -1,16 +1,18 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.objectMapper
 import java.time.LocalDateTime
 
-internal class Testhendelse(private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45)) :
+class Testhendelse(
+    private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
+    private val hendelsetype: Sykdomshendelse.Type = Sykdomshendelse.Type.SendtSykepengesøknad
+) :
     Sykdomshendelse {
-    override fun hendelsetype(): Sykdomshendelse.Type {
-        TODO("not implemented")
-    }
+    override fun hendelsetype(): Sykdomshendelse.Type = hendelsetype
 
     override fun organisasjonsnummer(): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -32,6 +34,7 @@ internal class Testhendelse(private val rapportertdato: LocalDateTime = LocalDat
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
 
-    override fun toJson(): JsonNode = objectMapper.readTree("{}")
-
+    override fun toJson(): JsonNode {
+        return objectMapper.readValue("{}")
+    }
 }

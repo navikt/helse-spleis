@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -45,7 +45,6 @@ internal class HistorikkTest {
         assertEquals(0, dager[4].dagerErstattet().size)
     }
 
-    @Disabled
     @Test
     fun `bevarer historikk fra forrige overlapp`() {
         val sykmeldingsperiode = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, Testhendelse())

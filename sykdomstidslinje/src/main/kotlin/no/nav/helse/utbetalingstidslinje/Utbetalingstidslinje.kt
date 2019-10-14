@@ -15,6 +15,8 @@ class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisito
 
     fun erAvklart() = utbetalingsdager.all(Utbetalingsdag::erAvklart)
 
+    override fun toString() = utbetalingsdager.joinToString(separator = "\n") { it.toString() }
+
     override fun visitSykedag(sykedag: Sykedag) {
         state.visitSykedag(sykedag)
     }
@@ -31,6 +33,10 @@ class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisito
         state.visitUtenlandsdag(utenlandsdag)
     }
 
+    override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
+        state.visitUbestemt(ubestemtdag)
+    }
+
     private fun tellArbeidsgiverdager() {
         antallArbeidsgiverdager += 1
         if (antallArbeidsgiverdager >= dagerIArbeidsgiverperiode) state = Trygdeperiode()
@@ -45,14 +51,16 @@ class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisito
         fun erAvklart(): Boolean
     }
 
-    private class UavklartUtbetalingsdag(private val dag: Dag): Utbetalingsdag {
+    private class UavklartUtbetalingsdag(private val dag: Dag) : Utbetalingsdag {
         override fun dagsats() = 0.0
         override fun erAvklart() = false
+        override fun toString(): String = "Uavklart utbetalingsdag\t$dag"
     }
 
-    private class AvklartUtbetalingsdag(private val dagsats: Double, private val dag: Dag): Utbetalingsdag {
+    private class AvklartUtbetalingsdag(private val dagsats: Double, private val dag: Dag) : Utbetalingsdag {
         override fun dagsats() = dagsats
         override fun erAvklart() = true
+        override fun toString(): String = "Avklart utbetalingsdag\t$dag"
     }
 
     private interface State : SykdomstidslinjeVisitor
@@ -76,6 +84,10 @@ class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisito
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
             utbetalingsdager.add(UavklartUtbetalingsdag(dag = utenlandsdag))
         }
+
+        override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
+            utbetalingsdager.add(UavklartUtbetalingsdag(dag = ubestemtdag))
+        }
     }
 
     private inner class Trygdeperiode : State {
@@ -89,6 +101,10 @@ class Utbetalingstidslinje(private val dagsats: Double) : SykdomstidslinjeVisito
 
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
             utbetalingsdager.add(UavklartUtbetalingsdag(dag = utenlandsdag))
+        }
+
+        override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
+            utbetalingsdager.add(UavklartUtbetalingsdag(dag = ubestemtdag))
         }
     }
 

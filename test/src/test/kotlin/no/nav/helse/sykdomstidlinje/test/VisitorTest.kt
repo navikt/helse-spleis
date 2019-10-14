@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
@@ -7,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,6 +24,7 @@ class VisitorTest {
         private val rapporteringshendelse = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
     }
 
+    @Disabled
     @Test
     fun flereSykdomstilfellerSlåttSammen() {
         val visitor = VisitorCounter()

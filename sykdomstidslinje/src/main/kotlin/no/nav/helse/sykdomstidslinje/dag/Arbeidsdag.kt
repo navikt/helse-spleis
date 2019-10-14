@@ -1,12 +1,12 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.Sykdomshendelse.Type.Inntektsmelding
+import no.nav.helse.hendelse.Sykdomshendelse.Type.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse): Dag(gjelder, hendelse) {
+class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) : Dag(gjelder, hendelse) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitArbeidsdag(this)
     }
@@ -20,9 +20,9 @@ class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshende
     override fun dagType(): JsonDagType = JsonDagType.ARBEIDSDAG
 
     override fun nøkkel(): Nøkkel =
-        when(hendelse) {
-            is SendtSykepengesøknad -> Nøkkel.WD_A
-            is Inntektsmelding -> Nøkkel.WD_IM
+        when (hendelse.hendelsetype()) {
+            SendtSykepengesøknad -> Nøkkel.WD_A
+            Inntektsmelding -> Nøkkel.WD_IM
             else -> throw RuntimeException("Hendelse ${hendelse.hendelsetype()} er ikke støttet")
         }
 }
