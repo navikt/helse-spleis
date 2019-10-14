@@ -24,13 +24,21 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
     val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Periode(it) } ?: emptyList()
-    val fraværsperioder get() = jsonNode["fravar"]?.filterNot {
-        Fraværstype.valueOf(it["type"].textValue()) in listOf(Fraværstype.UTDANNING_FULLTID, Fraværstype.UTDANNING_DELTID)
-    }?.map { FraværsPeriode(it) } ?: emptyList()
+    val fraværsperioder
+        get() = jsonNode["fravar"]?.filterNot {
+            Fraværstype.valueOf(it["type"].textValue()) in listOf(
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
+            )
+        }?.map { FraværsPeriode(it) } ?: emptyList()
 
-    val utdanningsperioder get() = jsonNode["fravar"]?.filter {
-        Fraværstype.valueOf(it["type"].textValue()) in listOf(Fraværstype.UTDANNING_FULLTID, Fraværstype.UTDANNING_DELTID)
-    }?.map { Utdanningsfraværsperiode(it) } ?: emptyList()
+    val utdanningsperioder
+        get() = jsonNode["fravar"]?.filter {
+            Fraværstype.valueOf(it["type"].textValue()) in listOf(
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
+            )
+        }?.map { Utdanningsfraværsperiode(it) } ?: emptyList()
 
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
@@ -61,8 +69,13 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
         Sykdomstidslinje.studiedager(it.fom, tom, this)
     }
 
-    override fun sykdomstidslinje() = (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
-        .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+    override fun sykdomstidslinje() =
+        if (status == SØKNAD_SENDT) {
+            (egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
+        } else {
+            sykeperiodeTidslinje
+        }
+            .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     override fun toJson(): JsonNode = jsonNode
 }
