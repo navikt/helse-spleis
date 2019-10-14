@@ -35,7 +35,9 @@ data class SykepengeHistorikk(val json: JsonNode) : Sykdomshendelse {
     }
 
     fun påvirkerSakensMaksdato(sakensTidslinje: Sykdomstidslinje): Boolean {
-        return sakensTidslinje.startdato().minusMonths(6).isBefore(this.sisteDato)
+        return !sakensTidslinje.startdato()
+            .minusMonths(6)
+            .isAfter(this.sisteDato)
     }
 
 }
