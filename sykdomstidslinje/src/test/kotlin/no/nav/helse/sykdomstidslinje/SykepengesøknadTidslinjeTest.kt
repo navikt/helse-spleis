@@ -5,7 +5,7 @@ import no.nav.helse.hendelse.TestHendelser.egenmeldingTom
 import no.nav.helse.hendelse.TestHendelser.ferieFom
 import no.nav.helse.hendelse.TestHendelser.ferieTom
 import no.nav.helse.hendelse.TestHendelser.sendtSøknad
-import no.nav.helse.hendelse.TestHendelser.sykeperiodFOM
+import no.nav.helse.hendelse.TestHendelser.sykeperiodeFOM
 import no.nav.helse.hendelse.TestHendelser.sykeperiodeTOM
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
@@ -24,7 +24,7 @@ class SykepengesøknadTidslinjeTest {
         val sykdomstidslinje = sendtSøknad().sykdomstidslinje()
         val syketilfeller = sykdomstidslinje.also { println(it) }.syketilfeller().also { println(it) }
 
-        assertEquals(Sykedag::class, syketilfeller.dagForDato(sykeperiodFOM)::class)
+        assertEquals(Sykedag::class, syketilfeller.dagForDato(sykeperiodeFOM)::class)
         assertEquals(SykHelgedag::class, syketilfeller.dagForDato(sykeperiodeTOM)::class)
         assertEquals(sykeperiodeTOM, syketilfeller.last().sluttdato())
     }

@@ -12,6 +12,7 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object TestHendelser {
@@ -19,12 +20,15 @@ internal object TestHendelser {
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    val sykeperiodFOM = LocalDate.of(2019, Month.SEPTEMBER, 16)
+    val sykeperiodeFOM = LocalDate.of(2019, Month.SEPTEMBER, 16)
     val sykeperiodeTOM = LocalDate.of(2019, Month.OCTOBER, 5)
     val egenmeldingFom = LocalDate.of(2019, Month.SEPTEMBER, 12)
     val egenmeldingTom = LocalDate.of(2019, Month.SEPTEMBER, 15)
     val ferieFom = LocalDate.of(2019, Month.SEPTEMBER, 20)
     val ferieTom = LocalDate.of(2019, Month.SEPTEMBER, 23)
+    val `seks måneder og én dag før første sykedag` = egenmeldingFom.minusMonths(6).minusDays(1)
+    val `én dag færre enn seks måneder før første sykedag` = egenmeldingFom.minusMonths(6).plusDays(1)
+
 
     private fun søknad(
         id: String = UUID.randomUUID().toString(),
@@ -39,7 +43,7 @@ internal object TestHendelser {
         ),
         søknadsperioder: List<SoknadsperiodeDTO> = listOf(
             SoknadsperiodeDTO(
-                fom = sykeperiodFOM,
+                fom = sykeperiodeFOM,
                 tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
             ),
             SoknadsperiodeDTO(
@@ -109,6 +113,14 @@ internal object TestHendelser {
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver
         ) as NySykepengesøknad
+
+    fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): SykepengeHistorikk {
+        val historikk = mapOf(
+            "aktørId" to "12345678910",
+            "sistedato" to sisteHistoriskeSykedag.format(DateTimeFormatter.ISO_DATE)
+        )
+        return SykepengeHistorikk(objectMapper.valueToTree(historikk))
+    }
 
     fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(
         objectMapper.valueToTree(
