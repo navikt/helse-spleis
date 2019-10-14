@@ -176,13 +176,25 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta sykepengehistorikk når saken er komplett`() {
+    fun `motta sykepengehistorikk når saken er komplett men historikken er utenfor seks måneder`() {
         val sakskompleks = beInKomplettTidslinje()
+        val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(6).minusDays(1)
 
-        sakskompleks.håndterSykepengeHistorikk(sykepengeHistorikk())
+        sakskompleks.håndterSykepengeHistorikk(sykepengeHistorikk(sisteHistoriskeSykedag))
 
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `motta sykepengehistorikk med siste sykedag innenfor seks måneder av denne sakens første sykedag`() {
+        val sakskompleks = beInKomplettTidslinje()
+        val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(6)
+
+        sakskompleks.håndterSykepengeHistorikk(sykepengeHistorikk(sisteHistoriskeSykedag))
+
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.previousState)
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
     }
 
     private fun beInStartTilstand(): Sakskompleks {

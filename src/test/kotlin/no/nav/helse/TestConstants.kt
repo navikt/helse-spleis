@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.SykepengeHistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -15,6 +16,7 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object TestConstants {
@@ -33,8 +35,6 @@ internal object TestConstants {
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
-            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
-            tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
             egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
@@ -65,8 +65,8 @@ internal object TestConstants {
             arbeidsgiver = arbeidsgiver,
             arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
             arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
-            fom = fom,
-            tom = tom,
+            fom = søknadsperioder.sortedBy { it.fom }.first().fom,
+            tom = søknadsperioder.sortedBy { it.tom }.last().tom,
             startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 10),
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
@@ -88,7 +88,7 @@ internal object TestConstants {
     fun sendtSøknad(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
-            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 12),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
@@ -115,8 +115,6 @@ internal object TestConstants {
             søknad(
                     id = id,
                     aktørId = aktørId,
-                    fom = fom,
-                    tom = tom,
                     arbeidGjenopptatt = arbeidGjenopptatt,
                     korrigerer = korrigerer,
                     egenmeldinger = egenmeldinger,
@@ -129,7 +127,7 @@ internal object TestConstants {
     fun nySøknad(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
-            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            fom: LocalDate = LocalDate.of(2019, Month.SEPTEMBER, 12),
             tom: LocalDate = LocalDate.of(2019, Month.OCTOBER, 5),
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
@@ -156,8 +154,6 @@ internal object TestConstants {
             søknad(
                     id = id,
                     aktørId = aktørId,
-                    fom = fom,
-                    tom = tom,
                     arbeidGjenopptatt = arbeidGjenopptatt,
                     korrigerer = korrigerer,
                     egenmeldinger = egenmeldinger,
@@ -189,12 +185,12 @@ internal object TestConstants {
             arkivreferanse = ""
     )))
 
-    fun sykepengeHistorikk(): SykepengeHistorikk {
-        val historikk = {"aktørId" to "12345678910"}
+    fun sykepengeHistorikk(sisteSykedag: LocalDate = LocalDate.now()): SykepengeHistorikk {
+        val historikk = mapOf("aktørId" to "12345678910", "sistedato" to sisteSykedag.format(DateTimeFormatter.ISO_DATE))
         return SykepengeHistorikk(objectMapper.valueToTree(historikk))
     }
 
-
 }
+
 val Int.juli
     get() = LocalDate.of(2019, Month.JULY, this)
