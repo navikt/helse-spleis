@@ -1,34 +1,40 @@
 package no.nav.helse.component.person
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.ApplicationStarted
-import io.mockk.mockk
-import kafka.tools.ConsoleConsumer.addShutdownHook
+import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.Topics
+import no.nav.helse.TestConstants.inntektsmeldingDTO
+import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.sykmeldingTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.component.PersonRepositoryPostgresTest
 import no.nav.helse.createHikariConfig
-import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer.Companion.inntektsmeldingObjectMapper
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
-import no.nav.helse.person.PersonRepository
-import no.nav.helse.sakskompleks.SakskompleksProbe
 import no.nav.helse.sakskompleks.db.runMigration
-import no.nav.helse.søknad.SøknadConsumer
-import org.apache.kafka.streams.KafkaStreams
-import org.apache.kafka.streams.StreamsBuilder
+import no.nav.helse.serde.JsonNodeSerializer
+import no.nav.helse.testServer
+import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.config.SaslConfigs
+import org.apache.kafka.common.serialization.StringSerializer
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.util.*
+import java.util.concurrent.TimeUnit
 
-
+@KtorExperimentalAPI
 internal class PersonComponentTest {
 
     companion object {
@@ -41,7 +47,7 @@ internal class PersonComponentTest {
             autoStart = false,
             withSchemaRegistry = false,
             withSecurity = true,
-            topicNames = listOf(sykmeldingTopic, inntektsmeldingTopic, søknadTopic)
+            topicNames = listOf(søknadTopic, inntektsmeldingTopic)
         )
 
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -80,4 +86,42 @@ internal class PersonComponentTest {
         )
 
     }
+
+    @Test
+    fun `inntektsmelding som kommer først, blir ignorert`() {
+        testServer(config = mapOf(
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val søknadDTO = søknadDTO(status = SoknadsstatusDTO.NY)
+            val sendtSøknadDTO = søknadDTO(status = SoknadsstatusDTO.SENDT)
+            sendKafkaMessage(søknadTopic, søknadDTO.id!!, søknadDTO.toJsonNode())
+            sendKafkaMessage(søknadTopic, sendtSøknadDTO.id!!, sendtSøknadDTO.toJsonNode())
+            sendKafkaMessage(inntektsmeldingTopic, inntektsmeldingDTO().inntektsmeldingId, inntektsmeldingDTO().toJsonNode())
+
+            await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted {
+
+                }
+        }
+    }
+
+    private fun sendKafkaMessage(topic: String, key: String, message: JsonNode, objectMapper: ObjectMapper = inntektsmeldingObjectMapper) {
+        val producer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(objectMapper))
+        producer.send(ProducerRecord(topic, key, message))
+        producer.flush()
+    }
+
+    private fun producerProperties() =
+        Properties().apply {
+            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
+        }
+
 }

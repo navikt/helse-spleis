@@ -7,6 +7,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.SykepengeHistorikk
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.søknad.SøknadConsumer
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -57,26 +59,26 @@ internal object TestConstants {
             orgnummer = "123456789"
         )
     ) = SykepengesoknadDTO(
-            id = id,
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = status,
-            aktorId = aktørId,
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = arbeidsgiver,
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
-            fom = fom,
-            tom = tom,
-            startSyketilfelle = 10.september,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
-            sendtArbeidsgiver = 30.september.atStartOfDay(),
-            egenmeldinger = egenmeldinger,
-            soknadsperioder = søknadsperioder,
-            fravar = fravær
-        )
+        id = id,
+        type = SoknadstypeDTO.ARBEIDSTAKERE,
+        status = status,
+        aktorId = aktørId,
+        sykmeldingId = UUID.randomUUID().toString(),
+        arbeidsgiver = arbeidsgiver,
+        arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+        arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
+        fom = fom,
+        tom = tom,
+        startSyketilfelle = 10.september,
+        arbeidGjenopptatt = arbeidGjenopptatt,
+        korrigerer = korrigerer,
+        opprettet = LocalDateTime.now(),
+        sendtNav = LocalDateTime.now(),
+        sendtArbeidsgiver = 30.september.atStartOfDay(),
+        egenmeldinger = egenmeldinger,
+        soknadsperioder = søknadsperioder,
+        fravar = fravær
+    )
 
     fun sendtSøknad(
         id: String = UUID.randomUUID().toString(),
@@ -104,19 +106,19 @@ internal object TestConstants {
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
         )
-    ) = SendtSykepengesøknad(objectMapper.valueToTree<JsonNode>(søknadDTO(
-            id = id,
-            aktørId = aktørId,
-            fom = fom,
-            tom = tom,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            egenmeldinger = egenmeldinger,
-            søknadsperioder = søknadsperioder,
-            fravær = fravær,
-            status = SoknadsstatusDTO.SENDT,
-            arbeidsgiver = arbeidsgiver
-        )))
+    ) = SendtSykepengesøknad(søknadDTO(
+        id = id,
+        aktørId = aktørId,
+        fom = fom,
+        tom = tom,
+        arbeidGjenopptatt = arbeidGjenopptatt,
+        korrigerer = korrigerer,
+        egenmeldinger = egenmeldinger,
+        søknadsperioder = søknadsperioder,
+        fravær = fravær,
+        status = SoknadsstatusDTO.SENDT,
+        arbeidsgiver = arbeidsgiver
+    ).toJsonNode())
 
     fun nySøknad(
         id: String = UUID.randomUUID().toString(),
@@ -144,7 +146,7 @@ internal object TestConstants {
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
         )
-    ) = NySykepengesøknad(objectMapper.valueToTree<JsonNode>(søknadDTO(
+    ) = NySykepengesøknad(søknadDTO(
         id = id,
         aktørId = aktørId,
         fom = fom,
@@ -156,35 +158,41 @@ internal object TestConstants {
         fravær = fravær,
         status = SoknadsstatusDTO.NY,
         arbeidsgiver = arbeidsgiver
-    )))
+    ).toJsonNode())
 
-    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(objectMapper.valueToTree(Inntektsmelding(
-        inntektsmeldingId = "",
-        arbeidstakerFnr = "",
-        arbeidstakerAktorId = "",
-        virksomhetsnummer = virksomhetsnummer,
-        arbeidsgiverFnr = null,
-        arbeidsgiverAktorId = null,
-        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-        arbeidsforholdId = null,
-        beregnetInntekt = null,
-        refusjon = Refusjon(
-            beloepPrMnd = null,
-            opphoersdato = null
-        ),
-        endringIRefusjoner = emptyList(),
-        opphoerAvNaturalytelser = emptyList(),
-        gjenopptakelseNaturalytelser = emptyList(),
-        arbeidsgiverperioder = emptyList(),
-        status = Status.GYLDIG,
-        arkivreferanse = ""
-    )))
+    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(inntektsmeldingDTO(virksomhetsnummer).toJsonNode())
+
+    fun inntektsmeldingDTO(virksomhetsnummer: String? = null) =
+        Inntektsmelding(
+            inntektsmeldingId = "",
+            arbeidstakerFnr = "",
+            arbeidstakerAktorId = "",
+            virksomhetsnummer = virksomhetsnummer,
+            arbeidsgiverFnr = null,
+            arbeidsgiverAktorId = null,
+            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+            arbeidsforholdId = null,
+            beregnetInntekt = null,
+            refusjon = Refusjon(
+                beloepPrMnd = null,
+                opphoersdato = null
+            ),
+            endringIRefusjoner = emptyList(),
+            opphoerAvNaturalytelser = emptyList(),
+            gjenopptakelseNaturalytelser = emptyList(),
+            arbeidsgiverperioder = emptyList(),
+            status = Status.GYLDIG,
+            arkivreferanse = ""
+        )
 
     fun sykepengeHistorikk(): SykepengeHistorikk {
         val historikk = { "aktørId" to "12345678910" }
         return SykepengeHistorikk(objectMapper.valueToTree(historikk))
     }
+
 }
+    fun SykepengesoknadDTO.toJsonNode(): JsonNode = SøknadConsumer.søknadObjectMapper.valueToTree(this)
+    fun Inntektsmelding.toJsonNode(): JsonNode = InntektsmeldingConsumer.inntektsmeldingObjectMapper.valueToTree(this)
 
 val Int.juli
     get() = LocalDate.of(2019, Month.JULY, this)
