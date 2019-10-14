@@ -1,37 +1,83 @@
 package no.nav.helse.component.person
 
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import io.ktor.application.ApplicationStarted
+import io.mockk.mockk
+import kafka.tools.ConsoleConsumer.addShutdownHook
+import no.nav.common.JAASCredential
+import no.nav.common.KafkaEnvironment
+import no.nav.helse.Topics
+import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.sykmeldingTopic
+import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.component.PersonRepositoryPostgresTest
+import no.nav.helse.createHikariConfig
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.person.PersonMediator
+import no.nav.helse.person.PersonPostgresRepository
+import no.nav.helse.person.PersonRepository
+import no.nav.helse.sakskompleks.SakskompleksProbe
+import no.nav.helse.sakskompleks.db.runMigration
+import no.nav.helse.søknad.SøknadConsumer
+import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.streams.StreamsBuilder
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.sql.Connection
 
 
 internal class PersonComponentTest {
 
-    @Test
-    internal fun `testtopology`() {
-/*
-        val sakskompleksService = SakskompleksService(
-                behovProducer = mockk(relaxed = true),
-                sakskompleksDao = SakskompleksDao(getDataSource(createHikariConfigFromEnvironment())))
+    companion object {
 
-        val builder = StreamsBuilder()
+        private const val username = "srvkafkaclient"
+        private const val password = "kafkaclient"
 
-        SøknadConsumer(builder, Topics.søknadTopic, sakskompleksService)
-        InntektsmeldingConsumer(builder, Topics.inntektsmeldingTopic, sakskompleksService)
+        private val embeddedEnvironment = KafkaEnvironment(
+            users = listOf(JAASCredential(username, password)),
+            autoStart = false,
+            withSchemaRegistry = false,
+            withSecurity = true,
+            topicNames = listOf(sykmeldingTopic, inntektsmeldingTopic, søknadTopic)
+        )
 
-        return KafkaStreams(builder.build(), streamsConfig()).apply {
-            addShutdownHook(this)
+        private lateinit var embeddedPostgres: EmbeddedPostgres
+        private lateinit var postgresConnection: Connection
 
-            environment.monitor.subscribe(ApplicationStarted) {
-                start()
-            }
+        private lateinit var hikariConfig: HikariConfig
 
-            environment.monitor.subscribe(ApplicationStopping) {
-                close(Duration.ofSeconds(10))
-            }
+        @BeforeAll
+        @JvmStatic
+        internal fun `start embedded environment`() {
+            embeddedPostgres = EmbeddedPostgres.builder().start()
+            postgresConnection = embeddedPostgres.postgresDatabase.connection
+            hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
+            runMigration(HikariDataSource(hikariConfig))
+            embeddedEnvironment.start()
+
         }
 
-        val props = Properties()
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "test")
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234")
-        val testDriver = TopologyTestDriver(topology, props)*/
+        @AfterAll
+        @JvmStatic
+        internal fun `stop embedded environment`() {
+            embeddedEnvironment.tearDown()
+            postgresConnection.close()
+            embeddedPostgres.close()
+        }
+
+
+    }
+
+    @Test
+    internal fun `testtopology`() {
+        val repo = PersonPostgresRepository(HikariDataSource(hikariConfig))
+
+        val personMediator = PersonMediator(
+            personRepository = repo
+        )
+
     }
 }
