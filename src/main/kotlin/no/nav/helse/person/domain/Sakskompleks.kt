@@ -181,7 +181,8 @@ class Sakskompleks internal constructor(
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengeHistorikk: SykepengeHistorikk) {
-            sakskompleks.setTilstand(sykepengeHistorikk, SykepengehistorikkMottattTilstand)
+            if (sykepengeHistorikk.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengeHistorikk, TrengerManuellHåndteringTilstand)
+            else sakskompleks.setTilstand(sykepengeHistorikk, SykepengehistorikkMottattTilstand)
         }
 
     }

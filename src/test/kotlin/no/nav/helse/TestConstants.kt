@@ -9,6 +9,7 @@ import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.SykepengeHistorikk
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -17,6 +18,7 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object TestConstants {
@@ -59,25 +61,25 @@ internal object TestConstants {
             orgnummer = "123456789"
         )
     ) = SykepengesoknadDTO(
-        id = id,
-        type = SoknadstypeDTO.ARBEIDSTAKERE,
-        status = status,
-        aktorId = aktørId,
-        sykmeldingId = UUID.randomUUID().toString(),
-        arbeidsgiver = arbeidsgiver,
-        arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-        arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
-        fom = fom,
-        tom = tom,
-        startSyketilfelle = 10.september,
-        arbeidGjenopptatt = arbeidGjenopptatt,
-        korrigerer = korrigerer,
-        opprettet = LocalDateTime.now(),
-        sendtNav = LocalDateTime.now(),
-        sendtArbeidsgiver = 30.september.atStartOfDay(),
-        egenmeldinger = egenmeldinger,
-        soknadsperioder = søknadsperioder,
-        fravar = fravær
+            id = id,
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = status,
+            aktorId = aktørId,
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = arbeidsgiver,
+            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+            arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
+            fom = søknadsperioder.sortedBy { it.fom }.first().fom,
+            tom = søknadsperioder.sortedBy { it.tom }.last().tom,
+            startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 10),
+            arbeidGjenopptatt = arbeidGjenopptatt,
+            korrigerer = korrigerer,
+            opprettet = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
+            sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
+            egenmeldinger = egenmeldinger,
+            soknadsperioder = søknadsperioder,
+            fravar = fravær
     )
 
     fun sendtSøknad(
@@ -185,8 +187,8 @@ internal object TestConstants {
             arkivreferanse = ""
         )
 
-    fun sykepengeHistorikk(): SykepengeHistorikk {
-        val historikk = { "aktørId" to "12345678910" }
+    fun sykepengeHistorikk(sisteSykedag: LocalDate = LocalDate.now()): SykepengeHistorikk {
+        val historikk = mapOf("aktørId" to "12345678910", "sistedato" to sisteSykedag.format(DateTimeFormatter.ISO_DATE))
         return SykepengeHistorikk(objectMapper.valueToTree(historikk))
     }
 
