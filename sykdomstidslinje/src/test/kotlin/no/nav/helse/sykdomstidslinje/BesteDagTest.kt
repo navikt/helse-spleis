@@ -7,6 +7,7 @@ import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -53,12 +54,14 @@ internal class BesteDagTest {
         assertWinner(sykdomFraInntektsmelding, ferieFraSøknad, Feriedag::class, 1)
     }
 
+    @Disabled
     @Test
     fun `ferie vinner over utenlandsdag`() {
         assertWinner(ferieFraSøknad, utenlandsFraSendtSøknad, Feriedag::class, 1)
         assertWinner(utenlandsFraSendtSøknad, ferieFraSøknad, Feriedag::class, 1)
     }
 
+    @Disabled
     @Test
     fun `arbeidsdag vinner over sykedag`() {
         assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class, 1)

@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -64,6 +65,7 @@ class SykedagerTest {
         assertEquals(uke3Fredag, grupper.first().sluttdato())
     }
 
+    @Disabled
     @Test
     fun toSøknaderUtenfor16Dager() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
@@ -78,6 +80,7 @@ class SykedagerTest {
         assertEquals(uke5Fredag, grupper[1].sluttdato())
     }
 
+    @Disabled
     @Test
     fun søknadMedPåfølgendeFerieUtenGapKoblesSammenMedNySøknadInnenfor16Dager() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
@@ -91,6 +94,7 @@ class SykedagerTest {
         assertEquals(uke6Fredag, grupper.first().sluttdato())
     }
 
+    @Disabled
     @Test
     fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
@@ -107,6 +111,7 @@ class SykedagerTest {
         assertEquals(uke5Fredag, grupper[1].sluttdato())
     }
 
+    @Disabled
     @Test
     fun søknadMedTrailingFerieGirBareSøknad() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)

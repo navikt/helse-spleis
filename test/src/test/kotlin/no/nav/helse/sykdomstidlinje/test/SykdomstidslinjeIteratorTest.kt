@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,6 +73,7 @@ class SykdomstidslinjeIteratorTest {
         assertEquals(5, sykedager.syketilfeller().first().antallSykedagerHvorViIkkeTellerMedHelg())
     }
 
+    @Disabled
     @Test
     fun toSykmeldingerMedGapStørreEnn16DagerGirToArbeidsgiverPerioder() {
         val spysyke = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringshendelse)
@@ -86,6 +88,7 @@ class SykdomstidslinjeIteratorTest {
         assertEquals(uke7Fredag, syketilfeller[1].sluttdato())
     }
 
+    @Disabled
     @Test
     fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
         val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringshendelse)

@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,6 +18,7 @@ class EgenmeldingsdagTest {
         private val testKildeHendelse = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
     }
 
+    @Disabled
     @Test
     fun `egenmeldingsdager kan legges til tidslinjen`() {
         val egenmeldingsdager = Sykdomstidslinje.egenmeldingsdager(uke1Mandag, uke1Onsdag, testKildeHendelse)
@@ -25,6 +27,7 @@ class EgenmeldingsdagTest {
         Assertions.assertEquals(0, egenmeldingsdager.antallSykedagerHvorViIkkeTellerMedHelg())
     }
 
+    @Disabled
     @Test
     fun `egenmeldingsdager over helg teller som egenmeldingsdager på arbeidsdager`() {
         val egenmeldingsdager = Sykdomstidslinje.egenmeldingsdager(uke1Fredag, uke2Mandag, testKildeHendelse)

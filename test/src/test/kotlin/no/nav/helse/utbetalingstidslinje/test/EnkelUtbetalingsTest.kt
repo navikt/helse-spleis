@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedager
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.utenlandsdag
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -40,6 +41,7 @@ internal class EnkelUtbetalingsTest {
         )
     }
 
+    @Disabled
     @Test
     internal fun `syke-, ferie- og egenmeldingsdager blir med i utbetalingstidslinja`() {
         val sykdomstidslinje = egenmeldingsdager(1.juli, 3.juli, testKildeHendelse) +
@@ -73,6 +75,7 @@ internal class EnkelUtbetalingsTest {
         assertFalse(utbetalingstidslinje.erAvklart())
     }
 
+    @Disabled
     @Test
     internal fun `utenlandsopphold i arbeidsgiverperioden telles ikke som en dag i arbeidsgiverperioden`() {
         val sykdomstidslinje = sykedager(1.juli, 8.juli, testKildeHendelse) +
@@ -89,6 +92,7 @@ internal class EnkelUtbetalingsTest {
         assertFalse(utbetalingstidslinje.erAvklart())
     }
 
+    @Disabled
     @Test
     internal fun `utenlandsopphold utbetales ikke når trygden yter`() {
         val sykdomstidslinje = sykedager(1.juli, 17.juli, testKildeHendelse) +

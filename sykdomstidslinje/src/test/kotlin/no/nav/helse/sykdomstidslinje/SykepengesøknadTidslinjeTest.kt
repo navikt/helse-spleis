@@ -12,11 +12,13 @@ import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class SykepengesøknadTidslinjeTest {
 
+    @Disabled
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`() {
         val sykdomstidslinje = sendtSøknad().sykdomstidslinje()
@@ -27,6 +29,7 @@ class SykepengesøknadTidslinjeTest {
         assertEquals(sykeperiodeTOM, syketilfeller.last().sluttdato())
     }
 
+    @Disabled
     @Test
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`() {
         val syketilfeller = sendtSøknad().sykdomstidslinje().syketilfeller()
@@ -36,6 +39,7 @@ class SykepengesøknadTidslinjeTest {
         assertEquals(Egenmeldingsdag::class, syketilfeller.dagForDato(egenmeldingTom)::class)
     }
 
+    @Disabled
     @Test
     fun `Tidslinjen får ferien fra søknaden`() {
         val syketilfeller = sendtSøknad().sykdomstidslinje().syketilfeller()

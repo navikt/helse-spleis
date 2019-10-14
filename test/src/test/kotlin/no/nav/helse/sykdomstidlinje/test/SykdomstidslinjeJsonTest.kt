@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import no.nav.helse.sykdomstidslinje.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -17,6 +18,7 @@ class SykdomstidslinjeJsonTest {
     val inntektsmelding = Inntektsmelding(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json")))
     val søknadSendt = SendtSykepengesøknad(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json")))
 
+    @Disabled
     @Test
     fun `lagring og restoring av en sykdomstidslinje med har de samme egenskapene som den opprinnelige`() {
         val tidslinjeA = Sykdomstidslinje.ikkeSykedager(
@@ -37,6 +39,7 @@ class SykdomstidslinjeJsonTest {
         assertSykdomstidslinjerEquals(combined, restored)
     }
 
+    @Disabled
     @Test
     fun `lagring og restoring av en sykdomstidslinje med søknader og inntektsmeldinger har like egenskaper`() {
         val egenmelding = Sykdomstidslinje.egenmeldingsdager(LocalDate.of(2019, 9, 30), LocalDate.of(2019, 10, 1), søknadSendt)
@@ -57,6 +60,7 @@ class SykdomstidslinjeJsonTest {
         assertSykdomstidslinjerEquals(combined, restored)
     }
 
+    @Disabled
     @Test
     fun `sykdomstidslinje med alle typer dager blir serialisert riktig`() {
         val egenmeldingsdag = Sykdomstidslinje.egenmeldingsdag(LocalDate.of(2019, 10, 7), inntektsmelding)

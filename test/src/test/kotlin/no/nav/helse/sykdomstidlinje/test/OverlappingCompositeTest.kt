@@ -4,6 +4,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,6 +24,7 @@ internal class OverlappingCompositeTest {
 
     private lateinit var sykdomstidslinje: Sykdomstidslinje
 
+    @Disabled
     @Test
     internal fun sykedagerOgFerie() {
         val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
@@ -43,6 +45,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteMandag, førsteTirsdag, 2, 2)
     }
 
+    @Disabled
     @Test
     internal fun trailingOverlapp() {
         val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
@@ -53,6 +56,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteMandag, førsteTorsdag, 2, 4)
     }
 
+    @Disabled
     @Test
     internal fun leadingOverlapp() {
         val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
@@ -63,6 +67,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteMandag, førsteTorsdag, 2, 4)
     }
 
+    @Disabled
     @Test
     internal fun arbeidIMidtenAvSykdom() {
         val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
@@ -73,6 +78,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteMandag, førsteTorsdag, 2, 4)
     }
 
+    @Disabled
     @Test
     internal fun leadingAndTrailingIntervals() {
         val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
@@ -83,6 +89,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteMandag, førsteTorsdag, 1, 4)
     }
 
+    @Disabled
     @Test
     internal fun sykHelgMedLedendeHelg() {
         val sykedager = Sykdomstidslinje.sykedager(førsteTorsdag, andreMandag, tidligereTidspunktRapportert)
@@ -93,6 +100,7 @@ internal class OverlappingCompositeTest {
         assertInterval(førsteOnsdag, andreMandag, 4, 6)
     }
 
+    @Disabled
     @Test
     internal fun friskHelg() {
         val sykedager = Sykdomstidslinje.sykedager(førsteTorsdag, andreMandag, tidligereTidspunktRapportert)
