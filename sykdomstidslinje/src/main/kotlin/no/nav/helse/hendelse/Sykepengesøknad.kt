@@ -93,7 +93,7 @@ class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
 
     override fun sykdomstidslinje() =
         (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
-            .fold(Sykdomstidslinje.tomSykdomstidslinje()) { resultatTidslinje, delTidslinje ->
+            .reduce { resultatTidslinje, delTidslinje ->
                 resultatTidslinje + delTidslinje
             }
 

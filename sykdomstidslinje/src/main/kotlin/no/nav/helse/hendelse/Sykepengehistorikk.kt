@@ -1,6 +1,7 @@
 package no.nav.helse.hendelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,7 +30,7 @@ data class Sykepengehistorikk(val json: JsonNode) : Sykdomshendelse {
     }
 
     override fun sykdomstidslinje() =
-        perioder().fold(Sykdomstidslinje.tomSykdomstidslinje()) { aggregate, periode ->
+        perioder().fold(CompositeSykdomstidslinje(emptyList()) as Sykdomstidslinje) { aggregate, periode ->
             aggregate + Sykdomstidslinje.sykedager(periode.fom, periode.tom, this)
         }
 

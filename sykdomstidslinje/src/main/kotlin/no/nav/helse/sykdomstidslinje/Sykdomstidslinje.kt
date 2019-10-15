@@ -40,13 +40,18 @@ abstract class Sykdomstidslinje {
 
     internal fun antallDagerMellom(other: Sykdomstidslinje) =
         when {
+            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
             inneholder(other) -> -min(this.length(), other.length())
             harOverlapp(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
             else -> min(this.avstand(other), other.avstand(this))
         }
 
     fun overlapperMed(other: Sykdomstidslinje) =
-        this.antallDagerMellom(other) < 0
+        when {
+            this.length() == 0 || other.length() == 0 -> false
+            else -> this.antallDagerMellom(other) < 0
+        }
+
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -217,8 +222,6 @@ abstract class Sykdomstidslinje {
                 )
             }.toList())
         }
-
-        fun tomSykdomstidslinje(): Sykdomstidslinje = CompositeSykdomstidslinje(emptyList())
 
         fun fromJson(json: String): Sykdomstidslinje {
             return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))
