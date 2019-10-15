@@ -42,16 +42,15 @@ abstract class Sykdomstidslinje {
         when {
             this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
             inneholder(other) -> -min(this.length(), other.length())
-            harOverlapp(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
+            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
             else -> min(this.avstand(other), other.avstand(this))
         }
 
     fun overlapperMed(other: Sykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> false
-            else -> this.antallDagerMellom(other) < 0
+            else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
-
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -73,8 +72,6 @@ abstract class Sykdomstidslinje {
 
     private fun harBeggeGrenseneInnenfor(other: Sykdomstidslinje) =
         this.startdato() in other.startdato()..other.sluttdato() && this.sluttdato() in other.startdato()..other.sluttdato()
-
-    private fun harOverlapp(other: Sykdomstidslinje) = this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
 
     private fun harGrenseInnenfor(other: Sykdomstidslinje) =
         this.startdato() in (other.startdato()..other.sluttdato())
