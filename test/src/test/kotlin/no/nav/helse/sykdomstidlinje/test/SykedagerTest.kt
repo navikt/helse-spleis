@@ -1,136 +1,131 @@
 package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.Testhendelse
+import no.nav.helse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class SykedagerTest {
 
     companion object {
-        private val uke1Mandag = LocalDate.of(2019, 9, 23)
-        private val uke1Fredag = LocalDate.of(2019, 9, 27)
-        private val uke1Søndag = LocalDate.of(2019, 9, 29)
-        private val uke2Mandag = LocalDate.of(2019, 9, 30)
-        private val uke2Tirsdag = LocalDate.of(2019, 10, 1)
-        private val uke2Onsdag = LocalDate.of(2019, 10, 2)
-        private val uke2Fredag = LocalDate.of(2019, 10, 4)
-        private val uke3Mandag = LocalDate.of(2019, 10, 7)
-        private val uke3Fredag = LocalDate.of(2019, 10, 11)
-        private val uke4Mandag = LocalDate.of(2019, 10, 14)
-        private val uke4Onsdag = LocalDate.of(2019, 10, 16)
-        private val uke4Fredag = LocalDate.of(2019, 10, 18)
-        private val uke5Mandag = LocalDate.of(2019, 10, 21)
-        private val uke5Fredag = LocalDate.of(2019, 10, 25)
-        private val uke6Fredag = LocalDate.of(2019, 11, 4)
-        private val uke7Fredag = LocalDate.of(2019, 11, 11)
-
-        private val rapporteringsdato = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
+        private val sendtSykmelding = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
     }
 
     @Test
-    fun testSykdagerOverHelg() {
-        val sykedager = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
+    fun `test sykdager over helg`() {
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
         assertEquals(8, sykedager.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
-    fun erInnenforArbeidsgiverperioden() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke2Fredag, uke4Mandag, rapporteringsdato)
-
+    fun `er innenfor arbeidsgiverperioden`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(2.fredag, 4.mandag, sendtSykmelding)
         val tidslinje = (influensa + spysyka).syketilfeller()
 
         assertEquals(1, tidslinje.size)
     }
 
     @Test
-    fun søknadOver16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke3Mandag, rapporteringsdato)
+    fun `søknad over 16 dager`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 3.mandag, sendtSykmelding)
         val grupper = influensa.syketilfeller()
         assertEquals(1, grupper.size)
-        assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke3Mandag, grupper.first().sluttdato())
+        assertEquals(1.mandag, grupper.first().startdato())
+        assertEquals(3.mandag, grupper.first().sluttdato())
     }
 
     @Test
-    fun toSøknaderInnenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke3Mandag, uke3Fredag, rapporteringsdato)
+    fun `to søknader innenfor 16 dager`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(3.mandag, 3.fredag, sendtSykmelding)
         val grupper = (influensa + spysyka).syketilfeller()
         assertEquals(1, grupper.size)
-        assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke3Fredag, grupper.first().sluttdato())
+        assertEquals(1.mandag, grupper.first().startdato())
+        assertEquals(3.fredag, grupper.first().sluttdato())
     }
 
-    @Disabled
     @Test
-    fun toSøknaderUtenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Fredag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke5Mandag, uke5Fredag, rapporteringsdato)
+    fun `to søknader utenfor 16 dager`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(5.mandag, 5.fredag, sendtSykmelding)
         val grupper = (influensa + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(uke1Mandag, grupper[0].startdato())
-        assertEquals(uke1Fredag, grupper[0].sluttdato())
+        assertEquals(1.mandag, grupper[0].startdato())
+        assertEquals(1.fredag, grupper[0].sluttdato())
 
-        assertEquals(uke5Mandag, grupper[1].startdato())
-        assertEquals(uke5Fredag, grupper[1].sluttdato())
+        assertEquals(5.mandag, grupper[1].startdato())
+        assertEquals(5.fredag, grupper[1].sluttdato())
     }
 
     @Test
-    fun søknadMedPåfølgendeFerieUtenGapKoblesSammenMedNySøknadInnenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        val ferie = Sykdomstidslinje.ferie(uke2Tirsdag, uke3Fredag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke5Fredag, uke6Fredag, rapporteringsdato)
+    fun `søknad med påfølgende ferie uten gap kobles sammen med ny søknad innenfor 16 dager`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(2.tirsdag, 3.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(5.fredag, 6.fredag, sendtSykmelding)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke6Fredag, grupper.first().sluttdato())
+        assertEquals(1.mandag, grupper.first().startdato())
+        assertEquals(6.fredag, grupper.first().sluttdato())
     }
 
-    @Disabled
     @Test
-    fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        val ferie = Sykdomstidslinje.ferie(uke2Onsdag, uke2Fredag, rapporteringsdato)
-        val spysyka = Sykdomstidslinje.sykedager(uke4Fredag, uke5Fredag, rapporteringsdato)
+    fun `søknad med ferie - helg - ferie kobles sammen til en sykeperiode`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, sendtSykmelding)
+        val ferieDelEn = Sykdomstidslinje.ferie(1.torsdag, 1.fredag, sendtSykmelding)
+        val ferieDelTo = Sykdomstidslinje.ferie(2.mandag, 2.fredag, sendtSykmelding)
+        val ferieDelTre = Sykdomstidslinje.ferie(3.mandag, 3.fredag, sendtSykmelding)
+        val malaria = Sykdomstidslinje.sykedager(5.mandag, 5.torsdag, sendtSykmelding)
+
+        val tilfeller = (influensa + ferieDelEn + ferieDelTo + ferieDelTre + malaria).also { println(it) }.syketilfeller()
+
+        println(tilfeller)
+
+        assertEquals(1, tilfeller.size)
+        assertEquals(1.mandag, tilfeller.first().startdato())
+        assertEquals(5.torsdag, tilfeller.first().sluttdato())
+    }
+
+    @Test
+    fun `søknad med opphold ferie kobles ikke sammen med ny søknad innenfor 16 dager`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(2.onsdag, 2.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(4.fredag, 5.fredag, sendtSykmelding)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(uke1Mandag, grupper[0].startdato())
-        assertEquals(uke2Mandag, grupper[0].sluttdato())
+        assertEquals(1.mandag, grupper[0].startdato())
+        assertEquals(2.mandag, grupper[0].sluttdato())
 
-        assertEquals(uke4Fredag, grupper[1].startdato())
-        assertEquals(uke5Fredag, grupper[1].sluttdato())
+        assertEquals(4.fredag, grupper[1].startdato())
+        assertEquals(5.fredag, grupper[1].sluttdato())
     }
 
     @Test
-    fun søknadMedTrailingFerieGirBareSøknad() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke2Mandag, rapporteringsdato)
-        val ferie = Sykdomstidslinje.ferie(uke2Tirsdag, uke2Fredag, rapporteringsdato)
+    fun `søknad med trailing ferie gir bare søknad`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(2.tirsdag, 2.fredag, sendtSykmelding)
 
         val grupper = (influensa + ferie).syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke2Mandag, grupper.first().sluttdato())
+        assertEquals(1.mandag, grupper.first().startdato())
+        assertEquals(2.mandag, grupper.first().sluttdato())
     }
 
     @Test
-    fun kutterHelgISluttenAvGruppe() {
-        val influensa = Sykdomstidslinje.sykedager(uke1Mandag, uke1Søndag, rapporteringsdato)
+    fun `kutter helg i slutten av gruppe`() {
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 1.søndag, sendtSykmelding)
 
         val grupper = influensa.syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(uke1Mandag, grupper.first().startdato())
-        assertEquals(uke1Søndag, grupper.first().sluttdato())
+        assertEquals(1.mandag, grupper.first().startdato())
+        assertEquals(1.søndag, grupper.first().sluttdato())
     }
 }

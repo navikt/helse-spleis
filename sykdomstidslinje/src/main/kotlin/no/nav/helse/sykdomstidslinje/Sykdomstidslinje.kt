@@ -109,10 +109,7 @@ abstract class Sykdomstidslinje {
             Egenmeldingsdag(gjelder, hendelse)
 
         fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
-            if (erArbeidsdag(gjelder)) Feriedag(
-                gjelder,
-                hendelse
-            ) else ImplisittDag(
+            Feriedag(
                 gjelder,
                 hendelse
             )

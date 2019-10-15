@@ -6,7 +6,9 @@ import java.time.LocalDate
 
 class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) :
     Dag(gjelder, hendelse) {
-    override fun accept(visitor: SykdomstidslinjeVisitor) {}
+    override fun accept(visitor: SykdomstidslinjeVisitor) {
+        visitor.visitImplisittDag(this)
+    }
 
     override fun antallSykedagerHvorViTellerMedHelg() = 0
 

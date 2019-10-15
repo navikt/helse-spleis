@@ -3,8 +3,10 @@ package no.nav.helse.sykdomstidslinje.dag
 import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Calendar.SATURDAY
 import kotlin.reflect.KClass
 
 abstract class Dag internal constructor(
@@ -59,6 +61,8 @@ abstract class Dag internal constructor(
                 this
             )
         }
+
+    fun erHelg() = dagen.dayOfWeek  == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
 
     internal open fun tilDag() = this
 

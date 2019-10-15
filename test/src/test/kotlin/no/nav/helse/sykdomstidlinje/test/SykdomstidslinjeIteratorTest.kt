@@ -1,13 +1,10 @@
 package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.Testhendelse
+import no.nav.helse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Month
 
 class SykdomstidslinjeIteratorTest {
 
@@ -16,7 +13,7 @@ class SykdomstidslinjeIteratorTest {
     }
 
     @Test
-    fun `sammenhengendeSykdom gir en arbeidsgiverperiode`() {
+    fun `sammenhengende sykdom gir en arbeidsgiverperiode`() {
         val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 3.mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
@@ -50,21 +47,21 @@ class SykdomstidslinjeIteratorTest {
     }
 
     @Test
-    fun sykmeldingMandagTilLørdagFørerTil6Dager() {
+    fun `sykmelding mandag til lørdag fører til 6 dager`() {
         val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.lørdag, rapporteringshendelse)
 
         assertEquals(6, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
         assertEquals(5, sykedager.syketilfeller().first().antallSykedagerHvorViIkkeTellerMedHelg())
     }
 
-    @Disabled
     @Test
-    fun toSykmeldingerMedGapStørreEnn16DagerGirToArbeidsgiverPerioder() {
+    fun `to sykmeldinger med gap større enn 16 dager gir to arbeidsgiver perioder`() {
         val spysyke = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, rapporteringshendelse)
         val malaria = Sykdomstidslinje.sykedager(5.mandag, 7.fredag, rapporteringshendelse)
 
         val syketilfeller = (spysyke + malaria).syketilfeller()
-        assertEquals(2, syketilfeller.size)
+
+        assertEquals(2, syketilfeller.size, "Forventer to perioder i syketilfellet")
         assertEquals(1.mandag, syketilfeller[0].startdato())
         assertEquals(1.fredag, syketilfeller[0].sluttdato())
 
@@ -72,9 +69,8 @@ class SykdomstidslinjeIteratorTest {
         assertEquals(7.fredag, syketilfeller[1].sluttdato())
     }
 
-    @Disabled
     @Test
-    fun søknadMedOppholdFerieKoblesIkkeSammenMedNySøknadInnenfor16Dager() {
+    fun `søknad med opphold (ferie) kobles ikke sammen med ny søknad innenfor 16 dager`() {
         val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, rapporteringshendelse)
         val ferie = Sykdomstidslinje.ferie(2.onsdag, 2.fredag, rapporteringshendelse)
         val spysyka = Sykdomstidslinje.sykedager(4.fredag, 5.fredag, rapporteringshendelse)
@@ -88,14 +84,4 @@ class SykdomstidslinjeIteratorTest {
         assertEquals(4.fredag, grupper[1].startdato())
         assertEquals(5.fredag, grupper[1].sluttdato())
     }
-
-    private val Int.juli get() = LocalDate.of(2019, Month.JULY, this)
-
-    private val Int.mandag get() = LocalDate.of(2019, Month.JULY, 7*(this - 1) + 1 )
-    private val Int.tirsdag get() = this.mandag.plusDays(1)
-    private val Int.onsdag get() = this.mandag.plusDays(2)
-    private val Int.torsdag get() = this.mandag.plusDays(3)
-    private val Int.fredag get() = this.mandag.plusDays(4)
-    private val Int.lørdag get() = this.mandag.plusDays(5)
-    private val Int.søndag get() = this.mandag.plusDays(6)
 }
