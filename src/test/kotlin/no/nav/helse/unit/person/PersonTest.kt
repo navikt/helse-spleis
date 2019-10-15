@@ -278,23 +278,6 @@ internal class PersonTest {
     }
 
     @Test
-    fun `sykepengehistorikk for en person med flere arbeidsgivere og saker skal ta den aktuelle saken videre`() {
-        val aktørId = "id"
-        val orgnr = "12"
-        val needObserver = TestNeedObserver()
-        Person(aktørId = aktørId).also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
-
-            it.addObserver(needObserver)
-            it.håndterSykepengehistorikk(sykepengehistorikk(1.juli.minusMonths(7), orgnr, aktørId))
-        }
-
-        assertTrue(needObserver.needEvent.map { it.type }.containsAll(listOf(TRENGER_PERSONOPPLYSNINGER, TRENGER_INNTEKTSOPPLYSNINGER)))
-    }
-
-    @Test
     fun `sykepengehistorikk yngre enn seks måneder fører til manuell saksbehandling`() {
         val aktørId = "id"
         val orgnr = "12"
