@@ -6,12 +6,12 @@ import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.juli
 import no.nav.helse.person.domain.*
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_INNTEKTSOPPLYSNINGER
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
@@ -239,31 +239,76 @@ internal class PersonTest {
         assertFalse(observer.personEndret)
     }
 
-    @TestFactory
-    fun `skjekker tilstand på sak basert på sykepengehistorikk`() = listOf(
-            1.juli.minusMonths(7) to Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT,
-            1.juli.minusMonths(5) to Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING
-    ).map { (sisteHistoriskeSykedag, forventetState) ->
-        DynamicTest.dynamicTest("forventet tilstand er $forventetState") {
-            val aktørId = "id"
-            val orgnr = "12"
-            val observer = TestObserver()
-            Person(aktørId = aktørId).also {
-                it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-                it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+    @Test
+    fun `komplett genererer sykepengehistorikk-needs`() {
+        val aktørId = "id"
+        val orgnr = "12"
+        val observer = TestObserver()
+        val needObserver = TestNeedObserver()
+        Person(aktørId = aktørId).also {
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
 
-                it.addObserver(observer)
-                it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
-                it.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag, orgnr, aktørId))
-            }
-
-            assertEquals(aktørId, observer.needEvent!!.aktørId)
-            assertEquals(orgnr, observer.needEvent!!.organisasjonsnummer)
-            assertTrue(observer.wasTriggered, "skulle ha trigget observer")
-            assertTrue(observer.personEndret, "skulle endret person")
-            assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, observer.forrigeSakskomplekstilstand)
-            assertEquals(forventetState, observer.sakskomplekstilstand, "skulle vært i state $forventetState")
+            it.addObserver(observer)
+            it.addObserver(needObserver)
+            it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
         }
+
+        assertTrue(observer.wasTriggered, "skulle ha trigget observer")
+        assertTrue(observer.personEndret, "skulle endret person")
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, observer.sakskomplekstilstand)
+        assertNotNull(needObserver.needEvent.find{ it.type == SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK})
+    }
+
+    @Test
+    fun `sykepengehistorikk eldre enn seks måneder fører saken videre`() {
+        val aktørId = "id"
+        val orgnr = "12"
+        val needObserver = TestNeedObserver()
+        Person(aktørId = aktørId).also {
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
+
+            it.addObserver(needObserver)
+            it.håndterSykepengehistorikk(sykepengehistorikk(1.juli.minusMonths(7), orgnr, aktørId))
+        }
+
+        assertTrue(needObserver.needEvent.map { it.type }.containsAll(listOf(TRENGER_PERSONOPPLYSNINGER, TRENGER_INNTEKTSOPPLYSNINGER)))
+    }
+
+    @Test
+    fun `sykepengehistorikk for en person med flere arbeidsgivere og saker skal ta den aktuelle saken videre`() {
+        val aktørId = "id"
+        val orgnr = "12"
+        val needObserver = TestNeedObserver()
+        Person(aktørId = aktørId).also {
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
+
+            it.addObserver(needObserver)
+            it.håndterSykepengehistorikk(sykepengehistorikk(1.juli.minusMonths(7), orgnr, aktørId))
+        }
+
+        assertTrue(needObserver.needEvent.map { it.type }.containsAll(listOf(TRENGER_PERSONOPPLYSNINGER, TRENGER_INNTEKTSOPPLYSNINGER)))
+    }
+
+    @Test
+    fun `sykepengehistorikk yngre enn seks måneder fører til manuell saksbehandling`() {
+        val aktørId = "id"
+        val orgnr = "12"
+        val observer = TestObserver()
+        Person(aktørId = aktørId).also {
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
+            it.addObserver(observer)
+            it.håndterSykepengehistorikk(sykepengehistorikk(1.juli.minusMonths(5), orgnr, aktørId))
+        }
+        assertTrue(observer.wasTriggered, "skulle ha trigget observer")
+        assertTrue(observer.personEndret, "skulle endret person")
+        assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, observer.sakskomplekstilstand)
     }
 
     private class TestObserver : PersonObserver {
@@ -272,7 +317,6 @@ internal class PersonTest {
         internal var personEndret = false
         internal var forrigeSakskomplekstilstand: Sakskompleks.TilstandType? = null
         internal var sakskomplekstilstand: Sakskompleks.TilstandType? = null
-        internal var needEvent: SakskompleksObserver.NeedEvent? = null
 
         override fun personEndret(person: Person) {
             personEndret = true
@@ -284,8 +328,14 @@ internal class PersonTest {
             sakskomplekstilstand = event.currentState
         }
 
+    }
+
+    private class TestNeedObserver : PersonObserver {
+
+        internal val needEvent: MutableList<SakskompleksObserver.NeedEvent> = mutableListOf()
+
         override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
-            needEvent = event
+            needEvent.add(event)
         }
     }
 

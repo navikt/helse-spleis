@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
 import no.nav.helse.person.domain.SakskompleksObserver.*
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
@@ -192,6 +192,12 @@ class Sakskompleks internal constructor(
     }
 
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand{
+
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.notifyNeedObservers(TRENGER_INNTEKTSOPPLYSNINGER)
+            sakskompleks.notifyNeedObservers(TRENGER_PERSONOPPLYSNINGER)
+        }
+
         override val type = TilstandType.SYKEPENGEHISTORIKK_MOTTATT
     }
 
