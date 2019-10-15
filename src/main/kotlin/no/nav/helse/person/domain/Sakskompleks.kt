@@ -206,7 +206,13 @@ class Sakskompleks internal constructor(
                 organisasjonsnummer = sakskompleksJson.organisasjonsnummer
             ).apply {
                 tilstand = tilstandFraEnum(sakskompleksJson.tilstandType)
-                sykdomstidslinje = Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(sakskompleksJson.sykdomstidslinje))
+                sykdomstidslinje = sakskompleksJson.sykdomstidslinje?.let {
+                    if (!it.isNull) {
+                        Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(it))
+                    } else {
+                        null
+                    }
+                }
             }
         }
 
@@ -273,7 +279,9 @@ class Sakskompleks internal constructor(
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             tilstandType = tilstand.type,
-            sykdomstidslinje = objectMapper.readTree(sykdomstidslinje?.toJson())
+            sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
+                objectMapper.readTree(it)
+            }
         )
     }
 
@@ -325,6 +333,6 @@ class Sakskompleks internal constructor(
         val aktørId: String,
         val organisasjonsnummer: String,
         val tilstandType: TilstandType,
-        val sykdomstidslinje: JsonNode
+        val sykdomstidslinje: JsonNode?
     )
 }

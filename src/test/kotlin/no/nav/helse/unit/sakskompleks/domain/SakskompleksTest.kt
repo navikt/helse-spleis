@@ -29,6 +29,44 @@ class SakskompleksTest {
     }
 
     @Test
+    internal fun `gyldig jsonrepresentasjon av tomt sakskompleks`() {
+        val id = UUID.randomUUID()
+        val aktørId = "1234"
+        val organisasjonsnummer = "123456789"
+
+        val sakskompleks = Sakskompleks(
+                id = id,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer
+        )
+
+        val jsonRepresentation = sakskompleks.jsonRepresentation()
+
+        assertEquals(id, jsonRepresentation.id)
+        assertEquals(aktørId, jsonRepresentation.aktørId)
+        assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
+        assertNull(jsonRepresentation.sykdomstidslinje)
+    }
+
+    @Test
+    internal fun `gyldig sakskompleks fra jsonrepresentasjon av tomt sakskompleks`() {
+        val id = UUID.randomUUID()
+        val aktørId = "1234"
+        val organisasjonsnummer = "123456789"
+
+        val sakskompleks = Sakskompleks(
+                id = id,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer
+        )
+
+        val jsonRepresentation = sakskompleks.jsonRepresentation()
+        val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
+
+        assertEquals(jsonRepresentation, gjenopprettetSakskompleks.jsonRepresentation())
+    }
+
+    @Test
     fun `memento inneholder en tilstand`() {
         val id = UUID.randomUUID()
         val sakskompleks = Sakskompleks(
