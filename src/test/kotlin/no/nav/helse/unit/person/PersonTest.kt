@@ -3,14 +3,17 @@ package no.nav.helse.unit.person
 import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.juli
 import no.nav.helse.person.domain.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class PersonTest {
 
@@ -224,11 +227,52 @@ internal class PersonTest {
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, observer.sakskomplekstilstand)
     }
 
+    @Test
+    internal fun `sykepengehistorikk lager ikke ny sak, selv om det ikke finnes noen fra før`() {
+        val observer = TestObserver()
+        Person(aktørId = "id").also {
+            it.addObserver(observer)
+            it.håndterSykepengehistorikk(sykepengehistorikk(LocalDate.now()))
+        }
+
+        assertFalse(observer.wasTriggered)
+        assertFalse(observer.personEndret)
+    }
+
+    @TestFactory
+    fun `skjekker tilstand på sak basert på sykepengehistorikk`() = listOf(
+            1.juli.minusMonths(7) to Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT,
+            1.juli.minusMonths(5) to Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING
+    ).map { (sisteHistoriskeSykedag, forventetState) ->
+        DynamicTest.dynamicTest("forventet tilstand er $forventetState") {
+            val aktørId = "id"
+            val orgnr = "12"
+            val observer = TestObserver()
+            Person(aktørId = aktørId).also {
+                it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+                it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnr), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+
+                it.addObserver(observer)
+                it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = orgnr))
+                it.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag, orgnr, aktørId))
+            }
+
+            assertEquals(aktørId, observer.needEvent!!.aktørId)
+            assertEquals(orgnr, observer.needEvent!!.organisasjonsnummer)
+            assertTrue(observer.wasTriggered, "skulle ha trigget observer")
+            assertTrue(observer.personEndret, "skulle endret person")
+            assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, observer.forrigeSakskomplekstilstand)
+            assertEquals(forventetState, observer.sakskomplekstilstand, "skulle vært i state $forventetState")
+        }
+    }
+
     private class TestObserver : PersonObserver {
+
         internal var wasTriggered = false
         internal var personEndret = false
         internal var forrigeSakskomplekstilstand: Sakskompleks.TilstandType? = null
         internal var sakskomplekstilstand: Sakskompleks.TilstandType? = null
+        internal var needEvent: SakskompleksObserver.NeedEvent? = null
 
         override fun personEndret(person: Person) {
             personEndret = true
@@ -238,6 +282,10 @@ internal class PersonTest {
             wasTriggered = true
             forrigeSakskomplekstilstand = event.previousState
             sakskomplekstilstand = event.currentState
+        }
+
+        override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+            needEvent = event
         }
     }
 

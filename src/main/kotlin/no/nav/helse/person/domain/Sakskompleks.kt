@@ -49,7 +49,7 @@ class Sakskompleks internal constructor(
             }
         }
 
-    internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk){
+    internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
         tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
     }
 
@@ -79,7 +79,6 @@ class Sakskompleks internal constructor(
         KOMPLETT_SAK,
         SYKEPENGEHISTORIKK_MOTTATT,
         TRENGER_MANUELL_HÅNDTERING
-
     }
 
     // Gang of four State pattern
