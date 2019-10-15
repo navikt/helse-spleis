@@ -5,12 +5,14 @@ import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 // Embedded document - json er output fra Spole
 data class Sykepengehistorikk(val json: JsonNode) : Sykdomshendelse {
     val aktørId = json["aktørId"].textValue()
     val organisasjonsnummer = json["organisasjonsnummer"].textValue()
-    val sakskompleksId = json["sakskompleksId"].textValue()
+
+    fun sakskompleksId() = UUID.fromString(json["sakskompleksId"].textValue())
 
     private fun perioder() =
         json["@løsning"]["perioder"]?.map { Periode(it) } ?: emptyList()
