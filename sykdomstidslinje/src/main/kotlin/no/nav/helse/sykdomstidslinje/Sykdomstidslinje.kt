@@ -26,6 +26,9 @@ abstract class Sykdomstidslinje {
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
+        if (this.length() == 0) return other
+        if (other.length() == 0) return this
+
         if (this.startdato().isAfter(other.startdato())) return other + this
 
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
@@ -214,6 +217,8 @@ abstract class Sykdomstidslinje {
                 )
             }.toList())
         }
+
+        fun tomSykdomstidslinje(): Sykdomstidslinje = CompositeSykdomstidslinje(emptyList())
 
         fun fromJson(json: String): Sykdomstidslinje {
             return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))

@@ -6,8 +6,8 @@ import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 
-class CompositeSykdomstidslinje(
-    sykdomstidslinjer: List<Sykdomstidslinje?>
+class CompositeSykdomstidslinje internal constructor(
+    private val tidslinjer: List<Sykdomstidslinje>
 ) : Sykdomstidslinje() {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitComposite(this)
@@ -16,8 +16,6 @@ class CompositeSykdomstidslinje(
     }
 
     override fun sisteHendelse() = tidslinjer.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
-
-    private val tidslinjer = sykdomstidslinjer.filterNotNull()
 
     override fun length() = tidslinjer.sumBy { it.length() }
 

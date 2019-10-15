@@ -6,26 +6,19 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SykepengeHistorikkTest {
+internal class SykepengehistorikkTest {
 
     @Test
     fun `historikk eldre enn seks måneder skal ikke påvirke en sak`() {
-        val sykdomstidslinje = TestHendelser.sendtSøknad().sykdomstidslinje()
+        val sykdomstidslinje = TestHendelser.nySøknad().sykdomstidslinje()
         val sykepengeHistorikk = TestHendelser.sykepengeHistorikk(`seks måneder og én dag før første sykedag`)
         assertFalse(sykepengeHistorikk.påvirkerSakensMaksdato(sykdomstidslinje))
     }
 
     @Test
     fun `historikk yngre enn seks måneder skal påvirke en sak`() {
-        val sykdomstidslinje = TestHendelser.sendtSøknad().sykdomstidslinje()
+        val sykdomstidslinje = TestHendelser.nySøknad().sykdomstidslinje()
         val sykepengeHistorikk = TestHendelser.sykepengeHistorikk(`én dag færre enn seks måneder før første sykedag`)
-        assertTrue(sykepengeHistorikk.påvirkerSakensMaksdato(sykdomstidslinje))
-    }
-
-    @Test
-    fun `historikk som er akkurat seks måneder gammal skal påvirke en sak`() {
-        val sykdomstidslinje = TestHendelser.sendtSøknad().sykdomstidslinje()
-        val sykepengeHistorikk = TestHendelser.sykepengeHistorikk(`én dag færre enn seks måneder før første sykedag`.minusDays(1))
         assertTrue(sykepengeHistorikk.påvirkerSakensMaksdato(sykdomstidslinje))
     }
 }

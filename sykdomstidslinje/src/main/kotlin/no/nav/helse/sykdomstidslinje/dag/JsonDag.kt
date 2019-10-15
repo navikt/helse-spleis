@@ -19,7 +19,7 @@ internal data class JsonHendelse(
         Sykdomshendelse.Type.Inntektsmelding -> Inntektsmelding(json)
         Sykdomshendelse.Type.NySykepengesøknad -> NySykepengesøknad(json)
         Sykdomshendelse.Type.SendtSykepengesøknad -> SendtSykepengesøknad(json)
-        Sykdomshendelse.Type.SykepengeHistorikk -> SykepengeHistorikk(json)
+        Sykdomshendelse.Type.Sykepengehistorikk -> Sykepengehistorikk(json)
     }
 }
 

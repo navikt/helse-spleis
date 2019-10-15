@@ -12,7 +12,6 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object TestHendelser {
@@ -114,12 +113,18 @@ internal object TestHendelser {
             arbeidsgiver = arbeidsgiver
         ) as NySykepengesøknad
 
-    fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): SykepengeHistorikk {
-        val historikk = mapOf(
+    fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
+        val historikk: Map<String, Any> = mapOf<String, Any>(
             "aktørId" to "12345678910",
-            "sistedato" to sisteHistoriskeSykedag.format(DateTimeFormatter.ISO_DATE)
+            "perioder" to listOf(
+                mapOf<String, Any>(
+                    "fom" to "${sisteHistoriskeSykedag.minusMonths(1)}",
+                    "tom" to "$sisteHistoriskeSykedag",
+                    "grad" to "100"
+                )
+            )
         )
-        return SykepengeHistorikk(objectMapper.valueToTree(historikk))
+        return Sykepengehistorikk(objectMapper.valueToTree(historikk))
     }
 
     fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(

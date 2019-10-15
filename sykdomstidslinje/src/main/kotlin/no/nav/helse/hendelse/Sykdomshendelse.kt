@@ -10,7 +10,7 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
         SendtSykepengesøknad,
         NySykepengesøknad,
         Inntektsmelding,
-        SykepengeHistorikk
+        Sykepengehistorikk
     }
 
     fun hendelsetype(): Type

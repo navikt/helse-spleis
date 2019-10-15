@@ -48,34 +48,26 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
 
-    private val sykeperiodeTidslinje
+    protected val sykeperiodeTidslinje
         get(): List<Sykdomstidslinje> = sykeperioder.map {
             Sykdomstidslinje.sykedager(it.fom, it.tom, this)
         }
-    private val egenmeldingsTidslinje
+    protected val egenmeldingsTidslinje
         get(): List<Sykdomstidslinje> = egenmeldinger.map {
             Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this)
         }
-    private val ferieTidslinje
+    protected val ferieTidslinje
         get(): List<Sykdomstidslinje> = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map {
             Sykdomstidslinje.ferie(it.fom, it.tom, this)
         }
-    private val arbeidGjenopptattTidslinje
+    protected val arbeidGjenopptattTidslinje
         get(): List<Sykdomstidslinje> = arbeidGjenopptatt?.let {
             listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this))
         } ?: emptyList()
 
-    private val studiedagertidslinje = utdanningsperioder.map {
+    protected val studiedagertidslinje = utdanningsperioder.map {
         Sykdomstidslinje.studiedager(it.fom, tom, this)
     }
-
-    override fun sykdomstidslinje() =
-        if (status == SØKNAD_SENDT) {
-            (egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
-        } else {
-            sykeperiodeTidslinje
-        }
-            .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
     override fun toJson(): JsonNode = jsonNode
 }
@@ -85,6 +77,11 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
 
+    override fun sykdomstidslinje() =
+            sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
+                resultatTidslinje + delTidslinje
+            }
+
     override fun hendelsetype() =
         Sykdomshendelse.Type.NySykepengesøknad
 }
@@ -93,6 +90,12 @@ class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }
+
+    override fun sykdomstidslinje() =
+        (egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
+            .fold(Sykdomstidslinje.tomSykdomstidslinje()) { resultatTidslinje, delTidslinje ->
+                resultatTidslinje + delTidslinje
+            }
 
     override fun hendelsetype() =
         Sykdomshendelse.Type.SendtSykepengesøknad
