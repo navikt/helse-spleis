@@ -27,9 +27,7 @@ data class Sykepengehistorikk(val json: JsonNode) : Sykdomshendelse {
         TODO("not implemented")
     }
 
-    override fun organisasjonsnummer(): String? {
-        return null
-    }
+    override fun organisasjonsnummer(): String? = organisasjonsnummer
 
     override fun sykdomstidslinje() =
         perioder().fold(CompositeSykdomstidslinje(emptyList()) as Sykdomstidslinje) { aggregate, periode ->
