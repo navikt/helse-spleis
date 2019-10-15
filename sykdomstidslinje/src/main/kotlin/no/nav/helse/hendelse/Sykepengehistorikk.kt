@@ -8,10 +8,12 @@ import java.time.LocalDateTime
 
 // Embedded document - json er output fra Spole
 data class Sykepengehistorikk(val json: JsonNode) : Sykdomshendelse {
-    val aktørId = json["aktørId"]?.textValue()
+    val aktørId = json["aktørId"].textValue()
+    val organisasjonsnummer = json["organisasjonsnummer"].textValue()
+    val sakskompleksId = json["sakskompleksId"].textValue()
 
     private fun perioder() =
-        json["perioder"]?.map { Periode(it) } ?: emptyList()
+        json["@løsning"]["perioder"]?.map { Periode(it) } ?: emptyList()
 
     override fun hendelsetype(): Sykdomshendelse.Type {
         return Sykdomshendelse.Type.Sykepengehistorikk

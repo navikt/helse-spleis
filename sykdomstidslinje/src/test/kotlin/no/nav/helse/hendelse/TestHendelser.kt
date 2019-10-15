@@ -115,12 +115,16 @@ internal object TestHendelser {
 
     fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
         val historikk: Map<String, Any> = mapOf<String, Any>(
+            "organisasjonsnummer" to "ola sitt orgnummer",
+            "sakskompleksId" to "121312",
             "aktørId" to "12345678910",
-            "perioder" to listOf(
-                mapOf<String, Any>(
-                    "fom" to "${sisteHistoriskeSykedag.minusMonths(1)}",
-                    "tom" to "$sisteHistoriskeSykedag",
-                    "grad" to "100"
+            "@løsning" to mapOf<String, Any>(
+                "perioder" to listOf(
+                    mapOf<String, Any>(
+                        "fom" to "${sisteHistoriskeSykedag.minusMonths(1)}",
+                        "tom" to "$sisteHistoriskeSykedag",
+                        "grad" to "100"
+                    )
                 )
             )
         )
