@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class SakskompleksKtTest {
+class SakskompleksTest {
     companion object {
         val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
