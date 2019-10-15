@@ -12,18 +12,17 @@ import java.util.*
 class BehovProducer(private val topic: String, private val producer: KafkaProducer<String, String>) {
 
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
+        val behovObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val log = LoggerFactory.getLogger(BehovProducer::class.java)
-
     }
 
     fun nyttBehov(type: String, additionalParams: Map<String, Any> = emptyMap()): UUID =
-            Pakke(type, additionalParams).publiser(topic).first
+            BehovDto(type, additionalParams).publiser(topic).first
 
-    inner class Pakke internal constructor(private val type: String, private val additionalParams: Map<String, Any>) {
+    inner class BehovDto internal constructor(private val type: String, private val additionalParams: Map<String, Any>) {
 
         private val id = UUID.randomUUID()
 
@@ -37,7 +36,7 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
 
         private fun key() = id.toString()
 
-        private fun value(): String = objectMapper.writeValueAsString(additionalParams + mapOf(
+        private fun value(): String = behovObjectMapper.writeValueAsString(additionalParams + mapOf(
                 "@behov" to type,
                 "@id" to id.toString(),
                 "@opprettet" to opprettet.toString()
