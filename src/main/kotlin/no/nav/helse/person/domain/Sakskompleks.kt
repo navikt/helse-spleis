@@ -49,8 +49,8 @@ class Sakskompleks internal constructor(
             }
         }
 
-    internal fun håndterSykepengeHistorikk(sykepengeHistorikk: SykepengeHistorikk){
-        tilstand.håndterSykepengehistorikk(this, sykepengeHistorikk)
+    internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk){
+        tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
     }
 
     private fun overlapperMed(hendelse: Sykdomshendelse) =
@@ -100,8 +100,8 @@ class Sakskompleks internal constructor(
             sakskompleks.setTilstand(inntektsmelding, TrengerManuellHåndteringTilstand)
         }
 
-        fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengeHistorikk: SykepengeHistorikk) {
-            sakskompleks.setTilstand(sykepengeHistorikk, TrengerManuellHåndteringTilstand)
+        fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
+            sakskompleks.setTilstand(sykepengehistorikk, TrengerManuellHåndteringTilstand)
         }
 
         fun leaving() {
@@ -180,9 +180,9 @@ class Sakskompleks internal constructor(
             sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
         }
 
-        override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengeHistorikk: SykepengeHistorikk) {
-            if (sykepengeHistorikk.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengeHistorikk, TrengerManuellHåndteringTilstand)
-            else sakskompleks.setTilstand(sykepengeHistorikk, SykepengehistorikkMottattTilstand)
+        override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
+            if (sykepengehistorikk.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikk, TrengerManuellHåndteringTilstand)
+            else sakskompleks.setTilstand(sykepengehistorikk, SykepengehistorikkMottattTilstand)
         }
 
     }

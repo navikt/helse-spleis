@@ -6,10 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.SykepengeHistorikk
+import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -18,7 +17,6 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object TestConstants {
@@ -187,9 +185,18 @@ internal object TestConstants {
             arkivreferanse = ""
         )
 
-    fun sykepengeHistorikk(sisteSykedag: LocalDate = LocalDate.now()): SykepengeHistorikk {
-        val historikk = mapOf("aktørId" to "12345678910", "sistedato" to sisteSykedag.format(DateTimeFormatter.ISO_DATE))
-        return SykepengeHistorikk(objectMapper.valueToTree(historikk))
+    fun sykepengehistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
+        val historikk: Map<String, Any> = mapOf<String, Any>(
+                "aktørId" to "12345678910",
+                "perioder" to listOf(
+                        mapOf<String, Any>(
+                                "fom" to "${sisteHistoriskeSykedag.minusMonths(1)}",
+                                "tom" to "$sisteHistoriskeSykedag",
+                                "grad" to "100"
+                        )
+                )
+        )
+        return Sykepengehistorikk(objectMapper.valueToTree(historikk))
     }
 
 }
