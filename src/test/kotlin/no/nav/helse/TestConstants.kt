@@ -185,10 +185,15 @@ internal object TestConstants {
             arkivreferanse = ""
         )
 
-    fun sykepengehistorikk(sisteHistoriskeSykedag: LocalDate, organisasjonsnummer: String = "123546564", aktørId: String = "1"): Sykepengehistorikk {
-        val historikk: Map<String, Any> = mapOf<String, Any>(
+    fun sykepengehistorikk(
+            sisteHistoriskeSykedag: LocalDate,
+            organisasjonsnummer: String = "123546564",
+            aktørId: String = "1",
+            sakskompleksId: UUID = UUID.randomUUID()
+    ): Sykepengehistorikk {
+        val historikk: Map<String, Any> = mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to "121312",
+                "sakskompleksId" to sakskompleksId.toString(),
                 "aktørId" to aktørId,
                 "@løsning" to mapOf<String, Any>(
                         "perioder" to listOf(

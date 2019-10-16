@@ -50,7 +50,7 @@ class Sakskompleks internal constructor(
         }
 
     internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
-        tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
+        if (id == sykepengehistorikk.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
     }
 
     private fun overlapperMed(hendelse: Sykdomshendelse) =

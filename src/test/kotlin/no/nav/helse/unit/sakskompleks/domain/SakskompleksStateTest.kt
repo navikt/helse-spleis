@@ -68,7 +68,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sykdomshistorikk på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(LocalDate.now()))
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = LocalDate.now(), sakskompleksId = sakskompleksId))
 
         assertEquals(Sakskompleks.TilstandType.START, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
@@ -181,7 +181,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sakskompleks = beInKomplettTidslinje()
         val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(7)
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag))
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag, sakskompleksId = sakskompleksId))
 
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT, lastStateEvent.currentState)
@@ -192,7 +192,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sakskompleks = beInKomplettTidslinje()
         val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(5)
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag))
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag, sakskompleksId = sakskompleksId))
 
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, lastStateEvent.previousState)
         assertEquals(Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
