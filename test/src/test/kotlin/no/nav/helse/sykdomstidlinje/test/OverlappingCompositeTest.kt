@@ -1,114 +1,111 @@
 package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.Testhendelse
+import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.testhelpers.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class OverlappingCompositeTest {
 
-    companion object {
-        private val tidligereTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,16, 10, 45))
-        private val senereTidspunktRapportert = Testhendelse(LocalDateTime.of(2019,9,17, 10, 45))
-
-        private val førsteMandag = LocalDate.of(2019,9,23)
-        private val førsteTirsdag = LocalDate.of(2019,9,24)
-        private val førsteOnsdag = LocalDate.of(2019,9,25)
-        private val førsteTorsdag = LocalDate.of(2019,9,26)
-        private val andreMandag = LocalDate.of(2019,9,30)
-    }
+    private val nySøknad = Testhendelse(
+        rapportertdato = 2.fredag.atTime(12, 0),
+        hendelsetype = Sykdomshendelse.Type.NySykepengesøknad
+    )
+    private val sendtSøknad = Testhendelse(
+        rapportertdato = 3.fredag.atTime(12, 0),
+        hendelsetype = Sykdomshendelse.Type.SendtSykepengesøknad
+    )
 
     private lateinit var sykdomstidslinje: Sykdomstidslinje
 
     @Test
     internal fun sykedagerOgFerie() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.mandag, 1.tirsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(førsteMandag, førsteTirsdag, 0, 2)
+        assertInterval(1.mandag, 1.tirsdag, 0, 2)
     }
 
     @Test
     internal fun overlappendeSykedager() {
-        val sykedager1 = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
-        val sykedager2 = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, senereTidspunktRapportert)
+        val sykedager1 = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, nySøknad)
+        val sykedager2 = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager2 + sykedager1
 
-        assertInterval(førsteMandag, førsteTirsdag, 2, 2)
+        assertInterval(1.mandag, 1.tirsdag, 2, 2)
     }
 
     @Test
     internal fun trailingOverlapp() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
-        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(førsteOnsdag, førsteTorsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.torsdag, nySøknad)
+        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(1.onsdag, 1.torsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(førsteMandag, førsteTorsdag, 2, 4)
+        assertInterval(1.mandag, 1.torsdag, 2, 4)
     }
 
     @Test
     internal fun leadingOverlapp() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
-        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(førsteMandag, førsteTirsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.torsdag, nySøknad)
+        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(1.mandag, 1.tirsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(førsteMandag, førsteTorsdag, 2, 4)
+        assertInterval(1.mandag, 1.torsdag, 2, 4)
     }
 
     @Test
     internal fun arbeidIMidtenAvSykdom() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTorsdag, tidligereTidspunktRapportert)
-        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(førsteTirsdag, førsteOnsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.torsdag, nySøknad)
+        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(1.tirsdag, 1.onsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(førsteMandag, førsteTorsdag, 2, 4)
+        assertInterval(1.mandag, 1.torsdag, 2, 4)
     }
 
     @Test
     internal fun leadingAndTrailingIntervals() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
-        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(førsteTirsdag, førsteTorsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, nySøknad)
+        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(1.tirsdag, 1.torsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(førsteMandag, førsteTorsdag, 1, 4)
+        assertInterval(1.mandag, 1.torsdag, 1, 4)
     }
 
     @Test
     internal fun sykHelgMedLedendeHelg() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteTorsdag, andreMandag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteOnsdag, førsteTorsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.torsdag, 2.mandag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.onsdag, 1.torsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(førsteOnsdag, andreMandag, 4, 6)
+        assertInterval(1.onsdag, 2.mandag, 4, 6)
     }
 
     @Test
     internal fun friskHelg() {
-        val sykedager = Sykdomstidslinje.sykedager(førsteTorsdag, andreMandag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteOnsdag, førsteTorsdag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.torsdag, 2.mandag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.onsdag, 1.torsdag, sendtSøknad)
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(førsteOnsdag, andreMandag, 4, 6)
+        assertInterval(1.onsdag, 2.mandag, 4, 6)
     }
 
 
     @Test
     internal fun `sykdomstidslinjer som er kant i kant overlapper ikke`(){
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteTorsdag, andreMandag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.torsdag, 2.mandag, sendtSøknad)
 
         assertFalse(sykedager.overlapperMed(ferie))
     }
@@ -116,25 +113,25 @@ internal class OverlappingCompositeTest {
 
     @Test
     internal fun `sykdomstidslinjer overlapper`(){
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteOnsdag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteOnsdag, andreMandag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.onsdag, 2.mandag, sendtSøknad)
 
         assertTrue(sykedager.overlapperMed(ferie))
     }
 
     @Test
     internal fun `sykdomstidslinjer med et gap på en hel dag overlapper ikke`(){
-        val sykedager = Sykdomstidslinje.sykedager(førsteMandag, førsteTirsdag, tidligereTidspunktRapportert)
-        val ferie = Sykdomstidslinje.ferie(førsteTorsdag, andreMandag, senereTidspunktRapportert)
+        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, nySøknad)
+        val ferie = Sykdomstidslinje.ferie(1.torsdag, 2.mandag, sendtSøknad)
 
         assertFalse(sykedager.overlapperMed(ferie))
     }
 
 
     private fun assertInterval(startdag: LocalDate, sluttdag: LocalDate, antallSykedager: Int, forventetLengde: Int) {
-        Assertions.assertEquals(startdag, sykdomstidslinje.startdato())
-        Assertions.assertEquals(sluttdag, sykdomstidslinje.sluttdato())
-        Assertions.assertEquals(antallSykedager, sykdomstidslinje.antallSykedagerHvorViTellerMedHelg())
-        Assertions.assertEquals(forventetLengde, sykdomstidslinje.flatten().size)
+        assertEquals(startdag, sykdomstidslinje.startdato())
+        assertEquals(sluttdag, sykdomstidslinje.sluttdato())
+        assertEquals(antallSykedager, sykdomstidslinje.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(forventetLengde, sykdomstidslinje.flatten().size)
     }
 }
