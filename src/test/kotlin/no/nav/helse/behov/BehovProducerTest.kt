@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
+import java.util.*
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -14,24 +15,24 @@ internal class BehovProducerTest {
 
     @Test
     fun `behov skal produseres`() {
-        val producer = mockk< KafkaProducer <String, String>>(relaxed = true)
+        val producer = mockk<KafkaProducer<String, String>>(relaxed = true)
         val topic = "behov-topic"
 
         every {
             producer.send(any())
         } returns DummyFuture(RecordMetadata(TopicPartition(topic, 0), 0L, 0L, 0L, 0L, 0, 0))
 
-        val behovId = BehovProducer(topic, producer)
-                .nyttBehov("sykepengehistorikk")
+        BehovProducer(topic, producer)
+                .sendNyttSykepengehistorikkBehov("123", "567", UUID.randomUUID())
 
         verify(exactly = 1) {
             producer.send(match { record ->
-                behovId.toString() == record.key()
+                record.value().contains(BehovsTyper.Sykepengehistorikk.name)
             })
         }
     }
 
-    class DummyFuture(private val recordMetadata: RecordMetadata): Future<RecordMetadata> {
+    class DummyFuture(private val recordMetadata: RecordMetadata) : Future<RecordMetadata> {
         override fun isDone(): Boolean {
             TODO("not implemented")
         }
