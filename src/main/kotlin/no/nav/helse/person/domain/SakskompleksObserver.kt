@@ -13,7 +13,9 @@ interface SakskompleksObserver {
                                 val previousMemento: Sakskompleks.Memento)
 
     enum class NeedType {
-        TRENGER_SYKEPENGEHISTORIKK
+        TRENGER_SYKEPENGEHISTORIKK,
+        TRENGER_PERSONOPPLYSNINGER,
+        TRENGER_INNTEKTSOPPLYSNINGER
     }
 
     data class NeedEvent(val sakskompleksId: UUID,

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
 import no.nav.helse.person.domain.SakskompleksObserver.*
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
@@ -49,8 +49,8 @@ class Sakskompleks internal constructor(
             }
         }
 
-    internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk){
-        tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
+    internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
+        if (id == sykepengehistorikk.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
     }
 
     private fun overlapperMed(hendelse: Sykdomshendelse) =
@@ -79,7 +79,6 @@ class Sakskompleks internal constructor(
         KOMPLETT_SAK,
         SYKEPENGEHISTORIKK_MOTTATT,
         TRENGER_MANUELL_HÅNDTERING
-
     }
 
     // Gang of four State pattern
@@ -193,6 +192,12 @@ class Sakskompleks internal constructor(
     }
 
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand{
+
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.notifyNeedObservers(TRENGER_INNTEKTSOPPLYSNINGER)
+            sakskompleks.notifyNeedObservers(TRENGER_PERSONOPPLYSNINGER)
+        }
+
         override val type = TilstandType.SYKEPENGEHISTORIKK_MOTTATT
     }
 

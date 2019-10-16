@@ -1,10 +1,7 @@
 package no.nav.helse.person.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.*
 import no.nav.helse.sykdomstidslinje.objectMapper
 import java.util.*
 
@@ -22,6 +19,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
         findOrCreateArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
+    }
+
+    fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
+        findOrCreateArbeidsgiver(sykepengehistorikk).håndterSykepengehistorikk(sykepengehistorikk)
     }
 
     override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
@@ -52,7 +53,12 @@ class Person(val aktørId: String) : SakskompleksObserver {
         }
 
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
-        internal val saker = mutableListOf<Sakskompleks>()
+
+        internal constructor(arbeidsgiverJson: ArbeidsgiverJson): this(arbeidsgiverJson.organisasjonsnummer, arbeidsgiverJson.id) {
+            saker.addAll(arbeidsgiverJson.saker.map { Sakskompleks.fromJson(it) })
+        }
+
+        private val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
         fun håndterNySøknad(søknad: NySykepengesøknad) {
@@ -73,6 +79,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
             }
         }
 
+        internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
+            saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikk) }
+        }
+
         fun addObserver(observer: SakskompleksObserver) {
             sakskompleksObservers.add(observer)
             saker.forEach { it.addSakskompleksObserver(observer) }
@@ -85,7 +95,6 @@ class Person(val aktørId: String) : SakskompleksObserver {
             }
         }
 
-
         internal fun jsonRepresentation(): ArbeidsgiverJson {
             return ArbeidsgiverJson(
                 organisasjonsnummer = organisasjonsnummer,
@@ -93,6 +102,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
                 id = id
             )
         }
+
     }
 
     fun toJson(): String {
@@ -123,19 +133,12 @@ class Person(val aktørId: String) : SakskompleksObserver {
             return Person(personJson.aktørId)
                 .apply {
                     arbeidsgivere.putAll(personJson.arbeidsgivere
-                        .map { it.organisasjonsnummer to fromArbeidsgiverJson(it).also { arbeidsgiver ->
-                            arbeidsgiver.addObserver(this)
-                        } })
+                        .map {
+                            it.organisasjonsnummer to Arbeidsgiver(it).also { arbeidsgiver ->
+                                arbeidsgiver.addObserver(this)
+                            }
+                        })
                 }
-        }
-
-        private fun Person.fromArbeidsgiverJson(arbeidsgiverJson: ArbeidsgiverJson): Arbeidsgiver {
-            return Arbeidsgiver(
-                organisasjonsnummer = arbeidsgiverJson.organisasjonsnummer,
-                id = arbeidsgiverJson.id
-            ).apply {
-                saker.addAll(arbeidsgiverJson.saker.map { Sakskompleks.fromJson(it) })
-            }
         }
     }
 }
