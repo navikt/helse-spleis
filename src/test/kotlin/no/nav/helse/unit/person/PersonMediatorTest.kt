@@ -1,10 +1,12 @@
-package no.nav.helse.person
+package no.nav.helse.unit.person
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.person.PersonMediator
+import no.nav.helse.person.PersonRepository
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import org.junit.jupiter.api.Test
 
@@ -15,8 +17,8 @@ internal class PersonMediatorTest {
         val probe = mockk<SakskompleksProbe>(relaxed = true)
         val personRepo = mockk<PersonRepository>()
         val sakskompleksService = PersonMediator(
-                sakskompleksProbe = probe,
-                personRepository = personRepo)
+            sakskompleksProbe = probe,
+            personRepository = personRepo)
 
         every {
             personRepo.hentPerson(any())
