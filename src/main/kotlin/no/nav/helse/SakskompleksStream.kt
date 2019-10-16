@@ -10,6 +10,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.person.PersonMediator
@@ -18,9 +19,11 @@ import no.nav.helse.sakskompleks.db.getDataSource
 import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
@@ -60,9 +63,10 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     }
 
     migrate(createHikariConfigFromEnvironment())
-
+    val producer = KafkaProducer<String, String>(behovProducerConfig(), StringSerializer(), StringSerializer())
     val personMediator = PersonMediator(
-            personRepository = PersonPostgresRepository(getDataSource(createHikariConfigFromEnvironment())))
+        personRepository = PersonPostgresRepository(getDataSource(createHikariConfigFromEnvironment())),
+        behovProducer = BehovProducer(Topics.behovTopic, producer))
 
     val builder = StreamsBuilder()
 

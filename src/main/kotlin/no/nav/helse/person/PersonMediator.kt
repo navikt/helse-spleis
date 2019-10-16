@@ -1,19 +1,29 @@
 package no.nav.helse.person
 
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sakskompleks.SakskompleksProbe
 
 internal class PersonMediator(private val personRepository: PersonRepository,
-                              private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe()) : PersonObserver{
+                              private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe(),
+                              private val behovProducer: BehovProducer) : PersonObserver{
 
     override fun personEndret(person: Person) {
         personRepository.lagrePerson(person)
+    }
+
+    override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+        behovProducer.nyttBehov(event.type.toString(), mapOf(
+            "aktørId" to event.aktørId,
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "sakskompleksId" to event.sakskompleksId))
     }
 
     fun håndterNySøknad(sykepengesøknad: NySykepengesøknad) =

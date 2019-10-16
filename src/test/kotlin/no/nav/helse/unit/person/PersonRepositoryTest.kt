@@ -1,5 +1,6 @@
 package no.nav.helse.unit.person
 
+import io.mockk.mockk
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonRepository
@@ -31,7 +32,8 @@ internal class PersonRepositoryTest {
     internal fun `mediator lagrer person ved endringer`() {
         val repo = HashmapRepository()
         val mediator = PersonMediator(
-                personRepository = repo
+                personRepository = repo,
+                behovProducer = mockk()
         )
 
         mediator.håndterNySøknad(nySøknad(
@@ -50,7 +52,8 @@ internal class PersonRepositoryTest {
         repo.lagrePerson(person)
 
         val mediator = PersonMediator(
-                personRepository = repo
+                personRepository = repo,
+                behovProducer = mockk()
         )
 
         mediator.håndterNySøknad(nySøknad(

@@ -172,7 +172,7 @@ internal class PersonTest {
         Person(aktørId = "id").also {
             it.addObserver(observer)
             assertThrows<UtenforOmfangException> {
-                it.håndterInntektsmelding(inntektsmelding())
+                it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = null))
             }
         }
     }

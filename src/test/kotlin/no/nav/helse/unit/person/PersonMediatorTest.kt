@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknad
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonRepository
@@ -16,9 +17,11 @@ internal class PersonMediatorTest {
     fun `skal håndtere feil ved søknad uten virksomhetsnummer for arbeidsgiver`() {
         val probe = mockk<SakskompleksProbe>(relaxed = true)
         val personRepo = mockk<PersonRepository>()
+        val behovProducer = mockk<BehovProducer>()
         val sakskompleksService = PersonMediator(
-            sakskompleksProbe = probe,
-            personRepository = personRepo)
+                sakskompleksProbe = probe,
+                personRepository = personRepo,
+                behovProducer = behovProducer)
 
         every {
             personRepo.hentPerson(any())

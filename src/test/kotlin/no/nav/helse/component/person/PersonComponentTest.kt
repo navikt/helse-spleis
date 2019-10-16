@@ -9,24 +9,22 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.util.KtorExperimentalAPI
-import kafka.security.auth.Topic
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Topics
+import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.createHikariConfig
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer.Companion.inntektsmeldingObjectMapper
-import no.nav.helse.person.PersonMediator
-import no.nav.helse.person.PersonPostgresRepository
 import no.nav.helse.sakskompleks.db.runMigration
 import no.nav.helse.serde.JsonNodeDeserializer
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.testServer
 import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -40,6 +38,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -55,12 +54,11 @@ internal class PersonComponentTest {
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
 
-        private val embeddedEnvironment = KafkaEnvironment(
-            users = listOf(JAASCredential(username, password)),
-            autoStart = false,
-            withSchemaRegistry = false,
-            withSecurity = true,
-            topicNames = listOf(søknadTopic, inntektsmeldingTopic)
+        private val embeddedKafkaEnvironment = KafkaEnvironment(
+                autoStart = false,
+                withSchemaRegistry = false,
+                withSecurity = false,
+                topicNames = listOf(søknadTopic, inntektsmeldingTopic, behovTopic)
         )
 
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -79,14 +77,14 @@ internal class PersonComponentTest {
             postgresConnection = embeddedPostgres.postgresDatabase.connection
             hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
             runMigration(HikariDataSource(hikariConfig))
-            embeddedEnvironment.start()
+            embeddedKafkaEnvironment.start()
 
         }
 
         @AfterAll
         @JvmStatic
         internal fun `stop embedded environment`() {
-            embeddedEnvironment.tearDown()
+            embeddedKafkaEnvironment.tearDown()
             postgresConnection.close()
             embeddedPostgres.close()
         }
@@ -94,39 +92,71 @@ internal class PersonComponentTest {
 
     }
 
-    @Test
-    internal fun `testtopology`() {
-        val repo = PersonPostgresRepository(HikariDataSource(hikariConfig))
-
-        val personMediator = PersonMediator(
-            personRepository = repo
-        )
-
-    }
 
     @Test
-    fun `inntektsmelding som kommer først, blir ignorert`() {
+    fun `sender ny søknad til kafka`() {
         testServer(config = mapOf(
-            "KAFKA_BOOTSTRAP_SERVERS" to embeddedEnvironment.brokersURL,
-            "KAFKA_USERNAME" to username,
-            "KAFKA_PASSWORD" to password,
-            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+                "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
+                "KAFKA_USERNAME" to username,
+                "KAFKA_PASSWORD" to password,
+                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
         )) {
 
-            val søknadDTO = søknadDTO(status = SoknadsstatusDTO.NY)
-            val sendtSøknadDTO = søknadDTO(status = SoknadsstatusDTO.SENDT)
-            sendKafkaMessage(søknadTopic, søknadDTO.id!!, søknadDTO.toJsonNode())
-            sendKafkaMessage(søknadTopic, sendtSøknadDTO.id!!, sendtSøknadDTO.toJsonNode())
-            sendKafkaMessage(inntektsmeldingTopic, inntektsmeldingDTO().inntektsmeldingId, inntektsmeldingDTO().toJsonNode())
+            val nySøknad = søknadDTO(status = SoknadsstatusDTO.NY)
+            sendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode())
+            val resultConsumer = KafkaConsumer<String, String>(consumerProperties(), StringDeserializer(), StringDeserializer())
+            resultConsumer.subscribe(listOf(søknadTopic))
 
             await()
-                .atMost(10, TimeUnit.SECONDS)
-                .untilAsserted {
-                    val record = lyttPåTopic(objectMapper, Topics.behovTopic)
-                    Assertions.assertFalse(record!!.isEmpty)
-
-                }
+                    .atMost(30, TimeUnit.SECONDS)
+                    .untilAsserted {
+                        val record = resultConsumer.poll(Duration.ofSeconds(1))
+                        Assertions.assertFalse(record!!.isEmpty)
+                    }
+            resultConsumer.unsubscribe()
         }
+    }
+
+
+    @Test
+    fun `komplett sak fører til at sykepengehistorikk blir etterspurt`() {
+        testServer(config = mapOf(
+                "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
+                "KAFKA_USERNAME" to username,
+                "KAFKA_PASSWORD" to password,
+                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        )) {
+
+            val aktorID = "1234567890123"
+            val virksomhetsnummer = "123456789"
+
+            val nySøknad = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.NY)
+            val sendtSøknad = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.SENDT)
+            val inntektsMelding = inntektsmeldingDTO(aktørId = aktorID, virksomhetsnummer = virksomhetsnummer)
+
+            val resultConsumer = KafkaConsumer<String, String>(consumerProperties(), StringDeserializer(), StringDeserializer())
+            resultConsumer.subscribe(listOf(behovTopic, søknadTopic, inntektsmeldingTopic))
+
+            sendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode())
+            assertMessageReadyToBeConsumed(resultConsumer, søknadTopic)
+
+            sendKafkaMessage(søknadTopic, sendtSøknad.id!!, sendtSøknad.toJsonNode())
+            assertMessageReadyToBeConsumed(resultConsumer, søknadTopic)
+
+            sendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode())
+            assertMessageReadyToBeConsumed(resultConsumer, inntektsmeldingTopic)
+
+            resultConsumer.unsubscribe()
+        }
+    }
+
+    private fun assertMessageReadyToBeConsumed(resultConsumer: KafkaConsumer<String, String>, topic: String) {
+        await()
+                .atMost(30, TimeUnit.SECONDS)
+                .untilAsserted {
+                    val record = resultConsumer.poll(Duration.ofSeconds(1))
+                    assertEquals(1, record.records(topic).count(), "Antall meldinger på topic $topic skulle vært 1, men var ${record.records(topic).count()}")
+                }
     }
 
     private fun sendKafkaMessage(topic: String, key: String, message: JsonNode, objectMapper: ObjectMapper = inntektsmeldingObjectMapper) {
@@ -135,29 +165,21 @@ internal class PersonComponentTest {
         producer.flush()
     }
 
-    private fun lyttPåTopic(objectMapper: ObjectMapper, topic: String): ConsumerRecords<String, JsonNode>? {
-        val resultConsumer = KafkaConsumer<String, JsonNode>(consumerProperties(), StringDeserializer(), JsonNodeDeserializer(objectMapper))
-        resultConsumer.subscribe(listOf(topic))
-        resultConsumer.seekToBeginning(resultConsumer.assignment())
-        return resultConsumer.poll(Duration.ofSeconds(1))
-    }
-
     private fun producerProperties() =
-        Properties().apply {
-            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
-            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
-        }
+            Properties().apply {
+                put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
+                put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+            }
 
 
     private fun consumerProperties(): MutableMap<String, Any>? {
         return HashMap<String, Any>().apply {
-            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedEnvironment.brokersURL)
-            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
             put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
-            put(ConsumerConfig.GROUP_ID_CONFIG, "spa-e2e-verification")
+            put(ConsumerConfig.GROUP_ID_CONFIG, "personComponentTestGroupID")
+            put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
         }
     }
 
