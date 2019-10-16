@@ -32,6 +32,7 @@ internal object TestHendelser {
     private fun søknad(
         id: String = UUID.randomUUID().toString(),
         status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
+        opprettetTidspunkt: LocalDateTime,
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -76,8 +77,8 @@ internal object TestHendelser {
             startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 16),
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
-            opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
+            opprettet = opprettetTidspunkt,
+            sendtNav = opprettetTidspunkt,
             sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
             egenmeldinger = egenmeldinger,
             soknadsperioder = søknadsperioder,
@@ -93,22 +94,26 @@ internal object TestHendelser {
     }
 
     fun sendtSøknad(
+        opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
         arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
         )
     ) =
         søknad(
+            opprettetTidspunkt = opprettetTidspunkt,
             arbeidsgiver = arbeidsgiver
         ) as SendtSykepengesøknad
 
     fun nySøknad(
+        opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
         arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
         )
     ) =
         søknad(
+            opprettetTidspunkt = opprettetTidspunkt,
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver
         ) as NySykepengesøknad

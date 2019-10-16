@@ -32,7 +32,6 @@ class DagTurnering(val source: String = "/dagturnering.csv") {
                 val row = rowText.split(",")
                 row.drop(1)
                     .forEachIndexed { columnNumber, cell ->
-
                         if (cell != "") {
                             val strategy = strategyFor(cell)
                             val rowKey = row[0]

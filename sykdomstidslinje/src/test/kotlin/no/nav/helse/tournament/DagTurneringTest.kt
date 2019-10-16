@@ -2,13 +2,17 @@ package no.nav.helse.tournament
 
 import no.nav.helse.hendelse.TestHendelser.nySøknad
 import no.nav.helse.hendelse.TestHendelser.sendtSøknad
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class DagTurneringTest {
 
@@ -23,14 +27,37 @@ class DagTurneringTest {
         assertEquals(Impossible::class, turnering.strategies.getValue(Dag.Nøkkel.S).getValue(Dag.Nøkkel.S)::class)
     }
 
-    @Disabled("YOLO: Knut skal på ferie")
     @Test
     fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
         val turnering = DagTurnering()
-        val arbeidsdag = Arbeidsdag(LocalDate.of(2019,10,10), sendtSøknad())
-        val sykedag = Sykedag(LocalDate.of(2019,10,10), nySøknad())
+        val sykedag = Sykedag(1.mandag, nySøknad(
+            opprettetTidspunkt = 1.mandag.atTime(9, 0)
+        ))
+        val arbeidsdag = Arbeidsdag(1.mandag, sendtSøknad(
+            opprettetTidspunkt = 1.mandag.atTime(12, 0)
+        ))
         val vinner = turnering.slåss(arbeidsdag, sykedag)
 
         assertEquals(vinner, arbeidsdag)
+    }
+
+    @Test
+    fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
+        val nySøknad = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, nySøknad(
+            opprettetTidspunkt = 1.mandag.atTime(9, 0)
+        ))
+        val sendtSøknad = sendtSøknad(
+            opprettetTidspunkt = 1.mandag.atTime(12, 0)
+        )
+        val sendtSøknadSykedager = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, sendtSøknad)
+        val sendtSøknadArbeidsdager = Sykdomstidslinje.ikkeSykedager(1.torsdag, 1.fredag, sendtSøknad)
+
+        val tidslinje = nySøknad + (sendtSøknadSykedager + sendtSøknadArbeidsdager)
+        assertTrue(tidslinje[1.torsdag] is Arbeidsdag,
+            "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad")
+        assertTrue(tidslinje[1.onsdag] is Sykedag,
+            "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad")
+        assertEquals(1.onsdag, tidslinje.syketilfeller().first().sluttdato(),
+            "Siste arbeidsdag er onsdag siden personen var tilbake på jobb torsdag")
     }
 }

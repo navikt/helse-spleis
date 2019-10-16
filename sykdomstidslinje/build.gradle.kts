@@ -4,6 +4,10 @@ plugins {
     id("org.sonarqube") version "2.7"
 }
 
+dependencies {
+    testImplementation(project(":testhelpers"))
+}
+
 subprojects {
     properties["sonarHost"]?.let { host ->
         sonarqube {
