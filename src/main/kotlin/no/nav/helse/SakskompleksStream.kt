@@ -7,8 +7,10 @@ import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
@@ -59,13 +61,14 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     migrate(createHikariConfigFromEnvironment())
 
-    val sakskompleksService = PersonMediator(
+    val personMediator = PersonMediator(
             personRepository = PersonPostgresRepository(getDataSource(createHikariConfigFromEnvironment())))
 
     val builder = StreamsBuilder()
 
-    SøknadConsumer(builder, søknadTopic, sakskompleksService)
-    InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakskompleksService)
+    SøknadConsumer(builder, søknadTopic, personMediator)
+    InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
+    BehovConsumer(builder, behovTopic , personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)

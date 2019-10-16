@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.UtenforOmfangException
@@ -19,7 +20,6 @@ internal class PersonMediator(private val personRepository: PersonRepository,
             try {
                 finnPerson(sykepengesøknad.aktørId)
                         .also { person ->
-                            person.addObserver(sakskompleksProbe)
                             person.håndterNySøknad(sykepengesøknad)
                         }
             } catch (err: UtenforOmfangException) {
@@ -30,7 +30,6 @@ internal class PersonMediator(private val personRepository: PersonRepository,
             try {
                 finnPerson(sykepengesøknad.aktørId)
                         .also { person ->
-                            person.addObserver(sakskompleksProbe)
                             person.håndterSendtSøknad(sykepengesøknad)
                         }
             } catch (err: UtenforOmfangException) {
@@ -39,13 +38,19 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
             finnPerson(inntektsmelding.aktørId()).also { person ->
-                person.addObserver(sakskompleksProbe)
                 person.håndterInntektsmelding(inntektsmelding)
             }
+
+    fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
+        finnPerson(sykepengehistorikk.aktørId).also { person ->
+            person.håndterSykepengehistorikk(sykepengehistorikk)
+        }
+    }
 
     private fun finnPerson(aktørId: String) =
             (personRepository.hentPerson(aktørId) ?: Person(aktørId = aktørId)).also {
                 it.addObserver(this)
+                it.addObserver(sakskompleksProbe)
             }
 
 }
