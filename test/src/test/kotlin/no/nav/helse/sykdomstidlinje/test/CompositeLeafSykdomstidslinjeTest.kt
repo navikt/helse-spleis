@@ -1,33 +1,36 @@
 import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.onsdag
+import no.nav.helse.testhelpers.tirsdag
+import no.nav.helse.testhelpers.torsdag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class CompositeLeafSykdomstidslinjeTest {
 
     companion object {
-        private val tidspunktRapportert = Testhendelse()
+        private val sendtSøknad = Testhendelse()
 
         private val førsteMandag = Sykdomstidslinje.sykedag(
-            gjelder = LocalDate.of(2019, 9, 23),
-            hendelse = tidspunktRapportert
+            gjelder = 1.mandag,
+            hendelse = sendtSøknad
         )
         private val førsteTirsdag = Sykdomstidslinje.sykedag(
-            gjelder = LocalDate.of(2019, 9, 24),
-            hendelse = tidspunktRapportert
+            gjelder = 1.tirsdag,
+            hendelse = sendtSøknad
         )
         private val førsteOnsdag = Sykdomstidslinje.sykedag(
-            gjelder = LocalDate.of(2019, 9, 25),
-            hendelse = tidspunktRapportert
+            gjelder = 1.onsdag,
+            hendelse = sendtSøknad
         )
         private val førsteTorsdag = Sykdomstidslinje.sykedag(
-            gjelder = LocalDate.of(2019, 9, 26),
-            hendelse = tidspunktRapportert
+            gjelder = 1.torsdag,
+            hendelse = sendtSøknad
         )
         private val andreMandag = Sykdomstidslinje.sykedag(
-            gjelder = LocalDate.of(2019, 9, 30),
-            hendelse = tidspunktRapportert
+            gjelder = 2.mandag,
+            hendelse = sendtSøknad
         )
 
     }

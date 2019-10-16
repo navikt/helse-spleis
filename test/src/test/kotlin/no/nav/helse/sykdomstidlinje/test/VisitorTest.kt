@@ -8,28 +8,20 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.testhelpers.fredag
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.onsdag
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class VisitorTest {
-    companion object {
-        private val uke1Mandag = LocalDate.of(2019, 9, 23)
-        private val uke1Onsdag = LocalDate.of(2019, 9, 25)
-
-        private val uke1Fredag = LocalDate.of(2019, 9, 27)
-        private val uke2Mandag = LocalDate.of(2019, 9, 30)
-
-        private val rapporteringshendelse = Testhendelse(LocalDateTime.of(2019, 10, 14, 20, 0))
-    }
+    private val sendtSøknad = Testhendelse(4.fredag.atTime(12, 0))
 
     @Test
     fun flereSykdomstilfellerSlåttSammen() {
         val visitor = VisitorCounter()
-        (Sykdomstidslinje.sykedager(uke1Mandag, uke1Onsdag, rapporteringshendelse) +
-                Sykdomstidslinje.sykedager(uke1Fredag, uke2Mandag, rapporteringshendelse)).accept(visitor)
+        (Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, sendtSøknad) +
+                Sykdomstidslinje.sykedager(1.fredag, 2.mandag, sendtSøknad)).accept(visitor)
 
         assertEquals(2, visitor.compositeCount)
         assertEquals(7, visitor.sykedagerCount)
@@ -39,7 +31,7 @@ class VisitorTest {
     @Test
     fun enkeltSykdomstilfelle() {
         val visitor = VisitorCounter()
-        Sykdomstidslinje.sykedager(uke1Mandag, uke1Onsdag, rapporteringshendelse).accept(visitor)
+        Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, sendtSøknad).accept(visitor)
 
         assertEquals(2, visitor.compositeCount)
         assertEquals(3, visitor.sykedagerCount)
