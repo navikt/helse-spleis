@@ -10,12 +10,8 @@ class BehovProducer(private val topic: String, private val producer: KafkaProduc
         private val log = LoggerFactory.getLogger(BehovProducer::class.java)
     }
 
-    fun sendNyttSykepengehistorikkBehov(aktørId: String, organisasjonsnummer: String, sakskompleksId: UUID) {
-        publiser(Behov.nyttBehov(BehovsTyper.Sykepengehistorikk.name, mapOf(
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId
-        )))
+    fun sendNyttBehov(type: String, additionalParams: Map<String, Any>) {
+        publiser(Behov.nyttBehov(type, additionalParams))
     }
 
     private fun publiser(behov: Behov) =

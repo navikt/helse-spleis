@@ -23,7 +23,7 @@ internal class BehovProducerTest {
         } returns DummyFuture(RecordMetadata(TopicPartition(topic, 0), 0L, 0L, 0L, 0L, 0, 0))
 
         BehovProducer(topic, producer)
-                .sendNyttSykepengehistorikkBehov("123", "567", UUID.randomUUID())
+                .sendNyttBehov(BehovsTyper.Sykepengehistorikk.name, emptyMap())
 
         verify(exactly = 1) {
             producer.send(match { record ->
