@@ -146,6 +146,8 @@ internal class PersonComponentTest {
             sendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode())
             assertMessageReadyToBeConsumed(resultConsumer, inntektsmeldingTopic)
 
+            assertMessageReadyToBeConsumed(resultConsumer, behovTopic)
+
             resultConsumer.unsubscribe()
         }
     }
