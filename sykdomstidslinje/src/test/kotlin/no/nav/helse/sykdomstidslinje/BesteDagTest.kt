@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.testhelpers.mandag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -91,14 +92,6 @@ internal class BesteDagTest {
         assertWinner(dag2, dag1, expectedWinnerClass, antallDagerErstattet)
     }
 }
-
-private val Int.mandag get() = LocalDate.of(2019, 7, (this - 1) * 7 + 1)
-private val Int.tirsdag get() = this.mandag.plusDays(1)
-private val Int.onsdag get() = this.mandag.plusDays(2)
-private val Int.torsdag get() = this.mandag.plusDays(3)
-private val Int.fredag get() = this.mandag.plusDays(4)
-private val Int.lørdag get() = this.mandag.plusDays(5)
-private val Int.søndag get() = this.mandag.plusDays(6)
 
 fun String.readResource() =
     object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8)

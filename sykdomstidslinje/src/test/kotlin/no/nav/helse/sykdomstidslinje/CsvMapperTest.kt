@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelse.TestHendelser.sendtSøknad
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
+import no.nav.helse.testhelpers.mandag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -10,7 +11,7 @@ import java.time.LocalDate
 class CsvMapperTest {
     @Test
     internal fun `kan hente ut nøkkel fra dag`(){
-        val nøkkel = ImplisittDag(LocalDate.of(2019,10,10), sendtSøknad()).nøkkel()
+        val nøkkel = ImplisittDag(1.mandag, sendtSøknad()).nøkkel()
         assertEquals(Dag.Nøkkel.I, nøkkel)
     }
 }

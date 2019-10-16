@@ -1,8 +1,8 @@
 import no.nav.helse.Testhendelse
-import no.nav.helse.fredag
-import no.nav.helse.mandag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.tirsdag
+import no.nav.helse.testhelpers.fredag
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.tirsdag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
