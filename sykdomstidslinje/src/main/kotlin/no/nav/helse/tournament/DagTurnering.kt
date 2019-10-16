@@ -20,29 +20,26 @@ class DagTurnering(val source: String = "/dagturnering.csv") {
     }
 
     private fun readStrategies(): Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> {
-        val reader = this::class.java.getResourceAsStream(source)
+        val csv = this::class.java.getResourceAsStream(source)
             .bufferedReader(Charsets.UTF_8)
-        val result: MutableMap<Dag.Nøkkel, MutableMap<Dag.Nøkkel, Strategy>> = mutableMapOf()
-
-        val columnHeaders = reader.readLine().split(",").drop(1).toList()
-
-        reader
             .readLines()
-            .forEach { rowText ->
-                val row = rowText.split(",")
-                row.drop(1)
-                    .forEachIndexed { columnNumber, cell ->
-                        if (cell != "") {
-                            val strategy = strategyFor(cell)
-                            val rowKey = row[0]
-                            val columnKey = columnHeaders[columnNumber]
-                            result.getOrPut(enumValueOf(rowKey)) { mutableMapOf() }[enumValueOf(columnKey)] = strategy
-                        }
-                    }
-            }
+            .map { it.split(",") }
+            .map { it.first() to it.drop(1) }
 
-        return result
+        val (_, columnHeaders) = csv.first()
+
+        return csv
+            .drop(1)
+            .map { (key, row) ->
+                enumValueOf<Dag.Nøkkel>(key) to row
+                    .mapIndexed { index, cell -> columnHeaders[index] to cell }
+                    .filter { (_, cell) -> cell != "" }
+                    .map { (columnHeader, cell) -> enumValueOf<Dag.Nøkkel>(columnHeader) to strategyFor(cell) }
+                    .toMap()
+            }
+            .toMap()
     }
+
 
     private fun strategyFor(cellValue: String) =
         when (cellValue) {
@@ -83,5 +80,6 @@ internal object LatestOrColumn : Strategy() {
 }
 
 internal object Impossible : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
+    override fun decide(row: Dag, column: Dag): Dag =
+        throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
 }
