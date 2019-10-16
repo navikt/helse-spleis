@@ -33,7 +33,7 @@ class DagTurnering(val source: String = "/dagturnering.csv") {
             .map { (key, row) ->
                 enumValueOf<Dag.Nøkkel>(key) to row
                     .mapIndexed { index, cell -> columnHeaders[index] to cell }
-                    .filter { (_, cell) -> cell != "" }
+                    .filter { (_, cell) -> cell.isNotBlank() }
                     .map { (columnHeader, cell) -> enumValueOf<Dag.Nøkkel>(columnHeader) to strategyFor(cell) }
                     .toMap()
             }

@@ -1,12 +1,14 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.*
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.NySykepengesøknad
+import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Calendar.SATURDAY
 import kotlin.reflect.KClass
 
 abstract class Dag internal constructor(
@@ -46,8 +48,9 @@ abstract class Dag internal constructor(
     )
 
     internal fun erstatter(vararg dager: Dag): Dag {
-        dager.filterNot { it is ImplisittDag }
-            .forEach { erstatter.addAll(it.erstatter + it) }
+        erstatter.addAll(dager
+            .filterNot { it is ImplisittDag }
+            .flatMap { it.erstatter + it })
         return this
     }
 

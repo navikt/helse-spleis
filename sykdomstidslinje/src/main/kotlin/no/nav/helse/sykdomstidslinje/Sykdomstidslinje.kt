@@ -209,12 +209,10 @@ abstract class Sykdomstidslinje {
 
         fun permisjonsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
-            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
-                permisjonsdag(
-                    it,
-                    hendelse
-                )
-            }.toList())
+            return CompositeSykdomstidslinje(
+                fra.datesUntil(til.plusDays(1))
+                    .map { permisjonsdag(it, hendelse) }
+                    .toList())
         }
 
         fun fromJson(json: String): Sykdomstidslinje {

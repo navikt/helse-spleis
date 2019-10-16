@@ -49,21 +49,27 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
 
     protected val sykeperiodeTidslinje
-        get(): List<Sykdomstidslinje> = sykeperioder.map {
-            Sykdomstidslinje.sykedager(it.fom, it.tom, this)
-        }
+        get(): List<Sykdomstidslinje> = sykeperioder
+            .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+
     protected val egenmeldingsTidslinje
-        get(): List<Sykdomstidslinje> = egenmeldinger.map {
-            Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this)
-        }
+        get(): List<Sykdomstidslinje> = egenmeldinger
+            .map { Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
+
     protected val ferieTidslinje
-        get(): List<Sykdomstidslinje> = fraværsperioder.filter { it.type == Fraværstype.FERIE }.map {
-            Sykdomstidslinje.ferie(it.fom, it.tom, this)
-        }
+        get(): List<Sykdomstidslinje> = fraværsperioder
+            .filter { it.type == Fraværstype.FERIE }
+            .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+
+    protected val permisjonTidslinje
+        get(): List<Sykdomstidslinje> = fraværsperioder
+            .filter { it.type == Fraværstype.PERMISJON }
+            .map { Sykdomstidslinje.permisjonsdager(it.fom, it.tom, this) }
+
     protected val arbeidGjenopptattTidslinje
-        get(): List<Sykdomstidslinje> = arbeidGjenopptatt?.let {
-            listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this))
-        } ?: emptyList()
+        get(): List<Sykdomstidslinje> = arbeidGjenopptatt
+            ?.let { listOf(Sykdomstidslinje.ikkeSykedager(it, tom, this)) }
+            ?: emptyList()
 
     protected val studiedagertidslinje = utdanningsperioder.map {
         Sykdomstidslinje.studiedager(it.fom, tom, this)
@@ -78,9 +84,9 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     }
 
     override fun sykdomstidslinje() =
-            sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
-                resultatTidslinje + delTidslinje
-            }
+        sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
+            resultatTidslinje + delTidslinje
+        }
 
     override fun hendelsetype() =
         Sykdomshendelse.Type.NySykepengesøknad
@@ -92,7 +98,7 @@ class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     }
 
     override fun sykdomstidslinje() =
-        (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje)
+        (sykeperiodeTidslinje + egenmeldingsTidslinje + ferieTidslinje + arbeidGjenopptattTidslinje + studiedagertidslinje + permisjonTidslinje)
             .reduce { resultatTidslinje, delTidslinje ->
                 resultatTidslinje + delTidslinje
             }

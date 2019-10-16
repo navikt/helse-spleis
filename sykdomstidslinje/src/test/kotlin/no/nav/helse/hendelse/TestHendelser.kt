@@ -29,6 +29,17 @@ internal object TestHendelser {
     val `én dag færre enn seks måneder før første sykedag` = egenmeldingFom.minusMonths(6).plusDays(1)
 
 
+    val søknadsperioder = listOf(
+        SoknadsperiodeDTO(
+            fom = sykeperiodeFOM,
+            tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
+        ),
+        SoknadsperiodeDTO(
+            fom = LocalDate.of(2019, Month.OCTOBER, 5),
+            tom = sykeperiodeTOM
+        )
+    )
+
     private fun søknad(
         id: String = UUID.randomUUID().toString(),
         status: SoknadsstatusDTO = SoknadsstatusDTO.SENDT,
@@ -41,23 +52,8 @@ internal object TestHendelser {
                 tom = egenmeldingTom
             )
         ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = LocalDate.of(2019, Month.SEPTEMBER, 30)
-            ),
-            SoknadsperiodeDTO(
-                fom = LocalDate.of(2019, Month.OCTOBER, 5),
-                tom = sykeperiodeTOM
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
+        søknadsperioder: List<SoknadsperiodeDTO>,
+        fravær: List<FravarDTO>,
         arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
@@ -98,11 +94,21 @@ internal object TestHendelser {
         arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
-        )
+        ),
+        fravær: List<FravarDTO> = listOf(
+            FravarDTO(
+                fom = ferieFom,
+                tom = ferieTom,
+                type = FravarstypeDTO.FERIE
+            )
+        ),
+        søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder
     ) =
         søknad(
             opprettetTidspunkt = opprettetTidspunkt,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            fravær = fravær,
+            søknadsperioder = søknadsperioder
         ) as SendtSykepengesøknad
 
     fun nySøknad(
@@ -110,12 +116,15 @@ internal object TestHendelser {
         arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
             navn = "enArbeidsgiver",
             orgnummer = "123456789"
-        )
+        ),
+        søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder
     ) =
         søknad(
             opprettetTidspunkt = opprettetTidspunkt,
             status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            fravær = emptyList(),
+            søknadsperioder = søknadsperioder
         ) as NySykepengesøknad
 
     fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
