@@ -35,4 +35,6 @@ class Testhendelse(
     override fun toJson(): JsonNode {
         return objectMapper.readValue("{}")
     }
+
+    override fun equals(other: Any?): Boolean = this === other
 }

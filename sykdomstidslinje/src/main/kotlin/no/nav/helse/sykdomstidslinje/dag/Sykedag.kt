@@ -16,5 +16,10 @@ class Sykedag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse
 
     override fun dagType(): JsonDagType = JsonDagType.SYKEDAG
 
-    override fun nøkkel(): Nøkkel = Nøkkel.S
+    override fun nøkkel(): Nøkkel =
+        when (hendelse.hendelsetype()) {
+            Sykdomshendelse.Type.SendtSykepengesøknad -> Nøkkel.S_A
+            Sykdomshendelse.Type.NySykepengesøknad -> Nøkkel.S_SM
+            else -> throw RuntimeException("Hendelse ${hendelse.hendelsetype()} er ikke støttet")
+        }
 }

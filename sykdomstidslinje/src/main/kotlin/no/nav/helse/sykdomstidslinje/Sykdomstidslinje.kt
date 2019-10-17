@@ -33,9 +33,19 @@ abstract class Sykdomstidslinje {
 
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
         val intervalEtterKonflikter =
-            datesUntil.map { this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }.toList()
+            datesUntil
+                .map {
+                    // TODO: Clean me up
+                    val firstDay = this.dag(it, this.sisteHendelse())
+                    val secondDay = other.dag(it, other.sisteHendelse())
+                    if (firstDay is ImplisittDag && secondDay is ImplisittDag && this.sisteHendelse() == other.sisteHendelse()) {
+                        firstDay
+                    } else {
+                        firstDay.beste(secondDay)
+                    }
+                }
 
-        return CompositeSykdomstidslinje(intervalEtterKonflikter.map { it.tilDag() })
+        return CompositeSykdomstidslinje(intervalEtterKonflikter)
     }
 
     internal fun antallDagerMellom(other: Sykdomstidslinje) =

@@ -67,8 +67,6 @@ abstract class Dag internal constructor(
 
     fun erHelg() = dagen.dayOfWeek  == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
 
-    internal open fun tilDag() = this
-
     override fun length() = 1
 
     override fun sisteHendelse() = this.hendelse
@@ -77,7 +75,8 @@ abstract class Dag internal constructor(
         I,
         WD_A,
         WD_IM,
-        S,
+        S_SM,
+        S_A,
         V_A,
         V_IM,
         Le_Areg,

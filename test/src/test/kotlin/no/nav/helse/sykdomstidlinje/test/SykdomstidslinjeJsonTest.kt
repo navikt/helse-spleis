@@ -31,7 +31,7 @@ class SykdomstidslinjeJsonTest {
         )
         val tidslinjeC = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), inntektsmelding
+            LocalDate.of(2019, 10, 10), søknadSendt
         )
 
         val combined = tidslinjeA + tidslinjeB + tidslinjeC
@@ -56,7 +56,7 @@ class SykdomstidslinjeJsonTest {
         )
         val sykedagerB = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), inntektsmelding
+            LocalDate.of(2019, 10, 10), søknadSendt
         )
 
         val combined = egenmelding + sykedagerA + ikkeSykedager + sykedagerB

@@ -47,6 +47,7 @@ class DagTurnering(val source: String = "/dagturnering.csv") {
             "R" -> Row
             "C" -> Column
             "X" -> Impossible
+            "L" -> Latest
             "LR" -> LatestOrRow
             "LC" -> LatestOrColumn
             else -> throw RuntimeException("$cellValue is not a known strategy for deciding between days")
@@ -67,6 +68,15 @@ internal object Row : Strategy() {
 
 internal object Column : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = column.erstatter(row)
+}
+
+internal object Latest : Strategy() {
+    override fun decide(row: Dag, column: Dag): Dag =
+        when {
+            row.sisteHendelse() == column.sisteHendelse() -> throw IllegalStateException("Strategien latest støtter ikke sammenliging av eventer med samme tidspunkt. (row: $row, column: $column)")
+            row.sisteHendelse() > (column.sisteHendelse()) -> row.erstatter(column)
+            else -> column.erstatter(row)
+        }
 }
 
 internal object LatestOrRow : Strategy() {

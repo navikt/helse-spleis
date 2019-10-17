@@ -9,7 +9,6 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.mandag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import kotlin.reflect.KClass
 
 internal class BesteDagTest {
@@ -26,16 +25,16 @@ internal class BesteDagTest {
         private val implisittDag get() = ImplisittDag(2.mandag, inntektsmelding)
         private val arbeidsdag get() = Arbeidsdag(2.mandag, sendtSøknad)
         private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
-        private val sykdomFraInntektsmelding get() = Sykdomstidslinje.sykedag(2.mandag, inntektsmelding)
+        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(2.mandag, inntektsmelding)
         private val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
         private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(2.mandag, sendtSøknad)
         private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(2.mandag, sendtSøknad)
     }
 
     @Test
-    fun `inntektsmelding sier ferie, søknad sier syk blir udefinert`() {
-        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Ubestemtdag::class, 2)
-        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Ubestemtdag::class, 2)
+    fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
+        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Feriedag::class, 1)
+        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Feriedag::class, 1)
     }
 
     @Test
@@ -50,9 +49,9 @@ internal class BesteDagTest {
     }
 
     @Test
-    fun `søknad med ferie vinner over en gitt dag`() {
-        assertWinner(ferieFraSøknad, sykdomFraInntektsmelding, Feriedag::class, 1)
-        assertWinner(sykdomFraInntektsmelding, ferieFraSøknad, Feriedag::class, 1)
+    fun `søknad med egenmelding vinner over en gitt dag`() {
+        assertWinner(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class, 1)
+        assertWinner(egenmeldingFraInntektsmelding, ferieFraSøknad, Egenmeldingsdag::class, 1)
     }
 
     @Test
@@ -60,7 +59,7 @@ internal class BesteDagTest {
         assertWinnerBidirectional(implisittDag, utenlandsFraSendtSøknad, Ubestemtdag::class, 1)
         assertWinnerBidirectional(arbeidsdag, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
         assertWinnerBidirectional(sykdomFraSendtSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
-        assertWinnerBidirectional(sykdomFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(egenmeldingFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
         assertWinnerBidirectional(ferieFraSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
         assertWinnerBidirectional(ferieFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
     }

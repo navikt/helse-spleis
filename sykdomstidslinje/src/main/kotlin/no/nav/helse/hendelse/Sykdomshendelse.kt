@@ -21,7 +21,7 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
 
     fun toJson(): JsonNode
     override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())
-
+    override fun equals(other: Any?): Boolean
 }
 
 fun JsonNode.safelyUnwrapDate(): LocalDate? {
