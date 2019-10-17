@@ -16,6 +16,8 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.createHikariConfig
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sakskompleks.db.runMigration
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.testServer
@@ -36,6 +38,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -121,16 +124,33 @@ internal class PersonComponentTest {
             val virksomhetsnummer = "123456789"
 
             sendNySøknad(aktørID, virksomhetsnummer)
+            ventTilSøknadErSendt(antall = 1)
             sendSøknad(aktørID, virksomhetsnummer)
             sendInnteksmelding(aktørID, virksomhetsnummer)
 
-            val behov = ventPåBehov(antall = 1)
+            val behov = ventPåBehov(antall = 2).groupBy(Behov::behovType)
 
-            assertEquals("TRENGER_SYKEPENGEHISTORIKK", behov[0].behovType())
-            assertEquals(aktørID, behov[0]["aktørId"])
-            assertEquals(virksomhetsnummer, behov[0]["organisasjonsnummer"])
+            behov.getValue(TRENGER_SYKEPENGEHISTORIKK.name).first().also {
+                assertEquals(aktørID, it["aktørId"])
+                assertEquals(virksomhetsnummer, it["organisasjonsnummer"])
+                assertTrue(it.get<String>("sakskompleksId")?.isNotBlank() ?: false)
+
+            }
+
+            behov.getValue(TRENGER_PERSONOPPLYSNINGER.name).first().also {
+                assertEquals(aktørID, it["aktørId"])
+                assertEquals(virksomhetsnummer, it["organisasjonsnummer"])
+                assertTrue(it.get<String>("sakskompleksId")?.isNotBlank() ?: false)
+            }
 
         }
+    }
+
+    private fun ventTilSøknadErSendt(antall: Int) {
+        val resultConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
+        resultConsumer.subscribe(listOf(søknadTopic))
+        val messages = assertMessageConsumedCount(resultConsumer, søknadTopic, antall)
+        resultConsumer.unsubscribe()
     }
 
     private fun ventPåBehov(antall: Int): List<Behov> {
@@ -142,7 +162,6 @@ internal class PersonComponentTest {
         }.also {
             resultConsumer.unsubscribe()
         }
-
     }
 
     private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String) {

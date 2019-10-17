@@ -6,8 +6,6 @@ import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.juli
 import no.nav.helse.person.domain.*
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_INNTEKTSOPPLYSNINGER
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
@@ -253,7 +251,7 @@ internal class PersonTest {
             ))
         }
 
-        assertTrue(needObserver.needEvent.map { it.type }.containsAll(listOf(TRENGER_PERSONOPPLYSNINGER, TRENGER_INNTEKTSOPPLYSNINGER)))
+        assertEquals(Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test

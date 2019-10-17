@@ -7,15 +7,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
 import no.nav.helse.person.domain.SakskompleksObserver.*
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.*
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
+import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
 
 class Sakskompleks internal constructor(
-    private val id: UUID,
-    private val aktørId: String,
-    private val organisasjonsnummer: String
+        private val id: UUID,
+        private val aktørId: String,
+        private val organisasjonsnummer: String
 ) {
 
     private var tilstand: Sakskomplekstilstand = StartTilstand
@@ -42,19 +43,19 @@ class Sakskompleks internal constructor(
 
     internal fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
     // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
-        // passerMed(inntektsmelding).also {
-        true.also {
-            if (it) {
-                tilstand.håndterInntektsmelding(this, inntektsmelding)
+            // passerMed(inntektsmelding).also {
+            true.also {
+                if (it) {
+                    tilstand.håndterInntektsmelding(this, inntektsmelding)
+                }
             }
-        }
 
     internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
         if (id == sykepengehistorikk.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikk)
     }
 
     private fun overlapperMed(hendelse: Sykdomshendelse) =
-        this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
 
     private fun setTilstand(event: Sykdomshendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
@@ -113,7 +114,7 @@ class Sakskompleks internal constructor(
 
     private fun slåSammenSykdomstidslinje(hendelse: Sykdomshendelse) {
         this.sykdomstidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje())
-            ?: hendelse.sykdomstidslinje()
+                ?: hendelse.sykdomstidslinje()
     }
 
     private object StartTilstand : Sakskomplekstilstand {
@@ -177,6 +178,7 @@ class Sakskompleks internal constructor(
 
         override fun entering(sakskompleks: Sakskompleks) {
             sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
+            sakskompleks.notifyNeedObservers(TRENGER_PERSONOPPLYSNINGER)
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
@@ -191,12 +193,7 @@ class Sakskompleks internal constructor(
 
     }
 
-    private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand{
-
-        override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.notifyNeedObservers(TRENGER_INNTEKTSOPPLYSNINGER)
-            sakskompleks.notifyNeedObservers(TRENGER_PERSONOPPLYSNINGER)
-        }
+    private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand {
 
         override val type = TilstandType.SYKEPENGEHISTORIKK_MOTTATT
     }
@@ -206,9 +203,9 @@ class Sakskompleks internal constructor(
 
         internal fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
             return Sakskompleks(
-                id = sakskompleksJson.id,
-                aktørId = sakskompleksJson.aktørId,
-                organisasjonsnummer = sakskompleksJson.organisasjonsnummer
+                    id = sakskompleksJson.id,
+                    aktørId = sakskompleksJson.aktørId,
+                    organisasjonsnummer = sakskompleksJson.organisasjonsnummer
             ).apply {
                 tilstand = tilstandFraEnum(sakskompleksJson.tilstandType)
                 sykdomstidslinje = sakskompleksJson.sykdomstidslinje?.let {
@@ -232,16 +229,16 @@ class Sakskompleks internal constructor(
         }
 
         private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         internal fun restore(memento: Memento): Sakskompleks {
             val node = objectMapper.readTree(memento.state)
 
             val sakskompleks = Sakskompleks(
-                id = UUID.fromString(node["id"].textValue()),
-                aktørId = node["aktørId"].textValue(),
-                organisasjonsnummer = node["organisasjonsnummer"].textValue()
+                    id = UUID.fromString(node["id"].textValue()),
+                    aktørId = node["aktørId"].textValue(),
+                    organisasjonsnummer = node["organisasjonsnummer"].textValue()
             )
 
             sakskompleks.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
@@ -280,13 +277,13 @@ class Sakskompleks internal constructor(
 
     internal fun jsonRepresentation(): SakskompleksJson {
         return SakskompleksJson(
-            id = id,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            tilstandType = tilstand.type,
-            sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
-                objectMapper.readTree(it)
-            }
+                id = id,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                tilstandType = tilstand.type,
+                sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
+                    objectMapper.readTree(it)
+                }
         )
     }
 
@@ -301,19 +298,19 @@ class Sakskompleks internal constructor(
     }
 
     private fun notifyStateObservers(
-        currentState: TilstandType,
-        tidslinjeEvent: Sykdomshendelse,
-        previousState: TilstandType,
-        previousMemento: Memento
+            currentState: TilstandType,
+            tidslinjeEvent: Sykdomshendelse,
+            previousState: TilstandType,
+            previousMemento: Memento
     ) {
         val event = StateChangeEvent(
-            id = id,
-            aktørId = aktørId,
-            currentState = currentState,
-            previousState = previousState,
-            sykdomshendelse = tidslinjeEvent,
-            currentMemento = memento(),
-            previousMemento = previousMemento
+                id = id,
+                aktørId = aktørId,
+                currentState = currentState,
+                previousState = previousState,
+                sykdomshendelse = tidslinjeEvent,
+                currentMemento = memento(),
+                previousMemento = previousMemento
         )
 
         observers.forEach { observer ->
@@ -323,10 +320,10 @@ class Sakskompleks internal constructor(
 
     private fun notifyNeedObservers(needType: NeedType) {
         val needEvent = NeedEvent(
-            sakskompleksId = id,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            type = needType)
+                sakskompleksId = id,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                type = needType)
 
         observers.forEach { observer ->
             observer.sakskompleksHarBehov(needEvent)
@@ -334,10 +331,10 @@ class Sakskompleks internal constructor(
     }
 
     internal data class SakskompleksJson(
-        val id: UUID,
-        val aktørId: String,
-        val organisasjonsnummer: String,
-        val tilstandType: TilstandType,
-        val sykdomstidslinje: JsonNode?
+            val id: UUID,
+            val aktørId: String,
+            val organisasjonsnummer: String,
+            val tilstandType: TilstandType,
+            val sykdomstidslinje: JsonNode?
     )
 }
