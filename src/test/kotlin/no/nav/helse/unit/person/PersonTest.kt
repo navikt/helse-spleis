@@ -302,7 +302,7 @@ internal class PersonTest {
             personEndret = true
         }
 
-        override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
             wasTriggered = true
             forrigeSakskomplekstilstand = event.previousState
             sakskomplekstilstand = event.currentState
@@ -314,7 +314,7 @@ internal class PersonTest {
 
         internal val needEvent: MutableList<SakskompleksObserver.NeedEvent> = mutableListOf()
 
-        override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+        override fun sakskompleksHarBehov(event: SakskompleksObserver.NeedEvent) {
             needEvent.add(event)
         }
     }
@@ -322,7 +322,7 @@ internal class PersonTest {
     private class SakstilstandObserver: PersonObserver {
         internal val sakstilstander: MutableMap<UUID, SakskompleksObserver.StateChangeEvent> = mutableMapOf()
 
-        override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
             sakstilstander[event.id] = event
         }
     }

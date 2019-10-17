@@ -10,22 +10,22 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     private val personObservers = mutableListOf<PersonObserver>()
     fun håndterNySøknad(søknad: NySykepengesøknad) {
-        findOrCreateArbeidsgiver(søknad).håndterNySøknad(søknad)
+        finnEllerOpprettArbeidsgiver(søknad).håndterNySøknad(søknad)
     }
 
     fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
-        findOrCreateArbeidsgiver(søknad).håndterSendtSøknad(søknad)
+        finnEllerOpprettArbeidsgiver(søknad).håndterSendtSøknad(søknad)
     }
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-        findOrCreateArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
+        finnEllerOpprettArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
     }
 
     fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
-        findOrCreateArbeidsgiver(sykepengehistorikk).håndterSykepengehistorikk(sykepengehistorikk)
+        finnArbeidsgiver(sykepengehistorikk)?.håndterSykepengehistorikk(sykepengehistorikk)
     }
 
-    override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+    override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         personObservers.forEach {
             it.personEndret(this)
         }
@@ -37,7 +37,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun findOrCreateArbeidsgiver(hendelse: Sykdomshendelse) =
+    private fun finnArbeidsgiver(hendelse: Sykdomshendelse) =
+            hendelse.organisasjonsnummer()?.let { arbeidsgivere[it] }
+
+    private fun finnEllerOpprettArbeidsgiver(hendelse: Sykdomshendelse) =
         hendelse.organisasjonsnummer()?.let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)

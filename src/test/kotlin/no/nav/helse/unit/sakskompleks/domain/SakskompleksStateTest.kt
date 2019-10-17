@@ -20,11 +20,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     private lateinit var lastStateEvent: SakskompleksObserver.StateChangeEvent
     private lateinit var lastNeedEvent: SakskompleksObserver.NeedEvent
 
-    override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+    override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         lastStateEvent = event
     }
 
-    override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+    override fun sakskompleksHarBehov(event: SakskompleksObserver.NeedEvent) {
         lastNeedEvent = event
     }
 

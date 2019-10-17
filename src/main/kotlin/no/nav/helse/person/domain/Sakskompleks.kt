@@ -317,7 +317,7 @@ class Sakskompleks internal constructor(
         )
 
         observers.forEach { observer ->
-            observer.sakskompleksChanged(event)
+            observer.sakskompleksEndret(event)
         }
     }
 
@@ -329,7 +329,7 @@ class Sakskompleks internal constructor(
             type = needType)
 
         observers.forEach { observer ->
-            observer.sakskompleksHasNeed(needEvent)
+            observer.sakskompleksHarBehov(needEvent)
         }
     }
 

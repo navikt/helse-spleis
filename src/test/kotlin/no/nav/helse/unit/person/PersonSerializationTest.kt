@@ -49,7 +49,7 @@ internal class PersonSerializationTest {
             personUpdates++
         }
 
-        override fun sakskompleksChanged(event: SakskompleksObserver.StateChangeEvent) {
+        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
 
         }
     }

@@ -41,7 +41,7 @@ class SakskompleksDao(private val dataSource: DataSource) : SakskompleksObserver
                         memento.toString(), id.toString()).asUpdate)
             }
 
-    override fun sakskompleksChanged(event: StateChangeEvent) {
+    override fun sakskompleksEndret(event: StateChangeEvent) {
         when (event.previousState) {
             Sakskompleks.TilstandType.START -> {
                 opprettSak(event.id, event.aktørId, event.currentMemento)

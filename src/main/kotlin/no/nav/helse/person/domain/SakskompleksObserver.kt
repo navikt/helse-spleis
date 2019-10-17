@@ -23,6 +23,6 @@ interface SakskompleksObserver {
                          val organisasjonsnummer: String,
                          val type: NeedType)
 
-    fun sakskompleksChanged(event: StateChangeEvent) {}
-    fun sakskompleksHasNeed(event: NeedEvent) {}
+    fun sakskompleksEndret(event: StateChangeEvent) {}
+    fun sakskompleksHarBehov(event: NeedEvent) {}
 }

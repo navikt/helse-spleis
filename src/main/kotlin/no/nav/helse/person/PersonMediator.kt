@@ -19,7 +19,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         personRepository.lagrePerson(person)
     }
 
-    override fun sakskompleksHasNeed(event: SakskompleksObserver.NeedEvent) {
+    override fun sakskompleksHarBehov(event: SakskompleksObserver.NeedEvent) {
         behovProducer.sendNyttBehov(event.type.toString(), mapOf(
             "aktørId" to event.aktørId,
             "organisasjonsnummer" to event.organisasjonsnummer,

@@ -55,7 +55,7 @@ class SakskompleksProbe : PersonObserver {
         log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en inntektsmelding")
     }
 
-    override fun sakskompleksChanged(event: StateChangeEvent) {
+    override fun sakskompleksEndret(event: StateChangeEvent) {
         log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.hendelsetype().name} state=${event.currentState} previousState=${event.previousState}")
 
         dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
