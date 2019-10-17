@@ -76,6 +76,16 @@ class SykedagerTest {
 
     @Test
     fun `søknad med ferie - helg - ferie kobles sammen til en sykeperiode`() {
+        //       |D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|
+        //
+        // syk   |S|S|S|
+        // ferie1      |F|F|
+        // ferie2              |F|F|F|F|F|
+        // ferie3                            |F|F|F|F|F|
+        // syk                                             |S|S|S|S|
+        //
+        //       |S|S|S|F|F|-|-|F|F|F|F|F|-|-|F|F|F|F|F|-|-|S|S|S|S|
+
         val influensa = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, sendtSykmelding)
         val ferieDelEn = Sykdomstidslinje.ferie(1.torsdag, 1.fredag, sendtSykmelding)
         val ferieDelTo = Sykdomstidslinje.ferie(2.mandag, 2.fredag, sendtSykmelding)
@@ -93,6 +103,18 @@ class SykedagerTest {
 
     @Test
     fun `søknad med opphold ferie kobles ikke sammen med ny søknad innenfor 16 dager`() {
+        //       |D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|H|H|D|D|D|D|D|
+        //
+        // syk   |S|S|S|S|S|S|S|S|
+        // ferie1                  |F|F|F|
+        // syk                                                     |S|S|S|S|S|S|S|
+
+        //
+        //tidsl  |S|S|S|S|S|S|S|S|-|F|F|F|-|-|-|-|-|-|-|-|-|-|-|-|-|S|S|S|S|S|S|S|
+        //
+        //tilf 1 |S|S|S|S|S|S|S|S|
+        //tilf 2                                                   |S|S|S|S|S|S|S|
+
         val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
         val ferie = Sykdomstidslinje.ferie(2.onsdag, 2.fredag, sendtSykmelding)
         val spysyka = Sykdomstidslinje.sykedager(4.fredag, 5.fredag, sendtSykmelding)
