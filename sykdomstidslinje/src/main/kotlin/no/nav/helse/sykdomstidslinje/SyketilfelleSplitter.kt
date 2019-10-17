@@ -5,6 +5,8 @@ import no.nav.helse.sykdomstidslinje.dag.*
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     var state: SykedagerTellerTilstand = Starttilstand()
     var ikkeSykedager = 0
+    private var sykedager = 0
+    private var antallFridager = 0
     private var syketilfelle = mutableListOf<Dag>()
     private val syketilfeller = mutableListOf<Sykdomstidslinje>()
 
@@ -59,24 +61,28 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
 
     internal inner class Starttilstand : SykedagerTellerTilstand {
         override fun visitSykedag(dag: Sykedag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitSykedag(dag)
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitSykHelgedag(dag)
         }
 
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitEgenmeldingsdag(dag)
         }
     }
 
-    internal inner class TellerSykedager : SykedagerTellerTilstand {
+    internal inner class SykInnenforArbeidsgiverPeriode : SykedagerTellerTilstand {
         override fun visitSykedag(dag: Sykedag) {
             ikkeSykedager = 0
+            if (sykedager + antallFridager > 16) {
+                state = SykUtenforArbeidsgiverPeriode()
+                state.visitSykedag(dag)
+            } else sykedager++
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
@@ -113,23 +119,23 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitSykedag(dag: Sykedag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitSykedag(dag)
         }
 
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitEgenmeldingsdag(dag)
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitSykHelgedag(dag)
         }
 
         private fun tellIkkeSykedager() {
             ikkeSykedager++
-            if (ikkeSykedager >= 16) {
+            if (ikkeSykedager + antallFridager >= 16) {
                 state = Starttilstand()
                 pushResultat()
             }
@@ -137,6 +143,10 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     }
 
     internal inner class FeriePåfølgendeSykdom : SykedagerTellerTilstand {
+        override fun visitFeriedag(dag: Feriedag) {
+            antallFridager++
+        }
+
         override fun visitArbeidsdag(dag: Arbeidsdag) {
             state = TellerIkkeSykedager()
             state.visitArbeidsdag(dag)
@@ -150,7 +160,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitSykedag(dag: Sykedag) {
-            state = TellerSykedager()
+            if (erInnenforArbeidsgiverperiode()) {
+                state = SykInnenforArbeidsgiverPeriode()
+            } else {
+                state = SykUtenforArbeidsgiverPeriode()
+            }
             state.visitSykedag(dag)
         }
 
@@ -159,6 +173,8 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
             state.visitSykHelgedag(dag)
         }
     }
+
+    private fun erInnenforArbeidsgiverperiode() = sykedager + antallFridager <= 16
 
     internal inner class TellerHelg : SykedagerTellerTilstand {
         override fun visitArbeidsdag(dag: Arbeidsdag) {
@@ -174,8 +190,14 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitSykedag(dag: Sykedag) {
-            state = TellerSykedager()
+            state = SykInnenforArbeidsgiverPeriode()
             state.visitSykedag(dag)
+        }
+    }
+
+    internal inner class SykUtenforArbeidsgiverPeriode : SykedagerTellerTilstand {
+        override fun visitSykedag(dag: Sykedag) {
+            sykedager++
         }
     }
 

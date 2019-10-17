@@ -94,8 +94,6 @@ class SykedagerTest {
 
         val tilfeller = (influensa + ferieDelEn + ferieDelTo + ferieDelTre + malaria).also { println(it) }.syketilfeller()
 
-        println(tilfeller)
-
         assertEquals(1, tilfeller.size)
         assertEquals(1.mandag, tilfeller.first().startdato())
         assertEquals(5.torsdag, tilfeller.first().sluttdato())
@@ -151,4 +149,73 @@ class SykedagerTest {
         assertEquals(1.mandag, grupper.first().startdato())
         assertEquals(1.søndag, grupper.first().sluttdato())
     }
+
+    @Test
+    fun `gitt en person som har vært syk i 16 dager, har ferie i 15 dager, jobber i 5 dager og deretter blir syk i 10 nye dager så skal den siste perioden telle som en del av samme sykdomstilfelle`() {
+        //       |D*16|D*15|D|D|D|D|D*10|
+        //
+        // syk1  |S*16|
+        // ferie      |F*15|
+        // arbeid          |A|A|A|A|
+        // syk2                    |S*10|
+        //
+        // tidsl |S*16|F*15|A|A|A|A|S*10|
+        //
+        // tilf  |S*16|F*15|A|A|A|A|S*10|
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 3.tirsdag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(3.onsdag, 5.onsdag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(6.mandag, 7.onsdag, sendtSykmelding)
+
+        val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
+        println(syketilfeller)
+
+        assertEquals(1, syketilfeller.size)
+    }
+
+    @Test
+    fun `gitt en person som har vært syk i 15 dager, har ferie i 15 dager, jobber i 4 dager og deretter blir syk i 10 nye dager så skal den siste perioden telle som en ny sykdomsperiode`() {
+        //       |D*15|D*15|D|D|D|D|D*10|
+        //
+        // syk1  |S*15|
+        // ferie      |F*15|
+        // arbeid          |A|A|A|A|
+        // syk2                    |S*10|
+        //
+        // tidsl |S*15|F*15|A|A|A|A|S*10|
+        //
+        // tilf1 |S*15|
+        // tilf2                   |S*10|
+        val influensa = Sykdomstidslinje.sykedager(1.tirsdag, 3.tirsdag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(3.onsdag, 5.onsdag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(6.mandag, 7.onsdag, sendtSykmelding)
+
+        val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
+        println(syketilfeller)
+        assertEquals(2, syketilfeller.size)
+    }
+
+    @Test
+    fun `gitt en person som har vært syk i 10 dager, har ferie i 20 dager og deretter blir syk i 9 nye dager så skal den siste perioden telle som en del av samme sykdomstilfelle`() {
+        //       |D*10|D*20|D*10|
+        //
+        // syk1  |S*10|
+        // ferie      |F*20|
+        // syk2            |S*10|
+        //
+        // tidsl |S*10|F*20|S*10|
+        //
+        // tilf  |S*10|F*20|S*10|
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.onsdag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(2.torsdag, 5.onsdag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(5.torsdag, 6.fredag, sendtSykmelding)
+
+        val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
+        println(syketilfeller)
+
+        assertEquals(1, syketilfeller.size)
+    }
+
+    @Test fun `gitt en person som har vært syk i 2 dager, har ferie i 10 dager og deretter blir syk i 2 nye dager er innenfor arbeidsgiverperioden`() {}
+
+    @Test fun `gitt en person som har vært syk i 2 dager, har ferie i 14 dager og deretter blir syk i 2 nye dager er utenfor arbeidsgiverperioden`() {}
 }
