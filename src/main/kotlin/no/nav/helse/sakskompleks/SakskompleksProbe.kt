@@ -34,7 +34,11 @@ class SakskompleksProbe : PersonObserver {
 
         private val manglendeSakskompleksForInntektsmeldingCounter = Counter.build(manglendeSakskompleksForInntektsmeldingCounterName, "Antall inntektsmeldinger vi har mottatt som vi ikke klarer å koble til et sakskompleks")
                 .register()
-        private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen").register()
+        private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen")
+                .quantile(0.5, 0.05)
+                .quantile(0.75, 0.1)
+                .quantile(0.9, 0.01)
+                .quantile(0.99, 0.001).register()
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
