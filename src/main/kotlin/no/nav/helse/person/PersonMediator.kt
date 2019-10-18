@@ -47,8 +47,12 @@ internal class PersonMediator(private val personRepository: PersonRepository,
             }
 
     fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
-            finnPerson(inntektsmelding.aktørId()).also { person ->
-                person.håndterInntektsmelding(inntektsmelding)
+            try {
+                finnPerson(inntektsmelding.aktørId()).also { person ->
+                    person.håndterInntektsmelding(inntektsmelding)
+                }
+            } catch (err: UtenforOmfangException) {
+                sakskompleksProbe.utenforOmfang(err, inntektsmelding)
             }
 
     fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
