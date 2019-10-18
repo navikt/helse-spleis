@@ -28,8 +28,6 @@ abstract class Dag internal constructor(
     private val utenlandsdag = Utenlandsdag::class
     private val arbeidsdag = Arbeidsdag::class
 
-    internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
     internal abstract fun dagType(): JsonDagType
@@ -94,6 +92,8 @@ abstract class Dag internal constructor(
     internal abstract fun nøkkel(): Nøkkel
 
     companion object {
+        internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
         internal fun fromJsonRepresentation(jsonDag: JsonDag): Dag = jsonDag.type.creator(jsonDag).also {
             it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag -> fromJsonRepresentation(erstatterJsonDag) })
         }
