@@ -9,10 +9,7 @@ import no.nav.helse.hendelse.TestHendelser.sendtSøknad
 import no.nav.helse.hendelse.TestHendelser.sykeperiodeFOM
 import no.nav.helse.hendelse.TestHendelser.sykeperiodeTOM
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.testhelpers.fredag
-import no.nav.helse.testhelpers.get
-import no.nav.helse.testhelpers.mandag
-import no.nav.helse.testhelpers.torsdag
+import no.nav.helse.testhelpers.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO.PERMISJON
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
@@ -59,6 +56,22 @@ class SykepengesøknadTidslinjeTest {
 
         assertType(Permisjonsdag::class, tidslinje[1.torsdag])
         assertType(Permisjonsdag::class, tidslinje[1.fredag])
+    }
+
+    @Test
+    fun `Tidslinjen får arbeidsdag resten av perioden hvis soknaden har arbeid gjenopptatt`() {
+        val tidslinje = sendtSøknad(
+            søknadsperioder = listOf(SoknadsperiodeDTO(1.mandag, 1.fredag)),
+            arbeidGjenopptatt = 1.onsdag
+        ).also {
+            it.toString()
+        }.sykdomstidslinje()
+
+        assertType(Sykedag::class, tidslinje[1.mandag])
+        assertType(Sykedag::class, tidslinje[1.tirsdag])
+        assertType(Arbeidsdag::class, tidslinje[1.onsdag])
+        assertType(Arbeidsdag::class, tidslinje[1.torsdag])
+        assertType(Arbeidsdag::class, tidslinje[1.fredag])
     }
 
     inline fun assertType(expected: KClass<*>, actual: Any?) =

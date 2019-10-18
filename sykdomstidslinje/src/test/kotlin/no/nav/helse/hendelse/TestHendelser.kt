@@ -102,13 +102,15 @@ internal object TestHendelser {
                 type = FravarstypeDTO.FERIE
             )
         ),
-        søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder
+        søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder,
+        arbeidGjenopptatt: LocalDate? = null
     ) =
         søknad(
             opprettetTidspunkt = opprettetTidspunkt,
             arbeidsgiver = arbeidsgiver,
             fravær = fravær,
-            søknadsperioder = søknadsperioder
+            søknadsperioder = søknadsperioder,
+            arbeidGjenopptatt = arbeidGjenopptatt
         ) as SendtSykepengesøknad
 
     fun nySøknad(
