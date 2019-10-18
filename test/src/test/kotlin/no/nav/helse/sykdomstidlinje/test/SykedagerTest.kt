@@ -5,6 +5,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 
 class SykedagerTest {
@@ -232,4 +233,17 @@ class SykedagerTest {
         assertEquals(1, syketilfeller.size)
     }
 
+    @Test
+    fun `syketilfeller støtter ikke ubestemte dager`() {
+        assertThrows<IllegalStateException> {
+            (Sykdomstidslinje.utenlandsdag(1.mandag, sendtSykmelding) + Sykdomstidslinje.permisjonsdag(1.mandag, sendtSykmelding)).syketilfeller()
+        }
+    }
+
+    @Test
+    fun `syketilfeller støtter ikke permisjonsdager`() {
+        assertThrows<IllegalStateException> {
+            Sykdomstidslinje.permisjonsdag(1.mandag, sendtSykmelding).syketilfeller()
+        }
+    }
 }

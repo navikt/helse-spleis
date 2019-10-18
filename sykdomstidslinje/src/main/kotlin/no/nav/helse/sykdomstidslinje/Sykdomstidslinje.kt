@@ -94,6 +94,8 @@ abstract class Sykdomstidslinje {
     }
 
     fun syketilfeller(): List<Sykdomstidslinje> {
+        check(flatten().none { it::class == Permisjonsdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med permisjonsdager." }
+        check(flatten().none { it::class == Ubestemtdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med ubestemte dager." }
         val visitor = SyketilfelleSplitter()
         this.accept(visitor)
 

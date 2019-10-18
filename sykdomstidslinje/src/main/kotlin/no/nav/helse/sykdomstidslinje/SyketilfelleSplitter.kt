@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
+import java.lang.RuntimeException
 
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     var state: SykedagerTellerTilstand = Starttilstand()
@@ -38,6 +39,10 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         syketilfelle.add(sykHelgedag)
         state.visitSykHelgedag(sykHelgedag)
     }
+
+    override fun visitUbestemt(ubestemtdag: Ubestemtdag) = throw RuntimeException("Det er ikke mulig å beregne arbeidsgiverperioder for tidslinjer med ubestemte dager, som f.eks ${ubestemtdag.dagen}")
+
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = throw RuntimeException("Det er ikke mulig å beregne arbeidsgiverperioder for tidslinjer med permisjonsdager, som f.eks ${permisjonsdag.dagen}")
 
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         pushResultat()
