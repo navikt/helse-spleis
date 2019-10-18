@@ -65,7 +65,7 @@ class SykedagerTest {
     fun `søknad med påfølgende ferie uten gap kobles sammen med ny søknad innenfor 16 dager`() {
         val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, sendtSykmelding)
         val ferie = Sykdomstidslinje.ferie(2.tirsdag, 3.fredag, sendtSykmelding)
-        val spysyka = Sykdomstidslinje.sykedager(5.fredag, 6.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(4.onsdag, 6.fredag, sendtSykmelding)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
@@ -90,13 +90,13 @@ class SykedagerTest {
         val ferieDelEn = Sykdomstidslinje.ferie(1.torsdag, 1.fredag, sendtSykmelding)
         val ferieDelTo = Sykdomstidslinje.ferie(2.mandag, 2.fredag, sendtSykmelding)
         val ferieDelTre = Sykdomstidslinje.ferie(3.mandag, 3.fredag, sendtSykmelding)
-        val malaria = Sykdomstidslinje.sykedager(5.mandag, 5.torsdag, sendtSykmelding)
+        val malaria = Sykdomstidslinje.sykedager(4.mandag, 4.torsdag, sendtSykmelding)
 
-        val tilfeller = (influensa + ferieDelEn + ferieDelTo + ferieDelTre + malaria).also { println(it) }.syketilfeller()
+        val tilfeller = (influensa + ferieDelEn + ferieDelTo + ferieDelTre + malaria).syketilfeller()
 
         assertEquals(1, tilfeller.size)
         assertEquals(1.mandag, tilfeller.first().startdato())
-        assertEquals(5.torsdag, tilfeller.first().sluttdato())
+        assertEquals(4.torsdag, tilfeller.first().sluttdato())
     }
 
     @Test
@@ -167,7 +167,6 @@ class SykedagerTest {
         val spysyka = Sykdomstidslinje.sykedager(6.mandag, 7.onsdag, sendtSykmelding)
 
         val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
-        println(syketilfeller)
 
         assertEquals(1, syketilfeller.size)
     }
@@ -190,7 +189,6 @@ class SykedagerTest {
         val spysyka = Sykdomstidslinje.sykedager(6.mandag, 7.onsdag, sendtSykmelding)
 
         val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
-        println(syketilfeller)
         assertEquals(2, syketilfeller.size)
     }
 
@@ -210,12 +208,28 @@ class SykedagerTest {
         val spysyka = Sykdomstidslinje.sykedager(5.torsdag, 6.fredag, sendtSykmelding)
 
         val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
-        println(syketilfeller)
 
         assertEquals(1, syketilfeller.size)
     }
 
-    @Test fun `gitt en person som har vært syk i 2 dager, har ferie i 10 dager og deretter blir syk i 2 nye dager er innenfor arbeidsgiverperioden`() {}
+    @Test
+    fun `gitt en person som har vært syk i 19 dager, har ferie i 19 dager og deretter blir syk i 10 nye dager så skal den siste perioden telle som en del av samme sykdomstilfelle`() {
+        //       |D*19|D*19|D*10|
+        //
+        // syk1  |S*19|
+        // ferie      |F*19|
+        // syk2            |S*10|
+        //
+        // tidsl |S*19|F*19|S*10|
+        //
+        // tilf  |S*19|F*19|S*10|
+        val influensa = Sykdomstidslinje.sykedager(1.mandag, 4.fredag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(5.mandag, 8.fredag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(9.mandag, 10.fredag, sendtSykmelding)
 
-    @Test fun `gitt en person som har vært syk i 2 dager, har ferie i 14 dager og deretter blir syk i 2 nye dager er utenfor arbeidsgiverperioden`() {}
+        val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
+
+        assertEquals(1, syketilfeller.size)
+    }
+
 }
