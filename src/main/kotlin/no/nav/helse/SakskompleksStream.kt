@@ -10,9 +10,10 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovConsumer
+import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
 import no.nav.helse.sakskompleks.db.getDataSource
@@ -63,9 +64,13 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     }
 
     migrate(createHikariConfigFromEnvironment())
+
+    val dataSource = getDataSource(createHikariConfigFromEnvironment())
+
     val producer = KafkaProducer<String, String>(behovProducerConfig(), StringSerializer(), StringSerializer())
     val personMediator = PersonMediator(
-        personRepository = PersonPostgresRepository(getDataSource(createHikariConfigFromEnvironment())),
+        personRepository = PersonPostgresRepository(dataSource),
+        lagrePersonDao = LagrePersonDao(dataSource),
         behovProducer = BehovProducer(Topics.behovTopic, producer))
 
     val builder = StreamsBuilder()

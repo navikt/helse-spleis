@@ -8,10 +8,10 @@ import org.junit.jupiter.api.assertThrows
 internal class BehovTest {
     @Test
     fun `Opprette ett nytt behov`() {
-        val behov = Behov.nyttBehov("sykepengehistorikk", mapOf("id" to "1123"))
+        val behov = Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf("id" to "1123"))
 
         val json = behov.toJson()
-        assertTrue(json.contains("sykepengehistorikk"))
+        assertTrue(json.contains(BehovsTyper.Sykepengehistorikk.name))
         assertTrue(json.contains("1123"))
 
     }
@@ -25,7 +25,7 @@ internal class BehovTest {
     @Test
     fun `En behovsløser må kunne opprette et behov fra json, og legge på løsning, og lage json`() {
 
-        val orignalBehov = Behov.nyttBehov("sykepengehistorikk", mapOf("id" to "1123"))
+        val orignalBehov = Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf("id" to "1123"))
 
 
         val behov = Behov.fromJson(orignalBehov.toJson())

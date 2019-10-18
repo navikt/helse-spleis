@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelse.*
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
-import no.nav.helse.person.domain.SakskompleksObserver.*
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
+import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.io.StringWriter
 import java.util.*
@@ -70,7 +70,7 @@ class Sakskompleks internal constructor(
 
         tilstand.entering(this)
 
-        notifyStateObservers(tilstand.type, event, previousStateName, previousMemento)
+        emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
     }
 
     enum class TilstandType {
@@ -178,8 +178,8 @@ class Sakskompleks internal constructor(
         override val type = KOMPLETT_SAK
 
         override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
-            sakskompleks.notifyNeedObservers(TRENGER_PERSONOPPLYSNINGER)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.TRENGER_SYKEPENGEHISTORIKK)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.TRENGER_PERSONOPPLYSNINGER)
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
@@ -296,7 +296,7 @@ class Sakskompleks internal constructor(
         observers.add(observer)
     }
 
-    private fun notifyStateObservers(
+    private fun emitSakskompleksEndret(
             currentState: TilstandType,
             tidslinjeEvent: Sykdomshendelse,
             previousState: TilstandType,
@@ -317,15 +317,14 @@ class Sakskompleks internal constructor(
         }
     }
 
-    private fun notifyNeedObservers(needType: NeedType) {
-        val needEvent = NeedEvent(
-                sakskompleksId = id,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                type = needType)
+    private fun emitTrengerLøsning(type: BehovsTyper) {
+        val behov = Behov.nyttBehov(type, mapOf(
+                "sakskompleksId" to id,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer))
 
         observers.forEach { observer ->
-            observer.sakskompleksHarBehov(needEvent)
+            observer.sakskompleksTrengerLøsning(behov)
         }
     }
 

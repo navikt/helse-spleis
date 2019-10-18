@@ -17,11 +17,4 @@ class PersonPostgresRepository(private val dataSource: DataSource) : PersonRepos
         }
     }
 
-    override fun lagrePerson(person: Person) {
-        using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO person (aktor_id, data) VALUES (?, (to_json(?::json)))", person.aktørId, person.toJson()).asExecute)
-        }
-    }
-
-
 }

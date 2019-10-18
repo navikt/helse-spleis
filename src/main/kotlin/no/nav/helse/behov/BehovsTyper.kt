@@ -1,5 +1,8 @@
 package no.nav.helse.behov
 
 enum class BehovsTyper {
-    Sykepengehistorikk
+    Sykepengehistorikk,
+    TRENGER_SYKEPENGEHISTORIKK,
+    TRENGER_PERSONOPPLYSNINGER,
+    TRENGER_INNTEKTSOPPLYSNINGER
 }

@@ -15,9 +15,9 @@ class Behov internal constructor(private val pakke: Pakke) {
         private const val LøsningsKey = "@løsning"
 
 
-        fun nyttBehov(type: String, additionalParams: Map<String, Any>): Behov {
+        fun nyttBehov(type: BehovsTyper, additionalParams: Map<String, Any>): Behov {
             val pakke = Pakke(additionalParams + mapOf(
-                    BehovKey to type,
+                    BehovKey to type.name,
                     IdKey to UUID.randomUUID().toString(),
                     OpprettetKey to LocalDateTime.now().toString()
             ))

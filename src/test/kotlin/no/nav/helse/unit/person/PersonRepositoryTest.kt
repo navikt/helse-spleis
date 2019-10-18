@@ -2,6 +2,7 @@ package no.nav.helse.unit.person
 
 import io.mockk.mockk
 import no.nav.helse.TestConstants.nySøknad
+import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.domain.Person
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,6 +18,7 @@ internal class PersonRepositoryTest {
         val repo = HashmapPersonRepository()
         val mediator = PersonMediator(
                 personRepository = repo,
+                lagrePersonDao = repo,
                 behovProducer = mockk()
         )
 
@@ -29,25 +31,32 @@ internal class PersonRepositoryTest {
     }
 
     @Test
-    internal fun `mediator henter person ved endringer`() {
+    internal fun `gitt at en ny person er lagret i databasen, og endrer tilstand, så lagres ny versjon`() {
         val repo = HashmapPersonRepository()
-
-        val person = Person("1234")
-        repo.lagrePerson(person)
-
+        val aktørId = "1234"
         val mediator = PersonMediator(
                 personRepository = repo,
+                lagrePersonDao = repo,
                 behovProducer = mockk()
         )
-
         mediator.håndterNySøknad(nySøknad(
-                aktørId = "1234"
+                aktørId = aktørId
         ))
 
-        assertNotNull(repo.hentPerson("1234"))
-        assertEquals(2, repo.hentHistorikk("1234").size)
-    }
 
+        val personEtterNySøknad = repo.hentPerson(aktørId)
+        assertNotNull(personEtterNySøknad)
+        assertEquals(1, repo.hentHistorikk(aktørId).size)
+
+        mediator.håndterSendtSøknad(sendtSøknad(
+                aktørId = aktørId
+        ))
+
+        val personEtterSøknad = repo.hentPerson(aktørId)
+        assertNotNull(personEtterSøknad)
+        assertEquals(2, repo.hentHistorikk(aktørId).size)
+
+    }
 }
 
 

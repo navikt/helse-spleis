@@ -7,7 +7,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -23,7 +22,7 @@ internal class BehovProducerTest {
         } returns DummyFuture(RecordMetadata(TopicPartition(topic, 0), 0L, 0L, 0L, 0L, 0, 0))
 
         BehovProducer(topic, producer)
-                .sendNyttBehov(BehovsTyper.Sykepengehistorikk.name, emptyMap())
+                .sendNyttBehov(Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, emptyMap()))
 
         verify(exactly = 1) {
             producer.send(match { record ->

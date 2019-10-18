@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class SakskompleksProbe : PersonObserver {
+    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+    }
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)

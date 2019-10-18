@@ -27,10 +27,13 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         personObservers.forEach {
-            it.personEndret(this)
+            it.personEndret(PersonObserver.PersonEndretEvent(
+                    aktørId = aktørId,
+                    sykdomshendelse = event.sykdomshendelse,
+                    memento = memento()
+            ))
         }
     }
-
 
     fun addObserver(observer: PersonObserver) {
         personObservers.add(observer)
@@ -108,15 +111,18 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     }
 
-    fun toJson(): String {
-        return objectMapper.writeValueAsString(jsonRepresentation())
-    }
+    internal fun memento() =
+            Memento(objectMapper.writeValueAsString(jsonRepresentation()))
 
     private fun jsonRepresentation(): PersonJson {
         return PersonJson(
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
         )
+    }
+
+    data class Memento(private val json: String) {
+        override fun toString() = json
     }
 
     internal data class ArbeidsgiverJson(
@@ -144,8 +150,4 @@ class Person(val aktørId: String) : SakskompleksObserver {
                 }
         }
     }
-}
-
-interface PersonObserver : SakskompleksObserver {
-    fun personEndret(person: Person) {}
 }

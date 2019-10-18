@@ -13,7 +13,7 @@ internal class PersonSerializationTest {
     @Test
     fun `restoring av lagret person gir samme objekt`() {
         val person = Person(aktørId = "id")
-        val json = person.toJson()
+        val json = person.memento().toString()
         val restored = Person.fromJson(json)
         assertEquals(person.aktørId, restored.aktørId)
     }
@@ -24,7 +24,7 @@ internal class PersonSerializationTest {
 
         val restoredPerson = Person.fromJson(personJson)
 
-        val serializedPerson = restoredPerson.toJson()
+        val serializedPerson = restoredPerson.memento().toString()
 
         assertEquals(objectMapper.readTree(personJson), objectMapper.readTree(serializedPerson))
     }
@@ -33,7 +33,7 @@ internal class PersonSerializationTest {
     fun `restoring adds the sakskompleks observer for the person`() {
         val initialPerson = Person("abde")
         initialPerson.håndterNySøknad(TestConstants.nySøknad())
-        val personJson = initialPerson.toJson()
+        val personJson = initialPerson.memento().toString()
 
         val testObserver = TestObserver()
         val restoredPerson = Person.fromJson(personJson)
@@ -45,7 +45,7 @@ internal class PersonSerializationTest {
     class TestObserver : PersonObserver {
         var personUpdates: Int = 0
 
-        override fun personEndret(person: Person) {
+        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
             personUpdates++
         }
 

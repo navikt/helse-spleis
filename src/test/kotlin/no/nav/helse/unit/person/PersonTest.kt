@@ -4,6 +4,8 @@ import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykepengehistorikk
+import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.juli
 import no.nav.helse.person.domain.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -81,8 +83,8 @@ internal class PersonTest {
     @Test
     internal fun `ny sak blir opprettet når en ny søknad som ikke overlapper saken personen har fra før blir sendt inn`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterNySøknad(nySøknad(fom = 21.juli, tom=28.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=21.juli, tom=28.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 21.juli, tom = 28.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 28.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -94,8 +96,8 @@ internal class PersonTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende saken`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterNySøknad(nySøknad(fom = 10.juli, tom=22.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=10.juli, tom=22.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 10.juli, tom = 22.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 22.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -107,9 +109,9 @@ internal class PersonTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når vi mottar den andre sendte søknaden`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 10.juli, tom=30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=10.juli, tom=30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 10.juli, tom = 30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -120,8 +122,8 @@ internal class PersonTest {
     @Test
     internal fun `oppretter ny sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterNySøknad(nySøknad(fom = 21.juli, tom=30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=21.juli, tom=30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 21.juli, tom = 30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -132,8 +134,8 @@ internal class PersonTest {
     @Test
     internal fun `ny sak må behandles i infotrygd når vi mottar den sendte søknaden først`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 10.juli, tom=30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom=10.juli, tom=30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 10.juli, tom = 30.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 30.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -145,7 +147,7 @@ internal class PersonTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når vi mottar den andre inntektsmeldngen`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer ="12"), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = "12"), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = "12"))
             it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = "12"))
         }
@@ -230,14 +232,14 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, tilstandsflytObserver.sakskomplekstilstand)
-        assertNotNull(needObserver.needEvent.find{ it.type == SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK})
+        assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.TRENGER_SYKEPENGEHISTORIKK.name })
     }
 
     @Test
     fun `sykepengehistorikk eldre enn seks måneder fører saken videre`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = organisasjonsnummer))
 
             assertEquals(1, sakstilstandObserver.sakstilstander.size)
@@ -257,8 +259,8 @@ internal class PersonTest {
     @Test
     fun `sykepengehistorikk med feil sakskompleksid skal ikke føre noen saker videre`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = organisasjonsnummer))
 
             it.håndterSykepengehistorikk(sykepengehistorikk(1.juli.minusMonths(7), organisasjonsnummer, aktørId, UUID.randomUUID()))
@@ -270,8 +272,8 @@ internal class PersonTest {
     @Test
     fun `sykepengehistorikk yngre enn seks måneder fører til at saken må behandles i infotrygd`() {
         testPerson.also {
-            it.håndterNySøknad(nySøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom=9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom=1.juli, tom=9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterNySøknad(nySøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndterSendtSøknad(sendtSøknad(fom = 1.juli, tom = 9.juli, arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndterInntektsmelding(inntektsmelding(virksomhetsnummer = organisasjonsnummer))
 
             assertEquals(1, sakstilstandObserver.sakstilstander.size)
@@ -296,7 +298,7 @@ internal class PersonTest {
         internal var forrigeSakskomplekstilstand: Sakskompleks.TilstandType? = null
         internal var sakskomplekstilstand: Sakskompleks.TilstandType? = null
 
-        override fun personEndret(person: Person) {
+        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
             personEndret = true
         }
 
@@ -309,16 +311,22 @@ internal class PersonTest {
     }
 
     private class NeedObserver : PersonObserver {
+        internal val needEvent: MutableList<Behov> = mutableListOf()
 
-        internal val needEvent: MutableList<SakskompleksObserver.NeedEvent> = mutableListOf()
+        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+        }
 
-        override fun sakskompleksHarBehov(event: SakskompleksObserver.NeedEvent) {
+        override fun sakskompleksTrengerLøsning(event: Behov) {
             needEvent.add(event)
         }
     }
 
-    private class SakstilstandObserver: PersonObserver {
+    private class SakstilstandObserver : PersonObserver {
         internal val sakstilstander: MutableMap<UUID, SakskompleksObserver.StateChangeEvent> = mutableMapOf()
+
+        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+
+        }
 
         override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
             sakstilstander[event.id] = event

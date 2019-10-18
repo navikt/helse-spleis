@@ -17,11 +17,14 @@ internal class PersonMediatorTest {
     val probe = mockk<SakskompleksProbe>(relaxed = true)
     val oppgaveProducer = spyk(OppgaveProducer())
     val behovProducer = mockk<BehovProducer>()
+    val repo = HashmapPersonRepository()
     val personMediator = PersonMediator(
-        oppgaveProducer = oppgaveProducer,
-        sakskompleksProbe = probe,
-        personRepository = HashmapPersonRepository(),
-        behovProducer = behovProducer)
+            oppgaveProducer = oppgaveProducer,
+            sakskompleksProbe = probe,
+            personRepository = repo,
+            lagrePersonDao = repo,
+            behovProducer = behovProducer)
+
     val sykepengesøknad = sendtSøknad()
 
     @Test

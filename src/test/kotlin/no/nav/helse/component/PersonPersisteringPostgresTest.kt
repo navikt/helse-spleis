@@ -6,8 +6,10 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.TestConstants
+import no.nav.helse.TestConstants.nySøknad
+import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.createHikariConfig
+import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonPostgresRepository
 import no.nav.helse.person.domain.Person
 import no.nav.helse.sakskompleks.db.runMigration
@@ -17,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 
-class PersonRepositoryPostgresTest {
+class PersonPersisteringPostgresTest {
 
     companion object {
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -51,23 +53,27 @@ class PersonRepositoryPostgresTest {
     }
 
     @Test
-    internal fun `skal returnere person når person finnes`() {
-        val repo = PersonPostgresRepository(HikariDataSource(hikariConfig))
+    internal fun `skal returnere person når person blir lagret etter statechange`() {
+        val dataSource = HikariDataSource(hikariConfig)
+        val repo = PersonPostgresRepository(dataSource)
 
         val person = Person("2")
-        repo.lagrePerson(person)
+        person.addObserver(LagrePersonDao(dataSource))
+        person.håndterNySøknad(nySøknad())
+
         assertNotNull(repo.hentPerson("2"))
     }
 
     @Test
-    internal fun `det lagres to ulike versjoner av samme personaggregat`() {
+    internal fun `hver endring av person fører til at ny versjon lagres`() {
         val dataSource = HikariDataSource(hikariConfig)
         val repo = PersonPostgresRepository(dataSource)
 
         val aktørId = "3"
-        val personAggregat = Person(aktørId)
-        repo.lagrePerson(personAggregat)
-        repo.lagrePerson(personAggregat)
+        val person = Person(aktørId)
+        person.addObserver(LagrePersonDao(dataSource))
+        person.håndterNySøknad(nySøknad())
+        person.håndterSendtSøknad(sendtSøknad())
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {
@@ -76,20 +82,5 @@ class PersonRepositoryPostgresTest {
         }
         assertEquals(2, alleVersjoner.size, "Antall versjoner av personaggregat skal være 2, men var ${alleVersjoner.size}")
     }
-
-    @Test
-    internal fun `siste versjon av personaggregat hentes`() {
-        val repo = PersonPostgresRepository(HikariDataSource(hikariConfig))
-
-        val personAggregat = Person("4")
-        repo.lagrePerson(personAggregat)
-        personAggregat.håndterNySøknad(TestConstants.nySøknad(id="UnikID"))
-        repo.lagrePerson(personAggregat)
-
-        assertTrue(repo.hentPerson("4")!!.toJson().contains("UnikID"))
-    }
-
-
-
 
 }

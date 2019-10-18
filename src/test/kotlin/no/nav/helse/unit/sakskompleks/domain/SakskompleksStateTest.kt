@@ -4,6 +4,7 @@ import no.nav.helse.TestConstants.inntektsmelding
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykepengehistorikk
+import no.nav.helse.behov.Behov
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
@@ -18,13 +19,13 @@ import java.util.*
 
 internal class SakskompleksStateTest : SakskompleksObserver {
     private lateinit var lastStateEvent: SakskompleksObserver.StateChangeEvent
-    private lateinit var lastNeedEvent: SakskompleksObserver.NeedEvent
+    private lateinit var lastNeedEvent: Behov
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         lastStateEvent = event
     }
 
-    override fun sakskompleksHarBehov(event: SakskompleksObserver.NeedEvent) {
+    override fun sakskompleksTrengerLøsning(event: Behov) {
         lastNeedEvent = event
     }
 
@@ -201,31 +202,31 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     private fun beInStartTilstand(): Sakskompleks {
         return Sakskompleks(
-            aktørId = aktørId,
-            id = sakskompleksId,
-            organisasjonsnummer = organisasjonsnummer
+                aktørId = aktørId,
+                id = sakskompleksId,
+                organisasjonsnummer = organisasjonsnummer
         ).apply {
             addSakskompleksObserver(this@SakskompleksStateTest)
         }
     }
 
     private fun beInNySøknad() =
-        beInStartTilstand().apply {
-            håndterNySøknad(nySøknad())
-        }
+            beInStartTilstand().apply {
+                håndterNySøknad(nySøknad())
+            }
 
     private fun beInSendtSøknad() =
-        beInNySøknad().apply {
-            håndterSendtSøknad(sendtSøknad())
-        }
+            beInNySøknad().apply {
+                håndterSendtSøknad(sendtSøknad())
+            }
 
     private fun beInMottattInntektsmelding() =
-        beInNySøknad().apply {
-            håndterInntektsmelding(inntektsmelding())
-        }
+            beInNySøknad().apply {
+                håndterInntektsmelding(inntektsmelding())
+            }
 
     private fun beInKomplettTidslinje() =
-        beInMottattInntektsmelding().apply {
-            håndterSendtSøknad(sendtSøknad())
-        }
+            beInMottattInntektsmelding().apply {
+                håndterSendtSøknad(sendtSøknad())
+            }
 }

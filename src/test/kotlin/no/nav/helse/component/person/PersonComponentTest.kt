@@ -15,9 +15,9 @@ import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovsTyper.TRENGER_PERSONOPPLYSNINGER
+import no.nav.helse.behov.BehovsTyper.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.createHikariConfig
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
-import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
 import no.nav.helse.sakskompleks.db.runMigration
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.testServer

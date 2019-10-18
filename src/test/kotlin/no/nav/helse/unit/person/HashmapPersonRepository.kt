@@ -2,14 +2,19 @@ package no.nav.helse.unit.person
 
 import no.nav.helse.person.PersonRepository
 import no.nav.helse.person.domain.Person
+import no.nav.helse.person.domain.PersonObserver
 
-class HashmapPersonRepository : PersonRepository {
+internal class HashmapPersonRepository : PersonRepository, PersonObserver {
     private val map: MutableMap<String, MutableList<String>> = mutableMapOf()
 
-    override fun lagrePerson(person: Person) {
-        map.computeIfAbsent(person.aktørId) {
+    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+        lagrePerson(personEndretEvent.aktørId, personEndretEvent.memento)
+    }
+
+    private fun lagrePerson(aktørId: String, memento: Person.Memento) {
+        map.computeIfAbsent(aktørId) {
             mutableListOf()
-        }.add(person.toJson())
+        }.add(memento.toString())
     }
 
     override fun hentPerson(aktørId: String): Person? {
@@ -17,5 +22,5 @@ class HashmapPersonRepository : PersonRepository {
     }
 
     fun hentHistorikk(aktørId: String): List<String> =
-        map[aktørId] ?: emptyList()
+            map[aktørId] ?: emptyList()
 }
