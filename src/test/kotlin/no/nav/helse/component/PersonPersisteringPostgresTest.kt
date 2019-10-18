@@ -67,7 +67,6 @@ class PersonPersisteringPostgresTest {
     @Test
     internal fun `hver endring av person fører til at ny versjon lagres`() {
         val dataSource = HikariDataSource(hikariConfig)
-        val repo = PersonPostgresRepository(dataSource)
 
         val aktørId = "3"
         val person = Person(aktørId)
