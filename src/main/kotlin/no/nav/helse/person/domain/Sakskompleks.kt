@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
 import no.nav.helse.person.domain.SakskompleksObserver.*
 import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_PERSONOPPLYSNINGER
 import no.nav.helse.person.domain.SakskompleksObserver.NeedType.TRENGER_SYKEPENGEHISTORIKK
@@ -125,7 +126,7 @@ class Sakskompleks internal constructor(
             }
         }
 
-        override val type = Sakskompleks.TilstandType.START
+        override val type = START
 
     }
 
@@ -144,7 +145,7 @@ class Sakskompleks internal constructor(
             }
         }
 
-        override val type = TilstandType.NY_SØKNAD_MOTTATT
+        override val type = NY_SØKNAD_MOTTATT
 
     }
 
@@ -157,7 +158,7 @@ class Sakskompleks internal constructor(
             }
         }
 
-        override val type = TilstandType.SENDT_SØKNAD_MOTTATT
+        override val type = SENDT_SØKNAD_MOTTATT
 
     }
 
@@ -169,12 +170,12 @@ class Sakskompleks internal constructor(
             }
         }
 
-        override val type = TilstandType.INNTEKTSMELDING_MOTTATT
+        override val type = INNTEKTSMELDING_MOTTATT
 
     }
 
     private object KomplettSakTilstand : Sakskomplekstilstand {
-        override val type = TilstandType.KOMPLETT_SAK
+        override val type = KOMPLETT_SAK
 
         override fun entering(sakskompleks: Sakskompleks) {
             sakskompleks.notifyNeedObservers(TRENGER_SYKEPENGEHISTORIKK)
@@ -189,13 +190,12 @@ class Sakskompleks internal constructor(
     }
 
     private object TrengerManuellHåndteringTilstand : Sakskomplekstilstand {
-        override val type = TilstandType.TRENGER_MANUELL_HÅNDTERING
-
+        override val type = TRENGER_MANUELL_HÅNDTERING
     }
 
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand {
 
-        override val type = TilstandType.SYKEPENGEHISTORIKK_MOTTATT
+        override val type = SYKEPENGEHISTORIKK_MOTTATT
     }
 
     // Gang of four Memento pattern
@@ -219,13 +219,13 @@ class Sakskompleks internal constructor(
         }
 
         private fun tilstandFraEnum(tilstand: TilstandType) = when (tilstand) {
-            TilstandType.START -> StartTilstand
-            TilstandType.NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
-            TilstandType.SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
-            TilstandType.INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
-            TilstandType.KOMPLETT_SAK -> KomplettSakTilstand
-            TilstandType.SYKEPENGEHISTORIKK_MOTTATT -> SykepengehistorikkMottattTilstand
-            TilstandType.TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
+            START -> StartTilstand
+            NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
+            SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
+            INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
+            KOMPLETT_SAK -> KomplettSakTilstand
+            SYKEPENGEHISTORIKK_MOTTATT -> SykepengehistorikkMottattTilstand
+            TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
         }
 
         private val objectMapper = jacksonObjectMapper()
@@ -289,7 +289,6 @@ class Sakskompleks internal constructor(
 
     class Memento(internal val state: String) {
         override fun toString() = state
-
     }
 
     // Gang of four Observer pattern
