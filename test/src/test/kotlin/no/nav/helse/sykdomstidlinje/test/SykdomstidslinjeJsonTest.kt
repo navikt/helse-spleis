@@ -1,19 +1,27 @@
 package no.nav.helse.sykdomstidlinje.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
-import no.nav.helse.sykdomstidslinje.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class SykdomstidslinjeJsonTest {
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
+
     val inntektsmelding =
         Inntektsmelding(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json")))
     val søknadSendt =

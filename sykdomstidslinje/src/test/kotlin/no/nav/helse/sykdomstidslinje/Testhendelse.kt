@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import java.time.LocalDateTime
@@ -33,7 +34,7 @@ class Testhendelse(
     }
 
     override fun toJson(): JsonNode {
-        return objectMapper.readValue("{}")
+        return ObjectMapper().readValue("{}")
     }
 
     override fun equals(other: Any?): Boolean = this === other
