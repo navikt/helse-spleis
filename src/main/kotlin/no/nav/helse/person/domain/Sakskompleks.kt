@@ -178,8 +178,8 @@ class Sakskompleks internal constructor(
         override val type = KOMPLETT_SAK
 
         override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.TRENGER_SYKEPENGEHISTORIKK)
-            sakskompleks.emitTrengerLøsning(BehovsTyper.TRENGER_PERSONOPPLYSNINGER)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Personopplysninger)
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {

@@ -15,8 +15,8 @@ import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper.TRENGER_PERSONOPPLYSNINGER
-import no.nav.helse.behov.BehovsTyper.TRENGER_SYKEPENGEHISTORIKK
+import no.nav.helse.behov.BehovsTyper.Personopplysninger
+import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
 import no.nav.helse.createHikariConfig
 import no.nav.helse.sakskompleks.db.runMigration
 import no.nav.helse.serde.JsonNodeSerializer
@@ -130,14 +130,14 @@ internal class PersonComponentTest {
 
             val behov = ventPåBehov(antall = 2).groupBy(Behov::behovType)
 
-            behov.getValue(TRENGER_SYKEPENGEHISTORIKK.name).first().also {
+            behov.getValue(Sykepengehistorikk.name).first().also {
                 assertEquals(aktørID, it["aktørId"])
                 assertEquals(virksomhetsnummer, it["organisasjonsnummer"])
                 assertTrue(it.get<String>("sakskompleksId")?.isNotBlank() ?: false)
 
             }
 
-            behov.getValue(TRENGER_PERSONOPPLYSNINGER.name).first().also {
+            behov.getValue(Personopplysninger.name).first().also {
                 assertEquals(aktørID, it["aktørId"])
                 assertEquals(virksomhetsnummer, it["organisasjonsnummer"])
                 assertTrue(it.get<String>("sakskompleksId")?.isNotBlank() ?: false)
@@ -149,7 +149,7 @@ internal class PersonComponentTest {
     private fun ventTilSøknadErSendt(antall: Int) {
         val resultConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
         resultConsumer.subscribe(listOf(søknadTopic))
-        val messages = assertMessageConsumedCount(resultConsumer, søknadTopic, antall)
+        assertMessageConsumedCount(resultConsumer, søknadTopic, antall)
         resultConsumer.unsubscribe()
     }
 

@@ -232,7 +232,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, tilstandsflytObserver.sakskomplekstilstand)
-        assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.TRENGER_SYKEPENGEHISTORIKK.name })
+        assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.Sykepengehistorikk.name })
     }
 
     @Test
