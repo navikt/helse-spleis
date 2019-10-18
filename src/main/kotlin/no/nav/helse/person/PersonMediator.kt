@@ -8,7 +8,7 @@ import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.oppgave.OppgaveProducer
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
-import no.nav.helse.person.domain.Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sakskompleks.SakskompleksProbe
@@ -61,7 +61,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
-        if (event.currentState == TRENGER_MANUELL_HÅNDTERING) {
+        if (event.currentState == SKAL_TIL_INFOTRYGD) {
             oppgaveProducer.opprettOppgave("AAAAAAA! HELP!")
         }
     }

@@ -80,8 +80,8 @@ class SakskompleksProbe : PersonObserver {
             Sakskompleks.TilstandType.KOMPLETT_SAK -> {
                 log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
             }
-            Sakskompleks.TilstandType.TRENGER_MANUELL_HÅNDTERING -> {
-                log.info("sakskompleks med id ${event.id} trenger manuell behandling")
+            Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD -> {
+                log.info("sakskompleks med id ${event.id} må behandles i infotrygd")
             }
         }
     }

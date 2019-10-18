@@ -50,7 +50,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterSendtSøknad(sendtSøknad())
 
         assertEquals(START, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is SendtSykepengesøknad)
     }
 
@@ -61,7 +61,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
         assertEquals(START, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is Inntektsmelding)
     }
 
@@ -72,7 +72,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = LocalDate.now(), sakskompleksId = sakskompleksId))
 
         assertEquals(START, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is Sykepengehistorikk)
     }
 
@@ -103,7 +103,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test
@@ -113,7 +113,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test
@@ -133,7 +133,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test
@@ -153,7 +153,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterNySøknad(nySøknad())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test
@@ -163,7 +163,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterInntektsmelding(inntektsmelding())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test
@@ -196,7 +196,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag, sakskompleksId = sakskompleksId))
 
         assertEquals(KOMPLETT_SAK, lastStateEvent.previousState)
-        assertEquals(TRENGER_MANUELL_HÅNDTERING, lastStateEvent.currentState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     private fun beInStartTilstand(): Sakskompleks {

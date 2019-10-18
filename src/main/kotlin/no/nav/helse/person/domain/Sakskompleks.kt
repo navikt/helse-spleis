@@ -80,7 +80,7 @@ class Sakskompleks internal constructor(
         INNTEKTSMELDING_MOTTATT,
         KOMPLETT_SAK,
         SYKEPENGEHISTORIKK_MOTTATT,
-        TRENGER_MANUELL_HÅNDTERING
+        SKAL_TIL_INFOTRYGD
     }
 
     // Gang of four State pattern
@@ -90,19 +90,19 @@ class Sakskompleks internal constructor(
 
         // Default implementasjoner av transisjonene
         fun håndterNySøknad(sakskompleks: Sakskompleks, søknad: NySykepengesøknad) {
-            sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
+            sakskompleks.setTilstand(søknad, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterSendtSøknad(sakskompleks: Sakskompleks, søknad: SendtSykepengesøknad) {
-            sakskompleks.setTilstand(søknad, TrengerManuellHåndteringTilstand)
+            sakskompleks.setTilstand(søknad, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmelding: Inntektsmelding) {
-            sakskompleks.setTilstand(inntektsmelding, TrengerManuellHåndteringTilstand)
+            sakskompleks.setTilstand(inntektsmelding, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
-            sakskompleks.setTilstand(sykepengehistorikk, TrengerManuellHåndteringTilstand)
+            sakskompleks.setTilstand(sykepengehistorikk, MåBehandlesIInfotrygdTilstand)
         }
 
         fun leaving() {
@@ -183,14 +183,14 @@ class Sakskompleks internal constructor(
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikk: Sykepengehistorikk) {
-            if (sykepengehistorikk.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikk, TrengerManuellHåndteringTilstand)
+            if (sykepengehistorikk.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikk, MåBehandlesIInfotrygdTilstand)
             else sakskompleks.setTilstand(sykepengehistorikk, SykepengehistorikkMottattTilstand)
         }
 
     }
 
-    private object TrengerManuellHåndteringTilstand : Sakskomplekstilstand {
-        override val type = TRENGER_MANUELL_HÅNDTERING
+    private object MåBehandlesIInfotrygdTilstand : Sakskomplekstilstand {
+        override val type = SKAL_TIL_INFOTRYGD
     }
 
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand {
@@ -225,7 +225,7 @@ class Sakskompleks internal constructor(
             INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
             KOMPLETT_SAK -> KomplettSakTilstand
             SYKEPENGEHISTORIKK_MOTTATT -> SykepengehistorikkMottattTilstand
-            TRENGER_MANUELL_HÅNDTERING -> TrengerManuellHåndteringTilstand
+            SKAL_TIL_INFOTRYGD -> MåBehandlesIInfotrygdTilstand
         }
 
         private val objectMapper = jacksonObjectMapper()
