@@ -112,30 +112,6 @@ internal class PersonComponentTest {
     }
 
     @Test
-    fun `mange søknader`() {
-        testServer(config = mapOf(
-                "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
-                "KAFKA_USERNAME" to username,
-                "KAFKA_PASSWORD" to password,
-                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
-        )) {
-
-            for (i in 0..5000) {
-                val aktørID = "1234567890123$i"
-                val virksomhetsnummer = "123456789"
-
-                sendNySøknad(aktørID, virksomhetsnummer)
-                sendSøknad(aktørID, virksomhetsnummer)
-                sendInnteksmelding(aktørID, virksomhetsnummer)
-            }
-
-            ventTilSøknadErSendt(antall = 5000)
-
-            val behov = ventPåBehov(antall = 2).groupBy(Behov::behovType)
-        }
-    }
-
-    @Test
     fun `innsendt Nysøknad, Søknad og Inntekstmelding fører til at sykepengehistorikk blir etterspurt`() {
         testServer(config = mapOf(
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
