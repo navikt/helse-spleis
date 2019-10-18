@@ -1,15 +1,23 @@
 package no.nav.helse.unit.person
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.readResource
-import no.nav.helse.sykdomstidslinje.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class PersonSerializationTest {
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
+
     @Test
     fun `restoring av lagret person gir samme objekt`() {
         val person = Person(aktørId = "id")

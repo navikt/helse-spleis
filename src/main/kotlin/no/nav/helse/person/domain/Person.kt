@@ -1,8 +1,10 @@
 package no.nav.helse.person.domain
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.*
-import no.nav.helse.sykdomstidslinje.objectMapper
 import java.util.*
 
 class Person(val aktørId: String) : SakskompleksObserver {
@@ -137,6 +139,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
     )
 
     companion object {
+        private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
         fun fromJson(json: String): Person {
             val personJson: PersonJson = objectMapper.readValue(json)
             return Person(personJson.aktørId)
