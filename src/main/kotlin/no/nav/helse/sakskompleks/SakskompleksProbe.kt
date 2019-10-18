@@ -1,6 +1,7 @@
 package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
+import io.prometheus.client.Summary
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.NySykepengesøknad
 import no.nav.helse.hendelse.SendtSykepengesøknad
@@ -13,8 +14,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class SakskompleksProbe : PersonObserver {
-    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-    }
+
 
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
@@ -22,6 +22,8 @@ class SakskompleksProbe : PersonObserver {
         val sakskompleksTotalsCounterName = "sakskompleks_totals"
         val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
         val manglendeSakskompleksForInntektsmeldingCounterName = "manglende_sakskompleks_for_inntektsmelding_totals"
+        val personMementoSize = "personMementoSize"
+
 
         private val sakskompleksCounter = Counter.build(sakskompleksTotalsCounterName, "Antall sakskompleks opprettet")
                 .register()
@@ -32,6 +34,12 @@ class SakskompleksProbe : PersonObserver {
 
         private val manglendeSakskompleksForInntektsmeldingCounter = Counter.build(manglendeSakskompleksForInntektsmeldingCounterName, "Antall inntektsmeldinger vi har mottatt som vi ikke klarer å koble til et sakskompleks")
                 .register()
+        private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen").register()
+    }
+
+    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+        log.info("lagret person med størrelse ${personEndretEvent.memento.toString().length} bytes")
+        personMementoStørrelse.observe(personEndretEvent.memento.toString().length.toDouble())
     }
 
     fun inntektmeldingManglerSakskompleks(inntektsmelding: Inntektsmelding) {
@@ -56,6 +64,7 @@ class SakskompleksProbe : PersonObserver {
     private fun inntektsmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
         log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en inntektsmelding")
     }
+
 
     override fun sakskompleksEndret(event: StateChangeEvent) {
         log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.hendelsetype().name} state=${event.currentState} previousState=${event.previousState}")
