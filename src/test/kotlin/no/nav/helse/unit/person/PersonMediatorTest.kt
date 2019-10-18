@@ -9,8 +9,6 @@ import no.nav.helse.behov.BehovProducer
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.oppgave.OppgaveProducer
 import no.nav.helse.person.PersonMediator
-import no.nav.helse.person.PersonRepository
-import no.nav.helse.person.domain.Person
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import org.junit.jupiter.api.Test
 
@@ -36,13 +34,13 @@ internal class PersonMediatorTest {
     }
 
     @Test
-    fun `skal lage gosys-oppgave når saken trenger manuell håndtering`() {
-        beInTrengerManuellSaksbehandlingState()
+    fun `skal lage gosys-oppgave når saken må behandles i infotrygd`() {
+        beInMåBehandlesIInfotrygdState()
 
         verify(exactly = 1) { oppgaveProducer.opprettOppgave(any()) }
     }
 
-    fun beInTrengerManuellSaksbehandlingState() {
+    fun beInMåBehandlesIInfotrygdState() {
         personMediator.håndterSendtSøknad(sykepengesøknad)
     }
 }
