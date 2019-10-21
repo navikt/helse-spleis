@@ -2,16 +2,16 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
-import java.time.Month
 
-val Int.juli get() = LocalDate.of(2019, Month.JULY, this)
-
-val Int.mandag get() = 1.juli.plusWeeks(this.toLong() - 1)
-val Int.tirsdag get() = this.mandag.plusDays(1)
-val Int.onsdag get() = this.mandag.plusDays(2)
-val Int.torsdag get() = this.mandag.plusDays(3)
-val Int.fredag get() = this.mandag.plusDays(4)
-val Int.lørdag get() = this.mandag.plusDays(5)
-val Int.søndag get() = this.mandag.plusDays(6)
+class Uke(ukenr: Long) {
+    val mandag = LocalDate.of(2018, 1, 1)
+        .plusWeeks(ukenr - 1L)
+    val tirsdag get() = mandag.plusDays(1)
+    val onsdag get() = mandag.plusDays(2)
+    val torsdag get() = mandag.plusDays(3)
+    val fredag get() = mandag.plusDays(4)
+    val lørdag get() = mandag.plusDays(5)
+    val søndag get() = mandag.plusDays(6)
+}
 
 operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }

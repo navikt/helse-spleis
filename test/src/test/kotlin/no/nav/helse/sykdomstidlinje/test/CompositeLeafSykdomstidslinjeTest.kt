@@ -1,9 +1,6 @@
 import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.mandag
-import no.nav.helse.testhelpers.onsdag
-import no.nav.helse.testhelpers.tirsdag
-import no.nav.helse.testhelpers.torsdag
+import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -13,23 +10,23 @@ internal class CompositeLeafSykdomstidslinjeTest {
         private val sendtSøknad = Testhendelse()
 
         private val førsteMandag = Sykdomstidslinje.sykedag(
-            gjelder = 1.mandag,
+            gjelder = Uke(1).mandag,
             hendelse = sendtSøknad
         )
         private val førsteTirsdag = Sykdomstidslinje.sykedag(
-            gjelder = 1.tirsdag,
+            gjelder = Uke(1).tirsdag,
             hendelse = sendtSøknad
         )
         private val førsteOnsdag = Sykdomstidslinje.sykedag(
-            gjelder = 1.onsdag,
+            gjelder = Uke(1).onsdag,
             hendelse = sendtSøknad
         )
         private val førsteTorsdag = Sykdomstidslinje.sykedag(
-            gjelder = 1.torsdag,
+            gjelder = Uke(1).torsdag,
             hendelse = sendtSøknad
         )
         private val andreMandag = Sykdomstidslinje.sykedag(
-            gjelder = 2.mandag,
+            gjelder = Uke(2).mandag,
             hendelse = sendtSøknad
         )
 

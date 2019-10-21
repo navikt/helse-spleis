@@ -1,9 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.testhelpers.fredag
-import no.nav.helse.testhelpers.mandag
-import no.nav.helse.testhelpers.onsdag
-import no.nav.helse.testhelpers.tirsdag
+import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -13,13 +10,13 @@ class GapDaysTest {
     @Test
     internal fun tidslinjerMedAvstandMellom() {
         val førsteTidslinje = Sykdomstidslinje.sykedager(
-            1.mandag,
-            1.tirsdag,
+            Uke(1).mandag,
+            Uke(1).tirsdag,
             sendtSøknad
         )
         val andreTidslinje = Sykdomstidslinje.sykedager(
-            1.fredag,
-            2.mandag,
+            Uke(1).fredag,
+            Uke(2).mandag,
             sendtSøknad
         )
 
@@ -30,13 +27,13 @@ class GapDaysTest {
     @Test
     internal fun tidslinjerSammenhengende() {
         val førsteTidslinje = Sykdomstidslinje.sykedager(
-            1.mandag,
-            1.tirsdag,
+            Uke(1).mandag,
+            Uke(1).tirsdag,
             sendtSøknad
         )
         val andreTidslinje = Sykdomstidslinje.sykedager(
-            1.onsdag,
-            1.fredag,
+            Uke(1).onsdag,
+            Uke(1).fredag,
             sendtSøknad
         )
 
@@ -47,13 +44,13 @@ class GapDaysTest {
     @Test
     internal fun overlappendeTidslinjer() {
         val førsteTidslinje = Sykdomstidslinje.sykedager(
-            1.mandag,
-            1.onsdag,
+            Uke(1).mandag,
+            Uke(1).onsdag,
             sendtSøknad
         )
         val andreTidslinje = Sykdomstidslinje.sykedager(
-            1.tirsdag,
-            1.fredag,
+            Uke(1).tirsdag,
+            Uke(1).fredag,
             sendtSøknad
         )
 
@@ -64,13 +61,13 @@ class GapDaysTest {
     @Test
     internal fun denEneSomDelAvDenAndre() {
         val førsteTidslinje = Sykdomstidslinje.sykedager(
-            1.mandag,
-            2.mandag,
+            Uke(1).mandag,
+            Uke(2).mandag,
             sendtSøknad
         )
         val andreTidslinje = Sykdomstidslinje.sykedager(
-            1.onsdag,
-            1.fredag,
+            Uke(1).onsdag,
+            Uke(1).fredag,
             sendtSøknad
         )
 

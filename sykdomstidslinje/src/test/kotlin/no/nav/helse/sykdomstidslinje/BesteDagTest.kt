@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Inntektsmelding
 import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
@@ -22,13 +22,13 @@ internal class BesteDagTest {
         private val sendtSøknad =
             SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
-        private val implisittDag get() = ImplisittDag(2.mandag, inntektsmelding)
-        private val arbeidsdag get() = Arbeidsdag(2.mandag, sendtSøknad)
-        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(2.mandag, inntektsmelding)
-        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(2.mandag, inntektsmelding)
-        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(2.mandag, sendtSøknad)
-        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(2.mandag, sendtSøknad)
-        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(2.mandag, sendtSøknad)
+        private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmelding)
+        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknad)
+        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(Uke(2).mandag, inntektsmelding)
+        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmelding)
+        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(Uke(2).mandag, sendtSøknad)
+        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknad)
+        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknad)
     }
 
     @Test

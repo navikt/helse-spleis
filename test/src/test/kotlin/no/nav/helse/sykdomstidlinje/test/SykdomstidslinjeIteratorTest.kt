@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidlinje.test
 
-import no.nav.helse.*
+import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -15,7 +15,7 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun `sammenhengende sykdom gir en arbeidsgiverperiode`() {
-        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 3.mandag, rapporteringshendelse)
+        val tidslinje = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).mandag, rapporteringshendelse)
 
         val tidslinjer = tidslinje.syketilfeller()
         val antallSykedager = tidslinjer.first().antallSykedagerHvorViTellerMedHelg()
@@ -26,15 +26,15 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun `sykdom innenfor en uke teller antall dager`() {
-        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, rapporteringshendelse)
+        val tidslinje = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, rapporteringshendelse)
         assertEquals(5, tidslinje.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
     fun `test sykdager over helg`() {
         val sykedager = Sykdomstidslinje.sykedager(
-            1.mandag,
-            2.mandag,
+            Uke(1).mandag,
+            Uke(2).mandag,
             rapporteringshendelse
         )
         assertEquals(8, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
@@ -42,14 +42,14 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun `sykmelding mandag til søndag fører til 7 dager hvor vi teller med helg`() {
-        val sykdager = Sykdomstidslinje.sykedager(1.mandag, 1.søndag, rapporteringshendelse)
+        val sykdager = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).søndag, rapporteringshendelse)
 
         assertEquals(7, sykdager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
     fun `sykmelding mandag til lørdag fører til 6 dager`() {
-        val sykedager = Sykdomstidslinje.sykedager(1.mandag, 1.lørdag, rapporteringshendelse)
+        val sykedager = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).lørdag, rapporteringshendelse)
 
         assertEquals(6, sykedager.syketilfeller().first().antallSykedagerHvorViTellerMedHelg())
         assertEquals(5, sykedager.syketilfeller().first().antallSykedagerHvorViIkkeTellerMedHelg())
@@ -57,32 +57,32 @@ class SykdomstidslinjeIteratorTest {
 
     @Test
     fun `to sykmeldinger med gap større enn 16 dager gir to arbeidsgiver perioder`() {
-        val spysyke = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, rapporteringshendelse)
-        val malaria = Sykdomstidslinje.sykedager(5.mandag, 7.fredag, rapporteringshendelse)
+        val spysyke = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, rapporteringshendelse)
+        val malaria = Sykdomstidslinje.sykedager(Uke(5).mandag, Uke(7).fredag, rapporteringshendelse)
 
         val syketilfeller = (spysyke + malaria).syketilfeller()
 
         assertEquals(2, syketilfeller.size, "Forventer to perioder i syketilfellet")
-        assertEquals(1.mandag, syketilfeller[0].startdato())
-        assertEquals(1.fredag, syketilfeller[0].sluttdato())
+        assertEquals(Uke(1).mandag, syketilfeller[0].startdato())
+        assertEquals(Uke(1).fredag, syketilfeller[0].sluttdato())
 
-        assertEquals(5.mandag, syketilfeller[1].startdato())
-        assertEquals(7.fredag, syketilfeller[1].sluttdato())
+        assertEquals(Uke(5).mandag, syketilfeller[1].startdato())
+        assertEquals(Uke(7).fredag, syketilfeller[1].sluttdato())
     }
 
     @Test
     fun `søknad med opphold (ferie) kobles ikke sammen med ny søknad innenfor 16 dager`() {
-        val influensa = Sykdomstidslinje.sykedager(1.mandag, 2.mandag, rapporteringshendelse)
-        val ferie = Sykdomstidslinje.ferie(2.onsdag, 2.fredag, rapporteringshendelse)
-        val spysyka = Sykdomstidslinje.sykedager(4.fredag, 5.fredag, rapporteringshendelse)
+        val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, rapporteringshendelse)
+        val ferie = Sykdomstidslinje.ferie(Uke(2).onsdag, Uke(2).fredag, rapporteringshendelse)
+        val spysyka = Sykdomstidslinje.sykedager(Uke(4).fredag, Uke(5).fredag, rapporteringshendelse)
 
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(1.mandag, grupper[0].startdato())
-        assertEquals(2.mandag, grupper[0].sluttdato())
+        assertEquals(Uke(1).mandag, grupper[0].startdato())
+        assertEquals(Uke(2).mandag, grupper[0].sluttdato())
 
-        assertEquals(4.fredag, grupper[1].startdato())
-        assertEquals(5.fredag, grupper[1].sluttdato())
+        assertEquals(Uke(4).fredag, grupper[1].startdato())
+        assertEquals(Uke(5).fredag, grupper[1].sluttdato())
     }
 }
