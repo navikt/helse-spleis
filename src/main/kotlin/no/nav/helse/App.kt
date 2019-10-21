@@ -8,6 +8,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
+import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -45,6 +46,10 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
 
 @KtorExperimentalAPI
 fun main() {
+    Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
+        LoggerFactory.getLogger("main")
+                .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+    }
     val config = createConfigFromEnvironment(System.getenv())
 
     embeddedServer(Netty, createApplicationEnvironment(config)).let { app ->
