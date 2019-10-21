@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class Ubestemtdag internal constructor(dato: LocalDate, hendelse: Sykdomshendelse): Dag(dato, hendelse) {
+class Ubestemtdag internal constructor(dato: LocalDate, hendelse: DokumentMottattHendelse): Dag(dato, hendelse) {
     internal constructor(left: Dag, right: Dag) : this(left.dagen, sykdomshendelse(left, right)) {
         erstatter(left,right)
     }

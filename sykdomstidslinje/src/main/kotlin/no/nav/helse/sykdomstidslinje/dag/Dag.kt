@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje.dag
 import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
@@ -13,11 +13,11 @@ import kotlin.reflect.KClass
 
 abstract class Dag internal constructor(
     internal val dagen: LocalDate,
-    internal val hendelse: Sykdomshendelse
+    internal val hendelse: DokumentMottattHendelse
 ) :
     Sykdomstidslinje() {
     private val anyDag = null as KClass<Dag>?
-    private val anyEvent = null as KClass<Sykdomshendelse>?
+    private val anyEvent = null as KClass<DokumentMottattHendelse>?
     private val nySøknad = NySøknadOpprettet::class
     private val sendtSøknad = SendtSøknadMottatt::class
     private val inntektsmelding = InntektsmeldingMottatt::class
@@ -40,7 +40,7 @@ abstract class Dag internal constructor(
     override fun startdato() = dagen
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
-    override fun dag(dato: LocalDate, hendelse: Sykdomshendelse) = if (dato == dagen) this else ImplisittDag(
+    override fun dag(dato: LocalDate, hendelse: DokumentMottattHendelse) = if (dato == dagen) this else ImplisittDag(
         dato,
         hendelse
     )

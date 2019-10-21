@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje.dag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelse.*
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 internal data class JsonDag(
@@ -15,11 +16,12 @@ internal data class JsonHendelse(
     val type: String,
     val json: JsonNode
 ) {
-    fun toHendelse(): Sykdomshendelse = when (enumValueOf<Sykdomshendelse.Type>(type)) {
-        Sykdomshendelse.Type.InntektsmeldingMottatt -> InntektsmeldingMottatt(json)
-        Sykdomshendelse.Type.NySøknadOpprettet -> NySøknadOpprettet(json)
-        Sykdomshendelse.Type.SendtSøknadMottatt -> SendtSøknadMottatt(json)
-        Sykdomshendelse.Type.Sykepengehistorikk -> Sykepengehistorikk(json)
+    fun toHendelse(): DokumentMottattHendelse = when (type) {
+        DokumentMottattHendelse.Type.InntektsmeldingMottatt.name -> InntektsmeldingMottatt(json)
+        DokumentMottattHendelse.Type.NySøknadOpprettet.name -> NySøknadOpprettet(json)
+        DokumentMottattHendelse.Type.SendtSøknadMottatt.name -> SendtSøknadMottatt(json)
+        Sykepengehistorikk::javaClass.name -> Sykepengehistorikk(json)
+        else -> throw RuntimeException("ukjent type")
     }
 }
 

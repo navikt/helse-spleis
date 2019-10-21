@@ -13,7 +13,7 @@ private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : DokumentMottattHendelse {
 
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
@@ -46,7 +46,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     override fun aktørId() = aktørId
     override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
     override fun rapportertdato(): LocalDateTime = opprettet
-    override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
+    override fun compareTo(other: DokumentMottattHendelse): Int = opprettet.compareTo(other.rapportertdato())
 
     protected val sykeperiodeTidslinje
         get(): List<Sykdomstidslinje> = sykeperioder
@@ -93,7 +93,7 @@ class NySøknadOpprettet(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
         }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.NySøknadOpprettet
+        DokumentMottattHendelse.Type.NySøknadOpprettet
 }
 
 class SendtSøknadMottatt(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
@@ -108,7 +108,7 @@ class SendtSøknadMottatt(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
             }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.SendtSøknadMottatt
+        DokumentMottattHendelse.Type.SendtSøknadMottatt
 }
 
 data class Periode(val jsonNode: JsonNode) {

@@ -5,7 +5,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-interface Sykdomshendelse: Comparable<Sykdomshendelse> {
+interface Sykepengehendelse {
+
+}
+
+interface DokumentMottattHendelse: Sykepengehendelse, Comparable<DokumentMottattHendelse> {
     enum class Type {
         SendtSøknadMottatt,
         NySøknadOpprettet,
@@ -20,7 +24,7 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     fun sykdomstidslinje(): Sykdomstidslinje
 
     fun toJson(): JsonNode
-    override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())
+    override fun compareTo(other: DokumentMottattHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
     override fun equals(other: Any?): Boolean
 }
 
