@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
@@ -106,7 +107,7 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )
-    ) = SendtSykepengesøknad(søknadDTO(
+    ) = SendtSøknadMottatt(søknadDTO(
             id = id,
             aktørId = aktørId,
             fom = fom,
@@ -146,7 +147,7 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )
-    ) = NySykepengesøknad(søknadDTO(
+    ) = NySøknadOpprettet(søknadDTO(
             id = id,
             aktørId = aktørId,
             fom = fom,
@@ -160,7 +161,7 @@ internal object TestConstants {
             arbeidsgiver = arbeidsgiver
     ).toJsonNode())
 
-    fun inntektsmelding(aktørId: String = "", virksomhetsnummer: String? = "123456789") = no.nav.helse.hendelse.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode())
+    fun inntektsmelding(aktørId: String = "", virksomhetsnummer: String? = "123456789") = InntektsmeldingMottatt(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode())
 
     fun inntektsmeldingDTO(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
             Inntektsmelding(

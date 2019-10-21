@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
-import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.juli
 import no.nav.helse.person.domain.Sakskompleks
@@ -25,7 +25,7 @@ class SakskompleksTest {
         private val standardSendtSøknad = sendtSøknad()
 
         private val enInntektsmeldingSomJson = InntektsmeldingConsumer.inntektsmeldingObjectMapper.readTree("/inntektsmelding.json".readResource())
-        private val enInntektsmelding = Inntektsmelding(enInntektsmeldingSomJson)
+        private val enInntektsmelding = InntektsmeldingMottatt(enInntektsmeldingSomJson)
     }
 
     @Test

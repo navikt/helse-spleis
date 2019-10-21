@@ -5,9 +5,9 @@ import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
@@ -41,7 +41,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is NySykepengesøknad)
+        assertTrue(lastStateEvent.sykdomshendelse is NySøknadOpprettet)
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is SendtSykepengesøknad)
+        assertTrue(lastStateEvent.sykdomshendelse is SendtSøknadMottatt)
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is Inntektsmelding)
+        assertTrue(lastStateEvent.sykdomshendelse is InntektsmeldingMottatt)
     }
 
     @Test
