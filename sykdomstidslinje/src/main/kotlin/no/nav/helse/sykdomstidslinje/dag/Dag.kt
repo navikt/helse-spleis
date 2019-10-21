@@ -54,7 +54,7 @@ abstract class Dag internal constructor(
 
     fun dagerErstattet(): List<Dag> = erstatter
 
-    internal fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
+    internal open fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
 
     private fun sisteDag(other: Dag) =
         if (this.hendelse.rapportertdato() > other.hendelse.rapportertdato()) this.also { this.erstatter(other) } else other.also {

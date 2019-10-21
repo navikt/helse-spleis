@@ -6,6 +6,12 @@ import java.time.LocalDate
 
 class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) :
     Dag(gjelder, hendelse) {
+
+    override fun beste(other: Dag) = when {
+        this.sisteHendelse() == other.sisteHendelse() -> other
+        else -> super.beste(other)
+    }
+
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitImplisittDag(this)
     }
