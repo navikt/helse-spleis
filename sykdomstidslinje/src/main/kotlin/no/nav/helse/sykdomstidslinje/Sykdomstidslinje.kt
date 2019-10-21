@@ -235,8 +235,15 @@ abstract class Sykdomstidslinje {
                     .toList())
         }
 
-        fun fromJson(json: String): Sykdomstidslinje {
-            return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))
+        fun fromJson(
+            json: String
+        ): Sykdomstidslinje {
+            val map = lagMeldingsMap(json)
+            return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json), map)
+        }
+
+        private fun lagMeldingsMap(json: String): Map<String, Sykdomshendelse> {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         private fun erArbeidsdag(dato: LocalDate) =

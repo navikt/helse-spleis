@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
-interface Sykdomshendelse: Comparable<Sykdomshendelse> {
+interface Sykdomshendelse : Comparable<Sykdomshendelse> {
     enum class Type {
         SendtSykepengesøknad,
         NySykepengesøknad,
@@ -18,6 +19,7 @@ interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     fun rapportertdato(): LocalDateTime
     fun organisasjonsnummer(): String?
     fun sykdomstidslinje(): Sykdomstidslinje
+    fun hendelseId(): String
 
     fun toJson(): JsonNode
     override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())

@@ -6,6 +6,7 @@ import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
+import java.lang.RuntimeException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -33,8 +34,16 @@ abstract class Dag internal constructor(
     internal abstract fun dagType(): JsonDagType
     override fun jsonRepresentation(): List<JsonDag> {
         val hendelseType = hendelse.hendelsetype()
-        val hendelseJson = hendelse.toJson()
-        return listOf(JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.flatMap { it.jsonRepresentation() }))
+        val hendelseId = hendelse.hendelseId()
+
+        //Antarhendelsen er persistert et annet sted
+        return listOf(
+            JsonDag(
+                dagType(),
+                dagen,
+                JsonHendelsesReferanse(hendelseType.name, hendelseId),
+                erstatter.flatMap { it.jsonRepresentation() })
+        )
     }
 
     override fun startdato() = dagen
@@ -63,13 +72,13 @@ abstract class Dag internal constructor(
             )
         }
 
-    fun erHelg() = dagen.dayOfWeek  == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
+    fun erHelg() = dagen.dayOfWeek == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
 
     override fun length() = 1
 
     override fun sisteHendelse() = this.hendelse
 
-    internal enum class Nøkkel{
+    internal enum class Nøkkel {
         I,
         WD_A,
         WD_IM,
@@ -94,8 +103,18 @@ abstract class Dag internal constructor(
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-        internal fun fromJsonRepresentation(jsonDag: JsonDag): Dag = jsonDag.type.creator(jsonDag).also {
-            it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag -> fromJsonRepresentation(erstatterJsonDag) })
-        }
+        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, Sykdomshendelse>): Dag =
+            jsonDag.type.creator(
+                jsonDag.dato,
+                hendelseMap.getOrElse(jsonDag.hendelse.hendelseid,
+                    { throw RuntimeException("hendelse med id ${jsonDag.hendelse.hendelseid} finnes ikke") })
+            ).also {
+                it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag ->
+                    fromJsonRepresentation(
+                        erstatterJsonDag,
+                        hendelseMap
+                    )
+                })
+            }
     }
 }

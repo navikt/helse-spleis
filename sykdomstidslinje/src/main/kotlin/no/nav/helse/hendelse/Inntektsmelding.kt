@@ -6,10 +6,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode): Sykdomshendelse {
+data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
+    override fun hendelseId(): String {
+        return hendelseId()
+    }
+
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())

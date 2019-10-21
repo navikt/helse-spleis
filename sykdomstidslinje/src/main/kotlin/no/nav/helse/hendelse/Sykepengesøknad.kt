@@ -13,9 +13,13 @@ private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse  {
+
+
+    val jsonWithHendelseId get() = jsonNode.contains("hendelseId") ? json
 
     val id = jsonNode["id"].asText()!!
+    val hendelseId = jsonNode.
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!
     val aktørId = jsonNode["aktorId"].asText()!!
@@ -75,6 +79,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
         Sykdomstidslinje.studiedager(it.fom, tom, this)
     }
 
+
     override fun toJson(): JsonNode = jsonNode
 
     override fun equals(other: Any?): Boolean {
@@ -82,7 +87,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     }
 }
 
-class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class NySykepengesøknad(jsonNode: JsonNode, hendelseId: String) : Sykepengesøknad(jsonNode, hendelseId) {
     init {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
@@ -96,7 +101,7 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
         Sykdomshendelse.Type.NySykepengesøknad
 }
 
-class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class SendtSykepengesøknad(jsonNode: JsonNode,hendelseId: String) : Sykepengesøknad(jsonNode, hendelseId) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }

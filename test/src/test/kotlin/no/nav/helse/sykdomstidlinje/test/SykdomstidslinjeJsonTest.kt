@@ -10,8 +10,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -26,6 +25,23 @@ class SykdomstidslinjeJsonTest {
         Inntektsmelding(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json")))
     val søknadSendt =
         SendtSykepengesøknad(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json")))
+
+
+    @Test
+    fun `gitt en tidslinje så serialiseres den med et json pr hendelse, som refereses til med id fra dag`() {
+
+        val tidslinje = Sykdomstidslinje.sykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), søknadSendt
+        )
+
+        val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
+        tidslinjeJson.elements().forEach {
+            assertEquals(søknadSendt.hendelsetype().name, it["hendelse"]["type"].asText())
+            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseid"])
+            assertNull(it["hendelse"]["json"])
+        }
+    }
 
     @Test
     fun `lagring og restoring av en sykdomstidslinje med har de samme egenskapene som den opprinnelige`() {
