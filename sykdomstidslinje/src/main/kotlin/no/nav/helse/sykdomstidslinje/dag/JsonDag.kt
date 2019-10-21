@@ -16,9 +16,9 @@ internal data class JsonHendelse(
     val json: JsonNode
 ) {
     fun toHendelse(): Sykdomshendelse = when (enumValueOf<Sykdomshendelse.Type>(type)) {
-        Sykdomshendelse.Type.Inntektsmelding -> Inntektsmelding(json)
-        Sykdomshendelse.Type.NySykepengesøknad -> NySykepengesøknad(json)
-        Sykdomshendelse.Type.SendtSykepengesøknad -> SendtSykepengesøknad(json)
+        Sykdomshendelse.Type.InntektsmeldingMottatt -> InntektsmeldingMottatt(json)
+        Sykdomshendelse.Type.NySøknadOpprettet -> NySøknadOpprettet(json)
+        Sykdomshendelse.Type.SendtSøknadMottatt -> SendtSøknadMottatt(json)
         Sykdomshendelse.Type.Sykepengehistorikk -> Sykepengehistorikk(json)
     }
 }

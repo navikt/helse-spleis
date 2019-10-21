@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
-    private val hendelsetype: Sykdomshendelse.Type = Sykdomshendelse.Type.SendtSykepengesøknad
+    private val hendelsetype: Sykdomshendelse.Type = Sykdomshendelse.Type.SendtSøknadMottatt
 ) :
     Sykdomshendelse {
     override fun hendelsetype(): Sykdomshendelse.Type = hendelsetype

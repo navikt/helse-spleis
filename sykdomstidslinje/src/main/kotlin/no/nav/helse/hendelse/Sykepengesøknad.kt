@@ -82,7 +82,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     }
 }
 
-class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class NySøknadOpprettet(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
@@ -93,10 +93,10 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
         }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.NySykepengesøknad
+        Sykdomshendelse.Type.NySøknadOpprettet
 }
 
-class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class SendtSøknadMottatt(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }
@@ -108,7 +108,7 @@ class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
             }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.SendtSykepengesøknad
+        Sykdomshendelse.Type.SendtSøknadMottatt
 }
 
 data class Periode(val jsonNode: JsonNode) {

@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode): Sykdomshendelse {
+data class InntektsmeldingMottatt(val jsonNode: JsonNode): Sykdomshendelse {
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
@@ -43,7 +43,7 @@ data class Inntektsmelding(val jsonNode: JsonNode): Sykdomshendelse {
 
     override fun rapportertdato() = rapportertDato
 
-    override fun hendelsetype() = Sykdomshendelse.Type.Inntektsmelding
+    override fun hendelsetype() = Sykdomshendelse.Type.InntektsmeldingMottatt
 
     override fun aktørId(): String = arbeidstakerAktorId
 
@@ -69,6 +69,6 @@ data class Inntektsmelding(val jsonNode: JsonNode): Sykdomshendelse {
 
     override fun toJson(): JsonNode = jsonNode
 
-    override fun equals(other: Any?): Boolean = other is Inntektsmelding && jsonNode == other.jsonNode
+    override fun equals(other: Any?): Boolean = other is InntektsmeldingMottatt && jsonNode == other.jsonNode
 }
 

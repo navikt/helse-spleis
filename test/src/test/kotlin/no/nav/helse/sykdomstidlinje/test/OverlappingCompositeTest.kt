@@ -12,11 +12,11 @@ internal class OverlappingCompositeTest {
 
     private val nySøknad = Testhendelse(
         rapportertdato = Uke(2).fredag.atTime(12, 0),
-        hendelsetype = Sykdomshendelse.Type.NySykepengesøknad
+        hendelsetype = Sykdomshendelse.Type.NySøknadOpprettet
     )
     private val sendtSøknad = Testhendelse(
         rapportertdato = Uke(3).fredag.atTime(12, 0),
-        hendelsetype = Sykdomshendelse.Type.SendtSykepengesøknad
+        hendelsetype = Sykdomshendelse.Type.SendtSøknadMottatt
     )
 
     private lateinit var sykdomstidslinje: Sykdomstidslinje

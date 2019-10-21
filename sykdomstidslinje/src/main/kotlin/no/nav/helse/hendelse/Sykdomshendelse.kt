@@ -7,9 +7,9 @@ import java.time.LocalDateTime
 
 interface Sykdomshendelse: Comparable<Sykdomshendelse> {
     enum class Type {
-        SendtSykepengesøknad,
-        NySykepengesøknad,
-        Inntektsmelding,
+        SendtSøknadMottatt,
+        NySøknadOpprettet,
+        InntektsmeldingMottatt,
         Sykepengehistorikk
     }
 

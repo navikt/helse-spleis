@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Sykdomshendelse
-import no.nav.helse.hendelse.Sykdomshendelse.Type.Inntektsmelding
-import no.nav.helse.hendelse.Sykdomshendelse.Type.SendtSykepengesøknad
+import no.nav.helse.hendelse.Sykdomshendelse.Type.InntektsmeldingMottatt
+import no.nav.helse.hendelse.Sykdomshendelse.Type.SendtSøknadMottatt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
@@ -20,8 +20,8 @@ class Egenmeldingsdag internal constructor(gjelder: LocalDate, hendelse: Sykdoms
 
     override fun nøkkel(): Nøkkel =
         when (hendelse.hendelsetype()) {
-            SendtSykepengesøknad -> Nøkkel.SRD_A
-            Inntektsmelding -> Nøkkel.SRD_IM
+            SendtSøknadMottatt -> Nøkkel.SRD_A
+            InntektsmeldingMottatt -> Nøkkel.SRD_IM
             else -> throw RuntimeException("Hendelse er ikke støttet")
         }
 }

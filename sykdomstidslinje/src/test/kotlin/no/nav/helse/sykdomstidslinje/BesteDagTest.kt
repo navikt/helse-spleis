@@ -3,8 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,9 +18,9 @@ internal class BesteDagTest {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val inntektsmelding = Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource()))
+        private val inntektsmelding = InntektsmeldingMottatt(objectMapper.readTree("/inntektsmelding.json".readResource()))
         private val sendtSøknad =
-            SendtSykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+            SendtSøknadMottatt(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
 
         private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmelding)
         private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknad)

@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
@@ -18,9 +18,9 @@ abstract class Dag internal constructor(
     Sykdomstidslinje() {
     private val anyDag = null as KClass<Dag>?
     private val anyEvent = null as KClass<Sykdomshendelse>?
-    private val nySøknad = NySykepengesøknad::class
-    private val sendtSøknad = SendtSykepengesøknad::class
-    private val inntektsmelding = Inntektsmelding::class
+    private val nySøknad = NySøknadOpprettet::class
+    private val sendtSøknad = SendtSøknadMottatt::class
+    private val inntektsmelding = InntektsmeldingMottatt::class
 
     private val nulldag = ImplisittDag::class
     private val sykedag = Sykedag::class

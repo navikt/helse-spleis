@@ -19,7 +19,7 @@ class Permisjonsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomshe
 
     override fun nøkkel(): Nøkkel =
         when(hendelse.hendelsetype()){
-            Sykdomshendelse.Type.SendtSykepengesøknad -> Nøkkel.Le_A
+            Sykdomshendelse.Type.SendtSøknadMottatt -> Nøkkel.Le_A
             else -> throw RuntimeException("Hendelse er ikke støttet")
         }
 }
