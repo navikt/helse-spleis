@@ -61,6 +61,11 @@ abstract class Sykdomstidslinje {
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
 
+    fun erUtenforOmfang(): Boolean {
+        return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
+                || syketilfeller().size != 1
+    }
+
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
 
