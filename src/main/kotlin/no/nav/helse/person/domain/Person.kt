@@ -11,15 +11,15 @@ class Person(val aktørId: String) : SakskompleksObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
 
     private val personObservers = mutableListOf<PersonObserver>()
-    fun håndterNySøknad(søknad: NySykepengesøknad) {
+    fun håndterNySøknad(søknad: NySøknadOpprettet) {
         finnEllerOpprettArbeidsgiver(søknad).håndterNySøknad(søknad)
     }
 
-    fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
+    fun håndterSendtSøknad(søknad: SendtSøknadMottatt) {
         finnEllerOpprettArbeidsgiver(søknad).håndterSendtSøknad(søknad)
     }
 
-    fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
+    fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
         finnEllerOpprettArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
     }
 
@@ -42,10 +42,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun finnArbeidsgiver(hendelse: Sykdomshendelse) =
+    private fun finnArbeidsgiver(hendelse: DokumentMottattHendelse) =
             hendelse.organisasjonsnummer()?.let { arbeidsgivere[it] }
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: Sykdomshendelse) =
+    private fun finnEllerOpprettArbeidsgiver(hendelse: DokumentMottattHendelse) =
         hendelse.organisasjonsnummer()?.let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
@@ -69,19 +69,19 @@ class Person(val aktørId: String) : SakskompleksObserver {
         private val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
-        fun håndterNySøknad(søknad: NySykepengesøknad) {
+        fun håndterNySøknad(søknad: NySøknadOpprettet) {
             if (saker.none { it.håndterNySøknad(søknad) }) {
                 nyttSakskompleks().håndterNySøknad(søknad)
             }
         }
 
-        fun håndterSendtSøknad(søknad: SendtSykepengesøknad) {
+        fun håndterSendtSøknad(søknad: SendtSøknadMottatt) {
             if (saker.none { it.håndterSendtSøknad(søknad) }) {
                 nyttSakskompleks().håndterSendtSøknad(søknad)
             }
         }
 
-        fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
+        fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
             if (saker.none { it.håndterInntektsmelding(inntektsmelding) }) {
                 nyttSakskompleks().håndterInntektsmelding(inntektsmelding)
             }

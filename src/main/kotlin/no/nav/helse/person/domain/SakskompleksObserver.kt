@@ -1,7 +1,7 @@
 package no.nav.helse.person.domain
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import java.util.*
 
 interface SakskompleksObserver {
@@ -9,7 +9,7 @@ interface SakskompleksObserver {
                                 val aktørId: String,
                                 val currentState: Sakskompleks.TilstandType,
                                 val previousState: Sakskompleks.TilstandType,
-                                val sykdomshendelse: Sykdomshendelse,
+                                val sykdomshendelse: DokumentMottattHendelse,
                                 val currentMemento: Sakskompleks.Memento,
                                 val previousMemento: Sakskompleks.Memento)
 

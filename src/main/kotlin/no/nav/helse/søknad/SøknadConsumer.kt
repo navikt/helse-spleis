@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.serde.JsonNodeSerde
@@ -41,9 +41,9 @@ internal class SøknadConsumer(
                 }
                 .mapValues { jsonNode ->
                     when (jsonNode["status"].textValue()) {
-                        "NY" -> NySykepengesøknad(jsonNode)
-                        "FREMTIDIG" -> NySykepengesøknad(jsonNode)
-                        "SENDT" -> SendtSykepengesøknad(jsonNode)
+                        "NY" -> NySøknadOpprettet(jsonNode)
+                        "FREMTIDIG" -> NySøknadOpprettet(jsonNode)
+                        "SENDT" -> SendtSøknadMottatt(jsonNode)
                         else -> throw IllegalArgumentException("Kan ikke håndtere søknad med type ${jsonNode["type"].textValue()}.")
                     }
                 }
@@ -70,8 +70,8 @@ internal class SøknadConsumer(
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
         when (søknad) {
-            is NySykepengesøknad -> personMediator.håndterNySøknad(søknad)
-            is SendtSykepengesøknad -> personMediator.håndterSendtSøknad(søknad)
+            is NySøknadOpprettet -> personMediator.håndterNySøknad(søknad)
+            is SendtSøknadMottatt -> personMediator.håndterSendtSøknad(søknad)
         }
     }
 }

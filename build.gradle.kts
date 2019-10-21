@@ -44,7 +44,7 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    implementation("no.nav.helse:sykdomstidslinje:1.3d4ea73")
+    implementation("no.nav.helse:sykdomstidslinje:1.e320eda")
 
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.09.06-09-24-0426e")
     testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")

@@ -2,9 +2,9 @@ package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.Sakskompleks
@@ -46,7 +46,7 @@ class SakskompleksProbe : PersonObserver {
         personMementoStørrelse.observe(personEndretEvent.memento.toString().length.toDouble())
     }
 
-    fun inntektmeldingManglerSakskompleks(inntektsmelding: Inntektsmelding) {
+    fun inntektmeldingManglerSakskompleks(inntektsmelding: InntektsmeldingMottatt) {
         log.error("Mottok inntektsmelding med id ${inntektsmelding.inntektsmeldingId}, men klarte ikke finne et et tilhørende sakskompleks :(")
         manglendeSakskompleksForInntektsmeldingCounter.inc()
     }
@@ -76,17 +76,17 @@ class SakskompleksProbe : PersonObserver {
         dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
 
         when (event.sykdomshendelse) {
-            is Inntektsmelding -> {
+            is InntektsmeldingMottatt -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            is NySykepengesøknad -> {
+            is NySøknadOpprettet -> {
                 if (event.previousState == Sakskompleks.TilstandType.START) {
                     opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
 
                 sykmeldingKobletTilSakskompleks(event.id)
             }
-            is SendtSykepengesøknad -> {
+            is SendtSøknadMottatt -> {
                 søknadKobletTilSakskompleks(event.id)
             }
         }
@@ -105,7 +105,7 @@ class SakskompleksProbe : PersonObserver {
         log.info("Utenfor omfang: ${err.message} for søknad med id: ${sykepengesøknad.id}.")
     }
 
-    fun utenforOmfang(err: UtenforOmfangException, inntektsmelding: Inntektsmelding) {
+    fun utenforOmfang(err: UtenforOmfangException, inntektsmelding: InntektsmeldingMottatt) {
         log.info("Utenfor omfang: ${err.message} for inntektsmelding med id: ${inntektsmelding.inntektsmeldingId}.")
     }
 }

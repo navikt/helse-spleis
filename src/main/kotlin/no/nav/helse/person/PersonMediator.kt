@@ -2,9 +2,9 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.NySykepengesøknad
-import no.nav.helse.hendelse.SendtSykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.NySøknadOpprettet
+import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.oppgave.OppgaveProducer
 import no.nav.helse.person.domain.Person
@@ -26,7 +26,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         behovProducer.sendNyttBehov(event)
     }
 
-    fun håndterNySøknad(sykepengesøknad: NySykepengesøknad) =
+    fun håndterNySøknad(sykepengesøknad: NySøknadOpprettet) =
             try {
                 finnPerson(sykepengesøknad.aktørId)
                         .also { person ->
@@ -36,7 +36,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                 sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
             }
 
-    fun håndterSendtSøknad(sykepengesøknad: SendtSykepengesøknad) =
+    fun håndterSendtSøknad(sykepengesøknad: SendtSøknadMottatt) =
             try {
                 finnPerson(sykepengesøknad.aktørId)
                         .also { person ->
@@ -46,7 +46,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                 sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
             }
 
-    fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) =
+    fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) =
             try {
                 finnPerson(inntektsmelding.aktørId()).also { person ->
                     person.håndterInntektsmelding(inntektsmelding)

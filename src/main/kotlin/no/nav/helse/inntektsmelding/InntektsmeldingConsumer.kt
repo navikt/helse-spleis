@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
@@ -35,12 +35,12 @@ internal class InntektsmeldingConsumer(
             .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
             .mapValues { jsonNode ->
-                Inntektsmelding(jsonNode)
+                InntektsmeldingMottatt(jsonNode)
             }
             .peek{_, inntektsmelding -> probe.mottattInntektsmelding(inntektsmelding)}
             .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
 
-    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
+    private fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
         personMediator.håndterInntektsmelding(inntektsmelding)
     }
 
