@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -243,13 +243,29 @@ abstract class Sykdomstidslinje {
         fun fromJson(
             json: String
         ): Sykdomstidslinje {
-            val map = lagMeldingsMap(json)
-            return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json), map)
+            val jsonTidslinje = objectMapper.readTree(json)
+
+            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"])
+            val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
+
+            return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
         }
 
-        private fun lagMeldingsMap(json: String): Map<String, Sykdomshendelse> {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        private fun jsonDagFromJson(it: JsonNode): JsonDag {
+            return JsonDag(
+                JsonDagType.valueOf(it["type"].asText()),
+                LocalDate.parse(it["dato"].asText()),
+                JsonHendelsesReferanse(it["hendelse"]["type"].asText(), it["hendelse"]["hendelseId"].asText()),
+                it["erstatter"].map { jsonDagFromJson(it) })
         }
+
+
+        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<String, Sykdomshendelse> {
+            return json.map { JsonHendelse(it["type"].asText(), it["json"]) }
+                .groupBy(keySelector = { it.hendelseId() }, valueTransform = { it.toHendelse() })
+                .mapValues { (_, v) -> v.first() }
+        }
+
 
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY

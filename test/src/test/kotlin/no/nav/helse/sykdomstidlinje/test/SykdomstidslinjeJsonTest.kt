@@ -65,13 +65,13 @@ class SykdomstidslinjeJsonTest {
 
         val hendelser = tidslinjeJson["hendelser"]
         assertEquals(hendelser.size(), 2)
-        val meldinger = hendelser.groupBy { it["json"]["hendelseId"].asText() }
+        val hendelseMap = hendelser.groupBy { it["json"]["hendelseId"].asText() }
         tidslinjeJson["dager"].elements().forEach {
             val hendelseId = it["hendelse"]["hendelseId"].asText()
-            assertTrue(meldinger.containsKey(hendelseId))
+            assertTrue(hendelseMap.containsKey(hendelseId))
             if (!it["erstatter"].isEmpty)
                 it["erstatter"].onEach {
-                    assertTrue(meldinger.containsKey(it["hendelse"]["hendelseId"].asText()))
+                    assertTrue(hendelseMap.containsKey(it["hendelse"]["hendelseId"].asText()))
                 }
         }
     }
