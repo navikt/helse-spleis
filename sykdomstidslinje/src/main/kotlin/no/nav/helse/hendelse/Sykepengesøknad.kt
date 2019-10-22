@@ -3,9 +3,11 @@ package no.nav.helse.hendelse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 private const val SØKNAD_SENDT = "SENDT"
 private const val SØKNAD_NY = "NY"
@@ -13,13 +15,17 @@ private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse  {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse {
 
+    init {
+        if (!jsonNode.hasNonNull("hendelseId")) {
+            (jsonNode as ObjectNode).put("hendelseId", UUID.randomUUID().toString())
+        }
+    }
 
-    val jsonWithHendelseId get() = jsonNode.contains("hendelseId") ? json
 
     val id = jsonNode["id"].asText()!!
-    val hendelseId = jsonNode.
+    val hendelseId = jsonNode["hendelseId"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!
     val aktørId = jsonNode["aktorId"].asText()!!
@@ -48,6 +54,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
     override fun aktørId() = aktørId
+    override fun hendelseId() = hendelseId
     override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
     override fun rapportertdato(): LocalDateTime = opprettet
     override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
@@ -87,7 +94,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     }
 }
 
-class NySykepengesøknad(jsonNode: JsonNode, hendelseId: String) : Sykepengesøknad(jsonNode, hendelseId) {
+class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
@@ -101,7 +108,7 @@ class NySykepengesøknad(jsonNode: JsonNode, hendelseId: String) : Sykepengesøk
         Sykdomshendelse.Type.NySykepengesøknad
 }
 
-class SendtSykepengesøknad(jsonNode: JsonNode,hendelseId: String) : Sykepengesøknad(jsonNode, hendelseId) {
+class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }

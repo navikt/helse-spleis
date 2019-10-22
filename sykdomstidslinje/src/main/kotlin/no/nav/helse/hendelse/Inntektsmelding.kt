@@ -3,6 +3,7 @@ package no.nav.helse.hendelse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,9 +12,15 @@ import java.util.*
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
 data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
-    override fun hendelseId(): String {
-        return hendelseId()
+
+    init {
+        if (!jsonNode.hasNonNull("hendelseId")) {
+            (jsonNode as ObjectNode).put("hendelseId", UUID.randomUUID().toString())
+        }
     }
+
+    val hendelseId = jsonNode["hendelseId"].asText()!!
+    override fun hendelseId() = hendelseId
 
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 

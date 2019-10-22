@@ -38,7 +38,7 @@ class SykdomstidslinjeJsonTest {
         val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
         tidslinjeJson.elements().forEach {
             assertEquals(søknadSendt.hendelsetype().name, it["hendelse"]["type"].asText())
-            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseid"])
+            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseid"].asText())
             assertNull(it["hendelse"]["json"])
         }
     }

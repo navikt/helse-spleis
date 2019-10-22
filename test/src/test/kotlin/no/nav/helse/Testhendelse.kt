@@ -12,6 +12,11 @@ class Testhendelse(
     private val hendelsetype: Sykdomshendelse.Type = Sykdomshendelse.Type.SendtSykepengesøknad
 ) :
     Sykdomshendelse {
+    override fun hendelseId(): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+
     override fun hendelsetype(): Sykdomshendelse.Type = hendelsetype
 
     override fun organisasjonsnummer(): String {
