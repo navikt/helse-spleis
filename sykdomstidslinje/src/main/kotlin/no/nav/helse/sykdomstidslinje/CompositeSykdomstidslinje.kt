@@ -40,10 +40,13 @@ class CompositeSykdomstidslinje internal constructor(
 
     override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
 
-    override fun jsonRepresentation(): List<JsonDag> = flatten().flatMap { it.jsonRepresentation() }
+
 
     companion object {
-        internal fun fromJsonRepresentation(jsonDager: List<JsonDag>, hendelseMap: Map<String, Sykdomshendelse>): CompositeSykdomstidslinje {
+        internal fun fromJsonRepresentation(
+            jsonDager: List<JsonDag>,
+            hendelseMap: Map<String, Sykdomshendelse>
+        ): CompositeSykdomstidslinje {
             return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it, hendelseMap) })
         }
     }
