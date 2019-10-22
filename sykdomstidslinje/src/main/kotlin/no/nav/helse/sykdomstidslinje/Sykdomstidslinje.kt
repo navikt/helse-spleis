@@ -106,7 +106,7 @@ abstract class Sykdomstidslinje {
         return visitor.results()
     }
 
-    fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje(dagsats).also { this.accept(it) }
+    fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje().also { this.accept(it) }
 
     companion object {
         fun sykedag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
