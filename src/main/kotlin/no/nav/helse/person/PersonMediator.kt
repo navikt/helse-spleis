@@ -6,7 +6,7 @@ import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengehistorikk
-import no.nav.helse.oppgave.OppgaveProducer
+import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
@@ -18,7 +18,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                               private val lagrePersonDao: PersonObserver,
                               private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe(),
                               private val behovProducer: BehovProducer,
-                              private val oppgaveProducer: OppgaveProducer = OppgaveProducer()) : PersonObserver {
+                              private val gosysOppgaveProducer: GosysOppgaveProducer) : PersonObserver {
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
@@ -63,7 +63,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         if (event.currentState == SKAL_TIL_INFOTRYGD) {
-            oppgaveProducer.opprettOppgave("AAAAAAA! HELP!")
+            gosysOppgaveProducer.opprettOppgave(event.aktørId)
         }
     }
 

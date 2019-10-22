@@ -1,11 +1,7 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.zaxxer.hikari.HikariConfig
 import io.ktor.application.*
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
@@ -13,6 +9,7 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
@@ -56,13 +53,6 @@ fun Application.createHikariConfigFromEnvironment() =
 @KtorExperimentalAPI
 fun Application.sakskompleksApplication(): KafkaStreams {
 
-    install(ContentNegotiation) {
-        jackson {
-            registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        }
-    }
-
     migrate(createHikariConfigFromEnvironment())
 
     val dataSource = getDataSource(createHikariConfigFromEnvironment())
@@ -71,7 +61,8 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val personMediator = PersonMediator(
         personRepository = PersonPostgresRepository(dataSource),
         lagrePersonDao = LagrePersonDao(dataSource),
-        behovProducer = BehovProducer(Topics.behovTopic, producer))
+        behovProducer = BehovProducer(behovTopic, producer),
+        gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
 
     val builder = StreamsBuilder()
 

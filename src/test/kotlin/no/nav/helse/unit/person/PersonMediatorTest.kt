@@ -1,13 +1,12 @@
 package no.nav.helse.unit.person
 
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.hendelse.Sykepengesøknad
-import no.nav.helse.oppgave.OppgaveProducer
+import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import org.junit.jupiter.api.Test
@@ -15,15 +14,15 @@ import org.junit.jupiter.api.Test
 internal class PersonMediatorTest {
 
     val probe = mockk<SakskompleksProbe>(relaxed = true)
-    val oppgaveProducer = spyk(OppgaveProducer())
+    val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
     val behovProducer = mockk<BehovProducer>()
     val repo = HashmapPersonRepository()
     val personMediator = PersonMediator(
-            oppgaveProducer = oppgaveProducer,
             sakskompleksProbe = probe,
             personRepository = repo,
             lagrePersonDao = repo,
-            behovProducer = behovProducer)
+            behovProducer = behovProducer,
+            gosysOppgaveProducer = oppgaveProducer)
 
     val sykepengesøknad = sendtSøknad()
 
@@ -40,7 +39,7 @@ internal class PersonMediatorTest {
     fun `skal lage gosys-oppgave når saken må behandles i infotrygd`() {
         beInMåBehandlesIInfotrygdState()
 
-        verify(exactly = 1) { oppgaveProducer.opprettOppgave(any()) }
+        verify(exactly = 1) { oppgaveProducer.opprettOppgave(aktørId = sykepengesøknad.aktørId) }
     }
 
     fun beInMåBehandlesIInfotrygdState() {

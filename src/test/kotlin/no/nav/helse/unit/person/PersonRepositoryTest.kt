@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.helse.TestConstants.nySøknad
 import no.nav.helse.TestConstants.sendtSøknad
 import no.nav.helse.person.PersonMediator
-import no.nav.helse.person.domain.Person
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -19,7 +18,8 @@ internal class PersonRepositoryTest {
         val mediator = PersonMediator(
                 personRepository = repo,
                 lagrePersonDao = repo,
-                behovProducer = mockk()
+                behovProducer = mockk(),
+                gosysOppgaveProducer = mockk()
         )
 
         mediator.håndterNySøknad(nySøknad(
@@ -37,7 +37,8 @@ internal class PersonRepositoryTest {
         val mediator = PersonMediator(
                 personRepository = repo,
                 lagrePersonDao = repo,
-                behovProducer = mockk()
+                behovProducer = mockk(),
+                gosysOppgaveProducer = mockk()
         )
         mediator.håndterNySøknad(nySøknad(
                 aktørId = aktørId
