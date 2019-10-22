@@ -6,7 +6,6 @@ import no.nav.helse.hendelse.SendtSykepengesøknad
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
-import java.lang.RuntimeException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -32,18 +31,27 @@ abstract class Dag internal constructor(
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
     internal abstract fun dagType(): JsonDagType
-    override fun jsonRepresentation(): List<JsonDag> {
+
+    internal fun toJsonDag(): JsonDag {
         val hendelseType = hendelse.hendelsetype()
         val hendelseId = hendelse.hendelseId()
+        return JsonDag(
+            dagType(),
+            dagen,
+            JsonHendelsesReferanse(hendelseType.name, hendelseId),
+            erstatter.map { it.toJsonDag() })
 
-        //Antarhendelsen er persistert et annet sted
-        return listOf(
-            JsonDag(
-                dagType(),
-                dagen,
-                JsonHendelsesReferanse(hendelseType.name, hendelseId),
-                erstatter.flatMap { it.jsonRepresentation() })
+    }
+
+    internal fun toJsonHendelse(): List<JsonHendelse> {
+        val alleHendelser = mutableListOf<JsonHendelse>(
+            JsonHendelse(
+                hendelse.hendelsetype().name,
+                hendelse.toJson()
+            )
         )
+        alleHendelser.addAll(erstatter.flatMap { it.toJsonHendelse() })
+        return alleHendelser
     }
 
     override fun startdato() = dagen
@@ -100,14 +108,15 @@ abstract class Dag internal constructor(
 
     internal abstract fun nøkkel(): Nøkkel
 
+
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, Sykdomshendelse>): Dag =
             jsonDag.type.creator(
                 jsonDag.dato,
-                hendelseMap.getOrElse(jsonDag.hendelse.hendelseid,
-                    { throw RuntimeException("hendelse med id ${jsonDag.hendelse.hendelseid} finnes ikke") })
+                hendelseMap.getOrElse(jsonDag.hendelse.hendelseId,
+                    { throw RuntimeException("hendelse med id ${jsonDag.hendelse.hendelseId} finnes ikke") })
             ).also {
                 it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag ->
                     fromJsonRepresentation(

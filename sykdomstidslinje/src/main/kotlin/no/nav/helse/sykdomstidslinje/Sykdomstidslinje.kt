@@ -28,10 +28,15 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
-    internal abstract fun jsonRepresentation(): List<JsonDag>
     internal abstract fun sisteHendelse(): Sykdomshendelse
     internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
+
+    internal fun jsonRepresentation(): JsonTidslinje {
+        val dager = flatten().map { it.toJsonDag() }
+        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }
+        return JsonTidslinje(dager = dager, hendelser = hendelser)
+    }
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.length() == 0) return other

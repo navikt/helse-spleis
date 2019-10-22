@@ -28,7 +28,7 @@ class SykdomstidslinjeJsonTest {
 
 
     @Test
-    fun `gitt en tidslinje så serialiseres den med et json pr hendelse, som refereses til med id fra dag`() {
+    fun `gitt en tidslinje så serialiseres den med en json pr hendelse, som refereses til med id fra dag`() {
 
         val tidslinje = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
@@ -36,10 +36,43 @@ class SykdomstidslinjeJsonTest {
         )
 
         val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
-        tidslinjeJson.elements().forEach {
-            assertEquals(søknadSendt.hendelsetype().name, it["hendelse"]["type"].asText())
-            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseid"].asText())
-            assertNull(it["hendelse"]["json"])
+        tidslinjeJson["hendelser"].elements().forEach {
+            assertEquals(søknadSendt.hendelsetype().name, it["type"].asText())
+            assertNotNull(it["json"])
+            assertEquals(søknadSendt.hendelseId(), it["json"]["hendelseId"].asText())
+        }
+        tidslinjeJson["dager"].elements().forEach {
+            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseId"].asText())
+        }
+    }
+
+    @Test
+    fun `hendeler på erstattede dager blir også normalisert`() {
+
+        val tidslinjeB = Sykdomstidslinje.ikkeSykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), inntektsmelding
+        )
+        val tidslinjeC = Sykdomstidslinje.sykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), søknadSendt
+        )
+
+        val combined = tidslinjeB + tidslinjeC
+
+        val tidslinjeJson = objectMapper.readTree(combined.toJson()).also { println(it) }
+
+
+        val hendelser = tidslinjeJson["hendelser"]
+        assertEquals(hendelser.size(), 2)
+        val meldinger = hendelser.groupBy { it["json"]["hendelseId"].asText() }
+        tidslinjeJson["dager"].elements().forEach {
+            val hendelseId = it["hendelse"]["hendelseId"].asText()
+            assertTrue(meldinger.containsKey(hendelseId))
+            if (!it["erstatter"].isEmpty)
+                it["erstatter"].onEach {
+                    assertTrue(meldinger.containsKey(it["hendelse"]["hendelseId"].asText()))
+                }
         }
     }
 
