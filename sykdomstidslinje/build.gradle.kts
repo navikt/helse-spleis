@@ -19,6 +19,11 @@ subprojects {
     }
 }
 
+val sourcesJar by tasks.registering(Jar::class) {
+    classifier = "sources"
+    from(sourceSets.main.get().allSource)
+}
+
 publishing {
     repositories {
         maven {
@@ -36,6 +41,7 @@ publishing {
                 name.set("helse-sykdomstidslinje")
                 description.set("Bibliotek for tidslinjer av intervaller relatert til sykefravær")
                 url.set("https://github.com/navikt/helse-sykdomstidslinje")
+
                 licenses {
                     license {
                         name.set("MIT License")
@@ -50,6 +56,7 @@ publishing {
                 }
             }
             from(components["java"])
+            artifact(sourcesJar.get())
         }
     }
 }
