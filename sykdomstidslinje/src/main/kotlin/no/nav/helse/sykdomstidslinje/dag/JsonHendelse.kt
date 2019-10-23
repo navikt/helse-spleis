@@ -8,12 +8,12 @@ internal data class JsonHendelse(
     val json: JsonNode
 ) {
     fun hendelseId() = json["hendelseId"].asText()
-    fun toHendelse(): Sykdomshendelse = when (enumValueOf<Sykdomshendelse.Type>(type)) {
-        Sykdomshendelse.Type.Inntektsmelding -> Inntektsmelding(json)
-        Sykdomshendelse.Type.NySykepengesøknad -> NySykepengesøknad(json)
-        Sykdomshendelse.Type.SendtSykepengesøknad -> SendtSykepengesøknad(
-            json
-        )
-        Sykdomshendelse.Type.Sykepengehistorikk -> Sykepengehistorikk(json)
+
+    fun toHendelse(): DokumentMottattHendelse = when (type) {
+        DokumentMottattHendelse.Type.InntektsmeldingMottatt.name -> InntektsmeldingMottatt(json)
+        DokumentMottattHendelse.Type.NySøknadOpprettet.name -> NySøknadOpprettet(json)
+        DokumentMottattHendelse.Type.SendtSøknadMottatt.name -> SendtSøknadMottatt(json)
+        Sykepengehistorikk::javaClass.name -> Sykepengehistorikk(json)
+        else -> throw RuntimeException("ukjent type")
     }
 }

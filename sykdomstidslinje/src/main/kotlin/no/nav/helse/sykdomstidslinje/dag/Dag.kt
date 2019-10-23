@@ -1,9 +1,9 @@
 package no.nav.helse.sykdomstidslinje.dag
 
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
@@ -112,7 +112,7 @@ abstract class Dag internal constructor(
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, Sykdomshendelse>): Dag =
+        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, DokumentMottattHendelse>): Dag =
             jsonDag.type.creator(
                 jsonDag.dato,
                 hendelseMap.getOrElse(jsonDag.hendelse.hendelseId,

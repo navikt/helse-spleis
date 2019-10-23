@@ -45,7 +45,7 @@ class CompositeSykdomstidslinje internal constructor(
     companion object {
         internal fun fromJsonRepresentation(
             jsonDager: List<JsonDag>,
-            hendelseMap: Map<String, Sykdomshendelse>
+            hendelseMap: Map<String, DokumentMottattHendelse>
         ): CompositeSykdomstidslinje {
             return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it, hendelseMap) })
         }

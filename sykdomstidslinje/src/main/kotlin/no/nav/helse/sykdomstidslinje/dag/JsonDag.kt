@@ -1,9 +1,6 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.Sykdomshendelse
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelse.*
-import java.lang.RuntimeException
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import java.time.LocalDate
 
 internal data class JsonDag(
@@ -15,10 +12,10 @@ internal data class JsonDag(
 
 internal data class JsonHendelsesReferanse(
     val type: String,
-    val hendelseId: Strin
+    val hendelseId: String
 )
 
-enum class JsonDagType(internal val creator: (LocalDate, Sykdomshendelse) -> Dag) {
+enum class JsonDagType(internal val creator: (LocalDate, DokumentMottattHendelse) -> Dag) {
     ARBEIDSDAG({ dato, hendelse -> Arbeidsdag(dato, hendelse) }),
     EGENMELDINGSDAG({ dato, hendelse -> Egenmeldingsdag(dato, hendelse) }),
     FERIEDAG({ dato, hendelse -> Feriedag(dato, hendelse) }),

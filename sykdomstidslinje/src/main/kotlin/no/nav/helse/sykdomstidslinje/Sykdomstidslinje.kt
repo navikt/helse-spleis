@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.DokumentMottattHendelse
-import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.DayOfWeek
@@ -260,7 +258,7 @@ abstract class Sykdomstidslinje {
         }
 
 
-        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<String, Sykdomshendelse> {
+        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<String, DokumentMottattHendelse> {
             return json.map { JsonHendelse(it["type"].asText(), it["json"]) }
                 .groupBy(keySelector = { it.hendelseId() }, valueTransform = { it.toHendelse() })
                 .mapValues { (_, v) -> v.first() }
