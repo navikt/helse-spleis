@@ -7,8 +7,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.*
 import java.util.*
 
+private const val CURRENT_SKJEMA_VERSJON=2
+
 class Person(val aktørId: String) : SakskompleksObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
+    private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
     private val personObservers = mutableListOf<PersonObserver>()
     fun håndterNySøknad(søknad: NySøknadOpprettet) {
@@ -118,8 +121,9 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     private fun jsonRepresentation(): PersonJson {
         return PersonJson(
-            aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
+                aktørId = aktørId,
+                skjemaVersjon = skjemaVersjon,
+                arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
         )
     }
 
@@ -134,8 +138,9 @@ class Person(val aktørId: String) : SakskompleksObserver {
     )
 
     private data class PersonJson(
-        val aktørId: String,
-        val arbeidsgivere: List<ArbeidsgiverJson>
+            val aktørId: String,
+            val skjemaVersjon: Int,
+            val arbeidsgivere: List<ArbeidsgiverJson>
     )
 
     companion object {
@@ -145,15 +150,18 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         fun fromJson(json: String): Person {
             val personJson: PersonJson = objectMapper.readValue(json)
+            if (personJson.skjemaVersjon < CURRENT_SKJEMA_VERSJON){
+                throw PersonskjemaForGammelt(personJson.aktørId, personJson.skjemaVersjon,CURRENT_SKJEMA_VERSJON)
+            }
             return Person(personJson.aktørId)
-                .apply {
-                    arbeidsgivere.putAll(personJson.arbeidsgivere
-                        .map {
-                            it.organisasjonsnummer to Arbeidsgiver(it).also { arbeidsgiver ->
-                                arbeidsgiver.addObserver(this)
-                            }
-                        })
-                }
+                    .apply {
+                        arbeidsgivere.putAll(personJson.arbeidsgivere
+                                .map {
+                                    it.organisasjonsnummer to Arbeidsgiver(it).also { arbeidsgiver ->
+                                        arbeidsgiver.addObserver(this)
+                                    }
+                                })
+                    }
         }
     }
 }

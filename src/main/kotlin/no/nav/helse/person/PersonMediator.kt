@@ -7,11 +7,8 @@ import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengehistorikk
 import no.nav.helse.oppgave.GosysOppgaveProducer
-import no.nav.helse.person.domain.Person
-import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.*
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
-import no.nav.helse.person.domain.SakskompleksObserver
-import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sakskompleks.SakskompleksProbe
 
 internal class PersonMediator(private val personRepository: PersonRepository,
@@ -34,7 +31,9 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                         }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
-            }
+            } catch (err: PersonskjemaForGammelt) {
+                sakskompleksProbe.forGammelSkjemaversjon(err)
+}
 
     fun håndterSendtSøknad(sykepengesøknad: SendtSøknadMottatt) =
             try {

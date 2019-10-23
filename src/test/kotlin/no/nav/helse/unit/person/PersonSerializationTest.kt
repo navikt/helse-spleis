@@ -6,10 +6,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.PersonskjemaForGammelt
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+
+import org.junit.jupiter.api.assertThrows
 
 internal class PersonSerializationTest {
     companion object {
@@ -36,6 +39,19 @@ internal class PersonSerializationTest {
 
         assertEquals(objectMapper.readTree(personJson), objectMapper.readTree(serializedPerson))
     }
+
+    @Test
+    fun `deserialisering av en serialisert person med gammelt skjema gir feil`() {
+        val personJson = "/serialisert_person_komplett_sak_med_gammel_versjon.json".readResource()
+        assertThrows<PersonskjemaForGammelt> { Person.fromJson(personJson) }
+    }
+
+    @Test
+    fun `deserialisering av en serialisert person uten skjemaversjon gir feil`() {
+        val personJson = "/serialisert_person_komplett_sak_uten_versjon.json".readResource()
+        assertThrows<PersonskjemaForGammelt> { Person.fromJson(personJson) }
+    }
+
 
     @Test
     fun `restoring adds the sakskompleks observer for the person`() {

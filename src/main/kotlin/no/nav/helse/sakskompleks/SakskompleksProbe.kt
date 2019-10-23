@@ -7,6 +7,7 @@ import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
 import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.person.domain.PersonObserver
+import no.nav.helse.person.domain.PersonskjemaForGammelt
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.person.domain.UtenforOmfangException
@@ -44,6 +45,10 @@ class SakskompleksProbe : PersonObserver {
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
         log.info("lagret person med størrelse ${personEndretEvent.memento.toString().length} bytes")
         personMementoStørrelse.observe(personEndretEvent.memento.toString().length.toDouble())
+    }
+
+    fun forGammelSkjemaversjon(err: PersonskjemaForGammelt) {
+        log.info(err.message)
     }
 
     fun inntektmeldingManglerSakskompleks(inntektsmelding: InntektsmeldingMottatt) {
