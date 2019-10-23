@@ -97,7 +97,7 @@ abstract class Sykdomstidslinje {
         return CompositeSykdomstidslinje(days)
     }
 
-    fun syketilfeller(): List<Sykdomstidslinje> {
+    fun syketilfeller(): List<Syketilfelle> {
         check(flatten().none { it::class == Permisjonsdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med permisjonsdager." }
         check(flatten().none { it::class == Ubestemtdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med ubestemte dager." }
         val visitor = SyketilfelleSplitter()
@@ -105,8 +105,6 @@ abstract class Sykdomstidslinje {
 
         return visitor.results()
     }
-
-    fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje().also { this.accept(it) }
 
     companion object {
         fun sykedag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
