@@ -233,6 +233,50 @@ class SykedagerTest {
     }
 
     @Test
+    fun `utenfor arbeidsgiverperioden teller vi bare til 16 fridager før vi går tilbake til start - case 1`() {
+        /*
+        syk 20 dager
+        frisk 15 dager
+        syk 1 dag
+        skal gi 1 sykdomstilfelle
+        */
+        val sisteSykedagFørPeriodeIArbeid = Uke(1).mandag
+        val sisteArbeidsdagFørSykIgjen = sisteSykedagFørPeriodeIArbeid.plusDays(15)
+
+        val influensa = Sykdomstidslinje.sykedager(sisteSykedagFørPeriodeIArbeid.minusDays(20), sisteSykedagFørPeriodeIArbeid, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(
+            sisteArbeidsdagFørSykIgjen.plusDays(1),
+            sisteArbeidsdagFørSykIgjen.plusDays(21),
+            sendtSykmelding
+        )
+
+        val syketilfeller = (influensa + spysyka).syketilfeller()
+        assertEquals(1, syketilfeller.size, "skulle bare vært ett syketilfelle der bruker har vært tilbake i jobb i strengt mindre enn 16 dager")
+    }
+
+    @Test
+    fun `utenfor arbeidsgiverperioden teller vi bare til 16 fridager før vi går tilbake til start - case 2`() {
+        /*
+        syk 20 dager
+        frisk 16 dager
+        syk 1 dag
+        skal gi 2 sykdomstilfeller
+         */
+        val sisteSykedagFørPeriodeIArbeid = Uke(1).mandag
+        val sisteArbeidsdagFørSykIgjen = sisteSykedagFørPeriodeIArbeid.plusDays(16)
+
+        val influensa = Sykdomstidslinje.sykedager(sisteSykedagFørPeriodeIArbeid.minusDays(20), sisteSykedagFørPeriodeIArbeid, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(
+            sisteArbeidsdagFørSykIgjen.plusDays(1),
+            sisteArbeidsdagFørSykIgjen.plusDays(21),
+            sendtSykmelding
+        )
+
+        val syketilfeller = (influensa + spysyka).syketilfeller()
+        assertEquals(2, syketilfeller.size, "skulle bare vært to syketilfeller der bruker har vært tilbake i jobb i 16 dager eller mer")
+    }
+
+    @Test
     fun `syketilfeller støtter ikke ubestemte dager`() {
         assertThrows<IllegalStateException> {
             (Sykdomstidslinje.utenlandsdag(Uke(1).mandag, sendtSykmelding) + Sykdomstidslinje.permisjonsdag(Uke(1).mandag, sendtSykmelding)).syketilfeller()

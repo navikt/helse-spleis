@@ -17,7 +17,7 @@ internal class SykepengesøknadTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val testSøknadJson = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
-        private val testSøknad = SendtSykepengesøknad(testSøknadJson)
+        private val testSøknad = SendtSøknadMottatt(testSøknadJson)
         private val testSøknadSerialisert = objectMapper.readTree(objectMapper.writeValueAsString(testSøknad))
     }
 
@@ -41,7 +41,7 @@ internal class SykepengesøknadTest {
         val json = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()) as ObjectNode
         json.remove("arbeidGjenopptatt")
 
-        val søknad = SendtSykepengesøknad(json)
+        val søknad = SendtSøknadMottatt(json)
         assertNull(søknad.arbeidGjenopptatt)
     }
 }

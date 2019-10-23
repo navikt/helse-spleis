@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.hendelse.Sykdomshendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -28,8 +30,10 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
-    internal abstract fun sisteHendelse(): Sykdomshendelse
-    internal abstract fun dag(dato: LocalDate, hendelse: Sykdomshendelse): Dag
+
+    internal abstract fun sisteHendelse(): DokumentMottattHendelse
+    internal abstract fun dag(dato: LocalDate, hendelse: DokumentMottattHendelse): Dag
+
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     internal fun jsonRepresentation(): JsonTidslinje {
@@ -47,16 +51,7 @@ abstract class Sykdomstidslinje {
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
         val intervalEtterKonflikter =
             datesUntil
-                .map {
-                    // TODO: Clean me up
-                    val firstDay = this.dag(it, this.sisteHendelse())
-                    val secondDay = other.dag(it, other.sisteHendelse())
-                    if (firstDay is ImplisittDag && secondDay is ImplisittDag && this.sisteHendelse() == other.sisteHendelse()) {
-                        firstDay
-                    } else {
-                        firstDay.beste(secondDay)
-                    }
-                }
+                .map {this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }
 
         return CompositeSykdomstidslinje(intervalEtterKonflikter)
     }
@@ -74,6 +69,11 @@ abstract class Sykdomstidslinje {
             this.length() == 0 || other.length() == 0 -> false
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
+
+    fun erUtenforOmfang(): Boolean {
+        return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
+                || syketilfeller().size != 1
+    }
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -115,10 +115,10 @@ abstract class Sykdomstidslinje {
         return visitor.results()
     }
 
-    fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje(dagsats).also { this.accept(it) }
+    fun utbetalingstidslinje(dagsats: Double) = Utbetalingstidslinje().also { this.accept(it) }
 
     companion object {
-        fun sykedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun sykedag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
                 hendelse
@@ -127,16 +127,16 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun egenmeldingsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun egenmeldingsdag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             Egenmeldingsdag(gjelder, hendelse)
 
-        fun ferie(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun ferie(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             Feriedag(
                 gjelder,
                 hendelse
             )
 
-        fun ikkeSykedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun ikkeSykedag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) Arbeidsdag(
                 gjelder,
                 hendelse
@@ -145,7 +145,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun utenlandsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun utenlandsdag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) Utenlandsdag(
                 gjelder,
                 hendelse
@@ -154,7 +154,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedag(
@@ -164,7 +164,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun egenmeldingsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun egenmeldingsdager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 egenmeldingsdag(
@@ -174,7 +174,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun ferie(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun ferie(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ferie(
@@ -184,7 +184,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun ikkeSykedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun ikkeSykedager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ikkeSykedag(
@@ -194,7 +194,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun utenlandsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun utenlandsdager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 utenlandsdag(
@@ -204,7 +204,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun studiedag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun studiedag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) Studiedag(
                 gjelder,
                 hendelse
@@ -213,7 +213,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun studiedager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun studiedager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 studiedag(
@@ -223,7 +223,7 @@ abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun permisjonsdag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        fun permisjonsdag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) Permisjonsdag(
                 gjelder,
                 hendelse
@@ -232,7 +232,7 @@ abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun permisjonsdager(fra: LocalDate, til: LocalDate, hendelse: Sykdomshendelse): Sykdomstidslinje {
+        fun permisjonsdager(fra: LocalDate, til: LocalDate, hendelse: DokumentMottattHendelse): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
@@ -270,7 +270,7 @@ abstract class Sykdomstidslinje {
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
 
-        internal fun implisittDag(gjelder: LocalDate, hendelse: Sykdomshendelse) =
+        internal fun implisittDag(gjelder: LocalDate, hendelse: DokumentMottattHendelse) =
             if (erArbeidsdag(gjelder)) ImplisittDag(
                 gjelder,
                 hendelse

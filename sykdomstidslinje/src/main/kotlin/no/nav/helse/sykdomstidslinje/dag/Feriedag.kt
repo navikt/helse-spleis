@@ -1,12 +1,12 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.Sykdomshendelse
-import no.nav.helse.hendelse.Sykdomshendelse.Type.Inntektsmelding
-import no.nav.helse.hendelse.Sykdomshendelse.Type.SendtSykepengesøknad
+import no.nav.helse.hendelse.DokumentMottattHendelse
+import no.nav.helse.hendelse.DokumentMottattHendelse.Type.InntektsmeldingMottatt
+import no.nav.helse.hendelse.DokumentMottattHendelse.Type.SendtSøknadMottatt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class Feriedag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendelse) : Dag(gjelder, hendelse) {
+class Feriedag internal constructor(gjelder: LocalDate, hendelse: DokumentMottattHendelse) : Dag(gjelder, hendelse) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitFeriedag(this)
     }
@@ -20,8 +20,8 @@ class Feriedag internal constructor(gjelder: LocalDate, hendelse: Sykdomshendels
 
     override fun nøkkel(): Nøkkel =
         when (hendelse.hendelsetype()) {
-            SendtSykepengesøknad -> Nøkkel.V_A
-            Inntektsmelding -> Nøkkel.V_IM
+            SendtSøknadMottatt -> Nøkkel.V_A
+            InntektsmeldingMottatt -> Nøkkel.V_IM
             else -> throw RuntimeException("Hendelse er ikke støttet")
         }
 }

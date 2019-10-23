@@ -82,9 +82,9 @@ internal object TestHendelser {
         )
     ).let {
         when (status) {
-            SoknadsstatusDTO.NY -> NySykepengesøknad(it)
-            SoknadsstatusDTO.FREMTIDIG -> NySykepengesøknad(it)
-            SoknadsstatusDTO.SENDT -> SendtSykepengesøknad(it)
+            SoknadsstatusDTO.NY -> NySøknadOpprettet(it)
+            SoknadsstatusDTO.FREMTIDIG -> NySøknadOpprettet(it)
+            SoknadsstatusDTO.SENDT -> SendtSøknadMottatt(it)
             else -> throw IllegalArgumentException("Kan ikke håndtere søknadstatus: $status")
         }
     }
@@ -111,7 +111,7 @@ internal object TestHendelser {
             fravær = fravær,
             søknadsperioder = søknadsperioder,
             arbeidGjenopptatt = arbeidGjenopptatt
-        ) as SendtSykepengesøknad
+        ) as SendtSøknadMottatt
 
     fun nySøknad(
         opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -127,7 +127,7 @@ internal object TestHendelser {
             arbeidsgiver = arbeidsgiver,
             fravær = emptyList(),
             søknadsperioder = søknadsperioder
-        ) as NySykepengesøknad
+        ) as NySøknadOpprettet
 
     fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
         val historikk: Map<String, Any> = mapOf<String, Any>(
@@ -147,7 +147,7 @@ internal object TestHendelser {
         return Sykepengehistorikk(objectMapper.valueToTree(historikk))
     }
 
-    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(
+    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.InntektsmeldingMottatt(
         objectMapper.valueToTree(
             Inntektsmelding(
                 inntektsmeldingId = "",

@@ -244,7 +244,7 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
 
         private fun tellFriskeDager() {
             friskeDager++
-            if (friskeDager > 16) {
+            if (friskeDager >= 16) {
                 state = Starttilstand()
                 pushResultat()
             }

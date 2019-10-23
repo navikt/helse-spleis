@@ -6,11 +6,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-interface Sykdomshendelse : Comparable<Sykdomshendelse> {
+interface Sykepengehendelse {
+
+}
+
+interface DokumentMottattHendelse: Sykepengehendelse, Comparable<DokumentMottattHendelse> {
     enum class Type {
-        SendtSykepengesøknad,
-        NySykepengesøknad,
-        Inntektsmelding,
+        SendtSøknadMottatt,
+        NySøknadOpprettet,
+        InntektsmeldingMottatt,
         Sykepengehistorikk
     }
 
@@ -22,7 +26,7 @@ interface Sykdomshendelse : Comparable<Sykdomshendelse> {
     fun hendelseId(): String
 
     fun toJson(): JsonNode
-    override fun compareTo(other: Sykdomshendelse) = this.rapportertdato().compareTo(other.rapportertdato())
+    override fun compareTo(other: DokumentMottattHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
     override fun equals(other: Any?): Boolean
 }
 

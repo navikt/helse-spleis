@@ -1,6 +1,9 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.hendelse.Sykdomshendelse
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelse.*
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 internal data class JsonDag(
@@ -12,7 +15,7 @@ internal data class JsonDag(
 
 internal data class JsonHendelsesReferanse(
     val type: String,
-    val hendelseId: String
+    val hendelseId: Strin
 )
 
 enum class JsonDagType(internal val creator: (LocalDate, Sykdomshendelse) -> Dag) {

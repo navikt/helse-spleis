@@ -3,21 +3,21 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.hendelse.Sykdomshendelse
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDateTime
 
 class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
-    private val hendelsetype: Sykdomshendelse.Type = Sykdomshendelse.Type.SendtSykepengesøknad
+    private val hendelsetype: DokumentMottattHendelse.Type = DokumentMottattHendelse.Type.SendtSøknadMottatt
 ) :
-    Sykdomshendelse {
+    DokumentMottattHendelse {
+
     override fun hendelseId(): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-
-    override fun hendelsetype(): Sykdomshendelse.Type = hendelsetype
+    override fun hendelsetype(): DokumentMottattHendelse.Type = hendelsetype
 
     override fun organisasjonsnummer(): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -35,7 +35,7 @@ class Testhendelse(
         return rapportertdato
     }
 
-    override fun compareTo(other: Sykdomshendelse): Int {
+    override fun compareTo(other: DokumentMottattHendelse): Int {
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
 

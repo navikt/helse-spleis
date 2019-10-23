@@ -11,7 +11,7 @@ import java.util.*
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
-data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
+data class InntektsmeldingMottatt(val jsonNode: JsonNode): DokumentMottattHendelse {
 
     init {
         if (!jsonNode.hasNonNull("hendelseId")) {
@@ -21,6 +21,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
 
     val hendelseId = jsonNode["hendelseId"].asText()!!
     override fun hendelseId() = hendelseId
+
 
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
@@ -55,7 +56,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
 
     override fun rapportertdato() = rapportertDato
 
-    override fun hendelsetype() = Sykdomshendelse.Type.Inntektsmelding
+    override fun hendelsetype() = DokumentMottattHendelse.Type.InntektsmeldingMottatt
 
     override fun aktørId(): String = arbeidstakerAktorId
 
@@ -81,6 +82,6 @@ data class Inntektsmelding(val jsonNode: JsonNode) : Sykdomshendelse {
 
     override fun toJson(): JsonNode = jsonNode
 
-    override fun equals(other: Any?): Boolean = other is Inntektsmelding && jsonNode == other.jsonNode
+    override fun equals(other: Any?): Boolean = other is InntektsmeldingMottatt && jsonNode == other.jsonNode
 }
 

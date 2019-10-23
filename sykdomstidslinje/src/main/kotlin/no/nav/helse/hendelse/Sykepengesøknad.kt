@@ -15,7 +15,7 @@ private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
 
 @JsonSerialize(using = SykdomsheldelseSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
-abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendelse {
+abstract class Sykepengesøknad(private val jsonNode: JsonNode) : DokumentMottattHendelse {
 
     init {
         if (!jsonNode.hasNonNull("hendelseId")) {
@@ -57,7 +57,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     override fun hendelseId() = hendelseId
     override fun organisasjonsnummer(): String? = jsonNode["arbeidsgiver"]?.get("orgnummer")?.textValue()
     override fun rapportertdato(): LocalDateTime = opprettet
-    override fun compareTo(other: Sykdomshendelse): Int = opprettet.compareTo(other.rapportertdato())
+    override fun compareTo(other: DokumentMottattHendelse): Int = opprettet.compareTo(other.rapportertdato())
 
     protected val sykeperiodeTidslinje
         get(): List<Sykdomstidslinje> = sykeperioder
@@ -94,7 +94,7 @@ abstract class Sykepengesøknad(private val jsonNode: JsonNode) : Sykdomshendels
     }
 }
 
-class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class NySøknadOpprettet(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_NY || status == SØKNAD_FREMTIDIG) { "Søknaden må være ny eller fremtidig" }
     }
@@ -105,10 +105,10 @@ class NySykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
         }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.NySykepengesøknad
+        DokumentMottattHendelse.Type.NySøknadOpprettet
 }
 
-class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
+class SendtSøknadMottatt(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
     init {
         require(status == SØKNAD_SENDT) { "Søknaden må være sendt" }
     }
@@ -120,7 +120,7 @@ class SendtSykepengesøknad(jsonNode: JsonNode) : Sykepengesøknad(jsonNode) {
             }
 
     override fun hendelsetype() =
-        Sykdomshendelse.Type.SendtSykepengesøknad
+        DokumentMottattHendelse.Type.SendtSøknadMottatt
 }
 
 data class Periode(val jsonNode: JsonNode) {
