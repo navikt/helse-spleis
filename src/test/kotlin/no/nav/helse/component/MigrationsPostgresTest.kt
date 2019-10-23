@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 
+// denne testen kan feile pga tilgangskontroll på mapper under /var/folders/ly/5p_0fdf10sv6y_vl408hlhvr0000gp/T/embedded-pg eller tilsvarende
+// prøv først å slette denne mappen før du sletter hele testen.
 class MigrationsPostgresTest {
 
     private lateinit var embeddedPostgres: EmbeddedPostgres
