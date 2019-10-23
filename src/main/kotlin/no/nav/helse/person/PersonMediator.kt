@@ -33,7 +33,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                 sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
             } catch (err: PersonskjemaForGammelt) {
                 sakskompleksProbe.forGammelSkjemaversjon(err)
-}
+            }
 
     fun håndterSendtSøknad(sykepengesøknad: SendtSøknadMottatt) =
             try {
@@ -43,6 +43,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                         }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
+            } catch (err: PersonskjemaForGammelt) {
+                sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
     fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) =
@@ -52,11 +54,17 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                 }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, inntektsmelding)
+            } catch (err: PersonskjemaForGammelt) {
+                sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
     fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
-        finnPerson(sykepengehistorikk.aktørId).also { person ->
-            person.håndterSykepengehistorikk(sykepengehistorikk)
+        try {
+            finnPerson(sykepengehistorikk.aktørId).also { person ->
+                person.håndterSykepengehistorikk(sykepengehistorikk)
+            }
+        } catch (err: PersonskjemaForGammelt) {
+            sakskompleksProbe.forGammelSkjemaversjon(err)
         }
     }
 
