@@ -1,9 +1,9 @@
 package no.nav.helse.sykdomstidslinje.dag
 
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.hendelse.InntektsmeldingMottatt
 import no.nav.helse.hendelse.NySøknadOpprettet
 import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
@@ -31,10 +31,27 @@ abstract class Dag internal constructor(
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
     internal abstract fun dagType(): JsonDagType
-    override fun jsonRepresentation(): List<JsonDag> {
+
+    internal fun toJsonDag(): JsonDag {
         val hendelseType = hendelse.hendelsetype()
-        val hendelseJson = hendelse.toJson()
-        return listOf(JsonDag(dagType(), dagen, JsonHendelse(hendelseType.name, hendelseJson), erstatter.flatMap { it.jsonRepresentation() }))
+        val hendelseId = hendelse.hendelseId()
+        return JsonDag(
+            dagType(),
+            dagen,
+            JsonHendelsesReferanse(hendelseType.name, hendelseId),
+            erstatter.map { it.toJsonDag() })
+
+    }
+
+    internal fun toJsonHendelse(): List<JsonHendelse> {
+        val alleHendelser = mutableListOf<JsonHendelse>(
+            JsonHendelse(
+                hendelse.hendelsetype().name,
+                hendelse.toJson()
+            )
+        )
+        alleHendelser.addAll(erstatter.flatMap { it.toJsonHendelse() })
+        return alleHendelser
     }
 
     override fun startdato() = dagen
@@ -63,13 +80,13 @@ abstract class Dag internal constructor(
             )
         }
 
-    fun erHelg() = dagen.dayOfWeek  == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
+    fun erHelg() = dagen.dayOfWeek == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
 
     override fun length() = 1
 
     override fun sisteHendelse() = this.hendelse
 
-    internal enum class Nøkkel{
+    internal enum class Nøkkel {
         I,
         WD_A,
         WD_IM,
@@ -91,11 +108,22 @@ abstract class Dag internal constructor(
 
     internal abstract fun nøkkel(): Nøkkel
 
+
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-        internal fun fromJsonRepresentation(jsonDag: JsonDag): Dag = jsonDag.type.creator(jsonDag).also {
-            it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag -> fromJsonRepresentation(erstatterJsonDag) })
-        }
+        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, DokumentMottattHendelse>): Dag =
+            jsonDag.type.creator(
+                jsonDag.dato,
+                hendelseMap.getOrElse(jsonDag.hendelse.hendelseId,
+                    { throw RuntimeException("hendelse med id ${jsonDag.hendelse.hendelseId} finnes ikke") })
+            ).also {
+                it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag ->
+                    fromJsonRepresentation(
+                        erstatterJsonDag,
+                        hendelseMap
+                    )
+                })
+            }
     }
 }

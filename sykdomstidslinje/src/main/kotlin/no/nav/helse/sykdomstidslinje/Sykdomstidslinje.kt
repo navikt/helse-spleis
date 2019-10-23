@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelse.DokumentMottattHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -28,10 +28,17 @@ abstract class Sykdomstidslinje {
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
-    internal abstract fun jsonRepresentation(): List<JsonDag>
+
     internal abstract fun sisteHendelse(): DokumentMottattHendelse
     internal abstract fun dag(dato: LocalDate, hendelse: DokumentMottattHendelse): Dag
+
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
+
+    internal fun jsonRepresentation(): JsonTidslinje {
+        val dager = flatten().map { it.toJsonDag() }
+        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }
+        return JsonTidslinje(dager = dager, hendelser = hendelser)
+    }
 
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         if (this.length() == 0) return other
@@ -229,9 +236,32 @@ abstract class Sykdomstidslinje {
                     .toList())
         }
 
-        fun fromJson(json: String): Sykdomstidslinje {
-            return CompositeSykdomstidslinje.fromJsonRepresentation(objectMapper.readValue(json))
+        fun fromJson(
+            json: String
+        ): Sykdomstidslinje {
+            val jsonTidslinje = objectMapper.readTree(json)
+
+            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"])
+            val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
+
+            return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
         }
+
+        private fun jsonDagFromJson(it: JsonNode): JsonDag {
+            return JsonDag(
+                JsonDagType.valueOf(it["type"].asText()),
+                LocalDate.parse(it["dato"].asText()),
+                JsonHendelsesReferanse(it["hendelse"]["type"].asText(), it["hendelse"]["hendelseId"].asText()),
+                it["erstatter"].map { jsonDagFromJson(it) })
+        }
+
+
+        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<String, DokumentMottattHendelse> {
+            return json.map { JsonHendelse(it["type"].asText(), it["json"]) }
+                .groupBy(keySelector = { it.hendelseId() }, valueTransform = { it.toHendelse() })
+                .mapValues { (_, v) -> v.first() }
+        }
+
 
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY

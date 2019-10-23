@@ -12,6 +12,11 @@ class Testhendelse(
     private val hendelsetype: DokumentMottattHendelse.Type = DokumentMottattHendelse.Type.SendtSøknadMottatt
 ) :
     DokumentMottattHendelse {
+
+    override fun hendelseId(): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun hendelsetype(): DokumentMottattHendelse.Type = hendelsetype
 
     override fun organisasjonsnummer(): String {

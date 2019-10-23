@@ -1,6 +1,7 @@
 package no.nav.helse.hendelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
@@ -8,14 +9,23 @@ import java.time.LocalDateTime
 import java.util.*
 
 // Embedded document - json er output fra Spole
-data class Sykepengehistorikk(val json: JsonNode) : DokumentMottattHendelse {
-    val aktørId = json["aktørId"].textValue()
-    val organisasjonsnummer = json["organisasjonsnummer"].textValue()
+data class Sykepengehistorikk(val jsonNode: JsonNode) : DokumentMottattHendelse {
+    init {
+        if (!jsonNode.hasNonNull("hendelseId")) {
+            (jsonNode as ObjectNode).put("hendelseId", UUID.randomUUID().toString())
+        }
+    }
 
-    fun sakskompleksId() = UUID.fromString(json["sakskompleksId"].textValue())
+    val hendelseId = jsonNode["hendelseId"].asText()!!
+    override fun hendelseId() = hendelseId
+
+    val aktørId = jsonNode["aktørId"].textValue()
+    val organisasjonsnummer = jsonNode["organisasjonsnummer"].textValue()
+
+    fun sakskompleksId() = UUID.fromString(jsonNode["sakskompleksId"].textValue())
 
     private fun perioder() =
-        json["@løsning"]["perioder"]?.map { Periode(it) } ?: emptyList()
+        jsonNode["@løsning"]["perioder"]?.map { Periode(it) } ?: emptyList()
 
     override fun hendelsetype(): DokumentMottattHendelse.Type {
         return DokumentMottattHendelse.Type.Sykepengehistorikk
@@ -36,7 +46,7 @@ data class Sykepengehistorikk(val json: JsonNode) : DokumentMottattHendelse {
             aggregate + Sykdomstidslinje.sykedager(periode.fom, periode.tom, this)
         }
 
-    override fun toJson() = json
+    override fun toJson() = jsonNode
 
     fun påvirkerSakensMaksdato(sakensTidslinje: Sykdomstidslinje) =
         sykdomstidslinje().antallDagerMellom(sakensTidslinje) <= seksMånederIDager

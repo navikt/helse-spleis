@@ -10,8 +10,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -26,6 +25,56 @@ class SykdomstidslinjeJsonTest {
         InntektsmeldingMottatt(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json")))
     val søknadSendt =
         SendtSøknadMottatt(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json")))
+
+
+    @Test
+    fun `gitt en tidslinje så serialiseres den med en json pr hendelse, som refereses til med id fra dag`() {
+
+        val tidslinje = Sykdomstidslinje.sykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), søknadSendt
+        )
+
+        val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
+        tidslinjeJson["hendelser"].elements().forEach {
+            assertEquals(søknadSendt.hendelsetype().name, it["type"].asText())
+            assertNotNull(it["json"])
+            assertEquals(søknadSendt.hendelseId(), it["json"]["hendelseId"].asText())
+        }
+        tidslinjeJson["dager"].elements().forEach {
+            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseId"].asText())
+        }
+    }
+
+    @Test
+    fun `hendeler på erstattede dager blir også normalisert`() {
+
+        val tidslinjeB = Sykdomstidslinje.ikkeSykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), inntektsmelding
+        )
+        val tidslinjeC = Sykdomstidslinje.sykedager(
+            LocalDate.of(2019, 10, 7),
+            LocalDate.of(2019, 10, 10), søknadSendt
+        )
+
+        val combined = tidslinjeB + tidslinjeC
+
+        val tidslinjeJson = objectMapper.readTree(combined.toJson()).also { println(it) }
+
+
+        val hendelser = tidslinjeJson["hendelser"]
+        assertEquals(hendelser.size(), 2)
+        val hendelseMap = hendelser.groupBy { it["json"]["hendelseId"].asText() }
+        tidslinjeJson["dager"].elements().forEach {
+            val hendelseId = it["hendelse"]["hendelseId"].asText()
+            assertTrue(hendelseMap.containsKey(hendelseId))
+            if (!it["erstatter"].isEmpty)
+                it["erstatter"].onEach {
+                    assertTrue(hendelseMap.containsKey(it["hendelse"]["hendelseId"].asText()))
+                }
+        }
+    }
 
     @Test
     fun `lagring og restoring av en sykdomstidslinje med har de samme egenskapene som den opprinnelige`() {

@@ -1,39 +1,29 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelse.*
-import java.lang.RuntimeException
+import no.nav.helse.hendelse.DokumentMottattHendelse
 import java.time.LocalDate
 
 internal data class JsonDag(
     val type: JsonDagType,
     val dato: LocalDate,
-    val hendelse: JsonHendelse,
+    val hendelse: JsonHendelsesReferanse,
     val erstatter: List<JsonDag>
 )
 
-internal data class JsonHendelse(
+internal data class JsonHendelsesReferanse(
     val type: String,
-    val json: JsonNode
-) {
-    fun toHendelse(): DokumentMottattHendelse = when (type) {
-        DokumentMottattHendelse.Type.InntektsmeldingMottatt.name -> InntektsmeldingMottatt(json)
-        DokumentMottattHendelse.Type.NySøknadOpprettet.name -> NySøknadOpprettet(json)
-        DokumentMottattHendelse.Type.SendtSøknadMottatt.name -> SendtSøknadMottatt(json)
-        Sykepengehistorikk::javaClass.name -> Sykepengehistorikk(json)
-        else -> throw RuntimeException("ukjent type")
-    }
-}
+    val hendelseId: String
+)
 
-enum class JsonDagType(internal val creator: (JsonDag) -> Dag) {
-    ARBEIDSDAG({ Arbeidsdag(it.dato, it.hendelse.toHendelse()) }),
-    EGENMELDINGSDAG({ Egenmeldingsdag(it.dato, it.hendelse.toHendelse()) }),
-    FERIEDAG({ Feriedag(it.dato, it.hendelse.toHendelse()) }),
-    IMPLISITT_DAG({ ImplisittDag(it.dato, it.hendelse.toHendelse()) }),
-    PERMISJONSDAG({ Permisjonsdag(it.dato, it.hendelse.toHendelse()) }),
-    STUDIEDAG({ Studiedag(it.dato, it.hendelse.toHendelse()) }),
-    SYKEDAG({ Sykedag(it.dato, it.hendelse.toHendelse()) }),
-    SYK_HELGEDAG({ SykHelgedag(it.dato, it.hendelse.toHendelse()) }),
-    UBESTEMTDAG({ Ubestemtdag(it.dato, it.hendelse.toHendelse()) }),
-    UTENLANDSDAG({ Utenlandsdag(it.dato, it.hendelse.toHendelse()) })
+enum class JsonDagType(internal val creator: (LocalDate, DokumentMottattHendelse) -> Dag) {
+    ARBEIDSDAG({ dato, hendelse -> Arbeidsdag(dato, hendelse) }),
+    EGENMELDINGSDAG({ dato, hendelse -> Egenmeldingsdag(dato, hendelse) }),
+    FERIEDAG({ dato, hendelse -> Feriedag(dato, hendelse) }),
+    IMPLISITT_DAG({ dato, hendelse -> ImplisittDag(dato, hendelse) }),
+    PERMISJONSDAG({ dato, hendelse -> Permisjonsdag(dato, hendelse) }),
+    STUDIEDAG({ dato, hendelse -> Studiedag(dato, hendelse) }),
+    SYKEDAG({ dato, hendelse -> Sykedag(dato, hendelse) }),
+    SYK_HELGEDAG({ dato, hendelse -> SykHelgedag(dato, hendelse) }),
+    UBESTEMTDAG({ dato, hendelse -> Ubestemtdag(dato, hendelse) }),
+    UTENLANDSDAG({ dato, hendelse -> Utenlandsdag(dato, hendelse) })
 }

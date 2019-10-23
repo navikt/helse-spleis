@@ -13,6 +13,10 @@ class Testhendelse(
     DokumentMottattHendelse {
     override fun hendelsetype(): DokumentMottattHendelse.Type = hendelsetype
 
+    override fun hendelseId(): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun organisasjonsnummer(): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
