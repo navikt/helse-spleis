@@ -24,7 +24,7 @@ Inntektsmelding (uten at sykmelding er mottatt) = manuell sak
 Sykmelding --> sykmelding eller andre varianter av 2 av en dokumenttype som overlapper = manuell sak
 
 ## Bygge prosjektet
-For å bygge trenger man å oppgi en Github-bruker med lesetilgang til Github-repoet
+For å bygge trenger man å oppgi en Github-bruker med lesetilgang til Github-repoet.
 Dette gjøres enklest ved å opprette et personal access token for Github-brukeren din: 
 
 På Github: gå til Settings/Developer settings/Personal access tokens,
