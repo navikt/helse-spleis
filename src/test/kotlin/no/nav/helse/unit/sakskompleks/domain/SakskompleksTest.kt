@@ -3,29 +3,22 @@ package no.nav.helse.unit.sakskompleks.domain
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.nySøknad
-import no.nav.helse.TestConstants.sendtSøknad
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.TestConstants.inntektsmeldingHendelse
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.juli
 import no.nav.helse.person.domain.Sakskompleks
-import no.nav.helse.readResource
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
 class SakskompleksTest {
-    companion object {
-        val objectMapper = jacksonObjectMapper()
+    private companion object {
+        private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val standardNySøknad = nySøknad()
-        private val standardSendtSøknad = sendtSøknad()
-
-        private val enInntektsmeldingSomJson = InntektsmeldingConsumer.inntektsmeldingObjectMapper.readTree("/inntektsmelding.json".readResource())
-        private val enInntektsmelding = InntektsmeldingMottatt(enInntektsmeldingSomJson)
     }
 
     @Test
@@ -108,9 +101,9 @@ class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = "orgnummer"
         )
-        sakskompleks.håndterNySøknad(standardNySøknad)
-        sakskompleks.håndterSendtSøknad(standardSendtSøknad)
-        sakskompleks.håndterInntektsmelding(enInntektsmelding)
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
+        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
 
         val inMemento = sakskompleks.memento()
 
@@ -130,7 +123,7 @@ class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        assertTrue(sakskompleks.håndterNySøknad(nySøknad()))
+        assertTrue(sakskompleks.håndterNySøknad(nySøknadHendelse()))
     }
 
     @Test
@@ -140,9 +133,9 @@ class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        sakskompleks.håndterNySøknad(nySøknad(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+        sakskompleks.håndterNySøknad(nySøknadHendelse(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
 
-        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknad(fom = 21.juli, tom = 25.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
+        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknadHendelse(fom = 21.juli, tom = 25.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
 
     }
 }

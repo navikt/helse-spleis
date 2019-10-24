@@ -1,7 +1,7 @@
 package no.nav.helse.inntektsmelding
 
 import io.prometheus.client.Counter
-import no.nav.helse.hendelse.InntektsmeldingMottatt
+import no.nav.helse.hendelse.Inntektsmelding
 import org.slf4j.LoggerFactory
 
 class InntektsmeldingProbe {
@@ -16,7 +16,7 @@ class InntektsmeldingProbe {
                 .register()
     }
 
-    fun mottattInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
+    fun mottattInntektsmelding(inntektsmelding: Inntektsmelding) {
         log.info("mottok inntektsmelding med id=${inntektsmelding.inntektsmeldingId} " +
                 "for arbeidstaker med aktørId = ${inntektsmelding.arbeidstakerAktorId} " +
                 "fra arbeidsgiver med virksomhetsnummer ${inntektsmelding.virksomhetsnummer} " +

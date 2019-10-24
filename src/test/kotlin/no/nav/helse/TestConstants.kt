@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.NySøknadOpprettet
-import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.Sykepengehistorikk
+import no.nav.helse.hendelse.*
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.søknad.SøknadConsumer
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
@@ -81,7 +78,7 @@ internal object TestConstants {
             fravar = fravær
     )
 
-    fun sendtSøknad(
+    fun sendtSøknadHendelse(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
             fom: LocalDate = 10.september,
@@ -107,7 +104,7 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )
-    ) = SendtSøknadMottatt(søknadDTO(
+    ) = SendtSøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
             fom = fom,
@@ -119,9 +116,9 @@ internal object TestConstants {
             fravær = fravær,
             status = SoknadsstatusDTO.SENDT,
             arbeidsgiver = arbeidsgiver
-    ).toJsonNode())
+    ).toJsonNode()))
 
-    fun nySøknad(
+    fun nySøknadHendelse(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
             fom: LocalDate = 10.september,
@@ -147,7 +144,7 @@ internal object TestConstants {
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
             )
-    ) = NySøknadOpprettet(søknadDTO(
+    ) = NySøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
             fom = fom,
@@ -159,9 +156,10 @@ internal object TestConstants {
             fravær = fravær,
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver
-    ).toJsonNode())
+    ).toJsonNode()))
 
-    fun inntektsmelding(aktørId: String = "", virksomhetsnummer: String? = "123456789") = InntektsmeldingMottatt(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode())
+    fun inntektsmeldingHendelse(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
+            InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode()))
 
     fun inntektsmeldingDTO(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
             Inntektsmelding(
@@ -186,12 +184,12 @@ internal object TestConstants {
                     arkivreferanse = ""
             )
 
-    fun sykepengehistorikk(
+    fun sykepengehistorikkHendelse(
             sisteHistoriskeSykedag: LocalDate,
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
-    ): Sykepengehistorikk {
+    ): SykepengehistorikkHendelse {
         val historikk: Map<String, Any> = mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "sakskompleksId" to sakskompleksId.toString(),
@@ -206,7 +204,7 @@ internal object TestConstants {
                         )
                 )
         )
-        return Sykepengehistorikk(objectMapper.valueToTree(historikk))
+        return SykepengehistorikkHendelse(Sykepengehistorikk(objectMapper.valueToTree(historikk)))
     }
 
 }

@@ -56,13 +56,13 @@ internal class PersonSerializationTest {
     @Test
     fun `restoring adds the sakskompleks observer for the person`() {
         val initialPerson = Person("abde")
-        initialPerson.håndterNySøknad(TestConstants.nySøknad())
+        initialPerson.håndterNySøknad(TestConstants.nySøknadHendelse())
         val personJson = initialPerson.memento().toString()
 
         val testObserver = TestObserver()
         val restoredPerson = Person.fromJson(personJson)
         restoredPerson.addObserver(testObserver)
-        restoredPerson.håndterSendtSøknad(TestConstants.sendtSøknad())
+        restoredPerson.håndterSendtSøknad(TestConstants.sendtSøknadHendelse())
         assertEquals(1, testObserver.personUpdates)
     }
 

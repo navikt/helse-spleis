@@ -14,20 +14,20 @@ class Person(val aktørId: String) : SakskompleksObserver {
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
     private val personObservers = mutableListOf<PersonObserver>()
-    fun håndterNySøknad(søknad: NySøknadOpprettet) {
-        finnEllerOpprettArbeidsgiver(søknad).håndterNySøknad(søknad)
+    fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
+        finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndterNySøknad(nySøknadHendelse)
     }
 
-    fun håndterSendtSøknad(søknad: SendtSøknadMottatt) {
-        finnEllerOpprettArbeidsgiver(søknad).håndterSendtSøknad(søknad)
+    fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
+        finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndterSendtSøknad(sendtSøknadHendelse)
     }
 
-    fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
-        finnEllerOpprettArbeidsgiver(inntektsmelding).håndterInntektsmelding(inntektsmelding)
+    fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndterInntektsmelding(inntektsmeldingHendelse)
     }
 
-    fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
-        finnArbeidsgiver(sykepengehistorikk)?.håndterSykepengehistorikk(sykepengehistorikk)
+    fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        finnArbeidsgiver(sykepengehistorikkHendelse)?.håndterSykepengehistorikk(sykepengehistorikkHendelse)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
@@ -45,10 +45,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun finnArbeidsgiver(hendelse: DokumentMottattHendelse) =
+    private fun finnArbeidsgiver(hendelse: PersonHendelse) =
             hendelse.organisasjonsnummer()?.let { arbeidsgivere[it] }
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: DokumentMottattHendelse) =
+    private fun finnEllerOpprettArbeidsgiver(hendelse: PersonHendelse) =
         hendelse.organisasjonsnummer()?.let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
@@ -72,26 +72,26 @@ class Person(val aktørId: String) : SakskompleksObserver {
         private val saker = mutableListOf<Sakskompleks>()
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
-        fun håndterNySøknad(søknad: NySøknadOpprettet) {
-            if (saker.none { it.håndterNySøknad(søknad) }) {
-                nyttSakskompleks().håndterNySøknad(søknad)
+        fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
+            if (saker.none { it.håndterNySøknad(nySøknadHendelse) }) {
+                nyttSakskompleks().håndterNySøknad(nySøknadHendelse)
             }
         }
 
-        fun håndterSendtSøknad(søknad: SendtSøknadMottatt) {
-            if (saker.none { it.håndterSendtSøknad(søknad) }) {
-                nyttSakskompleks().håndterSendtSøknad(søknad)
+        fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
+            if (saker.none { it.håndterSendtSøknad(sendtSøknadHendelse) }) {
+                nyttSakskompleks().håndterSendtSøknad(sendtSøknadHendelse)
             }
         }
 
-        fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) {
-            if (saker.none { it.håndterInntektsmelding(inntektsmelding) }) {
-                nyttSakskompleks().håndterInntektsmelding(inntektsmelding)
+        fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            if (saker.none { it.håndterInntektsmelding(inntektsmeldingHendelse) }) {
+                nyttSakskompleks().håndterInntektsmelding(inntektsmeldingHendelse)
             }
         }
 
-        internal fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
-            saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikk) }
+        internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+            saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
         }
 
         fun addObserver(observer: SakskompleksObserver) {

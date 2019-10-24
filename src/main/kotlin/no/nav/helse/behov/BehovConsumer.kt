@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.Sykepengehistorikk
+import no.nav.helse.hendelse.SykepengehistorikkHendelse
 import no.nav.helse.person.PersonMediator
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -45,7 +46,7 @@ internal class BehovConsumer(
     private fun håndterLøsning(key: String, løsning: Behov) {
         when (løsning.behovType()) {
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
-                personMediator.håndterSykepengehistorikk(it)
+                personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
             }
         }
     }

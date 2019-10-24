@@ -2,10 +2,9 @@ package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.NySøknadOpprettet
-import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.hendelse.InntektsmeldingHendelse
+import no.nav.helse.hendelse.NySøknadHendelse
+import no.nav.helse.hendelse.SendtSøknadHendelse
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.PersonskjemaForGammelt
 import no.nav.helse.person.domain.Sakskompleks
@@ -51,11 +50,6 @@ class SakskompleksProbe : PersonObserver {
         log.info(err.message)
     }
 
-    fun inntektmeldingManglerSakskompleks(inntektsmelding: InntektsmeldingMottatt) {
-        log.error("Mottok inntektsmelding med id ${inntektsmelding.inntektsmeldingId}, men klarte ikke finne et et tilhørende sakskompleks :(")
-        manglendeSakskompleksForInntektsmeldingCounter.inc()
-    }
-
     private fun opprettetNyttSakskompleks(sakskompleksId: UUID, aktørId: String) {
         log.info("Opprettet sakskompleks med id=$sakskompleksId " +
                 "for arbeidstaker med aktørId = $aktørId ")
@@ -81,17 +75,17 @@ class SakskompleksProbe : PersonObserver {
         dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
 
         when (event.sykdomshendelse) {
-            is InntektsmeldingMottatt -> {
+            is InntektsmeldingHendelse -> {
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
-            is NySøknadOpprettet -> {
+            is NySøknadHendelse -> {
                 if (event.previousState == Sakskompleks.TilstandType.START) {
                     opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
 
                 sykmeldingKobletTilSakskompleks(event.id)
             }
-            is SendtSøknadMottatt -> {
+            is SendtSøknadHendelse -> {
                 søknadKobletTilSakskompleks(event.id)
             }
         }
@@ -106,11 +100,15 @@ class SakskompleksProbe : PersonObserver {
         }
     }
 
-    fun utenforOmfang(err: UtenforOmfangException, sykepengesøknad: Sykepengesøknad) {
-        log.info("Utenfor omfang: ${err.message} for søknad med id: ${sykepengesøknad.id}.")
+    fun utenforOmfang(err: UtenforOmfangException, nySøknadHendelse: NySøknadHendelse) {
+        log.info("Utenfor omfang: ${err.message} for nySøknadHendelse med id: ${nySøknadHendelse.hendelseId()}.")
     }
 
-    fun utenforOmfang(err: UtenforOmfangException, inntektsmelding: InntektsmeldingMottatt) {
-        log.info("Utenfor omfang: ${err.message} for inntektsmelding med id: ${inntektsmelding.inntektsmeldingId}.")
+    fun utenforOmfang(err: UtenforOmfangException, sendtSøknadHendelse: SendtSøknadHendelse) {
+        log.info("Utenfor omfang: ${err.message} for sendtSøknadHendelse med id: ${sendtSøknadHendelse.hendelseId()}.")
+    }
+
+    fun utenforOmfang(err: UtenforOmfangException, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        log.info("Utenfor omfang: ${err.message} for inntektsmeldingHendelse med id: ${inntektsmeldingHendelse.hendelseId()}.")
     }
 }

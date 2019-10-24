@@ -6,8 +6,8 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.TestConstants.nySøknad
-import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonPostgresRepository
@@ -59,7 +59,7 @@ class PersonPersisteringPostgresTest {
 
         val person = Person("2")
         person.addObserver(LagrePersonDao(dataSource))
-        person.håndterNySøknad(nySøknad())
+        person.håndterNySøknad(nySøknadHendelse())
 
         assertNotNull(repo.hentPerson("2"))
     }
@@ -71,8 +71,8 @@ class PersonPersisteringPostgresTest {
         val aktørId = "3"
         val person = Person(aktørId)
         person.addObserver(LagrePersonDao(dataSource))
-        person.håndterNySøknad(nySøknad())
-        person.håndterSendtSøknad(sendtSøknad())
+        person.håndterNySøknad(nySøknadHendelse())
+        person.håndterSendtSøknad(sendtSøknadHendelse())
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {

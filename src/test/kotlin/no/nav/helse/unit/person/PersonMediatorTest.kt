@@ -2,10 +2,10 @@ package no.nav.helse.unit.person
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.TestConstants.nySøknad
-import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.hendelse.Sykepengesøknad
+import no.nav.helse.hendelse.NySøknadHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.sakskompleks.SakskompleksProbe
@@ -24,14 +24,14 @@ internal class PersonMediatorTest {
             behovProducer = behovProducer,
             gosysOppgaveProducer = oppgaveProducer)
 
-    val sykepengesøknad = sendtSøknad()
+    val sendtSøknadHendelse = sendtSøknadHendelse()
 
     @Test
     fun `skal håndtere feil ved søknad uten virksomhetsnummer for arbeidsgiver`() {
-        personMediator.håndterNySøknad(nySøknad(arbeidsgiver = null))
+        personMediator.håndterNySøknad(nySøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
-            probe.utenforOmfang(any(), any<Sykepengesøknad>())
+            probe.utenforOmfang(any(), any<NySøknadHendelse>())
         }
     }
 
@@ -39,10 +39,12 @@ internal class PersonMediatorTest {
     fun `skal lage gosys-oppgave når saken må behandles i infotrygd`() {
         beInMåBehandlesIInfotrygdState()
 
-        verify(exactly = 1) { oppgaveProducer.opprettOppgave(aktørId = sykepengesøknad.aktørId) }
+        verify(exactly = 1) {
+            oppgaveProducer.opprettOppgave(aktørId = sendtSøknadHendelse.aktørId())
+        }
     }
 
     fun beInMåBehandlesIInfotrygdState() {
-        personMediator.håndterSendtSøknad(sykepengesøknad)
+        personMediator.håndterSendtSøknad(sendtSøknadHendelse)
     }
 }

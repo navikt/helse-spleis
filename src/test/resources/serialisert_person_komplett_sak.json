@@ -307,7 +307,8 @@
             "hendelser":[
               {
                 "type":"InntektsmeldingMottatt",
-                "json":{
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
+                "inntektsmelding":{
                   "inntektsmeldingId":"1",
                   "arbeidstakerFnr":"12345678910",
                   "arbeidstakerAktorId":"1234567890123",
@@ -338,13 +339,13 @@
                     }
                   ],
                   "status":"GYLDIG",
-                  "arkivreferanse":"ENARKIVREFERANSE",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
+                  "arkivreferanse":"ENARKIVREFERANSE"
                 }
               },
               {
                 "type":"SendtSøknadMottatt",
-                "json":{
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
+                "søknad":{
                   "id":"68da259c-ff7f-47cf-8fa0-c348ae95e220",
                   "type":"ARBEIDSTAKERE",
                   "status":"SENDT",
@@ -388,8 +389,7 @@
                       "sykmeldingstype":null
                     }
                   ],
-                  "sporsmal":null,
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
+                  "sporsmal":null
                 }
               }
             ]

@@ -1,8 +1,8 @@
 package no.nav.helse.unit.person
 
 import io.mockk.mockk
-import no.nav.helse.TestConstants.nySøknad
-import no.nav.helse.TestConstants.sendtSøknad
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.person.PersonMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -22,7 +22,7 @@ internal class PersonRepositoryTest {
                 gosysOppgaveProducer = mockk()
         )
 
-        mediator.håndterNySøknad(nySøknad(
+        mediator.håndterNySøknad(nySøknadHendelse(
                 aktørId = "1234"
         ))
 
@@ -40,7 +40,7 @@ internal class PersonRepositoryTest {
                 behovProducer = mockk(),
                 gosysOppgaveProducer = mockk()
         )
-        mediator.håndterNySøknad(nySøknad(
+        mediator.håndterNySøknad(nySøknadHendelse(
                 aktørId = aktørId
         ))
 
@@ -49,7 +49,7 @@ internal class PersonRepositoryTest {
         assertNotNull(personEtterNySøknad)
         assertEquals(1, repo.hentHistorikk(aktørId).size)
 
-        mediator.håndterSendtSøknad(sendtSøknad(
+        mediator.håndterSendtSøknad(sendtSøknadHendelse(
                 aktørId = aktørId
         ))
 

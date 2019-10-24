@@ -2,10 +2,10 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.NySøknadOpprettet
-import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.Sykepengehistorikk
+import no.nav.helse.hendelse.InntektsmeldingHendelse
+import no.nav.helse.hendelse.NySøknadHendelse
+import no.nav.helse.hendelse.SendtSøknadHendelse
+import no.nav.helse.hendelse.SykepengehistorikkHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
@@ -23,45 +23,45 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         behovProducer.sendNyttBehov(event)
     }
 
-    fun håndterNySøknad(sykepengesøknad: NySøknadOpprettet) =
+    fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) =
             try {
-                finnPerson(sykepengesøknad.aktørId)
+                finnPerson(nySøknadHendelse.aktørId())
                         .also { person ->
-                            person.håndterNySøknad(sykepengesøknad)
+                            person.håndterNySøknad(nySøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
+                sakskompleksProbe.utenforOmfang(err, nySøknadHendelse)
             } catch (err: PersonskjemaForGammelt) {
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterSendtSøknad(sykepengesøknad: SendtSøknadMottatt) =
+    fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) =
             try {
-                finnPerson(sykepengesøknad.aktørId)
+                finnPerson(sendtSøknadHendelse.aktørId())
                         .also { person ->
-                            person.håndterSendtSøknad(sykepengesøknad)
+                            person.håndterSendtSøknad(sendtSøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, sykepengesøknad)
+                sakskompleksProbe.utenforOmfang(err, sendtSøknadHendelse)
             } catch (err: PersonskjemaForGammelt) {
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterInntektsmelding(inntektsmelding: InntektsmeldingMottatt) =
+    fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) =
             try {
-                finnPerson(inntektsmelding.aktørId()).also { person ->
-                    person.håndterInntektsmelding(inntektsmelding)
+                finnPerson(inntektsmeldingHendelse.aktørId()).also { person ->
+                    person.håndterInntektsmelding(inntektsmeldingHendelse)
                 }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, inntektsmelding)
+                sakskompleksProbe.utenforOmfang(err, inntektsmeldingHendelse)
             } catch (err: PersonskjemaForGammelt) {
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterSykepengehistorikk(sykepengehistorikk: Sykepengehistorikk) {
+    fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         try {
-            finnPerson(sykepengehistorikk.aktørId).also { person ->
-                person.håndterSykepengehistorikk(sykepengehistorikk)
+            finnPerson(sykepengehistorikkHendelse.aktørId()).also { person ->
+                person.håndterSykepengehistorikk(sykepengehistorikkHendelse)
             }
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)

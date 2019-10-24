@@ -1,17 +1,19 @@
 package no.nav.helse.unit.sakskompleks.domain
 
-import no.nav.helse.TestConstants.inntektsmelding
-import no.nav.helse.TestConstants.nySøknad
-import no.nav.helse.TestConstants.sendtSøknad
-import no.nav.helse.TestConstants.sykepengehistorikk
+import no.nav.helse.TestConstants.inntektsmeldingHendelse
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.NySøknadOpprettet
-import no.nav.helse.hendelse.SendtSøknadMottatt
-import no.nav.helse.hendelse.Sykepengehistorikk
+import no.nav.helse.hendelse.InntektsmeldingHendelse
+import no.nav.helse.hendelse.NySøknadHendelse
+import no.nav.helse.hendelse.SendtSøknadHendelse
+import no.nav.helse.hendelse.SykepengehistorikkHendelse
+import no.nav.helse.juli
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
 import no.nav.helse.person.domain.SakskompleksObserver
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -37,51 +39,51 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterNySøknad(nySøknad())
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is NySøknadOpprettet)
+        assertTrue(lastStateEvent.sykdomshendelse is NySøknadHendelse)
     }
 
     @Test
     fun `motta sendt søknad på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterSendtSøknad(sendtSøknad())
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is SendtSøknadMottatt)
+        assertTrue(lastStateEvent.sykdomshendelse is SendtSøknadHendelse)
     }
 
     @Test
     fun `motta inntektsmelding på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterInntektsmelding(inntektsmelding())
+        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is InntektsmeldingMottatt)
+        assertTrue(lastStateEvent.sykdomshendelse is InntektsmeldingHendelse)
     }
 
     @Test
     fun `motta sykdomshistorikk på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = LocalDate.now(), sakskompleksId = sakskompleksId))
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(sisteHistoriskeSykedag = LocalDate.now(), sakskompleksId = sakskompleksId))
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is Sykepengehistorikk)
+        assertTrue(lastStateEvent.sykdomshendelse is SykepengehistorikkHendelse)
     }
 
     @Test
     fun `motta sendt søknad etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterSendtSøknad(sendtSøknad())
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.currentState)
@@ -91,7 +93,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektsmelding etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterInntektsmelding(inntektsmelding())
+        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.currentState)
@@ -101,7 +103,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad())
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -111,7 +113,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter sendt søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad())
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -121,7 +123,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektsmelding etter sendt søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterInntektsmelding(inntektsmelding())
+        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SAK, lastStateEvent.currentState)
@@ -131,7 +133,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterNySøknad(nySøknad())
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -141,7 +143,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta sendt søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterSendtSøknad(sendtSøknad())
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SAK, lastStateEvent.currentState)
@@ -151,7 +153,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta ny søknad etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterNySøknad(nySøknad())
+        sakskompleks.håndterNySøknad(nySøknadHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -161,7 +163,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektsmelding etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterInntektsmelding(inntektsmelding())
+        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -171,7 +173,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `når saken er komplett, ber vi om sykepengehistorikk`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterSendtSøknad(sendtSøknad())
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SAK, lastStateEvent.currentState)
@@ -180,10 +182,19 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sykepengehistorikk når saken er komplett men historikken er utenfor seks måneder`() {
-        val sakskompleks = beInKomplettTidslinje()
-        val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(7)
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag, sakskompleksId = sakskompleksId))
+        val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId))
 
         assertEquals(KOMPLETT_SAK, lastStateEvent.previousState)
         assertEquals(SYKEPENGEHISTORIKK_MOTTATT, lastStateEvent.currentState)
@@ -191,10 +202,19 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sykepengehistorikk med siste sykedag innenfor seks måneder av denne sakens første sykedag`() {
-        val sakskompleks = beInKomplettTidslinje()
-        val sisteHistoriskeSykedag = nySøknad().egenmeldinger.sortedBy { it.fom }.first().fom.minusMonths(5)
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
 
-        sakskompleks.håndterSykepengehistorikk(sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag, sakskompleksId = sakskompleksId))
+        val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(5),
+                sakskompleksId = sakskompleksId))
 
         assertEquals(KOMPLETT_SAK, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -210,23 +230,27 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         }
     }
 
-    private fun beInNySøknad() =
+    private fun beInNySøknad(nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
             beInStartTilstand().apply {
-                håndterNySøknad(nySøknad())
+                håndterNySøknad(nySøknadHendelse)
             }
 
-    private fun beInSendtSøknad() =
-            beInNySøknad().apply {
-                håndterSendtSøknad(sendtSøknad())
+    private fun beInSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
+                                nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
+            beInNySøknad(nySøknadHendelse).apply {
+                håndterSendtSøknad(sendtSøknadHendelse)
             }
 
-    private fun beInMottattInntektsmelding() =
-            beInNySøknad().apply {
-                håndterInntektsmelding(inntektsmelding())
+    private fun beInMottattInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
+                                           nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
+            beInNySøknad(nySøknadHendelse).apply {
+                håndterInntektsmelding(inntektsmeldingHendelse)
             }
 
-    private fun beInKomplettTidslinje() =
-            beInMottattInntektsmelding().apply {
-                håndterSendtSøknad(sendtSøknad())
+    private fun beInKomplettTidslinje(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
+                                      inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
+                                      nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
+            beInMottattInntektsmelding(inntektsmeldingHendelse, nySøknadHendelse).apply {
+                håndterSendtSøknad(sendtSøknadHendelse)
             }
 }
