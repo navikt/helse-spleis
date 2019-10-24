@@ -29,6 +29,63 @@ class SykedagerTest {
     }
 
     @Test
+    fun `syketilfeller returnerer syketilfelle og arbeidsgiverperiode`() {
+        val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(Uke(2).fredag, Uke(4).mandag, sendtSykmelding)
+        val syketilfelle = (influensa + spysyka).syketilfeller()
+        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
+
+        assertEquals(Uke(1).mandag, sykdomstidslinje.startdato())
+        assertEquals(Uke(1).mandag, arbeidsgiverperiode!!.startdato())
+
+        assertEquals(Uke(4).mandag, sykdomstidslinje.sluttdato())
+        assertEquals(Uke(3).fredag, arbeidsgiverperiode.sluttdato())
+
+        assertEquals(22, sykdomstidslinje.length())
+        assertEquals(16, arbeidsgiverperiode.length())
+    }
+
+    @Test
+    fun `arbeidsgvierperioden slutter på en feriedag`() {
+        val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).mandag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(Uke(3).tirsdag, Uke(4).lørdag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(Uke(4).søndag, Uke(5).mandag, sendtSykmelding)
+        val syketilfelle = (influensa + ferie + spysyka).syketilfeller()
+        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
+
+        assertEquals(Uke(1).mandag, sykdomstidslinje.startdato())
+        assertEquals(Uke(1).mandag, arbeidsgiverperiode!!.startdato())
+
+        assertEquals(Uke(5).mandag, sykdomstidslinje.sluttdato())
+        assertEquals(Uke(3).tirsdag, arbeidsgiverperiode.sluttdato())
+
+        assertEquals(29, sykdomstidslinje.length())
+        assertEquals(16, arbeidsgiverperiode.length())
+    }
+
+    @Test
+    fun `syketilfeller returnerer syketilfelle, arbeidsgiverperiode og dager etter arbeidsgiverperiode`() {
+        val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(5).mandag, sendtSykmelding)
+        val syketilfelle = influensa.syketilfeller()
+        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
+        val dagerEtterArbeidsgiverperiode = syketilfelle[0].dagerEtterArbeidsgiverperiode
+
+        assertEquals(Uke(1).mandag, sykdomstidslinje.startdato())
+        assertEquals(Uke(1).mandag, arbeidsgiverperiode!!.startdato())
+        assertEquals(Uke(3).onsdag, dagerEtterArbeidsgiverperiode!!.startdato())
+
+        assertEquals(Uke(5).mandag, sykdomstidslinje.sluttdato())
+        assertEquals(Uke(3).tirsdag, arbeidsgiverperiode.sluttdato())
+        assertEquals(Uke(5).mandag, dagerEtterArbeidsgiverperiode.sluttdato())
+
+        assertEquals(29, sykdomstidslinje.length())
+        assertEquals(16, arbeidsgiverperiode.length())
+    }
+
+    @Test
     fun `søknad over 16 dager`() {
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).mandag, sendtSykmelding)
         val grupper = influensa.syketilfeller()
@@ -224,8 +281,16 @@ class SykedagerTest {
         val arbeidsgiverPeriodensSisteDag = Uke(1).mandag.plusDays(15)
         val førsteUtbetalingsdag = Uke(4).mandag
         println((influensa + ferie + spysyka))
-        assertEquals(arbeidsgiverPeriodensSisteDag, syketilfeller.first().sisteDagIArbeidsgiverperioden, "feil arbeidsgiverperiode")
-        assertEquals(førsteUtbetalingsdag, syketilfeller.first().førsteUtbetalingsdag, "feil utbetalingsstart")
+        assertEquals(
+            arbeidsgiverPeriodensSisteDag,
+            syketilfeller.first().arbeidsgiverperiode!!.sluttdato(),
+            "feil arbeidsgiverperiode"
+        )
+        assertEquals(
+            førsteUtbetalingsdag,
+            syketilfeller.first().dagerEtterArbeidsgiverperiode!!.startdato(),
+            "feil utbetalingsstart"
+        )
     }
 
     @Test
@@ -248,7 +313,7 @@ class SykedagerTest {
         assertEquals(1, syketilfeller.size)
 
         val sisteDagIArbeidsgiverperioden = Uke(1).mandag.plusDays(15)
-        assertEquals(sisteDagIArbeidsgiverperioden, syketilfeller[0].sisteDagIArbeidsgiverperioden)
+        assertEquals(sisteDagIArbeidsgiverperioden, syketilfeller[0].arbeidsgiverperiode!!.sluttdato())
     }
 
     @Test
@@ -262,7 +327,11 @@ class SykedagerTest {
         val sisteSykedagFørPeriodeIArbeid = Uke(1).mandag
         val sisteArbeidsdagFørSykIgjen = sisteSykedagFørPeriodeIArbeid.plusDays(15)
 
-        val influensa = Sykdomstidslinje.sykedager(sisteSykedagFørPeriodeIArbeid.minusDays(20), sisteSykedagFørPeriodeIArbeid, sendtSykmelding)
+        val influensa = Sykdomstidslinje.sykedager(
+            sisteSykedagFørPeriodeIArbeid.minusDays(20),
+            sisteSykedagFørPeriodeIArbeid,
+            sendtSykmelding
+        )
         val spysyka = Sykdomstidslinje.sykedager(
             sisteArbeidsdagFørSykIgjen.plusDays(1),
             sisteArbeidsdagFørSykIgjen.plusDays(21),
@@ -270,7 +339,11 @@ class SykedagerTest {
         )
 
         val syketilfeller = (influensa + spysyka).syketilfeller()
-        assertEquals(1, syketilfeller.size, "skulle bare vært ett syketilfelle der bruker har vært tilbake i jobb i strengt mindre enn 16 dager")
+        assertEquals(
+            1,
+            syketilfeller.size,
+            "skulle bare vært ett syketilfelle der bruker har vært tilbake i jobb i strengt mindre enn 16 dager"
+        )
     }
 
     @Test
@@ -284,7 +357,11 @@ class SykedagerTest {
         val sisteSykedagFørPeriodeIArbeid = Uke(1).mandag
         val sisteArbeidsdagFørSykIgjen = sisteSykedagFørPeriodeIArbeid.plusDays(16)
 
-        val influensa = Sykdomstidslinje.sykedager(sisteSykedagFørPeriodeIArbeid.minusDays(20), sisteSykedagFørPeriodeIArbeid, sendtSykmelding)
+        val influensa = Sykdomstidslinje.sykedager(
+            sisteSykedagFørPeriodeIArbeid.minusDays(20),
+            sisteSykedagFørPeriodeIArbeid,
+            sendtSykmelding
+        )
         val spysyka = Sykdomstidslinje.sykedager(
             sisteArbeidsdagFørSykIgjen.plusDays(1),
             sisteArbeidsdagFørSykIgjen.plusDays(21),
@@ -292,13 +369,20 @@ class SykedagerTest {
         )
 
         val syketilfeller = (influensa + spysyka).syketilfeller()
-        assertEquals(2, syketilfeller.size, "skulle bare vært to syketilfeller der bruker har vært tilbake i jobb i 16 dager eller mer")
+        assertEquals(
+            2,
+            syketilfeller.size,
+            "skulle bare vært to syketilfeller der bruker har vært tilbake i jobb i 16 dager eller mer"
+        )
     }
 
     @Test
     fun `syketilfeller støtter ikke ubestemte dager`() {
         assertThrows<IllegalStateException> {
-            (Sykdomstidslinje.utenlandsdag(Uke(1).mandag, sendtSykmelding) + Sykdomstidslinje.permisjonsdag(Uke(1).mandag, sendtSykmelding)).syketilfeller()
+            (Sykdomstidslinje.utenlandsdag(
+                Uke(1).mandag,
+                sendtSykmelding
+            ) + Sykdomstidslinje.permisjonsdag(Uke(1).mandag, sendtSykmelding)).syketilfeller()
         }
     }
 
