@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.DokumentMottattHendelse
+import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import java.time.LocalDate
 
 internal data class JsonDag(
@@ -15,7 +15,7 @@ internal data class JsonHendelsesReferanse(
     val hendelseId: String
 )
 
-enum class JsonDagType(internal val creator: (LocalDate, DokumentMottattHendelse) -> Dag) {
+enum class JsonDagType(internal val creator: (LocalDate, SykdomstidslinjeHendelse) -> Dag) {
     ARBEIDSDAG({ dato, hendelse -> Arbeidsdag(dato, hendelse) }),
     EGENMELDINGSDAG({ dato, hendelse -> Egenmeldingsdag(dato, hendelse) }),
     FERIEDAG({ dato, hendelse -> Feriedag(dato, hendelse) }),

@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.readResource
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class SykepengesøknadTest {
@@ -17,7 +18,7 @@ internal class SykepengesøknadTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val testSøknadJson = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())
-        private val testSøknad = SendtSøknadMottatt(testSøknadJson)
+        private val testSøknad = Sykepengesøknad(testSøknadJson)
         private val testSøknadSerialisert = objectMapper.readTree(objectMapper.writeValueAsString(testSøknad))
     }
 
@@ -41,7 +42,7 @@ internal class SykepengesøknadTest {
         val json = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()) as ObjectNode
         json.remove("arbeidGjenopptatt")
 
-        val søknad = SendtSøknadMottatt(json)
+        val søknad = Sykepengesøknad(json)
         assertNull(søknad.arbeidGjenopptatt)
     }
 }

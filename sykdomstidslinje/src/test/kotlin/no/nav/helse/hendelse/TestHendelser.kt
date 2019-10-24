@@ -82,9 +82,9 @@ internal object TestHendelser {
         )
     ).let {
         when (status) {
-            SoknadsstatusDTO.NY -> NySøknadOpprettet(it)
-            SoknadsstatusDTO.FREMTIDIG -> NySøknadOpprettet(it)
-            SoknadsstatusDTO.SENDT -> SendtSøknadMottatt(it)
+            SoknadsstatusDTO.NY -> Sykepengesøknad(it)
+            SoknadsstatusDTO.FREMTIDIG -> Sykepengesøknad(it)
+            SoknadsstatusDTO.SENDT -> Sykepengesøknad(it)
             else -> throw IllegalArgumentException("Kan ikke håndtere søknadstatus: $status")
         }
     }
@@ -105,13 +105,15 @@ internal object TestHendelser {
         søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder,
         arbeidGjenopptatt: LocalDate? = null
     ) =
-        søknad(
-            opprettetTidspunkt = opprettetTidspunkt,
-            arbeidsgiver = arbeidsgiver,
-            fravær = fravær,
-            søknadsperioder = søknadsperioder,
-            arbeidGjenopptatt = arbeidGjenopptatt
-        ) as SendtSøknadMottatt
+        SendtSøknadHendelse(
+            søknad(
+                opprettetTidspunkt = opprettetTidspunkt,
+                arbeidsgiver = arbeidsgiver,
+                fravær = fravær,
+                søknadsperioder = søknadsperioder,
+                arbeidGjenopptatt = arbeidGjenopptatt
+            )
+        )
 
     fun nySøknad(
         opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -121,15 +123,17 @@ internal object TestHendelser {
         ),
         søknadsperioder: List<SoknadsperiodeDTO> = this.søknadsperioder
     ) =
-        søknad(
-            opprettetTidspunkt = opprettetTidspunkt,
-            status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver,
-            fravær = emptyList(),
-            søknadsperioder = søknadsperioder
-        ) as NySøknadOpprettet
+        NySøknadHendelse(
+            søknad(
+                opprettetTidspunkt = opprettetTidspunkt,
+                status = SoknadsstatusDTO.NY,
+                arbeidsgiver = arbeidsgiver,
+                fravær = emptyList(),
+                søknadsperioder = søknadsperioder
+            )
+        )
 
-    fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): Sykepengehistorikk {
+    fun sykepengeHistorikk(sisteHistoriskeSykedag: LocalDate): SykepengehistorikkHendelse {
         val historikk: Map<String, Any> = mapOf<String, Any>(
             "organisasjonsnummer" to "ola sitt orgnummer",
             "sakskompleksId" to "121312",
@@ -144,10 +148,10 @@ internal object TestHendelser {
                 )
             )
         )
-        return Sykepengehistorikk(objectMapper.valueToTree(historikk))
+        return SykepengehistorikkHendelse(Sykepengehistorikk(objectMapper.valueToTree(historikk)))
     }
 
-    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.InntektsmeldingMottatt(
+    fun inntektsmelding(virksomhetsnummer: String? = null) = no.nav.helse.hendelse.Inntektsmelding(
         objectMapper.valueToTree(
             Inntektsmelding(
                 inntektsmeldingId = "",

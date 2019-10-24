@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.SendtSøknadMottatt
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.InntektsmeldingHendelse
+import no.nav.helse.hendelse.SendtSøknadHendelse
+import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -21,10 +23,10 @@ class SykdomstidslinjeJsonTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    val inntektsmelding =
-        InntektsmeldingMottatt(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json")))
-    val søknadSendt =
-        SendtSøknadMottatt(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json")))
+    val inntektsmeldingHendelse =
+        InntektsmeldingHendelse(Inntektsmelding(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json"))))
+    val sendtSøknadHendelse =
+        SendtSøknadHendelse(Sykepengesøknad(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json"))))
 
 
     @Test
@@ -32,17 +34,17 @@ class SykdomstidslinjeJsonTest {
 
         val tidslinje = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), søknadSendt
+            LocalDate.of(2019, 10, 10), sendtSøknadHendelse
         )
 
         val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
         tidslinjeJson["hendelser"].elements().forEach {
-            assertEquals(søknadSendt.hendelsetype().name, it["type"].asText())
-            assertNotNull(it["json"])
-            assertEquals(søknadSendt.hendelseId(), it["json"]["hendelseId"].asText())
+            assertEquals(sendtSøknadHendelse.hendelsetype().name, it["type"].asText())
+            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelseId"].asText())
+            assertNotNull(it["søknad"])
         }
         tidslinjeJson["dager"].elements().forEach {
-            assertEquals(søknadSendt.hendelseId(), it["hendelse"]["hendelseId"].asText())
+            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelse"]["hendelseId"].asText())
         }
     }
 
@@ -51,11 +53,11 @@ class SykdomstidslinjeJsonTest {
 
         val tidslinjeB = Sykdomstidslinje.ikkeSykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), inntektsmelding
+            LocalDate.of(2019, 10, 10), inntektsmeldingHendelse
         )
         val tidslinjeC = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), søknadSendt
+            LocalDate.of(2019, 10, 10), sendtSøknadHendelse
         )
 
         val combined = tidslinjeB + tidslinjeC
@@ -65,7 +67,7 @@ class SykdomstidslinjeJsonTest {
 
         val hendelser = tidslinjeJson["hendelser"]
         assertEquals(hendelser.size(), 2)
-        val hendelseMap = hendelser.groupBy { it["json"]["hendelseId"].asText() }
+        val hendelseMap = hendelser.groupBy { it["hendelseId"].asText() }
         tidslinjeJson["dager"].elements().forEach {
             val hendelseId = it["hendelse"]["hendelseId"].asText()
             assertTrue(hendelseMap.containsKey(hendelseId))
@@ -80,15 +82,15 @@ class SykdomstidslinjeJsonTest {
     fun `lagring og restoring av en sykdomstidslinje med har de samme egenskapene som den opprinnelige`() {
         val tidslinjeA = Sykdomstidslinje.ikkeSykedager(
             LocalDate.of(2019, 10, 1),
-            LocalDate.of(2019, 10, 3), inntektsmelding
+            LocalDate.of(2019, 10, 3), inntektsmeldingHendelse
         )
         val tidslinjeB = Sykdomstidslinje.ikkeSykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), inntektsmelding
+            LocalDate.of(2019, 10, 10), inntektsmeldingHendelse
         )
         val tidslinjeC = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), søknadSendt
+            LocalDate.of(2019, 10, 10), sendtSøknadHendelse
         )
 
         val combined = tidslinjeA + tidslinjeB + tidslinjeC
@@ -102,18 +104,18 @@ class SykdomstidslinjeJsonTest {
     @Test
     fun `lagring og restoring av en sykdomstidslinje med søknader og inntektsmeldinger har like egenskaper`() {
         val egenmelding =
-            Sykdomstidslinje.egenmeldingsdager(LocalDate.of(2019, 9, 30), LocalDate.of(2019, 10, 1), søknadSendt)
+            Sykdomstidslinje.egenmeldingsdager(LocalDate.of(2019, 9, 30), LocalDate.of(2019, 10, 1), sendtSøknadHendelse)
         val sykedagerA = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 2),
-            LocalDate.of(2019, 10, 4), søknadSendt
+            LocalDate.of(2019, 10, 4), sendtSøknadHendelse
         )
         val ikkeSykedager = Sykdomstidslinje.ikkeSykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), inntektsmelding
+            LocalDate.of(2019, 10, 10), inntektsmeldingHendelse
         )
         val sykedagerB = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 7),
-            LocalDate.of(2019, 10, 10), søknadSendt
+            LocalDate.of(2019, 10, 10), sendtSøknadHendelse
         )
 
         val combined = egenmelding + sykedagerA + ikkeSykedager + sykedagerB
@@ -125,19 +127,19 @@ class SykdomstidslinjeJsonTest {
 
     @Test
     fun `sykdomstidslinje med alle typer dager blir serialisert riktig`() {
-        val egenmeldingsdag = Sykdomstidslinje.egenmeldingsdag(LocalDate.of(2019, 10, 7), inntektsmelding)
-        val sykedag = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 8), søknadSendt)
-        val feriedag = ferie(LocalDate.of(2019, 10, 9), søknadSendt)
+        val egenmeldingsdag = Sykdomstidslinje.egenmeldingsdag(LocalDate.of(2019, 10, 7), inntektsmeldingHendelse)
+        val sykedag = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 8), sendtSøknadHendelse)
+        val feriedag = ferie(LocalDate.of(2019, 10, 9), sendtSøknadHendelse)
         val permisjonsdager =
-            Sykdomstidslinje.permisjonsdager(LocalDate.of(2019, 10, 11), LocalDate.of(2019, 10, 12), søknadSendt)
-        val sykedager = Sykdomstidslinje.sykedager(LocalDate.of(2019, 10, 13), LocalDate.of(2019, 10, 15), søknadSendt)
+            Sykdomstidslinje.permisjonsdager(LocalDate.of(2019, 10, 11), LocalDate.of(2019, 10, 12), sendtSøknadHendelse)
+        val sykedager = Sykdomstidslinje.sykedager(LocalDate.of(2019, 10, 13), LocalDate.of(2019, 10, 15), sendtSøknadHendelse)
 
-        val permisjonsdagForUbestemt = Sykdomstidslinje.permisjonsdag(LocalDate.of(2019, 10, 16), søknadSendt)
-        val sykedagForUbestemt = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 16), søknadSendt)
+        val permisjonsdagForUbestemt = Sykdomstidslinje.permisjonsdag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
+        val sykedagForUbestemt = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
         val ubestemtdag = permisjonsdagForUbestemt + sykedagForUbestemt
-        val studiedag = Sykdomstidslinje.studiedag(LocalDate.of(2019, 10, 17), søknadSendt)
-        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(LocalDate.of(2019, 10, 18), søknadSendt)
-        val utenlandsdag = Sykdomstidslinje.utenlandsdag(LocalDate.of(2019, 10, 22), søknadSendt)
+        val studiedag = Sykdomstidslinje.studiedag(LocalDate.of(2019, 10, 17), sendtSøknadHendelse)
+        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(LocalDate.of(2019, 10, 18), sendtSøknadHendelse)
+        val utenlandsdag = Sykdomstidslinje.utenlandsdag(LocalDate.of(2019, 10, 22), sendtSøknadHendelse)
 
         val tidslinje =
             egenmeldingsdag + sykedag + feriedag + permisjonsdager + sykedager + ubestemtdag + studiedag + utenlandsdag + arbeidsdag

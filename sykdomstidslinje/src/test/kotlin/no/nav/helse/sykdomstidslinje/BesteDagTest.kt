@@ -3,8 +3,10 @@ package no.nav.helse.sykdomstidslinje
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.InntektsmeldingMottatt
-import no.nav.helse.hendelse.SendtSøknadMottatt
+import no.nav.helse.hendelse.Inntektsmelding
+import no.nav.helse.hendelse.InntektsmeldingHendelse
+import no.nav.helse.hendelse.SendtSøknadHendelse
+import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,17 +20,16 @@ internal class BesteDagTest {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val inntektsmelding = InntektsmeldingMottatt(objectMapper.readTree("/inntektsmelding.json".readResource()))
-        private val sendtSøknad =
-            SendtSøknadMottatt(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()))
+        private val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource())))
+        private val sendtSøknadHendelse = SendtSøknadHendelse(Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())))
 
-        private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmelding)
-        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknad)
-        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(Uke(2).mandag, inntektsmelding)
-        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmelding)
-        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(Uke(2).mandag, sendtSøknad)
-        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknad)
-        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknad)
+        private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmeldingHendelse)
+        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknadHendelse)
+        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(Uke(2).mandag, inntektsmeldingHendelse)
+        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmeldingHendelse)
+        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(Uke(2).mandag, sendtSøknadHendelse)
+        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknadHendelse)
+        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknadHendelse)
     }
 
     @Test

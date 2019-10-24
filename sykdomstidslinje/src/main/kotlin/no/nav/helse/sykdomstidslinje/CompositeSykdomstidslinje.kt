@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.DokumentMottattHendelse
+import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
@@ -19,7 +19,7 @@ class CompositeSykdomstidslinje internal constructor(
 
     override fun length() = tidslinjer.sumBy { it.length() }
 
-    override fun dag(dato: LocalDate, hendelse: DokumentMottattHendelse) =
+    override fun dag(dato: LocalDate, hendelse: SykdomstidslinjeHendelse) =
         tidslinjer
             .map { it.dag(dato, hendelse) }
             .firstOrNull { it !is ImplisittDag }
@@ -45,7 +45,7 @@ class CompositeSykdomstidslinje internal constructor(
     companion object {
         internal fun fromJsonRepresentation(
             jsonDager: List<JsonDag>,
-            hendelseMap: Map<String, DokumentMottattHendelse>
+            hendelseMap: Map<String, SykdomstidslinjeHendelse>
         ): CompositeSykdomstidslinje {
             return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it, hendelseMap) })
         }

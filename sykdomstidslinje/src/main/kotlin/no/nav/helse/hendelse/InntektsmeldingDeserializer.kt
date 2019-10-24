@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-class InntektsmeldingDeserializer: StdDeserializer<InntektsmeldingMottatt>(InntektsmeldingMottatt::class.java) {
+class InntektsmeldingDeserializer: StdDeserializer<Inntektsmelding>(Inntektsmelding::class.java) {
     companion object {
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
@@ -15,6 +15,6 @@ class InntektsmeldingDeserializer: StdDeserializer<InntektsmeldingMottatt>(Innte
     }
 
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
-            InntektsmeldingMottatt(objectMapper.readTree(parser))
+            Inntektsmelding(objectMapper.readTree(parser))
 
 }

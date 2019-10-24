@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.DokumentMottattHendelse
+import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: DokumentMottattHendelse) :
+class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) :
     Dag(gjelder, hendelse) {
 
     override fun beste(other: Dag) = when {

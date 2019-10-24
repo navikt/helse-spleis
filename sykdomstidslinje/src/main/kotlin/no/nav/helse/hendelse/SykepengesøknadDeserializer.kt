@@ -18,9 +18,9 @@ internal class SykepengesøknadDeserializer : StdDeserializer<Sykepengesøknad>(
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?) =
             objectMapper.readTree<JsonNode>(parser).let {
                 when (it["status"].textValue()) {
-                    "NY" -> NySøknadOpprettet(it)
-                    "FREMTIDIG" -> NySøknadOpprettet(it)
-                    "SENDT" -> SendtSøknadMottatt(it)
+                    "NY" -> Sykepengesøknad(it)
+                    "FREMTIDIG" -> Sykepengesøknad(it)
+                    "SENDT" -> Sykepengesøknad(it)
                     else -> throw IllegalArgumentException("Kan ikke håndtere søknad med type ${it["type"].textValue()}.")
                 }
             }
