@@ -49,6 +49,10 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
 
     override fun hendelsetype() =
         Type.NySøknadMottatt
+
+    override fun toJson(): JsonNode {
+        return (super.toJson() as ObjectNode).set("søknad", søknad.toJson())
+    }
 }
 
 class SendtSøknadHendelse private constructor(hendelseId: String, private val søknad: Sykepengesøknad): PersonHendelse, SykdomstidslinjeHendelse(hendelseId) {
