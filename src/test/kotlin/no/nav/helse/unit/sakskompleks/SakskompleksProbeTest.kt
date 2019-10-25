@@ -23,20 +23,6 @@ internal class SakskompleksProbeTest {
     }
 
     @Test
-    fun `teller nye sakskompleks`() {
-        val sakskompleksCounterBefore = getCounterValue(SakskompleksProbe.sakskompleksTotalsCounterName)
-        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.NySøknadMottatt.name))
-
-        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Sakskompleks.TilstandType.START, nySøknadHendelse()))
-
-        val sakskompleksCounterAfter = getCounterValue(SakskompleksProbe.sakskompleksTotalsCounterName)
-        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.NySøknadMottatt.name))
-
-        assertCounter(sakskompleksCounterAfter, sakskompleksCounterBefore)
-        assertCounter(sykmeldingerCounterAfter, sykmeldingerCounterBefore)
-    }
-
-    @Test
     fun `teller nye sykmeldinger`() {
         val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.NySøknadMottatt.name))
 

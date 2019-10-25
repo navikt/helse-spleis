@@ -6,13 +6,11 @@ import no.nav.helse.SykdomshendelseType
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.PersonskjemaForGammelt
-import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class SakskompleksProbe : PersonObserver {
 
@@ -22,7 +20,7 @@ class SakskompleksProbe : PersonObserver {
 
         val sakskompleksTotalsCounterName = "sakskompleks_totals"
         val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
-        val manglendeSakskompleksForInntektsmeldingCounterName = "manglende_sakskompleks_for_inntektsmelding_totals"
+        val tilstandCounterName = "sakskompleks_tilstander_totals"
         val personMementoSize = "personMementoSize"
 
 
@@ -33,7 +31,8 @@ class SakskompleksProbe : PersonObserver {
                 .labelNames("dokumentType")
                 .register()
 
-        private val manglendeSakskompleksForInntektsmeldingCounter = Counter.build(manglendeSakskompleksForInntektsmeldingCounterName, "Antall inntektsmeldinger vi har mottatt som vi ikke klarer å koble til et sakskompleks")
+        private val tilstandCounter = Counter.build(tilstandCounterName, "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
+                .labelNames("forrigeTilstand", "tilstand")
                 .register()
         private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen")
                 .quantile(0.5, 0.05)
@@ -51,57 +50,21 @@ class SakskompleksProbe : PersonObserver {
         log.info(err.message)
     }
 
-    private fun opprettetNyttSakskompleks(sakskompleksId: UUID, aktørId: String) {
-        log.info("Opprettet sakskompleks med id=$sakskompleksId " +
-                "for arbeidstaker med aktørId = $aktørId ")
-        sakskompleksCounter.inc()
-    }
-
-    private fun søknadKobletTilSakskompleks(sakskompleksId: UUID) {
-        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en søknad")
-    }
-
-    private fun sykmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
-        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en sykmelding")
-    }
-
-    private fun inntektsmeldingKobletTilSakskompleks(sakskompleksId: UUID) {
-        log.info("sakskompleks med id $sakskompleksId har blitt oppdatert med en inntektsmelding")
-    }
-
-
     override fun sakskompleksEndret(event: StateChangeEvent) {
+        tilstandCounter.labels(event.previousState.name, event.currentState.name).inc()
+
         when (event.sykdomshendelse) {
             is InntektsmeldingHendelse -> {
                 log.info("sakskompleks=${event.id} event=${SykdomshendelseType.InntektsmeldingMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.InntektsmeldingMottatt.name).inc()
-
-                inntektsmeldingKobletTilSakskompleks(event.id)
             }
             is NySøknadHendelse -> {
                 log.info("sakskompleks=${event.id} event=${SykdomshendelseType.NySøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.NySøknadMottatt.name).inc()
-
-                if (event.previousState == Sakskompleks.TilstandType.START) {
-                    opprettetNyttSakskompleks(event.id, event.aktørId)
-                }
-
-                sykmeldingKobletTilSakskompleks(event.id)
             }
             is SendtSøknadHendelse -> {
                 log.info("sakskompleks=${event.id} event=${SykdomshendelseType.SendtSøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
-
-                søknadKobletTilSakskompleks(event.id)
-            }
-        }
-
-        when (event.previousState) {
-            Sakskompleks.TilstandType.KOMPLETT_SAK -> {
-                log.info("sakskompleks med id ${event.id} er regnet som en komplett sak")
-            }
-            Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD -> {
-                log.info("sakskompleks med id ${event.id} må behandles i infotrygd")
             }
         }
     }
