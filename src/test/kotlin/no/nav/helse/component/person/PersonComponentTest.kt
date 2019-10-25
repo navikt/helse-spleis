@@ -66,6 +66,7 @@ internal class PersonComponentTest {
 
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
+        private const val serverShutdownTimeoutMs: Long = 40000
         private const val kafkaApplicationId = "spleis-v1"
 
         private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
@@ -163,30 +164,32 @@ internal class PersonComponentTest {
         val aktørID = "1234567890123"
         val virksomhetsnummer = "123456789"
 
-            ventTilMeldingErSendt(id = sendNySøknad(aktørID, virksomhetsnummer), topic = søknadTopic)
-            ventTilMeldingErSendt(id = sendSøknad(aktørID, virksomhetsnummer), topic = søknadTopic)
-            ventTilMeldingErSendt(id = sendInnteksmelding(aktørID, virksomhetsnummer), topic = inntektsmeldingTopic)
+        sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
 
-            assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Personopplysninger.name))
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Personopplysninger.name))
+    }
 
-            // Alt 2: Sendt søknad kommer sist
-            val aktørId2 = "0123456789012"
-            val virksomhetsnummer2 = "012345678"
+    @Test
+    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
+        val aktørId2 = "0123456789012"
+        val virksomhetsnummer2 = "012345678"
 
-            ventTilMeldingErSendt(id = sendNySøknad(aktørId2, virksomhetsnummer2), topic = søknadTopic)
-            ventTilMeldingErSendt(id = sendInnteksmelding(aktørId2, virksomhetsnummer2), topic = inntektsmeldingTopic)
-            ventTilMeldingErSendt(id = sendSøknad(aktørId2, virksomhetsnummer2), topic = søknadTopic)
+        sendNySøknad(aktørId2, virksomhetsnummer2)
+        sendInnteksmelding(aktørId2, virksomhetsnummer2)
+        sendSøknad(aktørId2, virksomhetsnummer2)
 
         assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Personopplysninger.name))
     }
 
+    @Test
+    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
+        val aktørID = "2345678901234"
+        val virksomhetsnummer = "234567890"
 
-
-    private fun ventTilMeldingErSendt(topic: String, id: String) {
-        val resultConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
-        resultConsumer.subscribe(listOf(topic))
-        assertMessageConsumed(resultConsumer, topic, id)
-        resultConsumer.unsubscribe()
+        sendSøknad(aktørID, virksomhetsnummer)
+        assertOpprettGosysOppgave(aktørID)
     }
 
     private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String) {
@@ -216,8 +219,17 @@ internal class PersonComponentTest {
                 assertTrue(behov.all { virksomhetsnummer == it["organisasjonsnummer"] })
                 assertTrue(behov.all { typer.contains(it.behovType()) })
             }
+    }
 
-        resultConsumer.unsubscribe()
+    private fun assertOpprettGosysOppgave(aktørId: String) {
+        await()
+            .atMost(5, SECONDS)
+            .untilAsserted {
+                val records = kafkaConsumer.poll(Duration.ofSeconds(1))
+                val opprettGosysOppgaveList = records.records(opprettGosysOppgaveTopic).map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
+
+                assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
+            }
     }
 
     /**
