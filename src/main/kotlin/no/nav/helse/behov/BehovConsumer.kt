@@ -3,9 +3,9 @@ package no.nav.helse.behov
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Sykepengehistorikk
-import no.nav.helse.hendelse.SykepengehistorikkHendelse
 import no.nav.helse.person.PersonMediator
+import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology

@@ -5,12 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.SykdomshendelseDeserializer
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.hendelse.*
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.søknad.NySøknadHendelse
+import no.nav.helse.søknad.SendtSøknadHendelse
 import java.io.StringWriter
 import java.util.*
 
@@ -203,6 +208,8 @@ class Sakskompleks internal constructor(
     // Gang of four Memento pattern
     companion object {
 
+        private val sykdomshendelseDeserializer = SykdomshendelseDeserializer()
+
         internal fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
             return Sakskompleks(
                     id = sakskompleksJson.id,
@@ -212,7 +219,7 @@ class Sakskompleks internal constructor(
                 tilstand = tilstandFraEnum(sakskompleksJson.tilstandType)
                 sykdomstidslinje = sakskompleksJson.sykdomstidslinje?.let {
                     if (!it.isNull) {
-                        Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(it))
+                        Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(it), sykdomshendelseDeserializer)
                     } else {
                         null
                     }
@@ -246,7 +253,7 @@ class Sakskompleks internal constructor(
             sakskompleks.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
 
             node["sykdomstidslinje"]?.let {
-                sakskompleks.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString())
+                sakskompleks.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
             }
 
             return sakskompleks

@@ -2,14 +2,14 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.hendelse.InntektsmeldingHendelse
-import no.nav.helse.hendelse.NySøknadHendelse
-import no.nav.helse.hendelse.SendtSøknadHendelse
-import no.nav.helse.hendelse.SykepengehistorikkHendelse
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
 import no.nav.helse.sakskompleks.SakskompleksProbe
+import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.søknad.NySøknadHendelse
+import no.nav.helse.søknad.SendtSøknadHendelse
 
 internal class PersonMediator(private val personRepository: PersonRepository,
                               private val lagrePersonDao: PersonObserver,

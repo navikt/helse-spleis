@@ -16,10 +16,7 @@
               {
                 "type":"EGENMELDINGSDAG",
                 "dato":"2019-10-07",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -27,10 +24,7 @@
               {
                 "type":"SYKEDAG",
                 "dato":"2019-10-08",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -38,10 +32,7 @@
               {
                 "type":"FERIEDAG",
                 "dato":"2019-10-09",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -49,10 +40,7 @@
               {
                 "type":"IMPLISITT_DAG",
                 "dato":"2019-10-10",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -60,10 +48,7 @@
               {
                 "type":"PERMISJONSDAG",
                 "dato":"2019-10-11",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -71,10 +56,7 @@
               {
                 "type":"IMPLISITT_DAG",
                 "dato":"2019-10-12",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -82,10 +64,7 @@
               {
                 "type":"SYK_HELGEDAG",
                 "dato":"2019-10-13",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -93,10 +72,7 @@
               {
                 "type":"SYKEDAG",
                 "dato":"2019-10-14",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -104,10 +80,7 @@
               {
                 "type":"SYKEDAG",
                 "dato":"2019-10-15",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -115,18 +88,12 @@
               {
                 "type":"PERMISJONSDAG",
                 "dato":"2019-10-16",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
                   {
                     "type":"SYKEDAG",
                     "dato":"2019-10-16",
-                    "hendelse":{
-                      "type":"SendtSøknadMottatt",
-                      "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                    },
+                    "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                     "erstatter":[
 
                     ]
@@ -136,18 +103,12 @@
               {
                 "type":"UBESTEMTDAG",
                 "dato":"2019-10-17",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
                   {
                     "type":"STUDIEDAG",
                     "dato":"2019-10-17",
-                    "hendelse":{
-                      "type":"SendtSøknadMottatt",
-                      "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                    },
+                    "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                     "erstatter":[
 
                     ]
@@ -155,18 +116,12 @@
                   {
                     "type":"UBESTEMTDAG",
                     "dato":"2019-10-17",
-                    "hendelse":{
-                      "type":"InntektsmeldingMottatt",
-                      "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                    },
+                    "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                     "erstatter":[
                       {
                         "type":"STUDIEDAG",
                         "dato":"2019-10-17",
-                        "hendelse":{
-                          "type":"SendtSøknadMottatt",
-                          "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                        },
+                        "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                         "erstatter":[
 
                         ]
@@ -176,18 +131,12 @@
                   {
                     "type":"UBESTEMTDAG",
                     "dato":"2019-10-17",
-                    "hendelse":{
-                      "type":"InntektsmeldingMottatt",
-                      "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                    },
+                    "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                     "erstatter":[
                       {
                         "type":"STUDIEDAG",
                         "dato":"2019-10-17",
-                        "hendelse":{
-                          "type":"SendtSøknadMottatt",
-                          "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                        },
+                        "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                         "erstatter":[
 
                         ]
@@ -195,18 +144,12 @@
                       {
                         "type":"UBESTEMTDAG",
                         "dato":"2019-10-17",
-                        "hendelse":{
-                          "type":"InntektsmeldingMottatt",
-                          "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                        },
+                        "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                         "erstatter":[
                           {
                             "type":"STUDIEDAG",
                             "dato":"2019-10-17",
-                            "hendelse":{
-                              "type":"SendtSøknadMottatt",
-                              "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                            },
+                            "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                             "erstatter":[
 
                             ]
@@ -220,10 +163,7 @@
               {
                 "type":"ARBEIDSDAG",
                 "dato":"2019-10-18",
-                "hendelse":{
-                  "type":"SendtSøknadMottatt",
-                  "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                },
+                "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                 "erstatter":[
 
                 ]
@@ -231,10 +171,7 @@
               {
                 "type":"IMPLISITT_DAG",
                 "dato":"2019-10-19",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -242,10 +179,7 @@
               {
                 "type":"IMPLISITT_DAG",
                 "dato":"2019-10-20",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -253,10 +187,7 @@
               {
                 "type":"IMPLISITT_DAG",
                 "dato":"2019-10-21",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
 
                 ]
@@ -264,18 +195,12 @@
               {
                 "type":"UBESTEMTDAG",
                 "dato":"2019-10-22",
-                "hendelse":{
-                  "type":"InntektsmeldingMottatt",
-                  "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                },
+                "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                 "erstatter":[
                   {
                     "type":"UTENLANDSDAG",
                     "dato":"2019-10-22",
-                    "hendelse":{
-                      "type":"SendtSøknadMottatt",
-                      "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                    },
+                    "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                     "erstatter":[
 
                     ]
@@ -283,18 +208,12 @@
                   {
                     "type":"UBESTEMTDAG",
                     "dato":"2019-10-22",
-                    "hendelse":{
-                      "type":"InntektsmeldingMottatt",
-                      "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b"
-                    },
+                    "hendelseId":"1587b483-4088-4c13-b2a4-d2788e207d9b",
                     "erstatter":[
                       {
                         "type":"UTENLANDSDAG",
                         "dato":"2019-10-22",
-                        "hendelse":{
-                          "type":"SendtSøknadMottatt",
-                          "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160"
-                        },
+                        "hendelseId":"1b762e88-a3a0-4600-b231-6af273275160",
                         "erstatter":[
 
                         ]

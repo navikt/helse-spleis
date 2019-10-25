@@ -5,10 +5,10 @@ import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.hendelse.NySøknadHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.sakskompleks.SakskompleksProbe
+import no.nav.helse.søknad.NySøknadHendelse
 import org.junit.jupiter.api.Test
 
 internal class PersonMediatorTest {

@@ -2,14 +2,15 @@ package no.nav.helse.sakskompleks
 
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
-import no.nav.helse.hendelse.InntektsmeldingHendelse
-import no.nav.helse.hendelse.NySøknadHendelse
-import no.nav.helse.hendelse.SendtSøknadHendelse
+import no.nav.helse.SykdomshendelseType
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.PersonskjemaForGammelt
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.person.domain.UtenforOmfangException
+import no.nav.helse.søknad.NySøknadHendelse
+import no.nav.helse.søknad.SendtSøknadHendelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -70,15 +71,17 @@ class SakskompleksProbe : PersonObserver {
 
 
     override fun sakskompleksEndret(event: StateChangeEvent) {
-        log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.hendelsetype().name} state=${event.currentState} previousState=${event.previousState}")
-
-        dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
-
         when (event.sykdomshendelse) {
             is InntektsmeldingHendelse -> {
+                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.InntektsmeldingMottatt.name} state=${event.currentState} previousState=${event.previousState}")
+                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.InntektsmeldingMottatt.name).inc()
+
                 inntektsmeldingKobletTilSakskompleks(event.id)
             }
             is NySøknadHendelse -> {
+                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.NySøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
+                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.NySøknadMottatt.name).inc()
+
                 if (event.previousState == Sakskompleks.TilstandType.START) {
                     opprettetNyttSakskompleks(event.id, event.aktørId)
                 }
@@ -86,6 +89,9 @@ class SakskompleksProbe : PersonObserver {
                 sykmeldingKobletTilSakskompleks(event.id)
             }
             is SendtSøknadHendelse -> {
+                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.SendtSøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
+                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
+
                 søknadKobletTilSakskompleks(event.id)
             }
         }

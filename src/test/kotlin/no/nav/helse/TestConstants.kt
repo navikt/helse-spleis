@@ -6,6 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelse.*
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.søknad.NySøknadHendelse
+import no.nav.helse.søknad.SendtSøknadHendelse
+import no.nav.helse.søknad.Sykepengesøknad
 import no.nav.helse.søknad.SøknadConsumer
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -22,12 +29,15 @@ internal object TestConstants {
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    val sykeperiodFOM = 16.september
+    val sykeperiodeFOM = 16.september
     val sykeperiodeTOM = 5.oktober
     val egenmeldingFom = 12.september
     val egenmeldingTom = 15.september
     val ferieFom = 1.oktober
     val ferieTom = 4.oktober
+
+    val `seks måneder og én dag før første sykedag` = egenmeldingFom.minusMonths(6).minusDays(1)
+    val `én dag færre enn seks måneder før første sykedag` = egenmeldingFom.minusMonths(6).plusDays(1)
 
     fun søknadDTO(
             id: String = UUID.randomUUID().toString(),
@@ -42,7 +52,7 @@ internal object TestConstants {
                     tom = egenmeldingTom
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
-                    fom = sykeperiodFOM,
+                    fom = sykeperiodeFOM,
                     tom = 30.september
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
@@ -90,7 +100,7 @@ internal object TestConstants {
                     tom = egenmeldingTom
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
-                    fom = sykeperiodFOM,
+                    fom = sykeperiodeFOM,
                     tom = 30.september
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
@@ -130,7 +140,7 @@ internal object TestConstants {
                     tom = egenmeldingTom
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
-                    fom = sykeperiodFOM,
+                    fom = sykeperiodeFOM,
                     tom = 30.september
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
@@ -208,6 +218,19 @@ internal object TestConstants {
     }
 
 }
+
+class Uke(ukenr: Long) {
+    val mandag = LocalDate.of(2018, 1, 1)
+            .plusWeeks(ukenr - 1L)
+    val tirsdag get() = mandag.plusDays(1)
+    val onsdag get() = mandag.plusDays(2)
+    val torsdag get() = mandag.plusDays(3)
+    val fredag get() = mandag.plusDays(4)
+    val lørdag get() = mandag.plusDays(5)
+    val søndag get() = mandag.plusDays(6)
+}
+
+operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
 
 fun SykepengesoknadDTO.toJsonNode(): JsonNode = SøknadConsumer.søknadObjectMapper.valueToTree(this)
 fun Inntektsmelding.toJsonNode(): JsonNode = InntektsmeldingConsumer.inntektsmeldingObjectMapper.valueToTree(this)

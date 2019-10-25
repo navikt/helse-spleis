@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.hendelse.*
+import no.nav.helse.hendelse.PersonHendelse
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.søknad.NySøknadHendelse
+import no.nav.helse.søknad.SendtSøknadHendelse
 import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON=2

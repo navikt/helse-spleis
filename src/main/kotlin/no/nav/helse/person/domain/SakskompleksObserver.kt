@@ -1,7 +1,7 @@
 package no.nav.helse.person.domain
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
 
 interface SakskompleksObserver {

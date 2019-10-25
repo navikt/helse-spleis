@@ -1,6 +1,6 @@
 package no.nav.helse.person.domain
 
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 interface PersonObserver : SakskompleksObserver {
     data class PersonEndretEvent(val aktørId: String,
