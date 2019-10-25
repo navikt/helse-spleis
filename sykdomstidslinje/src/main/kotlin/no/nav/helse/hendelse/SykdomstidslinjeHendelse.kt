@@ -25,12 +25,15 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
     }
 
     internal companion object {
-        fun fromJson(json: JsonNode): SykdomstidslinjeHendelse = when (json["type"].asText()) {
-            Type.InntektsmeldingMottatt.name -> InntektsmeldingHendelse.fromJson(json)
-            Type.NySøknadMottatt.name -> NySøknadHendelse.fromJson(json)
-            Type.SendtSøknadMottatt.name -> SendtSøknadHendelse.fromJson(json)
-            Type.SykepengehistorikkMottatt.name -> SykepengehistorikkHendelse.fromJson(json)
-            else -> throw RuntimeException("ukjent type")
+        fun fromJson(json: JsonNode): SykdomstidslinjeHendelse {
+            val type = json["type"].asText()
+            return when (type) {
+                Type.InntektsmeldingMottatt.name -> InntektsmeldingHendelse.fromJson(json)
+                Type.NySøknadMottatt.name -> NySøknadHendelse.fromJson(json)
+                Type.SendtSøknadMottatt.name -> SendtSøknadHendelse.fromJson(json)
+                Type.SykepengehistorikkMottatt.name -> SykepengehistorikkHendelse.fromJson(json)
+                else -> throw RuntimeException("ukjent type: $type for melding ${json["hendelseId"]?.asText()}")
+            }
         }
 
         private val objectMapper = ObjectMapper()
