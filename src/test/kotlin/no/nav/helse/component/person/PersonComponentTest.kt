@@ -66,7 +66,6 @@ internal class PersonComponentTest {
 
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
-        private const val serverShutdownTimeoutMs: Long = 40000
         private const val kafkaApplicationId = "spleis-v1"
 
         private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
@@ -252,7 +251,6 @@ internal class PersonComponentTest {
                 val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
                 val currentPositionOfSentMessage = recordMetadata.offset()
                 val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1) ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
-                println("mld $currentPositionOfSentMessage group $currentConsumerGroupPosition")
                 assertEquals(currentConsumerGroupPosition, currentPositionOfSentMessage)
             }
     }
