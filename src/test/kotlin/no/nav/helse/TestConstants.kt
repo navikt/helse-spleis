@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.*
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -169,7 +168,7 @@ internal object TestConstants {
     ).toJsonNode()))
 
     fun inntektsmeldingHendelse(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
-            InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode()))
+            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode()))
 
     fun inntektsmeldingDTO(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
             Inntektsmelding(
