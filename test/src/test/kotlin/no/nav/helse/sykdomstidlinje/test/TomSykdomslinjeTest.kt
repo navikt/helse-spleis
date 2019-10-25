@@ -1,5 +1,7 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.sykdomstidlinje.test
 
+import no.nav.helse.Testhendelse
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -7,8 +9,11 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class TomSykdomslinjeTest {
-    val tomTidslinje = CompositeSykdomstidslinje(emptyList())
-    val sykdom = Sykdomstidslinje.sykedag(LocalDate.now(), Testhendelse())
+    val tomTidslinje = Sykdomstidslinje.tomTidslinje()
+    val sykdom = Sykdomstidslinje.sykedag(
+        LocalDate.now(),
+        Testhendelse()
+    )
 
     @Test
     fun `pluss skal kunne håndtere tomme tidslinjer`() {
