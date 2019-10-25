@@ -87,8 +87,8 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 @KtorExperimentalAPI
 private fun Application.streamsConfig() = commonKafkaProperties().apply {
     put(StreamsConfig.APPLICATION_ID_CONFIG, environment.config.property("kafka.app-id").getString())
-
     put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndFailExceptionHandler::class.java)
+    put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, environment.config.property("kafka.commit-interval-ms-config").getString())
 }
 
 @KtorExperimentalAPI

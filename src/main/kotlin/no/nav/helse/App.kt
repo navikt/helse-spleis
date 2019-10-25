@@ -13,42 +13,44 @@ import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
 fun createConfigFromEnvironment(env: Map<String, String>) =
-     MapApplicationConfig().apply {
-            put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
+    MapApplicationConfig().apply {
+        put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
 
-            put("kafka.app-id", "spleis-v1")
+        put("kafka.app-id", env.getOrDefault("KAFKA_APP_ID", "spleis-v1"))
 
-            env["KAFKA_BOOTSTRAP_SERVERS"]?.let { put("kafka.bootstrap-servers", it) }
-            env["KAFKA_USERNAME"]?.let { put("kafka.username", it) }
-            env["KAFKA_PASSWORD"]?.let { put("kafka.password", it) }
+        env["KAFKA_BOOTSTRAP_SERVERS"]?.let { put("kafka.bootstrap-servers", it) }
+        env["KAFKA_USERNAME"]?.let { put("kafka.username", it) }
+        env["KAFKA_PASSWORD"]?.let { put("kafka.password", it) }
 
-            env["NAV_TRUSTSTORE_PATH"]?.let { put("kafka.truststore-path", it) }
-            env["NAV_TRUSTSTORE_PASSWORD"]?.let { put("kafka.truststore-password", it) }
+        put("kafka.commit-interval-ms-config", env.getOrDefault("KAFKA_COMMIT_INTERVAL_MS_CONFIG", "1000"))
 
-            env["DATABASE_HOST"]?.let { put("database.host", it) }
-            env["DATABASE_PORT"]?.let { put("database.port", it) }
-            env["DATABASE_NAME"]?.let { put("database.name", it) }
-            env["DATABASE_USERNAME"]?.let { put("database.username", it) }
-            env["DATABASE_PASSWORD"]?.let { put("database.password", it) }
+        env["NAV_TRUSTSTORE_PATH"]?.let { put("kafka.truststore-path", it) }
+        env["NAV_TRUSTSTORE_PASSWORD"]?.let { put("kafka.truststore-password", it) }
 
-            put("database.jdbc-url", env["DATABASE_JDBC_URL"]
-                    ?: String.format(
-                            "jdbc:postgresql://%s:%s/%s%s",
-                            property("database.host").getString(),
-                            property("database.port").getString(),
-                            property("database.name").getString(),
-                            propertyOrNull("database.username")?.getString()?.let {
-                                "?user=$it"
-                            } ?: ""))
+        env["DATABASE_HOST"]?.let { put("database.host", it) }
+        env["DATABASE_PORT"]?.let { put("database.port", it) }
+        env["DATABASE_NAME"]?.let { put("database.name", it) }
+        env["DATABASE_USERNAME"]?.let { put("database.username", it) }
+        env["DATABASE_PASSWORD"]?.let { put("database.password", it) }
 
-            env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
-        }
+        put("database.jdbc-url", env["DATABASE_JDBC_URL"]
+            ?: String.format(
+                "jdbc:postgresql://%s:%s/%s%s",
+                property("database.host").getString(),
+                property("database.port").getString(),
+                property("database.name").getString(),
+                propertyOrNull("database.username")?.getString()?.let {
+                    "?user=$it"
+                } ?: ""))
+
+        env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
+    }
 
 @KtorExperimentalAPI
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
         LoggerFactory.getLogger("main")
-                .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+            .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
     val config = createConfigFromEnvironment(System.getenv())
 
@@ -72,7 +74,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     module {
         val streams = sakskompleksApplication()
         nais(
-                isAliveCheck = { streams.state().isRunning }
+            isAliveCheck = { streams.state().isRunning }
         )
     }
 }
