@@ -12,7 +12,7 @@ import no.nav.helse.createHikariConfig
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonPostgresRepository
 import no.nav.helse.person.domain.Person
-import no.nav.helse.sakskompleks.db.runMigration
+import no.nav.helse.runMigration
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll

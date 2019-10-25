@@ -1,7 +1,10 @@
 package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationStarted
+import io.ktor.application.ApplicationStopping
+import io.ktor.application.log
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
@@ -13,8 +16,6 @@ import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
-import no.nav.helse.sakskompleks.db.getDataSource
-import no.nav.helse.sakskompleks.db.migrate
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer

@@ -18,7 +18,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper.Personopplysninger
 import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
 import no.nav.helse.createHikariConfig
-import no.nav.helse.sakskompleks.db.runMigration
+import no.nav.helse.runMigration
 import no.nav.helse.serde.JsonNodeSerializer
 import no.nav.helse.testServer
 import no.nav.helse.toJsonNode
