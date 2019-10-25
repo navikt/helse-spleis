@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidlinje.test
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -192,7 +193,7 @@ class SykdomstidslinjeJsonTest {
         }
     }
 
-    private class TestHendelseDeserializer: SykdomstidslinjeHendelse.Deserializer {
+    private class TestHendelseDeserializer : SykdomstidslinjeHendelse.Deserializer {
         override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
             return when (jsonNode["type"].textValue()) {
                 HendelseType.Inntektsmelding.name -> InntektsmeldingHendelse(jsonNode["hendelseId"].asText())
@@ -208,8 +209,8 @@ class SykdomstidslinjeJsonTest {
         SendtSøknad
     }
 
-    private class InntektsmeldingHendelse(hendelseId: String = UUID.randomUUID().toString()) : SykdomstidslinjeHendelse(hendelseId) {
-        override fun hendelsetype() = HendelseType.Inntektsmelding.name
+    private class InntektsmeldingHendelse(hendelseId: String = UUID.randomUUID().toString()) :
+        SykdomstidslinjeHendelse(hendelseId) {
 
         override fun rapportertdato(): LocalDateTime {
             return LocalDateTime.now()
@@ -220,10 +221,14 @@ class SykdomstidslinjeJsonTest {
         }
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
+
+        override fun toJson(): JsonNode {
+            return (super.toJson() as ObjectNode).put("type", HendelseType.Inntektsmelding.name)
+        }
     }
 
-    private class SendtSøknadHendelse(hendelseId: String = UUID.randomUUID().toString()) : SykdomstidslinjeHendelse(hendelseId) {
-        override fun hendelsetype() = HendelseType.SendtSøknad.name
+    private class SendtSøknadHendelse(hendelseId: String = UUID.randomUUID().toString()) :
+        SykdomstidslinjeHendelse(hendelseId) {
 
         override fun rapportertdato(): LocalDateTime {
             return LocalDateTime.now()
@@ -234,5 +239,9 @@ class SykdomstidslinjeJsonTest {
         }
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
+
+        override fun toJson(): JsonNode {
+            return (super.toJson() as ObjectNode).put("type", HendelseType.SendtSøknad.name)
+        }
     }
 }

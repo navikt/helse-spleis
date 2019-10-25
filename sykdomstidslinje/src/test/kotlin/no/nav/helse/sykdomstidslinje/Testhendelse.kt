@@ -14,10 +14,6 @@ class Testhendelse(
     SykdomstidslinjeHendelse(UUID.randomUUID().toString()) {
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType = hendelsetype
 
-    override fun hendelsetype(): String {
-        TODO("not implemented")
-    }
-
     override fun sykdomstidslinje(): Sykdomstidslinje {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
