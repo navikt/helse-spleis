@@ -52,7 +52,7 @@ abstract class Sykdomstidslinje {
         return CompositeSykdomstidslinje(intervalEtterKonflikter)
     }
 
-    internal fun antallDagerMellom(other: Sykdomstidslinje) =
+    fun antallDagerMellom(other: Sykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
             inneholder(other) -> -min(this.length(), other.length())
