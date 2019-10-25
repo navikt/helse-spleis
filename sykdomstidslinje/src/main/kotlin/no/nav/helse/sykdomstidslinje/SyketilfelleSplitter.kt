@@ -16,8 +16,17 @@ data class Syketilfelle(
 
 private class SyketilfelleDraft(
     var arbeidsgiverperiode: MutableList<Dag> = mutableListOf(),
-    var dagerEtterArbeidsgiverperiode: MutableList<Dag> = mutableListOf()
-)
+    var dagerEtterArbeidsgiverperiode: MutableList<Dag> = mutableListOf()) {
+
+    internal fun addDag(dag: Dag) {
+
+        if (arbeidsgiverperiode.size < 16) {
+            arbeidsgiverperiode.add(dag)
+        } else {
+            dagerEtterArbeidsgiverperiode.add(dag)
+        }
+    }
+}
 
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     private var state: SykedagerTellerTilstand = Starttilstand()
@@ -174,11 +183,17 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
 
     private inner class InnenforArbeidsperiodeFriPåfølgendeSykdom(draft: SyketilfelleDraft) : SykedagerTellerTilstand(draft) {
 
+        val draftForSykEtterFri = SyketilfelleDraft(
+            arbeidsgiverperiode = mutableListOf<Dag>().apply { addAll(draft.arbeidsgiverperiode) },
+            dagerEtterArbeidsgiverperiode = mutableListOf<Dag>().apply { addAll(draft.dagerEtterArbeidsgiverperiode) }
+        )
+
         //var antallFridagerFriPåfølgendeSykdom = 0
         val fridager: MutableList<Dag> = mutableListOf()
 
         override fun visitFeriedag(dag: Feriedag) {
             fridager.add(dag)
+            draftForSykEtterFri.addDag(dag)
         }
 
         override fun visitArbeidsdag(dag: Arbeidsdag) {
@@ -192,24 +207,18 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
                 state.visitImplisittdag(dag)
             } else {
                 fridager.add(dag)
+                draftForSykEtterFri.addDag(dag)
             }
         }
 
         override fun visitSykedag(dag: Sykedag) {
-
-            val splitt = 16 - draft.arbeidsgiverperiode.size
-            val fridagerIArbeidsgiverperioder = fridager.subList(0, min(splitt, fridager.size))
-            val fridagerUtenforArbeidsgiverperioden = fridager.subList(min(splitt, fridager.size), fridager.size)
-
-            draft.arbeidsgiverperiode.addAll(fridagerIArbeidsgiverperioder)
-            draft.dagerEtterArbeidsgiverperiode.addAll(fridagerUtenforArbeidsgiverperioden)
-
-            state = InnenforArbeidsgiverperiodeSyk(draft)
+            state = InnenforArbeidsgiverperiodeSyk(draftForSykEtterFri)
             state.visitSykedag(dag)
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
             fridager.add(dag)
+            draftForSykEtterFri.addDag(dag)
         }
     }
 
