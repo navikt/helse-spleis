@@ -66,7 +66,7 @@ class DagTurneringTest {
             "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad"
         )
         assertEquals(
-            Uke(1).onsdag, tidslinje.syketilfeller().first().tidslinje.sluttdato(),
+            Uke(1).onsdag, tidslinje.syketilfeller().first().tidslinje!!.sluttdato(),
             "Siste arbeidsdag er onsdag siden personen var tilbake på jobb torsdag"
         )
     }

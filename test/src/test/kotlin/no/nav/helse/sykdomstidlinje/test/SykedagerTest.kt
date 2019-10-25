@@ -21,6 +21,7 @@ class SykedagerTest {
 
     @Test
     fun `er innenfor arbeidsgiverperioden`() {
+        //sjekker vel egentlig at det blit ett syketilfelle - m+c
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSykmelding)
         val spysyka = Sykdomstidslinje.sykedager(Uke(2).fredag, Uke(4).mandag, sendtSykmelding)
         val tidslinje = (influensa + spysyka).syketilfeller()
@@ -28,12 +29,13 @@ class SykedagerTest {
         assertEquals(1, tidslinje.size)
     }
 
+
     @Test
     fun `syketilfeller returnerer syketilfelle og arbeidsgiverperiode`() {
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSykmelding)
         val spysyka = Sykdomstidslinje.sykedager(Uke(2).fredag, Uke(4).mandag, sendtSykmelding)
         val syketilfelle = (influensa + spysyka).syketilfeller()
-        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val sykdomstidslinje = syketilfelle[0].tidslinje!!
         val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
 
         assertEquals(Uke(1).mandag, sykdomstidslinje.startdato())
@@ -52,7 +54,7 @@ class SykedagerTest {
         val ferie = Sykdomstidslinje.ferie(Uke(3).tirsdag, Uke(4).lørdag, sendtSykmelding)
         val spysyka = Sykdomstidslinje.sykedager(Uke(4).søndag, Uke(5).mandag, sendtSykmelding)
         val syketilfelle = (influensa + ferie + spysyka).syketilfeller()
-        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val sykdomstidslinje = syketilfelle[0].tidslinje!!
         val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
 
         assertEquals(Uke(1).mandag, sykdomstidslinje.startdato())
@@ -65,11 +67,32 @@ class SykedagerTest {
         assertEquals(16, arbeidsgiverperiode.length())
     }
 
+
+
+    @Test
+    fun `ferie hele året`() {
+        val ferie = Sykdomstidslinje.ferie(Uke(1).tirsdag, Uke(50).lørdag, sendtSykmelding)
+        val syketilfelle = ferie.syketilfeller()
+
+        assertEquals(0, syketilfelle.size, "Bare ferie gir ingen syketilfeller")
+    }
+
+    @Test
+    fun `ferie hele året før en sykedag`() {
+        val ferie = Sykdomstidslinje.ferie(Uke(1).tirsdag, Uke(50).lørdag, sendtSykmelding)
+        val syk = Sykdomstidslinje.sykedager(Uke(50).søndag, Uke(51).mandag, sendtSykmelding)
+        val syketilfelle = (ferie + syk).syketilfeller()
+
+        assertEquals(1, syketilfelle.size, "En sykedag etter lang ferie")
+        assertEquals(Uke(51).mandag, syketilfelle[0].arbeidsgiverperiode!!.startdato())
+        assertEquals(Uke(51).mandag, syketilfelle[0].arbeidsgiverperiode!!.sluttdato())
+    }
+
     @Test
     fun `syketilfeller returnerer syketilfelle, arbeidsgiverperiode og dager etter arbeidsgiverperiode`() {
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(5).mandag, sendtSykmelding)
         val syketilfelle = influensa.syketilfeller()
-        val sykdomstidslinje = syketilfelle[0].tidslinje
+        val sykdomstidslinje = syketilfelle[0].tidslinje!!
         val arbeidsgiverperiode = syketilfelle[0].arbeidsgiverperiode
         val dagerEtterArbeidsgiverperiode = syketilfelle[0].dagerEtterArbeidsgiverperiode
 
@@ -90,8 +113,8 @@ class SykedagerTest {
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).mandag, sendtSykmelding)
         val grupper = influensa.syketilfeller()
         assertEquals(1, grupper.size)
-        assertEquals(Uke(1).mandag, grupper.first().tidslinje.startdato())
-        assertEquals(Uke(3).mandag, grupper.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper.first().tidslinje!!.startdato())
+        assertEquals(Uke(3).mandag, grupper.first().tidslinje!!.sluttdato())
     }
 
     @Test
@@ -100,8 +123,8 @@ class SykedagerTest {
         val spysyka = Sykdomstidslinje.sykedager(Uke(3).mandag, Uke(3).fredag, sendtSykmelding)
         val grupper = (influensa + spysyka).syketilfeller()
         assertEquals(1, grupper.size)
-        assertEquals(Uke(1).mandag, grupper.first().tidslinje.startdato())
-        assertEquals(Uke(3).fredag, grupper.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper.first().tidslinje!!.startdato())
+        assertEquals(Uke(3).fredag, grupper.first().tidslinje!!.sluttdato())
     }
 
     @Test
@@ -111,11 +134,11 @@ class SykedagerTest {
         val grupper = (influensa + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(Uke(1).mandag, grupper[0].tidslinje.startdato())
-        assertEquals(Uke(1).fredag, grupper[0].tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper[0].tidslinje!!.startdato())
+        assertEquals(Uke(1).fredag, grupper[0].tidslinje!!.sluttdato())
 
-        assertEquals(Uke(5).mandag, grupper[1].tidslinje.startdato())
-        assertEquals(Uke(5).fredag, grupper[1].tidslinje.sluttdato())
+        assertEquals(Uke(5).mandag, grupper[1].tidslinje!!.startdato())
+        assertEquals(Uke(5).fredag, grupper[1].tidslinje!!.sluttdato())
     }
 
     @Test
@@ -127,8 +150,8 @@ class SykedagerTest {
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(Uke(1).mandag, grupper.first().tidslinje.startdato())
-        assertEquals(Uke(6).fredag, grupper.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper.first().tidslinje!!.startdato())
+        assertEquals(Uke(6).fredag, grupper.first().tidslinje!!.sluttdato())
     }
 
     @Test
@@ -152,8 +175,8 @@ class SykedagerTest {
         val tilfeller = (influensa + ferieDelEn + ferieDelTo + ferieDelTre + malaria).syketilfeller()
 
         assertEquals(1, tilfeller.size)
-        assertEquals(Uke(1).mandag, tilfeller.first().tidslinje.startdato())
-        assertEquals(Uke(4).torsdag, tilfeller.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, tilfeller.first().tidslinje!!.startdato())
+        assertEquals(Uke(4).torsdag, tilfeller.first().tidslinje!!.sluttdato())
     }
 
     @Test
@@ -177,11 +200,11 @@ class SykedagerTest {
         val grupper = (influensa + ferie + spysyka).syketilfeller()
 
         assertEquals(2, grupper.size)
-        assertEquals(Uke(1).mandag, grupper[0].tidslinje.startdato())
-        assertEquals(Uke(2).mandag, grupper[0].tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper[0].tidslinje!!.startdato())
+        assertEquals(Uke(2).mandag, grupper[0].tidslinje!!.sluttdato())
 
-        assertEquals(Uke(4).fredag, grupper[1].tidslinje.startdato())
-        assertEquals(Uke(5).fredag, grupper[1].tidslinje.sluttdato())
+        assertEquals(Uke(4).fredag, grupper[1].tidslinje!!.startdato())
+        assertEquals(Uke(5).fredag, grupper[1].tidslinje!!.sluttdato())
     }
 
     @Test
@@ -192,8 +215,8 @@ class SykedagerTest {
         val grupper = (influensa + ferie).syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(Uke(1).mandag, grupper.first().tidslinje.startdato())
-        assertEquals(Uke(2).mandag, grupper.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper.first().tidslinje!!.startdato())
+        assertEquals(Uke(2).mandag, grupper.first().tidslinje!!.sluttdato())
     }
 
     @Test
@@ -203,8 +226,8 @@ class SykedagerTest {
         val grupper = influensa.syketilfeller()
 
         assertEquals(1, grupper.size)
-        assertEquals(Uke(1).mandag, grupper.first().tidslinje.startdato())
-        assertEquals(Uke(1).søndag, grupper.first().tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, grupper.first().tidslinje!!.startdato())
+        assertEquals(Uke(1).fredag, grupper.first().tidslinje!!.sluttdato())
     }
 
     @Test
