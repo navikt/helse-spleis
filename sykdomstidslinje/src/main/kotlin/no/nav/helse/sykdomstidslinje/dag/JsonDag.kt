@@ -1,18 +1,13 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate
 
 internal data class JsonDag(
     val type: JsonDagType,
     val dato: LocalDate,
-    val hendelse: JsonHendelsesReferanse,
+    val hendelseId: String,
     val erstatter: List<JsonDag>
-)
-
-internal data class JsonHendelsesReferanse(
-    val type: String,
-    val hendelseId: String
 )
 
 enum class JsonDagType(internal val creator: (LocalDate, SykdomstidslinjeHendelse) -> Dag) {

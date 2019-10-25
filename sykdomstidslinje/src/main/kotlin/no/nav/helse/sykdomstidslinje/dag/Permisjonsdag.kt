@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
@@ -18,8 +18,8 @@ class Permisjonsdag internal constructor(gjelder: LocalDate, hendelse: Sykdomsti
     override fun dagType() = JsonDagType.PERMISJONSDAG
 
     override fun nøkkel(): Nøkkel =
-        when(hendelse.hendelsetype()){
-            SykdomstidslinjeHendelse.Type.SendtSøknadMottatt -> Nøkkel.Le_A
-            else -> throw RuntimeException("Hendelse er ikke støttet")
+        when(hendelse.nøkkelHendelseType()){
+            NøkkelHendelseType.Søknad -> Nøkkel.Le_A
+            else -> throw RuntimeException("Hendelse ${hendelse.nøkkelHendelseType()} er ikke støttet")
         }
 }

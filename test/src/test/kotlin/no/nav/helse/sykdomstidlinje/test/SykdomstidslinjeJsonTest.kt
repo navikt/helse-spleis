@@ -1,32 +1,31 @@
 package no.nav.helse.sykdomstidlinje.test
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.InntektsmeldingHendelse
-import no.nav.helse.hendelse.SendtSøknadHendelse
-import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class SykdomstidslinjeJsonTest {
-    companion object {
+    private companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    val inntektsmeldingHendelse =
-        InntektsmeldingHendelse(Inntektsmelding(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/inntektsmelding.json"))))
-    val sendtSøknadHendelse =
-        SendtSøknadHendelse(Sykepengesøknad(objectMapper.readTree(SykdomstidslinjeJsonTest::class.java.getResourceAsStream("/søknad_arbeidstaker_sendt_nav.json"))))
+    private val inntektsmeldingHendelse = InntektsmeldingHendelse()
+    private val sendtSøknadHendelse = SendtSøknadHendelse()
 
 
     @Test
@@ -39,12 +38,10 @@ class SykdomstidslinjeJsonTest {
 
         val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
         tidslinjeJson["hendelser"].elements().forEach {
-            assertEquals(sendtSøknadHendelse.hendelsetype().name, it["type"].asText())
             assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelseId"].asText())
-            assertNotNull(it["søknad"])
         }
         tidslinjeJson["dager"].elements().forEach {
-            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelse"]["hendelseId"].asText())
+            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelseId"].asText())
         }
     }
 
@@ -69,11 +66,11 @@ class SykdomstidslinjeJsonTest {
         assertEquals(hendelser.size(), 2)
         val hendelseMap = hendelser.groupBy { it["hendelseId"].asText() }
         tidslinjeJson["dager"].elements().forEach {
-            val hendelseId = it["hendelse"]["hendelseId"].asText()
+            val hendelseId = it["hendelseId"].asText()
             assertTrue(hendelseMap.containsKey(hendelseId))
             if (!it["erstatter"].isEmpty)
                 it["erstatter"].onEach {
-                    assertTrue(hendelseMap.containsKey(it["hendelse"]["hendelseId"].asText()))
+                    assertTrue(hendelseMap.containsKey(it["hendelseId"].asText()))
                 }
         }
     }
@@ -96,7 +93,7 @@ class SykdomstidslinjeJsonTest {
         val combined = tidslinjeA + tidslinjeB + tidslinjeC
         val json = combined.toJson()
 
-        val restored = Sykdomstidslinje.fromJson(json)
+        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
 
         assertSykdomstidslinjerEquals(combined, restored)
     }
@@ -104,7 +101,11 @@ class SykdomstidslinjeJsonTest {
     @Test
     fun `lagring og restoring av en sykdomstidslinje med søknader og inntektsmeldinger har like egenskaper`() {
         val egenmelding =
-            Sykdomstidslinje.egenmeldingsdager(LocalDate.of(2019, 9, 30), LocalDate.of(2019, 10, 1), sendtSøknadHendelse)
+            Sykdomstidslinje.egenmeldingsdager(
+                LocalDate.of(2019, 9, 30),
+                LocalDate.of(2019, 10, 1),
+                sendtSøknadHendelse
+            )
         val sykedagerA = Sykdomstidslinje.sykedager(
             LocalDate.of(2019, 10, 2),
             LocalDate.of(2019, 10, 4), sendtSøknadHendelse
@@ -121,7 +122,7 @@ class SykdomstidslinjeJsonTest {
         val combined = egenmelding + sykedagerA + ikkeSykedager + sykedagerB
         val json = combined.toJson()
 
-        val restored = Sykdomstidslinje.fromJson(json)
+        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
         assertSykdomstidslinjerEquals(combined, restored)
     }
 
@@ -131,8 +132,13 @@ class SykdomstidslinjeJsonTest {
         val sykedag = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 8), sendtSøknadHendelse)
         val feriedag = ferie(LocalDate.of(2019, 10, 9), sendtSøknadHendelse)
         val permisjonsdager =
-            Sykdomstidslinje.permisjonsdager(LocalDate.of(2019, 10, 11), LocalDate.of(2019, 10, 12), sendtSøknadHendelse)
-        val sykedager = Sykdomstidslinje.sykedager(LocalDate.of(2019, 10, 13), LocalDate.of(2019, 10, 15), sendtSøknadHendelse)
+            Sykdomstidslinje.permisjonsdager(
+                LocalDate.of(2019, 10, 11),
+                LocalDate.of(2019, 10, 12),
+                sendtSøknadHendelse
+            )
+        val sykedager =
+            Sykdomstidslinje.sykedager(LocalDate.of(2019, 10, 13), LocalDate.of(2019, 10, 15), sendtSøknadHendelse)
 
         val permisjonsdagForUbestemt = Sykdomstidslinje.permisjonsdag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
         val sykedagForUbestemt = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
@@ -146,7 +152,7 @@ class SykdomstidslinjeJsonTest {
 
         val json = tidslinje.toJson()
 
-        val restored = Sykdomstidslinje.fromJson(json)
+        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
 
         assertSykdomstidslinjerEquals(tidslinje.also { println(it) }, restored.also { println(it) })
 
@@ -184,5 +190,49 @@ class SykdomstidslinjeJsonTest {
         expected.dagerErstattet().forEachIndexed { key, dag ->
             assertDagEquals(dag, actualDager[key])
         }
+    }
+
+    private class TestHendelseDeserializer: SykdomstidslinjeHendelse.Deserializer {
+        override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
+            return when (jsonNode["type"].textValue()) {
+                HendelseType.Inntektsmelding.name -> InntektsmeldingHendelse(jsonNode["hendelseId"].asText())
+                HendelseType.SendtSøknad.name -> InntektsmeldingHendelse(jsonNode["hendelseId"].asText())
+                else -> throw RuntimeException("ukjent type")
+            }
+        }
+
+    }
+
+    private enum class HendelseType {
+        Inntektsmelding,
+        SendtSøknad
+    }
+
+    private class InntektsmeldingHendelse(hendelseId: String = UUID.randomUUID().toString()) : SykdomstidslinjeHendelse(hendelseId) {
+        override fun hendelsetype() = HendelseType.Inntektsmelding.name
+
+        override fun rapportertdato(): LocalDateTime {
+            return LocalDateTime.now()
+        }
+
+        override fun sykdomstidslinje(): Sykdomstidslinje {
+            TODO("not implemented")
+        }
+
+        override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
+    }
+
+    private class SendtSøknadHendelse(hendelseId: String = UUID.randomUUID().toString()) : SykdomstidslinjeHendelse(hendelseId) {
+        override fun hendelsetype() = HendelseType.SendtSøknad.name
+
+        override fun rapportertdato(): LocalDateTime {
+            return LocalDateTime.now()
+        }
+
+        override fun sykdomstidslinje(): Sykdomstidslinje {
+            TODO("not implemented")
+        }
+
+        override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
     }
 }

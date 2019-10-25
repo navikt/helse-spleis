@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -18,12 +18,11 @@ abstract class Dag internal constructor(
     internal abstract fun dagType(): JsonDagType
 
     internal fun toJsonDag(): JsonDag {
-        val hendelseType = hendelse.hendelsetype()
         val hendelseId = hendelse.hendelseId()
         return JsonDag(
             dagType(),
             dagen,
-            JsonHendelsesReferanse(hendelseType.name, hendelseId),
+            hendelseId,
             erstatter.map { it.toJsonDag() })
 
     }
@@ -66,6 +65,12 @@ abstract class Dag internal constructor(
 
     override fun sisteHendelse() = this.hendelse
 
+    enum class NøkkelHendelseType {
+        Sykmelding,
+        Søknad,
+        Inntektsmelding
+    }
+
     internal enum class Nøkkel {
         I,
         WD_A,
@@ -88,15 +93,14 @@ abstract class Dag internal constructor(
 
     internal abstract fun nøkkel(): Nøkkel
 
-
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
         internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, SykdomstidslinjeHendelse>): Dag =
             jsonDag.type.creator(
                 jsonDag.dato,
-                hendelseMap.getOrElse(jsonDag.hendelse.hendelseId,
-                    { throw RuntimeException("hendelse med id ${jsonDag.hendelse.hendelseId} finnes ikke") })
+                hendelseMap.getOrElse(jsonDag.hendelseId,
+                    { throw RuntimeException("hendelse med id ${jsonDag.hendelseId} finnes ikke") })
             ).also {
                 it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag ->
                     fromJsonRepresentation(

@@ -1,8 +1,9 @@
 package no.nav.helse.sykdomstidlinje.test
 
 import no.nav.helse.Testhendelse
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Sykmelding
+import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,11 +13,11 @@ internal class OverlappingCompositeTest {
 
     private val nySøknad = Testhendelse(
         rapportertdato = Uke(2).fredag.atTime(12, 0),
-        hendelsetype = SykdomstidslinjeHendelse.Type.NySøknadMottatt
+        hendelsetype = Sykmelding
     )
     private val sendtSøknad = Testhendelse(
         rapportertdato = Uke(3).fredag.atTime(12, 0),
-        hendelsetype = SykdomstidslinjeHendelse.Type.SendtSøknadMottatt
+        hendelsetype = Søknad
     )
 
     private lateinit var sykdomstidslinje: Sykdomstidslinje

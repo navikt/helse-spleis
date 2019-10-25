@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -48,7 +47,7 @@ abstract class Sykdomstidslinje {
         val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
         val intervalEtterKonflikter =
             datesUntil
-                .map {this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }
+                .map { this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }
 
         return CompositeSykdomstidslinje(intervalEtterKonflikter)
     }
@@ -236,11 +235,12 @@ abstract class Sykdomstidslinje {
         }
 
         fun fromJson(
-            json: String
+            json: String,
+            deserializer: SykdomstidslinjeHendelse.Deserializer
         ): Sykdomstidslinje {
             val jsonTidslinje = objectMapper.readTree(json)
 
-            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"])
+            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"], deserializer)
             val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
 
             return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
@@ -250,14 +250,17 @@ abstract class Sykdomstidslinje {
             return JsonDag(
                 JsonDagType.valueOf(it["type"].asText()),
                 LocalDate.parse(it["dato"].asText()),
-                JsonHendelsesReferanse(it["hendelse"]["type"].asText(), it["hendelse"]["hendelseId"].asText()),
+                it["hendelseId"].asText(),
                 it["erstatter"].map { jsonDagFromJson(it) })
         }
 
 
-        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<String, SykdomstidslinjeHendelse> {
-            return json.map { SykdomstidslinjeHendelse.fromJson(it) }
-                .groupBy(keySelector = { it.hendelseId() } )
+        private fun gruppererHendelserPrHendelsesId(
+            json: JsonNode,
+            deserializer: SykdomstidslinjeHendelse.Deserializer
+        ): Map<String, SykdomstidslinjeHendelse> {
+            return json.map { deserializer.deserialize(it) }
+                .groupBy(keySelector = { it.hendelseId() })
                 .mapValues { (_, v) -> v.first() }
         }
 

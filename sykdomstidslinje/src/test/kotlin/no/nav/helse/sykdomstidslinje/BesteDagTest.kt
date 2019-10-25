@@ -1,12 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelse.Inntektsmelding
-import no.nav.helse.hendelse.InntektsmeldingHendelse
-import no.nav.helse.hendelse.SendtSøknadHendelse
-import no.nav.helse.hendelse.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,12 +9,9 @@ import kotlin.reflect.KClass
 internal class BesteDagTest {
 
     companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(objectMapper.readTree("/inntektsmelding.json".readResource())))
-        private val sendtSøknadHendelse = SendtSøknadHendelse(Sykepengesøknad(objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource())))
+        private val inntektsmeldingHendelse = Testhendelse(hendelsetype = Dag.NøkkelHendelseType.Inntektsmelding)
+        private val sendtSøknadHendelse = Testhendelse(hendelsetype = Dag.NøkkelHendelseType.Søknad)
 
         private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmeldingHendelse)
         private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknadHendelse)
