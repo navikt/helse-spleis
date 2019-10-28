@@ -8,6 +8,7 @@ import io.ktor.application.log
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
@@ -29,27 +30,27 @@ import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.time.Duration
-import java.util.*
+import java.util.Properties
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
-    HikariConfig().apply {
-        this.jdbcUrl = jdbcUrl
-        maximumPoolSize = 3
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-        username?.let { this.username = it }
-        password?.let { this.password = it }
-    }
+        HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            maximumPoolSize = 3
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+            username?.let { this.username = it }
+            password?.let { this.password = it }
+        }
 
 @KtorExperimentalAPI
 fun Application.createHikariConfigFromEnvironment() =
-    createHikariConfig(
-        jdbcUrl = environment.config.property("database.jdbc-url").getString(),
-        username = environment.config.propertyOrNull("database.user")?.getString(),
-        password = environment.config.propertyOrNull("database.password")?.getString()
-    )
+        createHikariConfig(
+                jdbcUrl = environment.config.property("database.jdbc-url").getString(),
+                username = environment.config.propertyOrNull("database.user")?.getString(),
+                password = environment.config.propertyOrNull("database.password")?.getString()
+        )
 
 @KtorExperimentalAPI
 fun Application.sakskompleksApplication(): KafkaStreams {
@@ -60,16 +61,16 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     val producer = KafkaProducer<String, String>(behovProducerConfig(), StringSerializer(), StringSerializer())
     val personMediator = PersonMediator(
-        personRepository = PersonPostgresRepository(dataSource),
-        lagrePersonDao = LagrePersonDao(dataSource),
-        behovProducer = BehovProducer(behovTopic, producer),
-        gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
+            personRepository = PersonPostgresRepository(dataSource),
+            lagrePersonDao = LagrePersonDao(dataSource),
+            behovProducer = BehovProducer(behovTopic, producer),
+            gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
 
     val builder = StreamsBuilder()
 
-    SøknadConsumer(builder, søknadTopic, personMediator)
+    SøknadConsumer(builder, søknadTopic, opprettGosysOppgaveTopic, personMediator)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
-    BehovConsumer(builder, behovTopic , personMediator)
+    BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)

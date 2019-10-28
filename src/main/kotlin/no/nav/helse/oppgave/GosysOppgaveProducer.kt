@@ -8,13 +8,19 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
-import java.util.*
+import org.slf4j.LoggerFactory
+import java.util.Properties
 
 private val objectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 class GosysOppgaveProducer(commonKafkaProperties: Properties) {
+
+
+    companion object {
+        private val log = LoggerFactory.getLogger(GosysOppgaveProducer::class.java)
+    }
 
     val oppgaveProducerProperties = commonKafkaProperties.apply {
         put(ProducerConfig.ACKS_CONFIG, "all")
@@ -25,11 +31,13 @@ class GosysOppgaveProducer(commonKafkaProperties: Properties) {
 
     internal class OpprettGosysOppgaveDto(val aktorId: String)
 
-    fun opprettOppgave(aktørId: String){
+    fun opprettOppgave(aktørId: String) {
         kafkaProducer.send(ProducerRecord(
-            Topics.opprettGosysOppgaveTopic,
-            aktørId,
-            objectMapper.writeValueAsString(OpprettGosysOppgaveDto(aktorId = aktørId))
-        ))
+                Topics.opprettGosysOppgaveTopic,
+                aktørId,
+                objectMapper.writeValueAsString(OpprettGosysOppgaveDto(aktorId = aktørId))
+        )).get().also {
+            log.info("produserte gosysOppgave for aktør=$aktørId, recordMetadata=$it")
+        }
     }
 }
