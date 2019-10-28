@@ -1,6 +1,10 @@
 import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
+import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -10,6 +14,27 @@ internal class CompositeSykdomstidslinjeTest {
 
     companion object {
         private val tidspunktRapportert = Testhendelse(rapportertdato = LocalDateTime.of(2019, 7, 31, 20, 0))
+    }
+
+    @Test
+    internal fun `kan bestemme hvilken type dager mellom to perioder skal ha`() {
+        val arbeidsgiverperiode1 = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, tidspunktRapportert)
+        val arbeidsgiverperiode2 = Sykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, tidspunktRapportert)
+
+        val  arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, Sykdomstidslinje.Companion::ikkeSykedag)
+
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).onsdag]!!::class)
+        assertEquals(Arbeidsdag::class, arbeidsgiverperiode[Uke(1).torsdag]!!::class)
+        assertEquals(Arbeidsdag::class, arbeidsgiverperiode[Uke(1).fredag]!!::class)
+        assertEquals(ImplisittDag::class, arbeidsgiverperiode[Uke(1).lørdag]!!::class)
+        assertEquals(ImplisittDag::class, arbeidsgiverperiode[Uke(1).søndag]!!::class)
+        assertEquals(Arbeidsdag::class, arbeidsgiverperiode[Uke(2).mandag]!!::class)
+        assertEquals(Arbeidsdag::class, arbeidsgiverperiode[Uke(2).tirsdag]!!::class)
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(2).onsdag]!!::class)
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(2).torsdag]!!::class)
+        assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(2).fredag]!!::class)
     }
 
     @Test

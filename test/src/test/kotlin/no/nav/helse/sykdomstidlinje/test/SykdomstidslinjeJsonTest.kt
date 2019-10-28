@@ -1,13 +1,18 @@
 package no.nav.helse.sykdomstidlinje.test
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ikkeSykedag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.permisjonsdag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.studiedag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.utenlandsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
@@ -129,43 +134,37 @@ class SykdomstidslinjeJsonTest {
 
     @Test
     fun `sykdomstidslinje med alle typer dager blir serialisert riktig`() {
-        val egenmeldingsdag = Sykdomstidslinje.egenmeldingsdag(LocalDate.of(2019, 10, 7), inntektsmeldingHendelse)
-        val sykedag = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 8), sendtSøknadHendelse)
-        val feriedag = ferie(LocalDate.of(2019, 10, 9), sendtSøknadHendelse)
-        val permisjonsdager =
-            Sykdomstidslinje.permisjonsdager(
-                LocalDate.of(2019, 10, 11),
-                LocalDate.of(2019, 10, 12),
-                sendtSøknadHendelse
-            )
-        val sykedager =
-            Sykdomstidslinje.sykedager(LocalDate.of(2019, 10, 13), LocalDate.of(2019, 10, 15), sendtSøknadHendelse)
+        egenmeldingsdag(LocalDate.of(2019, 10, 7), inntektsmeldingHendelse).also {
+            assertJsonDagType(JsonDagType.EGENMELDINGSDAG, it)
+        }
 
-        val permisjonsdagForUbestemt = Sykdomstidslinje.permisjonsdag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
-        val sykedagForUbestemt = Sykdomstidslinje.sykedag(LocalDate.of(2019, 10, 16), sendtSøknadHendelse)
-        val ubestemtdag = permisjonsdagForUbestemt + sykedagForUbestemt
-        val studiedag = Sykdomstidslinje.studiedag(LocalDate.of(2019, 10, 17), sendtSøknadHendelse)
-        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(LocalDate.of(2019, 10, 18), sendtSøknadHendelse)
-        val utenlandsdag = Sykdomstidslinje.utenlandsdag(LocalDate.of(2019, 10, 22), sendtSøknadHendelse)
+        sykedag(LocalDate.of(2019, 10, 8), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.SYKEDAG, it)
+        }
 
-        val tidslinje =
-            egenmeldingsdag + sykedag + feriedag + permisjonsdager + sykedager + ubestemtdag + studiedag + utenlandsdag + arbeidsdag
+        ferie(LocalDate.of(2019, 10, 9), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.FERIEDAG, it)
+        }
 
-        val json = tidslinje.toJson()
+        permisjonsdag(LocalDate.of(2019, 10, 11), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.PERMISJONSDAG, it)
+        }
 
-        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
+        studiedag(LocalDate.of(2019, 10, 17), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.STUDIEDAG, it)
+        }
 
-        assertSykdomstidslinjerEquals(tidslinje.also { println(it) }, restored.also { println(it) })
+        ikkeSykedag(LocalDate.of(2019, 10, 18), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.ARBEIDSDAG, it)
+        }
 
-        JsonDagType.values().forEach {
-            assertTrue(json.contains("\"${it.name}\""), "Tidslinje inneholder ikke dag-type $it")
+        utenlandsdag(LocalDate.of(2019, 10, 22), sendtSøknadHendelse).also {
+            assertJsonDagType(JsonDagType.UTENLANDSDAG, it)
         }
     }
 
-    private fun assertJsonEquals(expectedJsonPayload: String, json: String) {
-        val mapper = ObjectMapper()
-        assertEquals(mapper.readTree(expectedJsonPayload), mapper.readTree(json))
-
+    private fun assertJsonDagType(expectedType: JsonDagType, dag: Dag) {
+        assertTrue(dag.toJson().contains("\"${expectedType.name}\""), "Tidslinje inneholder ikke dag-type ${expectedType.name}")
     }
 
     private fun assertSykdomstidslinjerEquals(expected: Sykdomstidslinje, actual: Sykdomstidslinje) {

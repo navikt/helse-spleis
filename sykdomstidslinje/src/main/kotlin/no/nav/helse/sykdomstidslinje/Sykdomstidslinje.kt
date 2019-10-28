@@ -28,28 +28,30 @@ abstract class Sykdomstidslinje {
     abstract fun accept(visitor: SykdomstidslinjeVisitor)
 
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
-    internal abstract fun dag(dato: LocalDate, hendelse: SykdomstidslinjeHendelse): Dag
+    internal abstract fun dag(dato: LocalDate): Dag?
 
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
-    internal fun jsonRepresentation(): JsonTidslinje {
+    private fun jsonRepresentation(): JsonTidslinje {
         val dager = flatten().map { it.toJsonDag() }
         val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJson() }
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 
-    operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
+    fun plus(other: Sykdomstidslinje, gapDayCreator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
 
-        if (this.startdato().isAfter(other.startdato())) return other + this
+        if (this.startdato().isAfter(other.startdato())) return other.plus(this, gapDayCreator)
 
-        val datesUntil = this.førsteStartdato(other).datesUntil(this.sisteSluttdato(other).plusDays(1)).toList()
-        val intervalEtterKonflikter =
-            datesUntil
-                .map { this.dag(it, this.sisteHendelse()).beste(other.dag(it, other.sisteHendelse())) }
+        return CompositeSykdomstidslinje(this.startdato().datesUntil(this.sisteSluttdato(other).plusDays(1))
+            .map {
+                beste(this.dag(it), other.dag(it)) ?: gapDayCreator(it, other.sisteHendelse())
+            }.toList())
+    }
 
-        return CompositeSykdomstidslinje(intervalEtterKonflikter)
+    operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
+        return this.plus(other, Companion::implisittDag)
     }
 
     fun antallDagerMellom(other: Sykdomstidslinje) =
@@ -112,9 +114,9 @@ abstract class Sykdomstidslinje {
     }
 
     companion object {
+
         fun tomTidslinje(): Sykdomstidslinje =
             CompositeSykdomstidslinje(emptyList())
-
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
@@ -263,6 +265,12 @@ abstract class Sykdomstidslinje {
             val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
 
             return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
+        }
+
+        private fun beste(a: Dag?, b: Dag?): Dag? {
+            if (a == null) return b
+            if (b == null) return a
+            return a.beste(b)
         }
 
         private fun jsonDagFromJson(it: JsonNode): JsonDag {

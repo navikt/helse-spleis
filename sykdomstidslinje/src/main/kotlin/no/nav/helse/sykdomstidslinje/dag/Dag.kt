@@ -36,10 +36,7 @@ abstract class Dag internal constructor(
     override fun startdato() = dagen
     override fun sluttdato() = dagen
     override fun flatten() = listOf(this)
-    override fun dag(dato: LocalDate, hendelse: SykdomstidslinjeHendelse) = if (dato == dagen) this else ImplisittDag(
-        dato,
-        hendelse
-    )
+    override fun dag(dato: LocalDate) = if (dato == dagen) this else null
 
     internal fun erstatter(vararg dager: Dag): Dag {
         erstatter.addAll(dager

@@ -20,8 +20,8 @@ class CompositeSykdomstidslinje internal constructor(
 
     override fun length() = tidslinje.size
 
-    override fun dag(dato: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-        tidslinje.find { it.dagen == dato } ?: implisittDag(dato, hendelse)
+    override fun dag(dato: LocalDate) =
+        tidslinje.find { it.dagen == dato }
 
 
     override fun flatten() = tidslinje
