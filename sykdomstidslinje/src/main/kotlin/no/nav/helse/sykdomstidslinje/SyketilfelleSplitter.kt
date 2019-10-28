@@ -1,31 +1,17 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import kotlin.math.min
 
 data class Syketilfelle(
     val arbeidsgiverperiode: Sykdomstidslinje?,
     val dagerEtterArbeidsgiverperiode: Sykdomstidslinje?
-){
+) {
     val tidslinje
-    get() = when {
-        dagerEtterArbeidsgiverperiode != null -> arbeidsgiverperiode?.plus(dagerEtterArbeidsgiverperiode) ?: dagerEtterArbeidsgiverperiode
-        else -> arbeidsgiverperiode
-    }
-}
-
-private class SyketilfelleDraft(
-    var arbeidsgiverperiode: MutableList<Dag> = mutableListOf(),
-    var dagerEtterArbeidsgiverperiode: MutableList<Dag> = mutableListOf()) {
-
-    internal fun addDag(dag: Dag) {
-
-        if (arbeidsgiverperiode.size < 16) {
-            arbeidsgiverperiode.add(dag)
-        } else {
-            dagerEtterArbeidsgiverperiode.add(dag)
+        get() = when {
+            dagerEtterArbeidsgiverperiode != null -> arbeidsgiverperiode?.plus(dagerEtterArbeidsgiverperiode)
+                ?: dagerEtterArbeidsgiverperiode
+            else -> arbeidsgiverperiode
         }
-    }
 }
 
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
@@ -33,29 +19,17 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     private val syketilfeller = mutableListOf<Syketilfelle>()
 
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {
-        state.visitArbeidsdag(arbeidsdag)
-    }
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = state.visitArbeidsdag(arbeidsdag)
 
-    override fun visitImplisittDag(implisittDag: ImplisittDag) {
-        state.visitImplisittdag(implisittDag)
-    }
+    override fun visitImplisittDag(implisittDag: ImplisittDag) = state.visitImplisittdag(implisittDag)
 
-    override fun visitFeriedag(feriedag: Feriedag) {
-        state.visitFeriedag(feriedag)
-    }
+    override fun visitFeriedag(feriedag: Feriedag) = state.visitFeriedag(feriedag)
 
-    override fun visitSykedag(sykedag: Sykedag) {
-        state.visitSykedag(sykedag)
-    }
+    override fun visitSykedag(sykedag: Sykedag) = state.visitSykedag(sykedag)
 
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
-        state.visitEgenmeldingsdag(egenmeldingsdag)
-    }
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = state.visitEgenmeldingsdag(egenmeldingsdag)
 
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-        state.visitSykHelgedag(sykHelgedag)
-    }
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = state.visitSykHelgedag(sykHelgedag)
 
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) =
         throw RuntimeException("Det er ikke mulig å beregne arbeidsgiverperioder for tidslinjer med ubestemte dager, som f.eks ${ubestemtdag.dagen}")
@@ -71,22 +45,48 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
 
     private abstract class SykedagerTellerTilstand(val draft: SyketilfelleDraft) {
 
-
         open fun visitArbeidsdag(dag: Arbeidsdag) {}
         open fun visitImplisittdag(dag: ImplisittDag) {}
         open fun visitSykedag(dag: Sykedag) {}
         open fun visitSykHelgedag(dag: SykHelgedag) {}
         open fun visitFeriedag(dag: Feriedag) {}
         open fun visitEgenmeldingsdag(dag: Egenmeldingsdag) {}
-        fun syketilfelle() =
-            if ((draft.dagerEtterArbeidsgiverperiode.isNotEmpty() || draft.arbeidsgiverperiode.isNotEmpty())){
-                Syketilfelle(
-                    arbeidsgiverperiode = CompositeSykdomstidslinje(draft.arbeidsgiverperiode),
-                    dagerEtterArbeidsgiverperiode = CompositeSykdomstidslinje(draft.dagerEtterArbeidsgiverperiode).trim())
-            }else null
-
-
+        internal fun syketilfelle() = draft.syketilfelle()
     }
+
+    private class SyketilfelleDraft(
+        private var arbeidsgiverperiode: MutableSet<Dag> = mutableSetOf(),
+        private var dagerEtterArbeidsgiverperiode: MutableSet<Dag> = mutableSetOf()
+    ) {
+
+        internal fun addDag(dag: Dag) {
+            if (dag !in (arbeidsgiverperiode + dagerEtterArbeidsgiverperiode)) {
+                if (erArbeidsgiverperiodeBruktOpp()) {
+                    dagerEtterArbeidsgiverperiode.add(dag)
+                } else {
+                    arbeidsgiverperiode.add(dag)
+                }
+            }
+        }
+
+        fun syketilfelle() =
+            if ((dagerEtterArbeidsgiverperiode.isNotEmpty() || arbeidsgiverperiode.isNotEmpty())) {
+                Syketilfelle(
+                    arbeidsgiverperiode = CompositeSykdomstidslinje(arbeidsgiverperiode.toList()),
+                    dagerEtterArbeidsgiverperiode = CompositeSykdomstidslinje(dagerEtterArbeidsgiverperiode.toList()).trim()
+                )
+            } else null
+
+        fun erArbeidsgiverperiodeBruktOpp() = arbeidsgiverperiode.size >= 16
+
+        fun copy() = SyketilfelleDraft(
+            arbeidsgiverperiode = arbeidsgiverperiode.copy(),
+            dagerEtterArbeidsgiverperiode = dagerEtterArbeidsgiverperiode.copy()
+        )
+
+        fun Set<Dag>.copy() = this.mapTo(destination = mutableSetOf(), transform = { it })
+    }
+
 
     private inner class Starttilstand : SykedagerTellerTilstand(draft = SyketilfelleDraft()) {
 
@@ -104,16 +104,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     private inner class InnenforArbeidsgiverperiodeSyk(draft: SyketilfelleDraft) : SykedagerTellerTilstand(draft) {
 
         override fun visitSykedag(dag: Sykedag) {
+            draft.addDag(dag)
 
-            if (draft.arbeidsgiverperiode.size < 16) {
-                draft.arbeidsgiverperiode.add(dag)
-            }
-
-            if (draft.arbeidsgiverperiode.size >= 16) {
+            if (draft.erArbeidsgiverperiodeBruktOpp()) {
                 state = UtenforArbeidsgiverperiodeSyk(draft)
-                if (draft.dagerEtterArbeidsgiverperiode.isNotEmpty()) {
-                    state.visitSykedag(dag)
-                }
+                state.visitSykedag(dag)
             }
         }
 
@@ -128,13 +123,13 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitImplisittdag(dag: ImplisittDag) {
-            if (!dag.erHelg()) {
-                state = InnenforArbeidsgiverperiodeFrisk(draft, 0)
-                state.visitImplisittdag(dag)
+            state = if (!dag.erHelg()) {
+                InnenforArbeidsgiverperiodeFrisk(draft, 0)
             } else {
-                state = InnenforArbeidsperiodeFriPåfølgendeSykdom(draft)
-                state.visitImplisittdag(dag)
+                InnenforArbeidsperiodeFriPåfølgendeSykdom(draft)
             }
+
+            state.visitImplisittdag(dag)
         }
 
         override fun visitFeriedag(dag: Feriedag) {
@@ -158,7 +153,6 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitSykedag(dag: Sykedag) {
-
             state = InnenforArbeidsgiverperiodeSyk(draft)
             state.visitSykedag(dag)
         }
@@ -181,14 +175,11 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
     }
 
-    private inner class InnenforArbeidsperiodeFriPåfølgendeSykdom(draft: SyketilfelleDraft) : SykedagerTellerTilstand(draft) {
+    private inner class InnenforArbeidsperiodeFriPåfølgendeSykdom(draft: SyketilfelleDraft) :
+        SykedagerTellerTilstand(draft) {
 
-        val draftForSykEtterFri = SyketilfelleDraft(
-            arbeidsgiverperiode = mutableListOf<Dag>().apply { addAll(draft.arbeidsgiverperiode) },
-            dagerEtterArbeidsgiverperiode = mutableListOf<Dag>().apply { addAll(draft.dagerEtterArbeidsgiverperiode) }
-        )
+        val draftForSykEtterFri = draft.copy()
 
-        //var antallFridagerFriPåfølgendeSykdom = 0
         val fridager: MutableList<Dag> = mutableListOf()
 
         override fun visitFeriedag(dag: Feriedag) {
@@ -225,7 +216,7 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
     private inner class UtenforArbeidsgiverperiodeSyk(draft: SyketilfelleDraft) : SykedagerTellerTilstand(draft) {
 
         override fun visitSykedag(dag: Sykedag) {
-            draft.dagerEtterArbeidsgiverperiode.add(dag)
+            draft.addDag(dag)
         }
 
         override fun visitSykHelgedag(dag: SykHelgedag) {
@@ -239,10 +230,10 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         override fun visitImplisittdag(dag: ImplisittDag) {
-            if (!dag.erHelg()) {
-                state = UtenforArbeidsgiverperiodeFrisk(draft)
+            state = if (!dag.erHelg()) {
+                UtenforArbeidsgiverperiodeFrisk(draft)
             } else {
-                state = UtenforArbeidsperiodeFriPåfølgendeSykdom(draft)
+                UtenforArbeidsperiodeFriPåfølgendeSykdom(draft)
             }
             state.visitImplisittdag(dag)
         }
