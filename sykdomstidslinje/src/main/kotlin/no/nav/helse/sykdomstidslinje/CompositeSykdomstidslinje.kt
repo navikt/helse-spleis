@@ -1,45 +1,42 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 
 class CompositeSykdomstidslinje internal constructor(
-    private val tidslinjer: List<Sykdomstidslinje>
+    tidslinjer: List<Sykdomstidslinje>
 ) : Sykdomstidslinje() {
+
+    private val tidslinje = tidslinjer.flatMap { it.flatten() }
+
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitComposite(this)
-        tidslinjer.forEach { it.accept(visitor) }
+        tidslinje.forEach { it.accept(visitor) }
         visitor.postVisitComposite(this)
     }
 
-    override fun sisteHendelse() = tidslinjer.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
+    override fun sisteHendelse() = tidslinje.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
 
-    override fun length() = tidslinjer.sumBy { it.length() }
+    override fun length() = tidslinje.size
 
     override fun dag(dato: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-        tidslinjer
-            .map { it.dag(dato, hendelse) }
-            .firstOrNull { it !is ImplisittDag }
-            ?: implisittDag(dato, hendelse)
+        tidslinje.find { it.dagen == dato } ?: implisittDag(dato, hendelse)
 
 
-    override fun flatten() = tidslinjer.flatMap { it.flatten() }
+    override fun flatten() = tidslinje
 
-    override fun startdato() = tidslinjer.first().startdato()
+    override fun startdato() = tidslinje.first().dagen
 
-    override fun sluttdato() = tidslinjer.last().sluttdato()
+    override fun sluttdato() = tidslinje.last().dagen
 
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = tidslinjer.flatMap { it.flatten() }
+    override fun antallSykedagerHvorViIkkeTellerMedHelg() = tidslinje
         .sumBy { it.antallSykedagerHvorViIkkeTellerMedHelg() }
 
-    override fun antallSykedagerHvorViTellerMedHelg() = tidslinjer.flatMap { it.flatten() }
+    override fun antallSykedagerHvorViTellerMedHelg() = tidslinje
         .sumBy { it.antallSykedagerHvorViTellerMedHelg() }
 
-    override fun toString() = tidslinjer.joinToString(separator = "\n") { it.toString() }
-
-
+    override fun toString() = tidslinje.joinToString(separator = "\n") { it.toString() }
 
     companion object {
         internal fun fromJsonRepresentation(
