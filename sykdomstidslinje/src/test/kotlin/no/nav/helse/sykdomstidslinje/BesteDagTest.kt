@@ -61,6 +61,12 @@ internal class BesteDagTest {
         assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class, 1)
     }
 
+    @Test
+    fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
+        assertWinner(sykdomFraSendtSøknad, egenmeldingFraInntektsmelding, Sykedag::class, 1)
+        assertWinner(egenmeldingFraInntektsmelding, sykdomFraSendtSøknad, Sykedag::class, 1)
+    }
+
     private fun <T : Dag> assertWinner(
         dag1: Dag,
         dag2: Dag,
