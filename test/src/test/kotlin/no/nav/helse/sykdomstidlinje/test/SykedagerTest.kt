@@ -293,7 +293,7 @@ class SykedagerTest {
     }
 
     @Test
-    fun `gitt en person som er syk i 5 dager, har 14 dager ferie og så syk i 5 dager igjen, skal arbeidsgiverperioden utløpe på dag 16 og første utbetalingsdag skal være første dag etter ferie`() {
+    fun `gitt en person som er syk i 5 dager, har 14 dager ferie og så syk i 5 dager igjen, skal arbeidsgiverperioden utløpe på dag 16`() {
         val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, sendtSykmelding)
         val ferie = Sykdomstidslinje.ferie(Uke(2).mandag, Uke(3).fredag, sendtSykmelding)
         val spysyka = Sykdomstidslinje.sykedager(Uke(4).mandag, Uke(4).fredag, sendtSykmelding)
@@ -302,17 +302,10 @@ class SykedagerTest {
         assertEquals(1, syketilfeller.size)
 
         val arbeidsgiverPeriodensSisteDag = Uke(1).mandag.plusDays(15)
-        val førsteUtbetalingsdag = Uke(4).mandag
-        println((influensa + ferie + spysyka))
         assertEquals(
             arbeidsgiverPeriodensSisteDag,
             syketilfeller.first().arbeidsgiverperiode!!.sluttdato(),
             "feil arbeidsgiverperiode"
-        )
-        assertEquals(
-            førsteUtbetalingsdag,
-            syketilfeller.first().dagerEtterArbeidsgiverperiode!!.startdato(),
-            "feil utbetalingsstart"
         )
     }
 

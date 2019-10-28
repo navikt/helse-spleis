@@ -2,18 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 
-data class Syketilfelle(
-    val arbeidsgiverperiode: Sykdomstidslinje?,
-    val dagerEtterArbeidsgiverperiode: Sykdomstidslinje?
-) {
-    val tidslinje
-        get() = when {
-            dagerEtterArbeidsgiverperiode != null -> arbeidsgiverperiode?.plus(dagerEtterArbeidsgiverperiode)
-                ?: dagerEtterArbeidsgiverperiode
-            else -> arbeidsgiverperiode
-        }
-}
-
 private val ARBEIDSGIVERPERIODE = 16
 
 internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
@@ -87,7 +75,7 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
             if ((dagerEtterArbeidsgiverperiode.isNotEmpty() || arbeidsgiverperiode.isNotEmpty())) {
                 Syketilfelle(
                     arbeidsgiverperiode = CompositeSykdomstidslinje(arbeidsgiverperiode.toList()),
-                    dagerEtterArbeidsgiverperiode = CompositeSykdomstidslinje(dagerEtterArbeidsgiverperiode.toList()).trim()
+                    dagerEtterArbeidsgiverperiode = CompositeSykdomstidslinje(dagerEtterArbeidsgiverperiode.toList())
                 )
             } else null
 
