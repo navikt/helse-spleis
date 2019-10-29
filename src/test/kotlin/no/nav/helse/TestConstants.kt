@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
+import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
@@ -204,7 +208,7 @@ internal object TestConstants {
             )
 
     fun sykepengehistorikkHendelse(
-            sisteHistoriskeSykedag: LocalDate,
+            sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
@@ -226,6 +230,13 @@ internal object TestConstants {
         return SykepengehistorikkHendelse(Sykepengehistorikk(objectMapper.valueToTree(historikk)))
     }
 
+    fun inngangsvilkårHendelse() = InngangsvilkårHendelse()
+
+    fun inntektshistorikkHendelse() = InntektshistorikkHendelse()
+
+    fun manuellSaksbehandlingHendelse(sakskompleksId: String,
+                                      utbetalingGodkjent: Boolean) =
+            ManuellSaksbehandlingHendelse(ManuellSaksbehandling(sakskompleksId = sakskompleksId, utbetalingGodkjent = utbetalingGodkjent))
 }
 
 class Uke(ukenr: Long) {

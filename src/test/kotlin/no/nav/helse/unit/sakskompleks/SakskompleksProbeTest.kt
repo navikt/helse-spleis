@@ -5,10 +5,10 @@ import no.nav.helse.SykdomshendelseType
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.hendelse.PersonHendelse
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.sakskompleks.SakskompleksProbe
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -65,7 +65,7 @@ internal class SakskompleksProbeTest {
             organisasjonsnummer = "orgnummer"
         )
 
-    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: SykdomstidslinjeHendelse) =
+    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: PersonHendelse) =
         sakskompleks().let { sakskompleks ->
             SakskompleksObserver.StateChangeEvent(
                 id = id,

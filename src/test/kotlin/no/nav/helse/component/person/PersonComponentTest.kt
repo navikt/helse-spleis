@@ -20,7 +20,7 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper.Personopplysninger
+import no.nav.helse.behov.BehovsTyper.Inngangsvilkår
 import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
 import no.nav.helse.createHikariConfig
 import no.nav.helse.createTestApplicationConfig
@@ -38,10 +38,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION
-import org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.*
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -50,15 +47,12 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration.ofSeconds
-import java.util.HashMap
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
@@ -178,7 +172,7 @@ internal class PersonComponentTest {
                 .atMost(5, SECONDS)
                 .untilAsserted {
                     val records = kafkaConsumer.poll(ofSeconds(1))
-                    assertBehov(records = records, aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Personopplysninger.name))
+                    assertBehov(records = records, aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
                     assertOpprettGosysOppgave(records = records, aktørId = aktørID)
                 }
     }
@@ -196,7 +190,7 @@ internal class PersonComponentTest {
                 .atMost(5, SECONDS)
                 .untilAsserted {
                     val records = kafkaConsumer.poll(ofSeconds(1))
-                    assertBehov(records = records, aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Personopplysninger.name))
+                    assertBehov(records = records, aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
                     assertOpprettGosysOppgave(records = records, aktørId = aktørId2)
                 }
     }

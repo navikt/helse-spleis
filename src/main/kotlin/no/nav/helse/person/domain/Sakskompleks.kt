@@ -8,9 +8,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.SykdomshendelseDeserializer
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.hendelse.PersonHendelse
+import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
+import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
 import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
@@ -58,11 +62,22 @@ class Sakskompleks internal constructor(
         if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikkHendelse)
     }
 
+    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
+        tilstand.håndterInngangsvilkår(this, inngangsvilkårHendelse)
+    }
+
+    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
+        tilstand.håndterInntektshistorikk(this, inntektshistorikkHendelse)
+    }
+
+    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
+    }
+
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
             this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
-
-    private fun setTilstand(event: SykdomstidslinjeHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+    private fun setTilstand(event: PersonHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
 
         val previousStateName = tilstand.type
@@ -75,7 +90,6 @@ class Sakskompleks internal constructor(
 
         emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
     }
-
     enum class TilstandType {
         START,
         NY_SØKNAD_MOTTATT,
@@ -83,7 +97,13 @@ class Sakskompleks internal constructor(
         INNTEKTSMELDING_MOTTATT,
         KOMPLETT_SAK,
         SYKEPENGEHISTORIKK_MOTTATT,
-        SKAL_TIL_INFOTRYGD
+        SKAL_TIL_INFOTRYGD,
+        INNGANGSVILKÅR_MOTTATT,
+        BEREGN_UTBETALING,
+        KLAR_TIL_UTBETALING,
+        UTBETALING_GODKJENT,
+        UTBETALING_IKKE_GODKJENT
+
     }
 
     // Gang of four State pattern
@@ -108,6 +128,18 @@ class Sakskompleks internal constructor(
             sakskompleks.setTilstand(sykepengehistorikkHendelse, MåBehandlesIInfotrygdTilstand)
         }
 
+        fun håndterInngangsvilkår(sakskompleks: Sakskompleks, inngangsvilkårHendelse: InngangsvilkårHendelse) {
+            sakskompleks.setTilstand(inngangsvilkårHendelse, MåBehandlesIInfotrygdTilstand)
+        }
+
+        fun håndterInntektshistorikk(sakskompleks: Sakskompleks, inntektshistorikkHendelse: InntektshistorikkHendelse) {
+            sakskompleks.setTilstand(inntektshistorikkHendelse, MåBehandlesIInfotrygdTilstand)
+        }
+
+        fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+            sakskompleks.setTilstand(manuellSaksbehandlingHendelse, MåBehandlesIInfotrygdTilstand)
+        }
+
         fun leaving() {
         }
 
@@ -116,23 +148,24 @@ class Sakskompleks internal constructor(
 
     }
 
-    private fun slåSammenSykdomstidslinje(hendelse: SykdomstidslinjeHendelse, tilstand: Sakskomplekstilstand) {
+    private fun slåSammenSykdomstidslinje(hendelse: SykdomstidslinjeHendelse): Boolean {
         val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje())
                 ?: hendelse.sykdomstidslinje()
-
-        if (!tidslinje.erUtenforOmfang()) {
-            setTilstand(hendelse, tilstand) {
+        return !tidslinje.erUtenforOmfang().also { utenforOmfang ->
+            if (!utenforOmfang) {
                 sykdomstidslinje = tidslinje
             }
-        } else {
-            setTilstand(hendelse, MåBehandlesIInfotrygdTilstand)
         }
     }
 
     private object StartTilstand : Sakskomplekstilstand {
 
         override fun håndterNySøknad(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            sakskompleks.slåSammenSykdomstidslinje(nySøknadHendelse, NySøknadMottattTilstand)
+            if (sakskompleks.slåSammenSykdomstidslinje(nySøknadHendelse)) {
+                sakskompleks.setTilstand(nySøknadHendelse, NySøknadMottattTilstand)
+            } else {
+                sakskompleks.setTilstand(nySøknadHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
 
         override val type = START
@@ -142,11 +175,19 @@ class Sakskompleks internal constructor(
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse, SendtSøknadMottattTilstand)
+            if (sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse)) {
+                sakskompleks.setTilstand(sendtSøknadHendelse, SendtSøknadMottattTilstand)
+            } else {
+                sakskompleks.setTilstand(sendtSøknadHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
+            if (sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse)) {
+                sakskompleks.setTilstand(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
+            } else {
+                sakskompleks.setTilstand(inntektsmeldingHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -156,7 +197,11 @@ class Sakskompleks internal constructor(
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse, KomplettSakTilstand)
+            if (sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse)) {
+                sakskompleks.setTilstand(inntektsmeldingHendelse, KomplettSakTilstand)
+            } else {
+                sakskompleks.setTilstand(inntektsmeldingHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
@@ -166,19 +211,28 @@ class Sakskompleks internal constructor(
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse, KomplettSakTilstand)
+            if (sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse)) {
+                sakskompleks.setTilstand(sendtSøknadHendelse, KomplettSakTilstand)
+            } else {
+                sakskompleks.setTilstand(sendtSøknadHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
 
     }
-
     private object KomplettSakTilstand : Sakskomplekstilstand {
+
         override val type = KOMPLETT_SAK
 
         override fun entering(sakskompleks: Sakskompleks) {
             sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk)
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Personopplysninger)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Inngangsvilkår)
+        }
+
+        override fun håndterInngangsvilkår(sakskompleks: Sakskompleks, inngangsvilkårHendelse: InngangsvilkårHendelse) {
+            // TODO: Faktisk håndtere inngangsvilkår
+            sakskompleks.setTilstand(inngangsvilkårHendelse, InngangsvilkårMottattTilstand)
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
@@ -187,14 +241,67 @@ class Sakskompleks internal constructor(
         }
 
     }
+    private object InngangsvilkårMottattTilstand : Sakskomplekstilstand {
 
-    private object MåBehandlesIInfotrygdTilstand : Sakskomplekstilstand {
-        override val type = SKAL_TIL_INFOTRYGD
+        override val type = INNGANGSVILKÅR_MOTTATT
+        override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+            if (sykepengehistorikkHendelse.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikkHendelse, MåBehandlesIInfotrygdTilstand)
+            else sakskompleks.setTilstand(sykepengehistorikkHendelse, BeregnUtbetalingTilstand)
+        }
+
     }
-
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand {
 
         override val type = SYKEPENGEHISTORIKK_MOTTATT
+        override fun håndterInngangsvilkår(sakskompleks: Sakskompleks, inngangsvilkårHendelse: InngangsvilkårHendelse) {
+            // TODO: Faktisk håndtere inngangsvilkår
+            sakskompleks.setTilstand(inngangsvilkårHendelse, BeregnUtbetalingTilstand)
+        }
+
+    }
+    private object BeregnUtbetalingTilstand : Sakskomplekstilstand {
+
+        override val type = BEREGN_UTBETALING
+
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Inntektsopplysninger)
+        }
+
+        override fun håndterInntektshistorikk(sakskompleks: Sakskompleks, inntektshistorikkHendelse: InntektshistorikkHendelse) {
+            // TODO: Faktisk håndtere inntektshistorikk
+            sakskompleks.setTilstand(inntektshistorikkHendelse, KlarTilUtbetalingTilstand)
+        }
+    }
+
+    private object KlarTilUtbetalingTilstand : Sakskomplekstilstand {
+        override val type = KLAR_TIL_UTBETALING
+
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
+        }
+
+        override fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+            if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
+                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, UtbetalingGodkjentTilstand)
+            } else {
+                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, UtbetalingIkkeGodkjentTilstand)
+            }
+        }
+    }
+
+    private object UtbetalingGodkjentTilstand : Sakskomplekstilstand {
+        override val type = UTBETALING_GODKJENT
+
+    }
+
+    private object UtbetalingIkkeGodkjentTilstand : Sakskomplekstilstand {
+        override val type = UTBETALING_IKKE_GODKJENT
+
+    }
+
+    private object MåBehandlesIInfotrygdTilstand : Sakskomplekstilstand {
+        override val type = SKAL_TIL_INFOTRYGD
+
     }
 
     // Gang of four Memento pattern
@@ -226,6 +333,11 @@ class Sakskompleks internal constructor(
             INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
             KOMPLETT_SAK -> KomplettSakTilstand
             SYKEPENGEHISTORIKK_MOTTATT -> SykepengehistorikkMottattTilstand
+            INNGANGSVILKÅR_MOTTATT -> InngangsvilkårMottattTilstand
+            BEREGN_UTBETALING -> BeregnUtbetalingTilstand
+            KLAR_TIL_UTBETALING -> KlarTilUtbetalingTilstand
+            UTBETALING_GODKJENT -> UtbetalingGodkjentTilstand
+            UTBETALING_IKKE_GODKJENT -> UtbetalingIkkeGodkjentTilstand
             SKAL_TIL_INFOTRYGD -> MåBehandlesIInfotrygdTilstand
         }
 
@@ -287,9 +399,9 @@ class Sakskompleks internal constructor(
                 }
         )
     }
-
     class Memento(internal val state: String) {
         override fun toString() = state
+
     }
 
     // Gang of four Observer pattern
@@ -299,7 +411,7 @@ class Sakskompleks internal constructor(
 
     private fun emitSakskompleksEndret(
             currentState: TilstandType,
-            tidslinjeEvent: SykdomstidslinjeHendelse,
+            tidslinjeEvent: PersonHendelse,
             previousState: TilstandType,
             previousMemento: Memento
     ) {
