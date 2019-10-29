@@ -146,10 +146,7 @@ class Sakskompleks internal constructor(
         }
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.setTilstand(inntektsmeldingHendelse, InntektsmeldingMottattTilstand) {
-                // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
-                // sakskompleks.slåSammenSykdomstidslinje(inntektsmelding)
-            }
+            sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -159,10 +156,7 @@ class Sakskompleks internal constructor(
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.setTilstand(inntektsmeldingHendelse, KomplettSakTilstand) {
-                // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
-                // sakskompleks.slåSammenSykdomstidslinje(inntektsmelding)
-            }
+            sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse, KomplettSakTilstand)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
