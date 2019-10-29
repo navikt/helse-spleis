@@ -10,11 +10,9 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
 
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
 
-    val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["forsteFravarsdag"].textValue())
+    val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["foersteFravaersdag"].textValue())
 
-    // TODO: mottattDato er ikke endel av kontrakten enda
-    // val rapportertDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["mottattDato"].textValue())
-    val rapportertDato = LocalDateTime.now()
+    val mottattDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["mottattDato"].textValue())
 
     val ferie
         get() = jsonNode["ferieperioder"]?.map {

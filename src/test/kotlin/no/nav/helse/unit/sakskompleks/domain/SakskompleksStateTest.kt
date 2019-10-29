@@ -13,6 +13,7 @@ import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
+import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -187,10 +188,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val sakskompleks = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse)
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
 
         sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
@@ -207,10 +210,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val sakskompleks = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse)
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
 
         sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(5),

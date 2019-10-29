@@ -13,10 +13,7 @@ import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
 import no.nav.helse.søknad.Sykepengesøknad
 import no.nav.helse.søknad.SøknadConsumer
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status
+import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -167,10 +164,20 @@ internal object TestConstants {
             arbeidsgiver = arbeidsgiver
     ).toJsonNode()))
 
-    fun inntektsmeldingHendelse(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
-            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer).toJsonNode()))
+    fun inntektsmeldingHendelse(aktørId: String = "",
+                                virksomhetsnummer: String? = "123456789",
+                                førsteFraværsdag: LocalDate = 10.september,
+                                arbeidsgiverperioder: List<Periode> = listOf(
+                                        Periode(10.september, 10.september.plusDays(16))
+                                )) =
+            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder).toJsonNode()))
 
-    fun inntektsmeldingDTO(aktørId: String = "", virksomhetsnummer: String? = "123456789") =
+    fun inntektsmeldingDTO(aktørId: String = "",
+                           virksomhetsnummer: String? = "123456789",
+                           førsteFraværsdag: LocalDate = 10.september,
+                           arbeidsgiverperioder: List<Periode> = listOf(
+                                   Periode(10.september, 10.september.plusDays(16))
+                           )) =
             Inntektsmelding(
                     inntektsmeldingId = "",
                     arbeidstakerFnr = "",
@@ -188,9 +195,12 @@ internal object TestConstants {
                     endringIRefusjoner = emptyList(),
                     opphoerAvNaturalytelser = emptyList(),
                     gjenopptakelseNaturalytelser = emptyList(),
-                    arbeidsgiverperioder = emptyList(),
+                    arbeidsgiverperioder = arbeidsgiverperioder,
                     status = Status.GYLDIG,
-                    arkivreferanse = ""
+                    arkivreferanse = "",
+                    ferieperioder = emptyList(),
+                    foersteFravaersdag = førsteFraværsdag,
+                    mottattDato = LocalDateTime.now()
             )
 
     fun sykepengehistorikkHendelse(
@@ -233,6 +243,9 @@ operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it
 
 fun SykepengesoknadDTO.toJsonNode(): JsonNode = SøknadConsumer.søknadObjectMapper.valueToTree(this)
 fun Inntektsmelding.toJsonNode(): JsonNode = InntektsmeldingConsumer.inntektsmeldingObjectMapper.valueToTree(this)
+
+val Int.juni
+    get() = LocalDate.of(2019, Month.JUNE, this)
 
 val Int.juli
     get() = LocalDate.of(2019, Month.JULY, this)

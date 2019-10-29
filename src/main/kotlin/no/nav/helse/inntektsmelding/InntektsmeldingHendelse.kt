@@ -25,22 +25,21 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
             inntektsmelding.arbeidstakerAktorId
 
     override fun rapportertdato() =
-            inntektsmelding.rapportertDato
+            inntektsmelding.mottattDato
 
     override fun organisasjonsnummer() =
             inntektsmelding.virksomhetsnummer
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
-        val arbeidsgiverperiodetidslinjer = inntektsmelding.arbeidsgiverperioder
-                .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
-        val ferietidslinjer = inntektsmelding.ferie
+        val arbeidsgiverperiodetidslinje = inntektsmelding.arbeidsgiverperioder
+                .map { Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
+                .reduce { acc, sykdomstidslinje -> acc.plus(sykdomstidslinje, Sykdomstidslinje.Companion::ikkeSykedag) }
+
+        val ferietidslinje = inntektsmelding.ferie
                 .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+                .fold(Sykdomstidslinje.tomTidslinje()) { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
 
-        // TODO: førsteFraværsdag er ikke med i kontrakten enda
-        // val førsteFraværsdagTidslinje = listOf(Sykdomstidslinje.sykedag(gjelder = førsteFraværsdag, hendelse = this))
-
-        return (/*førsteFraværsdagTidslinje + */arbeidsgiverperiodetidslinjer + ferietidslinjer)
-                .reduce { resultatTidslinje, delTidslinje -> resultatTidslinje + delTidslinje }
+        return (arbeidsgiverperiodetidslinje + ferietidslinje)
     }
     override fun toJson(): JsonNode {
         return (super.toJson() as ObjectNode).apply {

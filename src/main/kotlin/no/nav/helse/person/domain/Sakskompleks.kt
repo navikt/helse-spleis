@@ -48,9 +48,7 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) =
-    // TODO: blokkert fordi inntektsmelding ikke har tidslinje enda
-            // passerMed(inntektsmelding).also {
-            true.also {
+            overlapperMed(inntektsmeldingHendelse).also {
                 if (it) {
                     tilstand.håndterInntektsmelding(this, inntektsmeldingHendelse)
                 }

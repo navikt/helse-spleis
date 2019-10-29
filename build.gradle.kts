@@ -44,9 +44,9 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    implementation("no.nav.helse:sykdomstidslinje:1.133c44b")
+    implementation("no.nav.helse:sykdomstidslinje:1.be57cc0")
 
-    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.09.06-09-24-0426e")
+    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
     testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
 
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -72,6 +72,13 @@ repositories {
     maven("http://packages.confluent.io/maven/")
     maven {
         url = uri("https://maven.pkg.github.com/navikt/helse-sykdomstidslinje")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
         credentials {
             username = githubUser
             password = githubPassword
