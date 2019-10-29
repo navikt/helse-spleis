@@ -1,5 +1,6 @@
 package no.nav.helse.oppgave
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -30,6 +31,10 @@ class GosysOppgaveProducer(commonKafkaProperties: Properties) {
     private val kafkaProducer = KafkaProducer<String, String>(oppgaveProducerProperties, StringSerializer(), StringSerializer())
 
     internal class OpprettGosysOppgaveDto(val aktorId: String)
+
+    fun opprettOppgave(søknad: JsonNode) {
+        opprettOppgave(søknad["aktorId"].textValue())
+    }
 
     fun opprettOppgave(aktørId: String) {
         kafkaProducer.send(ProducerRecord(

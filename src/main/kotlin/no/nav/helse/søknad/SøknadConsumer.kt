@@ -8,12 +8,9 @@ import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
-import org.apache.kafka.streams.kstream.Produced
-import org.slf4j.LoggerFactory
 
 internal class SøknadConsumer(
         streamsBuilder: StreamsBuilder,
@@ -31,9 +28,6 @@ internal class SøknadConsumer(
         val søknadObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        private val log = LoggerFactory.getLogger(SøknadProbe::class.java)
-
     }
 
     fun build(builder: StreamsBuilder): StreamsBuilder {
@@ -42,37 +36,16 @@ internal class SøknadConsumer(
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
         sendtSøknad
-                .filter { _, jsonNode ->
-                    skalTaInnSøknad(søknad = jsonNode, søknadProbe = probe)
-                }
-                .mapValues { jsonNode -> Sykepengesøknad(jsonNode) }
+                .filter { _, søknad -> skalTaInnSøknad(søknad = søknad, søknadProbe = probe) }
+                .mapValues { søknad -> Sykepengesøknad(søknad) }
                 .peek { _, søknad -> probe.mottattSøknad(søknad) }
                 .foreach(::håndterSøknad)
 
         sendtSøknad
-                .peek { key, value -> log.info("key $key value $value") }
-                .filter { _, søknad -> søknad["status"].textValue() == "SENDT" }
-                .map { key, søknad -> KeyValue(søknad["aktorId"].textValue(), søknadObjectMapper.writeValueAsString(GosysOppgaveProducer.OpprettGosysOppgaveDto(aktorId = søknad["aktorId"].textValue()))) }
-                .peek { key, value -> log.info("key $key value $value") }
-                .to(opprettGosysOppgaveTopic, Produced.with(Serdes.String(), Serdes.String()))
-
+                .filter { _, søknad -> erSendtSøknad(søknad) }
+                .foreach { _, søknad -> personMediator.opprettOppgave(søknad) }
 
         return builder
-    }
-
-    private fun skalTaInnSøknad(søknad: JsonNode, søknadProbe: SøknadProbe): Boolean {
-        val id = søknad["id"].textValue()
-        val type = søknad["soknadstype"]?.textValue()
-                ?: søknad["type"]?.textValue()
-                ?: throw RuntimeException("Fant ikke type på søknad")
-        val status = søknad["status"].textValue()
-
-        return if (type in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE") && (status == "SENDT" || status == "NY" || status == "FREMTIDIG")) {
-            true
-        } else {
-            søknadProbe.søknadIgnorert(id, type, status)
-            false
-        }
     }
 
     private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {

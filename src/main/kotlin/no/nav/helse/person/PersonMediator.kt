@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
@@ -66,6 +67,10 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)
         }
+    }
+
+    fun opprettOppgave(søknad: JsonNode) {
+        gosysOppgaveProducer.opprettOppgave(søknad)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
