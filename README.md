@@ -33,3 +33,36 @@ og opprett et nytt token med scope "read:packages"
 Legg inn tokenet i din .gradle/gradle.properties fil slik:
 githubUser=x-access-token
 githubPassword=<tokenet ditt>
+
+## Kafka (iac)
+
+```json
+{
+ "topics": [
+   {
+     "configEntries": {},
+     "members": [
+       {
+         "member": "srvspsak",
+         "role": "PRODUCER"
+       },
+{
+         "member": "s150563",
+         "role": "MANAGER"
+       },
+{
+         "member": "s149030",
+         "role": "MANAGER"
+       },
+{
+         "member": "srvSyfogsak",
+         "role": "CONSUMER"
+       }
+     ],
+     "numPartitions": 3,
+     "topicName": "privat-helse-sykepenger-opprettGosysOppgave"
+   }
+ ]
+}
+```
+
