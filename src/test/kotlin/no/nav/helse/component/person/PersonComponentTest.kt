@@ -193,7 +193,7 @@ internal class PersonComponentTest {
     }
 
     @Test
-    fun `gitt en komplett tidslinje, når vi mottar svar på inngangsvilkår- og sykepengehistorikk-behov, så skal vi etterspørre inntektsopplysninger`() {
+    fun `gitt en komplett tidslinje, når vi mottar svar på inngangsvilkår- og sykepengehistorikk-behov, så skal vi etterspørre inntektshistorikk`() {
         val aktørID = "09876543212"
         val virksomhetsnummer = "123456789"
 
@@ -201,23 +201,79 @@ internal class PersonComponentTest {
         sendSøknad(aktørID, virksomhetsnummer)
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
-        val sykepengehistorikkBehov = ventPåBehov(aktørID, Sykepengehistorikk)
-        sykepengehistorikkBehov.løsBehov(TestConstants.responsFraSpole(
-                perioder = listOf(
-                        SpolePeriode(
-                                fom = søknad.fom!!.minusMonths(8),
-                                tom = søknad.fom!!.minusMonths(7),
-                                grad = "100"
-                        )
-                )
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
         ))
-        sendBehov(sykepengehistorikkBehov)
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendInngangsvilkårløsning(aktørID)
 
-        val inngangsvilkårBehov = ventPåBehov(aktørID, Inngangsvilkår)
-        inngangsvilkårBehov.løsBehov("min løsning")
-        sendBehov(inngangsvilkårBehov)
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Inntektshistorikk.name))
+    }
 
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Inntektsopplysninger.name))
+    @Test
+    fun `gitt en sak klar til beregning, når vi mottar svar på inntektshistorikk med 5 % avvik, så skal saken til infotrygd`() {
+        val aktørID = "76543214679"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendInngangsvilkårløsning(aktørID)
+        sendInntektshistorikkløsning(aktørId = aktørID, avvikSisteTreMåneder = true)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
+    fun `gitt en sak klar til beregning, når vi mottar svar på inntektshistorikk uten 5 % avvik, så skal saken til Speil for godkjenning`() {
+        val aktørID = "87654321962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendInngangsvilkårløsning(aktørID)
+        sendInntektshistorikkløsning(aktørId = aktørID, avvikSisteTreMåneder = false)
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+    }
+
+    private fun sendInntektshistorikkløsning(aktørId: String, avvikSisteTreMåneder: Boolean) {
+        val behov = ventPåBehov(aktørId, Inntektshistorikk)
+        behov.løsBehov(mapOf(
+                "avvikSisteTreMåneder" to avvikSisteTreMåneder
+        ))
+        sendBehov(behov)
+    }
+
+    private fun sendInngangsvilkårløsning(aktørId: String) {
+        val behov = ventPåBehov(aktørId, Inngangsvilkår)
+        behov.løsBehov("min løsning")
+        sendBehov(behov)
+    }
+
+    private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
+        val behov = ventPåBehov(aktørId, Sykepengehistorikk)
+        behov.løsBehov(TestConstants.responsFraSpole(
+                perioder = perioder
+        ))
+        sendBehov(behov)
     }
 
     private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String) {

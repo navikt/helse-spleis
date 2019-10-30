@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
+import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
@@ -74,6 +75,16 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         try {
             finnPerson(inngangsvilkårHendelse).also { person ->
                 person.håndterInngangsvilkår(inngangsvilkårHendelse)
+            }
+        } catch (err: PersonskjemaForGammelt) {
+            sakskompleksProbe.forGammelSkjemaversjon(err)
+        }
+    }
+
+    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
+        try {
+            finnPerson(inntektshistorikkHendelse).also { person ->
+                person.håndterInntektshistorikk(inntektshistorikkHendelse)
             }
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)

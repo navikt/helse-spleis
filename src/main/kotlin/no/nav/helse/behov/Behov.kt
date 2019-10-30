@@ -51,8 +51,11 @@ class Behov internal constructor(private val pakke: Pakke) {
     }
 
     fun harLøsning(): Boolean {
-        return pakke[LøsningsKey] != null
+        return løsning() != null
     }
+
+    fun løsning() =
+            pakke[LøsningsKey]
 
     @Suppress("UNCHECKED_CAST")
     operator fun <T> get(key: String): T? {

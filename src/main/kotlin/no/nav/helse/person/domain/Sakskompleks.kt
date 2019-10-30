@@ -66,7 +66,7 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-        tilstand.håndterInntektshistorikk(this, inntektshistorikkHendelse)
+        if (id.toString() == inntektshistorikkHendelse.sakskompleksId()) tilstand.håndterInntektshistorikk(this, inntektshistorikkHendelse)
     }
 
     internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
@@ -263,12 +263,17 @@ class Sakskompleks internal constructor(
         override val type = BEREGN_UTBETALING
 
         override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Inntektsopplysninger)
+            // TODO: behovet må inneholde sykepengegrunnlaget som er oppgitt i inntektsmeldingen,
+            // slik at den som løser behovet kan regne ut avvik
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Inntektshistorikk)
         }
 
         override fun håndterInntektshistorikk(sakskompleks: Sakskompleks, inntektshistorikkHendelse: InntektshistorikkHendelse) {
-            // TODO: Faktisk håndtere inntektshistorikk
-            sakskompleks.setTilstand(inntektshistorikkHendelse, KlarTilUtbetalingTilstand)
+            if (!inntektshistorikkHendelse.avvikSisteTreMåneder()) {
+                sakskompleks.setTilstand(inntektshistorikkHendelse, KlarTilUtbetalingTilstand)
+            } else {
+                sakskompleks.setTilstand(inntektshistorikkHendelse, MåBehandlesIInfotrygdTilstand)
+            }
         }
     }
 

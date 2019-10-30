@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
+import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
@@ -51,6 +52,9 @@ internal class BehovConsumer(
             }
             BehovsTyper.Inngangsvilkår.name -> {
                 personMediator.håndterInngangsvilkår(InngangsvilkårHendelse(løsning))
+            }
+            BehovsTyper.Inntektshistorikk.name -> {
+                personMediator.håndterInntektshistorikk(InntektshistorikkHendelse(løsning))
             }
         }
     }

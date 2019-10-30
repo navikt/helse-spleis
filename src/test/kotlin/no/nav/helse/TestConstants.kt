@@ -185,7 +185,7 @@ internal object TestConstants {
                            arbeidsgiverperioder: List<Periode> = listOf(
                                    Periode(10.september, 10.september.plusDays(16))
                            ),
-                            feriePerioder: List<Periode> = emptyList())=
+                           feriePerioder: List<Periode> = emptyList()) =
             Inntektsmelding(
                     inntektsmeldingId = "",
                     arbeidstakerFnr = "",
@@ -266,7 +266,19 @@ internal object TestConstants {
                     "sakskompleksId" to sakskompleksId
             )))
 
-    fun inntektshistorikkHendelse() = InntektshistorikkHendelse()
+    fun inntektshistorikkHendelse(aktørId: String = UUID.randomUUID().toString(),
+                                  organisasjonsnummer: String = "123546564",
+                                  sakskompleksId: String = UUID.randomUUID().toString(),
+                                  avvikSisteTreMåneder: Boolean = false) =
+            InntektshistorikkHendelse(Behov.nyttBehov(BehovsTyper.Inntektshistorikk, mapOf(
+                    "aktørId" to aktørId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "sakskompleksId" to sakskompleksId
+            )).also {
+                it.løsBehov(mapOf(
+                        "avvikSisteTreMåneder" to avvikSisteTreMåneder
+                ))
+            })
 
     fun manuellSaksbehandlingHendelse(sakskompleksId: String,
                                       utbetalingGodkjent: Boolean) =

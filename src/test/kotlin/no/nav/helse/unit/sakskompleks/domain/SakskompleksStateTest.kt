@@ -113,7 +113,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektshistorikk på feil tidspunkt`() {
         val sakskompleks = beInStartTilstand()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -169,7 +173,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektshistorikk etter ny søknad`() {
         val sakskompleks = beInNySøknad()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -225,7 +233,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektshistorikk etter sendt søknad`() {
         val sakskompleks = beInSendtSøknad()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -297,7 +309,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektshistorikk etter inntektsmelding`() {
         val sakskompleks = beInMottattInntektsmelding()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -377,7 +393,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertEquals(BEREGN_UTBETALING, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is InngangsvilkårHendelse)
         assertTrue(behovsliste.any {
-            it.behovType() == BehovsTyper.Inntektsopplysninger.name
+            it.behovType() == BehovsTyper.Inntektshistorikk.name
         })
     }
 
@@ -385,7 +401,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     fun `motta inntektshistorikk etter sykepengehistorikk`() {
         val sakskompleks = beInMottattSykepengehistorikk()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(SYKEPENGEHISTORIKK_MOTTATT, lastStateEvent.previousState)
         assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -393,10 +413,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta inntektshistorikk etter beregn utbetaling`() {
+    fun `motta inntektshistorikk uten avvik siste tre måneder etter beregn utbetaling`() {
         val sakskompleks = beInBeregnUtbetaling()
 
-        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse())
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString()
+        ))
 
         assertEquals(BEREGN_UTBETALING, lastStateEvent.previousState)
         assertEquals(KLAR_TIL_UTBETALING, lastStateEvent.currentState)
@@ -405,6 +429,22 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertTrue(behovsliste.any {
             it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
         })
+    }
+
+    @Test
+    fun `motta inntektshistorikk med avvik siste tre måneder etter beregn utbetaling`() {
+        val sakskompleks = beInBeregnUtbetaling()
+
+        sakskompleks.håndterInntektshistorikk(inntektshistorikkHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                sakskompleksId = sakskompleksId.toString(),
+                avvikSisteTreMåneder = true
+        ))
+
+        assertEquals(BEREGN_UTBETALING, lastStateEvent.previousState)
+        assertEquals(SKAL_TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTrue(lastStateEvent.sykdomshendelse is InntektshistorikkHendelse)
     }
 
     @Test
@@ -484,7 +524,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 håndterInngangsvilkår(inngangsvilkårHendelse)
             }
 
-    private fun beInKlarTilUtbetaling(inntektshistorikkHendelse: InntektshistorikkHendelse = inntektshistorikkHendelse(),
+    private fun beInKlarTilUtbetaling(inntektshistorikkHendelse: InntektshistorikkHendelse = inntektshistorikkHendelse(aktørId = aktørId, organisasjonsnummer = organisasjonsnummer, sakskompleksId = sakskompleksId.toString()),
                                       inngangsvilkårHendelse: InngangsvilkårHendelse = inngangsvilkårHendelse(aktørId = aktørId, organisasjonsnummer = organisasjonsnummer, sakskompleksId = sakskompleksId.toString()),
                                       sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(sakskompleksId = sakskompleksId, sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)),
                                       sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
