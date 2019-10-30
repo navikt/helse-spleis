@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 @KtorExperimentalAPI
 internal class PersonComponentTest {
 
-    companion object {
+    private companion object {
 
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
@@ -160,7 +160,6 @@ internal class PersonComponentTest {
         TestConsumer.reset()
     }
 
-
     @Test
     fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
         val aktørID = "1234567890123"
@@ -170,12 +169,8 @@ internal class PersonComponentTest {
         sendSøknad(aktørID, virksomhetsnummer)
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
-        await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    assertBehov(records = TestConsumer.records(), aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
-                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørID)
-                }
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     @Test
@@ -187,12 +182,8 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørId2, virksomhetsnummer2)
         sendSøknad(aktørId2, virksomhetsnummer2)
 
-        await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    assertBehov(records = TestConsumer.records(), aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
-                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørId2)
-                }
+        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+        assertOpprettGosysOppgave(aktørId = aktørId2)
     }
 
     @Test
@@ -202,11 +193,7 @@ internal class PersonComponentTest {
 
         sendSøknad(aktørID, virksomhetsnummer)
 
-        await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørID)
-                }
+        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String) {
@@ -224,24 +211,30 @@ internal class PersonComponentTest {
         synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode())
     }
 
-    private fun assertBehov(records: List<ConsumerRecord<String, String>>, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
-        val meldingerPåTopic = records
-                .filter { it.topic() == behovTopic }
-        val behov = meldingerPåTopic
-                .map { Behov.fromJson(it.value()) }
-                .filter { it.get<String>("aktørId").equals(aktørId) }
+    private fun assertBehov(virksomhetsnummer: String, aktørId: String, typer: List<String>) {
+        await()
+                .atMost(5, SECONDS)
+                .untilAsserted {
+                    val meldingerPåTopic = TestConsumer.records(behovTopic)
+                    val behov = meldingerPåTopic
+                            .map { Behov.fromJson(it.value()) }
+                            .filter { it.get<String>("aktørId").equals(aktørId) }
 
-        assertEquals(typer.size, behov.size, "Antall meldinger på topic $behovTopic skulle vært ${typer.size}, men var ${meldingerPåTopic.count()}")
-        assertTrue(behov.all { aktørId == it["aktørId"] })
-        assertTrue(behov.all { virksomhetsnummer == it["organisasjonsnummer"] })
-        assertTrue(behov.all { typer.contains(it.behovType()) })
+                    assertEquals(typer.size, behov.size, "Antall meldinger på topic $behovTopic skulle vært ${typer.size}, men var ${meldingerPåTopic.count()}")
+                    assertTrue(behov.all { aktørId == it["aktørId"] })
+                    assertTrue(behov.all { virksomhetsnummer == it["organisasjonsnummer"] })
+                    assertTrue(behov.all { typer.contains(it.behovType()) })
+                }
     }
 
-    private fun assertOpprettGosysOppgave(records: List<ConsumerRecord<String, String>>, aktørId: String) {
-        val opprettGosysOppgaveList = records
-                .filter { it.topic() == opprettGosysOppgaveTopic }
-                .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
-        assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
+    private fun assertOpprettGosysOppgave(aktørId: String) {
+        await()
+                .atMost(5, SECONDS)
+                .untilAsserted {
+                    val opprettGosysOppgaveList = TestConsumer.records(opprettGosysOppgaveTopic)
+                            .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
+                    assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
+                }
     }
 
     /**
@@ -260,8 +253,7 @@ internal class PersonComponentTest {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
-                    val admin = adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
-                    val offsetAndMetadataMap = admin
+                    val offsetAndMetadataMap = adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
                     val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
                     val currentPositionOfSentMessage = recordMetadata.offset()
                     val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
@@ -280,6 +272,8 @@ internal class PersonComponentTest {
         fun reset() {
             records.clear()
         }
+
+        fun records(topic: String) = records().filter { it.topic() == topic }
 
         fun records() =
                 records.also { it.addAll(kafkaConsumer.poll(ofMillis(0))) }
