@@ -53,17 +53,16 @@ class SakskompleksProbe : PersonObserver {
     override fun sakskompleksEndret(event: StateChangeEvent) {
         tilstandCounter.labels(event.previousState.name, event.currentState.name).inc()
 
+        log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.currentState} previousState=${event.previousState}")
+
         when (event.sykdomshendelse) {
             is InntektsmeldingHendelse -> {
-                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.InntektsmeldingMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.InntektsmeldingMottatt.name).inc()
             }
             is NySøknadHendelse -> {
-                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.NySøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.NySøknadMottatt.name).inc()
             }
             is SendtSøknadHendelse -> {
-                log.info("sakskompleks=${event.id} event=${SykdomshendelseType.SendtSøknadMottatt.name} state=${event.currentState} previousState=${event.previousState}")
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
             }
         }
