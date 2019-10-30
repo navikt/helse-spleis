@@ -32,7 +32,7 @@ class SakskompleksProbe : PersonObserver {
                 .register()
 
         private val tilstandCounter = Counter.build(tilstandCounterName, "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
-                .labelNames("forrigeTilstand", "tilstand")
+                .labelNames("forrigeTilstand", "tilstand", "hendelse")
                 .register()
         private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen")
                 .quantile(0.5, 0.05)
@@ -51,7 +51,7 @@ class SakskompleksProbe : PersonObserver {
     }
 
     override fun sakskompleksEndret(event: StateChangeEvent) {
-        tilstandCounter.labels(event.previousState.name, event.currentState.name).inc()
+        tilstandCounter.labels(event.previousState.name, event.currentState.name, event.sykdomshendelse.javaClass.simpleName).inc()
 
         log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.currentState} previousState=${event.previousState}")
 
