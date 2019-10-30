@@ -257,7 +257,14 @@ internal object TestConstants {
             sakskompleksId = sakskompleksId
     ))
 
-    fun inngangsvilkårHendelse() = InngangsvilkårHendelse(Behov.nyttBehov(BehovsTyper.Inngangsvilkår, emptyMap()))
+    fun inngangsvilkårHendelse(aktørId: String = UUID.randomUUID().toString(),
+                               organisasjonsnummer: String = "123546564",
+                               sakskompleksId: String = UUID.randomUUID().toString()) =
+            InngangsvilkårHendelse(Behov.nyttBehov(BehovsTyper.Inngangsvilkår, mapOf(
+                    "aktørId" to aktørId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "sakskompleksId" to sakskompleksId
+            )))
 
     fun inntektshistorikkHendelse() = InntektshistorikkHendelse()
 
