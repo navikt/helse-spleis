@@ -173,15 +173,17 @@ internal object TestConstants {
                                 førsteFraværsdag: LocalDate = 10.september,
                                 arbeidsgiverperioder: List<Periode> = listOf(
                                         Periode(10.september, 10.september.plusDays(16))
-                                )) =
-            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder).toJsonNode()))
+                                ),
+                                ferieperioder: List<Periode> = emptyList()) =
+            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()))
 
     fun inntektsmeldingDTO(aktørId: String = "",
                            virksomhetsnummer: String? = "123456789",
                            førsteFraværsdag: LocalDate = 10.september,
                            arbeidsgiverperioder: List<Periode> = listOf(
                                    Periode(10.september, 10.september.plusDays(16))
-                           )) =
+                           ),
+                            feriePerioder: List<Periode> = emptyList())=
             Inntektsmelding(
                     inntektsmeldingId = "",
                     arbeidstakerFnr = "",
@@ -202,7 +204,7 @@ internal object TestConstants {
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     status = Status.GYLDIG,
                     arkivreferanse = "",
-                    ferieperioder = emptyList(),
+                    ferieperioder = feriePerioder,
                     foersteFravaersdag = førsteFraværsdag,
                     mottattDato = LocalDateTime.now()
             )
