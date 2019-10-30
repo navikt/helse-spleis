@@ -72,7 +72,7 @@ internal class SyketilfelleSplitter : SykdomstidslinjeVisitor {
         }
 
         fun syketilfelle() =
-            if ((dagerEtterArbeidsgiverperiode.isNotEmpty() || arbeidsgiverperiode.isNotEmpty())) {
+            if (dagerEtterArbeidsgiverperiode.isNotEmpty() || arbeidsgiverperiode.isNotEmpty()) {
                 Syketilfelle(
                     arbeidsgiverperiode = CompositeSykdomstidslinje(arbeidsgiverperiode.toList()),
                     dagerEtterArbeidsgiverperiode = CompositeSykdomstidslinje(dagerEtterArbeidsgiverperiode.toList())

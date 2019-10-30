@@ -1,14 +1,13 @@
 package no.nav.helse.utbetalingstidslinje.test
 
 import no.nav.helse.Testhendelse
-import no.nav.helse.sykdomstidlinje.test.SykedagerTest
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.testhelpers.Uke
+import no.nav.helse.utbetalingstidslinje.tilUtbetalingstidslinjer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 internal class UtbetalingsTest {
 
@@ -22,27 +21,41 @@ internal class UtbetalingsTest {
         val syk = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).søndag, sendtSykmelding)
         val syketilfelle = syk.syketilfeller()[0]
 
-        val utbetalingstidslinje = syketilfelle.tilUtbetalingstidslinje()
+        val utbetalingstidslinjer = syketilfelle.tilUtbetalingstidslinjer()
+
+        assertThat(utbetalingstidslinjer).hasSize(1)
+        val utbetalingsdager = utbetalingstidslinjer.first().utbetalingsdager
+
 
         assertEquals(21, syketilfelle.tidslinje.length())
-        assertEquals(15, utbetalingstidslinje.size)
-        assertEquals(BigDecimal.ZERO, utbetalingstidslinje[11].dagsats)
-        assertEquals(BigDecimal.TEN, utbetalingstidslinje[12].dagsats)
+        assertEquals(15, utbetalingsdager.size)
 
-        assertThat(utbetalingstidslinje)
+        assertThat(utbetalingsdager)
             .filteredOn{it.arbeidsgiverperiode}
             .hasSize(12)
-            .allMatch{ it.dagsats == BigDecimal.ZERO }
             .noneMatch{it.dag.erHelg()}
-        assertThat(utbetalingstidslinje)
+        assertThat(utbetalingsdager)
             .filteredOn{!it.arbeidsgiverperiode}
             .hasSize(3)
-            .allMatch{it.dagsats == BigDecimal.TEN}
             .noneMatch{it.dag.erHelg()}
 
-        assertThat(syketilfelle.tidslinje.flatten().filterNot { dag -> dag in utbetalingstidslinje.map { it.dag } })
+        assertThat(syketilfelle.tidslinje.flatten().filterNot { dag -> dag in utbetalingsdager.map { it.dag } })
             .hasSize(6)
             .allMatch{it.erHelg()}
+    }
+
+
+    @Test
+    fun `enkel sykdomstidslinje splitter`(){
+        val fri = Sykdomstidslinje.ferie(Uke(0).fredag, Uke(0).søndag, sendtSykmelding)
+        val influensa = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).mandag, sendtSykmelding)
+        val ferie = Sykdomstidslinje.ferie(Uke(3).tirsdag, Uke(4).lørdag, sendtSykmelding)
+        val spysyka = Sykdomstidslinje.sykedager(Uke(4).søndag, Uke(5).mandag, sendtSykmelding)
+        val syketilfelle = (fri + influensa + ferie + spysyka).syketilfeller()[0]
+
+        val utbetalingsdager = syketilfelle.tilUtbetalingstidslinjer()
+        println(utbetalingsdager)
+
     }
 
     @Test
@@ -52,23 +65,24 @@ internal class UtbetalingsTest {
         val spysyka = Sykdomstidslinje.sykedager(Uke(4).søndag, Uke(5).mandag, sendtSykmelding)
         val syketilfelle = (influensa + ferie + spysyka).syketilfeller()[0]
 
-        val utbetalingstidslinje = syketilfelle.tilUtbetalingstidslinje()
+        val utbetalingstidslinjer = syketilfelle.tilUtbetalingstidslinjer()
+
+        assertThat(utbetalingstidslinjer).hasSize(1)
+        val utbetalingsdager = utbetalingstidslinjer.first().utbetalingsdager
 
         assertEquals(29, syketilfelle.tidslinje.length())
-        assertEquals(12, utbetalingstidslinje.size)
+        assertEquals(12, utbetalingsdager.size)
 
-        assertThat(utbetalingstidslinje)
+        assertThat(utbetalingsdager)
             .filteredOn{it.arbeidsgiverperiode}
             .hasSize(11)
-            .allMatch{ it.dagsats == BigDecimal.ZERO }
             .noneMatch{it.dag.erHelg()}
-        assertThat(utbetalingstidslinje)
+        assertThat(utbetalingsdager)
             .filteredOn{!it.arbeidsgiverperiode}
             .hasSize(1)
-            .allMatch{it.dagsats == BigDecimal.TEN}
             .noneMatch{it.dag.erHelg()}
 
-        assertThat(syketilfelle.tidslinje.flatten().filterNot { dag -> dag in utbetalingstidslinje.map { it.dag } })
+        assertThat(syketilfelle.tidslinje.flatten().filterNot { dag -> dag in utbetalingsdager.map { it.dag } })
             .hasSize(17)
             .allMatch{it.erHelg() || it is Feriedag}
     }
@@ -83,7 +97,10 @@ internal class UtbetalingsTest {
         val syketilfeller = (influensa + ferie + spysyka).syketilfeller()
         assertEquals(1, syketilfeller.size)
 
-        val utbetalingstidslinje = syketilfeller[0].tilUtbetalingstidslinje()
+        val utbetalingstidslinjer = syketilfeller[0].tilUtbetalingstidslinjer()
+
+        assertThat(utbetalingstidslinjer).hasSize(1)
+        val utbetalingsdager = utbetalingstidslinjer.first().utbetalingsdager
 
         val arbeidsgiverPeriodensSisteDag = Uke(1).mandag.plusDays(15)
         val førsteUtbetalingsdag = Uke(4).mandag
@@ -94,7 +111,7 @@ internal class UtbetalingsTest {
         )
         assertEquals(
             førsteUtbetalingsdag,
-            utbetalingstidslinje.filterNot { it.arbeidsgiverperiode }.first().dag.startdato(),
+            utbetalingsdager.filterNot { it.arbeidsgiverperiode }.first().dag.startdato(),
             "feil utbetalingsstart"
         )
     }

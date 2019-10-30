@@ -1,103 +1,41 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Syketilfelle
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import java.math.BigDecimal
 
-class Utbetalingstidslinje : SykdomstidslinjeVisitor {
+ class Utbetalingstidslinje(val dagsats: BigDecimal, val utbetalingsdager: List<Utbetalingsdag>)
 
-    private val utbetalingsdager = mutableListOf<Utbetalingsdag>()
+fun Syketilfelle.tilUtbetalingstidslinjer(): List<Utbetalingstidslinje> {
+    val utbetalingsdager = arbeidsgiverperiode.tilUtbetalingsdager(true) +
+            dagerEtterArbeidsgiverperiode.tilUtbetalingsdager(false)
 
-    private var state: State = Arbeidsgiverperiode()
-    private val dagerIArbeidsgiverperiode = 16
-    private var antallArbeidsgiverdager = 0
+    return utbetalingsdager.filter { it.dag is Sykedag || it.dag.erHelg() || it.dag is Feriedag }
+        .fold(mutableListOf(), splitUtbetalingstilfeller())
+        .map { utbetalingsdager -> Utbetalingstidslinje(
+            BigDecimal.TEN,
+            utbetalingsdager.filterNot { it.dag.erHelg() || it.dag is Feriedag }) }
+}
 
-    fun erAvklart() = utbetalingsdager.all(Utbetalingsdag::erAvklart)
+private fun Sykdomstidslinje?.tilUtbetalingsdager(arbeidsgiverperiode: Boolean) =
+    this?.flatten()?.map { Utbetalingsdag(it, arbeidsgiverperiode) } ?: emptyList()
 
-    override fun toString() = utbetalingsdager.joinToString(separator = "\n") { it.toString() }
-
-    override fun visitSykedag(sykedag: Sykedag) {
-        state.visitSykedag(sykedag)
-    }
-
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-        state.visitSykHelgedag(sykHelgedag)
-    }
-
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
-        state.visitEgenmeldingsdag(egenmeldingsdag)
-    }
-
-    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
-        state.visitUtenlandsdag(utenlandsdag)
-    }
-
-    override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
-        state.visitUbestemt(ubestemtdag)
-    }
-
-    private fun tellArbeidsgiverdager() {
-        antallArbeidsgiverdager += 1
-        if (antallArbeidsgiverdager >= dagerIArbeidsgiverperiode) state = Trygdeperiode()
-    }
-
-    private interface Utbetalingsdag {
-        fun erAvklart(): Boolean
-    }
-
-    private class UavklartUtbetalingsdag(private val dag: Dag) : Utbetalingsdag {
-        override fun erAvklart() = false
-        override fun toString(): String = "Uavklart utbetalingsdag\t$dag"
-    }
-
-    private class AvklartUtbetalingsdag(private val dag: Dag) : Utbetalingsdag {
-        override fun erAvklart() = true
-        override fun toString(): String = "Avklart utbetalingsdag\t$dag"
-    }
-
-    private interface State : SykdomstidslinjeVisitor
-
-    private inner class Arbeidsgiverperiode : State {
-        override fun visitSykedag(sykedag: Sykedag) {
-            utbetalingsdager.add(AvklartUtbetalingsdag(dag = sykedag))
-            tellArbeidsgiverdager()
+private fun splitUtbetalingstilfeller(): (MutableList<MutableList<Utbetalingsdag>>, Utbetalingsdag) -> MutableList<MutableList<Utbetalingsdag>> {
+    return { utbetalingstilfeller, utbetalingsdag ->
+        when {
+            utbetalingstilfeller.isEmpty() -> utbetalingstilfeller.add(mutableListOf(utbetalingsdag))
+            utbetalingstilfeller.last().last().erPåfølgendeDag(utbetalingsdag) -> utbetalingstilfeller.last().add(
+                utbetalingsdag
+            )
+            utbetalingsdag.dag is Sykedag -> utbetalingstilfeller.add(mutableListOf(utbetalingsdag))
         }
-
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-            utbetalingsdager.add(AvklartUtbetalingsdag(dag = sykHelgedag))
-            tellArbeidsgiverdager()
-        }
-
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
-            utbetalingsdager.add(AvklartUtbetalingsdag(dag = egenmeldingsdag))
-            tellArbeidsgiverdager()
-        }
-
-        override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
-            utbetalingsdager.add(UavklartUtbetalingsdag(dag = utenlandsdag))
-        }
-
-        override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
-            utbetalingsdager.add(UavklartUtbetalingsdag(dag = ubestemtdag))
-        }
+        utbetalingstilfeller
     }
+}
 
-    private inner class Trygdeperiode : State {
-        override fun visitSykedag(sykedag: Sykedag) {
-            utbetalingsdager.add(AvklartUtbetalingsdag(dag = sykedag))
-        }
-
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-            utbetalingsdager.add(AvklartUtbetalingsdag(dag = sykHelgedag))
-        }
-
-        override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
-            utbetalingsdager.add(UavklartUtbetalingsdag(dag = utenlandsdag))
-        }
-
-        override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
-            utbetalingsdager.add(UavklartUtbetalingsdag(dag = ubestemtdag))
-        }
-    }
-
+data class Utbetalingsdag(val dag: Dag, val arbeidsgiverperiode: Boolean) {
+    internal fun erPåfølgendeDag(other: Utbetalingsdag) = other.dag.dagen.minusDays(1) == dag.dagen
 }
