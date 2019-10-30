@@ -35,7 +35,7 @@ import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
-import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig.*
@@ -49,11 +49,11 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Duration.ofSeconds
+import java.time.Duration.ofMillis
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
@@ -83,7 +83,6 @@ internal class PersonComponentTest {
         )
 
         private lateinit var adminClient: AdminClient
-        private lateinit var kafkaConsumer: KafkaConsumer<String, String>
         private lateinit var kafkaProducer: KafkaProducer<String, JsonNode>
 
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -136,8 +135,6 @@ internal class PersonComponentTest {
 
             embeddedKafkaEnvironment.start()
             adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
-            kafkaConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
-            kafkaConsumer.subscribe(topics)
             kafkaProducer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(objectMapper))
 
             embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig()))
@@ -147,9 +144,8 @@ internal class PersonComponentTest {
         @AfterAll
         @JvmStatic
         internal fun `stop embedded environment`() {
-            embeddedServer.stop(1, 1, TimeUnit.SECONDS)
-            kafkaConsumer.unsubscribe()
-            kafkaConsumer.close()
+            embeddedServer.stop(1, 1, SECONDS)
+            TestConsumer.close()
             adminClient.close()
             embeddedKafkaEnvironment.tearDown()
 
@@ -158,6 +154,12 @@ internal class PersonComponentTest {
         }
 
     }
+
+    @BeforeEach
+    fun `create test consumer`() {
+        TestConsumer.reset()
+    }
+
 
     @Test
     fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
@@ -171,9 +173,8 @@ internal class PersonComponentTest {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
-                    val records = kafkaConsumer.poll(ofSeconds(1))
-                    assertBehov(records = records, aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
-                    assertOpprettGosysOppgave(records = records, aktørId = aktørID)
+                    assertBehov(records = TestConsumer.records(), aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørID)
                 }
     }
 
@@ -189,9 +190,8 @@ internal class PersonComponentTest {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
-                    val records = kafkaConsumer.poll(ofSeconds(1))
-                    assertBehov(records = records, aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
-                    assertOpprettGosysOppgave(records = records, aktørId = aktørId2)
+                    assertBehov(records = TestConsumer.records(), aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørId2)
                 }
     }
 
@@ -205,8 +205,7 @@ internal class PersonComponentTest {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
-                    val records = kafkaConsumer.poll(ofSeconds(1))
-                    assertOpprettGosysOppgave(records = records, aktørId = aktørID)
+                    assertOpprettGosysOppgave(records = TestConsumer.records(), aktørId = aktørID)
                 }
     }
 
@@ -225,17 +224,23 @@ internal class PersonComponentTest {
         synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode())
     }
 
-    private fun assertBehov(records: ConsumerRecords<String, String>, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
-        val behov = records.records(behovTopic).map { Behov.fromJson(it.value()) }.filter { it.get<String>("aktørId").equals(aktørId) }
+    private fun assertBehov(records: List<ConsumerRecord<String, String>>, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
+        val meldingerPåTopic = records
+                .filter { it.topic() == behovTopic }
+        val behov = meldingerPåTopic
+                .map { Behov.fromJson(it.value()) }
+                .filter { it.get<String>("aktørId").equals(aktørId) }
 
-        assertEquals(typer.size, behov.size, "Antall meldinger på topic $behovTopic skulle vært ${typer.size}, men var ${records?.records(behovTopic)?.count()}")
+        assertEquals(typer.size, behov.size, "Antall meldinger på topic $behovTopic skulle vært ${typer.size}, men var ${meldingerPåTopic.count()}")
         assertTrue(behov.all { aktørId == it["aktørId"] })
         assertTrue(behov.all { virksomhetsnummer == it["organisasjonsnummer"] })
         assertTrue(behov.all { typer.contains(it.behovType()) })
     }
 
-    private fun assertOpprettGosysOppgave(records: ConsumerRecords<String, String>, aktørId: String) {
-        val opprettGosysOppgaveList = records.records(opprettGosysOppgaveTopic).map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
+    private fun assertOpprettGosysOppgave(records: List<ConsumerRecord<String, String>>, aktørId: String) {
+        val opprettGosysOppgaveList = records
+                .filter { it.topic() == opprettGosysOppgaveTopic }
+                .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
         assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
     }
 
@@ -265,4 +270,23 @@ internal class PersonComponentTest {
                 }
     }
 
+    private object TestConsumer {
+        private val records = mutableListOf<ConsumerRecord<String, String>>()
+
+        private val kafkaConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer()).also {
+            it.subscribe(topics)
+        }
+
+        fun reset() {
+            records.clear()
+        }
+
+        fun records() =
+                records.also { it.addAll(kafkaConsumer.poll(ofMillis(0))) }
+
+        fun close() {
+            kafkaConsumer.unsubscribe()
+            kafkaConsumer.close()
+        }
+    }
 }
