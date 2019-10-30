@@ -1,6 +1,5 @@
 package no.nav.helse.component.person
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -13,6 +12,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
+import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
@@ -20,16 +20,12 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper.Inngangsvilkår
-import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
-import no.nav.helse.createHikariConfig
-import no.nav.helse.createTestApplicationConfig
+import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
-import no.nav.helse.runMigration
-import no.nav.helse.serde.JsonNodeSerializer
-import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.admin.AdminClient
@@ -83,7 +79,7 @@ internal class PersonComponentTest {
         )
 
         private lateinit var adminClient: AdminClient
-        private lateinit var kafkaProducer: KafkaProducer<String, JsonNode>
+        private lateinit var kafkaProducer: KafkaProducer<String, String>
 
         private lateinit var embeddedPostgres: EmbeddedPostgres
         private lateinit var postgresConnection: Connection
@@ -135,7 +131,7 @@ internal class PersonComponentTest {
 
             embeddedKafkaEnvironment.start()
             adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
-            kafkaProducer = KafkaProducer<String, JsonNode>(producerProperties(), StringSerializer(), JsonNodeSerializer(objectMapper))
+            kafkaProducer = KafkaProducer(producerProperties(), StringSerializer(), StringSerializer())
 
             embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig()))
                     .start(wait = false)
@@ -196,19 +192,69 @@ internal class PersonComponentTest {
         assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
+    @Test
+    fun `gitt en komplett tidslinje, når vi mottar svar på inngangsvilkår- og sykepengehistorikk-behov, så skal vi etterspørre inntektsopplysninger`() {
+        val aktørID = "09876543212"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykepengehistorikkBehov = ventPåBehov(aktørID, Sykepengehistorikk)
+        sykepengehistorikkBehov.løsBehov(TestConstants.responsFraSpole(
+                perioder = listOf(
+                        SpolePeriode(
+                                fom = søknad.fom!!.minusMonths(8),
+                                tom = søknad.fom!!.minusMonths(7),
+                                grad = "100"
+                        )
+                )
+        ))
+        sendBehov(sykepengehistorikkBehov)
+
+        val inngangsvilkårBehov = ventPåBehov(aktørID, Inngangsvilkår)
+        inngangsvilkårBehov.løsBehov("min løsning")
+        sendBehov(inngangsvilkårBehov)
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Inntektsopplysninger.name))
+    }
+
     private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String) {
         val inntektsMelding = inntektsmeldingDTO(aktørId = aktorID, virksomhetsnummer = virksomhetsnummer)
-        synchronousSendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode())
+        synchronousSendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode().toString())
     }
 
     private fun sendSøknad(aktorID: String, virksomhetsnummer: String) {
         val sendtSøknad = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.SENDT)
-        synchronousSendKafkaMessage(søknadTopic, sendtSøknad.id!!, sendtSøknad.toJsonNode())
+        synchronousSendKafkaMessage(søknadTopic, sendtSøknad.id!!, sendtSøknad.toJsonNode().toString())
     }
 
-    private fun sendNySøknad(aktorID: String, virksomhetsnummer: String) {
+    private fun sendNySøknad(aktorID: String, virksomhetsnummer: String): SykepengesoknadDTO {
         val nySøknad = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.NY)
-        synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode())
+        synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode().toString())
+        return nySøknad
+    }
+
+    private fun sendBehov(behov: Behov) {
+        sendKafkaMessage(behovTopic, behov.id().toString(), behov.toJson())
+    }
+
+    private fun ventPåBehov(aktørId: String, behovType: BehovsTyper): Behov {
+        var behov: Behov? = null
+
+        await()
+                .atMost(5, SECONDS)
+                .until {
+                    behov = TestConsumer.records(behovTopic)
+                            .map { Behov.fromJson(it.value()) }
+                            .filter { it.behovType() == behovType.name }
+                            .firstOrNull { aktørId == it["aktørId"] }
+
+                    behov != null
+                }
+
+        return behov!!
     }
 
     private fun assertBehov(virksomhetsnummer: String, aktørId: String, typer: List<String>) {
@@ -218,12 +264,13 @@ internal class PersonComponentTest {
                     val meldingerPåTopic = TestConsumer.records(behovTopic)
                     val behov = meldingerPåTopic
                             .map { Behov.fromJson(it.value()) }
-                            .filter { it.get<String>("aktørId").equals(aktørId) }
+                            .filter { aktørId == it["aktørId"] }
+                            .filter { virksomhetsnummer == it["organisasjonsnummer"] }
+                            .filter { it.behovType() in typer }
+                            .map(Behov::behovType)
+                            .distinct()
 
-                    assertEquals(typer.size, behov.size, "Antall meldinger på topic $behovTopic skulle vært ${typer.size}, men var ${meldingerPåTopic.count()}")
-                    assertTrue(behov.all { aktørId == it["aktørId"] })
-                    assertTrue(behov.all { virksomhetsnummer == it["organisasjonsnummer"] })
-                    assertTrue(behov.all { typer.contains(it.behovType()) })
+                    assertEquals(typer, behov)
                 }
     }
 
@@ -237,11 +284,14 @@ internal class PersonComponentTest {
                 }
     }
 
+    private fun sendKafkaMessage(topic: String, key: String, message: String) =
+            kafkaProducer.send(ProducerRecord(topic, key, message))
+
     /**
      * Trick Kafka into behaving synchronously by sending the message, and then confirming that it is read by the consumer group
      */
-    private fun synchronousSendKafkaMessage(topic: String, key: String, message: JsonNode) {
-        val metadata = kafkaProducer.send(ProducerRecord(topic, key, message))
+    private fun synchronousSendKafkaMessage(topic: String, key: String, message: String) {
+        val metadata = sendKafkaMessage(topic, key, message)
         kafkaProducer.flush()
         metadata.get().assertMessageIsConsumed()
     }

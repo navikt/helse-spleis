@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.SykdomshendelseDeserializer
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.hendelse.PersonHendelse
 import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
 import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
@@ -62,15 +61,15 @@ class Sakskompleks internal constructor(
         if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikkHendelse)
     }
 
-    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-        tilstand.håndterInngangsvilkår(this, inngangsvilkårHendelse)
+    internal fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
+        if (id.toString() == inngangsvilkårHendelse.sakskompleksId()) tilstand.håndterInngangsvilkår(this, inngangsvilkårHendelse)
     }
 
-    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
+    internal fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
         tilstand.håndterInntektshistorikk(this, inntektshistorikkHendelse)
     }
 
-    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+    internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
     }
 

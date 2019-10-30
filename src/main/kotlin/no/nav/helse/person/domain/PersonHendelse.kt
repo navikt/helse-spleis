@@ -1,4 +1,4 @@
-package no.nav.helse.hendelse
+package no.nav.helse.person.domain
 
 interface PersonHendelse {
     fun aktørId(): String

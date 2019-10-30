@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
 import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
@@ -209,30 +211,53 @@ internal object TestConstants {
                     mottattDato = LocalDateTime.now()
             )
 
+    fun responsFraSpole(perioder: List<SpolePeriode>) = mapOf<String, Any>(
+            "perioder" to perioder.map {
+                mapOf<String, Any>(
+                        "fom" to "${it.fom}",
+                        "tom" to "${it.tom}",
+                        "grad" to it.grad
+                )
+            }
+    )
+
+    fun sykepengehistorikk(
+            sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
+            organisasjonsnummer: String = "123546564",
+            aktørId: String = "1",
+            sakskompleksId: UUID = UUID.randomUUID()
+    ): Sykepengehistorikk {
+        val behov = Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "sakskompleksId" to sakskompleksId.toString(),
+                "aktørId" to aktørId
+        )).also {
+            it.løsBehov(responsFraSpole(
+                    perioder = listOf(
+                            SpolePeriode(
+                                    fom = sisteHistoriskeSykedag.minusMonths(1),
+                                    tom = sisteHistoriskeSykedag,
+                                    grad = "100"
+                            )
+                    )
+            ))
+        }
+        return Sykepengehistorikk(objectMapper.readTree(behov.toJson()))
+    }
+
     fun sykepengehistorikkHendelse(
             sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
-    ): SykepengehistorikkHendelse {
-        val historikk: Map<String, Any> = mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId.toString(),
-                "aktørId" to aktørId,
-                "@løsning" to mapOf<String, Any>(
-                        "perioder" to listOf(
-                                mapOf<String, Any>(
-                                        "fom" to "${sisteHistoriskeSykedag.minusMonths(1)}",
-                                        "tom" to "$sisteHistoriskeSykedag",
-                                        "grad" to "100"
-                                )
-                        )
-                )
-        )
-        return SykepengehistorikkHendelse(Sykepengehistorikk(objectMapper.valueToTree(historikk)))
-    }
+    ) = SykepengehistorikkHendelse(sykepengehistorikk(
+            sisteHistoriskeSykedag = sisteHistoriskeSykedag,
+            organisasjonsnummer = organisasjonsnummer,
+            aktørId = aktørId,
+            sakskompleksId = sakskompleksId
+    ))
 
-    fun inngangsvilkårHendelse() = InngangsvilkårHendelse()
+    fun inngangsvilkårHendelse() = InngangsvilkårHendelse(Behov.nyttBehov(BehovsTyper.Inngangsvilkår, emptyMap()))
 
     fun inntektshistorikkHendelse() = InntektshistorikkHendelse()
 
@@ -240,6 +265,10 @@ internal object TestConstants {
                                       utbetalingGodkjent: Boolean) =
             ManuellSaksbehandlingHendelse(ManuellSaksbehandling(sakskompleksId = sakskompleksId, utbetalingGodkjent = utbetalingGodkjent))
 }
+
+data class SpolePeriode(val fom: LocalDate,
+                        val tom: LocalDate,
+                        val grad: String)
 
 class Uke(ukenr: Long) {
     val mandag = LocalDate.of(2018, 1, 1)

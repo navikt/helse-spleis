@@ -1,7 +1,7 @@
 package no.nav.helse.saksbehandling
 
-import no.nav.helse.hendelse.PersonHendelse
 import no.nav.helse.hendelse.SakskompleksHendelse
+import no.nav.helse.person.domain.PersonHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag

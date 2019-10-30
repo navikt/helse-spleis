@@ -3,7 +3,7 @@ package no.nav.helse.søknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
-import no.nav.helse.hendelse.PersonHendelse
+import no.nav.helse.person.domain.PersonHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag

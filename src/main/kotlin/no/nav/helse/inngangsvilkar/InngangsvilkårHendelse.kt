@@ -1,14 +1,20 @@
 package no.nav.helse.inngangsvilkar
 
-import no.nav.helse.hendelse.PersonHendelse
+import no.nav.helse.behov.Behov
+import no.nav.helse.hendelse.SakskompleksHendelse
+import no.nav.helse.person.domain.PersonHendelse
 
-class InngangsvilkårHendelse: PersonHendelse {
+class InngangsvilkårHendelse(private val behov: Behov): PersonHendelse, SakskompleksHendelse {
 
     override fun aktørId(): String {
-        TODO("not implemented")
+        return behov["aktørId"]!!
     }
 
     override fun organisasjonsnummer(): String? {
-        TODO("not implemented")
+        return behov["organisasjonsnummer"]
+    }
+
+    override fun sakskompleksId(): String {
+        return behov["sakskompleksId"]!!
     }
 }

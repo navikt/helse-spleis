@@ -3,6 +3,7 @@ package no.nav.helse.person
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
+import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
@@ -26,7 +27,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) =
             try {
-                finnPerson(nySøknadHendelse.aktørId())
+                finnPerson(nySøknadHendelse)
                         .also { person ->
                             person.håndterNySøknad(nySøknadHendelse)
                         }
@@ -38,7 +39,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) =
             try {
-                finnPerson(sendtSøknadHendelse.aktørId())
+                finnPerson(sendtSøknadHendelse)
                         .also { person ->
                             person.håndterSendtSøknad(sendtSøknadHendelse)
                         }
@@ -50,7 +51,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) =
             try {
-                finnPerson(inntektsmeldingHendelse.aktørId()).also { person ->
+                finnPerson(inntektsmeldingHendelse).also { person ->
                     person.håndterInntektsmelding(inntektsmeldingHendelse)
                 }
             } catch (err: UtenforOmfangException) {
@@ -61,8 +62,18 @@ internal class PersonMediator(private val personRepository: PersonRepository,
 
     fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         try {
-            finnPerson(sykepengehistorikkHendelse.aktørId()).also { person ->
+            finnPerson(sykepengehistorikkHendelse).also { person ->
                 person.håndterSykepengehistorikk(sykepengehistorikkHendelse)
+            }
+        } catch (err: PersonskjemaForGammelt) {
+            sakskompleksProbe.forGammelSkjemaversjon(err)
+        }
+    }
+
+    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
+        try {
+            finnPerson(inngangsvilkårHendelse).also { person ->
+                person.håndterInngangsvilkår(inngangsvilkårHendelse)
             }
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)
@@ -79,8 +90,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         }
     }
 
-    private fun finnPerson(aktørId: String) =
-            (personRepository.hentPerson(aktørId) ?: Person(aktørId = aktørId)).also {
+    private fun finnPerson(personHendelse: PersonHendelse) =
+            (personRepository.hentPerson(personHendelse.aktørId()) ?: Person(aktørId = personHendelse.aktørId())).also {
                 it.addObserver(this)
                 it.addObserver(lagrePersonDao)
                 it.addObserver(sakskompleksProbe)
