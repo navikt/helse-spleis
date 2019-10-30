@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
@@ -43,7 +42,8 @@ internal class SøknadConsumer(
 
         sendtSøknad
                 .filter { _, søknad -> erSendtSøknad(søknad) }
-                .foreach { _, søknad -> personMediator.opprettOppgave(søknad) }
+                .mapValues { søknad -> Sykepengesøknad(søknad) }
+                .foreach { _, søknad -> personMediator.håndterGenerellSendtSøknad(søknad) }
 
         return builder
     }
