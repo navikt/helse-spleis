@@ -137,7 +137,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     }
 
-    internal fun memento() =
+    private fun memento() =
             Memento(objectMapper.writeValueAsString(jsonRepresentation()))
 
     private fun jsonRepresentation(): PersonJson {
