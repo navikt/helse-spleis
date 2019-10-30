@@ -3,6 +3,7 @@ package no.nav.helse.sakskompleks
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.SykdomshendelseType
+import no.nav.helse.behov.Behov
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.domain.PersonObserver
 import no.nav.helse.person.domain.PersonskjemaForGammelt
@@ -18,13 +19,14 @@ class SakskompleksProbe : PersonObserver {
     companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
 
-        val sakskompleksTotalsCounterName = "sakskompleks_totals"
+        val behovCounterName = "behov_totals"
         val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
         val tilstandCounterName = "sakskompleks_tilstander_totals"
         val personMementoSize = "personMementoSize"
 
 
-        private val sakskompleksCounter = Counter.build(sakskompleksTotalsCounterName, "Antall sakskompleks opprettet")
+        private val behovCounter = Counter.build(behovCounterName, "Antall behov opprettet")
+                .labelNames("behovType")
                 .register()
 
         private val dokumenterKobletTilSakCounter = Counter.build(dokumenterKobletTilSakCounterName, "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
@@ -39,6 +41,10 @@ class SakskompleksProbe : PersonObserver {
                 .quantile(0.75, 0.1)
                 .quantile(0.9, 0.01)
                 .quantile(0.99, 0.001).register()
+    }
+
+    override fun sakskompleksTrengerLøsning(event: Behov) {
+        behovCounter.labels(event.behovType()).inc()
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
