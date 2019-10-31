@@ -40,12 +40,12 @@ internal class BehovConsumer(
                 .filter { _, behov ->
                     behov.harLøsning()
                 }
-                .foreach(::håndterLøsning)
+                .foreach { _, behov -> håndterLøsning(behov) }
 
         return builder
     }
 
-    private fun håndterLøsning(key: String, løsning: Behov) {
+    private fun håndterLøsning(løsning: Behov) {
         when (løsning.behovType()) {
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
                 personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))

@@ -45,8 +45,6 @@ internal object TestConstants {
             id: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO,
             aktørId: String = UUID.randomUUID().toString().substring(0, 13),
-            fom: LocalDate = 10.september,
-            tom: LocalDate = 5.oktober,
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
             egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
@@ -93,8 +91,6 @@ internal object TestConstants {
     fun sendtSøknadHendelse(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
-            fom: LocalDate = 10.september,
-            tom: LocalDate = 5.oktober,
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
             egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
@@ -119,8 +115,6 @@ internal object TestConstants {
     ) = SendtSøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
-            fom = fom,
-            tom = tom,
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
             egenmeldinger = egenmeldinger,
@@ -133,8 +127,6 @@ internal object TestConstants {
     fun nySøknadHendelse(
             id: String = UUID.randomUUID().toString(),
             aktørId: String = UUID.randomUUID().toString(),
-            fom: LocalDate = 10.september,
-            tom: LocalDate = 5.oktober,
             arbeidGjenopptatt: LocalDate? = null,
             korrigerer: String? = null,
             egenmeldinger: List<PeriodeDTO> = listOf(PeriodeDTO(
@@ -159,8 +151,6 @@ internal object TestConstants {
     ) = NySøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
-            fom = fom,
-            tom = tom,
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
             egenmeldinger = egenmeldinger,

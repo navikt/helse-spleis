@@ -37,7 +37,7 @@ internal class SøknadConsumer(
                 .filter { _, søknad -> skalTaInnSøknad(søknad = søknad, søknadProbe = probe) }
                 .mapValues { søknad -> Sykepengesøknad(søknad) }
                 .peek { _, søknad -> probe.mottattSøknad(søknad) }
-                .foreach(::håndterSøknad)
+                .foreach { _, søknad -> håndterSøknad(søknad) }
 
         sendtSøknad
                 .filter { _, søknad -> erSendtSøknad(søknad) }
@@ -47,7 +47,7 @@ internal class SøknadConsumer(
         return builder
     }
 
-    private fun håndterSøknad(key: String, søknad: Sykepengesøknad) {
+    private fun håndterSøknad(søknad: Sykepengesøknad) {
         when (søknad.status) {
             "NY" -> personMediator.håndterNySøknad(NySøknadHendelse(søknad))
             "FREMTIDIG" -> personMediator.håndterNySøknad(NySøknadHendelse(søknad))

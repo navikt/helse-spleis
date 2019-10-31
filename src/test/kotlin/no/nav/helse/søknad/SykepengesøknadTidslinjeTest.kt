@@ -75,7 +75,7 @@ class SykepengesøknadTidslinjeTest {
         assertType(Arbeidsdag::class, tidslinje[Uke(1).fredag])
     }
 
-    inline fun assertType(expected: KClass<*>, actual: Any?) =
+    private fun assertType(expected: KClass<*>, actual: Any?) =
         assertEquals(expected, actual?.let { it::class })
 }
 

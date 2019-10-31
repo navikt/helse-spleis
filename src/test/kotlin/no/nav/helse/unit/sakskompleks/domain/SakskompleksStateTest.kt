@@ -340,8 +340,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val sakskompleks = beInKomplettTidslinje(
@@ -362,8 +362,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(fom = periodeFom, tom = periodeTom, søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val sakskompleks = beInKomplettTidslinje(

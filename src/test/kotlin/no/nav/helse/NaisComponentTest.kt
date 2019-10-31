@@ -28,9 +28,6 @@ class NaisComponentTest {
     @Test
     fun `should respond with metrics`() {
         testServer(environment = testEnv) {
-            val probe = SøknadProbe()
-            //probe.mottattSøknad(sendtSøknad())
-
             handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
                 assertEquals(HttpStatusCode.OK, responseStatusCode)
                 val response = responseBody.reader().use { it.readText() }

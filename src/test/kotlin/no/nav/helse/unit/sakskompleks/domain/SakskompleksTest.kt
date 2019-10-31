@@ -133,9 +133,9 @@ class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        sakskompleks.håndterNySøknad(nySøknadHendelse(fom = 1.juli, tom = 20.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+        sakskompleks.håndterNySøknad(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
 
-        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknadHendelse(fom = 21.juli, tom = 25.juli, søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
+        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
 
     }
 }
