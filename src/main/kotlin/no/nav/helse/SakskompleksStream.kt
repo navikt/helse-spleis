@@ -68,7 +68,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     val builder = StreamsBuilder()
 
-    SøknadConsumer(builder, søknadTopic, opprettGosysOppgaveTopic, personMediator)
+    SøknadConsumer(builder, søknadTopic, personMediator)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
     BehovConsumer(builder, behovTopic, personMediator)
 

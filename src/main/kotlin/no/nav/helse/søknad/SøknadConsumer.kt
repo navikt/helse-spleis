@@ -14,7 +14,6 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class SøknadConsumer(
         streamsBuilder: StreamsBuilder,
         private val søknadKafkaTopic: String,
-        private val opprettGosysOppgaveTopic: String,
         private val personMediator: PersonMediator,
         private val probe: SøknadProbe = SøknadProbe()
 ) {
