@@ -29,19 +29,21 @@ class SykepengehistorikkHendelse private constructor(hendelseId: String, private
     }
 
     fun påvirkerSakensMaksdato(sakensTidslinje: Sykdomstidslinje) =
-        sykdomstidslinje().antallDagerMellom(sakensTidslinje) <= seksMånederIDager
+        sykdomstidslinje()?.let {
+            it.antallDagerMellom(sakensTidslinje) <= seksMånederIDager
+        }?:false
 
     override fun organisasjonsnummer(): String? =
         sykepengehistorikk.organisasjonsnummer
 
-    override fun sykdomstidslinje() =
-        sykepengehistorikk.perioder.fold( Sykdomstidslinje.tomTidslinje()) { aggregate, periode ->
-            aggregate + Sykdomstidslinje.sykedager(
-                periode.fom,
-                periode.tom,
-                this
-            )
-        }
+    override fun sykdomstidslinje() : Sykdomstidslinje? {
+        return sykepengehistorikk.perioder.takeIf { it.isNotEmpty() }?.map {
+            Sykdomstidslinje.sykedager(
+                    it.fom,
+                    it.tom,
+                    this)
+        }?.reduce(Sykdomstidslinje::plus)
+    }
 
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType {
         TODO("not implemented")

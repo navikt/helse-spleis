@@ -74,7 +74,9 @@ class Sakskompleks internal constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+            hendelse.sykdomstidslinje()?.let {
+                this.sykdomstidslinje?.overlapperMed(it) ?: true
+            }?:false
 
     private fun setTilstand(event: PersonHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -147,20 +149,24 @@ class Sakskompleks internal constructor(
 
     }
 
-    private fun slåSammenSykdomstidslinje(hendelse: SykdomstidslinjeHendelse): Boolean {
-        val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje())
-                ?: hendelse.sykdomstidslinje()
-        return !tidslinje.erUtenforOmfang().also { utenforOmfang ->
-            if (!utenforOmfang) {
-                sykdomstidslinje = tidslinje
-            }
+    private fun slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(hendelse: SykdomstidslinjeHendelse): Boolean {
+        val hendelseTidslinje = hendelse.sykdomstidslinje()
+        val tidslinje = when {
+            hendelseTidslinje != null -> this.sykdomstidslinje?.plus(hendelseTidslinje)
+                    ?: hendelseTidslinje
+            else -> this.sykdomstidslinje
         }
+        val innenforOmfang = tidslinje?.erUtenforOmfang()?.not()?:false
+        if (innenforOmfang) {
+            sykdomstidslinje = tidslinje
+        }
+        return innenforOmfang
     }
 
     private object StartTilstand : Sakskomplekstilstand {
 
         override fun håndterNySøknad(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinje(nySøknadHendelse)) {
+            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(nySøknadHendelse)) {
                 sakskompleks.setTilstand(nySøknadHendelse, NySøknadMottattTilstand)
             } else {
                 sakskompleks.setTilstand(nySøknadHendelse, MåBehandlesIInfotrygdTilstand)
@@ -174,7 +180,7 @@ class Sakskompleks internal constructor(
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse)) {
+            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(sendtSøknadHendelse)) {
                 sakskompleks.setTilstand(sendtSøknadHendelse, SendtSøknadMottattTilstand)
             } else {
                 sakskompleks.setTilstand(sendtSøknadHendelse, MåBehandlesIInfotrygdTilstand)
@@ -182,7 +188,7 @@ class Sakskompleks internal constructor(
         }
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse)) {
+            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(inntektsmeldingHendelse)) {
                 sakskompleks.setTilstand(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
             } else {
                 sakskompleks.setTilstand(inntektsmeldingHendelse, MåBehandlesIInfotrygdTilstand)
@@ -196,7 +202,7 @@ class Sakskompleks internal constructor(
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinje(inntektsmeldingHendelse)) {
+            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(inntektsmeldingHendelse)) {
                 sakskompleks.setTilstand(inntektsmeldingHendelse, KomplettSakTilstand)
             } else {
                 sakskompleks.setTilstand(inntektsmeldingHendelse, MåBehandlesIInfotrygdTilstand)
@@ -210,7 +216,7 @@ class Sakskompleks internal constructor(
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinje(sendtSøknadHendelse)) {
+            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(sendtSøknadHendelse)) {
                 sakskompleks.setTilstand(sendtSøknadHendelse, KomplettSakTilstand)
             } else {
                 sakskompleks.setTilstand(sendtSøknadHendelse, MåBehandlesIInfotrygdTilstand)
