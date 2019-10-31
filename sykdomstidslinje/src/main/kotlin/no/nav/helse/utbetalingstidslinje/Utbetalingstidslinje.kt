@@ -11,7 +11,7 @@ import java.math.BigDecimal
 
 fun Syketilfelle.tilUtbetalingstidslinjer(): List<Utbetalingstidslinje> {
     val utbetalingsdager = arbeidsgiverperiode.tilUtbetalingsdager(true) +
-            dagerEtterArbeidsgiverperiode.tilUtbetalingsdager(false)
+            (dagerEtterArbeidsgiverperiode?.tilUtbetalingsdager(false) ?: emptyList())
 
     return utbetalingsdager.filter { it.dag is Sykedag || it.dag.erHelg() || it.dag is Feriedag }
         .fold(mutableListOf(), splitUtbetalingstilfeller())
@@ -20,8 +20,8 @@ fun Syketilfelle.tilUtbetalingstidslinjer(): List<Utbetalingstidslinje> {
             utbetalingsdager.filterNot { it.dag.erHelg() || it.dag is Feriedag }) }
 }
 
-private fun Sykdomstidslinje?.tilUtbetalingsdager(arbeidsgiverperiode: Boolean) =
-    this?.flatten()?.map { Utbetalingsdag(it, arbeidsgiverperiode) } ?: emptyList()
+private fun Sykdomstidslinje.tilUtbetalingsdager(arbeidsgiverperiode: Boolean) =
+    this.flatten().map { Utbetalingsdag(it, arbeidsgiverperiode) }
 
 private fun splitUtbetalingstilfeller(): (MutableList<MutableList<Utbetalingsdag>>, Utbetalingsdag) -> MutableList<MutableList<Utbetalingsdag>> {
     return { utbetalingstilfeller, utbetalingsdag ->
