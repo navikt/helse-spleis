@@ -4,6 +4,7 @@ import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -84,5 +85,15 @@ class SykdomstidslinjeIteratorTest {
 
         assertEquals(Uke(4).fredag, grupper[1].tidslinje!!.startdato())
         assertEquals(Uke(5).fredag, grupper[1].tidslinje!!.sluttdato())
+    }
+
+    @Test
+    fun `ingen dager etter arbeidsgiverperiode oppretter ikke en tom tidslinje`() {
+        val spysyke = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, rapporteringshendelse)
+
+        val syketilfeller = spysyke.syketilfeller()
+
+        assertEquals(1, syketilfeller.size, "Forventer et syketilfelle")
+        assertNull(syketilfeller[0].dagerEtterArbeidsgiverperiode, "Forventer at vi ikke oppretter tidslinje når vi ikke har dager etter arbeidsgiverperioden")
     }
 }

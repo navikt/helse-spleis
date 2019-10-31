@@ -8,6 +8,10 @@ class CompositeSykdomstidslinje internal constructor(
     tidslinjer: List<Sykdomstidslinje>
 ) : Sykdomstidslinje() {
 
+    init {
+        assert(tidslinjer.isNotEmpty()) { "En tom tidslinje skal representeres med null og ikke en tom liste" }
+    }
+
     private val tidslinje = tidslinjer.flatMap { it.flatten() }
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
@@ -22,7 +26,6 @@ class CompositeSykdomstidslinje internal constructor(
 
     override fun dag(dato: LocalDate) =
         tidslinje.find { it.dagen == dato }
-
 
     override fun flatten() = tidslinje
 
