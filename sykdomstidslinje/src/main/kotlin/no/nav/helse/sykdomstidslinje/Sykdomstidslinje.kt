@@ -115,8 +115,6 @@ abstract class Sykdomstidslinje {
 
     companion object {
 
-        fun tomTidslinje(): Sykdomstidslinje =
-            CompositeSykdomstidslinje(emptyList())
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
             if (erArbeidsdag(gjelder)) Sykedag(
                 gjelder,
