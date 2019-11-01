@@ -20,4 +20,16 @@ internal class UtbetalingsTest {
         assertEquals(0, betalingslinjer.size)
     }
 
+    @Test
+    fun `en sykdomstidslinje over arbeidsgiverperioden gir 1 betalingslinje`() {
+        val sykdomstidslinje = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).fredag, sendtSykmelding)
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(1200.toBigDecimal())
+
+        assertEquals(1, betalingslinjer.size)
+
+        val betalingslinje = betalingslinjer.first()
+        assertEquals(Uke(3).onsdag, betalingslinje.fom())
+        assertEquals(Uke(3).fredag, betalingslinje.tom())
+        assertEquals(1200.toBigDecimal(), betalingslinje.dagsats())
+    }
 }
