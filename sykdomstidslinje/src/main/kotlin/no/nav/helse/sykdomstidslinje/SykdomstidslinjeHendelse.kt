@@ -17,7 +17,7 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
     override fun compareTo(other: SykdomstidslinjeHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
 
     abstract fun rapportertdato(): LocalDateTime
-    abstract fun sykdomstidslinje(): Sykdomstidslinje?
+    abstract fun sykdomstidslinje(): Sykdomstidslinje
 
     abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
 
@@ -27,10 +27,12 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
         ))
     }
 
-    override fun equals(other: Any?) =
-        other is SykdomstidslinjeHendelse && other.hendelseId == this.hendelseId
-
     interface Deserializer{
         fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse
     }
+
+    override fun equals(other: Any?) =
+        other is SykdomstidslinjeHendelse && other.hendelseId == this.hendelseId
+
+    override fun hashCode() = hendelseId.hashCode()
 }
