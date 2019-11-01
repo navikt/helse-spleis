@@ -3,14 +3,13 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.math.BigDecimal
 
-private val ARBEIDSGIVERPERIODE = 16
-
 internal class SyketilfelleSplitter(private val dagsats: BigDecimal) : SykdomstidslinjeVisitor {
 
     private var state: BetalingsState = Arbeidsgiverperiode()
     private val betalingslinjer = mutableListOf<Betalingslinje>()
 
     fun results(): List<Betalingslinje> {
+        require(state != Ugyldig)
         return betalingslinjer.toList()
     }
 
@@ -76,10 +75,34 @@ internal class SyketilfelleSplitter(private val dagsats: BigDecimal) : Sykdomsti
         }
     }
 
-    private class InitialStateBetaling : BetalingsState() {
-        private var ikkeSykedager = 0
+    private class InitialStateBetaling(private var ikkeSykedager:Int = 0) : BetalingsState() {
+        override fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) =
+            opprettBetalingslinje(sykedag, splitter)
 
-        override fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) {
+        override fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) =
+            opprettBetalingslinje(egenmeldingsdag, splitter)
+
+        override fun visitSykHelgedag(splitter: SyketilfelleSplitter, sykHelgedag: SykHelgedag) =
+            opprettBetalingslinje(sykHelgedag, splitter)
+
+        override fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) {
+            tellIkkeSykedag(splitter)
+        }
+
+        override fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) {
+            tellIkkeSykedag(splitter)
+        }
+
+        override fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) {
+            tellIkkeSykedag(splitter)
+        }
+
+        private fun tellIkkeSykedag(splitter: SyketilfelleSplitter) {
+            ikkeSykedager += 1
+            if (ikkeSykedager > nyttSyketilfelleGrense) splitter.state(Ugyldig)
+        }
+
+        private fun opprettBetalingslinje(sykedag: Dag, splitter: SyketilfelleSplitter) {
             Betalingslinje(sykedag.dagen, splitter.dagsats).apply { splitter.betalingslinjer.add(this) }
             splitter.state(SykBetaling)
         }
@@ -91,15 +114,15 @@ internal class SyketilfelleSplitter(private val dagsats: BigDecimal) : Sykdomsti
         }
 
         override fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) {
-            splitter.state(InitialStateBetaling())
+            splitter.state(InitialStateBetaling(1))
         }
 
         override fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) {
-            splitter.state(InitialStateBetaling())
+            splitter.state(InitialStateBetaling(1))
         }
 
         override fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) {
-            splitter.state(InitialStateBetaling())
+            splitter.state(InitialStateBetaling(1))
         }
 
         override fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) {

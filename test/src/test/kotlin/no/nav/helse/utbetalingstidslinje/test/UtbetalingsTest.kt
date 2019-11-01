@@ -5,6 +5,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingsTest {
 
@@ -36,9 +37,8 @@ internal class UtbetalingsTest {
     @Test
     fun `opphold i sykedager etter arbeidsgiverperioden gir flere betalingslinjer`() {
         val førsteSykdom = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).fredag, sendtSykmelding)
-        val arbeidsdager = Sykdomstidslinje.ikkeSykedager(Uke(4).mandag, Uke(4).fredag, sendtSykmelding)
         val andreSykdom = Sykdomstidslinje.sykedager(Uke(5).mandag, Uke(5).fredag, sendtSykmelding)
-        val betalingslinjer = (førsteSykdom + arbeidsdager + andreSykdom).betalingslinjer(1200.toBigDecimal())
+        val betalingslinjer = (førsteSykdom + andreSykdom).betalingslinjer(1200.toBigDecimal())
 
         assertEquals(2, betalingslinjer.size)
 
@@ -55,6 +55,8 @@ internal class UtbetalingsTest {
 
     @Test
     fun `opphold i sykedager over 16 dager etter arbeidsgiverperioden blir avvist`() {
-
+        val førsteSykdom = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(3).fredag, sendtSykmelding)
+        val andreSykdom = Sykdomstidslinje.sykedager(Uke(8).mandag, Uke(8).fredag, sendtSykmelding)
+        assertThrows<Exception> { (førsteSykdom + andreSykdom).betalingslinjer(1200.toBigDecimal()) }
     }
 }
