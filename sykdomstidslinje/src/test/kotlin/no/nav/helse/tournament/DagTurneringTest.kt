@@ -58,16 +58,12 @@ class DagTurneringTest {
 
         val tidslinje = nySøknad + (sendtSøknadSykedager + sendtSøknadArbeidsdager)
         assertTrue(
-            tidslinje[Uke(1).torsdag] is Arbeidsdag,
-            "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad"
-        )
-        assertTrue(
             tidslinje[Uke(1).onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad"
         )
-        assertEquals(
-            Uke(1).onsdag, tidslinje.syketilfeller().first().tidslinje!!.sluttdato(),
-            "Siste arbeidsdag er onsdag siden personen var tilbake på jobb torsdag"
+        assertTrue(
+            tidslinje[Uke(1).torsdag] is Arbeidsdag,
+            "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad"
         )
     }
 }

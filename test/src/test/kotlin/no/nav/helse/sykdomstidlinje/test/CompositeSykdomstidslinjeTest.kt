@@ -64,12 +64,4 @@ internal class CompositeSykdomstidslinjeTest {
         val permisjonsdag = Sykdomstidslinje.permisjonsdag(Uke(1).mandag, tidspunktRapportert)
         assertTrue(permisjonsdag.erUtenforOmfang())
     }
-
-    @Test
-    internal fun `tidslinje flere enn ett syketilfelle er utenfor omfang`() {
-        val sykedag1 = Sykdomstidslinje.sykedag(Uke(1).mandag, tidspunktRapportert)
-        val sykedag2 = Sykdomstidslinje.sykedag(Uke(4).mandag, tidspunktRapportert)
-
-        assertTrue(sykedag1.plus(sykedag2).erUtenforOmfang())
-    }
 }

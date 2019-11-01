@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
+import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -70,7 +71,14 @@ abstract class Sykdomstidslinje {
 
     fun erUtenforOmfang(): Boolean {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
-                || syketilfeller().size != 1
+
+    }
+
+
+    fun betalingslinjer(dagsats: BigDecimal): List<Betalingslinje> {
+        val builder = SyketilfelleSplitter(dagsats)
+        this.accept(builder)
+        return builder.results()
     }
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
@@ -88,6 +96,7 @@ abstract class Sykdomstidslinje {
     private fun erDelAv(other: Sykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
+    //TODO: Duplikat
     private fun inneholder(other: Sykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
@@ -102,15 +111,6 @@ abstract class Sykdomstidslinje {
             .dropWhile { it.antallSykedagerHvorViTellerMedHelg() < 1 }
             .dropLastWhile { it.antallSykedagerHvorViTellerMedHelg() < 1 }
         return CompositeSykdomstidslinje(days)
-    }
-
-    fun syketilfeller(): List<Syketilfelle> {
-        check(flatten().none { it::class == Permisjonsdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med permisjonsdager." }
-        check(flatten().none { it::class == Ubestemtdag::class }) { "Syketilfeller kan ikke beregnes på sykdomstidslinjer med ubestemte dager." }
-        val visitor = SyketilfelleSplitter()
-        this.accept(visitor)
-
-        return visitor.results()
     }
 
     companion object {
