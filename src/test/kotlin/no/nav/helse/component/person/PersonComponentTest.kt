@@ -1,11 +1,10 @@
 package no.nav.helse.component.person
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -25,6 +24,7 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
+import no.nav.helse.component.JwtStub
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.person.domain.Person
 import no.nav.helse.person.personPath
@@ -100,7 +100,13 @@ internal class PersonComponentTest {
                 "KAFKA_USERNAME" to username,
                 "KAFKA_PASSWORD" to password,
                 "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
-                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres"),
+                "OIDC_CONFIG_URL" to TODO,
+                "CLIENT_ID" to "el_cliento",
+                "CLIENT_SECRET" to "el_secreto",
+                "REQUIRED_GROUP" to "mygroup",
+                "ISSUER" to "test issuer"
+
             )
         }
 
@@ -261,20 +267,20 @@ internal class PersonComponentTest {
 
     @Test
     fun `gitt en ny sak, så skal den kunne hentes ut på personen`() {
-//        val jwkStub = JwtStub("test issuer", embeddedServer.baseUrl())
-//        val token = jwkStub.createTokenFor("mygroup")
+        val jwkStub = JwtStub("test issuer", embeddedServer.environment.rootPath)
+        val token = jwkStub.createTokenFor("mygroup")
         val enAktørId = "87654321962"
         val virksomhetsnummer = "123456789"
 
-//        stubFor(jwkStub.stubbedJwkProvider())
-//        stubFor(jwkStub.stubbedConfigProvider())
+        stubFor(jwkStub.stubbedJwkProvider())
+        stubFor(jwkStub.stubbedConfigProvider())
 
         sendNySøknad(enAktørId, virksomhetsnummer)
 
         embeddedServer.handleRequest(HttpMethod.Get, personPath + enAktørId,
             builder = {
                 headersOf(HttpHeaders.Accept to listOf(ContentType.Application.Json.toString()),
-//                HttpHeaders.Authorization to "Bearer $token",
+                    HttpHeaders.Authorization to listOf("Bearer $token"),
                     HttpHeaders.Origin to listOf("http://localhost"))
             },
             test = {

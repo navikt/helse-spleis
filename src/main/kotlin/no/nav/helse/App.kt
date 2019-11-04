@@ -11,6 +11,13 @@ import no.nav.helse.nais.nais
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
+const val oidcConfigUrl = "oidcConfigUrl"
+const val clientId = "clientId"
+const val clientSecret = "clientSecret"
+const val issuer = "issuer"
+const val requiredGroup = "requiredGroup"
+val ktorApplicationId = "ktor.application.id"
+
 @KtorExperimentalAPI
 fun createConfigFromEnvironment(env: Map<String, String>) =
     MapApplicationConfig().apply {
@@ -44,6 +51,11 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
                 } ?: ""))
 
         env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
+
+        put(ktorApplicationId, env.getOrDefault("KTOR_APPLICATION_ID", "spleis-v1"))
+        env["OIDC_CONFIG_URL"]?.let {put(oidcConfigUrl, it)}
+        env["CLIENT_ID"]?.let {put(clientId, it)}
+        env["REQUIRED_GROUP"]?.let {put(requiredGroup, it)}
     }
 
 @KtorExperimentalAPI

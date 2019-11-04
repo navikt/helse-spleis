@@ -7,7 +7,10 @@ val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kotliqueryVersion = "1.3.0"
+val fuelVersion = "2.0.1"
+val arrowVersion = "0.9.0"
 val junitJupiterVersion = "5.4.0"
+val wireMockVersion = "2.23.2"
 val mockkVersion = "1.9.3"
 val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
@@ -46,6 +49,13 @@ dependencies {
 
     implementation("no.nav.helse:sykdomstidslinje:1.e033b68")
 
+    implementation("com.github.kittinunf.fuel:fuel-coroutines:$fuelVersion")
+    implementation("io.arrow-kt:arrow-core-data:$arrowVersion")
+    implementation("org.json:json:20190722")
+    implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
+        exclude(group = "junit")
+    }
+
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
     testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
 
@@ -57,6 +67,9 @@ dependencies {
     testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
+        exclude(group = "junit")
+    }
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
@@ -67,6 +80,7 @@ val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
+    jcenter()
     mavenCentral()
     maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
