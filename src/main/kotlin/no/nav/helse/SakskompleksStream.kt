@@ -5,10 +5,10 @@ import io.ktor.application.Application
 import io.ktor.application.ApplicationStarted
 import io.ktor.application.ApplicationStopping
 import io.ktor.application.log
+import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
@@ -17,6 +17,7 @@ import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
+import no.nav.helse.person.person
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -30,7 +31,7 @@ import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.time.Duration
-import java.util.Properties
+import java.util.*
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
         HikariConfig().apply {
@@ -65,6 +66,10 @@ fun Application.sakskompleksApplication(): KafkaStreams {
             lagrePersonDao = LagrePersonDao(dataSource),
             behovProducer = BehovProducer(behovTopic, producer),
             gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
+
+    routing {
+        person(personMediator)
+    }
 
     val builder = StreamsBuilder()
 

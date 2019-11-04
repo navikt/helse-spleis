@@ -5,6 +5,11 @@ import no.nav.helse.person.domain.Person
 import no.nav.helse.person.domain.PersonObserver
 
 internal class HashmapPersonRepository : PersonRepository, PersonObserver {
+
+    override fun hentPersonJson(aktørId: String): String? {
+        return map[aktørId]?.last()
+    }
+
     private val map: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {

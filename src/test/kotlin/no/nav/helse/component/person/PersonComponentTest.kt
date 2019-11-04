@@ -1,5 +1,7 @@
 package no.nav.helse.component.person
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -7,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.http.*
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -23,6 +26,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
+import no.nav.helse.person.domain.Person
+import no.nav.helse.person.personPath
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
@@ -58,8 +63,8 @@ internal class PersonComponentTest {
     private companion object {
 
         private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private const val username = "srvkafkaclient"
         private const val password = "kafkaclient"
@@ -70,12 +75,12 @@ internal class PersonComponentTest {
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
-                autoStart = false,
-                noOfBrokers = 1,
-                topicInfos = topicInfos,
-                withSchemaRegistry = false,
-                withSecurity = false,
-                topicNames = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
+            autoStart = false,
+            noOfBrokers = 1,
+            topicInfos = topicInfos,
+            withSchemaRegistry = false,
+            withSecurity = false,
+            topicNames = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
         )
 
         private lateinit var adminClient: AdminClient
@@ -90,26 +95,26 @@ internal class PersonComponentTest {
 
         private fun applicationConfig(): Map<String, String> {
             return mapOf(
-                    "KAFKA_APP_ID" to kafkaApplicationId,
-                    "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
-                    "KAFKA_USERNAME" to username,
-                    "KAFKA_PASSWORD" to password,
-                    "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
-                    "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
+                "KAFKA_APP_ID" to kafkaApplicationId,
+                "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
+                "KAFKA_USERNAME" to username,
+                "KAFKA_PASSWORD" to password,
+                "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
+                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres")
             )
         }
 
         private fun producerProperties() =
-                Properties().apply {
-                    put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
-                    put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
-                    // Make sure our producer waits until the message is received by Kafka before returning. This is to make sure the tests can send messages in a specific order
-                    put(ACKS_CONFIG, "all")
-                    put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
-                    put(LINGER_MS_CONFIG, "0")
-                    put(RETRIES_CONFIG, "0")
-                    put(SASL_MECHANISM, "PLAIN")
-                }
+            Properties().apply {
+                put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
+                put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
+                // Make sure our producer waits until the message is received by Kafka before returning. This is to make sure the tests can send messages in a specific order
+                put(ACKS_CONFIG, "all")
+                put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+                put(LINGER_MS_CONFIG, "0")
+                put(RETRIES_CONFIG, "0")
+                put(SASL_MECHANISM, "PLAIN")
+            }
 
         private fun consumerProperties(): MutableMap<String, Any>? {
             return HashMap<String, Any>().apply {
@@ -134,7 +139,7 @@ internal class PersonComponentTest {
             kafkaProducer = KafkaProducer(producerProperties(), StringSerializer(), StringSerializer())
 
             embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig()))
-                    .start(wait = false)
+                .start(wait = false)
         }
 
         @AfterAll
@@ -202,9 +207,9 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
         val sykehistorikk = listOf(SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
+            fom = søknad.fom!!.minusMonths(8),
+            tom = søknad.fom!!.minusMonths(7),
+            grad = "100"
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
         sendInngangsvilkårløsning(aktørID)
@@ -222,9 +227,9 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
         val sykehistorikk = listOf(SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
+            fom = søknad.fom!!.minusMonths(8),
+            tom = søknad.fom!!.minusMonths(7),
+            grad = "100"
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
         sendInngangsvilkårløsning(aktørID)
@@ -243,9 +248,9 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
         val sykehistorikk = listOf(SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
+            fom = søknad.fom!!.minusMonths(8),
+            tom = søknad.fom!!.minusMonths(7),
+            grad = "100"
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
         sendInngangsvilkårløsning(aktørID)
@@ -254,10 +259,37 @@ internal class PersonComponentTest {
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
     }
 
+    @Test
+    fun `gitt en ny sak, så skal den kunne hentes ut på personen`() {
+//        val jwkStub = JwtStub("test issuer", embeddedServer.baseUrl())
+//        val token = jwkStub.createTokenFor("mygroup")
+        val enAktørId = "87654321962"
+        val virksomhetsnummer = "123456789"
+
+//        stubFor(jwkStub.stubbedJwkProvider())
+//        stubFor(jwkStub.stubbedConfigProvider())
+
+        sendNySøknad(enAktørId, virksomhetsnummer)
+
+        embeddedServer.handleRequest(HttpMethod.Get, personPath + enAktørId,
+            builder = {
+                headersOf(HttpHeaders.Accept to listOf(ContentType.Application.Json.toString()),
+//                HttpHeaders.Authorization to "Bearer $token",
+                    HttpHeaders.Origin to listOf("http://localhost"))
+            },
+            test = {
+                assertEquals(HttpStatusCode.OK.value, responseCode)
+                val person = Person.fromJson(responseBody)
+                assertEquals(enAktørId, person.aktørId)
+            })
+    }
+
+//fun `gitt en sak sendt til godkjenning, så skal hele saken kunne hentes ut`() {
+
     private fun sendInntektshistorikkløsning(aktørId: String, avvikSisteTreMåneder: Boolean) {
         val behov = ventPåBehov(aktørId, Inntektshistorikk)
         behov.løsBehov(mapOf(
-                "avvikSisteTreMåneder" to avvikSisteTreMåneder
+            "avvikSisteTreMåneder" to avvikSisteTreMåneder
         ))
         sendBehov(behov)
     }
@@ -271,7 +303,7 @@ internal class PersonComponentTest {
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
         val behov = ventPåBehov(aktørId, Sykepengehistorikk)
         behov.løsBehov(TestConstants.responsFraSpole(
-                perioder = perioder
+            perioder = perioder
         ))
         sendBehov(behov)
     }
@@ -300,48 +332,48 @@ internal class PersonComponentTest {
         var behov: Behov? = null
 
         await()
-                .atMost(5, SECONDS)
-                .until {
-                    behov = TestConsumer.records(behovTopic)
-                            .map { Behov.fromJson(it.value()) }
-                            .filter { it.behovType() == behovType.name }
-                            .firstOrNull { aktørId == it["aktørId"] }
+            .atMost(5, SECONDS)
+            .until {
+                behov = TestConsumer.records(behovTopic)
+                    .map { Behov.fromJson(it.value()) }
+                    .filter { it.behovType() == behovType.name }
+                    .firstOrNull { aktørId == it["aktørId"] }
 
-                    behov != null
-                }
+                behov != null
+            }
 
         return behov!!
     }
 
     private fun assertBehov(virksomhetsnummer: String, aktørId: String, typer: List<String>) {
         await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    val meldingerPåTopic = TestConsumer.records(behovTopic)
-                    val behov = meldingerPåTopic
-                            .map { Behov.fromJson(it.value()) }
-                            .filter { aktørId == it["aktørId"] }
-                            .filter { virksomhetsnummer == it["organisasjonsnummer"] }
-                            .filter { it.behovType() in typer }
-                            .map(Behov::behovType)
-                            .distinct()
+            .atMost(5, SECONDS)
+            .untilAsserted {
+                val meldingerPåTopic = TestConsumer.records(behovTopic)
+                val behov = meldingerPåTopic
+                    .map { Behov.fromJson(it.value()) }
+                    .filter { aktørId == it["aktørId"] }
+                    .filter { virksomhetsnummer == it["organisasjonsnummer"] }
+                    .filter { it.behovType() in typer }
+                    .map(Behov::behovType)
+                    .distinct()
 
-                    assertEquals(typer, behov)
-                }
+                assertEquals(typer, behov)
+            }
     }
 
     private fun assertOpprettGosysOppgave(aktørId: String) {
         await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    val opprettGosysOppgaveList = TestConsumer.records(opprettGosysOppgaveTopic)
-                            .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
-                    assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
-                }
+            .atMost(5, SECONDS)
+            .untilAsserted {
+                val opprettGosysOppgaveList = TestConsumer.records(opprettGosysOppgaveTopic)
+                    .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
+                assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
+            }
     }
 
     private fun sendKafkaMessage(topic: String, key: String, message: String) =
-            kafkaProducer.send(ProducerRecord(topic, key, message))
+        kafkaProducer.send(ProducerRecord(topic, key, message))
 
     /**
      * Trick Kafka into behaving synchronously by sending the message, and then confirming that it is read by the consumer group
@@ -357,15 +389,15 @@ internal class PersonComponentTest {
      */
     private fun RecordMetadata.assertMessageIsConsumed(recordMetadata: RecordMetadata = this) {
         await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    val offsetAndMetadataMap = adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
-                    val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
-                    val currentPositionOfSentMessage = recordMetadata.offset()
-                    val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
-                            ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
-                    assertEquals(currentConsumerGroupPosition, currentPositionOfSentMessage)
-                }
+            .atMost(5, SECONDS)
+            .untilAsserted {
+                val offsetAndMetadataMap = adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
+                val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
+                val currentPositionOfSentMessage = recordMetadata.offset()
+                val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
+                    ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
+                assertEquals(currentConsumerGroupPosition, currentPositionOfSentMessage)
+            }
     }
 
     private object TestConsumer {
@@ -382,7 +414,7 @@ internal class PersonComponentTest {
         fun records(topic: String) = records().filter { it.topic() == topic }
 
         fun records() =
-                records.also { it.addAll(kafkaConsumer.poll(ofMillis(0))) }
+            records.also { it.addAll(kafkaConsumer.poll(ofMillis(0))) }
 
         fun close() {
             kafkaConsumer.unsubscribe()
