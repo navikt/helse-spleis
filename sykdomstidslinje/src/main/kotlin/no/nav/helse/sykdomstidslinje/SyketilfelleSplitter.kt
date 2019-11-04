@@ -2,140 +2,254 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.math.BigDecimal
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 internal class SyketilfelleSplitter(private val dagsats: BigDecimal) : SykdomstidslinjeVisitor {
 
-    private var state: BetalingsState = Arbeidsgiverperiode()
+    private var state: BetalingsState = ArbeidsgiverperiodeInitiell
     private val betalingslinjer = mutableListOf<Betalingslinje>()
+
+    private var sykedager = 0
+    private var ikkeSykedager = 0
+    private var ubestemteDager = 0
 
     fun results(): List<Betalingslinje> {
         require(state != Ugyldig)
         return betalingslinjer.toList()
     }
 
-    private fun state(state:BetalingsState) {
-        this.state.leaving()
+    private fun state(state: BetalingsState) {
+        this.state.leaving(this)
         this.state = state
-        this.state.entering()
+        this.state.entering(this)
     }
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = state.visitArbeidsdag(this, arbeidsdag)
-    override fun visitImplisittDag(implisittDag: ImplisittDag) = state.visitImplisittDag(this, implisittDag)
-    override fun visitFeriedag(feriedag: Feriedag) = state.visitFeriedag(this, feriedag)
-    override fun visitSykedag(sykedag: Sykedag) = state.visitSykedag(this, sykedag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) =
-        state.visitEgenmeldingsdag(this, egenmeldingsdag)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = arbeidsdag(arbeidsdag.dagen)
+    override fun visitImplisittDag(implisittDag: ImplisittDag) = if (implisittDag.dagen.isWeekend()) state.ubestemt(this, implisittDag.dagen) else arbeidsdag(implisittDag.dagen)
 
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = state.visitSykHelgedag(this, sykHelgedag)
-    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state.visitUtenlandsdag(this, utenlandsdag)
-    override fun visitUbestemt(ubestemtdag: Ubestemtdag) = state.visitUbestemt(this, ubestemtdag)
-    override fun visitStudiedag(studiedag: Studiedag) = state.visitStudiedag(this, studiedag)
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = state.visitPermisjonsdag(this, permisjonsdag)
+    override fun visitFeriedag(feriedag: Feriedag) = state.ubestemt(this, feriedag.dagen)
+    override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = sykedag(egenmeldingsdag.dagen)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykedag(sykHelgedag.dagen)
+
+    private fun arbeidsdag(dagen: LocalDate) {
+        if (ikkeSykedager < 16) state.færreEnn16arbeidsdager(this, dagen) else state.merEnn15arbeidsdager(this, dagen)
+    }
+
+    private fun sykedag(dagen: LocalDate) {
+        if (sykedager < 16) state.færreEnn16Sykedager(this, dagen) else state.merEnn15Sykedager(this, dagen)
+    }
+
+    private fun opprettBetalingslinje(dagen: LocalDate) {
+        Betalingslinje(dagen, dagsats).apply { betalingslinjer.add(this) }
+    }
+
+    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
+        state = Ugyldig
+    }
+
+    override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
+        state = Ugyldig
+    }
+
+    override fun visitStudiedag(studiedag: Studiedag) {
+        state = Ugyldig
+    }
+
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) {
+        state = Ugyldig
+    }
 
     abstract class BetalingsState {
         internal val nyttSyketilfelleGrense = 16
 
-        open fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) {}
-        open fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) {}
-        open fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) {}
-        open fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) {}
-        open fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) {}
-        open fun visitSykHelgedag(splitter: SyketilfelleSplitter, sykHelgedag: SykHelgedag) {}
-        fun visitUtenlandsdag(splitter: SyketilfelleSplitter, utenlandsdag: Utenlandsdag) { splitter.state = Ugyldig }
-        fun visitUbestemt(splitter: SyketilfelleSplitter, ubestemtdag: Ubestemtdag) { splitter.state = Ugyldig }
-        fun visitStudiedag(splitter: SyketilfelleSplitter, studiedag: Studiedag) { splitter.state = Ugyldig }
-        fun visitPermisjonsdag(splitter: SyketilfelleSplitter, permisjonsdag: Permisjonsdag) { splitter.state = Ugyldig }
+        open fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {}
+        open fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {}
+        open fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {}
+        open fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {}
+        open fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {}
 
-        open fun entering() {}
-        open fun leaving() {}
+        open fun entering(splitter: SyketilfelleSplitter) {}
+        open fun leaving(splitter: SyketilfelleSplitter) {}
     }
 
-    private class Arbeidsgiverperiode : BetalingsState() {
-        private var sykedager = 0
-        private var ikkeSykedager = 0
-
-        override fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) = tellIkkeSykedag()
-        override fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) = tellIkkeSykedag()
-        override fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) = tellIkkeSykedag()
-        override fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) = tellSykedag(splitter)
-        override fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) = tellSykedag(splitter)
-        override fun visitSykHelgedag(splitter: SyketilfelleSplitter, sykHelgedag: SykHelgedag) = tellSykedag(splitter)
-
-        private fun tellIkkeSykedag() {
-            ikkeSykedager += 1
-            if (ikkeSykedager > nyttSyketilfelleGrense) sykedager = 0
+    private object ArbeidsgiverperiodeInitiell : BetalingsState() {
+        override fun entering(splitter: SyketilfelleSplitter) {
+            splitter.sykedager = 0
+            splitter.ikkeSykedager = 0
+            splitter.ubestemteDager = 0
         }
 
-        private fun tellSykedag(splitter: SyketilfelleSplitter) {
-            sykedager += 1
-            ikkeSykedager = 0
-            if (sykedager >= nyttSyketilfelleGrense) {
-                splitter.state = InitialStateBetaling()
-            }
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.sykedager = 1
+            splitter.state = ArbeidsgiverperiodeSykedager
+        }
+
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
         }
     }
 
-    private class InitialStateBetaling(private var ikkeSykedager:Int = 0) : BetalingsState() {
-        override fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) =
-            opprettBetalingslinje(sykedag, splitter)
-
-        override fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) =
-            opprettBetalingslinje(egenmeldingsdag, splitter)
-
-        override fun visitSykHelgedag(splitter: SyketilfelleSplitter, sykHelgedag: SykHelgedag) =
-            opprettBetalingslinje(sykHelgedag, splitter)
-
-        override fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) {
-            tellIkkeSykedag(splitter)
+    private object ArbeidsgiverperiodeSykedager : BetalingsState() {
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.sykedager += 1
         }
 
-        override fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) {
-            tellIkkeSykedag(splitter)
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = SykBetaling.also { splitter.opprettBetalingslinje(dagen) }
         }
 
-        override fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) {
-            tellIkkeSykedag(splitter)
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ubestemteDager = 1
+            splitter.state = ArbeidsgiverperiodeHelgOgFerie
         }
 
-        private fun tellIkkeSykedag(splitter: SyketilfelleSplitter) {
-            ikkeSykedager += 1
-            if (ikkeSykedager > nyttSyketilfelleGrense) splitter.state(Ugyldig)
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager = 1
+            splitter.state = ArbeidsgiverperiodeGap
         }
 
-        private fun opprettBetalingslinje(sykedag: Dag, splitter: SyketilfelleSplitter) {
-            Betalingslinje(sykedag.dagen, splitter.dagsats).apply { splitter.betalingslinjer.add(this) }
-            splitter.state(SykBetaling)
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
         }
     }
+
+    private object ArbeidsgiverperiodeGap : BetalingsState() {
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+            if (splitter.ikkeSykedager == 16) splitter.state = ArbeidsgiverperiodeInitiell
+        }
+
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+        }
+
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = ArbeidsgiverperiodeInitiell
+        }
+
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.sykedager += 1
+            splitter.state = ArbeidsgiverperiodeSykedager
+        }
+
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = SykBetaling
+        }
+    }
+
+    private object ArbeidsgiverperiodeHelgOgFerie : BetalingsState() {
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ubestemteDager += 1
+        }
+
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager = splitter.ubestemteDager + 1
+            if (splitter.ikkeSykedager >= 16) splitter.state = ArbeidsgiverperiodeInitiell else splitter.state =
+                ArbeidsgiverperiodeGap
+        }
+
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
+        }
+
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.sykedager += splitter.ubestemteDager + 1
+            if (splitter.sykedager >= 16) splitter.state =
+                SykBetaling.also { splitter.opprettBetalingslinje(dagen) }
+            else splitter.state = ArbeidsgiverperiodeSykedager
+        }
+
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = SykBetaling.also { splitter.opprettBetalingslinje(dagen) }
+        }
+    }
+
     private object SykBetaling : BetalingsState() {
-
-        override fun visitSykedag(splitter: SyketilfelleSplitter, sykedag: Sykedag) {
-            splitter.betalingslinjer.last().tom = sykedag.dagen
+        override fun entering(splitter: SyketilfelleSplitter) {
+            splitter.ikkeSykedager = 0
         }
 
-        override fun visitArbeidsdag(splitter: SyketilfelleSplitter, arbeidsdag: Arbeidsdag) {
-            splitter.state(InitialStateBetaling(1))
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.betalingslinjer.last().tom = dagen
         }
 
-        override fun visitImplisittDag(splitter: SyketilfelleSplitter, implisittDag: ImplisittDag) {
-            splitter.state(InitialStateBetaling(1))
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
         }
 
-        override fun visitFeriedag(splitter: SyketilfelleSplitter, feriedag: Feriedag) {
-            splitter.state(InitialStateBetaling(1))
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager = 1
+            splitter.state = BetalingGap
         }
 
-        override fun visitEgenmeldingsdag(splitter: SyketilfelleSplitter, egenmeldingsdag: Egenmeldingsdag) {
-            splitter.betalingslinjer.last().tom = egenmeldingsdag.dagen
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
         }
 
-        override fun visitSykHelgedag(splitter: SyketilfelleSplitter, sykHelgedag: SykHelgedag) {
-            splitter.betalingslinjer.last().tom = sykHelgedag.dagen
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = BetalingHelgOgFerie
+        }
+    }
+
+    private object BetalingHelgOgFerie: BetalingsState() {
+        override fun entering(splitter: SyketilfelleSplitter) {
+            splitter.ubestemteDager = 1
+        }
+
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
+        }
+
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.opprettBetalingslinje(dagen)
+            splitter.state = SykBetaling
+        }
+
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ubestemteDager += 1
+        }
+
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager = splitter.ubestemteDager + 1
+            if (splitter.ikkeSykedager >= 16) splitter.state = ArbeidsgiverperiodeInitiell else splitter.state =
+                BetalingGap
+        }
+
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+
+        }
+    }
+
+    private object BetalingGap: BetalingsState() {
+        override fun merEnn15Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.opprettBetalingslinje(dagen)
+            splitter.state = SykBetaling
+        }
+
+        override fun færreEnn16Sykedager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = Ugyldig
+        }
+
+        override fun færreEnn16arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+        }
+
+        override fun merEnn15arbeidsdager(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.state = ArbeidsgiverperiodeInitiell
+        }
+
+        override fun ubestemt(splitter: SyketilfelleSplitter, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+            if (splitter.ikkeSykedager == 16) splitter.state = ArbeidsgiverperiodeInitiell
         }
     }
 
     private object Ugyldig : BetalingsState()
+}
 
-
+private fun LocalDate.isWeekend(): Boolean {
+    return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY
 }
 
