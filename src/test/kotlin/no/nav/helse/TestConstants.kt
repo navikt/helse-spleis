@@ -212,7 +212,7 @@ internal object TestConstants {
     )
 
     fun sykepengehistorikk(
-            sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
+            perioder: List<SpolePeriode>,
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
@@ -223,13 +223,7 @@ internal object TestConstants {
                 "aktørId" to aktørId
         )).also {
             it.løsBehov(responsFraSpole(
-                    perioder = listOf(
-                            SpolePeriode(
-                                    fom = sisteHistoriskeSykedag.minusMonths(1),
-                                    tom = sisteHistoriskeSykedag,
-                                    grad = "100"
-                            )
-                    )
+                    perioder = perioder
             ))
         }
         return Sykepengehistorikk(objectMapper.readTree(behov.toJson()))
@@ -241,7 +235,13 @@ internal object TestConstants {
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
     ) = SykepengehistorikkHendelse(sykepengehistorikk(
-            sisteHistoriskeSykedag = sisteHistoriskeSykedag,
+            perioder = listOf(
+                    SpolePeriode(
+                            fom = sisteHistoriskeSykedag.minusMonths(1),
+                            tom = sisteHistoriskeSykedag,
+                            grad = "100"
+                    )
+            ),
             organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             sakskompleksId = sakskompleksId

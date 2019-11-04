@@ -35,12 +35,9 @@ class SykepengehistorikkHendelse private constructor(hendelseId: String, private
         sykepengehistorikk.organisasjonsnummer
 
     override fun sykdomstidslinje() : Sykdomstidslinje? {
-        return sykepengehistorikk.perioder.takeIf { it.isNotEmpty() }?.map {
-            Sykdomstidslinje.sykedager(
-                    it.fom,
-                    it.tom,
-                    this)
-        }?.reduce(Sykdomstidslinje::plus)
+        return sykepengehistorikk.perioder
+                .maxBy { it.tom }
+                ?.let { Sykdomstidslinje.sykedag(it.tom, this) }
     }
 
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType {
