@@ -6,7 +6,6 @@ import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
 
 internal class PaymentTest {
 
@@ -93,7 +92,6 @@ internal class PaymentTest {
         assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom())
     }
 
-
     @Test
     internal fun `Arbeidsdag etter ferie teller som gap`() {
         val sykdomstidslinje = 14.S + S + 2.F + A + S
@@ -103,8 +101,24 @@ internal class PaymentTest {
 
     }
 
+    @Test
+    internal fun `vacation after employer period`() {
+        val sykdomstidslinje = 16.S + 16.F + A + 3.S
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
+        assertEquals(1, betalingslinjer.size)
+        assertEquals(LocalDate.of(2018, 2, 3), betalingslinjer.first().fom())
+        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().tom())
 
+    }
+
+    @Test
+    internal fun `vacation during employer period`() {
+        val sykdomstidslinje = 15.S + 16.F + A + 3.S
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertEquals(0, betalingslinjer.size)
+    }
 
     private val S
         get() = Sykdomstidslinje.sykedag(startDato, sendtSykmelding).also {
