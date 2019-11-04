@@ -24,9 +24,7 @@ class SykepengehistorikkHendelse private constructor(hendelseId: String, private
     override fun aktørId() =
         sykepengehistorikk.aktørId
 
-    override fun rapportertdato(): LocalDateTime {
-        TODO("not implemented")
-    }
+    override fun rapportertdato() = LocalDateTime.now()
 
     fun påvirkerSakensMaksdato(sakensTidslinje: Sykdomstidslinje) =
         sykdomstidslinje()?.let {
