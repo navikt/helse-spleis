@@ -13,7 +13,6 @@ internal class PaymentTest {
         private val sendtSykmelding = Testhendelse(Uke(3).mandag.atStartOfDay())
     }
 
-
     //Mandag
     private var startDato = LocalDate.of(2018, 1, 1)
 
@@ -102,7 +101,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `vacation after employer period`() {
+    internal fun `Ferie rett etter arbeidsgiverperioden vacation teller ikke som opphold`() {
         val sykdomstidslinje = 16.S + 16.F + A + 3.S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -113,7 +112,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `vacation during employer period`() {
+    internal fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
         val sykdomstidslinje = 15.S + 16.F + A + 3.S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
