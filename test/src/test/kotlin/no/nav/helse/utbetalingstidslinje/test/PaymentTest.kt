@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class PaymentTest {
+class PaymentTest {
 
     companion object {
         private val sendtSykmelding = Testhendelse(Uke(3).mandag.atStartOfDay())
@@ -19,7 +19,7 @@ internal class PaymentTest {
     private val dagsats = 1200.toBigDecimal()
 
     @Test
-    internal fun `to dager blir betalt av arbeidsgiver`() {
+    fun `to dager blir betalt av arbeidsgiver`() {
         val tosykedager = S + S
 
         val betalingslinjer = tosykedager.betalingslinjer(dagsats)
@@ -28,7 +28,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `tjue dager gir 4 dager betalt av NAV`() {
+    fun `tjue dager gir 4 dager betalt av NAV`() {
         val tosykedager = 20.S
 
         val betalingslinjer = tosykedager.betalingslinjer(dagsats)
@@ -39,7 +39,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Sykedager med inneklemt ferie`() {
+    fun `Sykedager med inneklemt ferie`() {
         val sykdomstidslinje = 21.S + 2.S + 2.F + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -52,7 +52,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Ferie i arbeidsgiverperiode`() {
+    fun `Ferie i arbeidsgiverperiode`() {
         val sykdomstidslinje = S + 2.F + 13.S + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -62,7 +62,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
+    fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
         val sykdomstidslinje = S + 2.F + A + S + 14.S + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -72,7 +72,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
+    fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
         val sykdomstidslinje = S + A + 2.F + S + 14.S + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -82,7 +82,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Ferie etter arbeidsgiverperioden`() {
+    fun `Ferie etter arbeidsgiverperioden`() {
         val sykdomstidslinje = 14.S + 2.S + 2.F + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -92,7 +92,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Arbeidsdag etter ferie teller som gap`() {
+    fun `Arbeidsdag etter ferie teller som gap`() {
         val sykdomstidslinje = 14.S + S + 2.F + A + S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -101,7 +101,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Ferie rett etter arbeidsgiverperioden vacation teller ikke som opphold`() {
+    fun `Ferie rett etter arbeidsgiverperioden vacation teller ikke som opphold`() {
         val sykdomstidslinje = 16.S + 16.F + A + 3.S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
@@ -112,7 +112,7 @@ internal class PaymentTest {
     }
 
     @Test
-    internal fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
+    fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
         val sykdomstidslinje = 15.S + 16.F + A + 3.S
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 

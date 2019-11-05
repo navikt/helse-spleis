@@ -74,9 +74,8 @@ abstract class Sykdomstidslinje {
 
     }
 
-
-    fun betalingslinjer(dagsats: BigDecimal): List<Betalingslinje> {
-        val builder = SyketilfelleSplitter(dagsats)
+    fun betalingslinjer(dagsats: BigDecimal): List<Utbetalingslinje> {
+        val builder = Utbetalingsberegner(dagsats)
         this.accept(builder)
         return builder.results()
     }
