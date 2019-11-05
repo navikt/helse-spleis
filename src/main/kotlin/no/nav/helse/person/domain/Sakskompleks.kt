@@ -48,12 +48,18 @@ class Sakskompleks internal constructor(
         }
     }
 
-    internal fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) =
+    internal fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
+        return if (!inntektsmeldingHendelse.kanBehandles()) {
+            setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
+            true
+        } else {
             overlapperMed(inntektsmeldingHendelse).also {
                 if (it) {
                     tilstand.håndterInntektsmelding(this, inntektsmeldingHendelse)
                 }
             }
+        }
+    }
 
     internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikkHendelse)
@@ -66,7 +72,7 @@ class Sakskompleks internal constructor(
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
             hendelse.sykdomstidslinje()?.let {
                 this.sykdomstidslinje?.overlapperMed(it) ?: true
-            }?:false
+            } ?: false
 
     private fun setTilstand(event: PersonHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -81,6 +87,7 @@ class Sakskompleks internal constructor(
 
         emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
     }
+
     enum class TilstandType {
         START,
         NY_SØKNAD_MOTTATT,
@@ -131,6 +138,7 @@ class Sakskompleks internal constructor(
                     ?: hendelseTidslinje
             else -> this.sykdomstidslinje
         }
+
         val innenforOmfang = tidslinje?.erUtenforOmfang()?.not()?:false
         if (innenforOmfang) {
             sykdomstidslinje = tidslinje
@@ -201,6 +209,7 @@ class Sakskompleks internal constructor(
         override val type = INNTEKTSMELDING_MOTTATT
 
     }
+
     private object KomplettSykdomstidslinjeTilstand : Sakskomplekstilstand {
 
         override val type = KOMPLETT_SYKDOMSTIDSLINJE
@@ -332,6 +341,7 @@ class Sakskompleks internal constructor(
                 }
         )
     }
+
     class Memento(internal val state: String) {
         override fun toString() = state
 
@@ -382,3 +392,4 @@ class Sakskompleks internal constructor(
             val sykdomstidslinje: JsonNode?
     )
 }
+

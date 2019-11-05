@@ -165,7 +165,9 @@ internal object TestConstants {
                                         Periode(10.september, 10.september.plusDays(16))
                                 ),
                                 ferieperioder: List<Periode> = emptyList()) =
-            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()))
+            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(
+                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()
+            ))
 
     fun inntektsmeldingDTO(aktørId: String = "",
                            virksomhetsnummer: String? = "123456789",

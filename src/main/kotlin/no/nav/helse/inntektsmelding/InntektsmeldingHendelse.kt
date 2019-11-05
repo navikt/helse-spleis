@@ -31,6 +31,10 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
     override fun organisasjonsnummer() =
             inntektsmelding.virksomhetsnummer
 
+    override fun kanBehandles(): Boolean {
+        return inntektsmelding.kanBehandles()
+    }
+
     override fun sykdomstidslinje(): Sykdomstidslinje {
         val arbeidsgiverperiode = if (inntektsmelding.arbeidsgiverperioder.isNotEmpty())
             inntektsmelding.arbeidsgiverperioder
