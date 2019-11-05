@@ -126,19 +126,15 @@ class Sakskompleks internal constructor(
         }
 
         fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            sakskompleks.setTilstand(sykepengehistorikkHendelse, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterInngangsvilkår(sakskompleks: Sakskompleks, inngangsvilkårHendelse: InngangsvilkårHendelse) {
-            sakskompleks.setTilstand(inngangsvilkårHendelse, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterInntektshistorikk(sakskompleks: Sakskompleks, inntektshistorikkHendelse: InntektshistorikkHendelse) {
-            sakskompleks.setTilstand(inntektshistorikkHendelse, MåBehandlesIInfotrygdTilstand)
         }
 
         fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-            sakskompleks.setTilstand(manuellSaksbehandlingHendelse, MåBehandlesIInfotrygdTilstand)
         }
 
         fun leaving() {
@@ -244,7 +240,6 @@ class Sakskompleks internal constructor(
             if (sykepengehistorikkHendelse.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikkHendelse, MåBehandlesIInfotrygdTilstand)
             else sakskompleks.setTilstand(sykepengehistorikkHendelse, SykepengehistorikkMottattTilstand)
         }
-
     }
     private object InngangsvilkårMottattTilstand : Sakskomplekstilstand {
 
@@ -253,7 +248,6 @@ class Sakskompleks internal constructor(
             if (sykepengehistorikkHendelse.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikkHendelse, MåBehandlesIInfotrygdTilstand)
             else sakskompleks.setTilstand(sykepengehistorikkHendelse, BeregnUtbetalingTilstand)
         }
-
     }
     private object SykepengehistorikkMottattTilstand : Sakskomplekstilstand {
 
@@ -262,7 +256,6 @@ class Sakskompleks internal constructor(
             // TODO: Faktisk håndtere inngangsvilkår
             sakskompleks.setTilstand(inngangsvilkårHendelse, BeregnUtbetalingTilstand)
         }
-
     }
     private object BeregnUtbetalingTilstand : Sakskomplekstilstand {
 
