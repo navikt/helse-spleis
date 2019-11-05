@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje.test
 import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.Uke
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -119,6 +120,44 @@ class PaymentTest {
         assertEquals(0, betalingslinjer.size)
     }
 
+    @Test
+    fun `Ferie og arbeid påvirker ikke initiell tilsand`() {
+        val sykdomstidslinje = 2.F + 2.A + 16.S + 2.F
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertThat(betalingslinjer).isEmpty()
+    }
+
+    @Test
+    fun `20 feriedager med påfølgende arbeidsdag resetter arbeidsgiverperioden`() {
+        val sykdomstidslinje = 10.S + 20.F + A + 10.S + 20.F
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertThat(betalingslinjer).isEmpty()
+    }
+
+    @Test
+    fun `Ferie fullfører arbeidsgiverperioden`() {
+        val sykdomstidslinje = 10.S + 20.F + 10.S
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertThat(betalingslinjer).hasSize(1)
+        assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom())
+        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.first().tom())
+    }
+
+    @Test
+    fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode for betalingslinje 2`() {
+        val sykdomstidslinje = 20.S + 20.F + 10.S
+        val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertThat(betalingslinjer).hasSize(2)
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom())
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 2, 10), betalingslinjer.last().fom())
+        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer.last().tom())
+    }
+
     private val S
         get() = Sykdomstidslinje.sykedag(startDato, sendtSykmelding).also {
             startDato = startDato.plusDays(1)
@@ -136,6 +175,10 @@ class PaymentTest {
 
     private val Int.F
         get() = Sykdomstidslinje.ferie(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.A
+        get() = Sykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
             .also { startDato = startDato.plusDays(this.toLong()) }
 }
 
