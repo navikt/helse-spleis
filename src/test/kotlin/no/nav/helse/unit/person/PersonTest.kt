@@ -50,7 +50,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
 
@@ -118,7 +118,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -142,7 +142,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
 
@@ -156,7 +156,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -233,7 +233,7 @@ internal class PersonTest {
 
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.sakskomplekstilstand)
         assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.Sykepengehistorikk.name })
     }
 
@@ -255,7 +255,7 @@ internal class PersonTest {
             ))
         }
 
-        assertEquals(Sakskompleks.TilstandType.SYKEPENGEHISTORIKK_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_GODKJENNING, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -268,7 +268,7 @@ internal class PersonTest {
             it.håndterSykepengehistorikk(sykepengehistorikkHendelse(1.juli.minusMonths(7), organisasjonsnummer, aktørId, UUID.randomUUID()))
         }
 
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SAK, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -290,7 +290,7 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
-        assertEquals(Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     private class TilstandsflytObserver : PersonObserver {

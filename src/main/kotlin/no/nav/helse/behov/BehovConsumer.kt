@@ -50,12 +50,6 @@ internal class BehovConsumer(
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
                 personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
             }
-            BehovsTyper.Inngangsvilkår.name -> {
-                personMediator.håndterInngangsvilkår(InngangsvilkårHendelse(løsning))
-            }
-            BehovsTyper.Inntektshistorikk.name -> {
-                personMediator.håndterInntektshistorikk(InntektshistorikkHendelse(løsning))
-            }
         }
     }
 }

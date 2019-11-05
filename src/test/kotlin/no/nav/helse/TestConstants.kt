@@ -247,29 +247,6 @@ internal object TestConstants {
             sakskompleksId = sakskompleksId
     ))
 
-    fun inngangsvilkårHendelse(aktørId: String = UUID.randomUUID().toString(),
-                               organisasjonsnummer: String = "123546564",
-                               sakskompleksId: String = UUID.randomUUID().toString()) =
-            InngangsvilkårHendelse(Behov.nyttBehov(BehovsTyper.Inngangsvilkår, mapOf(
-                    "aktørId" to aktørId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "sakskompleksId" to sakskompleksId
-            )))
-
-    fun inntektshistorikkHendelse(aktørId: String = UUID.randomUUID().toString(),
-                                  organisasjonsnummer: String = "123546564",
-                                  sakskompleksId: String = UUID.randomUUID().toString(),
-                                  avvikSisteTreMåneder: Boolean = false) =
-            InntektshistorikkHendelse(Behov.nyttBehov(BehovsTyper.Inntektshistorikk, mapOf(
-                    "aktørId" to aktørId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "sakskompleksId" to sakskompleksId
-            )).also {
-                it.løsBehov(mapOf(
-                        "avvikSisteTreMåneder" to avvikSisteTreMåneder
-                ))
-            })
-
     fun manuellSaksbehandlingHendelse(sakskompleksId: String,
                                       utbetalingGodkjent: Boolean) =
             ManuellSaksbehandlingHendelse(ManuellSaksbehandling(sakskompleksId = sakskompleksId, utbetalingGodkjent = utbetalingGodkjent))

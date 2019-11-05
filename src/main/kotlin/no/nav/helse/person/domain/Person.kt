@@ -35,14 +35,6 @@ class Person(val aktørId: String) : SakskompleksObserver {
         finnArbeidsgiver(sykepengehistorikkHendelse)?.håndterSykepengehistorikk(sykepengehistorikkHendelse)
     }
 
-    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-        finnArbeidsgiver(inngangsvilkårHendelse)?.håndterInngangsvilkår(inngangsvilkårHendelse)
-    }
-
-    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-        finnArbeidsgiver(inntektshistorikkHendelse)?.håndterInntektshistorikk(inntektshistorikkHendelse)
-    }
-
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         personObservers.forEach {
             it.personEndret(PersonObserver.PersonEndretEvent(
@@ -105,14 +97,6 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
-        }
-
-        fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-            saker.forEach { it.håndterInngangsvilkår(inngangsvilkårHendelse) }
-        }
-
-        fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-            saker.forEach { it.håndterInntektshistorikk(inntektshistorikkHendelse) }
         }
 
         fun addObserver(observer: SakskompleksObserver) {

@@ -7,7 +7,7 @@ import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
-import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
@@ -71,32 +71,12 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         }
     }
 
-    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-        try {
-            finnPerson(inngangsvilkårHendelse).also { person ->
-                person.håndterInngangsvilkår(inngangsvilkårHendelse)
-            }
-        } catch (err: PersonskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
-        }
-    }
-
-    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-        try {
-            finnPerson(inntektshistorikkHendelse).also { person ->
-                person.håndterInntektshistorikk(inntektshistorikkHendelse)
-            }
-        } catch (err: PersonskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
-        }
-    }
-
     fun håndterGenerellSendtSøknad(søknad: Sykepengesøknad) {
         gosysOppgaveProducer.opprettOppgave(søknad.aktørId)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
-        if (event.currentState == SKAL_TIL_INFOTRYGD) {
+        if (event.currentState == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId)
         }
     }
