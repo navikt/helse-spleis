@@ -2,8 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
-import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
