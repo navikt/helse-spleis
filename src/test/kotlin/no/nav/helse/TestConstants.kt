@@ -62,7 +62,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = SykepengesoknadDTO(
             id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -78,7 +79,7 @@ internal object TestConstants {
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
             opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
+            sendtNav = sendtNav,
             sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
             egenmeldinger = egenmeldinger,
             soknadsperioder = søknadsperioder,
@@ -110,7 +111,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = SendtSøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -120,7 +122,8 @@ internal object TestConstants {
             søknadsperioder = søknadsperioder,
             fravær = fravær,
             status = SoknadsstatusDTO.SENDT,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            sendtNav = sendtNav
     ).toJsonNode()))
 
     fun nySøknadHendelse(
@@ -148,7 +151,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = NySøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -158,8 +162,12 @@ internal object TestConstants {
             søknadsperioder = søknadsperioder,
             fravær = fravær,
             status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            sendtNav = sendtNav
     ).toJsonNode()))
+
+    fun søknadsperiode(fom: LocalDate, tom: LocalDate, sykemeldingsgrad: Int = 100, faktiskGrad: Int? = null) =
+            SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = sykemeldingsgrad, faktiskGrad = faktiskGrad)
 
 
     fun inntektsmeldingHendelse(aktørId: String = "",
@@ -270,6 +278,10 @@ class Uke(ukenr: Long) {
     val lørdag get() = mandag.plusDays(5)
     val søndag get() = mandag.plusDays(6)
 }
+
+fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(Sykepengesøknad(this.copy(
+        status = SoknadsstatusDTO.SENDT
+).toJsonNode()))
 
 operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
 

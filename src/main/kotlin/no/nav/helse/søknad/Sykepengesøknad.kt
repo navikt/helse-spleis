@@ -7,11 +7,6 @@ import no.nav.helse.serde.safelyUnwrapDate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-private const val SØKNAD_SENDT = "SENDT"
-private const val SØKNAD_NY = "NY"
-private const val SØKNAD_FREMTIDIG = "FREMTIDIG"
-
-
 @JsonSerialize(using = SykepengesøknadSerializer::class)
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
 data class Sykepengesøknad(private val jsonNode: JsonNode) {
@@ -25,6 +20,7 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
     val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Sykeperiode(it) } ?: emptyList()
+    val sendtNav = jsonNode["sendtNav"]?.let { if (it.isNull) null else LocalDateTime.parse(it.asText()) }
     val fraværsperioder
         get() = jsonNode["fravar"]?.filterNot {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(

@@ -30,7 +30,10 @@ class SendtSøknadHendelse private constructor(hendelseId: String, private val s
             Søknad
 
     override fun kanBehandles(): Boolean {
-        return søknad.kanBehandles() && søknad.sykeperioder.all { (it.faktiskGrad ?: it.sykmeldingsgrad) == 100 }
+        return søknad.kanBehandles()
+                && søknad.sykeperioder.all { (it.faktiskGrad ?: it.sykmeldingsgrad) == 100 }
+                && søknad.sendtNav != null
+                && søknad.fom >= søknad.sendtNav.toLocalDate().minusMonths(3).withDayOfMonth(1)
     }
 
     override fun organisasjonsnummer(): String =

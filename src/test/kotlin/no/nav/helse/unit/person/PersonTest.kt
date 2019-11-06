@@ -25,14 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
-import kotlin.collections.MutableList
-import kotlin.collections.MutableMap
-import kotlin.collections.emptyList
-import kotlin.collections.find
-import kotlin.collections.first
-import kotlin.collections.listOf
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 internal class PersonTest {
@@ -194,6 +186,20 @@ internal class PersonTest {
                                 SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 60),
                                 SoknadsperiodeDTO(fom = Uke(1).fredag, tom = Uke(1).fredag, sykmeldingsgrad = 100)
                         )
+                ))
+            }
+        }
+    }
+
+    @Test
+    internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
+        testPerson.also {
+            assertThrows<UtenforOmfangException> {
+                it.håndterSendtSøknad(sendtSøknadHendelse(
+                        søknadsperioder = listOf(
+                                SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100)
+                        ),
+                        sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
                 ))
             }
         }
