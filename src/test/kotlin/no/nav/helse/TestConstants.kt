@@ -6,8 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
-import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.saksbehandling.ManuellSaksbehandling
@@ -38,9 +36,6 @@ internal object TestConstants {
     val ferieFom = 1.oktober
     val ferieTom = 4.oktober
 
-    val `seks måneder og én dag før første sykedag` = egenmeldingFom.minusMonths(6).minusDays(1)
-    val `én dag færre enn seks måneder før første sykedag` = egenmeldingFom.minusMonths(6).plusDays(1)
-
     fun søknadDTO(
             id: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO,
@@ -53,10 +48,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -65,7 +62,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = SykepengesoknadDTO(
             id = id,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -81,7 +79,7 @@ internal object TestConstants {
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
             opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
+            sendtNav = sendtNav,
             sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
             egenmeldinger = egenmeldinger,
             soknadsperioder = søknadsperioder,
@@ -99,10 +97,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -111,7 +111,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = SendtSøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -121,7 +122,8 @@ internal object TestConstants {
             søknadsperioder = søknadsperioder,
             fravær = fravær,
             status = SoknadsstatusDTO.SENDT,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            sendtNav = sendtNav
     ).toJsonNode()))
 
     fun nySøknadHendelse(
@@ -135,10 +137,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -147,7 +151,8 @@ internal object TestConstants {
             arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
                     navn = "enArbeidsgiver",
                     orgnummer = "123456789"
-            )
+            ),
+            sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
     ) = NySøknadHendelse(Sykepengesøknad(søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -157,8 +162,13 @@ internal object TestConstants {
             søknadsperioder = søknadsperioder,
             fravær = fravær,
             status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver
+            arbeidsgiver = arbeidsgiver,
+            sendtNav = sendtNav
     ).toJsonNode()))
+
+    fun søknadsperiode(fom: LocalDate, tom: LocalDate, sykemeldingsgrad: Int = 100, faktiskGrad: Int? = null) =
+            SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = sykemeldingsgrad, faktiskGrad = faktiskGrad)
+
 
     fun inntektsmeldingHendelse(aktørId: String = "",
                                 virksomhetsnummer: String? = "123456789",
@@ -167,7 +177,9 @@ internal object TestConstants {
                                         Periode(10.september, 10.september.plusDays(16))
                                 ),
                                 ferieperioder: List<Periode> = emptyList()) =
-            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()))
+            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(
+                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()
+            ))
 
     fun inntektsmeldingDTO(aktørId: String = "",
                            virksomhetsnummer: String? = "123456789",
@@ -212,7 +224,7 @@ internal object TestConstants {
     )
 
     fun sykepengehistorikk(
-            sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
+            perioder: List<SpolePeriode>,
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
@@ -223,13 +235,7 @@ internal object TestConstants {
                 "aktørId" to aktørId
         )).also {
             it.løsBehov(responsFraSpole(
-                    perioder = listOf(
-                            SpolePeriode(
-                                    fom = sisteHistoriskeSykedag.minusMonths(1),
-                                    tom = sisteHistoriskeSykedag,
-                                    grad = "100"
-                            )
-                    )
+                    perioder = perioder
             ))
         }
         return Sykepengehistorikk(objectMapper.readTree(behov.toJson()))
@@ -241,34 +247,17 @@ internal object TestConstants {
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
     ) = SykepengehistorikkHendelse(sykepengehistorikk(
-            sisteHistoriskeSykedag = sisteHistoriskeSykedag,
+            perioder = listOf(
+                    SpolePeriode(
+                            fom = sisteHistoriskeSykedag.minusMonths(1),
+                            tom = sisteHistoriskeSykedag,
+                            grad = "100"
+                    )
+            ),
             organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             sakskompleksId = sakskompleksId
     ))
-
-    fun inngangsvilkårHendelse(aktørId: String = UUID.randomUUID().toString(),
-                               organisasjonsnummer: String = "123546564",
-                               sakskompleksId: String = UUID.randomUUID().toString()) =
-            InngangsvilkårHendelse(Behov.nyttBehov(BehovsTyper.Inngangsvilkår, mapOf(
-                    "aktørId" to aktørId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "sakskompleksId" to sakskompleksId
-            )))
-
-    fun inntektshistorikkHendelse(aktørId: String = UUID.randomUUID().toString(),
-                                  organisasjonsnummer: String = "123546564",
-                                  sakskompleksId: String = UUID.randomUUID().toString(),
-                                  avvikSisteTreMåneder: Boolean = false) =
-            InntektshistorikkHendelse(Behov.nyttBehov(BehovsTyper.Inntektshistorikk, mapOf(
-                    "aktørId" to aktørId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "sakskompleksId" to sakskompleksId
-            )).also {
-                it.løsBehov(mapOf(
-                        "avvikSisteTreMåneder" to avvikSisteTreMåneder
-                ))
-            })
 
     fun manuellSaksbehandlingHendelse(sakskompleksId: String,
                                       utbetalingGodkjent: Boolean) =
@@ -289,6 +278,10 @@ class Uke(ukenr: Long) {
     val lørdag get() = mandag.plusDays(5)
     val søndag get() = mandag.plusDays(6)
 }
+
+fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(Sykepengesøknad(this.copy(
+        status = SoknadsstatusDTO.SENDT
+).toJsonNode()))
 
 operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
 

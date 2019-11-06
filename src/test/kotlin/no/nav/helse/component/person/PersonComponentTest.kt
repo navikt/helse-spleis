@@ -51,11 +51,8 @@ import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration.ofMillis
 import java.util.*
@@ -190,7 +187,7 @@ internal class PersonComponentTest {
         sendSøknad(aktørID, virksomhetsnummer)
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
         assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
@@ -203,7 +200,7 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørId2, virksomhetsnummer2)
         sendSøknad(aktørId2, virksomhetsnummer2)
 
-        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name, Inngangsvilkår.name))
+        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name))
         assertOpprettGosysOppgave(aktørId = aktørId2)
     }
 
@@ -218,48 +215,8 @@ internal class PersonComponentTest {
     }
 
     @Test
-    fun `gitt en komplett tidslinje, når vi mottar svar på inngangsvilkår- og sykepengehistorikk-behov, så skal vi etterspørre inntektshistorikk`() {
-        val aktørID = "09876543212"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendInngangsvilkårløsning(aktørID)
-
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Inntektshistorikk.name))
-    }
-
-    @Test
-    fun `gitt en sak klar til beregning, når vi mottar svar på inntektshistorikk med 5 % avvik, så skal saken til infotrygd`() {
-        val aktørID = "76543214679"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendInngangsvilkårløsning(aktørID)
-        sendInntektshistorikkløsning(aktørId = aktørID, avvikSisteTreMåneder = true)
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
-    }
-
-    @Test
-    fun `gitt en sak klar til beregning, når vi mottar svar på inntektshistorikk uten 5 % avvik, så skal saken til Speil for godkjenning`() {
+    @Disabled
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
         val aktørID = "87654321962"
         val virksomhetsnummer = "123456789"
 
@@ -273,10 +230,29 @@ internal class PersonComponentTest {
             grad = "100"
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendInngangsvilkårløsning(aktørID)
-        sendInntektshistorikkløsning(aktørId = aktørID, avvikSisteTreMåneder = false)
 
+
+        //TODO: Sjekke at vi har betalingslinjer og at de er ok
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+    }
+
+    @Test
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
+        val aktørID = "87654321963"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(6),
+                tom = søknad.fom!!.minusMonths(5),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     @Test
@@ -296,20 +272,6 @@ internal class PersonComponentTest {
         assertEquals(HttpStatusCode.OK.value, connection.responseCode)
         val lagretNySøknad = objectMapper.readTree(connection.responseBody).findValue("søknad")
         assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
-    }
-
-    private fun sendInntektshistorikkløsning(aktørId: String, avvikSisteTreMåneder: Boolean) {
-        val behov = ventPåBehov(aktørId, Inntektshistorikk)
-        behov.løsBehov(mapOf(
-            "avvikSisteTreMåneder" to avvikSisteTreMåneder
-        ))
-        sendBehov(behov)
-    }
-
-    private fun sendInngangsvilkårløsning(aktørId: String) {
-        val behov = ventPåBehov(aktørId, Inngangsvilkår)
-        behov.løsBehov("min løsning")
-        sendBehov(behov)
     }
 
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {

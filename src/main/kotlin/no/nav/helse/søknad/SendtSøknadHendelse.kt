@@ -3,14 +3,14 @@ package no.nav.helse.søknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
-import no.nav.helse.person.domain.PersonHendelse
+import no.nav.helse.person.domain.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDateTime
 import java.util.*
 
-class SendtSøknadHendelse private constructor(hendelseId: String, private val søknad: Sykepengesøknad) : PersonHendelse, SykdomstidslinjeHendelse(hendelseId) {
+class SendtSøknadHendelse private constructor(hendelseId: String, private val søknad: Sykepengesøknad) : ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
     constructor(søknad: Sykepengesøknad) : this(UUID.randomUUID().toString(), søknad)
 
     companion object {
@@ -29,8 +29,15 @@ class SendtSøknadHendelse private constructor(hendelseId: String, private val s
     override fun nøkkelHendelseType() =
             Søknad
 
-    override fun organisasjonsnummer(): String? =
-            søknad.arbeidsgiver?.orgnummer
+    override fun kanBehandles(): Boolean {
+        return søknad.kanBehandles()
+                && søknad.sykeperioder.all { (it.faktiskGrad ?: it.sykmeldingsgrad) == 100 }
+                && søknad.sendtNav != null
+                && søknad.fom >= søknad.sendtNav.toLocalDate().minusMonths(3).withDayOfMonth(1)
+    }
+
+    override fun organisasjonsnummer(): String =
+            søknad.arbeidsgiver.orgnummer
 
     override fun rapportertdato(): LocalDateTime =
             søknad.opprettet

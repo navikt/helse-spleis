@@ -1,12 +1,18 @@
 package no.nav.helse.unit.inntektsmelding
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
+import no.nav.helse.inntektsmelding.Inntektsmelding
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -93,5 +99,35 @@ internal class InntektsmeldingHendelseTest {
         assertEquals(Uke(3).torsdag, tidslinje.sluttdato())
         assertEquals(16, tidslinje.antallSykedagerHvorViTellerMedHelg())
         assertEquals(18, tidslinje.flatten().size)
+    }
+
+    @Test
+    internal fun `inntektsmelding uten mottattDato er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
+            (it as ObjectNode).remove("mottattDato")
+        }
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
+    }
+
+    @Test
+    internal fun `inntektsmelding uten foersteFravaersdag er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
+            (it as ObjectNode).remove("foersteFravaersdag")
+        }
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
+    }
+
+    @Test
+    internal fun `inntektsmelding uten virksomhetsnummer er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
+            (it as ObjectNode).remove("virksomhetsnummer")
+        }
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
 }

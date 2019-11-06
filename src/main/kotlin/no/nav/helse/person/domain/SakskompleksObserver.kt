@@ -8,7 +8,7 @@ interface SakskompleksObserver {
                                 val aktørId: String,
                                 val currentState: Sakskompleks.TilstandType,
                                 val previousState: Sakskompleks.TilstandType,
-                                val sykdomshendelse: PersonHendelse,
+                                val sykdomshendelse: ArbeidstakerHendelse,
                                 val currentMemento: Sakskompleks.Memento,
                                 val previousMemento: Sakskompleks.Memento)
 

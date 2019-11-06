@@ -8,7 +8,7 @@
           "id": "480a2300-b170-434d-b517-b21ff1255545",
           "organisasjonsnummer": "112233",
           "aktørId": "29a3fe30-00a7-40ec-98f6-201f33b668b4",
-          "tilstandType": "KOMPLETT_SAK",
+          "tilstandType": "KOMPLETT_SYKDOMSTIDSLINJE",
           "sykdomstidslinje":
           {
             "dager":[

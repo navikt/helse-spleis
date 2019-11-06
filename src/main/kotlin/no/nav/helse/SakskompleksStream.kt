@@ -78,7 +78,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     SøknadConsumer(builder, søknadTopic, personMediator)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
-    BehovConsumer(builder, behovTopic, personMediator)
+    //BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
-import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
@@ -20,27 +18,29 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     private val personObservers = mutableListOf<PersonObserver>()
     fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
+        if (!nySøknadHendelse.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
+        }
         finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndterNySøknad(nySøknadHendelse)
     }
 
     fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
+        if (!sendtSøknadHendelse.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
+        }
         finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndterSendtSøknad(sendtSøknadHendelse)
     }
 
     fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        if (!inntektsmeldingHendelse.kanBehandles()) {
+            invaliderAlleSaker(inntektsmeldingHendelse)
+            throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmeldingHendelse)
+        }
         finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndterInntektsmelding(inntektsmeldingHendelse)
     }
 
     fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         finnArbeidsgiver(sykepengehistorikkHendelse)?.håndterSykepengehistorikk(sykepengehistorikkHendelse)
-    }
-
-    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-        finnArbeidsgiver(inngangsvilkårHendelse)?.håndterInngangsvilkår(inngangsvilkårHendelse)
-    }
-
-    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-        finnArbeidsgiver(inntektshistorikkHendelse)?.håndterInntektshistorikk(inntektshistorikkHendelse)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
@@ -58,15 +58,21 @@ class Person(val aktørId: String) : SakskompleksObserver {
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun finnArbeidsgiver(hendelse: PersonHendelse) =
-            hendelse.organisasjonsnummer()?.let { arbeidsgivere[it] }
+    private fun invaliderAlleSaker(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        arbeidsgivere.forEach { (_, arbeidsgiver) ->
+            arbeidsgiver.invaliderSaker(inntektsmeldingHendelse)
+        }
+    }
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: PersonHendelse) =
-        hendelse.organisasjonsnummer()?.let { orgnr ->
+    private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
+            hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
+
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
+        hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }
-        } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
+        }
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
         Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
@@ -107,12 +113,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
             saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
         }
 
-        fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-            saker.forEach { it.håndterInngangsvilkår(inngangsvilkårHendelse) }
-        }
-
-        fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-            saker.forEach { it.håndterInntektshistorikk(inntektshistorikkHendelse) }
+        internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {
+            saker.forEach { it.invaliderSak(hendelse) }
         }
 
         fun addObserver(observer: SakskompleksObserver) {

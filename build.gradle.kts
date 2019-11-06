@@ -47,7 +47,7 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    implementation("no.nav.helse:sykdomstidslinje:1.e033b68")
+    implementation("no.nav.helse:sykdomstidslinje:1.3d99934")
 
     implementation("com.github.kittinunf.fuel:fuel-coroutines:$fuelVersion")
     implementation("io.arrow-kt:arrow-core-data:$arrowVersion")

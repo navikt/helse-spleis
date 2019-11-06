@@ -5,7 +5,7 @@ import no.nav.helse.SykdomshendelseType
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.person.domain.PersonHendelse
+import no.nav.helse.person.domain.ArbeidstakerHendelse
 import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.sakskompleks.SakskompleksProbe
@@ -48,7 +48,7 @@ internal class SakskompleksProbeTest {
     fun `teller nye inntektsmeldinger`() {
         val inntektsmeldingCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
-        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.KOMPLETT_SAK, Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
+        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
 
         val inntektsmeldingCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
@@ -65,7 +65,7 @@ internal class SakskompleksProbeTest {
             organisasjonsnummer = "orgnummer"
         )
 
-    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: PersonHendelse) =
+    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: ArbeidstakerHendelse) =
         sakskompleks().let { sakskompleks ->
             SakskompleksObserver.StateChangeEvent(
                 id = id,

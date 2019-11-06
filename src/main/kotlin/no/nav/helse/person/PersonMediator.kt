@@ -2,12 +2,10 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.inngangsvilkar.InngangsvilkårHendelse
-import no.nav.helse.inntektshistorikk.InntektshistorikkHendelse
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
-import no.nav.helse.person.domain.Sakskompleks.TilstandType.SKAL_TIL_INFOTRYGD
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
@@ -71,26 +69,6 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         }
     }
 
-    fun håndterInngangsvilkår(inngangsvilkårHendelse: InngangsvilkårHendelse) {
-        try {
-            finnPerson(inngangsvilkårHendelse).also { person ->
-                person.håndterInngangsvilkår(inngangsvilkårHendelse)
-            }
-        } catch (err: PersonskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
-        }
-    }
-
-    fun håndterInntektshistorikk(inntektshistorikkHendelse: InntektshistorikkHendelse) {
-        try {
-            finnPerson(inntektshistorikkHendelse).also { person ->
-                person.håndterInntektshistorikk(inntektshistorikkHendelse)
-            }
-        } catch (err: PersonskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
-        }
-    }
-
     fun håndterGenerellSendtSøknad(søknad: Sykepengesøknad) {
         gosysOppgaveProducer.opprettOppgave(søknad.aktørId)
     }
@@ -98,13 +76,13 @@ internal class PersonMediator(private val personRepository: PersonRepository,
     fun hentPersonJson(aktørId: String): String? = personRepository.hentPersonJson(aktørId)
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
-        if (event.currentState == SKAL_TIL_INFOTRYGD) {
+        if (event.currentState == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId)
         }
     }
 
-    private fun finnPerson(personHendelse: PersonHendelse) =
-            (personRepository.hentPerson(personHendelse.aktørId()) ?: Person(aktørId = personHendelse.aktørId())).also {
+    private fun finnPerson(arbeidstakerHendelse: ArbeidstakerHendelse) =
+            (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(aktørId = arbeidstakerHendelse.aktørId())).also {
                 it.addObserver(this)
                 it.addObserver(lagrePersonDao)
                 it.addObserver(sakskompleksProbe)

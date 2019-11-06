@@ -3,14 +3,14 @@ package no.nav.helse.inntektsmelding
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
-import no.nav.helse.person.domain.PersonHendelse
+import no.nav.helse.person.domain.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
 
-class InntektsmeldingHendelse private constructor(hendelseId: String, private val inntektsmelding: Inntektsmelding) : PersonHendelse, SykdomstidslinjeHendelse(hendelseId) {
+class InntektsmeldingHendelse private constructor(hendelseId: String, private val inntektsmelding: Inntektsmelding) : ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
     constructor(inntektsmelding: Inntektsmelding) : this(UUID.randomUUID().toString(), inntektsmelding)
 
     companion object {
@@ -29,7 +29,11 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
             inntektsmelding.mottattDato
 
     override fun organisasjonsnummer() =
-            inntektsmelding.virksomhetsnummer
+            inntektsmelding.virksomhetsnummer!!
+
+    override fun kanBehandles(): Boolean {
+        return inntektsmelding.kanBehandles()
+    }
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
         val arbeidsgiverperiode = if (inntektsmelding.arbeidsgiverperioder.isNotEmpty())

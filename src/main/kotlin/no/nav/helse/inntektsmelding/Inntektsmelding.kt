@@ -37,10 +37,15 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
             it.tom
         }?.tom
 
+    fun kanBehandles(): Boolean {
+        return jsonNode["mottattDato"] != null
+                && jsonNode["foersteFravaersdag"] != null
+                && jsonNode["virksomhetsnummer"] != null && !jsonNode["virksomhetsnummer"].isNull
+    }
     data class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
-    }
 
+    }
     fun toJson(): JsonNode = jsonNode
 }

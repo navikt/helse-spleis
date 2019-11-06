@@ -3,14 +3,15 @@ package no.nav.helse.søknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
-import no.nav.helse.person.domain.PersonHendelse
+import no.nav.helse.person.domain.ArbeidstakerHendelse
+import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
 import java.util.*
 
-class NySøknadHendelse private constructor(hendelseId: String, private val søknad: Sykepengesøknad): PersonHendelse, SykdomstidslinjeHendelse(hendelseId) {
+class NySøknadHendelse private constructor(hendelseId: String, private val søknad: Sykepengesøknad): ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
 
     constructor(søknad: Sykepengesøknad) : this(UUID.randomUUID().toString(), søknad)
 
@@ -23,11 +24,16 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
         }
     }
 
+    override fun kanBehandles(): Boolean {
+        return søknad.kanBehandles()
+                && søknad.sykeperioder.all { it.sykmeldingsgrad == 100 }
+    }
+
     override fun aktørId() =
             søknad.aktørId
 
-    override fun organisasjonsnummer(): String? =
-            søknad.arbeidsgiver?.orgnummer
+    override fun organisasjonsnummer(): String =
+            søknad.arbeidsgiver.orgnummer
 
     override fun rapportertdato(): LocalDateTime =
             søknad.opprettet
@@ -41,6 +47,7 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
 
     override fun sykdomstidslinje() =
             sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
+                if (resultatTidslinje.overlapperMed(delTidslinje)) throw UtenforOmfangException("Søknaden inneholder overlappende sykdomsperioder", this)
                 resultatTidslinje + delTidslinje
             }
 
