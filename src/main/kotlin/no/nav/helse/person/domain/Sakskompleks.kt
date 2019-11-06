@@ -69,9 +69,7 @@ class Sakskompleks internal constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-            hendelse.sykdomstidslinje()?.let {
-                this.sykdomstidslinje?.overlapperMed(it) ?: true
-            } ?: false
+            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
     private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -85,6 +83,21 @@ class Sakskompleks internal constructor(
         tilstand.entering(this)
 
         emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
+    }
+
+    private fun <HENDELSE> håndterSykdomstidslinjeHendelse(
+            hendelse: HENDELSE,
+            nesteTilstand: Sakskomplekstilstand
+    ) where HENDELSE: SykdomstidslinjeHendelse, HENDELSE: ArbeidstakerHendelse {
+        val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje()) ?: hendelse.sykdomstidslinje()
+
+        if (tidslinje.erUtenforOmfang()) {
+            setTilstand(hendelse, TilInfotrygdTilstand)
+        } else {
+            setTilstand(hendelse, nesteTilstand) {
+                sykdomstidslinje = tidslinje
+            }
+        }
     }
 
     enum class TilstandType {
@@ -130,29 +143,10 @@ class Sakskompleks internal constructor(
 
     }
 
-    private fun slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(hendelse: SykdomstidslinjeHendelse): Boolean {
-        val hendelseTidslinje = hendelse.sykdomstidslinje()
-        val tidslinje = when {
-            hendelseTidslinje != null -> this.sykdomstidslinje?.plus(hendelseTidslinje)
-                    ?: hendelseTidslinje
-            else -> this.sykdomstidslinje
-        }
-
-        val innenforOmfang = tidslinje?.erUtenforOmfang()?.not() ?: false
-        if (innenforOmfang) {
-            sykdomstidslinje = tidslinje
-        }
-        return innenforOmfang
-    }
-
     private object StartTilstand : Sakskomplekstilstand {
 
         override fun håndterNySøknad(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(nySøknadHendelse)) {
-                sakskompleks.setTilstand(nySøknadHendelse, NySøknadMottattTilstand)
-            } else {
-                sakskompleks.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
-            }
+            sakskompleks.håndterSykdomstidslinjeHendelse(nySøknadHendelse, NySøknadMottattTilstand)
         }
 
         override val type = START
@@ -162,19 +156,11 @@ class Sakskompleks internal constructor(
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(sendtSøknadHendelse)) {
-                sakskompleks.setTilstand(sendtSøknadHendelse, SendtSøknadMottattTilstand)
-            } else {
-                sakskompleks.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
-            }
+            sakskompleks.håndterSykdomstidslinjeHendelse(sendtSøknadHendelse, SendtSøknadMottattTilstand)
         }
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(inntektsmeldingHendelse)) {
-                sakskompleks.setTilstand(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
-            } else {
-                sakskompleks.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
-            }
+            sakskompleks.håndterSykdomstidslinjeHendelse(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -184,11 +170,7 @@ class Sakskompleks internal constructor(
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(inntektsmeldingHendelse)) {
-                sakskompleks.setTilstand(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
-            } else {
-                sakskompleks.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
-            }
+            sakskompleks.håndterSykdomstidslinjeHendelse(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
@@ -198,11 +180,7 @@ class Sakskompleks internal constructor(
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
         override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (sakskompleks.slåSammenSykdomstidslinjeOgReturnerHvorvidtViErInnenforOmfang(sendtSøknadHendelse)) {
-                sakskompleks.setTilstand(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
-            } else {
-                sakskompleks.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
-            }
+            sakskompleks.håndterSykdomstidslinjeHendelse(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
