@@ -24,6 +24,7 @@ abstract class Sykdomstidslinje {
     abstract fun sluttdato(): LocalDate
     abstract fun antallSykedagerHvorViTellerMedHelg(): Int
     abstract fun antallSykedagerHvorViIkkeTellerMedHelg(): Int
+    abstract fun hendelser(): Set<SykdomstidslinjeHendelse>
     abstract fun flatten(): List<Dag>
     abstract fun length(): Int
     abstract fun accept(visitor: SykdomstidslinjeVisitor)

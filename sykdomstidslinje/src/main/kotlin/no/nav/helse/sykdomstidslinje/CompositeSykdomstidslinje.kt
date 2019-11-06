@@ -27,6 +27,8 @@ class CompositeSykdomstidslinje internal constructor(
     override fun dag(dato: LocalDate) =
         tidslinje.find { it.dagen == dato }
 
+    override fun hendelser() = tidslinje.flatMapTo(mutableSetOf()) { it.hendelser() }
+
     override fun flatten() = tidslinje
 
     override fun startdato() = tidslinje.first().dagen

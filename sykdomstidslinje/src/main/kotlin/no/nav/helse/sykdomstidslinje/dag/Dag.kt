@@ -35,6 +35,7 @@ abstract class Dag internal constructor(
 
     override fun startdato() = dagen
     override fun sluttdato() = dagen
+    override fun hendelser(): Set<SykdomstidslinjeHendelse> = setOf(hendelse) + erstatter.flatMap { it.hendelser() }
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
 
@@ -48,13 +49,6 @@ abstract class Dag internal constructor(
     fun dagerErstattet(): List<Dag> = erstatter
 
     internal open fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
-
-    private fun sisteDag(other: Dag) =
-        if (this.hendelse.rapportertdato() > other.hendelse.rapportertdato()) this.also { this.erstatter(other) } else other.also {
-            other.erstatter(
-                this
-            )
-        }
 
     fun erHelg() = dagen.dayOfWeek == DayOfWeek.SATURDAY || dagen.dayOfWeek == DayOfWeek.SUNDAY
 
