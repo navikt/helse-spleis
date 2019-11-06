@@ -29,9 +29,9 @@ internal class UtbetalingsTest {
         assertEquals(1, betalingslinjer.size)
 
         val betalingslinje = betalingslinjer.first()
-        assertEquals(Uke(3).onsdag, betalingslinje.fom())
-        assertEquals(Uke(3).fredag, betalingslinje.tom())
-        assertEquals(1200.toBigDecimal(), betalingslinje.dagsats())
+        assertEquals(Uke(3).onsdag, betalingslinje.fom)
+        assertEquals(Uke(3).fredag, betalingslinje.tom)
+        assertEquals(1200.toBigDecimal(), betalingslinje.dagsats)
     }
 
     @Test
@@ -43,14 +43,14 @@ internal class UtbetalingsTest {
         assertEquals(2, betalingslinjer.size)
 
         val førsteBetalingslinje = betalingslinjer.first()
-        assertEquals(Uke(3).onsdag, førsteBetalingslinje.fom())
-        assertEquals(Uke(3).fredag, førsteBetalingslinje.tom())
-        assertEquals(1200.toBigDecimal(), førsteBetalingslinje.dagsats())
+        assertEquals(Uke(3).onsdag, førsteBetalingslinje.fom)
+        assertEquals(Uke(3).fredag, førsteBetalingslinje.tom)
+        assertEquals(1200.toBigDecimal(), førsteBetalingslinje.dagsats)
 
         val andreBetalingslinje = betalingslinjer.last()
-        assertEquals(Uke(5).mandag, andreBetalingslinje.fom())
-        assertEquals(Uke(5).fredag, andreBetalingslinje.tom())
-        assertEquals(1200.toBigDecimal(), andreBetalingslinje.dagsats())
+        assertEquals(Uke(5).mandag, andreBetalingslinje.fom)
+        assertEquals(Uke(5).fredag, andreBetalingslinje.tom)
+        assertEquals(1200.toBigDecimal(), andreBetalingslinje.dagsats)
     }
 
     @Test

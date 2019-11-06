@@ -35,8 +35,8 @@ class PaymentTest {
         val betalingslinjer = tosykedager.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
     }
 
     @Test
@@ -45,11 +45,11 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(2, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer.first().tom)
 
-        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().fom())
-        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().tom())
+        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().fom)
+        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().tom)
     }
 
     @Test
@@ -58,8 +58,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().tom)
     }
 
     @Test
@@ -68,8 +68,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
     }
 
     @Test
@@ -78,8 +78,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
     }
 
     @Test
@@ -88,8 +88,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom)
     }
 
     @Test
@@ -107,8 +107,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 2, 3), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 2, 3), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().tom)
 
     }
 
@@ -142,8 +142,8 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertThat(betalingslinjer).hasSize(1)
-        assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.first().tom())
+        assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.first().tom)
     }
 
     @Test
@@ -152,10 +152,10 @@ class PaymentTest {
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertThat(betalingslinjer).hasSize(2)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom())
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom())
-        assertEquals(LocalDate.of(2018, 2, 10), betalingslinjer.last().fom())
-        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer.last().tom())
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
+        assertEquals(LocalDate.of(2018, 2, 10), betalingslinjer.last().fom)
+        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer.last().tom)
     }
 
     private val S

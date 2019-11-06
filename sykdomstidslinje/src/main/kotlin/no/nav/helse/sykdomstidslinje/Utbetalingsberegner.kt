@@ -7,7 +7,7 @@ import java.time.LocalDate
 internal class Utbetalingsberegner(private val dagsats: BigDecimal) : SykdomstidslinjeVisitor {
 
     private var state: UtbetalingState = Initiell
-    private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
+    private val utbetalingslinjer = mutableListOf<InternUtbetalingslinje>()
 
     private var sykedager = 0
     private var ikkeSykedager = 0
@@ -15,7 +15,11 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
     fun results(): List<Utbetalingslinje> {
         require(state != Ugyldig)
-        return utbetalingslinjer.toList()
+        return utbetalingslinjer.map { Utbetalingslinje(it.startdato, it.tom, it.dagsats) }
+    }
+
+    private data class InternUtbetalingslinje(val startdato: LocalDate, val dagsats: BigDecimal) {
+        var tom = startdato
     }
 
     private fun state(state: UtbetalingState) {
@@ -46,7 +50,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
     }
 
     private fun opprettBetalingslinje(dagen: LocalDate) {
-        utbetalingslinjer.add(Utbetalingslinje(dagen,dagsats))
+        utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
     }
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
