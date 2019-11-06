@@ -3,6 +3,7 @@ package no.nav.helse.person.domain
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.SykdomshendelseDeserializer
@@ -14,6 +15,7 @@ import no.nav.helse.person.domain.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
@@ -29,6 +31,8 @@ class Sakskompleks internal constructor(
     private var tilstand: Sakskomplekstilstand = StartTilstand
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
+
+    private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
@@ -207,6 +211,9 @@ class Sakskompleks internal constructor(
             sakskompleks.setTilstand(sykepengehistorikkHendelse, if (sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
                 TilInfotrygdTilstand
             } else {
+                //TODO Dagsats
+                sakskompleks.utbetalingslinjer = tidslinje.betalingslinjer(10.toBigDecimal())
+
                 TilGodkjenningTilstand
             })
         }
@@ -326,7 +333,10 @@ class Sakskompleks internal constructor(
                 tilstandType = tilstand.type,
                 sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
                     objectMapper.readTree(it)
-                }
+                },
+                utbetalingslinjer = utbetalingslinjer
+                        ?.let { objectMapper.writeValueAsBytes(it) }
+                        ?.let { objectMapper.readTree(it) as ArrayNode }
         )
     }
 
@@ -377,7 +387,8 @@ class Sakskompleks internal constructor(
             val aktørId: String,
             val organisasjonsnummer: String,
             val tilstandType: TilstandType,
-            val sykdomstidslinje: JsonNode?
+            val sykdomstidslinje: JsonNode?,
+            val utbetalingslinjer: ArrayNode?
     )
 }
 

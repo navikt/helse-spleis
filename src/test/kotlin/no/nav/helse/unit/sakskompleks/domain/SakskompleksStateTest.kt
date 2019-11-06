@@ -13,6 +13,7 @@ import no.nav.helse.person.domain.Sakskompleks
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.*
 import no.nav.helse.person.domain.SakskompleksObserver
 import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
@@ -193,7 +194,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `motta sykepengehistorikk når saken er komplett men historikken er utenfor seks måneder`() {
+    fun `motta sykepengehistorikk når saken er komplett og historikken er utenfor seks måneder`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
@@ -210,6 +211,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 sakskompleksId = sakskompleksId
         ))
+
+        assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
+        assertEquals(10.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
+        assertEquals(20.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)

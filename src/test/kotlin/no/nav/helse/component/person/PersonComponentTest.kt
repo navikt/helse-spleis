@@ -214,7 +214,6 @@ internal class PersonComponentTest {
     }
 
     @Test
-    @Disabled
     fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
         val aktørID = "87654321962"
         val virksomhetsnummer = "123456789"
@@ -231,7 +230,7 @@ internal class PersonComponentTest {
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
 
 
-        //TODO: Sjekke at vi har betalingslinjer og at de er ok
+        //TODO: Sjekke at vi har betalingslinjer og at de er ok. Kall REST-endepunktet for å sjekke dette
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
     }
 

@@ -12,6 +12,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
+import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.http.getJson
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
@@ -76,7 +77,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
     SøknadConsumer(builder, søknadTopic, personMediator)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
-    //BehovConsumer(builder, behovTopic, personMediator)
+    BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)
