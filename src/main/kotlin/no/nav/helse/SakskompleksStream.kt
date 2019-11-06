@@ -7,12 +7,8 @@ import io.ktor.application.ApplicationStopping
 import io.ktor.application.log
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
-import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
@@ -30,7 +26,7 @@ import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.time.Duration
-import java.util.Properties
+import java.util.*
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
         HikariConfig().apply {
@@ -69,7 +65,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val builder = StreamsBuilder()
 
     SøknadConsumer(builder, søknadTopic, personMediator)
-    InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
+    //InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
     //BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
