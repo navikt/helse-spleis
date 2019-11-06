@@ -21,7 +21,8 @@ import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.behov.BehovsTyper.*
+import no.nav.helse.behov.BehovsTyper.GodkjenningFraSaksbehandler
+import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -42,11 +43,8 @@ import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration.ofMillis
 import java.util.*
@@ -156,79 +154,84 @@ internal class PersonComponentTest {
         TestConsumer.reset()
     }
 
-//    @Test
-//    fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
-//        val aktørID = "1234567890123"
-//        val virksomhetsnummer = "123456789"
-//
-//        sendNySøknad(aktørID, virksomhetsnummer)
-//        sendSøknad(aktørID, virksomhetsnummer)
-//        sendInnteksmelding(aktørID, virksomhetsnummer)
-//
-//        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
-//        assertOpprettGosysOppgave(aktørId = aktørID)
-//    }
-//
-//    @Test
-//    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
-//        val aktørId2 = "0123456789012"
-//        val virksomhetsnummer2 = "012345678"
-//
-//        sendNySøknad(aktørId2, virksomhetsnummer2)
-//        sendInnteksmelding(aktørId2, virksomhetsnummer2)
-//        sendSøknad(aktørId2, virksomhetsnummer2)
-//
-//        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name))
-//        assertOpprettGosysOppgave(aktørId = aktørId2)
-//    }
-//
-//    @Test
-//    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
-//        val aktørID = "2345678901234"
-//        val virksomhetsnummer = "234567890"
-//
-//        sendSøknad(aktørID, virksomhetsnummer)
-//
-//        assertOpprettGosysOppgave(aktørId = aktørID)
-//    }
-//
-//    @Test
-//    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
-//        val aktørID = "87654321962"
-//        val virksomhetsnummer = "123456789"
-//
-//        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-//        sendSøknad(aktørID, virksomhetsnummer)
-//        sendInnteksmelding(aktørID, virksomhetsnummer)
-//
-//        val sykehistorikk = listOf(SpolePeriode(
-//                fom = søknad.fom!!.minusMonths(8),
-//                tom = søknad.fom!!.minusMonths(7),
-//                grad = "100"
-//        ))
-//        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-//
-//        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
-//    }
-//
-//    @Test
-//    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
-//        val aktørID = "87654321963"
-//        val virksomhetsnummer = "123456789"
-//
-//        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-//        sendSøknad(aktørID, virksomhetsnummer)
-//        sendInnteksmelding(aktørID, virksomhetsnummer)
-//
-//        val sykehistorikk = listOf(SpolePeriode(
-//                fom = søknad.fom!!.minusMonths(6),
-//                tom = søknad.fom!!.minusMonths(5),
-//                grad = "100"
-//        ))
-//        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-//
-//        assertOpprettGosysOppgave(aktørId = aktørID)
-//    }
+    @Test
+    @Disabled("disabled until we have migrated")
+    fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
+        val aktørID = "1234567890123"
+        val virksomhetsnummer = "123456789"
+
+        sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
+    @Disabled("disabled until we have migrated")
+    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
+        val aktørId2 = "0123456789012"
+        val virksomhetsnummer2 = "012345678"
+
+        sendNySøknad(aktørId2, virksomhetsnummer2)
+        sendInnteksmelding(aktørId2, virksomhetsnummer2)
+        sendSøknad(aktørId2, virksomhetsnummer2)
+
+        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name))
+        assertOpprettGosysOppgave(aktørId = aktørId2)
+    }
+
+    @Test
+    @Disabled("disabled until we have migrated")
+    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
+        val aktørID = "2345678901234"
+        val virksomhetsnummer = "234567890"
+
+        sendSøknad(aktørID, virksomhetsnummer)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
+    @Disabled("disabled until we have migrated")
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
+        val aktørID = "87654321962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+    }
+
+    @Test
+    @Disabled("disabled until we have migrated")
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
+        val aktørID = "87654321963"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(6),
+                tom = søknad.fom!!.minusMonths(5),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
 
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
         val behov = ventPåBehov(aktørId, Sykepengehistorikk)
