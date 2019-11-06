@@ -20,6 +20,8 @@ import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
 import java.io.StringWriter
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.*
 
 class Sakskompleks internal constructor(
@@ -27,6 +29,7 @@ class Sakskompleks internal constructor(
         private val aktørId: String,
         private val organisasjonsnummer: String
 ) {
+    private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Sakskomplekstilstand = StartTilstand
 
@@ -35,6 +38,16 @@ class Sakskompleks internal constructor(
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
+
+    private inline fun <reified T> Set<*>.førsteAvType(): T {
+        return first { it is T } as T
+    }
+
+    private fun sykepengegrunnlag() = (sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
+
+    private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
+
+    internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), RoundingMode.HALF_UP)
 
     internal fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse): Boolean {
         return overlapperMed(nySøknadHendelse).also {
@@ -211,9 +224,7 @@ class Sakskompleks internal constructor(
             sakskompleks.setTilstand(sykepengehistorikkHendelse, if (sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
                 TilInfotrygdTilstand
             } else {
-                //TODO Dagsats
-                sakskompleks.utbetalingslinjer = tidslinje.betalingslinjer(10.toBigDecimal())
-
+                sakskompleks.utbetalingslinjer = tidslinje.betalingslinjer(sakskompleks.dagsats())
                 TilGodkjenningTilstand
             })
         }

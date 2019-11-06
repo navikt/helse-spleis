@@ -213,7 +213,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         ))
 
         assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
-        assertEquals(10.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
         assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
         assertEquals(20.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 

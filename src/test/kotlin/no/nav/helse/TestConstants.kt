@@ -197,7 +197,7 @@ internal object TestConstants {
                     arbeidsgiverAktorId = null,
                     arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
                     arbeidsforholdId = null,
-                    beregnetInntekt = null,
+                    beregnetInntekt = 666.toBigDecimal(),
                     refusjon = Refusjon(
                             beloepPrMnd = null,
                             opphoersdato = null
