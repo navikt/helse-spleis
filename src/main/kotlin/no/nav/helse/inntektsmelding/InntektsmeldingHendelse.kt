@@ -29,7 +29,7 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
             inntektsmelding.mottattDato
 
     override fun organisasjonsnummer() =
-            inntektsmelding.virksomhetsnummer
+            inntektsmelding.virksomhetsnummer!!
 
     override fun kanBehandles(): Boolean {
         return inntektsmelding.kanBehandles()

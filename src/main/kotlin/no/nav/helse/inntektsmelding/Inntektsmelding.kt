@@ -23,7 +23,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
 
     val arbeidstakerAktorId = jsonNode["arbeidstakerAktorId"].textValue() as String
 
-    val virksomhetsnummer: String get() = jsonNode["virksomhetsnummer"].textValue()
+    val virksomhetsnummer: String? get() = jsonNode["virksomhetsnummer"]?.textValue()
 
     val arbeidsgiverAktorId: String? get() = jsonNode["arbeidsgiverAktorId"]?.textValue()
 
