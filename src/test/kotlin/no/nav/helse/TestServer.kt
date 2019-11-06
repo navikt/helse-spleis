@@ -66,6 +66,23 @@ fun ApplicationEngine.handleRequest(method: HttpMethod,
     con.test(HttpStatusCode.fromValue(con.responseCode))
 }
 
+fun ApplicationEngine.handleRequest(method: HttpMethod,
+                                    path: String,
+                                    builder: HttpURLConnection.() -> Unit = {}): HttpURLConnection {
+    val url = environment.connectors[0].let { connector ->
+        URL("${connector.type.name.toLowerCase()}://${connector.host}:${connector.port}$path")
+    }
+    val con = url.openConnection() as HttpURLConnection
+    con.requestMethod = method.value
+
+    con.builder()
+
+    con.connectTimeout = 1000
+    con.readTimeout = 1000
+
+    return con
+}
+
 val HttpURLConnection.responseBody get() =
     BufferedReader(InputStreamReader(
             if (responseCode in 200..299) {

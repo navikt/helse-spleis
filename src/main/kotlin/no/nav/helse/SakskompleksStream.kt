@@ -3,7 +3,6 @@ package no.nav.helse
 import com.auth0.jwk.JwkProviderBuilder
 import com.zaxxer.hikari.HikariConfig
 import io.ktor.application.*
-import io.ktor.application.log
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
@@ -96,7 +95,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
 @KtorExperimentalAPI
 private fun Application.restInterface(personMediator: PersonMediator) {
-    routing { authenticate { person(personMediator) }}
+
 
     val idProvider = environment.config.property(oidcConfigUrl).getString()
         .getJson()
@@ -110,7 +109,7 @@ private fun Application.restInterface(personMediator: PersonMediator) {
     install(Authentication) {
         jwt {
             verifier(jwkProvider, idProvider["issuer"].toString())
-            realm = environment.config.property(ktorApplicationId)?.getString()
+            realm = environment.config.property(ktorApplicationId).getString()
             validate { credentials ->
                 val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
                 if (requiredGroup in groupsClaim &&
@@ -130,6 +129,12 @@ private fun Application.restInterface(personMediator: PersonMediator) {
         host(host = "nais.preprod.local", schemes = listOf("https"), subDomains = listOf("speil"))
         host(host = "localhost", schemes = listOf("http", "https"))
         allowCredentials = true
+    }
+
+    routing {
+        authenticate {
+            person(personMediator)
+        }
     }
 
 }

@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit
 
 const val oidcConfigUrl = "oidcConfigUrl"
 const val clientId = "clientId"
-const val clientSecret = "clientSecret"
-const val issuer = "issuer"
 const val requiredGroup = "requiredGroup"
 val ktorApplicationId = "ktor.application.id"
 

@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.http.*
+import io.ktor.http.HttpHeaders.Authorization
+import io.ktor.http.HttpHeaders.Origin
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -26,7 +31,6 @@ import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
-import no.nav.helse.person.domain.Person
 import no.nav.helse.person.personPath
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -91,9 +95,12 @@ internal class PersonComponentTest {
 
         private lateinit var hikariConfig: HikariConfig
 
+        private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
+        private lateinit var jwtStub: JwtStub
+
         private lateinit var embeddedServer: ApplicationEngine
 
-        private fun applicationConfig(): Map<String, String> {
+        private fun applicationConfig(wiremockBaseUrl: String): Map<String, String> {
             return mapOf(
                 "KAFKA_APP_ID" to kafkaApplicationId,
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
@@ -101,7 +108,7 @@ internal class PersonComponentTest {
                 "KAFKA_PASSWORD" to password,
                 "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
                 "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres"),
-                "OIDC_CONFIG_URL" to TODO,
+                "OIDC_CONFIG_URL" to "$wiremockBaseUrl/config",
                 "CLIENT_ID" to "el_cliento",
                 "CLIENT_SECRET" to "el_secreto",
                 "REQUIRED_GROUP" to "mygroup",
@@ -144,7 +151,13 @@ internal class PersonComponentTest {
             adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
             kafkaProducer = KafkaProducer(producerProperties(), StringSerializer(), StringSerializer())
 
-            embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig()))
+            //Stub ID provider (for authentication of REST endpoints)
+            wireMockServer.start()
+            jwtStub = JwtStub("test issuer", wireMockServer)
+            stubFor(jwtStub.stubbedJwkProvider())
+            stubFor(jwtStub.stubbedConfigProvider())
+
+            embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig(wireMockServer.baseUrl())))
                 .start(wait = false)
         }
 
@@ -152,6 +165,7 @@ internal class PersonComponentTest {
         @JvmStatic
         internal fun `stop embedded environment`() {
             embeddedServer.stop(1, 1, SECONDS)
+            wireMockServer.stop()
             TestConsumer.close()
             adminClient.close()
             embeddedKafkaEnvironment.tearDown()
@@ -267,30 +281,22 @@ internal class PersonComponentTest {
 
     @Test
     fun `gitt en ny sak, så skal den kunne hentes ut på personen`() {
-        val jwkStub = JwtStub("test issuer", embeddedServer.environment.rootPath)
-        val token = jwkStub.createTokenFor("mygroup")
-        val enAktørId = "87654321962"
+        val token = jwtStub.createTokenFor("mygroup")
+        val enAktørId = "1211109876543"
         val virksomhetsnummer = "123456789"
 
-        stubFor(jwkStub.stubbedJwkProvider())
-        stubFor(jwkStub.stubbedConfigProvider())
+        val nySøknad = sendNySøknad(enAktørId, virksomhetsnummer)
 
-        sendNySøknad(enAktørId, virksomhetsnummer)
-
-        embeddedServer.handleRequest(HttpMethod.Get, personPath + enAktørId,
+        val connection = embeddedServer.handleRequest(HttpMethod.Get, personPath + enAktørId,
             builder = {
-                headersOf(HttpHeaders.Accept to listOf(ContentType.Application.Json.toString()),
-                    HttpHeaders.Authorization to listOf("Bearer $token"),
-                    HttpHeaders.Origin to listOf("http://localhost"))
-            },
-            test = {
-                assertEquals(HttpStatusCode.OK.value, responseCode)
-                val person = Person.fromJson(responseBody)
-                assertEquals(enAktørId, person.aktørId)
+                setRequestProperty(Authorization, "Bearer $token")
+                setRequestProperty(Origin, "http://localhost")
             })
-    }
 
-//fun `gitt en sak sendt til godkjenning, så skal hele saken kunne hentes ut`() {
+        assertEquals(HttpStatusCode.OK.value, connection.responseCode)
+        val lagretNySøknad = objectMapper.readTree(connection.responseBody).findValue("søknad")
+        assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
+    }
 
     private fun sendInntektshistorikkløsning(aktørId: String, avvikSisteTreMåneder: Boolean) {
         val behov = ventPåBehov(aktørId, Inntektshistorikk)

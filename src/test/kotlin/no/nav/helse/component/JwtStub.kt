@@ -2,18 +2,22 @@ package no.nav.helse.component
 
 import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.*
 import kotlinx.io.core.*
 import java.security.*
 import java.security.interfaces.*
 import java.util.*
 
-class JwtStub(private val issuer: String, private val baseUrl: String) {
+class JwtStub(private val issuer: String, private val wireMockServer: WireMockServer) {
 
    private val privateKey: RSAPrivateKey
    private val publicKey: RSAPublicKey
 
    init {
+      val client = WireMock.create().port(wireMockServer.port()).build()
+      WireMock.configureFor(client)
+
       val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
       keyPairGenerator.initialize(512)
 
@@ -53,8 +57,8 @@ class JwtStub(private val issuer: String, private val baseUrl: String) {
    fun stubbedConfigProvider() = WireMock.get(WireMock.urlPathEqualTo("/config")).willReturn(
       WireMock.okJson("""
 {
-    "jwks_uri": "$baseUrl/jwks",
-    "token_endpoint": "$baseUrl/token",
+    "jwks_uri": "${wireMockServer.baseUrl()}/jwks",
+    "token_endpoint": "${wireMockServer.baseUrl()}/token",
     "issuer": "$issuer"
 }
 """.trimIndent())
