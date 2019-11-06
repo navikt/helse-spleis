@@ -1,18 +1,24 @@
 package no.nav.helse
 
+import com.auth0.jwk.JwkProviderBuilder
 import com.zaxxer.hikari.HikariConfig
-import io.ktor.application.Application
-import io.ktor.application.ApplicationStarted
-import io.ktor.application.ApplicationStopping
-import io.ktor.application.log
+import io.ktor.application.*
+import io.ktor.auth.Authentication
+import io.ktor.auth.authenticate
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.jwt.jwt
+import io.ktor.features.CORS
+import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovProducer
+import no.nav.helse.http.getJson
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
 import no.nav.helse.person.PersonPostgresRepository
+import no.nav.helse.person.person
 import no.nav.helse.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -25,6 +31,7 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
+import java.net.URL
 import java.time.Duration
 import java.util.*
 
@@ -62,6 +69,8 @@ fun Application.sakskompleksApplication(): KafkaStreams {
             behovProducer = BehovProducer(behovTopic, producer),
             gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
 
+    restInterface(personMediator)
+
     val builder = StreamsBuilder()
 
     SøknadConsumer(builder, søknadTopic, personMediator)
@@ -80,6 +89,53 @@ fun Application.sakskompleksApplication(): KafkaStreams {
         }
     }
 }
+
+@KtorExperimentalAPI
+private fun Application.restInterface(personMediator: PersonMediator) {
+
+
+    val idProvider = environment.config.property(oidcConfigUrl).getString()
+        .getJson()
+        .fold(
+            { throw it },
+            { it }
+        )
+    val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].toString())).build()
+
+    val requiredGroup = environment.config.property(requiredGroup).getString()
+    install(Authentication) {
+        jwt {
+            verifier(jwkProvider, idProvider["issuer"].toString())
+            realm = environment.config.property(ktorApplicationId).getString()
+            validate { credentials ->
+                val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
+                if (requiredGroup in groupsClaim &&
+                    environment.config.property(clientId).getString() in credentials.payload.audience) {
+                    JWTPrincipal(credentials.payload)
+                } else {
+                    log.info("${credentials.payload.getClaim("NAVident").asString()} with audience ${credentials.payload.audience} " +
+                        "is not authorized to use this app, denying access")
+                    null
+                }
+            }
+        }
+    }
+
+    install(CORS) {
+        host(host = "nais.adeo.no", schemes = listOf("https"), subDomains = listOf("speil"))
+        host(host = "nais.preprod.local", schemes = listOf("https"), subDomains = listOf("speil"))
+        host(host = "localhost", schemes = listOf("http", "https"))
+        allowCredentials = true
+    }
+
+    routing {
+        authenticate {
+            person(personMediator)
+        }
+    }
+
+}
+
 
 @KtorExperimentalAPI
 private fun Application.streamsConfig() = commonKafkaProperties().apply {

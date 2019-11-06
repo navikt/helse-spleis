@@ -73,6 +73,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         gosysOppgaveProducer.opprettOppgave(søknad.aktørId)
     }
 
+    fun hentPersonJson(aktørId: String): String? = personRepository.hentPersonJson(aktørId)
+
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         if (event.currentState == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId)
