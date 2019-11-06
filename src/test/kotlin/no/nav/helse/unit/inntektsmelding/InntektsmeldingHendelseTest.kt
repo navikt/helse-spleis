@@ -102,7 +102,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `inntektsmelding uten mottattDato er ikke ugyldig`() {
+    internal fun `inntektsmelding uten mottattDato er ikke gyldig`() {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("mottattDato")
         }
@@ -112,7 +112,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `inntektsmelding uten foersteFravaersdag er ikke ugyldig`() {
+    internal fun `inntektsmelding uten foersteFravaersdag er ikke gyldig`() {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("foersteFravaersdag")
         }
@@ -121,4 +121,13 @@ internal class InntektsmeldingHendelseTest {
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
 
+    @Test
+    internal fun `inntektsmelding uten virksomhetsnummer er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
+            (it as ObjectNode).remove("virksomhetsnummer")
+        }
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
+    }
 }
