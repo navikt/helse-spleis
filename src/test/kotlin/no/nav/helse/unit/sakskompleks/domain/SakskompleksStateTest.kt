@@ -1,7 +1,5 @@
 package no.nav.helse.unit.sakskompleks.domain
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
@@ -9,7 +7,6 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.inntektsmelding.Inntektsmelding
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.juli
 import no.nav.helse.person.domain.Sakskompleks
@@ -19,7 +16,6 @@ import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
-import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
@@ -111,20 +107,6 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.currentState)
-    }
-
-    @Test
-    fun `motta en inntektsmelding som ikke kan behandles etter ny søknad`() {
-        val sakskompleks = beInNySøknad()
-
-        val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
-            (it as ObjectNode).remove("mottattDato")
-        }
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
-        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse)
-
-        assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
     }
 
     @Test

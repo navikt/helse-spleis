@@ -44,12 +44,18 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val arbeidGjenopptatt get() = jsonNode["arbeidGjenopptatt"]?.safelyUnwrapDate()
     val korrigerer get() = jsonNode["korrigerer"]?.asText()
 
-    val arbeidsgiver: Arbeidsgiver? get() = jsonNode["arbeidsgiver"]?.let { Arbeidsgiver(it) }
+    val arbeidsgiver: Arbeidsgiver get() = jsonNode["arbeidsgiver"].let { Arbeidsgiver(it) }
+
+    fun kanBehandles(): Boolean {
+        return jsonNode["arbeidsgiver"].isNotNull() && jsonNode["arbeidsgiver"]["orgnummer"].isNotNull()
+    }
+
+    private fun JsonNode?.isNotNull() = this != null && !isNull
 
     fun toJson(): JsonNode = jsonNode
 
     data class Arbeidsgiver(val jsonNode: JsonNode) {
-        val orgnummer: String? get() = jsonNode["orgnummer"]?.textValue()
+        val orgnummer: String get() = jsonNode["orgnummer"].textValue()
     }
 
     data class Periode(val jsonNode: JsonNode) {

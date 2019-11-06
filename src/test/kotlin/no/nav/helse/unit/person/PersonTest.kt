@@ -1,14 +1,21 @@
 package no.nav.helse.unit.person
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.inntektsmelding.Inntektsmelding
+import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.person.domain.*
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT
+import no.nav.helse.person.domain.Sakskompleks.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
@@ -39,7 +46,7 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -50,7 +57,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -62,7 +69,7 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -91,7 +98,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
     }
 
 
@@ -103,8 +110,8 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
 
@@ -118,7 +125,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -130,7 +137,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -142,7 +149,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
 
@@ -156,7 +163,7 @@ internal class PersonTest {
         assertTrue(tilstandsflytObserver.personEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
         assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
     }
 
     @Test
@@ -180,10 +187,24 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `søknad uten organisasjonsnummer kaster exception`() {
+    internal fun `ny søknad uten organisasjonsnummer kaster exception`() {
         testPerson.also {
             assertThrows<UtenforOmfangException> {
                 it.håndterNySøknad(nySøknadHendelse(
+                        arbeidsgiver = ArbeidsgiverDTO(
+                                navn = "En arbeidsgiver",
+                                orgnummer = null
+                        )
+                ))
+            }
+        }
+    }
+
+    @Test
+    internal fun `sendt søknad uten organisasjonsnummer kaster exception`() {
+        testPerson.also {
+            assertThrows<UtenforOmfangException> {
+                it.håndterSendtSøknad(sendtSøknadHendelse(
                         arbeidsgiver = ArbeidsgiverDTO(
                                 navn = "En arbeidsgiver",
                                 orgnummer = null
@@ -290,7 +311,29 @@ internal class PersonTest {
         }
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
-        assertEquals(Sakskompleks.TilstandType.TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+    }
+
+    @Test
+    fun `motta en inntektsmelding som ikke kan behandles etter ny søknad`() {
+        testPerson.also {
+            it.håndterNySøknad(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+
+            val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
+                (it as ObjectNode).remove("virksomhetsnummer")
+            }
+            val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+            assertThrows<UtenforOmfangException> {
+                it.håndterInntektsmelding(inntektsmeldingHendelse)
+            }
+
+            assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
+            assertTrue(tilstandsflytObserver.personEndret, "skulle endret person")
+
+            assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
+            assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        }
     }
 
     private class TilstandsflytObserver : PersonObserver {

@@ -23,7 +23,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
 
     val arbeidstakerAktorId = jsonNode["arbeidstakerAktorId"].textValue() as String
 
-    val virksomhetsnummer: String? get() = jsonNode["virksomhetsnummer"]?.textValue()
+    val virksomhetsnummer: String get() = jsonNode["virksomhetsnummer"].textValue()
 
     val arbeidsgiverAktorId: String? get() = jsonNode["arbeidsgiverAktorId"]?.textValue()
 
@@ -40,7 +40,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
     fun kanBehandles(): Boolean {
         return jsonNode["mottattDato"] != null
                 && jsonNode["foersteFravaersdag"] != null
-                && jsonNode["virksomhetsnummer"] != null
+                && jsonNode["virksomhetsnummer"] != null && !jsonNode["virksomhetsnummer"].isNull
     }
     data class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate

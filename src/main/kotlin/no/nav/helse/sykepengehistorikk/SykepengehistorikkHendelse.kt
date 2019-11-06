@@ -1,9 +1,9 @@
 package no.nav.helse.sykepengehistorikk
 
 import no.nav.helse.hendelse.SakskompleksHendelse
-import no.nav.helse.person.domain.PersonHendelse
+import no.nav.helse.person.domain.ArbeidstakerHendelse
 
-class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistorikk): PersonHendelse, SakskompleksHendelse {
+class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistorikk): ArbeidstakerHendelse, SakskompleksHendelse {
 
     override fun sakskompleksId() =
         sykepengehistorikk.sakskompleksId
@@ -14,6 +14,6 @@ class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistor
     fun sisteFraværsdag() =
             sykepengehistorikk.perioder.maxBy { it.tom }?.tom
 
-    override fun organisasjonsnummer(): String? =
+    override fun organisasjonsnummer(): String =
             sykepengehistorikk.organisasjonsnummer
 }

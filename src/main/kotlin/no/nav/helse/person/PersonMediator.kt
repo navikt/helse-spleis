@@ -79,8 +79,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         }
     }
 
-    private fun finnPerson(personHendelse: PersonHendelse) =
-            (personRepository.hentPerson(personHendelse.aktørId()) ?: Person(aktørId = personHendelse.aktørId())).also {
+    private fun finnPerson(arbeidstakerHendelse: ArbeidstakerHendelse) =
+            (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(aktørId = arbeidstakerHendelse.aktørId())).also {
                 it.addObserver(this)
                 it.addObserver(lagrePersonDao)
                 it.addObserver(sakskompleksProbe)

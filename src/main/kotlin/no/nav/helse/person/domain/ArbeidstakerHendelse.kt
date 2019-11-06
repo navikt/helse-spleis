@@ -1,7 +1,7 @@
 package no.nav.helse.person.domain
 
-interface PersonHendelse {
+interface ArbeidstakerHendelse {
     fun aktørId(): String
-    fun organisasjonsnummer(): String?
+    fun organisasjonsnummer(): String
     fun kanBehandles() = true
 }

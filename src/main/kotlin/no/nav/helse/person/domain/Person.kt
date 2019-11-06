@@ -18,14 +18,24 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     private val personObservers = mutableListOf<PersonObserver>()
     fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
+        if (!nySøknadHendelse.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
+        }
         finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndterNySøknad(nySøknadHendelse)
     }
 
     fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
+        if (!sendtSøknadHendelse.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
+        }
         finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndterSendtSøknad(sendtSøknadHendelse)
     }
 
     fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        if (!inntektsmeldingHendelse.kanBehandles()) {
+            invaliderAlleSaker(inntektsmeldingHendelse)
+            throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmeldingHendelse)
+        }
         finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndterInntektsmelding(inntektsmeldingHendelse)
     }
 
@@ -48,15 +58,21 @@ class Person(val aktørId: String) : SakskompleksObserver {
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun finnArbeidsgiver(hendelse: PersonHendelse) =
-            hendelse.organisasjonsnummer()?.let { arbeidsgivere[it] }
+    private fun invaliderAlleSaker(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        arbeidsgivere.forEach { (_, arbeidsgiver) ->
+            arbeidsgiver.invaliderSaker(inntektsmeldingHendelse)
+        }
+    }
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: PersonHendelse) =
-        hendelse.organisasjonsnummer()?.let { orgnr ->
+    private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
+            hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
+
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
+        hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }
-        } ?: throw UtenforOmfangException("dokument mangler virksomhetsnummer", hendelse)
+        }
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
         Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
@@ -95,6 +111,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
+        }
+
+        internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {
+            saker.forEach { it.invaliderSak(hendelse) }
         }
 
         fun addObserver(observer: SakskompleksObserver) {

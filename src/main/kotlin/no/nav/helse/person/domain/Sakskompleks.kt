@@ -49,14 +49,9 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
-        return if (!inntektsmeldingHendelse.kanBehandles()) {
-            setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
-            true
-        } else {
-            overlapperMed(inntektsmeldingHendelse).also {
-                if (it) {
-                    tilstand.håndterInntektsmelding(this, inntektsmeldingHendelse)
-                }
+        return overlapperMed(inntektsmeldingHendelse).also {
+            if (it) {
+                tilstand.håndterInntektsmelding(this, inntektsmeldingHendelse)
             }
         }
     }
@@ -69,12 +64,16 @@ class Sakskompleks internal constructor(
         tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
     }
 
+    internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
+        setTilstand(hendelse, TilInfotrygdTilstand)
+    }
+
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
             hendelse.sykdomstidslinje()?.let {
                 this.sykdomstidslinje?.overlapperMed(it) ?: true
             } ?: false
 
-    private fun setTilstand(event: PersonHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+    private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
         tilstand.leaving()
 
         val previousStateName = tilstand.type
@@ -139,7 +138,7 @@ class Sakskompleks internal constructor(
             else -> this.sykdomstidslinje
         }
 
-        val innenforOmfang = tidslinje?.erUtenforOmfang()?.not()?:false
+        val innenforOmfang = tidslinje?.erUtenforOmfang()?.not() ?: false
         if (innenforOmfang) {
             sykdomstidslinje = tidslinje
         }
@@ -365,7 +364,7 @@ class Sakskompleks internal constructor(
 
     private fun emitSakskompleksEndret(
             currentState: TilstandType,
-            tidslinjeEvent: PersonHendelse,
+            tidslinjeEvent: ArbeidstakerHendelse,
             previousState: TilstandType,
             previousMemento: Memento
     ) {
