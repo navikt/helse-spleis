@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
 import no.nav.helse.person.domain.ArbeidstakerHendelse
+import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -45,6 +46,7 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
 
     override fun sykdomstidslinje() =
             sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
+                if (resultatTidslinje.overlapperMed(delTidslinje)) throw UtenforOmfangException("Søknaden inneholder overlappende sykdomsperioder", this)
                 resultatTidslinje + delTidslinje
             }
 
