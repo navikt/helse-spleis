@@ -69,7 +69,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val builder = StreamsBuilder()
 
     SøknadConsumer(builder, søknadTopic, personMediator)
-    //InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
+    InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
     //BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {

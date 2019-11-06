@@ -25,18 +25,18 @@ class NaisComponentTest {
         }
     }
 
-//    @Test
-//    fun `should respond with metrics`() {
-//        testServer(environment = testEnv) {
-//            handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
-//                assertEquals(HttpStatusCode.OK, responseStatusCode)
-//                val response = responseBody.reader().use { it.readText() }
-//                println(response)
-//                assertTrue(response.contains("soknader_totals"))
-//                assertTrue(response.contains("""logback_events_total{level="error",}"""))
-//            }
-//        }
-//    }
+    @Test
+    fun `should respond with metrics`() {
+        testServer(environment = testEnv) {
+            handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
+                assertEquals(HttpStatusCode.OK, responseStatusCode)
+                val response = responseBody.reader().use { it.readText() }
+                println(response)
+                assertTrue(response.contains("soknader_totals"))
+                assertTrue(response.contains("""logback_events_total{level="error",}"""))
+            }
+        }
+    }
 
     @Test
     fun `should be alive`() {
