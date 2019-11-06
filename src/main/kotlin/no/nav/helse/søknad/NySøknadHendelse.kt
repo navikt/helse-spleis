@@ -26,6 +26,7 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
 
     override fun kanBehandles(): Boolean {
         return søknad.kanBehandles()
+                && søknad.sykeperioder.all { it.sykmeldingsgrad == 100 }
     }
 
     override fun aktørId() =

@@ -24,7 +24,7 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val tom get() = jsonNode["tom"].asText().let { LocalDate.parse(it) }
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
     val egenmeldinger get() = jsonNode["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
-    val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Periode(it) } ?: emptyList()
+    val sykeperioder get() = jsonNode["soknadsperioder"]?.map { Sykeperiode(it) } ?: emptyList()
     val fraværsperioder
         get() = jsonNode["fravar"]?.filterNot {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(
@@ -61,6 +61,15 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     data class Periode(val jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+    }
+
+    data class Sykeperiode(val jsonNode: JsonNode) {
+        val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+        val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+        val sykmeldingsgrad: Int = jsonNode["sykmeldingsgrad"].intValue()
+        val faktiskGrad: Int? = jsonNode["faktiskGrad"]?.let {
+            if (!it.isNull) it.intValue() else null
+        }
     }
 
     data class FraværsPeriode(val jsonNode: JsonNode) {

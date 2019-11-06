@@ -36,9 +36,6 @@ internal object TestConstants {
     val ferieFom = 1.oktober
     val ferieTom = 4.oktober
 
-    val `seks måneder og én dag før første sykedag` = egenmeldingFom.minusMonths(6).minusDays(1)
-    val `én dag færre enn seks måneder før første sykedag` = egenmeldingFom.minusMonths(6).plusDays(1)
-
     fun søknadDTO(
             id: String = UUID.randomUUID().toString(),
             status: SoknadsstatusDTO,
@@ -51,10 +48,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -97,10 +96,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -133,10 +134,12 @@ internal object TestConstants {
             )),
             søknadsperioder: List<SoknadsperiodeDTO> = listOf(SoknadsperiodeDTO(
                     fom = sykeperiodeFOM,
-                    tom = 30.september
+                    tom = 30.september,
+                    sykmeldingsgrad = 100
             ), SoknadsperiodeDTO(
                     fom = 5.oktober,
-                    tom = sykeperiodeTOM
+                    tom = sykeperiodeTOM,
+                    sykmeldingsgrad = 100
             )),
             fravær: List<FravarDTO> = listOf(FravarDTO(
                     fom = ferieFom,
@@ -157,6 +160,7 @@ internal object TestConstants {
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver
     ).toJsonNode()))
+
 
     fun inntektsmeldingHendelse(aktørId: String = "",
                                 virksomhetsnummer: String? = "123456789",
