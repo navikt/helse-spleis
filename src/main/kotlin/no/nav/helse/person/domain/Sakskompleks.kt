@@ -214,13 +214,24 @@ class Sakskompleks internal constructor(
 
         override val type = KOMPLETT_SYKDOMSTIDSLINJE
 
+        private const val seksMåneder = 180
+
         override fun entering(sakskompleks: Sakskompleks) {
             sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk)
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            if (sykepengehistorikkHendelse.påvirkerSakensMaksdato(sakskompleks.sykdomstidslinje!!)) sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
-            else sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand)
+            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
+                    ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand)
+
+            val tidslinje = sakskompleks.sykdomstidslinje
+                    ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+
+            sakskompleks.setTilstand(sykepengehistorikkHendelse, if (sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
+                TilInfotrygdTilstand
+            } else {
+                TilGodkjenningTilstand
+            })
         }
     }
 

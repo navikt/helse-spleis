@@ -13,7 +13,7 @@ import java.util.*
 class SykepengehistorikkHendelseTest {
 
     @Test
-    fun `tidslinje fra tom sykepengehistorikk`() {
+    fun `siste fraværsdato fra tom sykepengehistorikk`() {
         val sykepengehistorikkHendelse = SykepengehistorikkHendelse(sykepengehistorikk(
                         perioder = emptyList(),
                         organisasjonsnummer = organisasjonsnummer,
@@ -21,11 +21,11 @@ class SykepengehistorikkHendelseTest {
                         sakskompleksId = sakskompleksId
                 ))
 
-        assertNull(sykepengehistorikkHendelse.sykdomstidslinje())
+        assertNull(sykepengehistorikkHendelse.sisteFraværsdag())
     }
 
     @Test
-    fun `tidslinje fra sykepengehistorikk med én periode`() {
+    fun `startdato fra sykepengehistorikk med én periode`() {
         val sykepengehistorikkHendelse = SykepengehistorikkHendelse(sykepengehistorikk(
                 perioder = listOf(
                         SpolePeriode(1.juni, 2.juni, "100")
@@ -35,12 +35,11 @@ class SykepengehistorikkHendelseTest {
                 sakskompleksId = sakskompleksId
         ))
 
-        assertEquals(2.juni, sykepengehistorikkHendelse.sykdomstidslinje()?.startdato())
-        assertEquals(2.juni, sykepengehistorikkHendelse.sykdomstidslinje()?.sluttdato())
+        assertEquals(2.juni, sykepengehistorikkHendelse.sisteFraværsdag())
     }
 
     @Test
-    fun `tidslinje fra sykepengehistorikk med flere periode`() {
+    fun `siste fraværsdag fra sykepengehistorikk med flere periode`() {
         val sykepengehistorikkHendelse = SykepengehistorikkHendelse(sykepengehistorikk(
                 perioder = listOf(
                         SpolePeriode(1.juni, 2.juni, "100"),
@@ -51,8 +50,7 @@ class SykepengehistorikkHendelseTest {
                 sakskompleksId = sakskompleksId
         ))
 
-        assertEquals(2.juli, sykepengehistorikkHendelse.sykdomstidslinje()?.startdato())
-        assertEquals(2.juli, sykepengehistorikkHendelse.sykdomstidslinje()?.sluttdato())
+        assertEquals(2.juli, sykepengehistorikkHendelse.sisteFraværsdag())
     }
 
     @Test
@@ -67,8 +65,7 @@ class SykepengehistorikkHendelseTest {
                 sakskompleksId = sakskompleksId
         ))
 
-        assertEquals(3.juni, sykepengehistorikkHendelse.sykdomstidslinje()?.startdato())
-        assertEquals(3.juni, sykepengehistorikkHendelse.sykdomstidslinje()?.sluttdato())
+        assertEquals(3.juni, sykepengehistorikkHendelse.sisteFraværsdag())
     }
 
     private companion object {
