@@ -1,12 +1,13 @@
 package no.nav.helse.component
 
-import com.auth0.jwt.*
-import com.auth0.jwt.algorithms.*
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.*
-import kotlinx.io.core.*
-import java.security.*
-import java.security.interfaces.*
+import com.github.tomakehurst.wiremock.client.WireMock
+import kotlinx.io.core.String
+import java.security.KeyPairGenerator
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 import java.util.*
 
 class JwtStub(private val issuer: String, private val wireMockServer: WireMockServer) {
@@ -26,15 +27,15 @@ class JwtStub(private val issuer: String, private val wireMockServer: WireMockSe
       publicKey = keyPair.public as RSAPublicKey
    }
 
-   fun createTokenFor(group: String, audience: String? = null): String {
+   fun createTokenFor(subject: String, groups: List<String>, audience: String): String {
       val algorithm = Algorithm.RSA256(publicKey, privateKey)
 
       return JWT.create()
          .withIssuer(issuer)
-         .withAudience(audience ?: "el_cliento")
+         .withAudience(audience)
          .withKeyId("key-1234")
-         .withSubject("Da Usah")
-         .withArrayClaim("groups", arrayOf("someothergroup1", group, "someothergroup2"))
+         .withSubject(subject)
+         .withArrayClaim("groups", groups.toTypedArray())
          .sign(algorithm)
    }
 

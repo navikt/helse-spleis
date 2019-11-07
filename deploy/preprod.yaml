@@ -30,6 +30,11 @@ spec:
     path: /metrics
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/vault
+        kvPath: /kv/preprod/fss/spleis/default
+      - mountPath: /var/run/secrets/nais.io/azure
+        kvPath: /azuread/data/dev/creds/spleis
   secureLogs:
     enabled: true
   env:
@@ -43,3 +48,5 @@ spec:
     value: spleis
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
+  - name: AZURE_CONFIG_URL
+    value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration

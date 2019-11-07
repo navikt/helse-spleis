@@ -92,21 +92,19 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 }
 
 @KtorExperimentalAPI
-private fun Application.restInterface(personMediator: PersonMediator) {
-    val idProvider = environment.config.propertyOrNull("oidc.configuration_url")
-            ?.getString()
-            ?.getJson() ?: return log.info("skipping rest interface because it has not been configured properly")
-
+private fun Application.restInterface(personMediator: PersonMediator,
+                                      configurationUrl: String = environment.config.property("azure.configuration_url").getString(),
+                                      clientId: String = environment.config.property("azure.client_id").getString(),
+                                      requiredGroup: String = environment.config.property("azure.required_group").getString()) {
+    val idProvider = configurationUrl.getJson()
     val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].textValue())).build()
 
-    val requiredGroup = environment.config.property("oidc.required_group").getString()
     install(Authentication) {
         jwt {
             verifier(jwkProvider, idProvider["issuer"].textValue())
             validate { credentials ->
                 val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
-                if (requiredGroup in groupsClaim &&
-                    environment.config.property("oidc.client_id").getString() in credentials.payload.audience) {
+                if (requiredGroup in groupsClaim && clientId in credentials.payload.audience) {
                     JWTPrincipal(credentials.payload)
                 } else {
                     log.info("${credentials.payload.subject} with audience ${credentials.payload.audience} " +
@@ -174,12 +172,12 @@ private fun Application.addShutdownHook(streams: KafkaStreams) {
 
         if (newState == KafkaStreams.State.ERROR) {
             // if the stream has died there is no reason to keep spinning
-            log.warn("No reason to keep living, closing stream")
+            log.warn("closing stream because it went into error state")
             streams.close(Duration.ofSeconds(10))
         }
     }
-    streams.setUncaughtExceptionHandler { _, ex ->
-        log.error("Caught exception in stream, exiting", ex)
+    streams.setUncaughtExceptionHandler { _, err ->
+        log.error("Caught exception in stream: ${err.message}", err)
         streams.close(Duration.ofSeconds(10))
     }
 }

@@ -9,6 +9,8 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -45,10 +47,18 @@ fun createConfigFromEnvironment(env: Map<String, String>) =
 
         env["VAULT_MOUNTPATH"]?.let { put("database.vault.mountpath", it) }
 
-        env["OIDC_CONFIG_URL"]?.let { put("oidc.configuration_url", it) }
-        env["CLIENT_ID"]?.let { put("oidc.client_id", it) }
-        env["REQUIRED_GROUP"]?.let { put("oidc.required_group", it) }
+        put("azure.client_id", "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID"))
+        put("azure.client_secret", "/var/run/secrets/nais.io/azure/client_secret".readFile() ?: env.getValue("AZURE_CLIENT_SECRET"))
+        env["AZURE_CONFIG_URL"]?.let { put("azure.configuration_url", it) }
+        env["AZURE_REQUIRED_GROUP"]?.let { put("azure.required_group", it) }
     }
+
+private fun String.readFile() =
+        try {
+            File(this).readText(Charsets.UTF_8)
+        } catch (err: FileNotFoundException) {
+            null
+        }
 
 @KtorExperimentalAPI
 fun main() {

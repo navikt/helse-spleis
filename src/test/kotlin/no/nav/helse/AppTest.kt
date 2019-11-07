@@ -12,7 +12,9 @@ class AppTest {
         val appConfig = createConfigFromEnvironment(mapOf(
                 "DATABASE_HOST" to "localhost",
                 "DATABASE_PORT" to "1234",
-                "DATABASE_NAME" to "foo"
+                "DATABASE_NAME" to "foo",
+                "AZURE_CLIENT_ID" to "foo",
+                "AZURE_CLIENT_SECRET" to "bar"
         ))
 
         assertEquals("jdbc:postgresql://localhost:1234/foo", appConfig.property("database.jdbc-url").getString())
@@ -24,7 +26,9 @@ class AppTest {
                 "DATABASE_HOST" to "localhost",
                 "DATABASE_PORT" to "1234",
                 "DATABASE_NAME" to "foo",
-                "DATABASE_USERNAME" to "bar"
+                "DATABASE_USERNAME" to "bar",
+                "AZURE_CLIENT_ID" to "foo",
+                "AZURE_CLIENT_SECRET" to "bar"
         ))
 
         assertEquals("jdbc:postgresql://localhost:1234/foo?user=bar", appConfig.property("database.jdbc-url").getString())
@@ -38,7 +42,9 @@ class AppTest {
                 "DATABASE_JDBC_URL" to jdbcUrl,
                 "DATABASE_HOST" to "localhost",
                 "DATABASE_PORT" to "1234",
-                "DATABASE_NAME" to "foo"
+                "DATABASE_NAME" to "foo",
+                "AZURE_CLIENT_ID" to "foo",
+                "AZURE_CLIENT_SECRET" to "bar"
         ))
 
         assertEquals(jdbcUrl, appConfig.property("database.jdbc-url").getString())
