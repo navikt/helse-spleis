@@ -17,12 +17,13 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
     private var betalteSykedager = 0
     private var maksdato: LocalDate? = null
 
-    fun results(): List<Utbetalingslinje> {
+    fun results(): Utbetalingsberegning {
         require(state != Ugyldig)
-        return utbetalingslinjer.map { Utbetalingslinje(it.startdato, it.tom, it.dagsats) }
+        return Utbetalingsberegning(
+            maksdato,
+            utbetalingslinjer.map { Utbetalingslinje(it.startdato, it.tom, it.dagsats) }
+        )
     }
-
-    fun maksdato() = maksdato
 
     private data class InternUtbetalingslinje(val startdato: LocalDate, val dagsats: BigDecimal) {
         var tom = startdato

@@ -21,7 +21,7 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 abstract class Sykdomstidslinje {
 
-    private var maksdato:LocalDate? = null
+    private var maksdato: LocalDate? = null
 
     abstract fun startdato(): LocalDate
     abstract fun sluttdato(): LocalDate
@@ -62,7 +62,7 @@ abstract class Sykdomstidslinje {
     fun antallDagerMellom(other: Sykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
-            inneholder(other) -> -min(this.length(), other.length())
+            erDelAv(other) -> -min(this.length(), other.length())
             overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
             else -> min(this.avstand(other), other.avstand(this))
         }
@@ -78,14 +78,11 @@ abstract class Sykdomstidslinje {
 
     }
 
-    fun betalingslinjer(dagsats: BigDecimal): List<Utbetalingslinje> {
-        val builder = Utbetalingsberegner(dagsats)
-        this.accept(builder)
-        maksdato = builder.maksdato()
-        return builder.results()
+    fun utbetalingsberegning(dagsats: BigDecimal): Utbetalingsberegning {
+        val beregner = Utbetalingsberegner(dagsats)
+        this.accept(beregner)
+        return beregner.results()
     }
-
-    fun maksdato() = maksdato
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -100,10 +97,6 @@ abstract class Sykdomstidslinje {
         -(this.sluttdato().until(other.startdato(), ChronoUnit.DAYS).absoluteValue.toInt() + 1)
 
     private fun erDelAv(other: Sykdomstidslinje) =
-        this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
-
-    //TODO: Duplikat
-    private fun inneholder(other: Sykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
     private fun harBeggeGrenseneInnenfor(other: Sykdomstidslinje) =
