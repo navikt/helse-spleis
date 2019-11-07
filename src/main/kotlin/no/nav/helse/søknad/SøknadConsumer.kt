@@ -15,7 +15,7 @@ internal class SøknadConsumer(
         streamsBuilder: StreamsBuilder,
         private val søknadKafkaTopic: String,
         private val personMediator: PersonMediator,
-        private val probe: SøknadProbe = SøknadProbe()
+        private val probe: SøknadProbe = SøknadProbe
 ) {
 
     init {
@@ -23,7 +23,7 @@ internal class SøknadConsumer(
     }
 
     companion object {
-        val søknadObjectMapper = jacksonObjectMapper()
+        internal val søknadObjectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }

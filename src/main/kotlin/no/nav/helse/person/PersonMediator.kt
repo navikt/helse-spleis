@@ -14,7 +14,7 @@ import no.nav.helse.søknad.Sykepengesøknad
 
 internal class PersonMediator(private val personRepository: PersonRepository,
                               private val lagrePersonDao: PersonObserver,
-                              private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe(),
+                              private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe,
                               private val behovProducer: BehovProducer,
                               private val gosysOppgaveProducer: GosysOppgaveProducer) : PersonObserver {
 

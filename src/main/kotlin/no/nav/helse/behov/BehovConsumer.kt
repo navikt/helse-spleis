@@ -15,7 +15,7 @@ internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
         private val behovTopic: String,
         private val personMediator: PersonMediator,
-        private val probe: BehovProbe = BehovProbe()
+        private val probe: BehovProbe = BehovProbe
 ) {
 
     init {

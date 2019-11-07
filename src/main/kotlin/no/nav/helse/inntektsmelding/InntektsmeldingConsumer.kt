@@ -15,7 +15,7 @@ internal class InntektsmeldingConsumer(
         streamsBuilder: StreamsBuilder,
         private val inntektsmeldingKafkaTopic: String,
         private val personMediator: PersonMediator,
-        private val probe: InntektsmeldingProbe = InntektsmeldingProbe()
+        private val probe: InntektsmeldingProbe = InntektsmeldingProbe
 ) {
 
     companion object {

@@ -15,11 +15,11 @@ import java.util.*
 
 internal class SakskompleksProbeTest {
 
-    companion object {
+    private companion object {
         private val id = UUID.randomUUID()
         private val aktørId = "123456789123"
 
-        private val probe = SakskompleksProbe()
+        private val probe = SakskompleksProbe
     }
 
     @Test

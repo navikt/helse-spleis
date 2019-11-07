@@ -6,7 +6,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.nais.nais
-import no.nav.helse.søknad.SøknadProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -31,8 +30,7 @@ class NaisComponentTest {
             handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
                 assertEquals(HttpStatusCode.OK, responseStatusCode)
                 val response = responseBody.reader().use { it.readText() }
-                println(response)
-                assertTrue(response.contains("soknader_totals"))
+                assertTrue(response.contains("jvm_memory_used_bytes"))
                 assertTrue(response.contains("""logback_events_total{level="error",}"""))
             }
         }
