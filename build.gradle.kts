@@ -7,8 +7,6 @@ val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kotliqueryVersion = "1.3.0"
-val fuelVersion = "2.0.1"
-val arrowVersion = "0.9.0"
 val junitJupiterVersion = "5.4.0"
 val wireMockVersion = "2.23.2"
 val mockkVersion = "1.9.3"
@@ -49,9 +47,6 @@ dependencies {
 
     implementation("no.nav.helse:sykdomstidslinje:1.3d99934")
 
-    implementation("com.github.kittinunf.fuel:fuel-coroutines:$fuelVersion")
-    implementation("io.arrow-kt:arrow-core-data:$arrowVersion")
-    implementation("org.json:json:20190722")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
         exclude(group = "junit")
     }

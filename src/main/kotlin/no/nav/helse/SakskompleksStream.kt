@@ -7,7 +7,6 @@ import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
-import io.ktor.features.CORS
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
@@ -92,40 +91,28 @@ fun Application.sakskompleksApplication(): KafkaStreams {
 
 @KtorExperimentalAPI
 private fun Application.restInterface(personMediator: PersonMediator) {
+    val idProvider = environment.config.propertyOrNull("oidc.configuration_url")
+            ?.getString()
+            ?.getJson() ?: return log.info("skipping rest interface because it has not been configured properly")
 
+    val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].textValue())).build()
 
-    val idProvider = environment.config.property(oidcConfigUrl).getString()
-        .getJson()
-        .fold(
-            { throw it },
-            { it }
-        )
-    val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].toString())).build()
-
-    val requiredGroup = environment.config.property(requiredGroup).getString()
+    val requiredGroup = environment.config.property("oidc.required_group").getString()
     install(Authentication) {
         jwt {
-            verifier(jwkProvider, idProvider["issuer"].toString())
-            realm = environment.config.property(ktorApplicationId).getString()
+            verifier(jwkProvider, idProvider["issuer"].textValue())
             validate { credentials ->
                 val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
                 if (requiredGroup in groupsClaim &&
-                    environment.config.property(clientId).getString() in credentials.payload.audience) {
+                    environment.config.property("oidc.client_id").getString() in credentials.payload.audience) {
                     JWTPrincipal(credentials.payload)
                 } else {
-                    log.info("${credentials.payload.getClaim("NAVident").asString()} with audience ${credentials.payload.audience} " +
+                    log.info("${credentials.payload.subject} with audience ${credentials.payload.audience} " +
                         "is not authorized to use this app, denying access")
                     null
                 }
             }
         }
-    }
-
-    install(CORS) {
-        host(host = "nais.adeo.no", schemes = listOf("https"), subDomains = listOf("speil"))
-        host(host = "nais.preprod.local", schemes = listOf("https"), subDomains = listOf("speil"))
-        host(host = "localhost", schemes = listOf("http", "https"))
-        allowCredentials = true
     }
 
     routing {

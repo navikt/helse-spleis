@@ -1,19 +1,25 @@
 package no.nav.helse.http
 
-import arrow.core.Try
-import com.github.kittinunf.fuel.core.ResponseResultOf
-import com.github.kittinunf.fuel.httpGet
-import org.json.JSONObject
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
-fun String.getJson() =
-   Try {
-      toJson(this.httpGet().responseString())
-   }.toEither()
+private val objectMapper = ObjectMapper()
 
-private fun toJson(fuelResult: ResponseResultOf<String>): JSONObject {
-   val (request, response, result) = fuelResult
-   return when (response.statusCode) {
-      200  -> JSONObject(result.component1())
-      else -> throw Exception("got status ${response.statusCode} from ${request.url.toExternalForm()}.")
+fun String.getJson(): JsonNode {
+   val (responseCode, responseBody) = this.fetchUrl()
+
+   if (responseCode >= 300 || responseBody == null) {
+      throw Exception("got status $responseCode from ${this}.")
    }
+   return objectMapper.readTree(responseBody)
 }
+
+private fun String.fetchUrl() = with(URL(this).openConnection() as HttpURLConnection) {
+      requestMethod = "GET"
+
+      val stream: InputStream? = if (responseCode < 300) this.inputStream else this.errorStream
+      responseCode to stream?.bufferedReader()?.readText()
+   }
