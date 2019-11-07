@@ -30,7 +30,7 @@ internal class BehovConsumer(
     fun build(builder: StreamsBuilder): StreamsBuilder {
         builder.stream<String, String>(
                 listOf(behovTopic), Consumed.with(Serdes.String(), Serdes.String())
-                .withOffsetResetPolicy(Topology.AutoOffsetReset.LATEST)
+                .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
                 .mapValues { _, json ->
                     Behov.fromJson(json)
