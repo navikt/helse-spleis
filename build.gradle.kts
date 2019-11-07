@@ -120,11 +120,11 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<KotlinCompile>("compileKotlin") {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "12"
 }
 
 tasks.named<KotlinCompile>("compileTestKotlin") {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "12"
 }
 
 tasks.withType<Test> {
