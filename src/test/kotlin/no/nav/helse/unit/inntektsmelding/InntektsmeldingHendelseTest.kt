@@ -7,6 +7,7 @@ import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.inntektsmelding.Inntektsmelding
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.toJsonNode
@@ -14,6 +15,7 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class InntektsmeldingHendelseTest {
@@ -69,6 +71,19 @@ internal class InntektsmeldingHendelseTest {
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
         assertEquals(Uke(1).mandag, tidslinje.startdato())
+    }
+
+    @Test
+    internal fun `arbeidsgiverperioden kan ikke ha overlappende perioder`() {
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(
+                Periode(Uke(1).mandag, Uke(1).tirsdag),
+                Periode(Uke(1).torsdag, Uke(1).fredag),
+                Periode(Uke(1).onsdag, Uke(1).torsdag)
+        ))
+
+        assertThrows<UtenforOmfangException> {
+            inntektsmeldingHendelse.sykdomstidslinje()
+        }
     }
 
     @Test

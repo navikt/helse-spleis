@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.SykdomshendelseType
 import no.nav.helse.person.domain.ArbeidstakerHendelse
+import no.nav.helse.person.domain.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -39,7 +40,12 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         val arbeidsgiverperiode = if (inntektsmelding.arbeidsgiverperioder.isNotEmpty())
             inntektsmelding.arbeidsgiverperioder
                     .map { Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
-                    .reduce { acc, sykdomstidslinje -> acc.plus(sykdomstidslinje, Sykdomstidslinje.Companion::ikkeSykedag) }
+                    .reduce { acc, sykdomstidslinje ->
+                        if (acc.overlapperMed(sykdomstidslinje)) {
+                            throw UtenforOmfangException("Inntektsmeldingen inneholder overlappende arbeidsgiverperioder", this)
+                        }
+                        acc.plus(sykdomstidslinje, Sykdomstidslinje.Companion::ikkeSykedag)
+                    }
         else null
 
         val ferietidslinje = if (inntektsmelding.ferie.isNotEmpty()) inntektsmelding.ferie
@@ -51,9 +57,8 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
             arbeidsgiverperiode != null && ferietidslinje != null -> (arbeidsgiverperiode + ferietidslinje)
             arbeidsgiverperiode == null && ferietidslinje != null -> ferietidslinje
             arbeidsgiverperiode != null && ferietidslinje == null -> arbeidsgiverperiode
-            else  -> egenmeldingsdag(inntektsmelding.førsteFraværsdag, this)
+            else -> egenmeldingsdag(inntektsmelding.førsteFraværsdag, this)
         }
-
     }
 
     override fun toJson(): JsonNode {
