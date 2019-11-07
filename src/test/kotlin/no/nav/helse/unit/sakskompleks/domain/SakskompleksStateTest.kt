@@ -246,6 +246,29 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
+    fun `motta sykepengehistorikk med siste sykedag nyere enn perioden det søkes for`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.plusMonths(2),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+    }
+
+    @Test
     fun `gitt en komplett tidslinje, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
         val sakskompleks = beInKomplettTidslinje()
 

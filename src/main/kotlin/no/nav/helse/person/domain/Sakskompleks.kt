@@ -226,14 +226,15 @@ class Sakskompleks internal constructor(
             val tidslinje = sakskompleks.sykdomstidslinje
                     ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
-            sakskompleks.setTilstand(sykepengehistorikkHendelse, if (sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
-                TilInfotrygdTilstand
+            if (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
+                sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             } else {
-                val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
-                sakskompleks.maksdato = utbetalingsberegning.maksdato
-                sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
-                TilGodkjenningTilstand
-            })
+                sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
+                    val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
+                    sakskompleks.maksdato = utbetalingsberegning.maksdato
+                    sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+                }
+            }
         }
     }
 
