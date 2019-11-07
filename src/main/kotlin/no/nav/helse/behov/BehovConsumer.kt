@@ -14,7 +14,8 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
         private val behovTopic: String,
-        private val personMediator: PersonMediator
+        private val personMediator: PersonMediator,
+        private val probe: BehovProbe = BehovProbe()
 ) {
 
     init {
@@ -38,6 +39,7 @@ internal class BehovConsumer(
                 .filter { _, behov ->
                     behov.harLøsning()
                 }
+                .peek { _, behov -> probe.mottattBehov(behov) }
                 .foreach { _, behov -> håndterLøsning(behov) }
 
         return builder

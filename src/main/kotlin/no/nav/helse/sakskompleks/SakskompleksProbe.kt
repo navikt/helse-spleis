@@ -15,28 +15,22 @@ import org.slf4j.LoggerFactory
 
 class SakskompleksProbe : PersonObserver {
 
-
-    companion object {
+    private companion object {
         private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
 
-        val behovCounterName = "behov_totals"
-        val dokumenterKobletTilSakCounterName = "dokumenter_koblet_til_sak_totals"
-        val tilstandCounterName = "sakskompleks_tilstander_totals"
-        val personMementoSize = "personMementoSize"
-
-
-        private val behovCounter = Counter.build(behovCounterName, "Antall behov opprettet")
+        private val behovCounter = Counter.build("behov_totals", "Antall behov opprettet")
                 .labelNames("behovType")
                 .register()
 
-        private val dokumenterKobletTilSakCounter = Counter.build(dokumenterKobletTilSakCounterName, "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
+        private val dokumenterKobletTilSakCounter = Counter.build("dokumenter_koblet_til_sak_totals", "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
                 .labelNames("dokumentType")
                 .register()
 
-        private val tilstandCounter = Counter.build(tilstandCounterName, "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
+        private val tilstandCounter = Counter.build("sakskompleks_tilstander_totals", "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
                 .labelNames("forrigeTilstand", "tilstand", "hendelse")
                 .register()
-        private val personMementoStørrelse = Summary.build(personMementoSize, "størrelse på person document i databasen")
+
+        private val personMementoStørrelse = Summary.build("personMementoSize", "størrelse på person document i databasen")
                 .quantile(0.5, 0.05)
                 .quantile(0.75, 0.1)
                 .quantile(0.9, 0.01)

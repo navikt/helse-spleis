@@ -24,33 +24,33 @@ internal class SakskompleksProbeTest {
 
     @Test
     fun `teller nye sykmeldinger`() {
-        val sykmeldingerCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.NySøknadMottatt.name))
+        val sykmeldingerCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
         probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, nySøknadHendelse()))
 
-        val sykmeldingerCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.NySøknadMottatt.name))
+        val sykmeldingerCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
         assertCounter(sykmeldingerCounterAfter, sykmeldingerCounterBefore)
     }
 
     @Test
     fun `teller nye søknader`() {
-        val søknadCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.SendtSøknadMottatt.name))
+        val søknadCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
         probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, sendtSøknadHendelse()))
 
-        val søknadCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.SendtSøknadMottatt.name))
+        val søknadCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
         assertCounter(søknadCounterAfter, søknadCounterBefore)
     }
 
     @Test
     fun `teller nye inntektsmeldinger`() {
-        val inntektsmeldingCounterBefore = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
+        val inntektsmeldingCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
         probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
 
-        val inntektsmeldingCounterAfter = getCounterValue(SakskompleksProbe.dokumenterKobletTilSakCounterName, listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
+        val inntektsmeldingCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
         assertCounter(inntektsmeldingCounterAfter, inntektsmeldingCounterBefore)
     }
