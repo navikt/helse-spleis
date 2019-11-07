@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknadHendelse
-import no.nav.helse.person.domain.Person
-import no.nav.helse.person.domain.PersonObserver
-import no.nav.helse.person.domain.PersonskjemaForGammelt
-import no.nav.helse.person.domain.SakskompleksObserver
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonskjemaForGammelt
+import no.nav.helse.person.SakskompleksObserver
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

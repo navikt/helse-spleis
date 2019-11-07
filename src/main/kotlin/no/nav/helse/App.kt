@@ -7,7 +7,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.nais.nais
+import no.nav.helse.spleis.nais.nais
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException

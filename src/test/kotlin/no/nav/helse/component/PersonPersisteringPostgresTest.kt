@@ -9,10 +9,10 @@ import kotliquery.using
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
-import no.nav.helse.person.LagrePersonDao
-import no.nav.helse.person.PersonPostgresRepository
-import no.nav.helse.person.domain.Person
+import no.nav.helse.person.Person
 import no.nav.helse.runMigration
+import no.nav.helse.spleis.LagrePersonDao
+import no.nav.helse.spleis.PersonPostgresRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll

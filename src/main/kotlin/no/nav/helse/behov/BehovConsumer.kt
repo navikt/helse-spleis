@@ -3,10 +3,10 @@ package no.nav.helse.behov
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.PersonMediator
-import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.spleis.PersonMediator
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
@@ -40,7 +40,7 @@ internal class BehovConsumer(
                 .filter { _, behov ->
                     behov.harLøsning()
                 }
-                .peek { _, behov -> probe.mottattBehov(behov) }
+                .peek { _, behov -> BehovProbe.mottattBehov(behov) }
                 .foreach { _, behov -> håndterLøsning(behov) }
 
         return builder

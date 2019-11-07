@@ -29,8 +29,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
-import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
-import no.nav.helse.person.personPath
+import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
+import no.nav.helse.spleis.personPath
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
@@ -224,9 +224,9 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
         val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
 

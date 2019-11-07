@@ -6,16 +6,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.spleis.inntektsmelding.InntektsmeldingConsumer
+import no.nav.helse.spleis.søknad.SøknadConsumer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.søknad.NySøknadHendelse
-import no.nav.helse.søknad.SendtSøknadHendelse
-import no.nav.helse.søknad.Sykepengesøknad
-import no.nav.helse.søknad.SøknadConsumer
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.time.LocalDate
@@ -176,7 +176,7 @@ internal object TestConstants {
                                         Periode(10.september, 10.september.plusDays(16))
                                 ),
                                 ferieperioder: List<Periode> = emptyList()) =
-            InntektsmeldingHendelse(no.nav.helse.inntektsmelding.Inntektsmelding(
+            InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(
                     inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()
             ))
 
