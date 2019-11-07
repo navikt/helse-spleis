@@ -22,6 +22,7 @@ import no.nav.helse.søknad.SendtSøknadHendelse
 import java.io.StringWriter
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 import java.util.*
 
 class Sakskompleks internal constructor(
@@ -34,6 +35,8 @@ class Sakskompleks internal constructor(
     private var tilstand: Sakskomplekstilstand = StartTilstand
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
+
+    private var maksdato: LocalDate? = null
 
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
@@ -224,7 +227,9 @@ class Sakskompleks internal constructor(
             sakskompleks.setTilstand(sykepengehistorikkHendelse, if (sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
                 TilInfotrygdTilstand
             } else {
-                sakskompleks.utbetalingslinjer = tidslinje.betalingslinjer(sakskompleks.dagsats())
+                val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
+                sakskompleks.maksdato = utbetalingsberegning.maksdato
+                sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
                 TilGodkjenningTilstand
             })
         }
@@ -345,6 +350,7 @@ class Sakskompleks internal constructor(
                 sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
                     objectMapper.readTree(it)
                 },
+                maksdato = maksdato,
                 utbetalingslinjer = utbetalingslinjer
                         ?.let { objectMapper.writeValueAsBytes(it) }
                         ?.let { objectMapper.readTree(it) as ArrayNode }
@@ -399,6 +405,7 @@ class Sakskompleks internal constructor(
             val organisasjonsnummer: String,
             val tilstandType: TilstandType,
             val sykdomstidslinje: JsonNode?,
+            val maksdato: LocalDate?,
             val utbetalingslinjer: ArrayNode?
     )
 }
