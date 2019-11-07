@@ -1,8 +1,5 @@
 package no.nav.helse.behov
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.*
 
@@ -31,10 +28,6 @@ class Behov internal constructor(private val pakke: Pakke) {
                     it.requireKey(OpprettetKey)
                 })
 
-
-        private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     fun behovType(): String = pakke[BehovKey] as String

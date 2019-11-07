@@ -3,8 +3,8 @@ package no.nav.helse.person.domain
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.SykdomshendelseDeserializer
 import no.nav.helse.behov.Behov
@@ -280,6 +280,14 @@ class Sakskompleks internal constructor(
                         null
                     }
                 }
+                maksdato = sakskompleksJson.maksdato
+                utbetalingslinjer = sakskompleksJson.utbetalingslinjer?.map {
+                    Utbetalingslinje(
+                            fom = LocalDate.parse(it["fom"].textValue()),
+                            tom = LocalDate.parse(it["tom"].textValue()),
+                            dagsats = BigDecimal(it["dagsats"].textValue())
+                    )
+                }
             }
         }
 
@@ -352,8 +360,7 @@ class Sakskompleks internal constructor(
                 },
                 maksdato = maksdato,
                 utbetalingslinjer = utbetalingslinjer
-                        ?.let { objectMapper.writeValueAsBytes(it) }
-                        ?.let { objectMapper.readTree(it) as ArrayNode }
+                        ?.let { objectMapper.convertValue<JsonNode>(it) }
         )
     }
 
@@ -406,7 +413,7 @@ class Sakskompleks internal constructor(
             val tilstandType: TilstandType,
             val sykdomstidslinje: JsonNode?,
             val maksdato: LocalDate?,
-            val utbetalingslinjer: ArrayNode?
+            val utbetalingslinjer: JsonNode?
     )
 }
 

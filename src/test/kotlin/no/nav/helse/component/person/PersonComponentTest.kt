@@ -51,8 +51,11 @@ import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration.ofMillis
 import java.util.*
@@ -203,7 +206,6 @@ internal class PersonComponentTest {
     }
 
     @Test
-    @Disabled
     fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
         val aktørID = "2345678901234"
         val virksomhetsnummer = "234567890"
@@ -229,13 +231,16 @@ internal class PersonComponentTest {
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
 
-
-        //TODO: Sjekke at vi har betalingslinjer og at de er ok. Kall REST-endepunktet for å sjekke dette
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+
+        aktørID.hentPerson {
+            assertTrue(this.contains("maksdato"))
+            assertTrue(this.contains("utbetalingslinjer"))
+            assertTrue(this.contains("dagsats"))
+        }
     }
 
     @Test
-    @Disabled
     fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
         val aktørID = "87654321963"
         val virksomhetsnummer = "123456789"
@@ -256,24 +261,32 @@ internal class PersonComponentTest {
 
     @Test
     fun `gitt en ny sak, så skal den kunne hentes ut på personen`() {
-        val token = jwtStub.createTokenFor(
-                subject = "en_saksbehandler_ident",
-                groups = listOf("sykepenger-saksbehandler-gruppe"),
-                audience = "spleis_azure_ad_app_id"
-        )
         val enAktørId = "1211109876543"
         val virksomhetsnummer = "123456789"
 
         val nySøknad = sendNySøknad(enAktørId, virksomhetsnummer)
 
-        val connection = embeddedServer.handleRequest(HttpMethod.Get, personPath + enAktørId,
-            builder = {
-                setRequestProperty(Authorization, "Bearer $token")
-            })
+        enAktørId.hentPerson {
+            val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
+            assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
+        }
+    }
+
+    private fun String.hentPerson(testBlock: String.() -> Unit) {
+        val token = jwtStub.createTokenFor(
+                subject = "en_saksbehandler_ident",
+                groups = listOf("sykepenger-saksbehandler-gruppe"),
+                audience = "spleis_azure_ad_app_id"
+        )
+
+        val connection = embeddedServer.handleRequest(HttpMethod.Get, personPath + this,
+                builder = {
+                    setRequestProperty(Authorization, "Bearer $token")
+                })
 
         assertEquals(HttpStatusCode.OK.value, connection.responseCode)
-        val lagretNySøknad = objectMapper.readTree(connection.responseBody).findValue("søknad")
-        assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
+
+        connection.responseBody.testBlock()
     }
 
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
