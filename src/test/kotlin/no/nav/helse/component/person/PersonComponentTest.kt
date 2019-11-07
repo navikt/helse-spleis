@@ -180,7 +180,6 @@ internal class PersonComponentTest {
     }
 
     @Test
-    @Disabled
     fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
         val aktørID = "1234567890123"
         val virksomhetsnummer = "123456789"
@@ -194,7 +193,6 @@ internal class PersonComponentTest {
     }
 
     @Test
-    @Disabled
     fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
         val aktørId2 = "0123456789012"
         val virksomhetsnummer2 = "012345678"

@@ -10,9 +10,11 @@ import io.ktor.auth.jwt.jwt
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.Topics.behovTopic
+import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.http.getJson
+import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.LagrePersonDao
 import no.nav.helse.person.PersonMediator
@@ -73,7 +75,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val builder = StreamsBuilder()
 
     SøknadConsumer(builder, søknadTopic, personMediator)
-    //InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
+    InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
     //BehovConsumer(builder, behovTopic, personMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
