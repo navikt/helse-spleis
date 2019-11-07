@@ -20,6 +20,9 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 abstract class Sykdomstidslinje {
+
+    private var maksdato:LocalDate? = null
+
     abstract fun startdato(): LocalDate
     abstract fun sluttdato(): LocalDate
     abstract fun antallSykedagerHvorViTellerMedHelg(): Int
@@ -78,8 +81,11 @@ abstract class Sykdomstidslinje {
     fun betalingslinjer(dagsats: BigDecimal): List<Utbetalingslinje> {
         val builder = Utbetalingsberegner(dagsats)
         this.accept(builder)
+        maksdato = builder.maksdato()
         return builder.results()
     }
+
+    fun maksdato() = maksdato
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
@@ -250,6 +256,18 @@ abstract class Sykdomstidslinje {
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
                     .map { permisjonsdag(it, hendelse) }
+                    .toList())
+        }
+
+        fun implisittdager(
+            fra: LocalDate,
+            til: LocalDate,
+            hendelse: SykdomstidslinjeHendelse
+        ): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(
+                fra.datesUntil(til.plusDays(1))
+                    .map { implisittDag(it, hendelse) }
                     .toList())
         }
 

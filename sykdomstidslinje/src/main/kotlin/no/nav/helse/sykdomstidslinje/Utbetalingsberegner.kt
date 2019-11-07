@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.math.BigDecimal
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 internal class Utbetalingsberegner(private val dagsats: BigDecimal) : SykdomstidslinjeVisitor {
@@ -13,10 +14,15 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
     private var ikkeSykedager = 0
     private var fridager = 0
 
+    private var betalteSykedager = 0
+    private var maksdato: LocalDate? = null
+
     fun results(): List<Utbetalingslinje> {
         require(state != Ugyldig)
         return utbetalingslinjer.map { Utbetalingslinje(it.startdato, it.tom, it.dagsats) }
     }
+
+    fun maksdato() = maksdato
 
     private data class InternUtbetalingslinje(val startdato: LocalDate, val dagsats: BigDecimal) {
         var tom = startdato
@@ -34,6 +40,36 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = sykedag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykedag(sykHelgedag.dagen)
+    override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
+        if(utbetalingslinjer.isNotEmpty()) {
+            val sykedagerNAVBetaler = 248
+            val virkedagerIEnUke = 5
+            val dagerIEnUke = 7
+
+            val gjenståendeSykedagerNAVBetaler = sykedagerNAVBetaler - betalteSykedager
+
+            val heleUkerIgjen = gjenståendeSykedagerNAVBetaler / virkedagerIEnUke
+            val heleUkerIDager = heleUkerIgjen * dagerIEnUke
+
+            val gjenståendeDagerISisteUke = gjenståendeSykedagerNAVBetaler % virkedagerIEnUke
+
+            maksdato = utbetalingslinjer.last().tom
+                .trimHelg()
+                .plusDays((heleUkerIDager + gjenståendeDagerISisteUke).toLong())
+                .justerForGjenståendeDagerSomGjørAtMaksdatoHavnerIHelg()
+        }
+    }
+
+    private fun LocalDate.justerForGjenståendeDagerSomGjørAtMaksdatoHavnerIHelg() = when (dayOfWeek) {
+        DayOfWeek.SATURDAY, DayOfWeek.SUNDAY -> plusDays(2)
+        else -> this
+    }
+
+    private fun LocalDate.trimHelg() = when (dayOfWeek) {
+        DayOfWeek.SATURDAY -> minusDays(1)
+        DayOfWeek.SUNDAY -> minusDays(2)
+        else -> this
+    }
 
     private fun arbeidsdag(dagen: LocalDate) {
         //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
@@ -51,6 +87,11 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
     private fun opprettBetalingslinje(dagen: LocalDate) {
         utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
+        tellSykeUkedager(dagen)
+    }
+
+    private fun tellSykeUkedager(dagen: LocalDate) {
+        if (dagen.dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) betalteSykedager += 1
     }
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
@@ -169,6 +210,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
         override fun merEnn16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.utbetalingslinjer.last().tom = dagen
+            splitter.tellSykeUkedager(dagen)
         }
 
         override fun færreEllerLik16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {

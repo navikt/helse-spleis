@@ -5,10 +5,12 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.Uke
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-class PaymentTest {
+class UtbetalingslinjerTest {
 
     companion object {
         private val sendtSykmelding = Testhendelse(Uke(3).mandag.atStartOfDay())
@@ -41,7 +43,7 @@ class PaymentTest {
 
     @Test
     fun `Sykedager med inneklemt ferie`() {
-        val sykdomstidslinje = 21.S + 2.S + 2.F + S
+        val sykdomstidslinje = 21.S + 2.S + 2.F + S //6 utbetalingsdager
         val betalingslinjer = sykdomstidslinje.betalingslinjer(dagsats)
 
         assertEquals(2, betalingslinjer.size)
@@ -50,6 +52,8 @@ class PaymentTest {
 
         assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().fom)
         assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().tom)
+
+        assertEquals(LocalDate.of(2019,1,1), sykdomstidslinje.maksdato() )
     }
 
     @Test
@@ -158,6 +162,66 @@ class PaymentTest {
         assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer.last().tom)
     }
 
+    @Test
+    fun `opphold i sykedager over 16 dager etter arbeidsgiverperioden blir avvist`() {
+        assertThrows<Exception> { (19.S + 40.I + 5.S).betalingslinjer(1200.toBigDecimal()) }
+    }
+
+    @Test
+    fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
+        val sykdomstidslinje = 20.S
+        sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertEquals(sykdomstidslinje.sluttdato().plusDays(342), sykdomstidslinje.maksdato())
+    }
+
+    @Test
+    fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
+        val sykdomstidslinje = 2.A + 20.S + 7.A + 20.S // Siste dag er 2018-02-18
+        sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertEquals(LocalDate.of(2019,1,8), sykdomstidslinje.maksdato())
+    }
+
+    @Test
+    fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
+        val sykdomstidslinje = 351.S + 1.F + S
+        sykdomstidslinje.betalingslinjer(dagsats)
+        assertEquals(LocalDate.of(2018, 12, 31), sykdomstidslinje.maksdato())
+    }
+
+    @Test
+    fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
+        val sykdomstidslinje = 23.S + 2.F + S
+        sykdomstidslinje.betalingslinjer(dagsats)
+        assertEquals(LocalDate.of(2019,1,1), sykdomstidslinje.maksdato() )
+
+    }
+
+    @Test
+    fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
+        val sykdomstidslinje = 21.S + 3.F + S
+        sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertEquals(LocalDate.of(2018,12,31), sykdomstidslinje.maksdato())
+    }
+
+    @Test
+    fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
+        val sykdomstidslinje = 21.S + 3.F
+        sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertEquals(LocalDate.of(2018,12,28), sykdomstidslinje.maksdato())
+    }
+
+    @Test
+    fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
+        val sykdomstidslinje = 16.S
+        sykdomstidslinje.betalingslinjer(dagsats)
+
+        assertNull(sykdomstidslinje.maksdato())
+    }
+
     private val S
         get() = Sykdomstidslinje.sykedag(startDato, sendtSykmelding).also {
             startDato = startDato.plusDays(1)
@@ -179,6 +243,10 @@ class PaymentTest {
 
     private val Int.A
         get() = Sykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.I
+        get() = Sykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
             .also { startDato = startDato.plusDays(this.toLong()) }
 }
 
