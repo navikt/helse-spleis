@@ -40,6 +40,8 @@ class Sakskompleks internal constructor(
 
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
+    private var godkjentAv: String? = null
+
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     private inline fun <reified T> Set<*>.førsteAvType(): T {
@@ -81,7 +83,7 @@ class Sakskompleks internal constructor(
     }
 
     internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
+        if (id.toString() == manuellSaksbehandlingHendelse.sakskompleksId()) tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
     }
 
     internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
@@ -244,7 +246,9 @@ class Sakskompleks internal constructor(
 
         override fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
             if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
-                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand)
+                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
+                    sakskompleks.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
+                }
             } else {
                 sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygdTilstand)
             }
@@ -253,6 +257,10 @@ class Sakskompleks internal constructor(
 
     private object TilUtbetalingTilstand : Sakskomplekstilstand {
         override val type = TIL_UTBETALING
+
+        override fun entering(sakskompleks: Sakskompleks) {
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Utbetaling)
+        }
 
     }
 
@@ -285,9 +293,10 @@ class Sakskompleks internal constructor(
                     Utbetalingslinje(
                             fom = LocalDate.parse(it["fom"].textValue()),
                             tom = LocalDate.parse(it["tom"].textValue()),
-                            dagsats = BigDecimal(it["dagsats"].textValue())
+                            dagsats = BigDecimal(it["dagsats"].doubleValue())
                     )
                 }
+                godkjentAv = sakskompleksJson.godkjentAv
             }
         }
 
@@ -360,7 +369,8 @@ class Sakskompleks internal constructor(
                 },
                 maksdato = maksdato,
                 utbetalingslinjer = utbetalingslinjer
-                        ?.let { objectMapper.convertValue<JsonNode>(it) }
+                        ?.let { objectMapper.convertValue<JsonNode>(it) },
+                godkjentAv = godkjentAv
         )
     }
 
@@ -396,10 +406,17 @@ class Sakskompleks internal constructor(
     }
 
     private fun emitTrengerLøsning(type: BehovsTyper) {
-        val behov = Behov.nyttBehov(type, mapOf(
+        val params = mutableMapOf(
                 "sakskompleksId" to id,
                 "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer))
+                "organisasjonsnummer" to organisasjonsnummer
+        )
+
+        utbetalingslinjer?.let { params.put("utbetalingslinjer", it) }
+        maksdato?.let { params.put("maksdato", it) }
+        godkjentAv?.let { params.put("saksbehandler", it) }
+
+        val behov = Behov.nyttBehov(type, params)
 
         observers.forEach { observer ->
             observer.sakskompleksTrengerLøsning(behov)
@@ -413,7 +430,8 @@ class Sakskompleks internal constructor(
             val tilstandType: TilstandType,
             val sykdomstidslinje: JsonNode?,
             val maksdato: LocalDate?,
-            val utbetalingslinjer: JsonNode?
+            val utbetalingslinjer: JsonNode?,
+            val godkjentAv: String?
     )
 }
 

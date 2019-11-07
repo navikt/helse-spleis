@@ -54,4 +54,9 @@ class Behov internal constructor(private val pakke: Pakke) {
     operator fun <T> get(key: String): T? {
         return pakke[key] as T?
     }
+
+    operator fun set(key: String, value: Any) {
+        pakke[key] = value
+    }
+
 }

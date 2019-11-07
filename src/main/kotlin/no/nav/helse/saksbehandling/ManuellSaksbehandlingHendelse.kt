@@ -1,38 +1,23 @@
 package no.nav.helse.saksbehandling
 
+import no.nav.helse.behov.Behov
 import no.nav.helse.hendelse.SakskompleksHendelse
 import no.nav.helse.person.domain.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import java.time.LocalDateTime
-import java.util.*
 
-class ManuellSaksbehandlingHendelse private constructor(hendelseId: String, private val manuellSaksbehandling: ManuellSaksbehandling) : ArbeidstakerHendelse, SakskompleksHendelse, SykdomstidslinjeHendelse(hendelseId) {
-    constructor(manuellSaksbehandling: ManuellSaksbehandling) : this(UUID.randomUUID().toString(), manuellSaksbehandling)
+class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse, SakskompleksHendelse {
 
-    fun utbetalingGodkjent() = manuellSaksbehandling.utbetalingGodkjent
+    fun saksbehandler() =
+            manuellSaksbehandling.get<String>("saksbehandler")!!
+
+    fun utbetalingGodkjent(): Boolean =
+            (manuellSaksbehandling.løsning() as Map<String, Any>?)?.getValue("godkjent") as Boolean? ?: false
 
     override fun sakskompleksId() =
-            manuellSaksbehandling.sakskompleksId
+            manuellSaksbehandling.get<String>("sakskompleksId")!!
 
-    override fun aktørId(): String {
-        TODO("not implemented")
-    }
+    override fun aktørId() =
+            manuellSaksbehandling.get<String>("aktørId")!!
 
-    override fun organisasjonsnummer(): String {
-        TODO("not implemented")
-    }
-
-    override fun nøkkelHendelseType(): Dag.NøkkelHendelseType {
-        TODO("not implemented")
-    }
-
-    override fun rapportertdato(): LocalDateTime {
-        TODO("not implemented")
-    }
-
-    override fun sykdomstidslinje(): Sykdomstidslinje {
-        TODO("not implemented")
-    }
+    override fun organisasjonsnummer() =
+            manuellSaksbehandling.get<String>("organisasjonsnummer")!!
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
 import no.nav.helse.søknad.SendtSøknadHendelse
@@ -41,6 +42,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
     fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         finnArbeidsgiver(sykepengehistorikkHendelse)?.håndterSykepengehistorikk(sykepengehistorikkHendelse)
+    }
+
+    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
@@ -111,6 +116,10 @@ class Person(val aktørId: String) : SakskompleksObserver {
 
         internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
+        }
+
+        internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+            saker.forEach { it.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse) }
         }
 
         internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {

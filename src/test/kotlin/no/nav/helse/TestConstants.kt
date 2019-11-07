@@ -8,7 +8,6 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.saksbehandling.ManuellSaksbehandling
 import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykepengehistorikk.Sykepengehistorikk
@@ -259,9 +258,36 @@ internal object TestConstants {
             sakskompleksId = sakskompleksId
     ))
 
-    fun manuellSaksbehandlingHendelse(sakskompleksId: String,
-                                      utbetalingGodkjent: Boolean) =
-            ManuellSaksbehandlingHendelse(ManuellSaksbehandling(sakskompleksId = sakskompleksId, utbetalingGodkjent = utbetalingGodkjent))
+    fun manuellSaksbehandlingLøsning(organisasjonsnummer: String = "123546564",
+                                     aktørId: String = "1",
+                                     sakskompleksId: String = UUID.randomUUID().toString(),
+                                     utbetalingGodkjent: Boolean,
+                                     saksbehandler: String): Behov {
+        return Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "sakskompleksId" to sakskompleksId,
+                "aktørId" to aktørId,
+                "saksbehandler" to saksbehandler
+        )).also {
+            it.løsBehov(mapOf(
+                    "godkjent" to utbetalingGodkjent
+            ))
+        }
+    }
+
+    fun manuellSaksbehandlingHendelse(organisasjonsnummer: String = "123546564",
+                                      aktørId: String = "1",
+                                      sakskompleksId: String = UUID.randomUUID().toString(),
+                                      utbetalingGodkjent: Boolean,
+                                      saksbehandler: String): ManuellSaksbehandlingHendelse {
+        return ManuellSaksbehandlingHendelse(manuellSaksbehandlingLøsning(
+                organisasjonsnummer = organisasjonsnummer,
+                aktørId = aktørId,
+                sakskompleksId = sakskompleksId,
+                utbetalingGodkjent = utbetalingGodkjent,
+                saksbehandler = saksbehandler
+        ))
+    }
 }
 
 data class SpolePeriode(val fom: LocalDate,

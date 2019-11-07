@@ -6,6 +6,7 @@ import no.nav.helse.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.oppgave.GosysOppgaveProducer
 import no.nav.helse.person.domain.*
 import no.nav.helse.person.domain.Sakskompleks.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.sakskompleks.SakskompleksProbe
 import no.nav.helse.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.søknad.NySøknadHendelse
@@ -63,6 +64,16 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         try {
             finnPerson(sykepengehistorikkHendelse).also { person ->
                 person.håndterSykepengehistorikk(sykepengehistorikkHendelse)
+            }
+        } catch (err: PersonskjemaForGammelt) {
+            sakskompleksProbe.forGammelSkjemaversjon(err)
+        }
+    }
+
+    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        try {
+            finnPerson(manuellSaksbehandlingHendelse).also { person ->
+                person.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse)
             }
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)

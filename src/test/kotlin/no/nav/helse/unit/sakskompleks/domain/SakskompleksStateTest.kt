@@ -253,7 +253,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse(
                 sakskompleksId = sakskompleksId.toString(),
-                utbetalingGodkjent = true
+                utbetalingGodkjent = true,
+                saksbehandler = "en_saksbehandler_ident"
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
@@ -265,7 +266,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse(
                 sakskompleksId = sakskompleksId.toString(),
-                utbetalingGodkjent = true))
+                utbetalingGodkjent = true,
+                saksbehandler = "en_saksbehandler_ident"
+        ))
 
         assertEquals(TIL_GODKJENNING, lastStateEvent.previousState)
         assertEquals(TIL_UTBETALING, lastStateEvent.currentState)
@@ -278,7 +281,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         sakskompleks.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse(
                 sakskompleksId = sakskompleksId.toString(),
-                utbetalingGodkjent = false))
+                utbetalingGodkjent = false,
+                saksbehandler = "en_saksbehandler_ident"
+        ))
 
         assertEquals(TIL_GODKJENNING, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)

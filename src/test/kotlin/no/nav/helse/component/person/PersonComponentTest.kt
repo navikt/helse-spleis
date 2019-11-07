@@ -27,8 +27,7 @@ import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.behov.BehovsTyper.GodkjenningFraSaksbehandler
-import no.nav.helse.behov.BehovsTyper.Sykepengehistorikk
+import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.person.personPath
@@ -241,6 +240,46 @@ internal class PersonComponentTest {
     }
 
     @Test
+    fun `gitt en sak for godkjenning, når utbetaling er godkjent skal vi produsere et utbetalingbehov`() {
+        val aktørID = "87654323421962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Utbetaling.name))
+    }
+
+    @Test
+    fun `gitt en sak for godkjenning, når utbetaling ikke er godkjent skal saken til Infotrygd`() {
+        val aktørID = "8787654421962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, false, "en_saksbehandler_ident")
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
     fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
         val aktørID = "87654321963"
         val virksomhetsnummer = "123456789"
@@ -294,6 +333,15 @@ internal class PersonComponentTest {
         behov.løsBehov(TestConstants.responsFraSpole(
             perioder = perioder
         ))
+        sendBehov(behov)
+    }
+
+    private fun sendGodkjenningFraSaksbehandlerløsning(aktørId: String, utbetalingGodkjent: Boolean, saksbehandler: String) {
+        val behov = ventPåBehov(aktørId, GodkjenningFraSaksbehandler)
+        behov.løsBehov(mapOf(
+                "godkjent" to utbetalingGodkjent
+        ))
+        behov["saksbehandler"] = saksbehandler
         sendBehov(behov)
     }
 
