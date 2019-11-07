@@ -75,7 +75,6 @@ val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
-    jcenter()
     mavenCentral()
     maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
@@ -135,5 +134,5 @@ tasks.withType<Test> {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "5.6.2"
+    gradleVersion = "5.6.4"
 }
