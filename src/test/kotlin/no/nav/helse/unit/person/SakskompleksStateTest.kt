@@ -181,16 +181,55 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
-    fun `når saken er komplett, ber vi om sykepengehistorikk`() {
-        val sakskompleks = beInMottattInntektsmelding()
+    fun `når saken er komplett, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
 
-        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+
+        val sakskompleks = beInMottattInntektsmelding(
+                nySøknadHendelse = nySøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse)
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+
         assertTrue(behovsliste.any {
             it.behovType() == BehovsTyper.Sykepengehistorikk.name
         })
+
+        val behov = behovsliste.first { it.behovType() == BehovsTyper.Sykepengehistorikk.name }
+        val historikkTom: LocalDate? = behov.get<LocalDate>("tom")
+
+        assertNotNull(historikkTom)
+        assertEquals(periodeFom.minusDays(1), historikkTom)
+    }
+
+    @Test
+    fun `motta tom sykepengehistorikk når saken er komplett`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = null,
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
     }
 
     @Test

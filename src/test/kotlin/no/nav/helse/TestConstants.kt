@@ -241,18 +241,20 @@ internal object TestConstants {
     }
 
     fun sykepengehistorikkHendelse(
-            sisteHistoriskeSykedag: LocalDate = LocalDate.now(),
+            sisteHistoriskeSykedag: LocalDate? = LocalDate.now(),
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
             sakskompleksId: UUID = UUID.randomUUID()
     ) = SykepengehistorikkHendelse(sykepengehistorikk(
-            perioder = listOf(
-                    SpolePeriode(
-                            fom = sisteHistoriskeSykedag.minusMonths(1),
-                            tom = sisteHistoriskeSykedag,
-                            grad = "100"
-                    )
-            ),
+            perioder = sisteHistoriskeSykedag?.let {
+                listOf(
+                        SpolePeriode(
+                                fom = sisteHistoriskeSykedag.minusMonths(1),
+                                tom = sisteHistoriskeSykedag,
+                                grad = "100"
+                        )
+                )
+            } ?: emptyList(),
             organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             sakskompleksId = sakskompleksId

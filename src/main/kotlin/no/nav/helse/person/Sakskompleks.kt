@@ -216,7 +216,9 @@ class Sakskompleks internal constructor(
         private const val seksMåneder = 180
 
         override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk)
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
+                    "tom" to sakskompleks.sykdomstidslinje!!.startdato().minusDays(1)
+            ))
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
@@ -406,12 +408,14 @@ class Sakskompleks internal constructor(
         }
     }
 
-    private fun emitTrengerLøsning(type: BehovsTyper) {
+    private fun emitTrengerLøsning(type: BehovsTyper, additionalParams: Map<String, Any> = emptyMap()) {
         val params = mutableMapOf(
                 "sakskompleksId" to id,
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer
         )
+
+        params.putAll(additionalParams)
 
         utbetalingslinjer?.let { params.put("utbetalingslinjer", it) }
         maksdato?.let { params.put("maksdato", it) }

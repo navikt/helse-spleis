@@ -328,6 +328,9 @@ internal class PersonComponentTest {
 
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
         val behov = ventPåBehov(aktørId, Sykepengehistorikk)
+
+        assertNotNull(behov["tom"])
+
         behov.løsBehov(TestConstants.responsFraSpole(
             perioder = perioder
         ))
