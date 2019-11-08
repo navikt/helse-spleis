@@ -35,7 +35,17 @@ internal class BehovConsumer(
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
                 .mapValues { _, json ->
-                    Behov.fromJson(json)
+                    try {
+                        Behov.fromJson(json)
+                    } catch (err: Exception) {
+                        null
+                    }
+                }
+                .filter { _, behov ->
+                    behov != null
+                }
+                .mapValues { _, behov ->
+                    behov as Behov
                 }
                 .filter { _, behov ->
                     behov.harLøsning()
