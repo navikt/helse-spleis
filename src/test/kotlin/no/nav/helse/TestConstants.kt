@@ -18,6 +18,7 @@ import no.nav.helse.spleis.søknad.SøknadConsumer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -175,9 +176,14 @@ internal object TestConstants {
                                 arbeidsgiverperioder: List<Periode> = listOf(
                                         Periode(10.september, 10.september.plusDays(16))
                                 ),
-                                ferieperioder: List<Periode> = emptyList()) =
+                                ferieperioder: List<Periode> = emptyList(),
+                                refusjon: Refusjon = Refusjon(
+                                        beloepPrMnd = 666.toBigDecimal(),
+                                        opphoersdato = null
+                                ),
+                                endringerIRefusjoner: List<EndringIRefusjon> = emptyList()) =
             InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(
-                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder).toJsonNode()
+                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder, refusjon, endringerIRefusjoner).toJsonNode()
             ))
 
     fun inntektsmeldingDTO(aktørId: String = "",
@@ -186,7 +192,13 @@ internal object TestConstants {
                            arbeidsgiverperioder: List<Periode> = listOf(
                                    Periode(10.september, 10.september.plusDays(16))
                            ),
-                           feriePerioder: List<Periode> = emptyList()) =
+                           feriePerioder: List<Periode> = emptyList(),
+                           refusjon: Refusjon = Refusjon(
+                                   beloepPrMnd = 666.toBigDecimal(),
+                                   opphoersdato = null
+                           ),
+                           endringerIRefusjoner: List<EndringIRefusjon> = emptyList(),
+                           beregnetInntekt: BigDecimal? = 666.toBigDecimal()) =
             Inntektsmelding(
                     inntektsmeldingId = "",
                     arbeidstakerFnr = "",
@@ -196,12 +208,9 @@ internal object TestConstants {
                     arbeidsgiverAktorId = null,
                     arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
                     arbeidsforholdId = null,
-                    beregnetInntekt = 666.toBigDecimal(),
-                    refusjon = Refusjon(
-                            beloepPrMnd = null,
-                            opphoersdato = null
-                    ),
-                    endringIRefusjoner = emptyList(),
+                    beregnetInntekt = beregnetInntekt,
+                    refusjon = refusjon,
+                    endringIRefusjoner = endringerIRefusjoner,
                     opphoerAvNaturalytelser = emptyList(),
                     gjenopptakelseNaturalytelser = emptyList(),
                     arbeidsgiverperioder = arbeidsgiverperioder,

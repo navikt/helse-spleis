@@ -25,6 +25,10 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.*
 
+private inline fun <reified T> Set<*>.førsteAvType(): T {
+    return first { it is T } as T
+}
+
 class Sakskompleks internal constructor(
         private val id: UUID,
         private val aktørId: String,
@@ -43,10 +47,6 @@ class Sakskompleks internal constructor(
     private var godkjentAv: String? = null
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
-
-    private inline fun <reified T> Set<*>.førsteAvType(): T {
-        return first { it is T } as T
-    }
 
     private fun sykepengegrunnlag() = (sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
 
@@ -231,12 +231,22 @@ class Sakskompleks internal constructor(
             if (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
                 sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             } else {
-                sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
-                    val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
-                    sakskompleks.maksdato = utbetalingsberegning.maksdato
-                    sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
-                }
+                val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
+                sakskompleks.maksdato = utbetalingsberegning.maksdato
+                sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+
+                sakskompleks.setTilstand(sykepengehistorikkHendelse, if(helePeriodenSkalBetalesAvArbeidsgiver(sakskompleks)) TilGodkjenningTilstand else TilInfotrygdTilstand)
             }
+        }
+
+        private fun helePeriodenSkalBetalesAvArbeidsgiver(sakskompleks: Sakskompleks): Boolean {
+            val sisteUtbetalingsdag = sakskompleks.utbetalingslinjer?.lastOrNull()?.tom ?: return true
+
+            val inntektsmelding = sakskompleks.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>() ?: return false
+
+            inntektsmelding.refusjon().opphoersdato?.apply { if(this <= sisteUtbetalingsdag) return false }
+
+            return inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
     }
 

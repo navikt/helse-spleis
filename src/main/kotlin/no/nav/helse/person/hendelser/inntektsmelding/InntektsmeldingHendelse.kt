@@ -23,6 +23,12 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
 
     fun beregnetInntekt() = inntektsmelding.beregnetInntekt ?: throw IllegalStateException("Vi kan ikke håndtere inntektsmeldinger uten beregnet inntekt")
 
+    fun refusjon() =
+            inntektsmelding.refusjon
+
+    fun endringIRefusjoner() =
+            inntektsmelding.endringIRefusjoner
+
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
     override fun aktørId() =

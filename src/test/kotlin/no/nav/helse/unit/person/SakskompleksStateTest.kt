@@ -18,7 +18,9 @@ import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendel
 import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.spleis.serde.safelyUnwrapDate
+import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -327,6 +329,194 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `hele perioden skal utbetales av arbeidsgiver når opphørsdato for refusjon er etter siste dag i utbetaling`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver skal ikke utbetale hele perioden, så dette må vurderes i Infotrygd`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                refusjon = Refusjon(opphoersdato = periodeTom)
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver har ikke oppgitt opphørsdato for refusjon`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                refusjon = Refusjon(opphoersdato = null)
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver enderer refusjonen etter utbetalingsperioden`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                endringerIRefusjoner = listOf(
+                        EndringIRefusjon(endringsdato = periodeTom.plusDays(1))
+                )
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver enderer ikke refusjonen`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                endringerIRefusjoner = emptyList()
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver enderer refusjonen i utbetalingsperioden, så dette må vurderes i Infotrygd`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                endringerIRefusjoner = listOf(
+                        EndringIRefusjon(endringsdato = periodeTom)
+                )
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+    }
+
+    @Test
+    fun `arbeidsgiver har ikke oppgitt dato for endering av refusjon`(){
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(
+                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+                endringerIRefusjoner = listOf(
+                        EndringIRefusjon(endringsdato = null)
+                )
+        )
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
     }
 
     @Test

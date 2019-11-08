@@ -2,6 +2,7 @@ package no.nav.helse.person.hendelser.inntektsmelding
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import no.nav.helse.spleis.serde.safelyUnwrapDate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -42,17 +43,30 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
             if (it.isNull) null else it.textValue().toBigDecimal()
         }
 
+    val refusjon
+        get() = Refusjon(jsonNode["refusjon"])
+
+    val endringIRefusjoner
+        get() = jsonNode["endringIRefusjoner"]
+                .mapNotNull { it["endringsdato"].safelyUnwrapDate() }
+
     fun kanBehandles(): Boolean {
         return jsonNode["mottattDato"] != null
                 && jsonNode["foersteFravaersdag"] != null
                 && jsonNode["virksomhetsnummer"] != null && !jsonNode["virksomhetsnummer"].isNull
                 && jsonNode["beregnetInntekt"] != null && !jsonNode["beregnetInntekt"].isNull
+                && jsonNode["refusjon"]?.let { Refusjon(it) }?.beloepPrMnd == beregnetInntekt ?: false
     }
 
     data class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
 
+    }
+
+    data class Refusjon(val jsonNode: JsonNode) {
+        val opphoersdato get() = jsonNode["opphoersdato"].safelyUnwrapDate()
+        val beloepPrMnd get() = jsonNode["beloepPrMnd"]?.textValue()?.toBigDecimal()
     }
 
     fun toJson(): JsonNode = jsonNode

@@ -12,8 +12,8 @@ import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -141,6 +141,36 @@ internal class InntektsmeldingHendelseTest {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("virksomhetsnummer")
         }
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
+    }
+
+    @Test
+    internal fun `inntektsmelding med refusjon beløp == null er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO(refusjon = Refusjon(null)).toJsonNode()
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertFalse(inntektsmeldingHendelse.kanBehandles())
+    }
+
+    @Test
+    internal fun `inntektsmelding med refusjon lik beregnet inntekt gir gyldig hendelse`() {
+        val inntektsmeldingJson = inntektsmeldingDTO(
+                beregnetInntekt = 700.toBigDecimal(),
+                refusjon = Refusjon(beloepPrMnd = 700.toBigDecimal())
+        ).toJsonNode()
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+
+        assertTrue(inntektsmeldingHendelse.kanBehandles())
+    }
+
+    @Test
+    internal fun `inntektsmelding med refusjon forskjellig fra beregnetInntekt er ikke gyldig`() {
+        val inntektsmeldingJson = inntektsmeldingDTO(
+                beregnetInntekt = 700.toBigDecimal(),
+                refusjon = Refusjon(beloepPrMnd = 321.toBigDecimal())
+        ).toJsonNode()
         val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
