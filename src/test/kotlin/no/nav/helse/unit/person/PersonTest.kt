@@ -330,7 +330,12 @@ internal class PersonTest {
             it.håndterSendtSøknad(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndterInntektsmelding(inntektsmeldingHendelse(virksomhetsnummer = organisasjonsnummer, arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))))
 
-            it.håndterSykepengehistorikk(sykepengehistorikkHendelse(1.juli.minusMonths(7), organisasjonsnummer, aktørId, UUID.randomUUID()))
+            it.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                    sisteHistoriskeSykedag = 1.juli.minusMonths(7),
+                    organisasjonsnummer = organisasjonsnummer,
+                    aktørId = aktørId,
+                    sakskompleksId = UUID.randomUUID()
+            ))
         }
 
         assertEquals(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.sakskomplekstilstand)

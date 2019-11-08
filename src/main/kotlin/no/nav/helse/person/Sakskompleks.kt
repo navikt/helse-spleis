@@ -222,11 +222,11 @@ class Sakskompleks internal constructor(
         }
 
         override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
-                    ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand)
-
             val tidslinje = sakskompleks.sykdomstidslinje
                     ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+
+            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag(tidslinje.startdato())
+                    ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand)
 
             if (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
                 sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)

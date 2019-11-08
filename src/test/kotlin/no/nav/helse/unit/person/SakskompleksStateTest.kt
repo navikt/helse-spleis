@@ -1,5 +1,6 @@
 package no.nav.helse.unit.person
 
+import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
@@ -262,6 +263,46 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     }
 
     @Test
+    fun `motta sykepengehistorikk med histoikk fordi saken når saken er komplett og historikken er utenfor seks måneder`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+
+        val sakskompleks = beInKomplettTidslinje(
+                nySøknadHendelse = nySøknadHendelse,
+                sendtSøknadHendelse = sendtSøknadHendelse,
+                inntektsmeldingHendelse = inntektsmeldingHendelse)
+
+        sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
+                perioder = listOf(
+                        SpolePeriode(
+                                fom = periodeFom.minusMonths(8),
+                                tom = periodeFom.minusMonths(7),
+                                grad = "100"
+                        ),
+                        SpolePeriode(
+                                fom = periodeFom.minusMonths(1),
+                                tom = periodeFom.plusMonths(1),
+                                grad = "100"
+                        )
+                ),
+                sakskompleksId = sakskompleksId
+        ))
+
+        assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
+        assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
+        assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
+        assertEquals(20.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
+
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+    }
+
+    @Test
     fun `motta sykepengehistorikk med siste sykedag innenfor seks måneder av denne sakens første sykedag`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
@@ -299,12 +340,18 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
         sakskompleks.håndterSykepengehistorikk(sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.plusMonths(2),
+                perioder = listOf(
+                        SpolePeriode(
+                                fom = periodeFom.minusMonths(1),
+                                tom = periodeFom.plusMonths(1),
+                                grad = "100"
+                        )
+                ),
                 sakskompleksId = sakskompleksId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
     }
 
     @Test
