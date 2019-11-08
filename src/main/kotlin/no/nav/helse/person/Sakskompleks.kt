@@ -225,7 +225,7 @@ class Sakskompleks internal constructor(
             val tidslinje = sakskompleks.sykdomstidslinje
                     ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
-            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag(tidslinje.startdato())
+            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
                     ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand)
 
             if (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder) {
