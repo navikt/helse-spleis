@@ -188,7 +188,6 @@ internal class PersonComponentTest {
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
-        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     @Test
@@ -201,7 +200,6 @@ internal class PersonComponentTest {
         sendSøknad(aktørId2, virksomhetsnummer2)
 
         assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name))
-        assertOpprettGosysOppgave(aktørId = aktørId2)
     }
 
     @Test

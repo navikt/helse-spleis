@@ -42,11 +42,6 @@ internal class SøknadConsumer(
                 .peek { _, søknad -> SøknadProbe.mottattSøknad(søknad) }
                 .foreach { _, søknad -> håndterSøknad(søknad) }
 
-        sendtSøknad
-                .filter { _, søknad -> erSendtSøknad(søknad) }
-                .mapValues { søknad -> Sykepengesøknad(søknad) }
-                .foreach { _, søknad -> personMediator.håndterGenerellSendtSøknad(søknad) }
-
         return builder
     }
 

@@ -20,5 +20,3 @@ internal fun skalTaInnSøknad(søknad: JsonNode, søknadProbe: SøknadProbe): Bo
 
 private fun riktigSøknad(type: String, status: String) = type in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")
         && (status in listOf("SENDT", "NY", "FREMTIDIG"))
-
-internal fun erSendtSøknad(søknad: JsonNode) = søknad["status"].textValue() == "SENDT"

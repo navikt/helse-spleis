@@ -9,7 +9,6 @@ import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendels
 import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 
 internal class PersonMediator(private val personRepository: PersonRepository,
@@ -77,10 +76,6 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         } catch (err: PersonskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)
         }
-    }
-
-    fun håndterGenerellSendtSøknad(søknad: Sykepengesøknad) {
-        gosysOppgaveProducer.opprettOppgave(søknad.aktørId)
     }
 
     fun hentPersonJson(aktørId: String): String? = personRepository.hentPersonJson(aktørId)
