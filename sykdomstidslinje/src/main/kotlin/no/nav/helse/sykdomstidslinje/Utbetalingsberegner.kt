@@ -40,7 +40,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
     override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = sykedag(egenmeldingsdag.dagen)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykedag(sykHelgedag.dagen)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = fridag(sykHelgedag.dagen)
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         if(utbetalingslinjer.isNotEmpty()) {
             val sykedagerNAVBetaler = 248
@@ -88,11 +88,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
     private fun opprettBetalingslinje(dagen: LocalDate) {
         utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
-        tellSykeUkedager(dagen)
-    }
-
-    private fun tellSykeUkedager(dagen: LocalDate) {
-        if (dagen.dayOfWeek !in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) betalteSykedager += 1
+        betalteSykedager += 1
     }
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
@@ -211,7 +207,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
         override fun merEnn16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.utbetalingslinjer.last().tom = dagen
-            splitter.tellSykeUkedager(dagen)
+            splitter.betalteSykedager += 1
         }
 
         override fun færreEllerLik16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {

@@ -38,7 +38,7 @@ class UtbetalingslinjerTest {
 
         assertEquals(1, betalingslinjer.size)
         assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
+        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom)
     }
 
     @Test
@@ -46,12 +46,15 @@ class UtbetalingslinjerTest {
         val sykdomstidslinje = 21.S + 2.S + 2.F + S //6 utbetalingsdager
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
-        assertEquals(2, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer.first().tom)
+        assertEquals(3, betalingslinjer.size)
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer[0].fom)
+        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer[0].tom)
 
-        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().fom)
-        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer.last().tom)
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer[1].fom)
+        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer[1].tom)
+
+        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer[2].fom)
+        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer[2].tom)
     }
 
     @Test
@@ -66,22 +69,22 @@ class UtbetalingslinjerTest {
 
     @Test
     fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
-        val sykdomstidslinje = S + 2.F + A + S + 14.S + S
+        val sykdomstidslinje = S + 2.F + A + S + 14.S + 3.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().tom)
     }
 
     @Test
     fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
-        val sykdomstidslinje = S + A + 2.F + S + 14.S + S
+        val sykdomstidslinje = S + A + 2.F + S + 14.S + 3.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().tom)
     }
 
     @Test
@@ -104,12 +107,12 @@ class UtbetalingslinjerTest {
     }
 
     @Test
-    fun `Ferie rett etter arbeidsgiverperioden vacation teller ikke som opphold`() {
+    fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
         val sykdomstidslinje = 16.S + 16.F + A + 3.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 2, 3), betalingslinjer.first().fom)
+        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().fom)
         assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().tom)
 
     }
@@ -143,21 +146,28 @@ class UtbetalingslinjerTest {
         val sykdomstidslinje = 10.S + 20.F + 10.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
-        assertThat(betalingslinjer).hasSize(1)
+        assertThat(betalingslinjer).hasSize(2)
         assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.first().tom)
+        assertEquals(LocalDate.of(2018, 2, 2), betalingslinjer.first().tom)
+
+        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.last().fom)
+        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.last().tom)
     }
 
     @Test
-    fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode for betalingslinje 2`() {
+    fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode`() {
         val sykdomstidslinje = 20.S + 20.F + 10.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
-        assertThat(betalingslinjer).hasSize(2)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 20), betalingslinjer.first().tom)
-        assertEquals(LocalDate.of(2018, 2, 10), betalingslinjer.last().fom)
-        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer.last().tom)
+        assertThat(betalingslinjer).hasSize(3)
+        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer[0].fom)
+        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer[0].tom)
+
+        assertEquals(LocalDate.of(2018, 2, 12), betalingslinjer[1].fom)
+        assertEquals(LocalDate.of(2018, 2, 16), betalingslinjer[1].tom)
+
+        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer[2].fom)
+        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer[2].tom)
     }
 
     @Test
@@ -218,6 +228,38 @@ class UtbetalingslinjerTest {
         val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats).maksdato
 
         assertNull(maksdato)
+    }
+
+    @Test
+    fun `splitter utbetalingslinjer på helg`() {
+        val sykdomstidslinje = 30.S
+        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
+
+        assertEquals(3, linjer.size)
+        assertEquals(LocalDate.of(2018,1,17), linjer[0].fom)
+        assertEquals(LocalDate.of(2018,1,19), linjer[0].tom)
+
+        assertEquals(LocalDate.of(2018,1,22), linjer[1].fom)
+        assertEquals(LocalDate.of(2018,1,26), linjer[1].tom)
+
+        assertEquals(LocalDate.of(2018,1,29), linjer[2].fom)
+        assertEquals(LocalDate.of(2018,1,30), linjer[2].tom)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode med to påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
+        val sykdomstidslinje = 3.A + 18.S
+        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
+        assertEquals(0, linjer.size)
+    }
+
+    @Test
+    fun `arbeidsgiverperioden slutter på en søndag`() {
+        val sykdomstidslinje = 3.A + 5.S + 2.F + 13.S
+        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
+        assertEquals(1, linjer.size)
+        assertEquals(LocalDate.of(2018,1,22), linjer[0].fom)
+        assertEquals(LocalDate.of(2018,1,23), linjer[0].tom)
     }
 
     private val S
