@@ -258,7 +258,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
         assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
         assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
-        assertEquals(20.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
+        assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
@@ -360,7 +360,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     @Test
     fun `arbeidsgiver skal ikke utbetale hele perioden, så dette må vurderes i Infotrygd`(){
         val periodeFom = 1.juli
-        val periodeTom = 20.juli
+        val periodeTom = 19.juli
 
         val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
@@ -466,7 +466,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
     @Test
     fun `arbeidsgiver enderer refusjonen i utbetalingsperioden, så dette må vurderes i Infotrygd`(){
         val periodeFom = 1.juli
-        val periodeTom = 20.juli
+        val periodeTom = 19.juli
 
         val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
