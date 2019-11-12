@@ -50,4 +50,4 @@ spec:
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
   - name: AZURE_CONFIG_URL
-    value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
+    value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
