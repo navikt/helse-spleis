@@ -172,6 +172,7 @@ internal object TestConstants {
 
     fun inntektsmeldingHendelse(aktørId: String = "",
                                 virksomhetsnummer: String? = "123456789",
+                                beregnetInntekt: BigDecimal? = 666.toBigDecimal(),
                                 førsteFraværsdag: LocalDate = 10.september,
                                 arbeidsgiverperioder: List<Periode> = listOf(
                                         Periode(10.september, 10.september.plusDays(16))
@@ -183,7 +184,7 @@ internal object TestConstants {
                                 ),
                                 endringerIRefusjoner: List<EndringIRefusjon> = emptyList()) =
             InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(
-                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder, refusjon, endringerIRefusjoner).toJsonNode()
+                    inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder, refusjon, endringerIRefusjoner, beregnetInntekt).toJsonNode()
             ))
 
     fun inntektsmeldingDTO(aktørId: String = "",

@@ -1,16 +1,23 @@
 package no.nav.helse.unit.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.juli
 import no.nav.helse.person.Sakskompleks
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.*
 
 class SakskompleksTest {
@@ -57,6 +64,46 @@ class SakskompleksTest {
         val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
 
         assertEquals(jsonRepresentation, gjenopprettetSakskompleks.jsonRepresentation())
+    }
+
+    @Test
+    internal fun `gamle dagsatser lagret som bigdecimal leses riktig`() {
+        val id = UUID.randomUUID()
+        val aktørId = "1234"
+        val organisasjonsnummer = "123456789"
+
+        val dagsats = 1000
+        val dagsatsMedDesimal = BigDecimal("999.50")
+
+        val utbetalingslinje = Utbetalingslinje(
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                dagsats = dagsats
+        ).let {
+            objectMapper.convertValue<ObjectNode>(it)
+        }.also {
+            it["dagsats"] = TextNode(dagsatsMedDesimal.toString())
+        }
+
+        val jsonRepresentation = Sakskompleks.SakskompleksJson(
+                id = id,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                utbetalingslinjer = listOf(utbetalingslinje).let {
+                    objectMapper.convertValue<JsonNode>(it)
+                },
+                godkjentAv = null,
+                maksdato = null,
+                sykdomstidslinje = null,
+                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING
+        )
+
+        val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
+        val nyJson = gjenopprettetSakskompleks.jsonRepresentation()
+
+        val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
+
+        assertEquals(dagsats, dagsatsFraNyJson!!)
     }
 
     @Test
