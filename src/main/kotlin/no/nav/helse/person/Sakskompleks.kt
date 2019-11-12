@@ -309,7 +309,7 @@ class Sakskompleks internal constructor(
                     Utbetalingslinje(
                             fom = LocalDate.parse(it["fom"].textValue()),
                             tom = LocalDate.parse(it["tom"].textValue()),
-                            dagsats = it["dagsats"].textValue().toInt()
+                            dagsats = it["dagsats"].intValue()
                     )
                 }
                 godkjentAv = sakskompleksJson.godkjentAv
