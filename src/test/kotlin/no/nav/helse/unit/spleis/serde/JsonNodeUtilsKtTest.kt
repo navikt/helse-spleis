@@ -11,12 +11,12 @@ import java.time.LocalDate
 internal class JsonNodeUtilsKtTest {
 
     companion object {
-        val objectMapper = jacksonObjectMapper()
+        private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    val json = """
+    private val json = """
         {
             "felt1": null,
             "felt2": "2019-01-01"
