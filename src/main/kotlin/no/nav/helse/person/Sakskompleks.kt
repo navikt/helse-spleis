@@ -52,7 +52,7 @@ class Sakskompleks internal constructor(
 
     private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
 
-    internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), RoundingMode.HALF_UP)
+    internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP).toInt()
 
     internal fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse): Boolean {
         return overlapperMed(nySøknadHendelse).also {
@@ -309,7 +309,7 @@ class Sakskompleks internal constructor(
                     Utbetalingslinje(
                             fom = LocalDate.parse(it["fom"].textValue()),
                             tom = LocalDate.parse(it["tom"].textValue()),
-                            dagsats = BigDecimal(it["dagsats"].doubleValue())
+                            dagsats = it["dagsats"].textValue().toInt()
                     )
                 }
                 godkjentAv = sakskompleksJson.godkjentAv

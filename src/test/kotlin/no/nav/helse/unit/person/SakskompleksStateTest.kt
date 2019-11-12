@@ -233,7 +233,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
         assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
-        assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(31, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
         assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
         assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
@@ -262,7 +262,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
         assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
         assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
-        assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(31, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
         assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
         assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
