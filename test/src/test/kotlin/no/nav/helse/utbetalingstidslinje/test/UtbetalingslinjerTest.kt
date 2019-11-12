@@ -211,7 +211,7 @@ class UtbetalingslinjerTest {
         val sykdomstidslinje = 21.S + 3.F + S
         val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats).maksdato
 
-        assertEquals(LocalDate.of(2018,12,31), maksdato)
+        assertEquals(LocalDate.of(2019,1,2), maksdato)
     }
 
     @Test
@@ -262,6 +262,21 @@ class UtbetalingslinjerTest {
         assertEquals(LocalDate.of(2018,1,23), linjer[0].tom)
     }
 
+    @Test
+    fun `når rest av ukedager gjør at maksdato går over helg, så skal helgen ikke telle med som sykedag`() {
+        startDato = LocalDate.of(2019,10,11)
+        val sykdomstidslinje = 4.E + 4.S + 2.E + 5.S + 1.E + S + 14.S
+        val utbetalingsberegning = sykdomstidslinje.utbetalingsberegning(dagsats)
+        val utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+        assertEquals(2, utbetalingslinjer.size)
+        assertEquals(LocalDate.of(2020,10,7), utbetalingsberegning.maksdato)
+
+        assertEquals(LocalDate.of(2019,10,28), utbetalingslinjer[0].fom)
+        assertEquals(LocalDate.of(2019,11,1), utbetalingslinjer[0].tom)
+        assertEquals(LocalDate.of(2019,11,4), utbetalingslinjer[1].fom)
+        assertEquals(LocalDate.of(2019,11,8), utbetalingslinjer[1].tom)
+    }
+
     private val S
         get() = Sykdomstidslinje.sykedag(startDato, sendtSykmelding).also {
             startDato = startDato.plusDays(1)
@@ -287,6 +302,10 @@ class UtbetalingslinjerTest {
 
     private val Int.I
         get() = Sykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.E
+        get() = Sykdomstidslinje.egenmeldingsdager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
             .also { startDato = startDato.plusDays(this.toLong()) }
 }
 

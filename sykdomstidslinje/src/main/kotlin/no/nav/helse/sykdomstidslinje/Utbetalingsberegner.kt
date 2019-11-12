@@ -56,15 +56,16 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
 
             maksdato = utbetalingslinjer.last().tom
                 .trimHelg()
-                .plusDays((heleUkerIDager + gjenståendeDagerISisteUke).toLong())
-                .justerForGjenståendeDagerSomGjørAtMaksdatoHavnerIHelg()
+                .plusDays((heleUkerIDager).toLong())
+                .leggTilGjenståendeDager(gjenståendeDagerISisteUke)
         }
     }
 
-    private fun LocalDate.justerForGjenståendeDagerSomGjørAtMaksdatoHavnerIHelg() = when (dayOfWeek) {
-        DayOfWeek.SATURDAY, DayOfWeek.SUNDAY -> plusDays(2)
-        else -> this
-    }
+    private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
+        (0..gjenståendeDagerISisteUke + 2)
+            .map { plusDays(it.toLong()) }
+            .filterNot { it.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+            .get(gjenståendeDagerISisteUke)
 
     private fun LocalDate.trimHelg() = when (dayOfWeek) {
         DayOfWeek.SATURDAY -> minusDays(1)
