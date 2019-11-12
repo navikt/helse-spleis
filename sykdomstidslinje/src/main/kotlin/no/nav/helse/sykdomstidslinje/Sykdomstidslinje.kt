@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -78,7 +77,7 @@ abstract class Sykdomstidslinje {
 
     }
 
-    fun utbetalingsberegning(dagsats: BigDecimal): Utbetalingsberegning {
+    fun utbetalingsberegning(dagsats: Int): Utbetalingsberegning {
         val beregner = Utbetalingsberegner(dagsats)
         this.accept(beregner)
         return beregner.results()

@@ -19,7 +19,7 @@ class UtbetalingslinjerTest {
     //Mandag
     private var startDato = LocalDate.of(2018, 1, 1)
 
-    private val dagsats = 1200.toBigDecimal()
+    private val dagsats = 1200
 
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
@@ -172,7 +172,7 @@ class UtbetalingslinjerTest {
 
     @Test
     fun `opphold i sykedager over 16 dager etter arbeidsgiverperioden blir avvist`() {
-        assertThrows<Exception> { (19.S + 40.I + 5.S).utbetalingsberegning(1200.toBigDecimal()) }
+        assertThrows<Exception> { (19.S + 40.I + 5.S).utbetalingsberegning(1200) }
     }
 
     @Test

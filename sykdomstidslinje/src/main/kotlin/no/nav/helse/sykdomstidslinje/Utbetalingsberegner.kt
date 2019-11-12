@@ -1,11 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class Utbetalingsberegner(private val dagsats: BigDecimal) : SykdomstidslinjeVisitor {
+internal class Utbetalingsberegner(private val dagsats: Int) : SykdomstidslinjeVisitor {
 
     private var state: UtbetalingState = Initiell
     private val utbetalingslinjer = mutableListOf<InternUtbetalingslinje>()
@@ -25,7 +24,7 @@ internal class Utbetalingsberegner(private val dagsats: BigDecimal) : Sykdomstid
         )
     }
 
-    private data class InternUtbetalingslinje(val startdato: LocalDate, val dagsats: BigDecimal) {
+    private data class InternUtbetalingslinje(val startdato: LocalDate, val dagsats: Int) {
         var tom = startdato
     }
 
