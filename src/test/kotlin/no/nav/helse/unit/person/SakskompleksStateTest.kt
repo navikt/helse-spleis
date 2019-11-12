@@ -385,6 +385,8 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 sakskompleksId = sakskompleksId
         ))
 
+        assertNull(sakskompleks.jsonRepresentation().maksdato, "skal ikke sette maksdato når saken skal manuelt behandles")
+        assertNull(sakskompleks.jsonRepresentation().utbetalingslinjer, "skal ikke sette utbetalingslinjer når saken skal manuelt behandles")
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
     }
