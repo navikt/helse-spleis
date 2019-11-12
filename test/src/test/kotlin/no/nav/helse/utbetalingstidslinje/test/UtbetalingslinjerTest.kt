@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje.test
 
 import no.nav.helse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,6 +15,7 @@ class UtbetalingslinjerTest {
 
     companion object {
         private val sendtSykmelding = Testhendelse(Uke(3).mandag.atStartOfDay())
+        private val inntektsmeldingHendelse = Testhendelse(Uke(3).tirsdag.atStartOfDay(), Dag.NøkkelHendelseType.Inntektsmelding)
     }
 
     //Mandag
@@ -244,6 +246,27 @@ class UtbetalingslinjerTest {
 
         assertEquals(LocalDate.of(2018,1,29), linjer[2].fom)
         assertEquals(LocalDate.of(2018,1,30), linjer[2].tom)
+    }
+
+    @Test
+    fun `de første 10 dagene av arbeidsgiverperioden er egenmeldingsdager`() {
+        val start = startDato
+        val sykdomstidslinje = 10.E + 30.S +
+                Sykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25), inntektsmeldingHendelse)
+        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
+
+        assertEquals(4, linjer.size)
+        assertEquals(LocalDate.of(2018,1,17), linjer[0].fom)
+        assertEquals(LocalDate.of(2018,1,19), linjer[0].tom)
+
+        assertEquals(LocalDate.of(2018,1,22), linjer[1].fom)
+        assertEquals(LocalDate.of(2018,1,26), linjer[1].tom)
+
+        assertEquals(LocalDate.of(2018,1,29), linjer[2].fom)
+        assertEquals(LocalDate.of(2018,2,2), linjer[2].tom)
+
+        assertEquals(LocalDate.of(2018,2,5), linjer[3].fom)
+        assertEquals(LocalDate.of(2018,2,9), linjer[3].tom)
     }
 
     @Test

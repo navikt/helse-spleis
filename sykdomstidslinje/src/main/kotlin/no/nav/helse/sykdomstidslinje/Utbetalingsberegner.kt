@@ -38,7 +38,7 @@ internal class Utbetalingsberegner(private val dagsats: Int) : SykdomstidslinjeV
     override fun visitImplisittDag(implisittDag: ImplisittDag) = if (implisittDag.erHelg()) fridag(implisittDag.dagen) else arbeidsdag(implisittDag.dagen)
     override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = sykedag(egenmeldingsdag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = if(egenmeldingsdag.erHelg()) fridag(egenmeldingsdag.dagen) else sykedag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = fridag(sykHelgedag.dagen)
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         if(utbetalingslinjer.isNotEmpty()) {
