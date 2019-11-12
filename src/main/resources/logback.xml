@@ -21,6 +21,10 @@
         <appender-ref ref="secureLog" />
     </logger>
 
+    <logger name="HttpTraceLog" level="INFO" additivity="false">
+        <appender-ref ref="secureLog" />
+    </logger>
+
     <logger name="io.ktor.auth.jwt" level="TRACE" />
 
     <root level="INFO">

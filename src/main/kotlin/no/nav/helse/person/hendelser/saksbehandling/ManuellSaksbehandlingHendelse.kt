@@ -7,7 +7,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse, SakskompleksHendelse {
 
     fun saksbehandler() =
-            manuellSaksbehandling.get<String>("saksbehandler")!!
+            manuellSaksbehandling.get<String>("saksbehandlerIdent")!!
 
     fun utbetalingGodkjent(): Boolean =
             (manuellSaksbehandling.løsning() as Map<String, Any>?)?.getValue("godkjent") as Boolean? ?: false
