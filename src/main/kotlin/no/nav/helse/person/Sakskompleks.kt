@@ -18,6 +18,7 @@ import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Utbetalingsberegning
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import java.io.StringWriter
 import java.math.BigDecimal
@@ -48,7 +49,10 @@ class Sakskompleks internal constructor(
 
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
-    private fun sykepengegrunnlag() = (sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
+    private fun inntektsmeldingHendelse() =
+            this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
+
+    private fun sykepengegrunnlag() = (inntektsmeldingHendelse()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
 
     private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
 
@@ -110,7 +114,7 @@ class Sakskompleks internal constructor(
     private fun <HENDELSE> håndterSykdomstidslinjeHendelse(
             hendelse: HENDELSE,
             nesteTilstand: Sakskomplekstilstand
-    ) where HENDELSE: SykdomstidslinjeHendelse, HENDELSE: ArbeidstakerHendelse {
+    ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
         val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje()) ?: hendelse.sykdomstidslinje()
 
         if (tidslinje.erUtenforOmfang()) {
@@ -228,26 +232,33 @@ class Sakskompleks internal constructor(
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
 
             if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder)) {
-                sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
-            } else {
-                try {
-                    val utbetalingsberegning = tidslinje.utbetalingsberegning(sakskompleks.dagsats())
-                    sakskompleks.maksdato = utbetalingsberegning.maksdato
-                    sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+            }
 
-                    sakskompleks.setTilstand(sykepengehistorikkHendelse, if (helePeriodenSkalBetalesAvArbeidsgiver(sakskompleks)) TilGodkjenningTilstand else TilInfotrygdTilstand)
-                }catch (ie: IllegalArgumentException){
-                    sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
-                }
+            val utbetalingsberegning = try {
+                tidslinje.utbetalingsberegning(sakskompleks.dagsats())
+            } catch (ie: IllegalArgumentException) {
+                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+            }
+
+            if (!sakskompleks.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning)) {
+                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+            }
+
+            sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
+                sakskompleks.maksdato = utbetalingsberegning.maksdato
+                sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
             }
         }
 
-        private fun helePeriodenSkalBetalesAvArbeidsgiver(sakskompleks: Sakskompleks): Boolean {
-            val sisteUtbetalingsdag = sakskompleks.utbetalingslinjer?.lastOrNull()?.tom ?: return true
+        private fun Sakskompleks.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning: Utbetalingsberegning): Boolean {
+            val inntektsmelding = this.inntektsmeldingHendelse() ?: return false
+            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return true
 
-            val inntektsmelding = sakskompleks.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>() ?: return false
-
-            inntektsmelding.refusjon().opphoersdato?.apply { if(this <= sisteUtbetalingsdag) return false }
+            val opphørsdato = inntektsmelding.refusjon().opphoersdato
+            if (opphørsdato != null && opphørsdato <= sisteUtbetalingsdag) {
+                return false
+            }
 
             return inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
