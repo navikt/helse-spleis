@@ -279,7 +279,7 @@ internal object TestConstants {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "sakskompleksId" to sakskompleksId,
                 "aktørId" to aktørId,
-                "saksbehandler" to saksbehandler
+                "saksbehandlerIdent" to saksbehandler
         )).also {
             it.løsBehov(mapOf(
                     "godkjent" to utbetalingGodkjent

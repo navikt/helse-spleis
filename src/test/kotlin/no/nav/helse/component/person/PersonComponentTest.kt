@@ -480,7 +480,7 @@ internal class PersonComponentTest {
         behov.løsBehov(mapOf(
             "godkjent" to utbetalingGodkjent
         ))
-        behov["saksbehandler"] = saksbehandler
+        behov["saksbehandlerIdent"] = saksbehandler
         sendBehov(behov)
     }
 
