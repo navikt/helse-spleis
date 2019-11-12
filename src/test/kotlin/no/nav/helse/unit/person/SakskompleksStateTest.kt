@@ -231,6 +231,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 sakskompleksId = sakskompleksId
         ))
 
+        assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
+        assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
+        assertEquals(30.74.toBigDecimal(), sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.decimalValue())
+        assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
+        assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
+
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
     }
