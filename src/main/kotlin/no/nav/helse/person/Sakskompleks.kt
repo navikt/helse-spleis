@@ -3,7 +3,7 @@ package no.nav.helse.person
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.databind.node.DecimalNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -322,7 +322,7 @@ class Sakskompleks internal constructor(
                             fom = LocalDate.parse(it["fom"].textValue()),
                             tom = LocalDate.parse(it["tom"].textValue()),
                             dagsats = when (it["dagsats"]) {
-                                is TextNode -> BigDecimal(it["dagsats"].textValue()).setScale(0, RoundingMode.HALF_UP).toInt()
+                                is DecimalNode -> it["dagsats"].decimalValue().setScale(0, RoundingMode.HALF_UP).toInt()
                                 else -> it["dagsats"].intValue()
                             }
                     )
