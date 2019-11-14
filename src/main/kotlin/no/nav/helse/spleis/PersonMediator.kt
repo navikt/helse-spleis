@@ -17,7 +17,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
                               private val lagreUtbetalingDao: PersonObserver,
                               private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe,
                               private val behovProducer: BehovProducer,
-                              private val gosysOppgaveProducer: GosysOppgaveProducer) : PersonObserver {
+                              private val gosysOppgaveProducer: GosysOppgaveProducer,
+                              private val sakskompleksEventProducer: SakskompleksEventProducer) : PersonObserver {
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
@@ -92,6 +93,8 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         if (event.currentState == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId)
         }
+
+        sakskompleksEventProducer.sendEndringEvent(event)
     }
 
     private fun finnPerson(arbeidstakerHendelse: ArbeidstakerHendelse) =

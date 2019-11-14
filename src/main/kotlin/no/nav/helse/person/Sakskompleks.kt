@@ -444,6 +444,7 @@ class Sakskompleks internal constructor(
         val event = StateChangeEvent(
                 id = id,
                 aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
                 currentState = currentState,
                 previousState = previousState,
                 sykdomshendelse = tidslinjeEvent,

@@ -6,6 +6,7 @@ import java.util.*
 interface SakskompleksObserver {
     data class StateChangeEvent(val id: UUID,
                                 val aktørId: String,
+                                val organisasjonsnummer: String,
                                 val currentState: Sakskompleks.TilstandType,
                                 val previousState: Sakskompleks.TilstandType,
                                 val sykdomshendelse: ArbeidstakerHendelse,

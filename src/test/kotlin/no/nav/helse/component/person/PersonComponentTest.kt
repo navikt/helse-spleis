@@ -24,12 +24,15 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
+import no.nav.helse.Topics.sakskompleksEventTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.person.Person
+import no.nav.helse.person.Sakskompleks
+import no.nav.helse.person.Sakskompleks.TilstandType.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.personPath
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -75,7 +78,7 @@ internal class PersonComponentTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
+        private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, sakskompleksEventTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -85,7 +88,7 @@ internal class PersonComponentTest {
             topicInfos = topicInfos,
             withSchemaRegistry = false,
             withSecurity = false,
-            topicNames = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic)
+            topicNames = topics
         )
 
         private lateinit var adminClient: AdminClient
@@ -189,6 +192,7 @@ internal class PersonComponentTest {
         sendSøknad(aktørID, virksomhetsnummer)
         sendInnteksmelding(aktørID, virksomhetsnummer)
 
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(NY_SØKNAD_MOTTATT, SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE))
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
     }
 
@@ -551,6 +555,24 @@ internal class PersonComponentTest {
             }
 
         return behov!!
+    }
+
+    private fun assertSakskompleksEndretEvent(virksomhetsnummer: String, aktørId: String, typer: List<Sakskompleks.TilstandType>) {
+        await()
+                .atMost(5, SECONDS)
+                .untilAsserted {
+                    val meldingerPåTopic = TestConsumer.records(sakskompleksEventTopic)
+                    val sakskompleksEndretHendelser = meldingerPåTopic
+                            .onEach { println("yolo: ${it.value()}") }
+                            .map { objectMapper.readTree(it.value()) }
+                            .filter { aktørId == it["aktørId"].textValue() }
+                            .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
+                            .map { Sakskompleks.TilstandType.valueOf(it["currentState"].textValue()) }
+                            .filter { it in typer }
+                            .distinct()
+
+                    assertEquals(typer, sakskompleksEndretHendelser)
+                }
     }
 
     private fun assertBehov(virksomhetsnummer: String, aktørId: String, typer: List<String>) {

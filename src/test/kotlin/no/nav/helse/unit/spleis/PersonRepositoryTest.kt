@@ -21,7 +21,8 @@ internal class PersonRepositoryTest {
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
                 behovProducer = mockk(),
-                gosysOppgaveProducer = mockk()
+                gosysOppgaveProducer = mockk(),
+                sakskompleksEventProducer = mockk(relaxed = true)
         )
 
         mediator.håndterNySøknad(nySøknadHendelse(
@@ -42,7 +43,8 @@ internal class PersonRepositoryTest {
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
                 behovProducer = mockk(),
-                gosysOppgaveProducer = mockk()
+                gosysOppgaveProducer = mockk(),
+                sakskompleksEventProducer = mockk(relaxed = true)
         )
         mediator.håndterNySøknad(nySøknadHendelse(
                 aktørId = aktørId

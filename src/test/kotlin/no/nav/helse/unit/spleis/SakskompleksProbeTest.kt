@@ -70,6 +70,7 @@ internal class SakskompleksProbeTest {
             SakskompleksObserver.StateChangeEvent(
                 id = id,
                 aktørId = aktørId,
+                organisasjonsnummer = "orgnummer",
                 currentState = currentState,
                 previousState = previousState,
                 sykdomshendelse = eventType,

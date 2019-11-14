@@ -76,7 +76,8 @@ fun Application.sakskompleksApplication(): KafkaStreams {
             utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
             lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
             behovProducer = BehovProducer(behovTopic, producer),
-            gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
+            gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()),
+            sakskompleksEventProducer = SakskompleksEventProducer(commonKafkaProperties()))
 
     restInterface(personMediator)
 

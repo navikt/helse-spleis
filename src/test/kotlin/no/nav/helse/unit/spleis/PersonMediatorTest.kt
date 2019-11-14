@@ -52,7 +52,9 @@ internal class PersonMediatorTest {
             utbetalingsreferanseRepository = utbetalingsRepo,
             lagreUtbetalingDao = lagreUtbetalingDao,
             behovProducer = behovProducer,
-            gosysOppgaveProducer = oppgaveProducer)
+            gosysOppgaveProducer = oppgaveProducer,
+            sakskompleksEventProducer = mockk(relaxed = true)
+    )
 
     private val sendtSøknadHendelse = sendtSøknadHendelse()
 
