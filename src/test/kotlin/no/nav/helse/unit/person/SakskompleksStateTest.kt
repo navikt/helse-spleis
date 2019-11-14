@@ -540,6 +540,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertEquals(TIL_GODKJENNING, lastStateEvent.previousState)
         assertEquals(TIL_UTBETALING, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is ManuellSaksbehandlingHendelse)
+
+        val utbetalingsreferanse = sakskompleks.jsonRepresentation().utbetalingsreferanse
+        assertNotNull(utbetalingsreferanse, "skal sette utbetalingsreferanse når saken skal utbetales")
+
+        assertTrue(behovsliste.any { it.behovType() == BehovsTyper.Utbetaling.name })
+
+        val behov = behovsliste.first { it.behovType() == BehovsTyper.Utbetaling.name }
+        assertEquals(utbetalingsreferanse, behov["utbetalingsreferanse"]!!)
     }
 
     @Test

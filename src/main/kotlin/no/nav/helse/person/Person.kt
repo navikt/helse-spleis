@@ -163,6 +163,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
         override fun toString() = json
     }
 
+    override fun toString() = memento().toString()
+
     internal data class ArbeidsgiverJson(
             val organisasjonsnummer: String,
             val saker: List<Sakskompleks.SakskompleksJson>,

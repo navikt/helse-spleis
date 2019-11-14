@@ -18,7 +18,7 @@ class LagrePersonDao(private val dataSource: DataSource,
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf("INSERT INTO person (aktor_id, data) VALUES (?, (to_json(?::json)))", aktørId, memento.toString()).asExecute)
         }.also {
-            PostgresProbe.personSkrevetTilDb()
+            probe.personSkrevetTilDb()
         }
     }
 

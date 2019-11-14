@@ -48,6 +48,8 @@ class Sakskompleks internal constructor(
 
     private var godkjentAv: String? = null
 
+    private var utbetalingsreferanse: String? = null
+
     private val observers: MutableList<SakskompleksObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
@@ -287,9 +289,26 @@ class Sakskompleks internal constructor(
         override val type = TIL_UTBETALING
 
         override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Utbetaling)
+            val utbetalingsreferanse = lagUtbetalingsReferanse()
+            sakskompleks.utbetalingsreferanse = utbetalingsreferanse
+
+            sakskompleks.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
+                    "utbetalingsreferanse" to utbetalingsreferanse
+            ))
+
+            val event = SakskompleksObserver.UtbetalingEvent(
+                    sakskompleksId = sakskompleks.id,
+                    aktørId = sakskompleks.aktørId,
+                    organisasjonsnummer = sakskompleks.organisasjonsnummer,
+                    utbetalingsreferanse = utbetalingsreferanse
+            )
+            sakskompleks.observers.forEach {
+                it.sakskompleksTilUtbetaling(event)
+            }
         }
 
+        // TODO: finn et format som oppdrag/UR ønsker
+        private fun lagUtbetalingsReferanse() = (System.currentTimeMillis()/1000).toString()
     }
 
     private object TilInfotrygdTilstand : Sakskomplekstilstand {
@@ -401,7 +420,8 @@ class Sakskompleks internal constructor(
                 maksdato = maksdato,
                 utbetalingslinjer = utbetalingslinjer
                         ?.let { objectMapper.convertValue<JsonNode>(it) },
-                godkjentAv = godkjentAv
+                godkjentAv = godkjentAv,
+                utbetalingsreferanse = utbetalingsreferanse
         )
     }
 
@@ -464,7 +484,8 @@ class Sakskompleks internal constructor(
             val sykdomstidslinje: JsonNode?,
             val maksdato: LocalDate?,
             val utbetalingslinjer: JsonNode?,
-            val godkjentAv: String?
+            val godkjentAv: String?,
+            val utbetalingsreferanse: String?
     )
 }
 

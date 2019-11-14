@@ -18,6 +18,8 @@ internal class PersonRepositoryTest {
         val mediator = PersonMediator(
                 personRepository = repo,
                 lagrePersonDao = repo,
+                utbetalingsreferanseRepository = mockk(),
+                lagreUtbetalingDao = mockk(),
                 behovProducer = mockk(),
                 gosysOppgaveProducer = mockk()
         )
@@ -37,6 +39,8 @@ internal class PersonRepositoryTest {
         val mediator = PersonMediator(
                 personRepository = repo,
                 lagrePersonDao = repo,
+                utbetalingsreferanseRepository = mockk(),
+                lagreUtbetalingDao = mockk(),
                 behovProducer = mockk(),
                 gosysOppgaveProducer = mockk()
         )

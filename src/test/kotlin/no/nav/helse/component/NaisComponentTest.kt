@@ -32,7 +32,7 @@ class NaisComponentTest {
         testServer(environment = testEnv) {
             handleRequest(HttpMethod.Get, "/metrics") { responseStatusCode ->
                 assertEquals(HttpStatusCode.OK, responseStatusCode)
-                val response = responseBody.reader().use { it.readText() }
+                val response = responseBody
                 assertTrue(response.contains("jvm_memory_used_bytes"))
                 assertTrue(response.contains("""logback_events_total{level="error",}"""))
             }

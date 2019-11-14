@@ -13,6 +13,8 @@ import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 
 internal class PersonMediator(private val personRepository: PersonRepository,
                               private val lagrePersonDao: PersonObserver,
+                              private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
+                              private val lagreUtbetalingDao: PersonObserver,
                               private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe,
                               private val behovProducer: BehovProducer,
                               private val gosysOppgaveProducer: GosysOppgaveProducer) : PersonObserver {
@@ -78,7 +80,13 @@ internal class PersonMediator(private val personRepository: PersonRepository,
         }
     }
 
-    fun hentPersonJson(aktørId: String): String? = personRepository.hentPersonJson(aktørId)
+    fun hentPerson(aktørId: String): Person? = personRepository.hentPerson(aktørId)
+
+    fun hentPersonForUtbetaling(utbetalingsreferanse: String): Person? {
+        return utbetalingsreferanseRepository.hentUtbetaling(utbetalingsreferanse)?.let {
+            personRepository.hentPerson(it.aktørId)
+        }
+    }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
         if (event.currentState == TIL_INFOTRYGD) {
@@ -90,6 +98,7 @@ internal class PersonMediator(private val personRepository: PersonRepository,
             (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(aktørId = arbeidstakerHendelse.aktørId())).also {
                 it.addObserver(this)
                 it.addObserver(lagrePersonDao)
+                it.addObserver(lagreUtbetalingDao)
                 it.addObserver(sakskompleksProbe)
             }
 

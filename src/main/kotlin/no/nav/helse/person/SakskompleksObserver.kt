@@ -12,8 +12,15 @@ interface SakskompleksObserver {
                                 val currentMemento: Sakskompleks.Memento,
                                 val previousMemento: Sakskompleks.Memento)
 
+    data class UtbetalingEvent(val sakskompleksId: UUID,
+                               val aktørId: String,
+                               val organisasjonsnummer: String,
+                               val utbetalingsreferanse: String)
+
 
     fun sakskompleksEndret(event: StateChangeEvent) {}
+
+    fun sakskompleksTilUtbetaling(event: UtbetalingEvent) {}
 
     fun sakskompleksTrengerLøsning(event: Behov) {}
 

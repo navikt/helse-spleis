@@ -9,14 +9,14 @@ import javax.sql.DataSource
 class PersonPostgresRepository(private val dataSource: DataSource,
                                private val probe: PostgresProbe = PostgresProbe) : PersonRepository {
 
-    override fun hentPerson(aktørId: String): Person? = hentPersonJson(aktørId)?.let { Person.fromJson(it) }
-
-    override fun hentPersonJson(aktørId: String): String? {
+    override fun hentPerson(aktørId: String): Person? {
         return using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1", aktørId).map {
                 it.string("data")
             }.asSingle)
-        }.also {
+        }?.let {
+            Person.fromJson(it)
+        }?.also {
             probe.personLestFraDb()
         }
     }

@@ -21,13 +21,10 @@ import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.spleis.LagrePersonDao
-import no.nav.helse.spleis.PersonMediator
-import no.nav.helse.spleis.PersonPostgresRepository
+import no.nav.helse.spleis.*
 import no.nav.helse.spleis.http.getJson
 import no.nav.helse.spleis.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
-import no.nav.helse.spleis.person
 import no.nav.helse.spleis.søknad.SøknadConsumer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -76,6 +73,8 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val personMediator = PersonMediator(
             personRepository = PersonPostgresRepository(dataSource),
             lagrePersonDao = LagrePersonDao(dataSource),
+            utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
+            lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
             behovProducer = BehovProducer(behovTopic, producer),
             gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()))
 
@@ -163,6 +162,7 @@ private fun Application.restInterface(personMediator: PersonMediator,
 
     routing {
         authenticate {
+            utbetaling(personMediator)
             person(personMediator)
         }
     }

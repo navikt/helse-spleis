@@ -91,7 +91,8 @@ class SakskompleksTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING
+                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING,
+                utbetalingsreferanse = null
         )
 
         val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
@@ -131,7 +132,8 @@ class SakskompleksTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING
+                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING,
+                utbetalingsreferanse = null
         )
 
         val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)

@@ -11,13 +11,11 @@ import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 
 fun randomPort(): Int = ServerSocket(0).use {
     it.localPort
@@ -83,11 +81,14 @@ fun ApplicationEngine.handleRequest(method: HttpMethod,
     return con
 }
 
-val HttpURLConnection.responseBody get() =
-    BufferedReader(InputStreamReader(
-            if (responseCode in 200..299) {
-                inputStream
-            } else {
-                errorStream
-            }
-    )).lines().collect(Collectors.joining())
+val HttpURLConnection.responseBody: String get() {
+    val stream: InputStream? = if (responseCode in 200..299) {
+        inputStream
+    } else {
+        errorStream
+    }
+
+    return stream?.use {
+        it.bufferedReader().readText()
+    } ?: ""
+}

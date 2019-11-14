@@ -17,8 +17,10 @@ import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.spleis.LagreUtbetalingDao
 import no.nav.helse.spleis.PersonMediator
 import no.nav.helse.spleis.SakskompleksProbe
+import no.nav.helse.spleis.UtbetalingsreferanseRepository
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,10 +42,15 @@ internal class PersonMediatorTest {
         } just runs
     }
     private val repo = HashmapPersonRepository()
+    private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>()
+    private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>()
+
     private val personMediator = PersonMediator(
             sakskompleksProbe = probe,
             personRepository = repo,
             lagrePersonDao = repo,
+            utbetalingsreferanseRepository = utbetalingsRepo,
+            lagreUtbetalingDao = lagreUtbetalingDao,
             behovProducer = behovProducer,
             gosysOppgaveProducer = oppgaveProducer)
 

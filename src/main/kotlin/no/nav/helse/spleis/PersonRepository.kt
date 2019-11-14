@@ -6,6 +6,4 @@ internal interface PersonRepository {
 
     fun hentPerson(aktørId: String): Person?
 
-    fun hentPersonJson(aktørId: String): String?
-
 }

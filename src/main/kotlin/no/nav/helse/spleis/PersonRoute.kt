@@ -12,7 +12,7 @@ private const val personParameterizedPath = "$personPath{$aktørId}"
 
 internal fun Route.person(personMediator: PersonMediator) {
     get(personParameterizedPath) {
-        personMediator.hentPersonJson(call.parameters[aktørId]!!)?.let { call.respond(it) }
+        personMediator.hentPerson(call.parameters[aktørId]!!)?.let { call.respond(it.toString()) }
             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
     }
 }

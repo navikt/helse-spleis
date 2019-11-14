@@ -29,6 +29,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
+import no.nav.helse.person.Person
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.personPath
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -395,6 +396,32 @@ internal class PersonComponentTest {
     }
 
     @Test
+    fun `gitt en sak for utbetaling, skal vi kunne hente opp saken via utbetalingsreferanse`() {
+        val aktørID = "87654323421962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInnteksmelding(aktørID, virksomhetsnummer)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
+
+        val utbetalingsbehov = ventPåBehov(aktørId = aktørID, behovType = Utbetaling)
+        val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
+
+        utbetalingsreferanse.hentUtbetaling {
+            val person = Person.fromJson(this)
+            assertEquals(aktørID, person.aktørId)
+        }
+    }
+
+    @Test
     fun `gitt en sak for godkjenning, når utbetaling ikke er godkjent skal saken til Infotrygd`() {
         val aktørID = "8787654421962"
         val virksomhetsnummer = "123456789"
@@ -458,6 +485,23 @@ internal class PersonComponentTest {
             builder = {
                 setRequestProperty(Authorization, "Bearer $token")
             })
+
+        assertEquals(HttpStatusCode.OK.value, connection.responseCode)
+
+        connection.responseBody.testBlock()
+    }
+
+    private fun String.hentUtbetaling(testBlock: String.() -> Unit) {
+        val token = jwtStub.createTokenFor(
+                subject = "en_saksbehandler_ident",
+                groups = listOf("sykepenger-saksbehandler-gruppe"),
+                audience = "spleis_azure_ad_app_id"
+        )
+
+        val connection = embeddedServer.handleRequest(HttpMethod.Get, "/api/utbetaling/" + this,
+                builder = {
+                    setRequestProperty(Authorization, "Bearer $token")
+                })
 
         assertEquals(HttpStatusCode.OK.value, connection.responseCode)
 
