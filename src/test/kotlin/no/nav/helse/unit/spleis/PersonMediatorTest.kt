@@ -12,16 +12,15 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.person.Sakskompleks
+import no.nav.helse.person.Sakskompleks.TilstandType.*
 import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.spleis.LagreUtbetalingDao
-import no.nav.helse.spleis.PersonMediator
-import no.nav.helse.spleis.SakskompleksProbe
-import no.nav.helse.spleis.UtbetalingsreferanseRepository
+import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,6 +31,7 @@ internal class PersonMediatorTest {
 
     private val probe = mockk<SakskompleksProbe>(relaxed = true)
     private val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
+    private val sakskompleksEventProducer = mockk<SakskompleksEventProducer>(relaxed = true)
 
     private val behovsliste = mutableListOf<Behov>()
     private val behovProducer = mockk<BehovProducer>(relaxed = true).also {
@@ -54,7 +54,7 @@ internal class PersonMediatorTest {
             lagreUtbetalingDao = lagreUtbetalingDao,
             behovProducer = behovProducer,
             gosysOppgaveProducer = oppgaveProducer,
-            sakskompleksEventProducer = mockk(relaxed = true)
+            sakskompleksEventProducer = sakskompleksEventProducer
     )
 
     private val sendtSøknadHendelse = sendtSøknadHendelse()
@@ -106,31 +106,69 @@ internal class PersonMediatorTest {
         }
     }
 
+    @Test
+    fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
+        val aktørID = "1234567890123"
+        val virksomhetsnummer = "123456789"
+
+        sendNySøknad(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = START, currentState = NY_SØKNAD_MOTTATT)
+
+        sendSøknad(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = NY_SØKNAD_MOTTATT, currentState = SENDT_SØKNAD_MOTTATT)
+
+        sendInntektsmelding(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = SENDT_SØKNAD_MOTTATT, currentState = KOMPLETT_SYKDOMSTIDSLINJE)
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Sykepengehistorikk)
+    }
+
+    @Test
+    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
+        val aktørId = "0123456789012"
+        val virksomhetsnummer = "012345678"
+
+        sendNySøknad(aktørId, virksomhetsnummer)
+        sendInntektsmelding(aktørId, virksomhetsnummer)
+        sendSøknad(aktørId, virksomhetsnummer)
+
+        assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Sykepengehistorikk)
+    }
+
+    @Test
+    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
+        val aktørID = "2345678901234"
+        val virksomhetsnummer = "234567890"
+
+        sendSøknad(aktørID, virksomhetsnummer)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
 
     @Test
     fun `gitt en sak for godkjenning, når utbetaling er godkjent skal vi produsere et utbetalingbehov`() {
         val aktørId = "87654323421962"
         val virksomhetsnummer = "123456789"
 
-        nySøknad(aktørId, virksomhetsnummer)
-        sendtSøknad(aktørId, virksomhetsnummer)
-        inntektsmelding(aktørId, virksomhetsnummer)
+        sendNySøknad(aktørId, virksomhetsnummer)
+        sendSøknad(aktørId, virksomhetsnummer)
+        sendInntektsmelding(aktørId, virksomhetsnummer)
 
-        assertBehov(BehovsTyper.Sykepengehistorikk)
+        assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Sykepengehistorikk)
 
-        sykepengehistorikk(emptyList())
+        sendSykepengehistorikk(emptyList())
 
-        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+        assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.GodkjenningFraSaksbehandler)
 
-        manuellSaksbehandling(
+        sendManuellSaksbehandling(
                 saksbehandlerIdent = "en_saksbehandler_ident",
                 utbetalingGodkjent = true
         )
 
-        assertBehov(BehovsTyper.Utbetaling)
+        assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Utbetaling)
     }
 
-    private fun nySøknad(aktørId: String, virksomhetsnummer: String) {
+    private fun sendNySøknad(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterNySøknad(nySøknadHendelse(
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
@@ -140,7 +178,7 @@ internal class PersonMediatorTest {
         ))
     }
 
-    private fun sendtSøknad(aktørId: String, virksomhetsnummer: String) {
+    private fun sendSøknad(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterSendtSøknad(sendtSøknadHendelse(
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
@@ -150,7 +188,7 @@ internal class PersonMediatorTest {
         ))
     }
 
-    private fun inntektsmelding(aktørId: String, virksomhetsnummer: String) {
+    private fun sendInntektsmelding(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterInntektsmelding(inntektsmeldingHendelse(
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
@@ -161,14 +199,14 @@ internal class PersonMediatorTest {
         personMediator.håndterSendtSøknad(sendtSøknadHendelse)
     }
 
-    private fun sykepengehistorikk(perioder: List<SpolePeriode>) {
+    private fun sendSykepengehistorikk(perioder: List<SpolePeriode>) {
         Sykepengehistorikk(objectMapper.readTree(løsSykepengehistorikkBehov(perioder).toJson())).let {
             personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
         }
     }
 
-    private fun manuellSaksbehandling(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
-        val manuellSaksbehandlingløsning = løsManuellSaksbehandlingBehov(
+    private fun sendManuellSaksbehandling(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
+        løsManuellSaksbehandlingBehov(
                 saksbehandlerIdent = saksbehandlerIdent,
                 utbetalingGodkjent = utbetalingGodkjent
         ).let {
@@ -198,7 +236,27 @@ internal class PersonMediatorTest {
                 first { it.behovType() == behovsType.name }
     }
 
-    private fun assertBehov(behovsType: BehovsTyper) {
-        assertEquals(1, behovsliste.filter { it.behovType() == behovsType.name}.size)
+    private fun assertSakskompleksEndretEvent(aktørId: String, virksomhetsnummer: String, previousState: Sakskompleks.TilstandType, currentState: Sakskompleks.TilstandType) {
+        verify(exactly = 1) {
+            sakskompleksEventProducer.sendEndringEvent(match {
+                it.previousState == previousState
+                        && it.currentState == currentState
+                        && it.aktørId == aktørId
+                        && it.organisasjonsnummer == virksomhetsnummer
+            })
+        }
+    }
+    private fun assertOpprettGosysOppgave(aktørId: String) {
+        verify(exactly = 1) {
+            oppgaveProducer.opprettOppgave(aktørId = aktørId)
+        }
+    }
+
+    private fun assertBehov(aktørId: String, virksomhetsnummer: String, behovsType: BehovsTyper) {
+        assertEquals(1, behovsliste
+                .filter { it.behovType() == behovsType.name}
+                .filter { aktørId == it["aktørId"] }
+                .filter { virksomhetsnummer == it["organisasjonsnummer"] }
+                .size)
     }
 }

@@ -32,7 +32,6 @@ import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sakskompleks
-import no.nav.helse.person.Sakskompleks.TilstandType.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.personPath
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -181,41 +180,6 @@ internal class PersonComponentTest {
     @BeforeEach
     fun `create test consumer`() {
         TestConsumer.reset()
-    }
-
-    @Test
-    fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
-        val aktørID = "1234567890123"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(NY_SØKNAD_MOTTATT, SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE))
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Sykepengehistorikk.name))
-    }
-
-    @Test
-    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
-        val aktørId2 = "0123456789012"
-        val virksomhetsnummer2 = "012345678"
-
-        sendNySøknad(aktørId2, virksomhetsnummer2)
-        sendInnteksmelding(aktørId2, virksomhetsnummer2)
-        sendSøknad(aktørId2, virksomhetsnummer2)
-
-        assertBehov(aktørId = aktørId2, virksomhetsnummer = virksomhetsnummer2, typer = listOf(Sykepengehistorikk.name))
-    }
-
-    @Test
-    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
-        val aktørID = "2345678901234"
-        val virksomhetsnummer = "234567890"
-
-        sendSøknad(aktørID, virksomhetsnummer)
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     @Test
