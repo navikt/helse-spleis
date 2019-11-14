@@ -1,1 +1,1 @@
-ALTER TABLE utbetalingsreferanse ALTER COLUMN id TYPE VARCHAR(30)
+ALTER TABLE utbetalingsreferanse ALTER COLUMN id TYPE VARCHAR(30);
