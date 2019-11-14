@@ -20,7 +20,7 @@ class LagreUtbetalingDao(private val dataSource: DataSource,
 
     private fun lagreUtbetaling(utbetalingsreferanse: String, aktørId: String, organisasjonsnummer: String, sakskompleksId: UUID) {
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO utbetalingsreferanse (id, aktor_id, orgnr, sakskompleksId) VALUES (?, ?, ?, ?)",
+            session.run(queryOf("INSERT INTO utbetalingsreferanse (id, aktor_id, orgnr, sakskompleks_id) VALUES (?, ?, ?, ?)",
                     utbetalingsreferanse, aktørId, organisasjonsnummer, sakskompleksId.toString()).asExecute)
         }.also {
             probe.utbetalingSkrevetTilDb()
