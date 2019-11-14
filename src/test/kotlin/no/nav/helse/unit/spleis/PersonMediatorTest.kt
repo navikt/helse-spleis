@@ -42,8 +42,8 @@ internal class PersonMediatorTest {
         } just runs
     }
     private val repo = HashmapPersonRepository()
-    private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>()
-    private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>()
+    private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
+    private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
 
     private val personMediator = PersonMediator(
             sakskompleksProbe = probe,

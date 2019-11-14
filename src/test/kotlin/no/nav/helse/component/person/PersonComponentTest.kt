@@ -397,7 +397,7 @@ internal class PersonComponentTest {
 
     @Test
     fun `gitt en sak for utbetaling, skal vi kunne hente opp saken via utbetalingsreferanse`() {
-        val aktørID = "87654323421962"
+        val aktørID = "87659123421962"
         val virksomhetsnummer = "123456789"
 
         val søknad = sendNySøknad(aktørID, virksomhetsnummer)
@@ -474,31 +474,14 @@ internal class PersonComponentTest {
         }
     }
 
-    private fun String.hentPerson(testBlock: String.() -> Unit) {
-        val token = jwtStub.createTokenFor(
-            subject = "en_saksbehandler_ident",
-            groups = listOf("sykepenger-saksbehandler-gruppe"),
-            audience = "spleis_azure_ad_app_id"
-        )
-
-        val connection = embeddedServer.handleRequest(HttpMethod.Get, personPath + this,
-            builder = {
-                setRequestProperty(Authorization, "Bearer $token")
-            })
-
-        assertEquals(HttpStatusCode.OK.value, connection.responseCode)
-
-        connection.responseBody.testBlock()
-    }
-
-    private fun String.hentUtbetaling(testBlock: String.() -> Unit) {
+    private fun String.httpGet(testBlock: String.() -> Unit) {
         val token = jwtStub.createTokenFor(
                 subject = "en_saksbehandler_ident",
                 groups = listOf("sykepenger-saksbehandler-gruppe"),
                 audience = "spleis_azure_ad_app_id"
         )
 
-        val connection = embeddedServer.handleRequest(HttpMethod.Get, "/api/utbetaling/" + this,
+        val connection = embeddedServer.handleRequest(HttpMethod.Get, this,
                 builder = {
                     setRequestProperty(Authorization, "Bearer $token")
                 })
@@ -506,6 +489,14 @@ internal class PersonComponentTest {
         assertEquals(HttpStatusCode.OK.value, connection.responseCode)
 
         connection.responseBody.testBlock()
+    }
+
+    private fun String.hentPerson(testBlock: String.() -> Unit) {
+        (personPath + this).httpGet(testBlock)
+    }
+
+    private fun String.hentUtbetaling(testBlock: String.() -> Unit) {
+        ("/api/utbetaling/" + this).httpGet(testBlock)
     }
 
     private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
