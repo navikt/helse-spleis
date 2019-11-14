@@ -21,9 +21,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.Utbetalingsberegning
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import org.apache.commons.codec.binary.Base32
 import java.io.StringWriter
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.nio.ByteBuffer
 import java.time.LocalDate
 import java.util.*
 
@@ -289,7 +291,7 @@ class Sakskompleks internal constructor(
         override val type = TIL_UTBETALING
 
         override fun entering(sakskompleks: Sakskompleks) {
-            val utbetalingsreferanse = lagUtbetalingsReferanse()
+            val utbetalingsreferanse = lagUtbetalingsReferanse(sakskompleks)
             sakskompleks.utbetalingsreferanse = utbetalingsreferanse
 
             sakskompleks.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
@@ -307,8 +309,19 @@ class Sakskompleks internal constructor(
             }
         }
 
-        // TODO: finn et format som oppdrag/UR ønsker
-        private fun lagUtbetalingsReferanse() = (System.currentTimeMillis()/1000).toString()
+        private fun lagUtbetalingsReferanse(sakskompleks: Sakskompleks) = sakskompleks.id.base32Encode()
+
+        private fun UUID.base32Encode(): String {
+            val pad = '='
+            return Base32(pad.toByte())
+                    .encodeAsString(this.byteArray())
+                    .replace(pad.toString(), "")
+        }
+
+        private fun UUID.byteArray() = ByteBuffer.allocate(Long.SIZE_BYTES * 2).apply {
+            putLong(this@byteArray.mostSignificantBits)
+            putLong(this@byteArray.leastSignificantBits)
+        }.array()
     }
 
     private object TilInfotrygdTilstand : Sakskomplekstilstand {
