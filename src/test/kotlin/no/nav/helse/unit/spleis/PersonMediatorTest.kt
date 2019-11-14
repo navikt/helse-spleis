@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.mockk.*
+import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.responsFraSpole
@@ -105,20 +106,41 @@ internal class PersonMediatorTest {
         }
     }
 
+
     @Test
     fun `gitt en sak for godkjenning, når utbetaling er godkjent skal vi produsere et utbetalingbehov`() {
         val aktørId = "87654323421962"
         val virksomhetsnummer = "123456789"
 
+        nySøknad(aktørId, virksomhetsnummer)
+        sendtSøknad(aktørId, virksomhetsnummer)
+        inntektsmelding(aktørId, virksomhetsnummer)
+
+        assertBehov(BehovsTyper.Sykepengehistorikk)
+
+        sykepengehistorikk(emptyList())
+
+        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+
+        manuellSaksbehandling(
+                saksbehandlerIdent = "en_saksbehandler_ident",
+                utbetalingGodkjent = true
+        )
+
+        assertBehov(BehovsTyper.Utbetaling)
+    }
+
+    private fun nySøknad(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterNySøknad(nySøknadHendelse(
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
                         orgnummer = virksomhetsnummer,
                         navn = "en_arbeidsgiver"
                 )
-
         ))
+    }
 
+    private fun sendtSøknad(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterSendtSøknad(sendtSøknadHendelse(
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
@@ -126,43 +148,57 @@ internal class PersonMediatorTest {
                         navn = "en_arbeidsgiver"
                 )
         ))
+    }
 
+    private fun inntektsmelding(aktørId: String, virksomhetsnummer: String) {
         personMediator.håndterInntektsmelding(inntektsmeldingHendelse(
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
         ))
-
-        assertEquals(1, behovsliste.filter { it.behovType() == BehovsTyper.Sykepengehistorikk.name}.size)
-
-        val sykepengehistorikkløsning = behovsliste.
-                first { it.behovType() == BehovsTyper.Sykepengehistorikk.name }
-                .also {
-                    it.løsBehov(responsFraSpole(
-                            perioder = emptyList()
-                    ))
-                }.let {
-                    Sykepengehistorikk(objectMapper.readTree(it.toJson()))
-                }
-
-        personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(sykepengehistorikkløsning))
-
-        assertEquals(1, behovsliste.filter { it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name}.size)
-
-        val manuellSaksbehandlingløsning = behovsliste.
-                first { it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name }
-                .also {
-                    it["saksbehandlerIdent"] = "en_saksbehandler_ident"
-                    it.løsBehov(mapOf(
-                            "godkjent" to true
-                    ))
-                }
-
-        personMediator.håndterManuellSaksbehandling(ManuellSaksbehandlingHendelse(manuellSaksbehandlingløsning))
-
-        assertEquals(1, behovsliste.filter { it.behovType() == BehovsTyper.Utbetaling.name}.size)
     }
 
-    fun beInMåBehandlesIInfotrygdState() {
+    private fun beInMåBehandlesIInfotrygdState() {
         personMediator.håndterSendtSøknad(sendtSøknadHendelse)
+    }
+
+    private fun sykepengehistorikk(perioder: List<SpolePeriode>) {
+        Sykepengehistorikk(objectMapper.readTree(løsSykepengehistorikkBehov(perioder).toJson())).let {
+            personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
+        }
+    }
+
+    private fun manuellSaksbehandling(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
+        val manuellSaksbehandlingløsning = løsManuellSaksbehandlingBehov(
+                saksbehandlerIdent = saksbehandlerIdent,
+                utbetalingGodkjent = utbetalingGodkjent
+        ).let {
+            personMediator.håndterManuellSaksbehandling(ManuellSaksbehandlingHendelse(it))
+        }
+    }
+
+    private fun løsManuellSaksbehandlingBehov(saksbehandlerIdent: String, utbetalingGodkjent: Boolean): Behov {
+        return finnBehov(BehovsTyper.GodkjenningFraSaksbehandler).also {
+            it["saksbehandlerIdent"] = saksbehandlerIdent
+            it.løsBehov(mapOf(
+                    "godkjent" to utbetalingGodkjent
+            ))
+        }
+    }
+
+    private fun løsSykepengehistorikkBehov(perioder: List<SpolePeriode>): Behov {
+        return finnBehov(BehovsTyper.Sykepengehistorikk).also {
+            it.løsBehov(responsFraSpole(
+                    perioder = perioder
+            ))
+        }
+    }
+
+    private fun finnBehov(behovsType: BehovsTyper): Behov {
+        return behovsliste.
+                first { it.behovType() == behovsType.name }
+    }
+
+    private fun assertBehov(behovsType: BehovsTyper) {
+        assertEquals(1, behovsliste.filter { it.behovType() == behovsType.name}.size)
     }
 }
