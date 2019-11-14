@@ -29,9 +29,7 @@ class GosysOppgaveProducer(commonKafkaProperties: Properties) {
                 Topics.opprettGosysOppgaveTopic,
                 aktørId,
                 OpprettGosysOppgaveDto(aktorId = aktørId).toJson()
-        )).get().also {
-            log.info("produserte gosysOppgave for aktør=$aktørId, recordMetadata=$it")
-        }
+        )).get()
     }
 
     internal class OpprettGosysOppgaveDto(val aktorId: String) {

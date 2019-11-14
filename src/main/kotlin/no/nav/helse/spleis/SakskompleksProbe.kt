@@ -29,18 +29,17 @@ object SakskompleksProbe : PersonObserver {
             .labelNames("forrigeTilstand", "tilstand", "hendelse")
             .register()
 
-    private val personMementoStørrelse = Summary.build("personMementoSize", "størrelse på person document i databasen")
-            .quantile(0.5, 0.05)
-            .quantile(0.75, 0.1)
-            .quantile(0.9, 0.01)
-            .quantile(0.99, 0.001).register()
+    private val utenforOmfangCounter = Counter.build("utenfor_omfang_totals", "Antall ganger en sak er utenfor omfang")
+            .labelNames("dokumentType")
+            .register()
+
+    private val personMementoStørrelse = Summary.build("person_memento_size", "størrelse på person document i databasen").register()
 
     override fun sakskompleksTrengerLøsning(event: Behov) {
         behovCounter.labels(event.behovType()).inc()
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        log.info("lagret person med størrelse ${personEndretEvent.memento.toString().length} bytes")
         personMementoStørrelse.observe(personEndretEvent.memento.toString().length.toDouble())
     }
 
@@ -67,14 +66,14 @@ object SakskompleksProbe : PersonObserver {
     }
 
     fun utenforOmfang(err: UtenforOmfangException, nySøknadHendelse: NySøknadHendelse) {
-        log.info("Utenfor omfang: ${err.message} for nySøknadHendelse med id: ${nySøknadHendelse.hendelseId()}.")
+        utenforOmfangCounter.labels(nySøknadHendelse.javaClass.simpleName).inc()
     }
 
     fun utenforOmfang(err: UtenforOmfangException, sendtSøknadHendelse: SendtSøknadHendelse) {
-        log.info("Utenfor omfang: ${err.message} for sendtSøknadHendelse med id: ${sendtSøknadHendelse.hendelseId()}.")
+        utenforOmfangCounter.labels(sendtSøknadHendelse.javaClass.simpleName).inc()
     }
 
     fun utenforOmfang(err: UtenforOmfangException, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-        log.info("Utenfor omfang: ${err.message} for inntektsmeldingHendelse med id: ${inntektsmeldingHendelse.hendelseId()}.")
+        utenforOmfangCounter.labels(inntektsmeldingHendelse.javaClass.simpleName).inc()
     }
 }
