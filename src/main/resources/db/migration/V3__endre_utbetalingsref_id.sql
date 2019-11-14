@@ -1,0 +1,1 @@
+ALTER TABLE utbetalingsreferanse ALTER COLUMN id TYPE VARCHAR(30)
