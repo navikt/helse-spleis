@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.mockk.*
-import no.nav.helse.SpolePeriode
+import no.nav.helse.*
+import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.responsFraSpole
 import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
@@ -20,9 +22,13 @@ import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -160,7 +166,7 @@ internal class PersonMediatorTest {
 
         assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.GodkjenningFraSaksbehandler)
 
-        sendManuellSaksbehandling(
+        sendGodkjenningFraSaksbehandler(
                 saksbehandlerIdent = "en_saksbehandler_ident",
                 utbetalingGodkjent = true
         )
@@ -168,31 +174,228 @@ internal class PersonMediatorTest {
         assertBehov(aktørId = aktørId, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Utbetaling)
     }
 
-    private fun sendNySøknad(aktørId: String, virksomhetsnummer: String) {
-        personMediator.håndterNySøknad(nySøknadHendelse(
+    @Test
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
+        val aktørID = "87654321962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInntektsmelding(aktørID, virksomhetsnummer)
+        sendSykepengehistorikk(listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        )))
+
+        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.GodkjenningFraSaksbehandler)
+    }
+
+    @Test
+    fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en ukedag)`() {
+        val aktørID = "87654321950"
+        val virksomhetsnummer = "123456789"
+
+        // 8 dager egenmelding - 9 sykedager - 17 arbeidsdager skal gi en ugyldig utbetalingstidslinje
+
+        val nySøknad = søknadDTO(
+                aktørId = aktørID,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+                status = SoknadsstatusDTO.NY,
+                egenmeldinger = emptyList(),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = 6.juli,
+                                tom = 1.august,
+                                sykmeldingsgrad = 100
+                        )),
+                fravær = emptyList()
+        )
+
+        val søknadMedUgyldigBetalingslinje = søknadDTO(
+                aktørId = aktørID,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+                status = SoknadsstatusDTO.SENDT,
+                egenmeldinger = listOf(
+                        PeriodeDTO(28.juni, 5.juli)
+                ),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = 6.juli,
+                                tom = 1.august,
+                                sykmeldingsgrad = 100
+                        )),
+                arbeidGjenopptatt = 16.juli,
+                fravær = emptyList()
+        )
+
+        val inntektsMelding = inntektsmeldingDTO(
+                aktørId = aktørID,
+                virksomhetsnummer = virksomhetsnummer,
+                førsteFraværsdag = 1.juli,
+                arbeidsgiverperioder = listOf(
+                        Periode(28.juni, 13.juli)
+                ),
+                feriePerioder = emptyList(),
+                refusjon = Refusjon(
+                        beloepPrMnd = 666.toBigDecimal(),
+                        opphoersdato = null
+                ),
+                endringerIRefusjoner = emptyList(),
+                beregnetInntekt = 666.toBigDecimal()
+        )
+
+        sendNySøknad(aktørID, virksomhetsnummer, nySøknad)
+        sendSøknad(aktørID, virksomhetsnummer, søknadMedUgyldigBetalingslinje)
+        sendInntektsmelding(aktørID, virksomhetsnummer, inntektsMelding)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = 1.juli.minusMonths(8),
+                tom = 1.juli.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikk(sykehistorikk)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
+    fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en søndag)`() {
+        val aktørID = "87654321738"
+        val virksomhetsnummer = "123456789"
+
+        // 8 dager egenmelding - 12 sykedager - 17 arbeidsdager skal gi en ugyldig utbetalingstidslinje
+
+        val nySøknad = søknadDTO(
+                aktørId = aktørID,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+                status = SoknadsstatusDTO.NY,
+                egenmeldinger = emptyList(),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = 6.juli,
+                                tom = 4.august,
+                                sykmeldingsgrad = 100
+                        )),
+                fravær = emptyList()
+        )
+
+        val søknadMedUgyldigBetalingslinje = søknadDTO(
+                aktørId = aktørID,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+                status = SoknadsstatusDTO.SENDT,
+                egenmeldinger = listOf(
+                        PeriodeDTO(28.juni, 5.juli)
+                ),
+                søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                                fom = 6.juli,
+                                tom = 4.august,
+                                sykmeldingsgrad = 100
+                        )),
+                arbeidGjenopptatt = 19.juli,
+                fravær = emptyList()
+        )
+
+        val inntektsMelding = inntektsmeldingDTO(
+                aktørId = aktørID,
+                virksomhetsnummer = virksomhetsnummer,
+                førsteFraværsdag = 1.juli,
+                arbeidsgiverperioder = listOf(
+                        Periode(28.juni, 13.juli)
+                ),
+                feriePerioder = emptyList(),
+                refusjon = Refusjon(
+                        beloepPrMnd = 666.toBigDecimal(),
+                        opphoersdato = null
+                ),
+                endringerIRefusjoner = emptyList(),
+                beregnetInntekt = 666.toBigDecimal()
+        )
+
+        sendNySøknad(aktørID, virksomhetsnummer, nySøknad)
+        sendSøknad(aktørID, virksomhetsnummer, søknadMedUgyldigBetalingslinje)
+        sendInntektsmelding(aktørID, virksomhetsnummer, inntektsMelding)
+
+        val sykehistorikk = listOf(SpolePeriode(
+                fom = 1.juli.minusMonths(8),
+                tom = 1.juli.minusMonths(7),
+                grad = "100"
+        ))
+        sendSykepengehistorikk(sykehistorikk)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    @Test
+    fun `gitt en sak for godkjenning, når utbetaling ikke er godkjent skal saken til Infotrygd`() {
+        val aktørID = "8787654421962"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInntektsmelding(aktørID, virksomhetsnummer)
+        sendSykepengehistorikk(listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+        )))
+        sendGodkjenningFraSaksbehandler("en_saksbehandler_ident", false)
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+
+    @Test
+    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
+        val aktørID = "87654321963"
+        val virksomhetsnummer = "123456789"
+
+        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        sendSøknad(aktørID, virksomhetsnummer)
+        sendInntektsmelding(aktørID, virksomhetsnummer)
+        sendSykepengehistorikk(listOf(SpolePeriode(
+                fom = søknad.fom!!.minusMonths(6),
+                tom = søknad.fom!!.minusMonths(5),
+                grad = "100"
+        )))
+
+        assertOpprettGosysOppgave(aktørId = aktørID)
+    }
+
+    private fun sendNySøknad(aktørId: String, virksomhetsnummer: String, søknad: SykepengesoknadDTO? = null): SykepengesoknadDTO {
+        return (søknad ?: søknadDTO(
+                status = SoknadsstatusDTO.NY,
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
                         orgnummer = virksomhetsnummer,
                         navn = "en_arbeidsgiver"
                 )
-        ))
+        )).also {
+            personMediator.håndterNySøknad(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+        }
     }
 
-    private fun sendSøknad(aktørId: String, virksomhetsnummer: String) {
-        personMediator.håndterSendtSøknad(sendtSøknadHendelse(
+    private fun sendSøknad(aktørId: String, virksomhetsnummer: String, søknad: SykepengesoknadDTO? = null): SykepengesoknadDTO {
+        return (søknad ?: søknadDTO(
+                status = SoknadsstatusDTO.SENDT,
                 aktørId = aktørId,
                 arbeidsgiver = ArbeidsgiverDTO(
                         orgnummer = virksomhetsnummer,
                         navn = "en_arbeidsgiver"
                 )
-        ))
+        )).also {
+            personMediator.håndterSendtSøknad(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+        }
     }
 
-    private fun sendInntektsmelding(aktørId: String, virksomhetsnummer: String) {
-        personMediator.håndterInntektsmelding(inntektsmeldingHendelse(
+    private fun sendInntektsmelding(aktørId: String, virksomhetsnummer: String, inntektsmelding: Inntektsmelding? = null): Inntektsmelding {
+        return (inntektsmelding ?: inntektsmeldingDTO(
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
-        ))
+        )).also {
+            personMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
+        }
     }
 
     private fun beInMåBehandlesIInfotrygdState() {
@@ -205,7 +408,7 @@ internal class PersonMediatorTest {
         }
     }
 
-    private fun sendManuellSaksbehandling(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
+    private fun sendGodkjenningFraSaksbehandler(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
         løsManuellSaksbehandlingBehov(
                 saksbehandlerIdent = saksbehandlerIdent,
                 utbetalingGodkjent = utbetalingGodkjent

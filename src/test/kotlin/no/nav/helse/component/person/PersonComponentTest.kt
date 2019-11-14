@@ -35,9 +35,9 @@ import no.nav.helse.person.Sakskompleks
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.personPath
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.admin.AdminClient
@@ -188,8 +188,11 @@ internal class PersonComponentTest {
         val virksomhetsnummer = "123456789"
 
         val søknad = sendNySøknad(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.START, currentState = Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT)
         sendSøknad(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, currentState = Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT)
         sendInnteksmelding(aktørID, virksomhetsnummer)
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, currentState = Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
 
         val sykehistorikk = listOf(SpolePeriode(
             fom = søknad.fom!!.minusMonths(8),
@@ -198,6 +201,7 @@ internal class PersonComponentTest {
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
 
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = Sakskompleks.TilstandType.TIL_GODKJENNING)
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
 
         aktørID.hentPerson {
@@ -205,162 +209,6 @@ internal class PersonComponentTest {
             assertTrue(this.contains("utbetalingslinjer"))
             assertTrue(this.contains("dagsats"))
         }
-    }
-
-    @Test
-    fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en ukedag)`() {
-        val aktørID = "87654321950"
-        val virksomhetsnummer = "123456789"
-
-        // 8 dager egenmelding - 9 sykedager - 17 arbeidsdager skal gi en ugyldig utbetalingstidslinje
-
-        val nySøknad = søknadDTO(
-            aktørId = aktørID,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
-            status = SoknadsstatusDTO.NY,
-            egenmeldinger = emptyList(),
-            søknadsperioder = listOf(
-                SoknadsperiodeDTO(
-                    fom = 6.juli,
-                    tom = 1.august,
-                    sykmeldingsgrad = 100
-                )),
-            fravær = emptyList()
-        )
-
-        val søknadMedUgyldigBetalingslinje = søknadDTO(
-            aktørId = aktørID,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
-            status = SoknadsstatusDTO.SENDT,
-            egenmeldinger = listOf(
-                PeriodeDTO(28.juni, 5.juli)
-            ),
-            søknadsperioder = listOf(
-                SoknadsperiodeDTO(
-                    fom = 6.juli,
-                    tom = 1.august,
-                sykmeldingsgrad = 100
-            )),
-            arbeidGjenopptatt = 16.juli,
-            fravær = emptyList()
-        )
-
-        val inntektsMelding = inntektsmeldingDTO(
-            aktørId = aktørID,
-            virksomhetsnummer = virksomhetsnummer,
-            førsteFraværsdag = 1.juli,
-            arbeidsgiverperioder = listOf(
-                Periode(28.juni, 13.juli)
-            ),
-            feriePerioder = emptyList(),
-            refusjon = Refusjon(
-                beloepPrMnd = 666.toBigDecimal(),
-                opphoersdato = null
-            ),
-            endringerIRefusjoner = emptyList(),
-            beregnetInntekt = 666.toBigDecimal()
-        )
-
-        sendNySøknad(aktørID, virksomhetsnummer, nySøknad)
-        sendSøknad(aktørID, virksomhetsnummer, søknadMedUgyldigBetalingslinje)
-        sendInnteksmelding(aktørID, virksomhetsnummer, inntektsMelding)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = 1.juli.minusMonths(8),
-            tom = 1.juli.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
-    }
-
-    @Test
-    fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en søndag)`() {
-        val aktørID = "87654321738"
-        val virksomhetsnummer = "123456789"
-
-        // 8 dager egenmelding - 12 sykedager - 17 arbeidsdager skal gi en ugyldig utbetalingstidslinje
-
-        val nySøknad = søknadDTO(
-            aktørId = aktørID,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
-            status = SoknadsstatusDTO.NY,
-            egenmeldinger = emptyList(),
-            søknadsperioder = listOf(
-                SoknadsperiodeDTO(
-                    fom = 6.juli,
-                    tom = 4.august,
-                    sykmeldingsgrad = 100
-                )),
-            fravær = emptyList()
-        )
-
-        val søknadMedUgyldigBetalingslinje = søknadDTO(
-            aktørId = aktørID,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
-            status = SoknadsstatusDTO.SENDT,
-            egenmeldinger = listOf(
-                PeriodeDTO(28.juni, 5.juli)
-            ),
-            søknadsperioder = listOf(
-                SoknadsperiodeDTO(
-                    fom = 6.juli,
-                    tom = 4.august,
-                    sykmeldingsgrad = 100
-                )),
-            arbeidGjenopptatt = 19.juli,
-            fravær = emptyList()
-        )
-
-        val inntektsMelding = inntektsmeldingDTO(
-            aktørId = aktørID,
-            virksomhetsnummer = virksomhetsnummer,
-            førsteFraværsdag = 1.juli,
-            arbeidsgiverperioder = listOf(
-                Periode(28.juni, 13.juli)
-            ),
-            feriePerioder = emptyList(),
-            refusjon = Refusjon(
-                beloepPrMnd = 666.toBigDecimal(),
-                opphoersdato = null
-            ),
-            endringerIRefusjoner = emptyList(),
-            beregnetInntekt = 666.toBigDecimal()
-        )
-
-        sendNySøknad(aktørID, virksomhetsnummer, nySøknad)
-        sendSøknad(aktørID, virksomhetsnummer, søknadMedUgyldigBetalingslinje)
-        sendInnteksmelding(aktørID, virksomhetsnummer, inntektsMelding)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = 1.juli.minusMonths(8),
-            tom = 1.juli.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
-    }
-
-    @Test
-    fun `gitt en sak for godkjenning, når utbetaling er godkjent skal vi produsere et utbetalingbehov`() {
-        val aktørID = "87654323421962"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
-
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(Utbetaling.name))
     }
 
     @Test
@@ -380,6 +228,8 @@ internal class PersonComponentTest {
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
         sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
 
+        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.TIL_GODKJENNING, currentState = Sakskompleks.TilstandType.TIL_UTBETALING)
+
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, behovType = Utbetaling)
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
 
@@ -387,46 +237,6 @@ internal class PersonComponentTest {
             val person = Person.fromJson(this)
             assertEquals(aktørID, person.aktørId)
         }
-    }
-
-    @Test
-    fun `gitt en sak for godkjenning, når utbetaling ikke er godkjent skal saken til Infotrygd`() {
-        val aktørID = "8787654421962"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, false, "en_saksbehandler_ident")
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
-    }
-
-
-    @Test
-    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mindre enn 7 måneder tilbake i tid, så skal saken til Infotrygd`() {
-        val aktørID = "87654321963"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(6),
-            tom = søknad.fom!!.minusMonths(5),
-            grad = "100"
-        ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-
-        assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
     @Test
@@ -521,21 +331,19 @@ internal class PersonComponentTest {
         return behov!!
     }
 
-    private fun assertSakskompleksEndretEvent(virksomhetsnummer: String, aktørId: String, typer: List<Sakskompleks.TilstandType>) {
+    private fun assertSakskompleksEndretEvent(virksomhetsnummer: String, aktørId: String, previousState: Sakskompleks.TilstandType, currentState: Sakskompleks.TilstandType) {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
                     val meldingerPåTopic = TestConsumer.records(sakskompleksEventTopic)
                     val sakskompleksEndretHendelser = meldingerPåTopic
-                            .onEach { println("yolo: ${it.value()}") }
                             .map { objectMapper.readTree(it.value()) }
                             .filter { aktørId == it["aktørId"].textValue() }
                             .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
-                            .map { Sakskompleks.TilstandType.valueOf(it["currentState"].textValue()) }
-                            .filter { it in typer }
-                            .distinct()
+                            .filter { previousState == Sakskompleks.TilstandType.valueOf(it["previousState"].textValue())
+                                    && currentState == Sakskompleks.TilstandType.valueOf(it["currentState"].textValue()) }
 
-                    assertEquals(typer, sakskompleksEndretHendelser)
+                    assertEquals(1, sakskompleksEndretHendelser.size)
                 }
     }
 
