@@ -33,7 +33,7 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-class Sakskompleks internal constructor(
+class Sakskompleks(
         private val id: UUID,
         private val aktørId: String,
         private val organisasjonsnummer: String
@@ -398,7 +398,7 @@ class Sakskompleks internal constructor(
 
     }
 
-    internal fun memento(): Memento {
+    fun memento(): Memento {
         val writer = StringWriter()
         val generator = JsonFactory().createGenerator(writer)
 
@@ -440,7 +440,6 @@ class Sakskompleks internal constructor(
 
     class Memento(internal val state: String) {
         override fun toString() = state
-
     }
 
     // Gang of four Observer pattern
