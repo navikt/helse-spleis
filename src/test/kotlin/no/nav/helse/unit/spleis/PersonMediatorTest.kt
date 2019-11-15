@@ -16,13 +16,13 @@ import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.person.Sakskompleks
 import no.nav.helse.person.Sakskompleks.TilstandType.*
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -394,7 +394,7 @@ internal class PersonMediatorTest {
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
         )).also {
-            personMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
+            personMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
         }
     }
 

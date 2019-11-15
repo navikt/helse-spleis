@@ -3,9 +3,9 @@ package no.nav.helse.behov
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.spleis.PersonMediator
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -15,8 +15,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
         private val behovTopic: String,
-        private val personMediator: PersonMediator,
-        private val probe: BehovProbe = BehovProbe
+        private val personMediator: PersonMediator
 ) {
 
     init {

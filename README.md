@@ -1,9 +1,10 @@
-Sykepenger - spleis [![Actions Status](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spleis/actions)
-=======================
+[![Actions Status](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spleis/actions)
+
+# Sykepenger - spleis
 
 Tar i mot hendelser knytter til sykepengesaken for en person, for eksempel søknader og inntektsmeldinger.
-Håndterer sakskompleksene for en person, og sørger for å innhente informasjon vi trenger for å kunne ta beslutning om saken
-skal resultere i en automatisk utbetaling eller ikke.
+Håndterer sakskompleksene for en person, og sørger for å innhente informasjon vi trenger for å kunne ta beslutning om 
+saken skal resultere i en automatisk utbetaling eller ikke.
 
 # Henvendelser
 
@@ -30,9 +31,12 @@ Dette gjøres enklest ved å opprette et personal access token for Github-bruker
 På Github: gå til Settings/Developer settings/Personal access tokens,
 og opprett et nytt token med scope "read:packages"
 
-Legg inn tokenet i din .gradle/gradle.properties fil slik:
+Legg inn tokenet i din `.gradle/gradle.properties` fil slik:
+
+```
 githubUser=x-access-token
 githubPassword=<tokenet ditt>
+```
 
 ## Kafka (iac)
 

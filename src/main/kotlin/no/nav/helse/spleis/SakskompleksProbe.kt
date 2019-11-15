@@ -7,10 +7,10 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonskjemaForGammelt
 import no.nav.helse.person.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.person.UtenforOmfangException
-import no.nav.helse.person.hendelser.SykdomshendelseType
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.SykdomshendelseType
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import org.slf4j.LoggerFactory
 
 object SakskompleksProbe : PersonObserver {

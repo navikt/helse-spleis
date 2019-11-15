@@ -45,7 +45,7 @@ dependencies {
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    implementation("no.nav.helse:sykdomstidslinje:1.7334033")
+    implementation("no.nav.helse:sykdomstidslinje:1.f9e93b5")
 
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
         exclude(group = "junit")

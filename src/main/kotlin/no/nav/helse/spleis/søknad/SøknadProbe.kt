@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.søknad
 
 import io.prometheus.client.Counter
-import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import org.slf4j.LoggerFactory
 
 object SøknadProbe {

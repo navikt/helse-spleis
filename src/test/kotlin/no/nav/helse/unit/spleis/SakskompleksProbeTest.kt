@@ -7,7 +7,7 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Sakskompleks
 import no.nav.helse.person.SakskompleksObserver
-import no.nav.helse.person.hendelser.SykdomshendelseType
+import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.spleis.SakskompleksProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
