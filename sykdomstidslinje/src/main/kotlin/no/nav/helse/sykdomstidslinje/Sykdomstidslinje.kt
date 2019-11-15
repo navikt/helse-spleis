@@ -18,7 +18,7 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-abstract class Sykdomstidslinje {
+internal abstract class Sykdomstidslinje {
 
     private var maksdato: LocalDate? = null
 

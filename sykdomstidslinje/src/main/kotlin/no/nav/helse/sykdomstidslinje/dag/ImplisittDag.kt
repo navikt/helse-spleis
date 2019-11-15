@@ -4,7 +4,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) :
+internal class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) :
     Dag(gjelder, hendelse) {
 
     override fun beste(other: Dag) = when {

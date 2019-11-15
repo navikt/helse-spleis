@@ -322,7 +322,7 @@ fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(Sykepenge
         status = SoknadsstatusDTO.SENDT
 ).toJsonNode()))
 
-operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
+internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
 
 fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

@@ -11,17 +11,16 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
         private val objectMapper = ObjectMapper()
     }
 
-    fun hendelseId() =
-        hendelseId
+    fun hendelseId() = hendelseId
 
     override fun compareTo(other: SykdomstidslinjeHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
 
-    abstract fun rapportertdato(): LocalDateTime
-    abstract fun sykdomstidslinje(): Sykdomstidslinje
+    internal abstract fun rapportertdato(): LocalDateTime
+    internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
-    abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
+    internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
 
-    open fun toJson(): JsonNode {
+    internal open fun toJson(): JsonNode {
         return objectMapper.valueToTree(mapOf(
             "hendelseId" to hendelseId()
         ))

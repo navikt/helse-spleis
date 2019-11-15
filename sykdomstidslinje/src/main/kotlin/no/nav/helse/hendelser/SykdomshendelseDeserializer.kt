@@ -12,7 +12,7 @@ enum class SykdomshendelseType {
     InntektsmeldingMottatt
 }
 
-class SykdomshendelseDeserializer : SykdomstidslinjeHendelse.Deserializer {
+internal class SykdomshendelseDeserializer : SykdomstidslinjeHendelse.Deserializer {
 
     override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
          val type = jsonNode["type"].asText()

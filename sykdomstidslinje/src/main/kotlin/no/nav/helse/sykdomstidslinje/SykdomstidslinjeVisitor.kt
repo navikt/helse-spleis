@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 
-interface SykdomstidslinjeVisitor {
+internal interface SykdomstidslinjeVisitor {
     fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {}
     fun visitImplisittDag(implisittDag: ImplisittDag) {}
     fun visitFeriedag(feriedag: Feriedag) {}

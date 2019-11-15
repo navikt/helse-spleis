@@ -10,7 +10,7 @@ internal data class JsonDag(
     val erstatter: List<JsonDag>
 )
 
-enum class JsonDagType(internal val creator: (LocalDate, SykdomstidslinjeHendelse) -> Dag) {
+internal enum class JsonDagType(internal val creator: (LocalDate, SykdomstidslinjeHendelse) -> Dag) {
     ARBEIDSDAG({ dato, hendelse -> Arbeidsdag(dato, hendelse) }),
     EGENMELDINGSDAG({ dato, hendelse -> Egenmeldingsdag(dato, hendelse) }),
     FERIEDAG({ dato, hendelse -> Feriedag(dato, hendelse) }),

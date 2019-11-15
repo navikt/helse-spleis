@@ -4,7 +4,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
-class Ubestemtdag internal constructor(dato: LocalDate, hendelse: SykdomstidslinjeHendelse): Dag(dato, hendelse) {
+internal class Ubestemtdag internal constructor(dato: LocalDate, hendelse: SykdomstidslinjeHendelse): Dag(dato, hendelse) {
     internal constructor(left: Dag, right: Dag) : this(left.dagen, sykdomshendelse(left, right)) {
         erstatter(left,right)
     }

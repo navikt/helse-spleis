@@ -6,7 +6,7 @@ import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDate
 
-class Feriedag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) : Dag(gjelder, hendelse) {
+internal class Feriedag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) : Dag(gjelder, hendelse) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitFeriedag(this)
     }

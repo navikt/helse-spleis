@@ -7,7 +7,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-abstract class Dag internal constructor(
+internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
     internal val hendelse: SykdomstidslinjeHendelse
 ) :

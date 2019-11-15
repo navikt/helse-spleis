@@ -3,9 +3,9 @@ package no.nav.helse.tournament
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 
-val dagTurnering = DagTurnering()
+internal val dagTurnering = DagTurnering()
 
-class DagTurnering(val source: String = "/dagturnering.csv") {
+internal class DagTurnering(val source: String = "/dagturnering.csv") {
 
     internal val strategies: Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> = readStrategies()
 

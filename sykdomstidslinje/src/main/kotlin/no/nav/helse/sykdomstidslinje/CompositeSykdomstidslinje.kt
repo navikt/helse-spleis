@@ -4,7 +4,7 @@ import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 
-class CompositeSykdomstidslinje internal constructor(
+internal class CompositeSykdomstidslinje internal constructor(
     tidslinjer: List<Sykdomstidslinje>
 ) : Sykdomstidslinje() {
 
