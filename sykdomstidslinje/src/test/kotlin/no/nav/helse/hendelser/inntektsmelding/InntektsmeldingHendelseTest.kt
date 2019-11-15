@@ -6,8 +6,8 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.person.UtenforOmfangException
-import no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.toJsonNode

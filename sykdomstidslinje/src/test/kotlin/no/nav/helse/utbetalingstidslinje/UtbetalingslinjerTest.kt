@@ -1,6 +1,6 @@
-package no.nav.helse.utbetalingstidslinje.test
+package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
@@ -11,11 +11,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-class UtbetalingslinjerTest {
+internal class UtbetalingslinjerTest {
 
     companion object {
-        private val sendtSykmelding = Testhendelse(Uke(3).mandag.atStartOfDay())
-        private val inntektsmeldingHendelse = Testhendelse(Uke(3).tirsdag.atStartOfDay(), Dag.NøkkelHendelseType.Inntektsmelding)
+        private val sendtSykmelding =
+            Testhendelse(Uke(3).mandag.atStartOfDay())
+        private val inntektsmeldingHendelse = Testhendelse(
+            Uke(3).tirsdag.atStartOfDay(),
+            Dag.NøkkelHendelseType.Inntektsmelding
+        )
     }
 
     //Mandag

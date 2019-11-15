@@ -1,4 +1,4 @@
-package no.nav.helse.person.hendelser.søknad
+package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize

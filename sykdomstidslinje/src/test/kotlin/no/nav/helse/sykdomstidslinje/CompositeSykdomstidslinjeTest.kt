@@ -1,5 +1,6 @@
-import no.nav.helse.hendelse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+package no.nav.helse.sykdomstidslinje
+
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -13,7 +14,15 @@ import java.time.LocalDateTime
 internal class CompositeSykdomstidslinjeTest {
 
     companion object {
-        private val tidspunktRapportert = Testhendelse(rapportertdato = LocalDateTime.of(2019, 7, 31, 20, 0))
+        private val tidspunktRapportert = Testhendelse(
+            rapportertdato = LocalDateTime.of(
+                2019,
+                7,
+                31,
+                20,
+                0
+            )
+        )
     }
 
     @Test

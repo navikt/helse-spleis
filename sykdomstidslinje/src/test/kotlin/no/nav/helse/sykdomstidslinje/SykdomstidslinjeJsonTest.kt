@@ -21,7 +21,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class SykdomstidslinjeJsonTest {
+internal class SykdomstidslinjeJsonTest {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())

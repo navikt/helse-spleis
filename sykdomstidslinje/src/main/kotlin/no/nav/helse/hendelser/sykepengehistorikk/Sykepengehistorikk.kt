@@ -1,4 +1,4 @@
-package no.nav.helse.person.hendelser.sykepengehistorikk
+package no.nav.helse.hendelser.sykepengehistorikk
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate

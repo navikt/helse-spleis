@@ -4,13 +4,13 @@ import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.juli
 import no.nav.helse.juni
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class SykepengehistorikkHendelseTest {
+internal class SykepengehistorikkHendelseTest {
 
     @Test
     fun `siste fraværsdato fra tom sykepengehistorikk`() {

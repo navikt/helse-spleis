@@ -3,7 +3,7 @@ package no.nav.helse.testhelpers
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 
-class Uke(ukenr: Long) {
+internal class Uke(ukenr: Long) {
     val mandag = LocalDate.of(2018, 1, 1)
         .plusWeeks(ukenr - 1L)
     val tirsdag get() = mandag.plusDays(1)

@@ -1,12 +1,11 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class EgenmeldingsdagTest {
+internal class EgenmeldingsdagTest {
     private val testKildeHendelse = Testhendelse(Uke(4).fredag.atTime(12, 0))
 
     @Test

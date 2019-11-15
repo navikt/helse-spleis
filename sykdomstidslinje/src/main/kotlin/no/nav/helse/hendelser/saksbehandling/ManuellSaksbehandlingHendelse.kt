@@ -1,4 +1,4 @@
-package no.nav.helse.person.hendelser.saksbehandling
+package no.nav.helse.hendelser.saksbehandling
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelse.SakskompleksHendelse

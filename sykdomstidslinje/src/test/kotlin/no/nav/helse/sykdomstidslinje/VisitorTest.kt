@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
@@ -9,7 +9,7 @@ import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class VisitorTest {
+internal class VisitorTest {
     private val sendtSøknad = Testhendelse(Uke(4).fredag.atTime(12, 0))
 
     @Test

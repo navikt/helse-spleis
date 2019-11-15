@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Sykmelding
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import no.nav.helse.testhelpers.Uke

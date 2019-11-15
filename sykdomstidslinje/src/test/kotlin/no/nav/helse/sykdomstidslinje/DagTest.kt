@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
+import no.nav.helse.hendelser.Testhendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

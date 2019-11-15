@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON=2

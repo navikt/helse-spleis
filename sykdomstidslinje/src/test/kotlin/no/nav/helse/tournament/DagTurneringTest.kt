@@ -1,8 +1,8 @@
 package no.nav.helse.tournament
 
 
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class DagTurneringTest {
+internal class DagTurneringTest {
 
     @Test
     fun `Turneringen skal inneholde riktige strategier basert på en csv-fil`() {

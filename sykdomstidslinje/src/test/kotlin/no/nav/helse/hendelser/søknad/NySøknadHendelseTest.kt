@@ -8,8 +8,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.Uke
 import no.nav.helse.person.UtenforOmfangException
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.readResource
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions

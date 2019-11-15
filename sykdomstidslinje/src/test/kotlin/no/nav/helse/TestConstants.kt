@@ -7,13 +7,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.person.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.person.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -182,7 +182,8 @@ internal object TestConstants {
                                         opphoersdato = null
                                 ),
                                 endringerIRefusjoner: List<EndringIRefusjon> = emptyList()) =
-            InntektsmeldingHendelse(no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding(
+            InntektsmeldingHendelse(
+                no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(
                     inntektsmeldingDTO(aktørId, virksomhetsnummer, førsteFraværsdag, arbeidsgiverperioder, ferieperioder, refusjon, endringerIRefusjoner, beregnetInntekt).toJsonNode()
             ))
 

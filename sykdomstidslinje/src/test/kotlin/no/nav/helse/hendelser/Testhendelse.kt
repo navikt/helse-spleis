@@ -1,12 +1,15 @@
-package no.nav.helse.hendelse
+package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
 import java.util.*
 
-class Testhendelse(
+internal class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
     private val hendelsetype: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad
 ) :
@@ -25,6 +28,9 @@ class Testhendelse(
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
 
+    override fun toJson(): JsonNode {
+        return ObjectMapper().readValue("{}")
+    }
 
     override fun equals(other: Any?): Boolean = this === other
 }

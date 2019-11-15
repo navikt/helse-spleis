@@ -14,8 +14,8 @@ import no.nav.helse.juni
 import no.nav.helse.person.*
 import no.nav.helse.person.Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT
 import no.nav.helse.person.Sakskompleks.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO

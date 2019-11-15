@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.testhelpers.Uke
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals

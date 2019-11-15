@@ -12,11 +12,11 @@ import no.nav.helse.juli
 import no.nav.helse.person.Sakskompleks
 import no.nav.helse.person.Sakskompleks.TilstandType.*
 import no.nav.helse.person.SakskompleksObserver
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.person.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
+import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Periode

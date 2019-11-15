@@ -1,10 +1,10 @@
-package no.nav.helse.person.hendelser.inntektsmelding
+package no.nav.helse.hendelser.inntektsmelding
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.UtenforOmfangException
-import no.nav.helse.person.hendelser.SykdomshendelseType
+import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

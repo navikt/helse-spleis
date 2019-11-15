@@ -1,4 +1,4 @@
-package no.nav.helse.person.hendelser.sykepengehistorikk
+package no.nav.helse.hendelser.sykepengehistorikk
 
 import no.nav.helse.hendelse.SakskompleksHendelse
 import no.nav.helse.person.ArbeidstakerHendelse

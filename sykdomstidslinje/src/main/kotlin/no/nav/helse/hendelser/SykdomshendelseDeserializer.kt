@@ -1,9 +1,9 @@
-package no.nav.helse.person.hendelser
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.person.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.person.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.person.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 enum class SykdomshendelseType {

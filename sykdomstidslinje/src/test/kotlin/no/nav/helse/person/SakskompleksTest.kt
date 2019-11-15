@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-class SakskompleksTest {
+internal class SakskompleksTest {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())

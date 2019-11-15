@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -10,8 +9,12 @@ internal class HistorikkTest {
 
     @Test
     fun `dager med overlapp gir historikk`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, Testhendelse())
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, Testhendelse())
+        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
+            Testhendelse()
+        )
+        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
+            Testhendelse()
+        )
 
         val periode = sykmeldingsperiode + søknadsperiode
 
@@ -24,8 +27,12 @@ internal class HistorikkTest {
 
     @Test
     fun `dager uten overlapp gir ikke historikk`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, Testhendelse())
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).fredag, Testhendelse())
+        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag,
+            Testhendelse()
+        )
+        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).fredag,
+            Testhendelse()
+        )
 
         val periode = sykmeldingsperiode + søknadsperiode
 
@@ -40,9 +47,15 @@ internal class HistorikkTest {
 
     @Test
     fun `bevarer historikk fra forrige overlapp`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Testhendelse())
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Testhendelse())
-        val inntektsmeldingsperiode = Sykdomstidslinje.ferie(Uke(1).mandag, Uke(1).onsdag, Testhendelse())
+        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
+            Testhendelse()
+        )
+        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
+            Testhendelse()
+        )
+        val inntektsmeldingsperiode = Sykdomstidslinje.ferie(Uke(1).mandag, Uke(1).onsdag,
+            Testhendelse()
+        )
 
         val periode = sykmeldingsperiode + søknadsperiode + inntektsmeldingsperiode
 
