@@ -12,6 +12,9 @@ allprojects {
 val junitJupiterVersion = "5.4.0"
 val jacksonVersion = "2.9.8"
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     mavenCentral()
 }
@@ -21,6 +24,13 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
+            credentials {
+                username = githubUser
+                password = githubPassword
+            }
+        }
     }
 
     dependencies {
@@ -30,7 +40,7 @@ subprojects {
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
         implementation("commons-codec:commons-codec:1.11")
 
-        testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.09.06-09-24-0426e")
+        testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.11.08-09-49-c3234")
         testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
