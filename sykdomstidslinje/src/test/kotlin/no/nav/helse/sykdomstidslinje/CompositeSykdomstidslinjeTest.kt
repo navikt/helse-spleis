@@ -1,4 +1,4 @@
-import no.nav.helse.Testhendelse
+import no.nav.helse.hendelse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag

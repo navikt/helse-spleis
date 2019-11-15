@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje.test
 
-import no.nav.helse.Testhendelse
+import no.nav.helse.hendelse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
@@ -252,7 +252,9 @@ class UtbetalingslinjerTest {
     fun `de første 10 dagene av arbeidsgiverperioden er egenmeldingsdager`() {
         val start = startDato
         val sykdomstidslinje = 10.E + 30.S +
-                Sykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25), inntektsmeldingHendelse)
+                Sykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25),
+                    inntektsmeldingHendelse
+                )
         val linjer = sykdomstidslinje.utbetalingsberegning(dagsats).utbetalingslinjer
 
         assertEquals(4, linjer.size)
@@ -301,34 +303,48 @@ class UtbetalingslinjerTest {
     }
 
     private val S
-        get() = Sykdomstidslinje.sykedag(startDato, sendtSykmelding).also {
+        get() = Sykdomstidslinje.sykedag(startDato,
+            sendtSykmelding
+        ).also {
             startDato = startDato.plusDays(1)
         }
 
     private val A
-        get() = Sykdomstidslinje.ikkeSykedag(startDato, sendtSykmelding).also {
+        get() = Sykdomstidslinje.ikkeSykedag(startDato,
+            sendtSykmelding
+        ).also {
             startDato = startDato.plusDays(1)
         }
 
 
     private val Int.S
-        get() = Sykdomstidslinje.sykedager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+        get() = Sykdomstidslinje.sykedager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.F
-        get() = Sykdomstidslinje.ferie(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+        get() = Sykdomstidslinje.ferie(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.A
-        get() = Sykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+        get() = Sykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.I
-        get() = Sykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+        get() = Sykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.E
-        get() = Sykdomstidslinje.egenmeldingsdager(startDato, startDato.plusDays(this.toLong() - 1), sendtSykmelding)
+        get() = Sykdomstidslinje.egenmeldingsdager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
             .also { startDato = startDato.plusDays(this.toLong()) }
 }
 

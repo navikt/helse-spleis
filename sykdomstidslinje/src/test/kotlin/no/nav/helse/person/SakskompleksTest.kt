@@ -119,7 +119,7 @@ class SakskompleksTest {
         ).let {
             objectMapper.convertValue<ObjectNode>(it)
         }.also {
-            it["dagsats"] = DecimalNode(dagsatsMedDesimal)
+            it.set<DecimalNode>("dagsats", DecimalNode(dagsatsMedDesimal))
         }
 
         val jsonRepresentation = Sakskompleks.SakskompleksJson(

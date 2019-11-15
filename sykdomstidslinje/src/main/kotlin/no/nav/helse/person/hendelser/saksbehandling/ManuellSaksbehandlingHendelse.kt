@@ -10,7 +10,7 @@ class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : 
             manuellSaksbehandling.get<String>("saksbehandlerIdent")!!
 
     fun utbetalingGodkjent(): Boolean =
-            (manuellSaksbehandling.løsning() as Map<String, Any>?)?.getValue("godkjent") as Boolean? ?: false
+            (manuellSaksbehandling.løsning() as Map<String, Boolean>?)?.getValue("godkjent") as Boolean? ?: false
 
     override fun sakskompleksId() =
             manuellSaksbehandling.get<String>("sakskompleksId")!!

@@ -56,7 +56,7 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
     override fun toJson(): JsonNode {
         return (super.toJson() as ObjectNode).apply {
             put("type", SykdomshendelseType.NySøknadMottatt.name)
-            set("søknad", søknad.toJson())
+            set<ObjectNode>("søknad", søknad.toJson())
         }
     }
 

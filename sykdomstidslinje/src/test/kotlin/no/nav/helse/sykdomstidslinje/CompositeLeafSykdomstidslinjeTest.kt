@@ -1,4 +1,4 @@
-import no.nav.helse.Testhendelse
+import no.nav.helse.hendelse.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals

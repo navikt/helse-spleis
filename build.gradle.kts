@@ -10,7 +10,7 @@ allprojects {
 }
 
 val junitJupiterVersion = "5.4.0"
-val jacksonVersion = "2.9.8"
+val jacksonVersion = "2.10.0"
 
 val githubUser: String by project
 val githubPassword: String by project

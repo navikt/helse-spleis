@@ -1,9 +1,6 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.Testhendelse
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import no.nav.helse.hendelse.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag

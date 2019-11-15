@@ -103,8 +103,8 @@ internal class NySøknadHendelseTest {
 
         assertThrows<UtenforOmfangException> {
             val json = objectMapper.readTree("/søknad_arbeidstaker_sendt_nav.json".readResource()) as ObjectNode
-            json.set("status", JsonNodeFactory.instance.textNode("NY"))
-            json.set("soknadsperioder", (objectMapper.readTree(overlappendePerioder)))
+            json.set<ObjectNode>("status", JsonNodeFactory.instance.textNode("NY"))
+            json.set<ObjectNode>("soknadsperioder", (objectMapper.readTree(overlappendePerioder)))
 
             NySøknadHendelse(Sykepengesøknad(json)).sykdomstidslinje()
         }

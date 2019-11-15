@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.hendelse
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

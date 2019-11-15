@@ -1,11 +1,10 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.sykdomstidslinje
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ikkeSykedag
@@ -13,7 +12,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.permisjonsdag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.studiedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.utenlandsdag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,8 +28,10 @@ class SykdomstidslinjeJsonTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private val inntektsmeldingHendelse = InntektsmeldingHendelse()
-    private val sendtSøknadHendelse = SendtSøknadHendelse()
+    private val inntektsmeldingHendelse =
+        InntektsmeldingHendelse()
+    private val sendtSøknadHendelse =
+        SendtSøknadHendelse()
 
 
     @Test
@@ -99,7 +99,9 @@ class SykdomstidslinjeJsonTest {
         val combined = tidslinjeA + tidslinjeB + tidslinjeC
         val json = combined.toJson()
 
-        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
+        val restored = Sykdomstidslinje.fromJson(json,
+            TestHendelseDeserializer()
+        )
 
         assertSykdomstidslinjerEquals(combined, restored)
     }
@@ -128,7 +130,9 @@ class SykdomstidslinjeJsonTest {
         val combined = egenmelding + sykedagerA + ikkeSykedager + sykedagerB
         val json = combined.toJson()
 
-        val restored = Sykdomstidslinje.fromJson(json, TestHendelseDeserializer())
+        val restored = Sykdomstidslinje.fromJson(json,
+            TestHendelseDeserializer()
+        )
         assertSykdomstidslinjerEquals(combined, restored)
     }
 
@@ -195,8 +199,12 @@ class SykdomstidslinjeJsonTest {
     private class TestHendelseDeserializer : SykdomstidslinjeHendelse.Deserializer {
         override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
             return when (jsonNode["type"].textValue()) {
-                HendelseType.Inntektsmelding.name -> InntektsmeldingHendelse(jsonNode["hendelseId"].asText())
-                HendelseType.SendtSøknad.name -> InntektsmeldingHendelse(jsonNode["hendelseId"].asText())
+                HendelseType.Inntektsmelding.name -> InntektsmeldingHendelse(
+                    jsonNode["hendelseId"].asText()
+                )
+                HendelseType.SendtSøknad.name -> InntektsmeldingHendelse(
+                    jsonNode["hendelseId"].asText()
+                )
                 else -> throw RuntimeException("ukjent type")
             }
         }

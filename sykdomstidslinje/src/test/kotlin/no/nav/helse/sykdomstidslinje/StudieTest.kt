@@ -1,7 +1,6 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelse.Testhendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -15,7 +14,9 @@ internal class StudieTest {
 
     @Test
     fun `studiedager`() {
-        val studiedager = Sykdomstidslinje.studiedager(1.juli, 7.juli, testKildeHendelse)
+        val studiedager = Sykdomstidslinje.studiedager(1.juli, 7.juli,
+            testKildeHendelse
+        )
         assertEquals(7, studiedager.length())
         assertEquals(0, studiedager.antallSykedagerHvorViTellerMedHelg())
         assertEquals(0, studiedager.antallSykedagerHvorViIkkeTellerMedHelg())

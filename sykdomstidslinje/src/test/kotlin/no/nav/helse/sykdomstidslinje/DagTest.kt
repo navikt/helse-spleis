@@ -1,7 +1,6 @@
-package no.nav.helse.sykdomstidlinje.test
+package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.hendelse.Testhendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -15,7 +14,9 @@ internal class DagTest {
     @Test
     internal fun sykedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val sykedag = Sykdomstidslinje.sykedag(dagSykedagenDekker, rapporterthendelse)
+        val sykedag = Sykdomstidslinje.sykedag(dagSykedagenDekker,
+            rapporterthendelse
+        )
 
         assertEquals(dagSykedagenDekker, sykedag.startdato())
         assertEquals(dagSykedagenDekker, sykedag.sluttdato())
@@ -25,7 +26,9 @@ internal class DagTest {
     @Test
     internal fun feriedag() {
         val dagFeriedagenDekker = LocalDate.of(2019,9,24)
-        val feriedag = Sykdomstidslinje.ferie(dagFeriedagenDekker, rapporterthendelse)
+        val feriedag = Sykdomstidslinje.ferie(dagFeriedagenDekker,
+            rapporterthendelse
+        )
 
         assertEquals(dagFeriedagenDekker, feriedag.startdato())
         assertEquals(dagFeriedagenDekker, feriedag.sluttdato())
@@ -35,7 +38,9 @@ internal class DagTest {
     @Test
     internal fun arbeidsdag() {
         val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
-        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder, rapporterthendelse)
+        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder,
+            rapporterthendelse
+        )
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
         assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
@@ -45,7 +50,9 @@ internal class DagTest {
     @Test
     internal fun helgedag() {
         val helgedagenGjelder = LocalDate.of(2019,9,28)
-        val helgedag = Sykdomstidslinje.ikkeSykedag(helgedagenGjelder, rapporterthendelse)
+        val helgedag = Sykdomstidslinje.ikkeSykedag(helgedagenGjelder,
+            rapporterthendelse
+        )
 
         assertEquals(helgedagenGjelder, helgedag.startdato())
         assertEquals(helgedagenGjelder, helgedag.sluttdato())
@@ -55,7 +62,9 @@ internal class DagTest {
     @Test
     internal fun studiedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val studiedag = Sykdomstidslinje.studiedag(dagSykedagenDekker, rapporterthendelse)
+        val studiedag = Sykdomstidslinje.studiedag(dagSykedagenDekker,
+            rapporterthendelse
+        )
 
         assertEquals(dagSykedagenDekker, studiedag.startdato())
         assertEquals(dagSykedagenDekker, studiedag.sluttdato())
