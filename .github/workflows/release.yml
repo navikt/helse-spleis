@@ -21,5 +21,7 @@ jobs:
       - name: upload artifact
         run: ./gradlew -Pversion="1.$(echo $GITHUB_SHA | cut -c1-7)" publish
         env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
