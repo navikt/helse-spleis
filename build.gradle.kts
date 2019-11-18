@@ -24,13 +24,6 @@ subprojects {
     repositories {
         mavenCentral()
         maven {
-            url = uri("https://maven.pkg.github.com/navikt/helse-sykdomstidslinje")
-            credentials {
-                username = githubUser
-                password = githubPassword
-            }
-        }
-        maven {
             url = uri("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
             credentials {
                 username = githubUser

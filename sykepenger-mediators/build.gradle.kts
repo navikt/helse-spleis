@@ -12,6 +12,7 @@ val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
+    implementation(project(":sykepenger-model"))
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("net.logstash.logback:logstash-logback-encoder:5.2")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -26,7 +27,6 @@ dependencies {
     implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
-    implementation("no.nav.helse:sykdomstidslinje:1.f9e93b5")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
