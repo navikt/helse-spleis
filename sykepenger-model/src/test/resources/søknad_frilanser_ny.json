@@ -1,0 +1,37 @@
+{
+  "id": "68da259c-ff7f-47cf-8fa0-c348ae95e220",
+  "soknadstype": "SELVSTENDIGE_OG_FRILANSERE",
+  "status": "NY",
+  "aktorId": "1234567890123",
+  "sykmeldingId": "71bd853d-36a1-49df-a34c-6e02cf727cfa",
+  "arbeidsgiver": null,
+  "arbeidssituasjon": "FRILANSER",
+  "korrigerer": null,
+  "korrigertAv": null,
+  "soktUtenlandsopphold": null,
+  "arbeidsgiverForskutterer": null,
+  "fom": "2019-06-01",
+  "tom": "2019-06-14",
+  "startSyketilfelle": "2019-06-01",
+  "arbeidGjenopptatt": null,
+  "sykmeldingSkrevet": "2019-06-01T00:00:00",
+  "opprettet": "2019-06-01T00:00:00.000",
+  "sendtNav": null,
+  "sendtArbeidsgiver": null,
+  "egenmeldinger": [],
+  "papirsykmeldinger": null,
+  "fravar": [],
+  "andreInntektskilder": [],
+  "soknadsperioder": [
+    {
+      "fom": "2019-06-01",
+      "tom": "2019-06-14",
+      "sykmeldingsgrad": 100,
+      "faktiskGrad": null,
+      "avtaltTimer": null,
+      "faktiskTimer": null,
+      "sykmeldingstype": null
+    }
+  ],
+  "sporsmal": null
+}
