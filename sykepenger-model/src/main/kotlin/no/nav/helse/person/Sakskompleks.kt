@@ -17,10 +17,8 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.Utbetalingsberegning
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import org.apache.commons.codec.binary.Base32
 import java.io.StringWriter
 import java.math.BigDecimal
@@ -478,7 +476,8 @@ class Sakskompleks(
 
         params.putAll(additionalParams)
 
-        utbetalingslinjer?.let { params.put("utbetalingslinjer", it) }
+        utbetalingslinjer?.let { params.put("utbetalingslinjer",
+            if (type == BehovsTyper.Utbetaling) it.joinForOppdrag() else it) }
         maksdato?.let { params.put("maksdato", it) }
         godkjentAv?.let { params.put("saksbehandler", it) }
 
