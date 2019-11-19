@@ -1,4 +1,4 @@
-package no.nav.helse.unit.person
+package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -11,7 +11,6 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.juli
-import no.nav.helse.person.Sakskompleks
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*

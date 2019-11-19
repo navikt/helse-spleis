@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.spleis.PersonMediator
+import no.nav.helse.spleis.SakMediator
 import no.nav.helse.spleis.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -14,10 +14,10 @@ import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 
 internal class InntektsmeldingConsumer(
-        streamsBuilder: StreamsBuilder,
-        private val inntektsmeldingKafkaTopic: String,
-        private val personMediator: PersonMediator,
-        private val probe: InntektsmeldingProbe = InntektsmeldingProbe
+    streamsBuilder: StreamsBuilder,
+    private val inntektsmeldingKafkaTopic: String,
+    private val sakMediator: SakMediator,
+    private val probe: InntektsmeldingProbe = InntektsmeldingProbe
 ) {
 
     companion object {
@@ -42,7 +42,7 @@ internal class InntektsmeldingConsumer(
             .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
 
     private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-        personMediator.håndterInntektsmelding(InntektsmeldingHendelse(inntektsmelding))
+        sakMediator.håndterInntektsmelding(InntektsmeldingHendelse(inntektsmelding))
     }
 
 }

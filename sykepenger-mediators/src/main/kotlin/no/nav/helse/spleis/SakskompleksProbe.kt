@@ -3,17 +3,17 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonskjemaForGammelt
-import no.nav.helse.person.SakskompleksObserver.StateChangeEvent
-import no.nav.helse.person.UtenforOmfangException
+import no.nav.helse.sak.SakObserver
+import no.nav.helse.sak.SakskjemaForGammelt
+import no.nav.helse.sak.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import org.slf4j.LoggerFactory
 
-object SakskompleksProbe : PersonObserver {
+object SakskompleksProbe : SakObserver {
 
     private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
 
@@ -33,17 +33,17 @@ object SakskompleksProbe : PersonObserver {
             .labelNames("dokumentType")
             .register()
 
-    private val personMementoStørrelse = Summary.build("person_memento_size", "størrelse på person document i databasen").register()
+    private val sakMementoStørrelse = Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
 
     override fun sakskompleksTrengerLøsning(event: Behov) {
         behovCounter.labels(event.behovType()).inc()
     }
 
-    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        personMementoStørrelse.observe(personEndretEvent.memento.toString().length.toDouble())
+    override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
+        sakMementoStørrelse.observe(sakEndretEvent.memento.toString().length.toDouble())
     }
 
-    fun forGammelSkjemaversjon(err: PersonskjemaForGammelt) {
+    fun forGammelSkjemaversjon(err: SakskjemaForGammelt) {
         log.info(err.message)
     }
 

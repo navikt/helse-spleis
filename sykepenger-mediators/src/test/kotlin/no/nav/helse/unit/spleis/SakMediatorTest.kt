@@ -14,8 +14,8 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.person.Sakskompleks
-import no.nav.helse.person.Sakskompleks.TilstandType.*
+import no.nav.helse.sak.Sakskompleks
+import no.nav.helse.sak.Sakskompleks.TilstandType.*
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class PersonMediatorTest {
+internal class SakMediatorTest {
 
     private val probe = mockk<SakskompleksProbe>(relaxed = true)
     private val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
@@ -48,14 +48,14 @@ internal class PersonMediatorTest {
             })
         } just runs
     }
-    private val repo = HashmapPersonRepository()
+    private val repo = HashmapSakRepository()
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
 
-    private val personMediator = PersonMediator(
+    private val sakMediator = SakMediator(
             sakskompleksProbe = probe,
-            personRepository = repo,
-            lagrePersonDao = repo,
+            sakRepository = repo,
+            lagreSakDao = repo,
             utbetalingsreferanseRepository = utbetalingsRepo,
             lagreUtbetalingDao = lagreUtbetalingDao,
             behovProducer = behovProducer,
@@ -78,7 +78,7 @@ internal class PersonMediatorTest {
 
     @Test
     fun `skal håndtere feil ved ny søknad uten virksomhetsnummer for arbeidsgiver`() {
-        personMediator.håndterNySøknad(nySøknadHendelse(arbeidsgiver = null))
+        sakMediator.håndterNySøknad(nySøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<NySøknadHendelse>())
@@ -87,7 +87,7 @@ internal class PersonMediatorTest {
 
     @Test
     fun `skal håndtere feil ved sendt søknad uten virksomhetsnummer for arbeidsgiver`() {
-        personMediator.håndterSendtSøknad(sendtSøknadHendelse(arbeidsgiver = null))
+        sakMediator.håndterSendtSøknad(sendtSøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<SendtSøknadHendelse>())
@@ -96,7 +96,7 @@ internal class PersonMediatorTest {
 
     @Test
     fun `skal håndtere feil ved inntektsmelding uten virksomhetsnummer for arbeidsgiver`() {
-        personMediator.håndterInntektsmelding(inntektsmeldingHendelse(virksomhetsnummer = null))
+        sakMediator.håndterInntektsmelding(inntektsmeldingHendelse(virksomhetsnummer = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<InntektsmeldingHendelse>())
@@ -372,7 +372,7 @@ internal class PersonMediatorTest {
                         navn = "en_arbeidsgiver"
                 )
         )).also {
-            personMediator.håndterNySøknad(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+            sakMediator.håndterNySøknad(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
         }
     }
 
@@ -385,7 +385,7 @@ internal class PersonMediatorTest {
                         navn = "en_arbeidsgiver"
                 )
         )).also {
-            personMediator.håndterSendtSøknad(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+            sakMediator.håndterSendtSøknad(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
         }
     }
 
@@ -394,17 +394,17 @@ internal class PersonMediatorTest {
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
         )).also {
-            personMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
+            sakMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
         }
     }
 
     private fun beInMåBehandlesIInfotrygdState() {
-        personMediator.håndterSendtSøknad(sendtSøknadHendelse)
+        sakMediator.håndterSendtSøknad(sendtSøknadHendelse)
     }
 
     private fun sendSykepengehistorikk(perioder: List<SpolePeriode>) {
         Sykepengehistorikk(objectMapper.readTree(løsSykepengehistorikkBehov(perioder).toJson())).let {
-            personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
+            sakMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
         }
     }
 
@@ -413,7 +413,7 @@ internal class PersonMediatorTest {
                 saksbehandlerIdent = saksbehandlerIdent,
                 utbetalingGodkjent = utbetalingGodkjent
         ).let {
-            personMediator.håndterManuellSaksbehandling(ManuellSaksbehandlingHendelse(it))
+            sakMediator.håndterManuellSaksbehandling(ManuellSaksbehandlingHendelse(it))
         }
     }
 

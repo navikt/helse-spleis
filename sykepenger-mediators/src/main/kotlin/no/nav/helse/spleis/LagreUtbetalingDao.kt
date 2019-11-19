@@ -3,15 +3,15 @@ package no.nav.helse.spleis
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.SakskompleksObserver
+import no.nav.helse.sak.SakObserver
+import no.nav.helse.sak.SakskompleksObserver
 import java.util.*
 import javax.sql.DataSource
 
 class LagreUtbetalingDao(private val dataSource: DataSource,
-                         private val probe: PostgresProbe = PostgresProbe): PersonObserver {
+                         private val probe: PostgresProbe = PostgresProbe): SakObserver {
 
-    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
+    override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
     }
 
     override fun sakskompleksTilUtbetaling(event: SakskompleksObserver.UtbetalingEvent) {

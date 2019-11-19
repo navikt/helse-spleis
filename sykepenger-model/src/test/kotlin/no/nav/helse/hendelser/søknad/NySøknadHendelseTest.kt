@@ -1,4 +1,4 @@
-package no.nav.helse.unit.person.hendelser.søknad
+package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
@@ -7,9 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.Uke
-import no.nav.helse.person.UtenforOmfangException
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.readResource
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions

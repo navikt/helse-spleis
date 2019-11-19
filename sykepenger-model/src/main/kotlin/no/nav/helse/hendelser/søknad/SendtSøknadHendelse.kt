@@ -2,7 +2,7 @@ package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse

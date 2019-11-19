@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -13,11 +13,11 @@ import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON=2
 
-class Person(val aktørId: String) : SakskompleksObserver {
+class Sak(val aktørId: String) : SakskompleksObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
-    private val personObservers = mutableListOf<PersonObserver>()
+    private val sakObservers = mutableListOf<SakObserver>()
     fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
         if (!nySøknadHendelse.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
@@ -49,8 +49,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
-        personObservers.forEach {
-            it.personEndret(PersonObserver.PersonEndretEvent(
+        sakObservers.forEach {
+            it.sakEndret(SakObserver.SakEndretEvent(
                     aktørId = aktørId,
                     sykdomshendelse = event.sykdomshendelse,
                     memento = memento()
@@ -58,8 +58,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
         }
     }
 
-    fun addObserver(observer: PersonObserver) {
-        personObservers.add(observer)
+    fun addObserver(observer: SakObserver) {
+        sakObservers.add(observer)
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
@@ -82,8 +82,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
     private fun arbeidsgiver(organisasjonsnummer: String) =
         Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
             it.addObserver(this)
-            personObservers.forEach { personObserver ->
-                it.addObserver(personObserver)
+            sakObservers.forEach { sakObserver ->
+                it.addObserver(sakObserver)
             }
         }
 
@@ -151,8 +151,8 @@ class Person(val aktørId: String) : SakskompleksObserver {
     private fun memento() =
             Memento(objectMapper.writeValueAsString(jsonRepresentation()))
 
-    private fun jsonRepresentation(): PersonJson {
-        return PersonJson(
+    private fun jsonRepresentation(): SakJson {
+        return SakJson(
                 aktørId = aktørId,
                 skjemaVersjon = skjemaVersjon,
                 arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
@@ -171,7 +171,7 @@ class Person(val aktørId: String) : SakskompleksObserver {
             val id: UUID
     )
 
-    private data class PersonJson(
+    private data class SakJson(
             val aktørId: String,
             val skjemaVersjon: Int,
             val arbeidsgivere: List<ArbeidsgiverJson>
@@ -182,14 +182,14 @@ class Person(val aktørId: String) : SakskompleksObserver {
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        fun fromJson(json: String): Person {
-            val personJson: PersonJson = objectMapper.readValue(json)
-            if (personJson.skjemaVersjon < CURRENT_SKJEMA_VERSJON){
-                throw PersonskjemaForGammelt(personJson.aktørId, personJson.skjemaVersjon, CURRENT_SKJEMA_VERSJON)
+        fun fromJson(json: String): Sak {
+            val sakJson: SakJson = objectMapper.readValue(json)
+            if (sakJson.skjemaVersjon < CURRENT_SKJEMA_VERSJON){
+                throw SakskjemaForGammelt(sakJson.aktørId, sakJson.skjemaVersjon, CURRENT_SKJEMA_VERSJON)
             }
-            return Person(personJson.aktørId)
+            return Sak(sakJson.aktørId)
                     .apply {
-                        arbeidsgivere.putAll(personJson.arbeidsgivere
+                        arbeidsgivere.putAll(sakJson.arbeidsgivere
                                 .map {
                                     it.organisasjonsnummer to Arbeidsgiver(it).also { arbeidsgiver ->
                                         arbeidsgiver.addObserver(this)

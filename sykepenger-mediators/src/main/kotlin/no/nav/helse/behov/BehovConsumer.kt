@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.spleis.PersonMediator
+import no.nav.helse.spleis.SakMediator
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
@@ -15,7 +15,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
         private val behovTopic: String,
-        private val personMediator: PersonMediator
+        private val sakMediatorMediator: SakMediator
 ) {
 
     init {
@@ -58,10 +58,10 @@ internal class BehovConsumer(
     private fun håndterLøsning(løsning: Behov) {
         when (løsning.behovType()) {
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
-                personMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
+                sakMediatorMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
             }
             BehovsTyper.GodkjenningFraSaksbehandler.name -> ManuellSaksbehandlingHendelse(løsning).let {
-                personMediator.håndterManuellSaksbehandling(it)
+                sakMediatorMediator.håndterManuellSaksbehandling(it)
             }
         }
     }

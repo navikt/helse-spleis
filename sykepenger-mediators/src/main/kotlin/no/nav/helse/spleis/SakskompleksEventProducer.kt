@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
-import no.nav.helse.person.Sakskompleks
-import no.nav.helse.person.SakskompleksObserver
+import no.nav.helse.sak.Sakskompleks
+import no.nav.helse.sak.SakskompleksObserver
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord

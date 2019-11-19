@@ -1,4 +1,4 @@
-package no.nav.helse.unit.person
+package no.nav.helse.sak
 
 import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
@@ -9,9 +9,7 @@ import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.juli
-import no.nav.helse.person.Sakskompleks
-import no.nav.helse.person.Sakskompleks.TilstandType.*
-import no.nav.helse.person.SakskompleksObserver
+import no.nav.helse.sak.Sakskompleks.TilstandType.*
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse

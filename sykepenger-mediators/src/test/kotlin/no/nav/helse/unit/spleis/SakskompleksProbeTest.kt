@@ -4,9 +4,9 @@ import io.prometheus.client.CollectorRegistry
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Sakskompleks
-import no.nav.helse.person.SakskompleksObserver
+import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.sak.Sakskompleks
+import no.nav.helse.sak.SakskompleksObserver
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.spleis.SakskompleksProbe
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -2,7 +2,7 @@ package no.nav.helse.hendelser.saksbehandling
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelse.SakskompleksHendelse
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.sak.ArbeidstakerHendelse
 
 class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse, SakskompleksHendelse {
 

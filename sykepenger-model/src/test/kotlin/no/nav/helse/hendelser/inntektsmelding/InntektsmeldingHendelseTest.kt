@@ -1,11 +1,11 @@
-package no.nav.helse.unit.person.hendelser.inntektsmelding
+package no.nav.helse.hendelser.inntektsmelding
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
-import no.nav.helse.person.UtenforOmfangException
+import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag

@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.sak
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.JsonNode
@@ -9,8 +9,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.person.Sakskompleks.TilstandType.*
-import no.nav.helse.person.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.sak.Sakskompleks.TilstandType.*
+import no.nav.helse.sak.SakskompleksObserver.StateChangeEvent
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse

@@ -3,21 +3,21 @@ package no.nav.helse.spleis
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.Person
+import no.nav.helse.sak.Sak
 import javax.sql.DataSource
 
-class PersonPostgresRepository(private val dataSource: DataSource,
-                               private val probe: PostgresProbe = PostgresProbe) : PersonRepository {
+class SakPostgresRepository(private val dataSource: DataSource,
+                            private val probe: PostgresProbe = PostgresProbe) : SakRepository {
 
-    override fun hentPerson(aktørId: String): Person? {
+    override fun hentSak(aktørId: String): Sak? {
         return using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1", aktørId).map {
                 it.string("data")
             }.asSingle)
         }?.let {
-            Person.fromJson(it)
+            Sak.fromJson(it)
         }?.also {
-            probe.personLestFraDb()
+            probe.sakLestFraDb()
         }
     }
 

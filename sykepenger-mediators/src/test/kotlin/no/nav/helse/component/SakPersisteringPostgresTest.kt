@@ -9,17 +9,17 @@ import kotliquery.using
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
-import no.nav.helse.person.Person
+import no.nav.helse.sak.Sak
 import no.nav.helse.runMigration
-import no.nav.helse.spleis.LagrePersonDao
-import no.nav.helse.spleis.PersonPostgresRepository
+import no.nav.helse.spleis.LagreSakDao
+import no.nav.helse.spleis.SakPostgresRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 
-class PersonPersisteringPostgresTest {
+class SakPersisteringPostgresTest {
 
     companion object {
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -46,40 +46,40 @@ class PersonPersisteringPostgresTest {
     }
 
     @Test
-    internal fun `skal gi null når person ikke finnes`() {
-        val repo = PersonPostgresRepository(HikariDataSource(hikariConfig))
+    internal fun `skal gi null når sak ikke finnes`() {
+        val repo = SakPostgresRepository(HikariDataSource(hikariConfig))
 
-        assertNull(repo.hentPerson("1"))
+        assertNull(repo.hentSak("1"))
     }
 
     @Test
-    internal fun `skal returnere person når person blir lagret etter statechange`() {
+    internal fun `skal returnere sak når sak blir lagret etter statechange`() {
         val dataSource = HikariDataSource(hikariConfig)
-        val repo = PersonPostgresRepository(dataSource)
+        val repo = SakPostgresRepository(dataSource)
 
-        val person = Person("2")
-        person.addObserver(LagrePersonDao(dataSource))
-        person.håndterNySøknad(nySøknadHendelse())
+        val sak = Sak("2")
+        sak.addObserver(LagreSakDao(dataSource))
+        sak.håndterNySøknad(nySøknadHendelse())
 
-        assertNotNull(repo.hentPerson("2"))
+        assertNotNull(repo.hentSak("2"))
     }
 
     @Test
-    internal fun `hver endring av person fører til at ny versjon lagres`() {
+    internal fun `hver endring av sak fører til at ny versjon lagres`() {
         val dataSource = HikariDataSource(hikariConfig)
 
         val aktørId = "3"
-        val person = Person(aktørId)
-        person.addObserver(LagrePersonDao(dataSource))
-        person.håndterNySøknad(nySøknadHendelse())
-        person.håndterSendtSøknad(sendtSøknadHendelse())
+        val sak = Sak(aktørId)
+        sak.addObserver(LagreSakDao(dataSource))
+        sak.håndterNySøknad(nySøknadHendelse())
+        sak.håndterSendtSøknad(sendtSøknadHendelse())
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {
-                Person.fromJson(it.string("data"))
+                Sak.fromJson(it.string("data"))
             }.asList)
         }
-        assertEquals(2, alleVersjoner.size, "Antall versjoner av personaggregat skal være 2, men var ${alleVersjoner.size}")
+        assertEquals(2, alleVersjoner.size, "Antall versjoner av sakaggregat skal være 2, men var ${alleVersjoner.size}")
     }
 
 }

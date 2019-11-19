@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
-import no.nav.helse.spleis.PersonMediator
+import no.nav.helse.spleis.SakMediator
 import no.nav.helse.spleis.serde.JsonNodeSerde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -15,10 +15,10 @@ import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 
 internal class SøknadConsumer(
-        streamsBuilder: StreamsBuilder,
-        private val søknadKafkaTopic: String,
-        private val personMediator: PersonMediator,
-        private val probe: SøknadProbe = SøknadProbe
+    streamsBuilder: StreamsBuilder,
+    private val søknadKafkaTopic: String,
+    private val sakMediatorMediator: SakMediator,
+    private val probe: SøknadProbe = SøknadProbe
 ) {
 
     init {
@@ -47,9 +47,9 @@ internal class SøknadConsumer(
 
     private fun håndterSøknad(søknad: Sykepengesøknad) {
         when (søknad.status) {
-            "NY" -> personMediator.håndterNySøknad(NySøknadHendelse(søknad))
-            "FREMTIDIG" -> personMediator.håndterNySøknad(NySøknadHendelse(søknad))
-            "SENDT" -> personMediator.håndterSendtSøknad(SendtSøknadHendelse(søknad))
+            "NY" -> sakMediatorMediator.håndterNySøknad(NySøknadHendelse(søknad))
+            "FREMTIDIG" -> sakMediatorMediator.håndterNySøknad(NySøknadHendelse(søknad))
+            "SENDT" -> sakMediatorMediator.håndterSendtSøknad(SendtSøknadHendelse(søknad))
         }
     }
 }

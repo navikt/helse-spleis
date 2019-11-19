@@ -70,22 +70,22 @@ fun Application.sakskompleksApplication(): KafkaStreams {
     val dataSource = getDataSource(createHikariConfigFromEnvironment())
 
     val producer = KafkaProducer<String, String>(behovProducerConfig(), StringSerializer(), StringSerializer())
-    val personMediator = PersonMediator(
-            personRepository = PersonPostgresRepository(dataSource),
-            lagrePersonDao = LagrePersonDao(dataSource),
+    val sakMediator = SakMediator(
+            sakRepository = SakPostgresRepository(dataSource),
+            lagreSakDao = LagreSakDao(dataSource),
             utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
             lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
             behovProducer = BehovProducer(behovTopic, producer),
             gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()),
             sakskompleksEventProducer = SakskompleksEventProducer(commonKafkaProperties()))
 
-    restInterface(personMediator)
+    restInterface(sakMediator)
 
     val builder = StreamsBuilder()
 
-    SøknadConsumer(builder, søknadTopic, personMediator)
-    InntektsmeldingConsumer(builder, inntektsmeldingTopic, personMediator)
-    BehovConsumer(builder, behovTopic, personMediator)
+    SøknadConsumer(builder, søknadTopic, sakMediator)
+    InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakMediator)
+    BehovConsumer(builder, behovTopic, sakMediator)
 
     return KafkaStreams(builder.build(), streamsConfig()).apply {
         addShutdownHook(this)
@@ -110,7 +110,7 @@ private val httpRequestDuration = Histogram.build("http_request_duration_seconds
         .register()
 
 @KtorExperimentalAPI
-private fun Application.restInterface(personMediator: PersonMediator,
+private fun Application.restInterface(sakMediator: SakMediator,
                                       configurationUrl: String = environment.config.property("azure.configuration_url").getString(),
                                       clientId: String = environment.config.property("azure.client_id").getString(),
                                       requiredGroup: String = environment.config.property("azure.required_group").getString()) {
@@ -163,8 +163,8 @@ private fun Application.restInterface(personMediator: PersonMediator,
 
     routing {
         authenticate {
-            utbetaling(personMediator)
-            person(personMediator)
+            utbetaling(sakMediator)
+            sak(sakMediator)
         }
     }
 

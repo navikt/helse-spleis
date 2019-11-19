@@ -1,4 +1,4 @@
-package no.nav.helse.component.person
+package no.nav.helse.component.sak
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -30,10 +30,10 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
-import no.nav.helse.person.Person
-import no.nav.helse.person.Sakskompleks
+import no.nav.helse.sak.Sak
+import no.nav.helse.sak.Sakskompleks
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
-import no.nav.helse.spleis.personPath
+import no.nav.helse.spleis.path
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -65,7 +65,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
-internal class PersonComponentTest {
+internal class SakComponentTest {
 
     private companion object {
 
@@ -135,7 +135,7 @@ internal class PersonComponentTest {
                 put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
                 put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
                 put(SASL_MECHANISM, "PLAIN")
-                put(GROUP_ID_CONFIG, "personComponentTest")
+                put(GROUP_ID_CONFIG, "sakComponentTest")
                 put(AUTO_OFFSET_RESET_CONFIG, "earliest")
             }
         }
@@ -204,7 +204,7 @@ internal class PersonComponentTest {
         assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = Sakskompleks.TilstandType.TIL_GODKJENNING)
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
 
-        aktørID.hentPerson {
+        aktørID.hentSak {
             assertTrue(this.contains("maksdato"))
             assertTrue(this.contains("utbetalingslinjer"))
             assertTrue(this.contains("dagsats"))
@@ -234,19 +234,19 @@ internal class PersonComponentTest {
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
 
         utbetalingsreferanse.hentUtbetaling {
-            val person = Person.fromJson(this)
-            assertEquals(aktørID, person.aktørId)
+            val sak = Sak.fromJson(this)
+            assertEquals(aktørID, sak.aktørId)
         }
     }
 
     @Test
-    fun `gitt en ny sak, så skal den kunne hentes ut på personen`() {
+    fun `gitt en ny sak, så skal den kunne hentes ut på saken`() {
         val enAktørId = "1211109876543"
         val virksomhetsnummer = "123456789"
 
         val nySøknad = sendNySøknad(enAktørId, virksomhetsnummer)
 
-        enAktørId.hentPerson {
+        enAktørId.hentSak {
             val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
             assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
         }
@@ -269,8 +269,8 @@ internal class PersonComponentTest {
         connection.responseBody.testBlock()
     }
 
-    private fun String.hentPerson(testBlock: String.() -> Unit) {
-        (personPath + this).httpGet(testBlock)
+    private fun String.hentSak(testBlock: String.() -> Unit) {
+        (path + this).httpGet(testBlock)
     }
 
     private fun String.hentUtbetaling(testBlock: String.() -> Unit) {

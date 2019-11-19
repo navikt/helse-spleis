@@ -6,13 +6,13 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 
-const val personPath = "/api/person/"
+const val path = "/api/sak/"
 private const val aktørId = "aktørId"
-private const val personParameterizedPath = "$personPath{$aktørId}"
+private const val parameterizedPath = "$path{$aktørId}"
 
-internal fun Route.person(personMediator: PersonMediator) {
-    get(personParameterizedPath) {
-        personMediator.hentPerson(call.parameters[aktørId]!!)?.let { call.respond(it.toString()) }
+internal fun Route.sak(sakMediator: SakMediator) {
+    get(parameterizedPath) {
+        sakMediator.hentSak(call.parameters[aktørId]!!)?.let { call.respond(it.toString()) }
             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
     }
 }
