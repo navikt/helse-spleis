@@ -14,6 +14,9 @@ data class Utbetalingslinje(
     val dagsats: Int
 )
 
+/** Oppdrag expects a continuous payment timeline spanning weekends.
+ * They need to know about the weekends for tax calculation, but have rules for not paying for them
+ */
 internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
     fun Utbetalingslinje.tilstøtende(utbetalingslinje: Utbetalingslinje) =
         this.tom.dayOfWeek == DayOfWeek.FRIDAY && this.tom.plusDays(3).isEqual(utbetalingslinje.fom)
@@ -29,6 +32,6 @@ internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
             results.add(utbetalingslinje)
         }
     }
-    return results
+    return results.toList()
 
 }
