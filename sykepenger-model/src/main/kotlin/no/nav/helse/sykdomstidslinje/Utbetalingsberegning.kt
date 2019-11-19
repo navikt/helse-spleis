@@ -15,11 +15,14 @@ data class Utbetalingslinje(
 )
 
 internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
+    fun Utbetalingslinje.tilstøtende(utbetalingslinje: Utbetalingslinje) =
+        this.tom.dayOfWeek == DayOfWeek.FRIDAY && this.tom.plusDays(3).isEqual(utbetalingslinje.fom)
+
     if (this.isEmpty()) return this
     val results = mutableListOf(this.first())
     for (utbetalingslinje: Utbetalingslinje in this.slice(1 until this.size)) {
         if (results.last().tilstøtende(utbetalingslinje)) {
-            require(results.last().dagsats == utbetalingslinje.dagsats) {"Uventet dagsats - forventet samme"}
+            require(results.last().dagsats == utbetalingslinje.dagsats) { "Uventet dagsats - forventet samme" }
             results[results.size - 1] =
                 Utbetalingslinje(results.last().fom, utbetalingslinje.tom, results.last().dagsats)
         } else {
@@ -27,7 +30,5 @@ internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
         }
     }
     return results
-}
 
-internal fun Utbetalingslinje.tilstøtende(utbetalingslinje: Utbetalingslinje) =
-    this.tom.dayOfWeek == DayOfWeek.FRIDAY && this.tom.plusDays(3).isEqual(utbetalingslinje.fom)
+}
