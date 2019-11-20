@@ -40,6 +40,8 @@ class Vedtaksperiode(
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
+    internal fun erIkkeINySøknadTilstand() = tilstand != NY_SØKNAD_MOTTATT
+
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
     private var maksdato: LocalDate? = null

@@ -148,6 +148,39 @@ internal class SakMediatorTest {
 
         sendSøknad(aktørID, virksomhetsnummer)
 
+        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID)
+    }
+
+    @Test
+    fun `gitt en komplett sykdomstidslinje, når det kommer en til sendt søknad med en annen arbeidsgiver, så skal begge søknadene behandles manuelt av saksbehandler`() {
+        val aktørID = "2345678901234"
+        val virksomhetsnummer_a = "234567890"
+        val virksomhetsnummer_b = "098765432"
+
+        sendNySøknad(aktørID, virksomhetsnummer_a)
+        sendInntektsmelding(aktørID, virksomhetsnummer_a)
+        sendSøknad(aktørID, virksomhetsnummer_a)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            virksomhetsnummer = virksomhetsnummer_a,
+            previousState = INNTEKTSMELDING_MOTTATT,
+            currentState = KOMPLETT_SYKDOMSTIDSLINJE
+        )
+
+        sendNySøknad(aktørID, virksomhetsnummer_b)
+        sendSøknad(aktørID, virksomhetsnummer_b)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            virksomhetsnummer = virksomhetsnummer_a,
+            previousState = KOMPLETT_SYKDOMSTIDSLINJE,
+            currentState = TIL_INFOTRYGD
+        )
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            virksomhetsnummer = virksomhetsnummer_b,
+            previousState = NY_SØKNAD_MOTTATT,
+            currentState = TIL_INFOTRYGD
+        )
         assertOpprettGosysOppgave(aktørId = aktørID)
     }
 
@@ -256,7 +289,7 @@ internal class SakMediatorTest {
         ))
         sendSykepengehistorikk(sykehistorikk)
 
-        assertOpprettGosysOppgave(aktørId = aktørID)
+        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID)
     }
 
     @Test
@@ -324,7 +357,7 @@ internal class SakMediatorTest {
         ))
         sendSykepengehistorikk(sykehistorikk)
 
-        assertOpprettGosysOppgave(aktørId = aktørID)
+        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID)
     }
 
     @Test
@@ -342,7 +375,7 @@ internal class SakMediatorTest {
         )))
         sendGodkjenningFraSaksbehandler("en_saksbehandler_ident", false)
 
-        assertOpprettGosysOppgave(aktørId = aktørID)
+        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID)
     }
 
 
@@ -360,7 +393,7 @@ internal class SakMediatorTest {
                 grad = "100"
         )))
 
-        assertOpprettGosysOppgave(aktørId = aktørID)
+        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID)
     }
 
     private fun sendNySøknad(aktørId: String, virksomhetsnummer: String, søknad: SykepengesoknadDTO? = null): SykepengesoknadDTO {
@@ -449,8 +482,15 @@ internal class SakMediatorTest {
             })
         }
     }
-    private fun assertOpprettGosysOppgave(aktørId: String) {
+
+    private fun assertOpprettGosysOppgaveNøyaktigEnGang(aktørId: String) {
         verify(exactly = 1) {
+            oppgaveProducer.opprettOppgave(aktørId = aktørId)
+        }
+    }
+
+    private fun assertOpprettGosysOppgave(aktørId: String) {
+        verify(atLeast = 1) {
             oppgaveProducer.opprettOppgave(aktørId = aktørId)
         }
     }
