@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class SakskompleksTest {
+internal class VedtaksperiodeTest {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
@@ -27,18 +27,18 @@ internal class SakskompleksTest {
     }
 
     @Test
-    internal fun `gyldig jsonrepresentasjon av tomt sakskompleks`() {
+    internal fun `gyldig jsonrepresentasjon av tomt vedtaksperiode`() {
         val id = UUID.randomUUID()
         val aktørId = "1234"
         val organisasjonsnummer = "123456789"
 
-        val sakskompleks = Sakskompleks(
+        val vedtaksperiode = Vedtaksperiode(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer
         )
 
-        val jsonRepresentation = sakskompleks.jsonRepresentation()
+        val jsonRepresentation = vedtaksperiode.jsonRepresentation()
 
         assertEquals(id, jsonRepresentation.id)
         assertEquals(aktørId, jsonRepresentation.aktørId)
@@ -47,21 +47,21 @@ internal class SakskompleksTest {
     }
 
     @Test
-    internal fun `gyldig sakskompleks fra jsonrepresentasjon av tomt sakskompleks`() {
+    internal fun `gyldig vedtaksperiode fra jsonrepresentasjon av tomt vedtaksperiode`() {
         val id = UUID.randomUUID()
         val aktørId = "1234"
         val organisasjonsnummer = "123456789"
 
-        val sakskompleks = Sakskompleks(
+        val vedtaksperiode = Vedtaksperiode(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer
         )
 
-        val jsonRepresentation = sakskompleks.jsonRepresentation()
-        val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
+        val jsonRepresentation = vedtaksperiode.jsonRepresentation()
+        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
 
-        assertEquals(jsonRepresentation, gjenopprettetSakskompleks.jsonRepresentation())
+        assertEquals(jsonRepresentation, gjenopprettetVedtaksperiode.jsonRepresentation())
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class SakskompleksTest {
             objectMapper.convertValue<ObjectNode>(it)
         }
 
-        val jsonRepresentation = Sakskompleks.SakskompleksJson(
+        val jsonRepresentation = Vedtaksperiode.VedtaksperiodeJson(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -90,12 +90,12 @@ internal class SakskompleksTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING,
+                tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
                 utbetalingsreferanse = null
         )
 
-        val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
-        val nyJson = gjenopprettetSakskompleks.jsonRepresentation()
+        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
+        val nyJson = gjenopprettetVedtaksperiode.jsonRepresentation()
 
         val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
 
@@ -121,7 +121,7 @@ internal class SakskompleksTest {
             it.set<DecimalNode>("dagsats", DecimalNode(dagsatsMedDesimal))
         }
 
-        val jsonRepresentation = Sakskompleks.SakskompleksJson(
+        val jsonRepresentation = Vedtaksperiode.VedtaksperiodeJson(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -131,12 +131,12 @@ internal class SakskompleksTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Sakskompleks.TilstandType.TIL_GODKJENNING,
+                tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
                 utbetalingsreferanse = null
         )
 
-        val gjenopprettetSakskompleks = Sakskompleks.fromJson(jsonRepresentation)
-        val nyJson = gjenopprettetSakskompleks.jsonRepresentation()
+        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
+        val nyJson = gjenopprettetVedtaksperiode.jsonRepresentation()
 
         val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
 
@@ -146,13 +146,13 @@ internal class SakskompleksTest {
     @Test
     fun `memento inneholder en tilstand`() {
         val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
+        val vedtaksperiode = Vedtaksperiode(
                 id = id,
                 aktørId = "aktørId",
                 organisasjonsnummer = "orgnummer"
         )
 
-        val memento = sakskompleks.memento()
+        val memento = vedtaksperiode.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertNotNull(node["tilstand"])
@@ -161,15 +161,15 @@ internal class SakskompleksTest {
     }
 
     @Test
-    fun `memento inneholder aktørId og sakskompleksId`() {
+    fun `memento inneholder aktørId og vedtaksperiodeId`() {
         val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
+        val vedtaksperiode = Vedtaksperiode(
                 id = id,
                 aktørId = "aktørId",
                 organisasjonsnummer = "orgnummer"
         )
 
-        val memento = sakskompleks.memento()
+        val memento = vedtaksperiode.memento()
         val node = objectMapper.readTree(memento.state)
 
         assertEquals(id.toString(), node["id"].textValue())
@@ -180,19 +180,19 @@ internal class SakskompleksTest {
     @Test
     fun `restore bygger opp likt objekt fra lagret memento`() {
         val id = UUID.randomUUID()
-        val sakskompleks = Sakskompleks(
+        val vedtaksperiode = Vedtaksperiode(
                 id = id,
                 aktørId = "aktørId",
                 organisasjonsnummer = "orgnummer"
         )
-        sakskompleks.håndter(nySøknadHendelse())
-        sakskompleks.håndter(sendtSøknadHendelse())
-        sakskompleks.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        val inMemento = sakskompleks.memento()
+        val inMemento = vedtaksperiode.memento()
 
-        val nyttSakskompleks = Sakskompleks.restore(inMemento)
-        val outMemento = nyttSakskompleks.memento()
+        val nyttVedtaksperiode = Vedtaksperiode.restore(inMemento)
+        val outMemento = nyttVedtaksperiode.memento()
         val inNode = objectMapper.readTree(inMemento.state)
         val outNode = objectMapper.readTree(outMemento.state)
 
@@ -201,25 +201,25 @@ internal class SakskompleksTest {
     }
 
     @Test
-    fun `nytt sakskompleks godtar ny søknad`() {
-        val sakskompleks = Sakskompleks(
+    fun `nytt vedtaksperiode godtar ny søknad`() {
+        val vedtaksperiode = Vedtaksperiode(
                 id = UUID.randomUUID(),
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        assertTrue(sakskompleks.håndter(nySøknadHendelse()))
+        assertTrue(vedtaksperiode.håndter(nySøknadHendelse()))
     }
 
     @Test
-    fun `eksisterende sakskompleks godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
-        val sakskompleks = Sakskompleks(
+    fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
+        val vedtaksperiode = Vedtaksperiode(
                 id = UUID.randomUUID(),
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        sakskompleks.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+        vedtaksperiode.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
 
-        assertFalse(sakskompleks.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
+        assertFalse(vedtaksperiode.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
 
     }
 }

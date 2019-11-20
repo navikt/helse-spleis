@@ -14,8 +14,8 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.sak.Sakskompleks
-import no.nav.helse.sak.Sakskompleks.TilstandType.*
+import no.nav.helse.sak.Vedtaksperiode
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
@@ -35,9 +35,9 @@ import org.junit.jupiter.api.Test
 
 internal class SakMediatorTest {
 
-    private val probe = mockk<SakskompleksProbe>(relaxed = true)
+    private val probe = mockk<VedtaksperiodeProbe>(relaxed = true)
     private val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
-    private val sakskompleksEventProducer = mockk<SakskompleksEventProducer>(relaxed = true)
+    private val vedtaksperiodeEventProducer = mockk<VedtaksperiodeEventProducer>(relaxed = true)
 
     private val behovsliste = mutableListOf<Behov>()
     private val behovProducer = mockk<BehovProducer>(relaxed = true).also {
@@ -53,14 +53,14 @@ internal class SakMediatorTest {
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
 
     private val sakMediator = SakMediator(
-            sakskompleksProbe = probe,
+            vedtaksperiodeProbe = probe,
             sakRepository = repo,
             lagreSakDao = repo,
             utbetalingsreferanseRepository = utbetalingsRepo,
             lagreUtbetalingDao = lagreUtbetalingDao,
             behovProducer = behovProducer,
             gosysOppgaveProducer = oppgaveProducer,
-            sakskompleksEventProducer = sakskompleksEventProducer
+            vedtaksperiodeEventProducer = vedtaksperiodeEventProducer
     )
 
     private val sendtSøknadHendelse = sendtSøknadHendelse()
@@ -81,7 +81,7 @@ internal class SakMediatorTest {
         sakMediator.håndter(nySøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
-            probe.utenforOmfang(any(), any<NySøknadHendelse>())
+            probe.utenforOmfang(any<NySøknadHendelse>())
         }
     }
 
@@ -90,7 +90,7 @@ internal class SakMediatorTest {
         sakMediator.håndter(sendtSøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
-            probe.utenforOmfang(any(), any<SendtSøknadHendelse>())
+            probe.utenforOmfang(any<SendtSøknadHendelse>())
         }
     }
 
@@ -99,7 +99,7 @@ internal class SakMediatorTest {
         sakMediator.håndter(inntektsmeldingHendelse(virksomhetsnummer = null))
 
         verify(exactly = 1) {
-            probe.utenforOmfang(any(), any<InntektsmeldingHendelse>())
+            probe.utenforOmfang(any<InntektsmeldingHendelse>())
         }
     }
 
@@ -118,13 +118,13 @@ internal class SakMediatorTest {
         val virksomhetsnummer = "123456789"
 
         sendNySøknad(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = START, currentState = NY_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = START, currentState = NY_SØKNAD_MOTTATT)
 
         sendSøknad(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = NY_SØKNAD_MOTTATT, currentState = SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = NY_SØKNAD_MOTTATT, currentState = SENDT_SØKNAD_MOTTATT)
 
         sendInntektsmelding(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = SENDT_SØKNAD_MOTTATT, currentState = KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = SENDT_SØKNAD_MOTTATT, currentState = KOMPLETT_SYKDOMSTIDSLINJE)
 
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Sykepengehistorikk)
     }
@@ -439,9 +439,9 @@ internal class SakMediatorTest {
                 first { it.behovType() == behovsType.name }
     }
 
-    private fun assertSakskompleksEndretEvent(aktørId: String, virksomhetsnummer: String, previousState: Sakskompleks.TilstandType, currentState: Sakskompleks.TilstandType) {
+    private fun assertVedtaksperiodeEndretEvent(aktørId: String, virksomhetsnummer: String, previousState: Vedtaksperiode.TilstandType, currentState: Vedtaksperiode.TilstandType) {
         verify(exactly = 1) {
-            sakskompleksEventProducer.sendEndringEvent(match {
+            vedtaksperiodeEventProducer.sendEndringEvent(match {
                 it.previousState == previousState
                         && it.currentState == currentState
                         && it.aktørId == aktørId

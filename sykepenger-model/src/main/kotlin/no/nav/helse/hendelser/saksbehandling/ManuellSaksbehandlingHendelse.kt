@@ -1,18 +1,19 @@
 package no.nav.helse.hendelser.saksbehandling
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelse.SakskompleksHendelse
+import no.nav.helse.sak.VedtaksperiodeHendelse
 import no.nav.helse.sak.ArbeidstakerHendelse
 
-class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse, SakskompleksHendelse {
+class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse,
+    VedtaksperiodeHendelse {
 
     fun saksbehandler() =
             manuellSaksbehandling.get<String>("saksbehandlerIdent")!!
 
     fun utbetalingGodkjent(): Boolean =
-            (manuellSaksbehandling.løsning() as Map<String, Boolean>?)?.getValue("godkjent") as Boolean? ?: false
+            (manuellSaksbehandling.løsning() as Map<String, Boolean>?)?.getValue("godkjent")?: false
 
-    override fun sakskompleksId() =
+    override fun vedtaksperiodeId() =
             manuellSaksbehandling.get<String>("sakskompleksId")!!
 
     override fun aktørId() =

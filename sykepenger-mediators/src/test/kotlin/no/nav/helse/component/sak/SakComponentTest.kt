@@ -24,14 +24,14 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
-import no.nav.helse.Topics.sakskompleksEventTopic
+import no.nav.helse.Topics.vedtaksperiodeEventTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.sak.Sak
-import no.nav.helse.sak.Sakskompleks
+import no.nav.helse.sak.Vedtaksperiode
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.path
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -77,7 +77,7 @@ internal class SakComponentTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, sakskompleksEventTopic)
+        private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -188,11 +188,11 @@ internal class SakComponentTest {
         val virksomhetsnummer = "123456789"
 
         val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.START, currentState = Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Vedtaksperiode.TilstandType.START, currentState = Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT)
         sendSøknad(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, currentState = Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, currentState = Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT)
         sendInnteksmelding(aktørID, virksomhetsnummer)
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, currentState = Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, currentState = Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
 
         val sykehistorikk = listOf(SpolePeriode(
             fom = søknad.fom!!.minusMonths(8),
@@ -201,7 +201,7 @@ internal class SakComponentTest {
         ))
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
 
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = Sakskompleks.TilstandType.TIL_GODKJENNING)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = Vedtaksperiode.TilstandType.TIL_GODKJENNING)
         assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
 
         aktørID.hentSak {
@@ -228,7 +228,7 @@ internal class SakComponentTest {
         sendSykepengehistorikkløsning(aktørID, sykehistorikk)
         sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
 
-        assertSakskompleksEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Sakskompleks.TilstandType.TIL_GODKJENNING, currentState = Sakskompleks.TilstandType.TIL_UTBETALING)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = Vedtaksperiode.TilstandType.TIL_GODKJENNING, currentState = Vedtaksperiode.TilstandType.TIL_UTBETALING)
 
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, behovType = Utbetaling)
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
@@ -331,19 +331,19 @@ internal class SakComponentTest {
         return behov!!
     }
 
-    private fun assertSakskompleksEndretEvent(virksomhetsnummer: String, aktørId: String, previousState: Sakskompleks.TilstandType, currentState: Sakskompleks.TilstandType) {
+    private fun assertVedtaksperiodeEndretEvent(virksomhetsnummer: String, aktørId: String, previousState: Vedtaksperiode.TilstandType, currentState: Vedtaksperiode.TilstandType) {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
-                    val meldingerPåTopic = TestConsumer.records(sakskompleksEventTopic)
-                    val sakskompleksEndretHendelser = meldingerPåTopic
+                    val meldingerPåTopic = TestConsumer.records(vedtaksperiodeEventTopic)
+                    val vedtaksperiodeEndretHendelser = meldingerPåTopic
                             .map { objectMapper.readTree(it.value()) }
                             .filter { aktørId == it["aktørId"].textValue() }
                             .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
-                            .filter { previousState == Sakskompleks.TilstandType.valueOf(it["previousState"].textValue())
-                                    && currentState == Sakskompleks.TilstandType.valueOf(it["currentState"].textValue()) }
+                            .filter { previousState == Vedtaksperiode.TilstandType.valueOf(it["previousState"].textValue())
+                                    && currentState == Vedtaksperiode.TilstandType.valueOf(it["currentState"].textValue()) }
 
-                    assertEquals(1, sakskompleksEndretHendelser.size)
+                    assertEquals(1, vedtaksperiodeEndretHendelser.size)
                 }
     }
 

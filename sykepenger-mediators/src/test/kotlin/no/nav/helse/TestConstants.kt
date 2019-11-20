@@ -273,12 +273,12 @@ internal object TestConstants {
         perioder: List<SpolePeriode>,
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        sakskompleksId: UUID = UUID.randomUUID()
+        vedtaksperiodeId: UUID = UUID.randomUUID()
     ): Sykepengehistorikk {
         val behov = Behov.nyttBehov(
             BehovsTyper.Sykepengehistorikk, mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId.toString(),
+                "sakskompleksId" to vedtaksperiodeId.toString(),
                 "aktørId" to aktørId
             )
         ).also {
@@ -294,14 +294,14 @@ internal object TestConstants {
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        sakskompleksId: String = UUID.randomUUID().toString(),
+        vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ): Behov {
         return Behov.nyttBehov(
             BehovsTyper.Sykepengehistorikk, mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId,
+                "sakskompleksId" to vedtaksperiodeId,
                 "aktørId" to aktørId,
                 "saksbehandlerIdent" to saksbehandler
             )

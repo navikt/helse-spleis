@@ -26,7 +26,7 @@ internal class SøknadsfilterTest {
     fun `skal ta inn alle typer arbeidstaker søknader`(status: String) {
         val søknad = søknadJson("ARBEIDSTAKERE", status)
 
-        assertTrue(skalTaInnSøknad(søknad, probe))
+        assertTrue(skalTaInnSøknad(søknad))
     }
 
     @ParameterizedTest
@@ -34,7 +34,7 @@ internal class SøknadsfilterTest {
     fun `skal ta inn alle typer selvstendig og frilans søknader`(status: String) {
         val søknad = søknadJson("SELVSTENDIGE_OG_FRILANSERE", status)
 
-        assertTrue(skalTaInnSøknad(søknad, probe))
+        assertTrue(skalTaInnSøknad(søknad))
     }
 
     private fun søknadJson(type: String, status: String): JsonNode {

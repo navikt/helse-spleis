@@ -37,7 +37,7 @@ internal class SøknadConsumer(
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
         )
         sendtSøknad
-                .filter { _, søknad -> skalTaInnSøknad(søknad = søknad, søknadProbe = probe) }
+                .filter { _, søknad -> skalTaInnSøknad(søknad = søknad) }
                 .mapValues { søknad -> Sykepengesøknad(søknad) }
                 .peek { _, søknad -> SøknadProbe.mottattSøknad(søknad) }
                 .foreach { _, søknad -> håndter(søknad) }

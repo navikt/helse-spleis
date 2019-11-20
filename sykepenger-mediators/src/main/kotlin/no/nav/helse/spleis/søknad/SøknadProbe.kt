@@ -23,7 +23,7 @@ object SøknadProbe {
         søknadCounter.labels(søknad.status).inc()
     }
 
-    fun søknadIgnorert(id: String, type: String, status: String) {
+    fun søknadIgnorert() {
         søknadIgnorertCounter.inc()
     }
 }

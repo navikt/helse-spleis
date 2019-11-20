@@ -16,7 +16,7 @@ class UtbetalingsreferansePostgresRepository(private val dataSource: DataSource,
                         id = it.string("id"),
                         aktørId = it.string("aktor_id"),
                         orgnummer = it.string("orgnr"),
-                        sakskompleksId = UUID.fromString(it.string("sakskompleks_id"))
+                        vedtaksperiodeId = UUID.fromString(it.string("sakskompleks_id"))
                 )
             }.asSingle)
         }?.also {

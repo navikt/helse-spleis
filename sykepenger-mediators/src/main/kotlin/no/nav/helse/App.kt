@@ -86,7 +86,7 @@ fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngi
     }
 
     module {
-        val streams = sakskompleksApplication()
+        val streams = vedtaksperiodeApplication()
         nais(
             isAliveCheck = { streams.state().isRunning }
         )

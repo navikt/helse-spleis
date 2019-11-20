@@ -51,7 +51,7 @@ internal class SakSerializationTest {
             lastSakEndretEvent = sakEndretEvent
         }
 
-        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
 
         }
     }

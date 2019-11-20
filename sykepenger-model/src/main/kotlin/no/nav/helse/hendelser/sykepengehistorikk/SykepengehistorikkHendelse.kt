@@ -1,12 +1,13 @@
 package no.nav.helse.hendelser.sykepengehistorikk
 
-import no.nav.helse.hendelse.SakskompleksHendelse
+import no.nav.helse.sak.VedtaksperiodeHendelse
 import no.nav.helse.sak.ArbeidstakerHendelse
 
-class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistorikk): ArbeidstakerHendelse, SakskompleksHendelse {
+class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistorikk): ArbeidstakerHendelse,
+    VedtaksperiodeHendelse {
 
-    override fun sakskompleksId() =
-        sykepengehistorikk.sakskompleksId
+    override fun vedtaksperiodeId() =
+        sykepengehistorikk.vedtaksperiodeId
 
     override fun aktørId() =
         sykepengehistorikk.aktørId

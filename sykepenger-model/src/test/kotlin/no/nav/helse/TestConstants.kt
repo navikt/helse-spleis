@@ -236,11 +236,11 @@ internal object TestConstants {
             perioder: List<SpolePeriode>,
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
-            sakskompleksId: UUID = UUID.randomUUID()
+            vedtaksperiodeId: UUID = UUID.randomUUID()
     ): Sykepengehistorikk {
         val behov = Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId.toString(),
+                "sakskompleksId" to vedtaksperiodeId.toString(),
                 "aktørId" to aktørId
         )).also {
             it.løsBehov(responsFraSpole(
@@ -255,7 +255,7 @@ internal object TestConstants {
             perioder: List<SpolePeriode>? = null,
             organisasjonsnummer: String = "123546564",
             aktørId: String = "1",
-            sakskompleksId: UUID = UUID.randomUUID()
+            vedtaksperiodeId: UUID = UUID.randomUUID()
     ) = SykepengehistorikkHendelse(sykepengehistorikk(
             perioder = perioder ?: sisteHistoriskeSykedag?.let {
                 listOf(
@@ -268,17 +268,17 @@ internal object TestConstants {
             } ?: emptyList(),
             organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
-            sakskompleksId = sakskompleksId
+            vedtaksperiodeId = vedtaksperiodeId
     ))
 
     fun manuellSaksbehandlingLøsning(organisasjonsnummer: String = "123546564",
                                      aktørId: String = "1",
-                                     sakskompleksId: String = UUID.randomUUID().toString(),
+                                     vedtaksperiodeId: String = UUID.randomUUID().toString(),
                                      utbetalingGodkjent: Boolean,
                                      saksbehandler: String): Behov {
         return Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to sakskompleksId,
+                "sakskompleksId" to vedtaksperiodeId,
                 "aktørId" to aktørId,
                 "saksbehandlerIdent" to saksbehandler
         )).also {
@@ -290,13 +290,13 @@ internal object TestConstants {
 
     fun manuellSaksbehandlingHendelse(organisasjonsnummer: String = "123546564",
                                       aktørId: String = "1",
-                                      sakskompleksId: String = UUID.randomUUID().toString(),
+                                      vedtaksperiodeId: String = UUID.randomUUID().toString(),
                                       utbetalingGodkjent: Boolean,
                                       saksbehandler: String): ManuellSaksbehandlingHendelse {
         return ManuellSaksbehandlingHendelse(manuellSaksbehandlingLøsning(
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
-                sakskompleksId = sakskompleksId,
+                vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingGodkjent = utbetalingGodkjent,
                 saksbehandler = saksbehandler
         ))

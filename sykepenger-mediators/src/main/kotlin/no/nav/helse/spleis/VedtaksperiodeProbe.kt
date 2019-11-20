@@ -5,27 +5,27 @@ import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.SakskjemaForGammelt
-import no.nav.helse.sak.SakskompleksObserver.StateChangeEvent
-import no.nav.helse.sak.UtenforOmfangException
+import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import org.slf4j.LoggerFactory
 
-object SakskompleksProbe : SakObserver {
+object VedtaksperiodeProbe : SakObserver {
 
-    private val log = LoggerFactory.getLogger(SakskompleksProbe::class.java)
+    private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
     private val behovCounter = Counter.build("behov_totals", "Antall behov opprettet")
             .labelNames("behovType")
             .register()
 
-    private val dokumenterKobletTilSakCounter = Counter.build("dokumenter_koblet_til_sak_totals", "Antall inntektsmeldinger vi har mottatt som ble koblet til et sakskompleks")
+    private val dokumenterKobletTilSakCounter = Counter.build("dokumenter_koblet_til_sak_totals", "Antall inntektsmeldinger vi har mottatt som ble koblet til et vedtaksperiode")
             .labelNames("dokumentType")
             .register()
 
-    private val tilstandCounter = Counter.build("sakskompleks_tilstander_totals", "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
+    private val tilstandCounter = Counter.build("vedtaksperiode_tilstander_totals", "Fordeling av tilstandene sakene er i, og hvilken tilstand de kom fra")
             .labelNames("forrigeTilstand", "tilstand", "hendelse")
             .register()
 
@@ -35,7 +35,7 @@ object SakskompleksProbe : SakObserver {
 
     private val sakMementoStørrelse = Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
 
-    override fun sakskompleksTrengerLøsning(event: Behov) {
+    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
         behovCounter.labels(event.behovType()).inc()
     }
 
@@ -47,10 +47,10 @@ object SakskompleksProbe : SakObserver {
         log.info(err.message)
     }
 
-    override fun sakskompleksEndret(event: StateChangeEvent) {
+    override fun vedtaksperiodeEndret(event: StateChangeEvent) {
         tilstandCounter.labels(event.previousState.name, event.currentState.name, event.sykdomshendelse.javaClass.simpleName).inc()
 
-        log.info("sakskompleks=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.currentState} previousState=${event.previousState}")
+        log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.currentState} previousState=${event.previousState}")
 
         when (event.sykdomshendelse) {
             is InntektsmeldingHendelse -> {
@@ -65,15 +65,8 @@ object SakskompleksProbe : SakObserver {
         }
     }
 
-    fun utenforOmfang(err: UtenforOmfangException, nySøknadHendelse: NySøknadHendelse) {
-        utenforOmfangCounter.labels(nySøknadHendelse.javaClass.simpleName).inc()
+    fun<T: SykdomstidslinjeHendelse> utenforOmfang(hendelse: T) {
+        utenforOmfangCounter.labels(hendelse.javaClass.simpleName).inc()
     }
 
-    fun utenforOmfang(err: UtenforOmfangException, sendtSøknadHendelse: SendtSøknadHendelse) {
-        utenforOmfangCounter.labels(sendtSøknadHendelse.javaClass.simpleName).inc()
-    }
-
-    fun utenforOmfang(err: UtenforOmfangException, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-        utenforOmfangCounter.labels(inntektsmeldingHendelse.javaClass.simpleName).inc()
-    }
 }

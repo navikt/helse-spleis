@@ -9,7 +9,7 @@ import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.juli
-import no.nav.helse.sak.Sakskompleks.TilstandType.*
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
@@ -26,23 +26,23 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class SakskompleksStateTest : SakskompleksObserver {
+internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     private var haveObserverBeenCalled: Boolean = false
-    private lateinit var lastStateEvent: SakskompleksObserver.StateChangeEvent
+    private lateinit var lastStateEvent: VedtaksperiodeObserver.StateChangeEvent
     private val behovsliste: MutableList<Behov> = mutableListOf()
 
-    override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         haveObserverBeenCalled = true
         lastStateEvent = event
     }
 
-    override fun sakskompleksTrengerLøsning(event: Behov) {
+    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
         behovsliste.add(event)
     }
 
     private val aktørId = "1234567891011"
     private val organisasjonsnummer = "123456789"
-    private val sakskompleksId = UUID.randomUUID()
+    private val vedtaksperiodeId = UUID.randomUUID()
 
     @BeforeEach
     fun `tilbakestill behovliste`() {
@@ -51,9 +51,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta ny søknad`() {
-        val sakskompleks = beInStartTilstand()
+        val vedtaksperiode = beInStartTilstand()
 
-        sakskompleks.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
@@ -62,9 +62,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sendt søknad på feil tidspunkt`() {
-        val sakskompleks = beInStartTilstand()
+        val vedtaksperiode = beInStartTilstand()
 
-        sakskompleks.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknadHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -73,9 +73,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta inntektsmelding på feil tidspunkt`() {
-        val sakskompleks = beInStartTilstand()
+        val vedtaksperiode = beInStartTilstand()
 
-        sakskompleks.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertEquals(START, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -84,18 +84,18 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sykdomshistorikk på feil tidspunkt`() {
-        val sakskompleks = beInStartTilstand()
+        val vedtaksperiode = beInStartTilstand()
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(sisteHistoriskeSykedag = LocalDate.now(), sakskompleksId = sakskompleksId))
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(sisteHistoriskeSykedag = LocalDate.now(), vedtaksperiodeId = vedtaksperiodeId))
 
         assertFalse(haveObserverBeenCalled)
     }
 
     @Test
     fun `motta sendt søknad etter ny søknad`() {
-        val sakskompleks = beInNySøknad()
+        val vedtaksperiode = beInNySøknad()
 
-        sakskompleks.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknadHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.currentState)
@@ -103,9 +103,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta inntektsmelding etter ny søknad`() {
-        val sakskompleks = beInNySøknad()
+        val vedtaksperiode = beInNySøknad()
 
-        sakskompleks.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.currentState)
@@ -113,9 +113,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta ny søknad etter ny søknad`() {
-        val sakskompleks = beInNySøknad()
+        val vedtaksperiode = beInNySøknad()
 
-        sakskompleks.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
 
         assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -123,9 +123,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta ny søknad etter sendt søknad`() {
-        val sakskompleks = beInSendtSøknad()
+        val vedtaksperiode = beInSendtSøknad()
 
-        sakskompleks.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -133,9 +133,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta inntektsmelding etter sendt søknad`() {
-        val sakskompleks = beInSendtSøknad()
+        val vedtaksperiode = beInSendtSøknad()
 
-        sakskompleks.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
@@ -143,9 +143,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta ny søknad etter søknad`() {
-        val sakskompleks = beInSendtSøknad()
+        val vedtaksperiode = beInSendtSøknad()
 
-        sakskompleks.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
 
         assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -153,9 +153,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sendt søknad etter inntektsmelding`() {
-        val sakskompleks = beInMottattInntektsmelding()
+        val vedtaksperiode = beInMottattInntektsmelding()
 
-        sakskompleks.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknadHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
@@ -163,9 +163,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta ny søknad etter inntektsmelding`() {
-        val sakskompleks = beInMottattInntektsmelding()
+        val vedtaksperiode = beInMottattInntektsmelding()
 
-        sakskompleks.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknadHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -173,9 +173,9 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta inntektsmelding etter inntektsmelding`() {
-        val sakskompleks = beInMottattInntektsmelding()
+        val vedtaksperiode = beInMottattInntektsmelding()
 
-        sakskompleks.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
@@ -190,11 +190,11 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val sakskompleks = beInMottattInntektsmelding(
+        val vedtaksperiode = beInMottattInntektsmelding(
                 nySøknadHendelse = nySøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sendtSøknadHendelse)
+        vedtaksperiode.håndter(sendtSøknadHendelse)
 
         assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
@@ -219,21 +219,21 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = null,
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
-        assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
-        assertEquals(31, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
-        assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
-        assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
+        assertNotNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer)
+        assertEquals(1.juli.plusDays(361), vedtaksperiode.jsonRepresentation().maksdato)
+        assertEquals(31, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
+        assertEquals(17.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
+        assertEquals(19.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
@@ -248,21 +248,21 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertNotNull(sakskompleks.jsonRepresentation().utbetalingslinjer)
-        assertEquals(1.juli.plusDays(361), sakskompleks.jsonRepresentation().maksdato)
-        assertEquals(31, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
-        assertEquals(17.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
-        assertEquals(19.juli, sakskompleks.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
+        assertNotNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer)
+        assertEquals(1.juli.plusDays(361), vedtaksperiode.jsonRepresentation().maksdato)
+        assertEquals(31, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
+        assertEquals(17.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
+        assertEquals(19.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
@@ -277,14 +277,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(5),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -300,12 +300,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
         val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 perioder = listOf(
                         SpolePeriode(
                                 fom = periodeFom.minusMonths(1),
@@ -313,7 +313,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                                 grad = "100"
                         )
                 ),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -322,12 +322,12 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `gitt en komplett tidslinje, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
-        val sakskompleks = beInKomplettTidslinje()
+        val vedtaksperiode = beInKomplettTidslinje()
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
 
-        sakskompleks.håndter(manuellSaksbehandlingHendelse(
-                sakskompleksId = sakskompleksId.toString(),
+        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident"
         ))
@@ -347,14 +347,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -373,18 +373,18 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 refusjon = Refusjon(opphoersdato = periodeTom)
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertNull(sakskompleks.jsonRepresentation().maksdato, "skal ikke sette maksdato når saken skal manuelt behandles")
-        assertNull(sakskompleks.jsonRepresentation().utbetalingslinjer, "skal ikke sette utbetalingslinjer når saken skal manuelt behandles")
+        assertNull(vedtaksperiode.jsonRepresentation().maksdato, "skal ikke sette maksdato når saken skal manuelt behandles")
+        assertNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer, "skal ikke sette utbetalingslinjer når saken skal manuelt behandles")
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
     }
@@ -401,14 +401,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 refusjon = Refusjon(opphoersdato = null)
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -429,14 +429,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 )
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -455,14 +455,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 endringerIRefusjoner = emptyList()
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -483,14 +483,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 )
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -511,14 +511,14 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 )
         )
 
-        val sakskompleks = beInKomplettTidslinje(
+        val vedtaksperiode = beInKomplettTidslinje(
                 nySøknadHendelse = nySøknadHendelse,
                 sendtSøknadHendelse = sendtSøknadHendelse,
                 inntektsmeldingHendelse = inntektsmeldingHendelse)
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
@@ -527,10 +527,10 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta manuell saksbehandling med utbetaling godkjent etter klar til utbetaling`() {
-        val sakskompleks = beInTilGodkjenning()
+        val vedtaksperiode = beInTilGodkjenning()
 
-        sakskompleks.håndter(manuellSaksbehandlingHendelse(
-                sakskompleksId = sakskompleksId.toString(),
+        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident"
         ))
@@ -539,7 +539,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
         assertEquals(TIL_UTBETALING, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is ManuellSaksbehandlingHendelse)
 
-        val utbetalingsreferanse = sakskompleks.jsonRepresentation().utbetalingsreferanse
+        val utbetalingsreferanse = vedtaksperiode.jsonRepresentation().utbetalingsreferanse
         assertNotNull(utbetalingsreferanse, "skal sette utbetalingsreferanse når saken skal utbetales")
 
         assertTrue(behovsliste.any { it.behovType() == BehovsTyper.Utbetaling.name })
@@ -550,10 +550,10 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta manuell saksbehandling med utbetaling ikke godkjent etter klar til utbetaling`() {
-        val sakskompleks = beInTilGodkjenning()
+        val vedtaksperiode = beInTilGodkjenning()
 
-        sakskompleks.håndter(manuellSaksbehandlingHendelse(
-                sakskompleksId = sakskompleksId.toString(),
+        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalingGodkjent = false,
                 saksbehandler = "en_saksbehandler_ident"
         ))
@@ -565,27 +565,27 @@ internal class SakskompleksStateTest : SakskompleksObserver {
 
     @Test
     fun `motta sykepengehistorikk etter klar til utbetaling skal ikke endre state`() {
-        val sakskompleks = beInTilGodkjenning()
+        val vedtaksperiode = beInTilGodkjenning()
 
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
 
         val previousState = lastStateEvent.previousState
 
-        sakskompleks.håndter(sykepengehistorikkHendelse(
-                sakskompleksId = sakskompleksId
+        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
         assertEquals(previousState, lastStateEvent.previousState)
     }
 
-    private fun beInStartTilstand(): Sakskompleks {
-        return Sakskompleks(
+    private fun beInStartTilstand(): Vedtaksperiode {
+        return Vedtaksperiode(
                 aktørId = aktørId,
-                id = sakskompleksId,
+                id = vedtaksperiodeId,
                 organisasjonsnummer = organisasjonsnummer
         ).apply {
-            addSakskompleksObserver(this@SakskompleksStateTest)
+            addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
 
@@ -613,7 +613,7 @@ internal class SakskompleksStateTest : SakskompleksObserver {
                 håndter(sendtSøknadHendelse)
             }
 
-    private fun beInTilGodkjenning(sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(sakskompleksId = sakskompleksId, sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)),
+    private fun beInTilGodkjenning(sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(vedtaksperiodeId = vedtaksperiodeId, sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)),
                                    sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
                                    inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
                                    nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =

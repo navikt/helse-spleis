@@ -9,8 +9,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.sak.Sakskompleks.TilstandType.*
-import no.nav.helse.sak.SakskompleksObserver.StateChangeEvent
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
+import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
@@ -31,14 +31,14 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-class Sakskompleks(
+class Vedtaksperiode(
         private val id: UUID,
         private val aktørId: String,
         private val organisasjonsnummer: String
 ) {
     private val `6G` = (6 * 99858).toBigDecimal()
 
-    private var tilstand: Sakskomplekstilstand = StartTilstand
+    private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
@@ -50,7 +50,7 @@ class Sakskompleks(
 
     private var utbetalingsreferanse: String? = null
 
-    private val observers: MutableList<SakskompleksObserver> = mutableListOf()
+    private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
             this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
@@ -86,11 +86,11 @@ class Sakskompleks(
     }
 
     internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndter(this, sykepengehistorikkHendelse)
+        if (id.toString() == sykepengehistorikkHendelse.vedtaksperiodeId()) tilstand.håndter(this, sykepengehistorikkHendelse)
     }
 
     internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        if (id.toString() == manuellSaksbehandlingHendelse.sakskompleksId()) tilstand.håndter(this, manuellSaksbehandlingHendelse)
+        if (id.toString() == manuellSaksbehandlingHendelse.vedtaksperiodeId()) tilstand.håndter(this, manuellSaksbehandlingHendelse)
     }
 
     internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
@@ -100,7 +100,7 @@ class Sakskompleks(
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
             this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
-    private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Sakskomplekstilstand, block: () -> Unit = {}) {
+    private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Vedtaksperiodetilstand, block: () -> Unit = {}) {
         tilstand.leaving()
 
         val previousStateName = tilstand.type
@@ -111,12 +111,12 @@ class Sakskompleks(
 
         tilstand.entering(this)
 
-        emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
+        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, previousMemento)
     }
 
     private fun <HENDELSE> håndter(
             hendelse: HENDELSE,
-            nesteTilstand: Sakskomplekstilstand
+            nesteTilstand: Vedtaksperiodetilstand
     ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
         val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje()) ?: hendelse.sykdomstidslinje()
 
@@ -141,120 +141,120 @@ class Sakskompleks(
     }
 
     // Gang of four State pattern
-    private interface Sakskomplekstilstand {
+    private interface Vedtaksperiodetilstand {
 
         val type: TilstandType
 
         // Default implementasjoner av transisjonene
-        fun håndter(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            sakskompleks.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
+        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
+            vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
+        fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
+            vedtaksperiode.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndter(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         }
 
-        fun håndter(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         }
 
         fun leaving() {
         }
 
-        fun entering(sakskompleks: Sakskompleks) {
+        fun entering(vedtaksperiode: Vedtaksperiode) {
         }
 
     }
 
-    private object StartTilstand : Sakskomplekstilstand {
+    private object StartTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            sakskompleks.håndter(nySøknadHendelse, NySøknadMottattTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
+            vedtaksperiode.håndter(nySøknadHendelse, NySøknadMottattTilstand)
         }
 
         override val type = START
 
     }
 
-    private object NySøknadMottattTilstand : Sakskomplekstilstand {
+    private object NySøknadMottattTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.håndter(sendtSøknadHendelse, SendtSøknadMottattTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
+            vedtaksperiode.håndter(sendtSøknadHendelse, SendtSøknadMottattTilstand)
         }
 
-        override fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.håndter(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            vedtaksperiode.håndter(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
         }
 
         override val type = NY_SØKNAD_MOTTATT
 
     }
 
-    private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
+    private object SendtSøknadMottattTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.håndter(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            vedtaksperiode.håndter(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
 
     }
 
-    private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
+    private object InntektsmeldingMottattTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.håndter(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
+            vedtaksperiode.håndter(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
 
     }
 
-    private object KomplettSykdomstidslinjeTilstand : Sakskomplekstilstand {
+    private object KomplettSykdomstidslinjeTilstand : Vedtaksperiodetilstand {
 
         override val type = KOMPLETT_SYKDOMSTIDSLINJE
 
         private const val seksMåneder = 180
 
-        override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
-                    "tom" to sakskompleks.sykdomstidslinje!!.startdato().minusDays(1)
+        override fun entering(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
+                    "tom" to vedtaksperiode.sykdomstidslinje!!.startdato().minusDays(1)
             ))
         }
 
-        override fun håndter(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            val tidslinje = sakskompleks.sykdomstidslinje
-                    ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+            val tidslinje = vedtaksperiode.sykdomstidslinje
+                    ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
 
             if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder)) {
-                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
             val utbetalingsberegning = try {
-                tidslinje.utbetalingsberegning(sakskompleks.dagsats())
+                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats())
             } catch (ie: IllegalArgumentException) {
-                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
-            if (!sakskompleks.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning)) {
-                return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+            if (!vedtaksperiode.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning)) {
+                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
-            sakskompleks.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
-                sakskompleks.maksdato = utbetalingsberegning.maksdato
-                sakskompleks.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+            vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
+                vedtaksperiode.maksdato = utbetalingsberegning.maksdato
+                vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
             }
         }
 
-        private fun Sakskompleks.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning: Utbetalingsberegning): Boolean {
+        private fun Vedtaksperiode.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning: Utbetalingsberegning): Boolean {
             val inntektsmelding = this.inntektsmeldingHendelse() ?: return false
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return true
 
@@ -267,47 +267,47 @@ class Sakskompleks(
         }
     }
 
-    private object TilGodkjenningTilstand : Sakskomplekstilstand {
+    private object TilGodkjenningTilstand : Vedtaksperiodetilstand {
         override val type = TIL_GODKJENNING
 
-        override fun entering(sakskompleks: Sakskompleks) {
-            sakskompleks.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
+        override fun entering(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
         }
 
-        override fun håndter(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
             if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
-                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
-                    sakskompleks.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
+                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
+                    vedtaksperiode.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
                 }
             } else {
-                sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygdTilstand)
+                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygdTilstand)
             }
         }
     }
 
-    private object TilUtbetalingTilstand : Sakskomplekstilstand {
+    private object TilUtbetalingTilstand : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
-        override fun entering(sakskompleks: Sakskompleks) {
-            val utbetalingsreferanse = lagUtbetalingsReferanse(sakskompleks)
-            sakskompleks.utbetalingsreferanse = utbetalingsreferanse
+        override fun entering(vedtaksperiode: Vedtaksperiode) {
+            val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
+            vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            sakskompleks.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
+            vedtaksperiode.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
                     "utbetalingsreferanse" to utbetalingsreferanse
             ))
 
-            val event = SakskompleksObserver.UtbetalingEvent(
-                    sakskompleksId = sakskompleks.id,
-                    aktørId = sakskompleks.aktørId,
-                    organisasjonsnummer = sakskompleks.organisasjonsnummer,
+            val event = VedtaksperiodeObserver.UtbetalingEvent(
+                    vedtaksperiodeId = vedtaksperiode.id,
+                    aktørId = vedtaksperiode.aktørId,
+                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     utbetalingsreferanse = utbetalingsreferanse
             )
-            sakskompleks.observers.forEach {
-                it.sakskompleksTilUtbetaling(event)
+            vedtaksperiode.observers.forEach {
+                it.vedtaksperiodeTilUtbetaling(event)
             }
         }
 
-        private fun lagUtbetalingsReferanse(sakskompleks: Sakskompleks) = sakskompleks.id.base32Encode()
+        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.id.base32Encode()
 
         private fun UUID.base32Encode(): String {
             val pad = '='
@@ -322,7 +322,7 @@ class Sakskompleks(
         }.array()
     }
 
-    private object TilInfotrygdTilstand : Sakskomplekstilstand {
+    private object TilInfotrygdTilstand : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
 
     }
@@ -332,22 +332,22 @@ class Sakskompleks(
 
         private val sykdomshendelseDeserializer = SykdomshendelseDeserializer()
 
-        internal fun fromJson(sakskompleksJson: SakskompleksJson): Sakskompleks {
-            return Sakskompleks(
-                    id = sakskompleksJson.id,
-                    aktørId = sakskompleksJson.aktørId,
-                    organisasjonsnummer = sakskompleksJson.organisasjonsnummer
+        internal fun fromJson(vedtaksperiodeJson: VedtaksperiodeJson): Vedtaksperiode {
+            return Vedtaksperiode(
+                    id = vedtaksperiodeJson.id,
+                    aktørId = vedtaksperiodeJson.aktørId,
+                    organisasjonsnummer = vedtaksperiodeJson.organisasjonsnummer
             ).apply {
-                tilstand = tilstandFraEnum(sakskompleksJson.tilstandType)
-                sykdomstidslinje = sakskompleksJson.sykdomstidslinje?.let {
+                tilstand = tilstandFraEnum(vedtaksperiodeJson.tilstandType)
+                sykdomstidslinje = vedtaksperiodeJson.sykdomstidslinje?.let {
                     if (!it.isNull) {
                         Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(it), sykdomshendelseDeserializer)
                     } else {
                         null
                     }
                 }
-                maksdato = sakskompleksJson.maksdato
-                utbetalingslinjer = sakskompleksJson.utbetalingslinjer?.map {
+                maksdato = vedtaksperiodeJson.maksdato
+                utbetalingslinjer = vedtaksperiodeJson.utbetalingslinjer?.map {
                     Utbetalingslinje(
                             fom = LocalDate.parse(it["fom"].textValue()),
                             tom = LocalDate.parse(it["tom"].textValue()),
@@ -357,7 +357,7 @@ class Sakskompleks(
                             }
                     )
                 }
-                godkjentAv = sakskompleksJson.godkjentAv
+                godkjentAv = vedtaksperiodeJson.godkjentAv
             }
         }
 
@@ -376,22 +376,22 @@ class Sakskompleks(
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        internal fun restore(memento: Memento): Sakskompleks {
+        internal fun restore(memento: Memento): Vedtaksperiode {
             val node = objectMapper.readTree(memento.state)
 
-            val sakskompleks = Sakskompleks(
+            val vedtaksperiode = Vedtaksperiode(
                     id = UUID.fromString(node["id"].textValue()),
                     aktørId = node["aktørId"].textValue(),
                     organisasjonsnummer = node["organisasjonsnummer"].textValue()
             )
 
-            sakskompleks.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
+            vedtaksperiode.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
 
             node["sykdomstidslinje"]?.let {
-                sakskompleks.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
+                vedtaksperiode.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
             }
 
-            return sakskompleks
+            return vedtaksperiode
         }
 
     }
@@ -419,8 +419,8 @@ class Sakskompleks(
         return Memento(state = writer.toString())
     }
 
-    internal fun jsonRepresentation(): SakskompleksJson {
-        return SakskompleksJson(
+    internal fun jsonRepresentation(): VedtaksperiodeJson {
+        return VedtaksperiodeJson(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
@@ -441,11 +441,11 @@ class Sakskompleks(
     }
 
     // Gang of four Observer pattern
-    internal fun addSakskompleksObserver(observer: SakskompleksObserver) {
+    internal fun addVedtaksperiodeObserver(observer: VedtaksperiodeObserver) {
         observers.add(observer)
     }
 
-    private fun emitSakskompleksEndret(
+    private fun emitVedtaksperiodeEndret(
             currentState: TilstandType,
             tidslinjeEvent: ArbeidstakerHendelse,
             previousState: TilstandType,
@@ -463,7 +463,7 @@ class Sakskompleks(
         )
 
         observers.forEach { observer ->
-            observer.sakskompleksEndret(event)
+            observer.vedtaksperiodeEndret(event)
         }
     }
 
@@ -484,11 +484,11 @@ class Sakskompleks(
         val behov = Behov.nyttBehov(type, params)
 
         observers.forEach { observer ->
-            observer.sakskompleksTrengerLøsning(behov)
+            observer.vedtaksperiodeTrengerLøsning(behov)
         }
     }
 
-    internal data class SakskompleksJson(
+    internal data class VedtaksperiodeJson(
             val id: UUID,
             val aktørId: String,
             val organisasjonsnummer: String,

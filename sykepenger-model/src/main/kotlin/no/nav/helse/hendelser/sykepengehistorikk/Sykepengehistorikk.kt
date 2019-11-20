@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class Sykepengehistorikk(val jsonNode: JsonNode) {
     val aktørId = jsonNode["aktørId"].textValue()
     val organisasjonsnummer = jsonNode["organisasjonsnummer"].textValue()
-    val sakskompleksId = jsonNode["sakskompleksId"].textValue()
+    val vedtaksperiodeId = jsonNode["sakskompleksId"].textValue()
     val perioder get() =
         jsonNode["@løsning"]["perioder"]?.map { Periode(it) } ?: emptyList()
 

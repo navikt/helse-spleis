@@ -5,28 +5,28 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.Sakskompleks
-import no.nav.helse.sak.SakskompleksObserver
+import no.nav.helse.sak.Vedtaksperiode
+import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.hendelser.SykdomshendelseType
-import no.nav.helse.spleis.SakskompleksProbe
+import no.nav.helse.spleis.VedtaksperiodeProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class SakskompleksProbeTest {
+internal class VedtaksperiodeProbeTest {
 
     private companion object {
         private val id = UUID.randomUUID()
         private val aktørId = "123456789123"
 
-        private val probe = SakskompleksProbe
+        private val probe = VedtaksperiodeProbe
     }
 
     @Test
     fun `teller nye sykmeldinger`() {
         val sykmeldingerCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
-        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, nySøknadHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, nySøknadHendelse()))
 
         val sykmeldingerCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
@@ -37,7 +37,7 @@ internal class SakskompleksProbeTest {
     fun `teller nye søknader`() {
         val søknadCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
-        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT, sendtSøknadHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, sendtSøknadHendelse()))
 
         val søknadCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
@@ -48,7 +48,7 @@ internal class SakskompleksProbeTest {
     fun `teller nye inntektsmeldinger`() {
         val inntektsmeldingCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
-        probe.sakskompleksEndret(changeEvent(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
 
         val inntektsmeldingCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
@@ -58,24 +58,24 @@ internal class SakskompleksProbeTest {
     private fun assertCounter(after: Int, before: Int) =
         assertEquals(1, after - before)
 
-    private fun sakskompleks() =
-            Sakskompleks(
+    private fun vedtaksperiode() =
+            Vedtaksperiode(
                     id = id,
                     aktørId = aktørId,
                     organisasjonsnummer = "orgnummer"
             )
 
-    private fun changeEvent(currentState: Sakskompleks.TilstandType, previousState: Sakskompleks.TilstandType, eventType: ArbeidstakerHendelse) =
-        sakskompleks().let { sakskompleks ->
-            SakskompleksObserver.StateChangeEvent(
+    private fun changeEvent(currentState: Vedtaksperiode.TilstandType, previousState: Vedtaksperiode.TilstandType, eventType: ArbeidstakerHendelse) =
+        vedtaksperiode().let { vedtaksperiode ->
+            VedtaksperiodeObserver.StateChangeEvent(
                 id = id,
                 aktørId = aktørId,
                 organisasjonsnummer = "orgnummer",
                 currentState = currentState,
                 previousState = previousState,
                 sykdomshendelse = eventType,
-                currentMemento = sakskompleks.memento(),
-                previousMemento = sakskompleks.memento()
+                currentMemento = vedtaksperiode.memento(),
+                previousMemento = vedtaksperiode.memento()
             )
         }
 

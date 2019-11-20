@@ -3,7 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.sak.*
-import no.nav.helse.sak.Sakskompleks.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
@@ -15,14 +15,14 @@ internal class SakMediator(private val sakRepository: SakRepository,
                            private val lagreSakDao: SakObserver,
                            private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
                            private val lagreUtbetalingDao: SakObserver,
-                           private val sakskompleksProbe: SakskompleksProbe = SakskompleksProbe,
+                           private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
                            private val behovProducer: BehovProducer,
                            private val gosysOppgaveProducer: GosysOppgaveProducer,
-                           private val sakskompleksEventProducer: SakskompleksEventProducer) : SakObserver {
+                           private val vedtaksperiodeEventProducer: VedtaksperiodeEventProducer) : SakObserver {
 
     override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {}
 
-    override fun sakskompleksTrengerLøsning(event: Behov) {
+    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
         behovProducer.sendNyttBehov(event)
     }
 
@@ -33,9 +33,9 @@ internal class SakMediator(private val sakRepository: SakRepository,
                             sak.håndter(nySøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, nySøknadHendelse)
+                vedtaksperiodeProbe.utenforOmfang(nySøknadHendelse)
             } catch (err: SakskjemaForGammelt) {
-                sakskompleksProbe.forGammelSkjemaversjon(err)
+                vedtaksperiodeProbe.forGammelSkjemaversjon(err)
             }
 
     fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) =
@@ -45,9 +45,9 @@ internal class SakMediator(private val sakRepository: SakRepository,
                             sak.håndter(sendtSøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, sendtSøknadHendelse)
+                vedtaksperiodeProbe.utenforOmfang(sendtSøknadHendelse)
             } catch (err: SakskjemaForGammelt) {
-                sakskompleksProbe.forGammelSkjemaversjon(err)
+                vedtaksperiodeProbe.forGammelSkjemaversjon(err)
             }
 
     fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) =
@@ -56,9 +56,9 @@ internal class SakMediator(private val sakRepository: SakRepository,
                     sak.håndter(inntektsmeldingHendelse)
                 }
             } catch (err: UtenforOmfangException) {
-                sakskompleksProbe.utenforOmfang(err, inntektsmeldingHendelse)
+                vedtaksperiodeProbe.utenforOmfang(inntektsmeldingHendelse)
             } catch (err: SakskjemaForGammelt) {
-                sakskompleksProbe.forGammelSkjemaversjon(err)
+                vedtaksperiodeProbe.forGammelSkjemaversjon(err)
             }
 
     fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
@@ -67,7 +67,7 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 sak.håndter(sykepengehistorikkHendelse)
             }
         } catch (err: SakskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
+            vedtaksperiodeProbe.forGammelSkjemaversjon(err)
         }
     }
 
@@ -77,7 +77,7 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 sak.håndter(manuellSaksbehandlingHendelse)
             }
         } catch (err: SakskjemaForGammelt) {
-            sakskompleksProbe.forGammelSkjemaversjon(err)
+            vedtaksperiodeProbe.forGammelSkjemaversjon(err)
         }
     }
 
@@ -89,12 +89,12 @@ internal class SakMediator(private val sakRepository: SakRepository,
         }
     }
 
-    override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         if (event.currentState == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId)
         }
 
-        sakskompleksEventProducer.sendEndringEvent(event)
+        vedtaksperiodeEventProducer.sendEndringEvent(event)
     }
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
@@ -102,7 +102,7 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 it.addObserver(this)
                 it.addObserver(lagreSakDao)
                 it.addObserver(lagreUtbetalingDao)
-                it.addObserver(sakskompleksProbe)
+                it.addObserver(vedtaksperiodeProbe)
             }
 
 }

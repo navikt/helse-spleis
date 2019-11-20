@@ -4,7 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.sak.SakObserver
-import no.nav.helse.sak.SakskompleksObserver
+import no.nav.helse.sak.VedtaksperiodeObserver
 import java.util.*
 import javax.sql.DataSource
 
@@ -14,14 +14,14 @@ class LagreUtbetalingDao(private val dataSource: DataSource,
     override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
     }
 
-    override fun sakskompleksTilUtbetaling(event: SakskompleksObserver.UtbetalingEvent) {
-        lagreUtbetaling(event.utbetalingsreferanse, event.aktørId, event.organisasjonsnummer, event.sakskompleksId)
+    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
+        lagreUtbetaling(event.utbetalingsreferanse, event.aktørId, event.organisasjonsnummer, event.vedtaksperiodeId)
     }
 
-    private fun lagreUtbetaling(utbetalingsreferanse: String, aktørId: String, organisasjonsnummer: String, sakskompleksId: UUID) {
+    private fun lagreUtbetaling(utbetalingsreferanse: String, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID) {
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf("INSERT INTO utbetalingsreferanse (id, aktor_id, orgnr, sakskompleks_id) VALUES (?, ?, ?, ?)",
-                    utbetalingsreferanse, aktørId, organisasjonsnummer, sakskompleksId.toString()).asExecute)
+                    utbetalingsreferanse, aktørId, organisasjonsnummer, vedtaksperiodeId.toString()).asExecute)
         }.also {
             probe.utbetalingSkrevetTilDb()
         }

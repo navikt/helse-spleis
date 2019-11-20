@@ -63,7 +63,7 @@ fun Application.createHikariConfigFromEnvironment() =
         )
 
 @KtorExperimentalAPI
-fun Application.sakskompleksApplication(): KafkaStreams {
+fun Application.vedtaksperiodeApplication(): KafkaStreams {
 
     migrate(createHikariConfigFromEnvironment())
 
@@ -77,7 +77,7 @@ fun Application.sakskompleksApplication(): KafkaStreams {
             lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
             behovProducer = BehovProducer(behovTopic, producer),
             gosysOppgaveProducer = GosysOppgaveProducer(commonKafkaProperties()),
-            sakskompleksEventProducer = SakskompleksEventProducer(commonKafkaProperties()))
+            vedtaksperiodeEventProducer = VedtaksperiodeEventProducer(commonKafkaProperties()))
 
     restInterface(sakMediator)
 

@@ -11,8 +11,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.juli
 import no.nav.helse.juni
-import no.nav.helse.sak.Sakskompleks.TilstandType.NY_SØKNAD_MOTTATT
-import no.nav.helse.sak.Sakskompleks.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.toJsonNode
@@ -41,28 +41,28 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `ny søknad fører til at sakskompleks trigger en sakskompleks endret hendelse`() {
+    internal fun `ny søknad fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         testSak.also {
             it.håndter(nySøknadHendelse())
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
-    internal fun `sendt søknad uten sak trigger sakskompleks endret-hendelse`() {
+    internal fun `sendt søknad uten sak trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
             it.håndter(sendtSøknadHendelse())
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
-    internal fun `inntektsmelding uten sak trigger sakskompleks endret-hendelse`() {
+    internal fun `inntektsmelding uten sak trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
             it.håndter(inntektsmeldingHendelse(
                     virksomhetsnummer = "123456789"
@@ -70,11 +70,11 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
-    internal fun `inntektsmelding med sak trigger sakskompleks endret-hendelse`() {
+    internal fun `inntektsmelding med sak trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
             it.håndter(nySøknadHendelse(
                     arbeidsgiver = ArbeidsgiverDTO(
@@ -87,7 +87,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -98,8 +98,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
 
@@ -111,8 +111,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
 
@@ -125,8 +125,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -137,8 +137,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -149,8 +149,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.START, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
 
@@ -163,8 +163,8 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -258,7 +258,7 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `sendt søknad trigger sakskompleks endret-hendelse`() {
+    internal fun `sendt søknad trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
             it.håndter(nySøknadHendelse(
                     arbeidsgiver = ArbeidsgiverDTO(
@@ -273,7 +273,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Sakskompleks.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -297,7 +297,7 @@ internal class SakTest {
 
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
         assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.Sykepengehistorikk.name })
     }
 
@@ -315,15 +315,15 @@ internal class SakTest {
                     sisteHistoriskeSykedag = 1.juli.minusMonths(7),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
-                    sakskompleksId = saksid
+                    vedtaksperiodeId = saksid
             ))
         }
 
-        assertEquals(Sakskompleks.TilstandType.TIL_GODKJENNING, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.TIL_GODKJENNING, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
-    fun `sykepengehistorikk med feil sakskompleksid skal ikke føre noen saker videre`() {
+    fun `sykepengehistorikk med feil vedtaksperiodeid skal ikke føre noen saker videre`() {
         testSak.also {
             it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
             it.håndter(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
@@ -333,11 +333,11 @@ internal class SakTest {
                     sisteHistoriskeSykedag = 1.juli.minusMonths(7),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
-                    sakskompleksId = UUID.randomUUID()
+                    vedtaksperiodeId = UUID.randomUUID()
             ))
         }
 
-        assertEquals(Sakskompleks.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -354,12 +354,12 @@ internal class SakTest {
                     sisteHistoriskeSykedag = 1.juli.minusMonths(5),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
-                    sakskompleksId = saksid
+                    vedtaksperiodeId = saksid
             ))
         }
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -379,8 +379,8 @@ internal class SakTest {
             assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
             assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
 
-            assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeSakskomplekstilstand)
-            assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.sakskomplekstilstand)
+            assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+            assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
         }
     }
 
@@ -388,17 +388,17 @@ internal class SakTest {
 
         internal var wasTriggered = false
         internal var sakEndret = false
-        internal var forrigeSakskomplekstilstand: Sakskompleks.TilstandType? = null
-        internal var sakskomplekstilstand: Sakskompleks.TilstandType? = null
+        internal var forrigeVedtaksperiodetilstand: Vedtaksperiode.TilstandType? = null
+        internal var vedtaksperiodetilstand: Vedtaksperiode.TilstandType? = null
 
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
             sakEndret = true
         }
 
-        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             wasTriggered = true
-            forrigeSakskomplekstilstand = event.previousState
-            sakskomplekstilstand = event.currentState
+            forrigeVedtaksperiodetilstand = event.previousState
+            vedtaksperiodetilstand = event.currentState
         }
 
     }
@@ -409,19 +409,19 @@ internal class SakTest {
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
         }
 
-        override fun sakskompleksTrengerLøsning(event: Behov) {
+        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
             needEvent.add(event)
         }
     }
 
     private class SakstilstandObserver : SakObserver {
-        internal val sakstilstander: MutableMap<UUID, SakskompleksObserver.StateChangeEvent> = mutableMapOf()
+        internal val sakstilstander: MutableMap<UUID, VedtaksperiodeObserver.StateChangeEvent> = mutableMapOf()
 
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
 
         }
 
-        override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             sakstilstander[event.id] = event
         }
     }

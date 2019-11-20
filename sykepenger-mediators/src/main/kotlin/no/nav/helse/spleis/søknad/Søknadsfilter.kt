@@ -2,8 +2,7 @@ package no.nav.helse.spleis.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
 
-internal fun skalTaInnSøknad(søknad: JsonNode, søknadProbe: SøknadProbe): Boolean {
-    val id = søknad["id"].textValue()
+internal fun skalTaInnSøknad(søknad: JsonNode): Boolean {
     val type = søknad["soknadstype"]?.textValue()
             ?: søknad["type"]?.textValue()
             ?: throw RuntimeException("Fant ikke type på søknad")
@@ -12,7 +11,7 @@ internal fun skalTaInnSøknad(søknad: JsonNode, søknadProbe: SøknadProbe): Bo
     return when {
         riktigSøknad(type, status) -> true
         else -> {
-            SøknadProbe.søknadIgnorert(id, type, status)
+            SøknadProbe.søknadIgnorert()
             false
         }
     }

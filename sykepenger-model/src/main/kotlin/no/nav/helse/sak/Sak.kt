@@ -13,7 +13,7 @@ import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON=2
 
-class Sak(val aktørId: String) : SakskompleksObserver {
+class Sak(val aktørId: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
@@ -48,7 +48,7 @@ class Sak(val aktørId: String) : SakskompleksObserver {
         finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
     }
 
-    override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         sakObservers.forEach {
             it.sakEndret(SakObserver.SakEndretEvent(
                     aktørId = aktørId,
@@ -90,27 +90,27 @@ class Sak(val aktørId: String) : SakskompleksObserver {
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
 
         internal constructor(arbeidsgiverJson: ArbeidsgiverJson): this(arbeidsgiverJson.organisasjonsnummer, arbeidsgiverJson.id) {
-            saker.addAll(arbeidsgiverJson.saker.map { Sakskompleks.fromJson(it) })
+            saker.addAll(arbeidsgiverJson.saker.map { Vedtaksperiode.fromJson(it) })
         }
-        private val saker = mutableListOf<Sakskompleks>()
+        private val saker = mutableListOf<Vedtaksperiode>()
 
-        private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
+        private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
         fun håndter(nySøknadHendelse: NySøknadHendelse) {
             if (saker.none { it.håndter(nySøknadHendelse) }) {
-                nyttSakskompleks().håndter(nySøknadHendelse)
+                nyttVedtaksperiode().håndter(nySøknadHendelse)
             }
         }
 
         fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
             if (saker.none { it.håndter(sendtSøknadHendelse) }) {
-                nyttSakskompleks().håndter(sendtSøknadHendelse)
+                nyttVedtaksperiode().håndter(sendtSøknadHendelse)
             }
         }
 
         fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
             if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
-                nyttSakskompleks().håndter(inntektsmeldingHendelse)
+                nyttVedtaksperiode().håndter(inntektsmeldingHendelse)
             }
         }
 
@@ -126,14 +126,14 @@ class Sak(val aktørId: String) : SakskompleksObserver {
             saker.forEach { it.invaliderSak(hendelse) }
         }
 
-        fun addObserver(observer: SakskompleksObserver) {
-            sakskompleksObservers.add(observer)
-            saker.forEach { it.addSakskompleksObserver(observer) }
+        fun addObserver(observer: VedtaksperiodeObserver) {
+            vedtaksperiodeObservers.add(observer)
+            saker.forEach { it.addVedtaksperiodeObserver(observer) }
         }
 
-        private fun nyttSakskompleks(): Sakskompleks {
-            return Sakskompleks(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
-                sakskompleksObservers.forEach(it::addSakskompleksObserver)
+        private fun nyttVedtaksperiode(): Vedtaksperiode {
+            return Vedtaksperiode(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
+                vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
                 saker.add(it)
             }
         }
@@ -166,9 +166,9 @@ class Sak(val aktørId: String) : SakskompleksObserver {
     override fun toString() = memento().toString()
 
     internal data class ArbeidsgiverJson(
-            val organisasjonsnummer: String,
-            val saker: List<Sakskompleks.SakskompleksJson>,
-            val id: UUID
+        val organisasjonsnummer: String,
+        val saker: List<Vedtaksperiode.VedtaksperiodeJson>,
+        val id: UUID
     )
 
     private data class SakJson(

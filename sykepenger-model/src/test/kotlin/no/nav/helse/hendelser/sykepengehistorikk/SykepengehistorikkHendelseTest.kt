@@ -18,7 +18,7 @@ internal class SykepengehistorikkHendelseTest {
                 perioder = emptyList(),
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertNull(sykepengehistorikkHendelse.sisteFraværsdag())
@@ -32,7 +32,7 @@ internal class SykepengehistorikkHendelseTest {
                 ),
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(2.juni, sykepengehistorikkHendelse.sisteFraværsdag())
@@ -47,7 +47,7 @@ internal class SykepengehistorikkHendelseTest {
                 ),
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(2.juli, sykepengehistorikkHendelse.sisteFraværsdag())
@@ -62,7 +62,7 @@ internal class SykepengehistorikkHendelseTest {
                 ),
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
-                sakskompleksId = sakskompleksId
+                vedtaksperiodeId = vedtaksperiodeId
         ))
 
         assertEquals(3.juni, sykepengehistorikkHendelse.sisteFraværsdag())
@@ -71,6 +71,6 @@ internal class SykepengehistorikkHendelseTest {
     private companion object {
         private val organisasjonsnummer = "123456789"
         private val aktørId = "987654321"
-        private val sakskompleksId = UUID.randomUUID()
+        private val vedtaksperiodeId = UUID.randomUUID()
     }
 }
