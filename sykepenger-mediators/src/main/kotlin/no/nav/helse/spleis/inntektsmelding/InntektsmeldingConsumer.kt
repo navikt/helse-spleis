@@ -39,10 +39,10 @@ internal class InntektsmeldingConsumer(
                 Inntektsmelding(jsonNode)
             }
             .peek{_, inntektsmelding -> InntektsmeldingProbe.mottattInntektsmelding(inntektsmelding) }
-            .foreach{_, inntektsmelding -> håndterInntektsmelding(inntektsmelding)}
+            .foreach{_, inntektsmelding -> håndter(inntektsmelding)}
 
-    private fun håndterInntektsmelding(inntektsmelding: Inntektsmelding) {
-        sakMediator.håndterInntektsmelding(InntektsmeldingHendelse(inntektsmelding))
+    private fun håndter(inntektsmelding: Inntektsmelding) {
+        sakMediator.håndter(InntektsmeldingHendelse(inntektsmelding))
     }
 
 }

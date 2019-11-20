@@ -185,9 +185,9 @@ internal class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = "orgnummer"
         )
-        sakskompleks.håndterNySøknad(nySøknadHendelse())
-        sakskompleks.håndterSendtSøknad(sendtSøknadHendelse())
-        sakskompleks.håndterInntektsmelding(inntektsmeldingHendelse())
+        sakskompleks.håndter(nySøknadHendelse())
+        sakskompleks.håndter(sendtSøknadHendelse())
+        sakskompleks.håndter(inntektsmeldingHendelse())
 
         val inMemento = sakskompleks.memento()
 
@@ -207,7 +207,7 @@ internal class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        assertTrue(sakskompleks.håndterNySøknad(nySøknadHendelse()))
+        assertTrue(sakskompleks.håndter(nySøknadHendelse()))
     }
 
     @Test
@@ -217,9 +217,9 @@ internal class SakskompleksTest {
                 aktørId = "aktørId",
                 organisasjonsnummer = ""
         )
-        sakskompleks.håndterNySøknad(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
+        sakskompleks.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli)), egenmeldinger = emptyList(), fravær = emptyList()))
 
-        assertFalse(sakskompleks.håndterSendtSøknad(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
+        assertFalse(sakskompleks.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 25.juli)), egenmeldinger = emptyList(), fravær = emptyList())))
 
     }
 }

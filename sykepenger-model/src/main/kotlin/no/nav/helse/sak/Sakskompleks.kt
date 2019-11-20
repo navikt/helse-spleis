@@ -61,36 +61,36 @@ class Sakskompleks(
 
     internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP).toInt()
 
-    internal fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse): Boolean {
+    internal fun håndter(nySøknadHendelse: NySøknadHendelse): Boolean {
         return overlapperMed(nySøknadHendelse).also {
             if (it) {
-                tilstand.håndterNySøknad(this, nySøknadHendelse)
+                tilstand.håndter(this, nySøknadHendelse)
             }
         }
     }
 
-    internal fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
+    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
         return overlapperMed(sendtSøknadHendelse).also {
             if (it) {
-                tilstand.håndterSendtSøknad(this, sendtSøknadHendelse)
+                tilstand.håndter(this, sendtSøknadHendelse)
             }
         }
     }
 
-    internal fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
+    internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
         return overlapperMed(inntektsmeldingHendelse).also {
             if (it) {
-                tilstand.håndterInntektsmelding(this, inntektsmeldingHendelse)
+                tilstand.håndter(this, inntektsmeldingHendelse)
             }
         }
     }
 
-    internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndterSykepengehistorikk(this, sykepengehistorikkHendelse)
+    internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        if (id.toString() == sykepengehistorikkHendelse.sakskompleksId()) tilstand.håndter(this, sykepengehistorikkHendelse)
     }
 
-    internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        if (id.toString() == manuellSaksbehandlingHendelse.sakskompleksId()) tilstand.håndterManuellSaksbehandling(this, manuellSaksbehandlingHendelse)
+    internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        if (id.toString() == manuellSaksbehandlingHendelse.sakskompleksId()) tilstand.håndter(this, manuellSaksbehandlingHendelse)
     }
 
     internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
@@ -114,7 +114,7 @@ class Sakskompleks(
         emitSakskompleksEndret(tilstand.type, event, previousStateName, previousMemento)
     }
 
-    private fun <HENDELSE> håndterSykdomstidslinjeHendelse(
+    private fun <HENDELSE> håndter(
             hendelse: HENDELSE,
             nesteTilstand: Sakskomplekstilstand
     ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
@@ -146,22 +146,22 @@ class Sakskompleks(
         val type: TilstandType
 
         // Default implementasjoner av transisjonene
-        fun håndterNySøknad(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
+        fun håndter(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
             sakskompleks.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
+        fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
             sakskompleks.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
             sakskompleks.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        fun håndter(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         }
 
-        fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        fun håndter(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         }
 
         fun leaving() {
@@ -174,8 +174,8 @@ class Sakskompleks(
 
     private object StartTilstand : Sakskomplekstilstand {
 
-        override fun håndterNySøknad(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
-            sakskompleks.håndterSykdomstidslinjeHendelse(nySøknadHendelse, NySøknadMottattTilstand)
+        override fun håndter(sakskompleks: Sakskompleks, nySøknadHendelse: NySøknadHendelse) {
+            sakskompleks.håndter(nySøknadHendelse, NySøknadMottattTilstand)
         }
 
         override val type = START
@@ -184,12 +184,12 @@ class Sakskompleks(
 
     private object NySøknadMottattTilstand : Sakskomplekstilstand {
 
-        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.håndterSykdomstidslinjeHendelse(sendtSøknadHendelse, SendtSøknadMottattTilstand)
+        override fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
+            sakskompleks.håndter(sendtSøknadHendelse, SendtSøknadMottattTilstand)
         }
 
-        override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.håndterSykdomstidslinjeHendelse(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
+        override fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            sakskompleks.håndter(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -198,8 +198,8 @@ class Sakskompleks(
 
     private object SendtSøknadMottattTilstand : Sakskomplekstilstand {
 
-        override fun håndterInntektsmelding(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            sakskompleks.håndterSykdomstidslinjeHendelse(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
+        override fun håndter(sakskompleks: Sakskompleks, inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            sakskompleks.håndter(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
@@ -208,8 +208,8 @@ class Sakskompleks(
 
     private object InntektsmeldingMottattTilstand : Sakskomplekstilstand {
 
-        override fun håndterSendtSøknad(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
-            sakskompleks.håndterSykdomstidslinjeHendelse(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
+        override fun håndter(sakskompleks: Sakskompleks, sendtSøknadHendelse: SendtSøknadHendelse) {
+            sakskompleks.håndter(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
@@ -228,7 +228,7 @@ class Sakskompleks(
             ))
         }
 
-        override fun håndterSykepengehistorikk(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        override fun håndter(sakskompleks: Sakskompleks, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             val tidslinje = sakskompleks.sykdomstidslinje
                     ?: return sakskompleks.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
@@ -274,7 +274,7 @@ class Sakskompleks(
             sakskompleks.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
         }
 
-        override fun håndterManuellSaksbehandling(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        override fun håndter(sakskompleks: Sakskompleks, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
             if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
                 sakskompleks.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
                     sakskompleks.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()

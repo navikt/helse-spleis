@@ -59,7 +59,7 @@ class SakPersisteringPostgresTest {
 
         val sak = Sak("2")
         sak.addObserver(LagreSakDao(dataSource))
-        sak.håndterNySøknad(nySøknadHendelse())
+        sak.håndter(nySøknadHendelse())
 
         assertNotNull(repo.hentSak("2"))
     }
@@ -71,8 +71,8 @@ class SakPersisteringPostgresTest {
         val aktørId = "3"
         val sak = Sak(aktørId)
         sak.addObserver(LagreSakDao(dataSource))
-        sak.håndterNySøknad(nySøknadHendelse())
-        sak.håndterSendtSøknad(sendtSøknadHendelse())
+        sak.håndter(nySøknadHendelse())
+        sak.håndter(sendtSøknadHendelse())
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {

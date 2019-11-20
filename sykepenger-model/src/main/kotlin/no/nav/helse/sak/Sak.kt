@@ -18,34 +18,34 @@ class Sak(val aktørId: String) : SakskompleksObserver {
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
     private val sakObservers = mutableListOf<SakObserver>()
-    fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
+    fun håndter(nySøknadHendelse: NySøknadHendelse) {
         if (!nySøknadHendelse.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
         }
-        finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndterNySøknad(nySøknadHendelse)
+        finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndter(nySøknadHendelse)
     }
 
-    fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
+    fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
         if (!sendtSøknadHendelse.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
         }
-        finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndterSendtSøknad(sendtSøknadHendelse)
+        finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndter(sendtSøknadHendelse)
     }
 
-    fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+    fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
         if (!inntektsmeldingHendelse.kanBehandles()) {
             invaliderAlleSaker(inntektsmeldingHendelse)
             throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmeldingHendelse)
         }
-        finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndterInntektsmelding(inntektsmeldingHendelse)
+        finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndter(inntektsmeldingHendelse)
     }
 
-    fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        finnArbeidsgiver(sykepengehistorikkHendelse)?.håndterSykepengehistorikk(sykepengehistorikkHendelse)
+    fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        finnArbeidsgiver(sykepengehistorikkHendelse)?.håndter(sykepengehistorikkHendelse)
     }
 
-    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse)
+    fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
     }
 
     override fun sakskompleksEndret(event: SakskompleksObserver.StateChangeEvent) {
@@ -96,30 +96,30 @@ class Sak(val aktørId: String) : SakskompleksObserver {
 
         private val sakskompleksObservers = mutableListOf<SakskompleksObserver>()
 
-        fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) {
-            if (saker.none { it.håndterNySøknad(nySøknadHendelse) }) {
-                nyttSakskompleks().håndterNySøknad(nySøknadHendelse)
+        fun håndter(nySøknadHendelse: NySøknadHendelse) {
+            if (saker.none { it.håndter(nySøknadHendelse) }) {
+                nyttSakskompleks().håndter(nySøknadHendelse)
             }
         }
 
-        fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (saker.none { it.håndterSendtSøknad(sendtSøknadHendelse) }) {
-                nyttSakskompleks().håndterSendtSøknad(sendtSøknadHendelse)
+        fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
+            if (saker.none { it.håndter(sendtSøknadHendelse) }) {
+                nyttSakskompleks().håndter(sendtSøknadHendelse)
             }
         }
 
-        fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (saker.none { it.håndterInntektsmelding(inntektsmeldingHendelse) }) {
-                nyttSakskompleks().håndterInntektsmelding(inntektsmeldingHendelse)
+        fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
+                nyttSakskompleks().håndter(inntektsmeldingHendelse)
             }
         }
 
-        internal fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            saker.forEach { it.håndterSykepengehistorikk(sykepengehistorikkHendelse) }
+        internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+            saker.forEach { it.håndter(sykepengehistorikkHendelse) }
         }
 
-        internal fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-            saker.forEach { it.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse) }
+        internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+            saker.forEach { it.håndter(manuellSaksbehandlingHendelse) }
         }
 
         internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {

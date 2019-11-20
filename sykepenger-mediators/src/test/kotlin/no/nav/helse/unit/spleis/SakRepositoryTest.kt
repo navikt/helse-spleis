@@ -25,7 +25,7 @@ internal class SakRepositoryTest {
                 sakskompleksEventProducer = mockk(relaxed = true)
         )
 
-        mediator.håndterNySøknad(nySøknadHendelse(
+        mediator.håndter(nySøknadHendelse(
                 aktørId = "1234"
         ))
 
@@ -46,7 +46,7 @@ internal class SakRepositoryTest {
                 gosysOppgaveProducer = mockk(),
                 sakskompleksEventProducer = mockk(relaxed = true)
         )
-        mediator.håndterNySøknad(nySøknadHendelse(
+        mediator.håndter(nySøknadHendelse(
                 aktørId = aktørId
         ))
 
@@ -55,7 +55,7 @@ internal class SakRepositoryTest {
         assertNotNull(sakEtterNySøknad)
         assertEquals(1, repo.hentHistorikk(aktørId).size)
 
-        mediator.håndterSendtSøknad(sendtSøknadHendelse(
+        mediator.håndter(sendtSøknadHendelse(
                 aktørId = aktørId
         ))
 

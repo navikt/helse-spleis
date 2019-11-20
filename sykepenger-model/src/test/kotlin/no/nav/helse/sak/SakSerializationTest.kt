@@ -24,7 +24,7 @@ internal class SakSerializationTest {
         sak.addObserver(testObserver)
 
         // trigger endring på sak som gjør at vi kan få ut memento fra observer
-        sak.håndterNySøknad(nySøknadHendelse())
+        sak.håndter(nySøknadHendelse())
 
         val json = testObserver.lastSakEndretEvent!!.memento.toString()
         val restored = Sak.fromJson(json)

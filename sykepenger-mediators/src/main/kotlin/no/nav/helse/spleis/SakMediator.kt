@@ -26,11 +26,11 @@ internal class SakMediator(private val sakRepository: SakRepository,
         behovProducer.sendNyttBehov(event)
     }
 
-    fun håndterNySøknad(nySøknadHendelse: NySøknadHendelse) =
+    fun håndter(nySøknadHendelse: NySøknadHendelse) =
             try {
                 finnSak(nySøknadHendelse)
                         .also { sak ->
-                            sak.håndterNySøknad(nySøknadHendelse)
+                            sak.håndter(nySøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, nySøknadHendelse)
@@ -38,11 +38,11 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse) =
+    fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) =
             try {
                 finnSak(sendtSøknadHendelse)
                         .also { sak ->
-                            sak.håndterSendtSøknad(sendtSøknadHendelse)
+                            sak.håndter(sendtSøknadHendelse)
                         }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, sendtSøknadHendelse)
@@ -50,10 +50,10 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse) =
+    fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) =
             try {
                 finnSak(inntektsmeldingHendelse).also { sak ->
-                    sak.håndterInntektsmelding(inntektsmeldingHendelse)
+                    sak.håndter(inntektsmeldingHendelse)
                 }
             } catch (err: UtenforOmfangException) {
                 sakskompleksProbe.utenforOmfang(err, inntektsmeldingHendelse)
@@ -61,20 +61,20 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 sakskompleksProbe.forGammelSkjemaversjon(err)
             }
 
-    fun håndterSykepengehistorikk(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+    fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         try {
             finnSak(sykepengehistorikkHendelse).also { sak ->
-                sak.håndterSykepengehistorikk(sykepengehistorikkHendelse)
+                sak.håndter(sykepengehistorikkHendelse)
             }
         } catch (err: SakskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)
         }
     }
 
-    fun håndterManuellSaksbehandling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+    fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         try {
             finnSak(manuellSaksbehandlingHendelse).also { sak ->
-                sak.håndterManuellSaksbehandling(manuellSaksbehandlingHendelse)
+                sak.håndter(manuellSaksbehandlingHendelse)
             }
         } catch (err: SakskjemaForGammelt) {
             sakskompleksProbe.forGammelSkjemaversjon(err)

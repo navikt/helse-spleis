@@ -50,18 +50,18 @@ internal class BehovConsumer(
                     behov.harLøsning()
                 }
                 .peek { _, behov -> BehovProbe.mottattBehov(behov) }
-                .foreach { _, behov -> håndterLøsning(behov) }
+                .foreach { _, behov -> håndter(behov) }
 
         return builder
     }
 
-    private fun håndterLøsning(løsning: Behov) {
+    private fun håndter(løsning: Behov) {
         when (løsning.behovType()) {
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
-                sakMediatorMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
+                sakMediatorMediator.håndter(SykepengehistorikkHendelse(it))
             }
             BehovsTyper.GodkjenningFraSaksbehandler.name -> ManuellSaksbehandlingHendelse(løsning).let {
-                sakMediatorMediator.håndterManuellSaksbehandling(it)
+                sakMediatorMediator.håndter(it)
             }
         }
     }

@@ -40,16 +40,16 @@ internal class SøknadConsumer(
                 .filter { _, søknad -> skalTaInnSøknad(søknad = søknad, søknadProbe = probe) }
                 .mapValues { søknad -> Sykepengesøknad(søknad) }
                 .peek { _, søknad -> SøknadProbe.mottattSøknad(søknad) }
-                .foreach { _, søknad -> håndterSøknad(søknad) }
+                .foreach { _, søknad -> håndter(søknad) }
 
         return builder
     }
 
-    private fun håndterSøknad(søknad: Sykepengesøknad) {
+    private fun håndter(søknad: Sykepengesøknad) {
         when (søknad.status) {
-            "NY" -> sakMediatorMediator.håndterNySøknad(NySøknadHendelse(søknad))
-            "FREMTIDIG" -> sakMediatorMediator.håndterNySøknad(NySøknadHendelse(søknad))
-            "SENDT" -> sakMediatorMediator.håndterSendtSøknad(SendtSøknadHendelse(søknad))
+            "NY" -> sakMediatorMediator.håndter(NySøknadHendelse(søknad))
+            "FREMTIDIG" -> sakMediatorMediator.håndter(NySøknadHendelse(søknad))
+            "SENDT" -> sakMediatorMediator.håndter(SendtSøknadHendelse(søknad))
         }
     }
 }

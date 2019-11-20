@@ -78,7 +78,7 @@ internal class SakMediatorTest {
 
     @Test
     fun `skal håndtere feil ved ny søknad uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndterNySøknad(nySøknadHendelse(arbeidsgiver = null))
+        sakMediator.håndter(nySøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<NySøknadHendelse>())
@@ -87,7 +87,7 @@ internal class SakMediatorTest {
 
     @Test
     fun `skal håndtere feil ved sendt søknad uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndterSendtSøknad(sendtSøknadHendelse(arbeidsgiver = null))
+        sakMediator.håndter(sendtSøknadHendelse(arbeidsgiver = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<SendtSøknadHendelse>())
@@ -96,7 +96,7 @@ internal class SakMediatorTest {
 
     @Test
     fun `skal håndtere feil ved inntektsmelding uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndterInntektsmelding(inntektsmeldingHendelse(virksomhetsnummer = null))
+        sakMediator.håndter(inntektsmeldingHendelse(virksomhetsnummer = null))
 
         verify(exactly = 1) {
             probe.utenforOmfang(any(), any<InntektsmeldingHendelse>())
@@ -372,7 +372,7 @@ internal class SakMediatorTest {
                         navn = "en_arbeidsgiver"
                 )
         )).also {
-            sakMediator.håndterNySøknad(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+            sakMediator.håndter(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
         }
     }
 
@@ -385,7 +385,7 @@ internal class SakMediatorTest {
                         navn = "en_arbeidsgiver"
                 )
         )).also {
-            sakMediator.håndterSendtSøknad(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
+            sakMediator.håndter(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
         }
     }
 
@@ -394,17 +394,17 @@ internal class SakMediatorTest {
                 aktørId = aktørId,
                 virksomhetsnummer = virksomhetsnummer
         )).also {
-            sakMediator.håndterInntektsmelding(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
+            sakMediator.håndter(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
         }
     }
 
     private fun beInMåBehandlesIInfotrygdState() {
-        sakMediator.håndterSendtSøknad(sendtSøknadHendelse)
+        sakMediator.håndter(sendtSøknadHendelse)
     }
 
     private fun sendSykepengehistorikk(perioder: List<SpolePeriode>) {
         Sykepengehistorikk(objectMapper.readTree(løsSykepengehistorikkBehov(perioder).toJson())).let {
-            sakMediator.håndterSykepengehistorikk(SykepengehistorikkHendelse(it))
+            sakMediator.håndter(SykepengehistorikkHendelse(it))
         }
     }
 
@@ -413,7 +413,7 @@ internal class SakMediatorTest {
                 saksbehandlerIdent = saksbehandlerIdent,
                 utbetalingGodkjent = utbetalingGodkjent
         ).let {
-            sakMediator.håndterManuellSaksbehandling(ManuellSaksbehandlingHendelse(it))
+            sakMediator.håndter(ManuellSaksbehandlingHendelse(it))
         }
     }
 
