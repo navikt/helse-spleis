@@ -44,6 +44,8 @@ class Vedtaksperiode(
 
     private var maksdato: LocalDate? = null
 
+    private var fødselsnummer: String? = null
+
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
     private var godkjentAv: String? = null
@@ -78,6 +80,7 @@ class Vedtaksperiode(
     }
 
     internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
+        fødselsnummer = inntektsmeldingHendelse.fødselsnummer()
         return overlapperMed(inntektsmeldingHendelse).also {
             if (it) {
                 tilstand.håndter(this, inntektsmeldingHendelse)
@@ -239,7 +242,8 @@ class Vedtaksperiode(
             }
 
             val utbetalingsberegning = try {
-                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats())
+                val fnr = vedtaksperiode.fødselsnummer ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), fnr)
             } catch (ie: IllegalArgumentException) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }

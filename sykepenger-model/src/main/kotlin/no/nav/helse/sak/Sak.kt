@@ -94,6 +94,8 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
         }
         private val saker = mutableListOf<Vedtaksperiode>()
 
+        private var fødselsnummer: String? = null
+
         private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
         fun håndter(nySøknadHendelse: NySøknadHendelse) {
@@ -109,6 +111,7 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
         }
 
         fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+            fødselsnummer = inntektsmeldingHendelse.fødselsnummer()
             if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
                 nyttVedtaksperiode().håndter(inntektsmeldingHendelse)
             }

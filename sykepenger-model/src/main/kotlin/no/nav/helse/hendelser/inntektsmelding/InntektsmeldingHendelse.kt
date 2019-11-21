@@ -29,6 +29,8 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
     fun endringIRefusjoner() =
             inntektsmelding.endringIRefusjoner
 
+    fun fødselsnummer() = inntektsmelding.arbeidstakerFnr
+
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
     override fun aktørId() =

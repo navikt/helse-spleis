@@ -202,7 +202,7 @@ internal object TestConstants {
                            beregnetInntekt: BigDecimal? = 666.toBigDecimal()) =
             Inntektsmelding(
                     inntektsmeldingId = "",
-                    arbeidstakerFnr = "",
+                    arbeidstakerFnr = "02129212345",
                     arbeidstakerAktorId = aktørId,
                     virksomhetsnummer = virksomhetsnummer,
                     arbeidsgiverFnr = null,

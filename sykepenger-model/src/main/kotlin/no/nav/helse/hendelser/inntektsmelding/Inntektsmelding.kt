@@ -24,6 +24,8 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
 
     val arbeidstakerAktorId = jsonNode["arbeidstakerAktorId"].textValue() as String
 
+    val arbeidstakerFnr = jsonNode["arbeidstakerFnr"].textValue() as String
+
     val virksomhetsnummer: String? get() = jsonNode["virksomhetsnummer"]?.textValue()
 
     val arbeidsgiverAktorId: String? get() = jsonNode["arbeidsgiverAktorId"]?.textValue()
@@ -55,6 +57,7 @@ data class Inntektsmelding(val jsonNode: JsonNode) {
                 && jsonNode["foersteFravaersdag"] != null
                 && jsonNode["virksomhetsnummer"] != null && !jsonNode["virksomhetsnummer"].isNull
                 && jsonNode["beregnetInntekt"] != null && !jsonNode["beregnetInntekt"].isNull
+                && jsonNode["arbeidstakerFnr"] != null
                 && jsonNode["refusjon"]?.let { Refusjon(it) }?.beloepPrMnd == beregnetInntekt ?: false
     }
 

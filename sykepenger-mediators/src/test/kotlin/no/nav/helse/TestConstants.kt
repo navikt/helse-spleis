@@ -239,7 +239,7 @@ internal object TestConstants {
     ) =
         Inntektsmelding(
             inntektsmeldingId = "",
-            arbeidstakerFnr = "",
+            arbeidstakerFnr = "02129212345",
             arbeidstakerAktorId = aktørId,
             virksomhetsnummer = virksomhetsnummer,
             arbeidsgiverFnr = null,
