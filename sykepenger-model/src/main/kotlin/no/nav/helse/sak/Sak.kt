@@ -119,20 +119,24 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
         internal fun tellVedtaksperioderSomIkkeErINySoknadTilstand() = saker.count { it.erIkkeINySøknadTilstand() }
 
         fun håndter(nySøknadHendelse: NySøknadHendelse) {
-            if (saker.none { it.håndter(nySøknadHendelse) }) {
-                nyttVedtaksperiode().håndter(nySøknadHendelse)
+            if (saker.map { periode ->
+                    periode.håndter(nySøknadHendelse)
+                }.none { håndterteSoknad ->
+                    håndterteSoknad
+                }) {
+                nyVedtaksperiode().håndter(nySøknadHendelse)
             }
         }
 
         fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
             if (saker.none { it.håndter(sendtSøknadHendelse) }) {
-                nyttVedtaksperiode().håndter(sendtSøknadHendelse)
+                nyVedtaksperiode().håndter(sendtSøknadHendelse)
             }
         }
 
         fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
             if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
-                nyttVedtaksperiode().håndter(inntektsmeldingHendelse)
+                nyVedtaksperiode().håndter(inntektsmeldingHendelse)
             }
         }
 
@@ -153,7 +157,7 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
             saker.forEach { it.addVedtaksperiodeObserver(observer) }
         }
 
-        private fun nyttVedtaksperiode(): Vedtaksperiode {
+        private fun nyVedtaksperiode(): Vedtaksperiode {
             return Vedtaksperiode(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
                 vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
                 saker.add(it)

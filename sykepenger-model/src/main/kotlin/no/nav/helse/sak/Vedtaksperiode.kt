@@ -32,9 +32,9 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
 }
 
 class Vedtaksperiode(
-        private val id: UUID,
-        private val aktørId: String,
-        private val organisasjonsnummer: String
+    private val id: UUID,
+    private val aktørId: String,
+    private val organisasjonsnummer: String
 ) {
     private val `6G` = (6 * 99858).toBigDecimal()
 
@@ -63,29 +63,18 @@ class Vedtaksperiode(
 
     internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP).toInt()
 
-    internal fun håndter(nySøknadHendelse: NySøknadHendelse): Boolean {
-        return overlapperMed(nySøknadHendelse).also {
-            if (it) {
-                tilstand.håndter(this, nySøknadHendelse)
-            }
-        }
+    internal fun håndter(nySøknadHendelse: NySøknadHendelse) = overlapperMed(nySøknadHendelse).also {
+        if (it) tilstand.håndter(this, nySøknadHendelse)
     }
 
-    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
-        return overlapperMed(sendtSøknadHendelse).also {
-            if (it) {
-                tilstand.håndter(this, sendtSøknadHendelse)
-            }
-        }
+    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) = overlapperMed(sendtSøknadHendelse).also {
+        if (it) tilstand.håndter(this, sendtSøknadHendelse)
     }
 
-    internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
-        return overlapperMed(inntektsmeldingHendelse).also {
-            if (it) {
-                tilstand.håndter(this, inntektsmeldingHendelse)
-            }
+    internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) =
+        overlapperMed(inntektsmeldingHendelse).also {
+            if (it) tilstand.håndter(this, inntektsmeldingHendelse)
         }
-    }
 
     internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         if (id.toString() == sykepengehistorikkHendelse.vedtaksperiodeId()) tilstand.håndter(this, sykepengehistorikkHendelse)
