@@ -31,6 +31,7 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SakMediatorTest {
@@ -225,6 +226,7 @@ internal class SakMediatorTest {
     }
 
     @Test
+    @Disabled("Denne saken skal bli behandlet nå, i epic 3")
     fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en ukedag)`() {
         val aktørID = "87654321950"
         val virksomhetsnummer = "123456789"
@@ -293,6 +295,7 @@ internal class SakMediatorTest {
     }
 
     @Test
+    @Disabled("Denne sakem skal behandles nå, in epic 3")
     fun `gitt en komplett tidslinje, når det er mer enn 16 arbeidsdager etter utbetalingsperioden, så skal den behandles manuelt av saksbehandler (17ende arbeidsdag faller på en søndag)`() {
         val aktørID = "87654321738"
         val virksomhetsnummer = "123456789"

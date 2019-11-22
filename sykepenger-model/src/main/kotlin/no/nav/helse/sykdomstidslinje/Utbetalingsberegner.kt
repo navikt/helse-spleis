@@ -261,14 +261,12 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
 
         override fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.ikkeSykedager = splitter.fridager + 1
-            if (splitter.ikkeSykedager >= 16) splitter.state(Ugyldig) else splitter.state =
-                UtbetalingOpphold
+            splitter.state(if (splitter.ikkeSykedager >= 16) Initiell else UtbetalingOpphold)
         }
 
         override fun merEnn16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.ikkeSykedager = splitter.fridager + 1
-            if (splitter.ikkeSykedager >= 16) splitter.state(Ugyldig) else splitter.state =
-                UtbetalingOpphold
+            splitter.state(if (splitter.ikkeSykedager >= 16) Ugyldig else UtbetalingOpphold)
         }
     }
 
@@ -284,15 +282,16 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
 
         override fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.ikkeSykedager += 1
+            if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
         }
 
         override fun merEnn16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
-            splitter.state(Ugyldig)
+            splitter.state(Initiell)
         }
 
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.ikkeSykedager += 1
-            if (splitter.ikkeSykedager == 16) splitter.state(Ugyldig)
+            if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
         }
     }
 

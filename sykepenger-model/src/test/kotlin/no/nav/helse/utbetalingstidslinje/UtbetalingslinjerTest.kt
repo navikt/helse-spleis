@@ -8,7 +8,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class UtbetalingslinjerTest {
@@ -181,11 +180,6 @@ internal class UtbetalingslinjerTest {
     }
 
     @Test
-    fun `opphold i sykedager over 16 dager etter arbeidsgiverperioden blir avvist`() {
-        assertThrows<Exception> { (19.S + 40.I + 5.S).utbetalingsberegning(1200, fødselsnummer) }
-    }
-
-    @Test
     fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
         val sykdomstidslinje = 20.S
         val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
@@ -337,6 +331,27 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 400.S
         val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, "01024812345")
         assertEquals(LocalDate.of(2018, 1, 31), beregning.utbetalingslinjer.last().tom)
+    }
+
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
+        val sykdomstidslinje = 16.S + 4.S + 16.F + A + 16.S
+        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
+    }
+
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
+        val sykdomstidslinje = 16.S + 4.S + 16.A + 16.S
+        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
+    }
+
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold der sykedager går over helg`() {
+        val sykdomstidslinje = 16.S + 6.S + 16.A + 16.S
+        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+        assertEquals(LocalDate.of(2018, 1, 22), sisteUtbetaling.tom)
     }
 
     private val S
