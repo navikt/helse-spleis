@@ -93,7 +93,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
         }
     }
 
-    private fun burdeUtbetales(dagen: LocalDate) = fødselsnummer.burdeBetale(betalteSykedager, dagen)
+    private fun burdeUtbetales(dagen: LocalDate) = fødselsnummer.navBurdeBetale(betalteSykedager, dagen)
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = state(Ugyldig)

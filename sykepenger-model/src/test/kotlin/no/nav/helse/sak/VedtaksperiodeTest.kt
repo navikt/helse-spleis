@@ -91,7 +91,8 @@ internal class VedtaksperiodeTest {
                 maksdato = null,
                 sykdomstidslinje = null,
                 tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
-                utbetalingsreferanse = null
+                utbetalingsreferanse = null,
+                fødselsnummer = null
         )
 
         val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
@@ -132,7 +133,8 @@ internal class VedtaksperiodeTest {
                 maksdato = null,
                 sykdomstidslinje = null,
                 tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
-                utbetalingsreferanse = null
+                utbetalingsreferanse = null,
+                fødselsnummer = null
         )
 
         val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
@@ -175,29 +177,6 @@ internal class VedtaksperiodeTest {
         assertEquals(id.toString(), node["id"].textValue())
         assertEquals("aktørId", node["aktørId"].textValue())
         assertEquals("orgnummer", node["organisasjonsnummer"].textValue())
-    }
-
-    @Test
-    fun `restore bygger opp likt objekt fra lagret memento`() {
-        val id = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(
-                id = id,
-                aktørId = "aktørId",
-                organisasjonsnummer = "orgnummer"
-        )
-        vedtaksperiode.håndter(nySøknadHendelse())
-        vedtaksperiode.håndter(sendtSøknadHendelse())
-        vedtaksperiode.håndter(inntektsmeldingHendelse())
-
-        val inMemento = vedtaksperiode.memento()
-
-        val nyttVedtaksperiode = Vedtaksperiode.restore(inMemento)
-        val outMemento = nyttVedtaksperiode.memento()
-        val inNode = objectMapper.readTree(inMemento.state)
-        val outNode = objectMapper.readTree(outMemento.state)
-
-        assertEquals(inNode, outNode)
-
     }
 
     @Test

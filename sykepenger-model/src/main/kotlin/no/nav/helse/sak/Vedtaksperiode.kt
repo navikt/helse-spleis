@@ -9,36 +9,47 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
-import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.START
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_GODKJENNING
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_UTBETALING
+import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.Fødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.io.StringWriter
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
 class Vedtaksperiode(
-        private val id: UUID,
-        private val aktørId: String,
-        private val organisasjonsnummer: String
-) {
+    private val id: UUID,
+    private val aktørId: String,
+    private val organisasjonsnummer: String
+): Comparable<Vedtaksperiode> {
     private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
+
+    internal fun erIkkeINySøknadTilstand() = tilstand != NY_SØKNAD_MOTTATT
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
@@ -63,20 +74,12 @@ class Vedtaksperiode(
 
     internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP).toInt()
 
-    internal fun håndter(nySøknadHendelse: NySøknadHendelse): Boolean {
-        return overlapperMed(nySøknadHendelse).also {
-            if (it) {
-                tilstand.håndter(this, nySøknadHendelse)
-            }
-        }
+    internal fun håndter(nySøknadHendelse: NySøknadHendelse) = overlapperMed(nySøknadHendelse).also {
+        if (it) tilstand.håndter(this, nySøknadHendelse)
     }
 
-    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
-        return overlapperMed(sendtSøknadHendelse).also {
-            if (it) {
-                tilstand.håndter(this, sendtSøknadHendelse)
-            }
-        }
+    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) = overlapperMed(sendtSøknadHendelse).also {
+        if (it) tilstand.håndter(this, sendtSøknadHendelse)
     }
 
     internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
@@ -338,9 +341,9 @@ class Vedtaksperiode(
 
         internal fun fromJson(vedtaksperiodeJson: VedtaksperiodeJson): Vedtaksperiode {
             return Vedtaksperiode(
-                    id = vedtaksperiodeJson.id,
-                    aktørId = vedtaksperiodeJson.aktørId,
-                    organisasjonsnummer = vedtaksperiodeJson.organisasjonsnummer
+                id = vedtaksperiodeJson.id,
+                aktørId = vedtaksperiodeJson.aktørId,
+                organisasjonsnummer = vedtaksperiodeJson.organisasjonsnummer
             ).apply {
                 tilstand = tilstandFraEnum(vedtaksperiodeJson.tilstandType)
                 sykdomstidslinje = vedtaksperiodeJson.sykdomstidslinje?.let {
@@ -353,15 +356,16 @@ class Vedtaksperiode(
                 maksdato = vedtaksperiodeJson.maksdato
                 utbetalingslinjer = vedtaksperiodeJson.utbetalingslinjer?.map {
                     Utbetalingslinje(
-                            fom = LocalDate.parse(it["fom"].textValue()),
-                            tom = LocalDate.parse(it["tom"].textValue()),
-                            dagsats = when (it["dagsats"]) {
-                                is DecimalNode -> it["dagsats"].decimalValue().setScale(0, RoundingMode.HALF_UP).toInt()
-                                else -> it["dagsats"].intValue()
-                            }
+                        fom = LocalDate.parse(it["fom"].textValue()),
+                        tom = LocalDate.parse(it["tom"].textValue()),
+                        dagsats = when (it["dagsats"]) {
+                            is DecimalNode -> it["dagsats"].decimalValue().setScale(0, RoundingMode.HALF_UP).toInt()
+                            else -> it["dagsats"].intValue()
+                        }
                     )
                 }
                 godkjentAv = vedtaksperiodeJson.godkjentAv
+                fødselsnummer = vedtaksperiodeJson.fødselsnummer
             }
         }
 
@@ -377,27 +381,19 @@ class Vedtaksperiode(
         }
 
         private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        internal fun restore(memento: Memento): Vedtaksperiode {
-            val node = objectMapper.readTree(memento.state)
-
-            val vedtaksperiode = Vedtaksperiode(
-                    id = UUID.fromString(node["id"].textValue()),
-                    aktørId = node["aktørId"].textValue(),
-                    organisasjonsnummer = node["organisasjonsnummer"].textValue()
-            )
-
-            vedtaksperiode.tilstand = tilstandFraEnum(enumValueOf(node["tilstand"].textValue()))
-
-            node["sykdomstidslinje"]?.let {
-                vedtaksperiode.sykdomstidslinje = Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
+        fun compare(leftFom: LocalDate?, leftTom: LocalDate?, rightFom: LocalDate?, rightTom: LocalDate?): Int =
+            when {
+                rightFom == null && leftFom != null -> 1
+                rightFom != null && leftFom == null -> -1
+                rightFom == null && rightTom == null && leftFom == null && leftTom == null -> 0
+                leftFom != rightFom -> leftFom!!.compareTo(rightFom)
+                rightTom == null && leftTom != null -> -1
+                rightTom != null && leftTom == null -> 1
+                else -> leftTom!!.compareTo(rightTom)
             }
-
-            return vedtaksperiode
-        }
-
     }
 
     fun memento(): Memento {
@@ -434,9 +430,10 @@ class Vedtaksperiode(
                 },
                 maksdato = maksdato,
                 utbetalingslinjer = utbetalingslinjer
-                        ?.let { objectMapper.convertValue<JsonNode>(it) },
+                    ?.let { objectMapper.convertValue<JsonNode>(it) },
                 godkjentAv = godkjentAv,
-                utbetalingsreferanse = utbetalingsreferanse
+                utbetalingsreferanse = utbetalingsreferanse,
+                fødselsnummer = fødselsnummer
         )
     }
 
@@ -501,7 +498,15 @@ class Vedtaksperiode(
             val maksdato: LocalDate?,
             val utbetalingslinjer: JsonNode?,
             val godkjentAv: String?,
-            val utbetalingsreferanse: String?
+            val utbetalingsreferanse: String?,
+            val fødselsnummer: String?
+    )
+
+    override fun compareTo(other: Vedtaksperiode): Int = Vedtaksperiode.compare(
+        leftFom = this.sykdomstidslinje?.startdato(),
+        leftTom = this.sykdomstidslinje?.sluttdato(),
+        rightFom = other.sykdomstidslinje?.startdato(),
+        rightTom = other.sykdomstidslinje?.sluttdato()
     )
 }
 

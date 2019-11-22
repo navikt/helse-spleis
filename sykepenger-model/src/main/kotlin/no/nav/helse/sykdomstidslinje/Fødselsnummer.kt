@@ -6,7 +6,7 @@ internal class Fødselsnummer(verdi: String, private val startDato: LocalDate, p
 
     private val fødselsdag = LocalDate.of(verdi.substring(4, 6).toInt().toYear(), verdi.substring(2, 4).toInt(), verdi.substring(0, 2).toInt().toDay())
 
-    internal val burdeBetale get(): BurdeBetale {
+    internal val navBurdeBetale get(): BurdeBetale {
         return when {
             fødselsdag.plusYears(67).isAfter(sluttDato) -> { antallDager: Int, _: LocalDate -> antallDager < 248}
             fødselsdag.plusYears(70).isBefore(startDato) -> {_: Int, _: LocalDate -> false}
