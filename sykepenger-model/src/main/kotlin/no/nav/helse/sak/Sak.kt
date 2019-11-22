@@ -114,8 +114,6 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
 
         private val saker = mutableListOf<Vedtaksperiode>()
 
-        private var fødselsnummer: String? = null
-
         private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
         internal fun tellVedtaksperioderSomIkkeErINySoknadTilstand() = saker.count { it.erIkkeINySøknadTilstand() }
@@ -137,7 +135,6 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
         }
 
         fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            fødselsnummer = inntektsmeldingHendelse.fødselsnummer()
             if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
                 nyVedtaksperiode().håndter(inntektsmeldingHendelse)
             }
