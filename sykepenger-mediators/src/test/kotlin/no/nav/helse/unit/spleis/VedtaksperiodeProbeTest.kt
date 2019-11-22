@@ -4,10 +4,10 @@ import io.prometheus.client.CollectorRegistry
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.Vedtaksperiode
-import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.hendelser.SykdomshendelseType
+import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.sak.TilstandType
+import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.spleis.VedtaksperiodeProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ internal class VedtaksperiodeProbeTest {
     fun `teller nye sykmeldinger`() {
         val sykmeldingerCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
-        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, nySøknadHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(TilstandType.NY_SØKNAD_MOTTATT, TilstandType.NY_SØKNAD_MOTTATT, nySøknadHendelse()))
 
         val sykmeldingerCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.NySøknadMottatt.name))
 
@@ -37,7 +37,7 @@ internal class VedtaksperiodeProbeTest {
     fun `teller nye søknader`() {
         val søknadCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
-        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT, sendtSøknadHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(TilstandType.SENDT_SØKNAD_MOTTATT, TilstandType.NY_SØKNAD_MOTTATT, sendtSøknadHendelse()))
 
         val søknadCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.SendtSøknadMottatt.name))
 
@@ -48,7 +48,7 @@ internal class VedtaksperiodeProbeTest {
     fun `teller nye inntektsmeldinger`() {
         val inntektsmeldingCounterBefore = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
-        probe.vedtaksperiodeEndret(changeEvent(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
+        probe.vedtaksperiodeEndret(changeEvent(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, TilstandType.SENDT_SØKNAD_MOTTATT, inntektsmeldingHendelse()))
 
         val inntektsmeldingCounterAfter = getCounterValue("dokumenter_koblet_til_sak_totals", listOf(SykdomshendelseType.InntektsmeldingMottatt.name))
 
@@ -58,26 +58,15 @@ internal class VedtaksperiodeProbeTest {
     private fun assertCounter(after: Int, before: Int) =
         assertEquals(1, after - before)
 
-    private fun vedtaksperiode() =
-            Vedtaksperiode(
-                    id = id,
-                    aktørId = aktørId,
-                    organisasjonsnummer = "orgnummer"
-            )
-
-    private fun changeEvent(currentState: Vedtaksperiode.TilstandType, previousState: Vedtaksperiode.TilstandType, eventType: ArbeidstakerHendelse) =
-        vedtaksperiode().let { vedtaksperiode ->
-            VedtaksperiodeObserver.StateChangeEvent(
-                id = id,
-                aktørId = aktørId,
-                organisasjonsnummer = "orgnummer",
-                currentState = currentState,
-                previousState = previousState,
-                sykdomshendelse = eventType,
-                currentMemento = vedtaksperiode.memento(),
-                previousMemento = vedtaksperiode.memento()
-            )
-        }
+    private fun changeEvent(currentState: TilstandType, previousState: TilstandType, eventType: ArbeidstakerHendelse) =
+        VedtaksperiodeObserver.StateChangeEvent(
+            id = id,
+            aktørId = aktørId,
+            organisasjonsnummer = "orgnummer",
+            currentState = currentState,
+            previousState = previousState,
+            sykdomshendelse = eventType
+        )
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =
         (CollectorRegistry.defaultRegistry

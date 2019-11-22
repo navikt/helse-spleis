@@ -1,11 +1,9 @@
 val ktorVersion = "1.2.4"
-val jacksonVersion = "2.9.8"
 val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
 val kotliqueryVersion = "1.3.0"
-val junitJupiterVersion = "5.5.2"
 val wireMockVersion = "2.23.2"
 val mockkVersion = "1.9.3"
 val micrometerRegistryPrometheusVersion = "1.1.5"
@@ -18,9 +16,6 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
-
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
@@ -50,23 +45,11 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
         exclude(group = "junit")
     }
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
-
-val githubUser: String by project
-val githubPassword: String by project
 
 repositories {
     maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_12
-    targetCompatibility = JavaVersion.VERSION_12
 }
 
 tasks.named<Jar>("jar") {

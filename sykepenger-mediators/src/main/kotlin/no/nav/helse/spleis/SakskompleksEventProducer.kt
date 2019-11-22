@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
+import no.nav.helse.sak.TilstandType
 import no.nav.helse.sak.VedtaksperiodeObserver
-import no.nav.helse.sak.Vedtaksperiode
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -40,8 +40,8 @@ class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val currentState: Vedtaksperiode.TilstandType,
-        val previousState: Vedtaksperiode.TilstandType
+        val currentState: TilstandType,
+        val previousState: TilstandType
     ) {
         private companion object {
             private val objectMapper = jacksonObjectMapper()

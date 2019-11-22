@@ -9,12 +9,12 @@ import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.sak.TilstandType.NY_SØKNAD_MOTTATT
+import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -57,7 +57,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -87,7 +87,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -125,7 +125,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -137,7 +137,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -149,7 +149,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -163,7 +163,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
@@ -273,7 +273,7 @@ internal class SakTest {
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -297,7 +297,7 @@ internal class SakTest {
 
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
-        assertEquals(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
         assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.Sykepengehistorikk.name })
     }
 
@@ -319,7 +319,7 @@ internal class SakTest {
             ))
         }
 
-        assertEquals(Vedtaksperiode.TilstandType.TIL_GODKJENNING, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TilstandType.TIL_GODKJENNING, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -337,7 +337,7 @@ internal class SakTest {
             ))
         }
 
-        assertEquals(Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test
@@ -388,8 +388,8 @@ internal class SakTest {
 
         internal var wasTriggered = false
         internal var sakEndret = false
-        internal var forrigeVedtaksperiodetilstand: Vedtaksperiode.TilstandType? = null
-        internal var vedtaksperiodetilstand: Vedtaksperiode.TilstandType? = null
+        internal var forrigeVedtaksperiodetilstand: TilstandType? = null
+        internal var vedtaksperiodetilstand: TilstandType? = null
 
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
             sakEndret = true
