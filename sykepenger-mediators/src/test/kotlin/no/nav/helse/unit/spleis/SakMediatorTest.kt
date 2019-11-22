@@ -14,8 +14,6 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.sak.Vedtaksperiode
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
@@ -23,6 +21,8 @@ import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.sak.TilstandType
+import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -472,7 +472,7 @@ internal class SakMediatorTest {
                 first { it.behovType() == behovsType.name }
     }
 
-    private fun assertVedtaksperiodeEndretEvent(aktørId: String, virksomhetsnummer: String, previousState: Vedtaksperiode.TilstandType, currentState: Vedtaksperiode.TilstandType) {
+    private fun assertVedtaksperiodeEndretEvent(aktørId: String, virksomhetsnummer: String, previousState: TilstandType, currentState: TilstandType) {
         verify(exactly = 1) {
             vedtaksperiodeEventProducer.sendEndringEvent(match {
                 it.previousState == previousState

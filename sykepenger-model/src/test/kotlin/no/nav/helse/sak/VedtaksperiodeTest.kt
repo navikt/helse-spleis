@@ -88,7 +88,7 @@ internal class VedtaksperiodeTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
+                tilstandType = TilstandType.TIL_GODKJENNING,
                 utbetalingsreferanse = null,
                 fødselsnummer = null
         )
@@ -130,7 +130,7 @@ internal class VedtaksperiodeTest {
                 godkjentAv = null,
                 maksdato = null,
                 sykdomstidslinje = null,
-                tilstandType = Vedtaksperiode.TilstandType.TIL_GODKJENNING,
+                tilstandType = TilstandType.TIL_GODKJENNING,
                 utbetalingsreferanse = null,
                 fødselsnummer = null
         )

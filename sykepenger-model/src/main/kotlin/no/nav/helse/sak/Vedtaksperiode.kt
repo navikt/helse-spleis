@@ -14,7 +14,7 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
+import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.*
 import org.apache.commons.codec.binary.Base32
@@ -28,7 +28,7 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-class Vedtaksperiode internal constructor(
+internal class Vedtaksperiode internal constructor(
     private val id: UUID,
     private val aktørId: String,
     private val organisasjonsnummer: String
@@ -120,17 +120,6 @@ class Vedtaksperiode internal constructor(
                 sykdomstidslinje = tidslinje
             }
         }
-    }
-
-    enum class TilstandType {
-        START,
-        NY_SØKNAD_MOTTATT,
-        SENDT_SØKNAD_MOTTATT,
-        INNTEKTSMELDING_MOTTATT,
-        KOMPLETT_SYKDOMSTIDSLINJE,
-        TIL_GODKJENNING,
-        TIL_UTBETALING,
-        TIL_INFOTRYGD
     }
 
     // Gang of four State pattern
@@ -407,9 +396,9 @@ class Vedtaksperiode internal constructor(
     }
 
     private fun emitVedtaksperiodeEndret(
-            currentState: TilstandType,
-            tidslinjeEvent: ArbeidstakerHendelse,
-            previousState: TilstandType
+        currentState: TilstandType,
+        tidslinjeEvent: ArbeidstakerHendelse,
+        previousState: TilstandType
     ) {
         val event = StateChangeEvent(
                 id = id,
@@ -447,16 +436,16 @@ class Vedtaksperiode internal constructor(
     }
 
     internal class VedtaksperiodeJson(
-            val id: UUID,
-            val aktørId: String,
-            val organisasjonsnummer: String,
-            val tilstandType: TilstandType,
-            val sykdomstidslinje: JsonNode?,
-            val maksdato: LocalDate?,
-            val utbetalingslinjer: JsonNode?,
-            val godkjentAv: String?,
-            val utbetalingsreferanse: String?,
-            val fødselsnummer: String?
+        val id: UUID,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val tilstandType: TilstandType,
+        val sykdomstidslinje: JsonNode?,
+        val maksdato: LocalDate?,
+        val utbetalingslinjer: JsonNode?,
+        val godkjentAv: String?,
+        val utbetalingsreferanse: String?,
+        val fødselsnummer: String?
     )
 
     override fun compareTo(other: Vedtaksperiode): Int = Vedtaksperiode.compare(

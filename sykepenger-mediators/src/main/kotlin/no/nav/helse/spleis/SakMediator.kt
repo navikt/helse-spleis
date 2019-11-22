@@ -2,13 +2,13 @@ package no.nav.helse.spleis
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.sak.*
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.sak.*
+import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 
 internal class SakMediator(private val sakRepository: SakRepository,
