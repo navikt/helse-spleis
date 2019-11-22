@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.juli
@@ -52,16 +51,15 @@ internal class VedtaksperiodeTest {
         val aktørId = "1234"
         val organisasjonsnummer = "123456789"
 
-        val vedtaksperiode = Vedtaksperiode(
-                id = id,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer
-        )
+        val originalJson = Vedtaksperiode(
+            id = id,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer
+        ).jsonRepresentation()
 
-        val jsonRepresentation = vedtaksperiode.jsonRepresentation()
-        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
+        val gjenopprettetJson = Vedtaksperiode.fromJson(originalJson)
 
-        assertEquals(jsonRepresentation, gjenopprettetVedtaksperiode.jsonRepresentation())
+        assertEquals(objectMapper.valueToTree<JsonNode>(originalJson), objectMapper.valueToTree<JsonNode>(gjenopprettetJson.jsonRepresentation()))
     }
 
     @Test
@@ -143,40 +141,6 @@ internal class VedtaksperiodeTest {
         val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
 
         assertEquals(dagsats, dagsatsFraNyJson!!)
-    }
-
-    @Test
-    fun `memento inneholder en tilstand`() {
-        val id = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(
-                id = id,
-                aktørId = "aktørId",
-                organisasjonsnummer = "orgnummer"
-        )
-
-        val memento = vedtaksperiode.memento()
-        val node = objectMapper.readTree(memento.state)
-
-        assertNotNull(node["tilstand"])
-        assertFalse(node["tilstand"].isNull)
-        assertTrue(node["tilstand"].textValue().isNotEmpty())
-    }
-
-    @Test
-    fun `memento inneholder aktørId og vedtaksperiodeId`() {
-        val id = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(
-                id = id,
-                aktørId = "aktørId",
-                organisasjonsnummer = "orgnummer"
-        )
-
-        val memento = vedtaksperiode.memento()
-        val node = objectMapper.readTree(memento.state)
-
-        assertEquals(id.toString(), node["id"].textValue())
-        assertEquals("aktørId", node["aktørId"].textValue())
-        assertEquals("orgnummer", node["organisasjonsnummer"].textValue())
     }
 
     @Test

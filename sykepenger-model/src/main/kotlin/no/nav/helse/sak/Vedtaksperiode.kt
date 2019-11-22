@@ -1,6 +1,5 @@
 package no.nav.helse.sak
 
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
@@ -15,32 +14,21 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.INNTEKTSMELDING_MOTTATT
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.NY_SØKNAD_MOTTATT
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.SENDT_SØKNAD_MOTTATT
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.START
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_GODKJENNING
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.sak.Vedtaksperiode.TilstandType.TIL_UTBETALING
+import no.nav.helse.sak.Vedtaksperiode.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.*
-import no.nav.helse.sykdomstidslinje.Fødselsnummer
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
-import java.io.StringWriter
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-class Vedtaksperiode(
+class Vedtaksperiode internal constructor(
     private val id: UUID,
     private val aktørId: String,
     private val organisasjonsnummer: String
@@ -110,14 +98,13 @@ class Vedtaksperiode(
         tilstand.leaving()
 
         val previousStateName = tilstand.type
-        val previousMemento = memento()
 
         tilstand = nyTilstand
         block()
 
         tilstand.entering(this)
 
-        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, previousMemento)
+        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName)
     }
 
     private fun <HENDELSE> håndter(
@@ -396,29 +383,6 @@ class Vedtaksperiode(
             }
     }
 
-    fun memento(): Memento {
-        val writer = StringWriter()
-        val generator = JsonFactory().createGenerator(writer)
-
-        generator.writeStartObject()
-        generator.writeStringField("id", id.toString())
-        generator.writeStringField("aktørId", aktørId)
-        generator.writeStringField("organisasjonsnummer", organisasjonsnummer)
-        generator.writeStringField("tilstand", tilstand.type.name)
-
-        sykdomstidslinje?.also {
-            generator.writeFieldName("sykdomstidslinje")
-            generator.writeRaw(":")
-            generator.writeRaw(it.toJson())
-        }
-
-        generator.writeEndObject()
-
-        generator.flush()
-
-        return Memento(state = writer.toString())
-    }
-
     internal fun jsonRepresentation(): VedtaksperiodeJson {
         return VedtaksperiodeJson(
                 id = id,
@@ -437,10 +401,6 @@ class Vedtaksperiode(
         )
     }
 
-    class Memento(internal val state: String) {
-        override fun toString() = state
-    }
-
     // Gang of four Observer pattern
     internal fun addVedtaksperiodeObserver(observer: VedtaksperiodeObserver) {
         observers.add(observer)
@@ -449,8 +409,7 @@ class Vedtaksperiode(
     private fun emitVedtaksperiodeEndret(
             currentState: TilstandType,
             tidslinjeEvent: ArbeidstakerHendelse,
-            previousState: TilstandType,
-            previousMemento: Memento
+            previousState: TilstandType
     ) {
         val event = StateChangeEvent(
                 id = id,
@@ -458,9 +417,7 @@ class Vedtaksperiode(
                 organisasjonsnummer = organisasjonsnummer,
                 currentState = currentState,
                 previousState = previousState,
-                sykdomshendelse = tidslinjeEvent,
-                currentMemento = memento(),
-                previousMemento = previousMemento
+                sykdomshendelse = tidslinjeEvent
         )
 
         observers.forEach { observer ->
@@ -489,7 +446,7 @@ class Vedtaksperiode(
         }
     }
 
-    internal data class VedtaksperiodeJson(
+    internal class VedtaksperiodeJson(
             val id: UUID,
             val aktørId: String,
             val organisasjonsnummer: String,

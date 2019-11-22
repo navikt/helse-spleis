@@ -9,9 +9,7 @@ interface VedtaksperiodeObserver {
                                 val organisasjonsnummer: String,
                                 val currentState: Vedtaksperiode.TilstandType,
                                 val previousState: Vedtaksperiode.TilstandType,
-                                val sykdomshendelse: ArbeidstakerHendelse,
-                                val currentMemento: Vedtaksperiode.Memento,
-                                val previousMemento: Vedtaksperiode.Memento)
+                                val sykdomshendelse: ArbeidstakerHendelse)
 
     data class UtbetalingEvent(val vedtaksperiodeId: UUID,
                                val aktørId: String,
