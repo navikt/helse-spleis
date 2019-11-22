@@ -27,7 +27,9 @@ internal class UtbetalingslinjerTest {
 
     private val dagsats = 1200
 
-    private val fødselsnummer = "12029812345"
+    private val fødselsnummer = "02029812345"
+
+    private val fødselsnummer67År = "01015112345"
 
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
@@ -314,6 +316,27 @@ internal class UtbetalingslinjerTest {
         val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer)
         assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
         assertEquals(LocalDate.of(2018, 12, 28), beregning.maksdato)
+    }
+
+    @Test
+    fun `når personen fyller 67 blir antall gjenværende dager 60`() {
+        val sykdomstidslinje = 16.S + 90.S
+        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer67År)
+        assertEquals(LocalDate.of(2018, 4, 10), beregning.utbetalingslinjer.last().tom)
+    }
+
+    @Test
+    fun `når personen fyller 67 og 248 dager er brukt opp`() {
+        val sykdomstidslinje = 400.S
+        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, "01125112345")
+        assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
+    }
+
+    @Test
+    fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
+        val sykdomstidslinje = 400.S
+        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, "01024812345")
+        assertEquals(LocalDate.of(2018, 1, 31), beregning.utbetalingslinjer.last().tom)
     }
 
     private val S

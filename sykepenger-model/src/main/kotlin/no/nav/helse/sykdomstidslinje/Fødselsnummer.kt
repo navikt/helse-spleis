@@ -4,15 +4,19 @@ import java.time.LocalDate
 
 internal class Fødselsnummer(verdi: String, private val startDato: LocalDate, private val sluttDato: LocalDate) {
 
+    private val maksSykepengedager = 248
+    private val maksSykepengedagerEtter67 = 60
+    private val ytesIkkeSykepengerAlder: Long = 70
+    private val ytesMindreSykepengedagerAlder: Long = 67
     private val individnummer = verdi.substring(6, 9).toInt()
     private val fødselsdag = LocalDate.of(verdi.substring(4, 6).toInt().toYear(individnummer), verdi.substring(2, 4).toInt(), verdi.substring(0, 2).toInt().toDay())
 
     internal val navBurdeBetale get(): BurdeBetale {
         return when {
-            fødselsdag.plusYears(67).isAfter(sluttDato) -> { antallDager: Int, _: Int, _: LocalDate -> antallDager < 248}
-            fødselsdag.plusYears(70).isBefore(startDato) -> {_: Int, _: Int, _: LocalDate -> false}
-            fødselsdag.plusYears(67).isAfter(startDato) -> {antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate -> fyller67IPerioden(antallDager, antallDagerEtter60, dagen)}
-            else -> {antallDager: Int, _: Int, dagen: LocalDate -> antallDager < 60 && dagen.isBefore(fødselsdag.plusYears(70))}
+            fødselsdag.plusYears(ytesMindreSykepengedagerAlder).isAfter(sluttDato) -> { antallDager: Int, _: Int, _: LocalDate -> antallDager < maksSykepengedager}
+            fødselsdag.plusYears(ytesIkkeSykepengerAlder).isBefore(startDato) -> {_: Int, _: Int, _: LocalDate -> false}
+            fødselsdag.plusYears(ytesMindreSykepengedagerAlder).isAfter(startDato) -> {antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate -> fyller67IPerioden(antallDager, antallDagerEtter60, dagen)}
+            else -> {antallDager: Int, _: Int, dagen: LocalDate -> antallDager < maksSykepengedagerEtter67 && dagen.isBefore(fødselsdag.plusYears(ytesIkkeSykepengerAlder))}
         }
     }
 
@@ -26,9 +30,11 @@ internal class Fødselsnummer(verdi: String, private val startDato: LocalDate, p
         }
     }
     private fun fyller67IPerioden(antallDager: Int, antallDagerEtter67: Int, dagen: LocalDate): Boolean {
-        if (dagen.isBefore(fødselsdag.plusYears(67)) && antallDager < 248) return true
-        return antallDager < 248 && antallDagerEtter67 < 60
+        if (dagen.isBefore(fødselsdag.plusYears(ytesMindreSykepengedagerAlder)) && antallDager < maksSykepengedager) return true
+        return antallDager < maksSykepengedager && antallDagerEtter67 < maksSykepengedagerEtter67
     }
+
+    internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(fødselsdag.plusYears(ytesMindreSykepengedagerAlder))
 
 }
 

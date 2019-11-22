@@ -14,6 +14,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
     private var fridager = 0
 
     private var betalteSykedager = 0
+    private var betalteSykepengerEtter67 = 0
     private var maksdato: LocalDate? = null
 
     fun results(): Utbetalingsberegning {
@@ -90,10 +91,13 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
         if (burdeUtbetales(dagen)) {
             utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
             betalteSykedager += 1
+            if (fødselsnummer.harFylt67(dagen)) {
+                betalteSykepengerEtter67 +=1
+            }
         }
     }
 
-    private fun burdeUtbetales(dagen: LocalDate) = fødselsnummer.navBurdeBetale(betalteSykedager, 0, dagen)
+    private fun burdeUtbetales(dagen: LocalDate) = fødselsnummer.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = state(Ugyldig)
@@ -213,6 +217,9 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
             if (splitter.burdeUtbetales(dagen)) {
                 splitter.utbetalingslinjer.last().tom = dagen
                 splitter.betalteSykedager += 1
+                if (splitter.fødselsnummer.harFylt67(dagen)) {
+                    splitter.betalteSykepengerEtter67 +=1
+                }
             }
         }
 
