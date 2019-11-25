@@ -37,7 +37,7 @@ internal class Vedtaksperiode internal constructor(
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
-    internal fun erIkkeINySøknadTilstand() = tilstand != NY_SØKNAD_MOTTATT
+    internal fun erIkkeINySøknadTilstand() = tilstand.type != NY_SØKNAD_MOTTATT
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
