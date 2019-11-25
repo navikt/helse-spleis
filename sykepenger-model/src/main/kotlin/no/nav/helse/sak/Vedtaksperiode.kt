@@ -448,7 +448,7 @@ internal class Vedtaksperiode internal constructor(
         val fødselsnummer: String?
     )
 
-    override fun compareTo(other: Vedtaksperiode): Int = Vedtaksperiode.compare(
+    override fun compareTo(other: Vedtaksperiode): Int = compare(
         leftFom = this.sykdomstidslinje?.startdato(),
         leftTom = this.sykdomstidslinje?.sluttdato(),
         rightFom = other.sykdomstidslinje?.startdato(),
