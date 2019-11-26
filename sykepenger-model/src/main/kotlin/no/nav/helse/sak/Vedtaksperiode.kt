@@ -275,9 +275,14 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            vedtaksperiode.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
-                    "utbetalingsreferanse" to utbetalingsreferanse
-            ))
+            vedtaksperiode.emitTrengerLøsning(
+                BehovsTyper.Utbetaling, mapOf(
+                    "utbetalingsreferanse" to utbetalingsreferanse,
+                    "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
+                    "maksdato" to (vedtaksperiode.maksdato ?: ""),
+                    "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
+                )
+            )
 
             val event = VedtaksperiodeObserver.UtbetalingEvent(
                     vedtaksperiodeId = vedtaksperiode.id,
@@ -422,11 +427,6 @@ internal class Vedtaksperiode internal constructor(
         )
 
         params.putAll(additionalParams)
-
-        utbetalingslinjer?.let { params.put("utbetalingslinjer",
-            if (type == BehovsTyper.Utbetaling) it.joinForOppdrag() else it) }
-        maksdato?.let { params.put("maksdato", it) }
-        godkjentAv?.let { params.put("saksbehandler", it) }
 
         val behov = Behov.nyttBehov(type, params)
 
