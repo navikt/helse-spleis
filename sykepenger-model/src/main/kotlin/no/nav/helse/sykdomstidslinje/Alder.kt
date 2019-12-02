@@ -18,7 +18,7 @@ internal class Alder(fødselsnummer: String, private val startDato: LocalDate, p
             øvreAldersgrense.isBefore(startDato) ->
                 {_: Int, _: Int, _: LocalDate -> false}
             redusertYtelseAlder.isAfter(startDato) ->
-                {antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate -> fyller67IPerioden(antallDager, antallDagerEtter60, dagen)}
+                {antallDager: Int, antallDagerEtter67: Int, dagen: LocalDate -> fyller67IPerioden(antallDager, antallDagerEtter67, dagen)}
             else -> {antallDager: Int, _: Int, dagen: LocalDate -> antallDager < maksSykepengedagerEtter67 && dagen.isBefore(øvreAldersgrense)}
         }
     }
