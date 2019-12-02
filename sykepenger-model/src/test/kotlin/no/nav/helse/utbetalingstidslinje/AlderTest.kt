@@ -7,46 +7,82 @@ import java.time.LocalDate
 
 internal class AlderTest {
 
-    private val startDato = LocalDate.of(2018, 1, 1)
-    private val sluttDato = LocalDate.of(2019, 1, 1)
+    private val startDato = 1.januar
+    private val sluttDato = 1.januar.plusYears(1)
     @Test
     fun `ung person`() {
-        assertTrue("12020052345".navBurdeBetale(247, LocalDate.of(2018, 12, 28)))
-        assertFalse("12020052345".navBurdeBetale(248, LocalDate.of(2018, 12, 28)))
+        assertTrue("12020052345".navBurdeBetale(247, 28.desember))
+        assertFalse("12020052345".navBurdeBetale(248, 28.desember))
     }
 
     @Test
     fun `ung person med D-nummer`() {
-        assertTrue("52029812345".navBurdeBetale(247, LocalDate.of(2018, 12, 28)))
-        assertFalse("52029812345".navBurdeBetale(248, LocalDate.of(2018, 12, 28)))
+        assertTrue("52029812345".navBurdeBetale(247, 28.desember))
+        assertFalse("52029812345".navBurdeBetale(248, 28.desember))
     }
 
     @Test
     fun `person som fyller 70 i perioden`() {
-        assertTrue("12024812345".navBurdeBetale(2, LocalDate.of(2018, 2, 11)))
-        assertFalse("12024812345".navBurdeBetale(2, LocalDate.of(2018, 2, 12)))
+        assertTrue("12024812345".navBurdeBetale(2, 11.februar))
+        assertFalse("12024812345".navBurdeBetale(2, 12.februar))
     }
 
     @Test
     fun `person som er 70 før sykeperioden starter`() {
-        assertFalse("12024712345".navBurdeBetale(2, LocalDate.of(2018, 2, 12)))
+        assertFalse("12024712345".navBurdeBetale(2, 12.februar))
     }
 
     @Test
     fun `person som fyller 67 i perioden`() {
-        assertTrue("12025112345".navBurdeBetale(2, LocalDate.of(2018, 2, 11)))
-        assertTrue("12025112345".navBurdeBetale(100, LocalDate.of(2018, 2, 12)))
-        assertTrue("12025112345".navBurdeBetale(100, LocalDate.of(2018, 5, 12), 59))
-        assertFalse("12025112345".navBurdeBetale(100, LocalDate.of(2018, 5, 12), 60))
-        assertFalse("12025112345".navBurdeBetale(248, LocalDate.of(2018, 5, 12), 59))
+        assertTrue("12025112345".navBurdeBetale(2, 11.februar))
+        assertTrue("12025112345".navBurdeBetale(100, 12.februar))
+        assertTrue("12025112345".navBurdeBetale(100, 12.mai, 59))
+        assertFalse("12025112345".navBurdeBetale(100, 12.mai, 60))
+        assertFalse("12025112345".navBurdeBetale(248, 12.mai, 59))
     }
 
     @Test
     fun `person som er mellom 67 and 70 i hele perioden`() {
-        assertTrue("12025012345".navBurdeBetale(2, LocalDate.of(2018, 2, 11)))
-        assertTrue("12025012345".navBurdeBetale(59, LocalDate.of(2018, 2, 11)))
-        assertFalse("12025012345".navBurdeBetale(60, LocalDate.of(2018, 2, 11)))
+        assertTrue("12025012345".navBurdeBetale(2, 11.februar))
+        assertTrue("12025012345".navBurdeBetale(59, 11.februar))
+        assertFalse("12025012345".navBurdeBetale(60, 11.februar))
     }
 
+    @Test
+    fun `ung person får korrekt maksdato`() {
+        assertEquals(15.mai, "12020052345".maksdato(248, 15.mai, 0))
+        assertEquals(18.mai, "12020052345".maksdato(244, 14.mai, 0))
+        assertEquals(21.mai, "12020052345".maksdato(243, 14.mai, 0))
+        assertEquals(22.mai, "12020052345".maksdato(242, 14.mai, 0))
+    }
+
+    val Int.januar
+        get() = LocalDate.of(2018, 1, this)
+
+    val Int.februar
+        get() = LocalDate.of(2018, 2, this)
+
+    val Int.mai
+        get() = LocalDate.of(2018, 5, this)
+
+    val Int.juni
+        get() = LocalDate.of(2018, 6, this)
+
+    val Int.juli
+        get() = LocalDate.of(2018, 7, this)
+
+    val Int.august
+        get() = LocalDate.of(2018, 8, this)
+
+    val Int.september
+        get() = LocalDate.of(2018, 9, this)
+
+    val Int.oktober
+        get() = LocalDate.of(2018, 10, this)
+
+    val Int.desember
+        get() = LocalDate.of(2018, 12, this)
+
     private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(this, startDato, sluttDato).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
+    private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(this, startDato, sluttDato).maksdato(antallDager, antallDagerEtter67, dagen)
 }
