@@ -234,8 +234,11 @@ internal class SakComponentTest {
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
 
         utbetalingsreferanse.hentUtbetaling {
-            val sak = Sak.fromJson(this)
-            assertEquals(aktørID, sak.aktørId)
+            assertTrue(this.contains(aktørID))
+
+            assertDoesNotThrow {
+                Sak.fromJson(this)
+            }
         }
     }
 

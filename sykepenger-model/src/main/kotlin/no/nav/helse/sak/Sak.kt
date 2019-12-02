@@ -9,11 +9,11 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import java.util.UUID
+import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON = 2
 
-class Sak(val aktørId: String) : VedtaksperiodeObserver {
+class Sak(private val aktørId: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
