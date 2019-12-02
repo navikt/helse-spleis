@@ -4,9 +4,7 @@ import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -139,7 +137,7 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 2.F + 2.A + 16.S + 2.F
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
 
-        assertThat(betalingslinjer).isEmpty()
+        assertTrue(betalingslinjer.isEmpty())
     }
 
     @Test
@@ -147,7 +145,7 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 10.S + 20.F + A + 10.S + 20.F
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
 
-        assertThat(betalingslinjer).isEmpty()
+        assertTrue(betalingslinjer.isEmpty())
     }
 
     @Test
@@ -155,7 +153,7 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 10.S + 20.F + 10.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
 
-        assertThat(betalingslinjer).hasSize(2)
+        assertEquals(2, betalingslinjer.size)
         assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom)
         assertEquals(LocalDate.of(2018, 2, 2), betalingslinjer.first().tom)
 
@@ -168,7 +166,7 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 20.S + 20.F + 10.S
         val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
 
-        assertThat(betalingslinjer).hasSize(3)
+        assertEquals(3, betalingslinjer.size)
         assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer[0].fom)
         assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer[0].tom)
 

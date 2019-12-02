@@ -2,8 +2,8 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.testhelpers.Uke
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class HendelserTest {
@@ -28,6 +28,6 @@ internal class HendelserTest {
         val hendelser = tidslinje.hendelser()
 
         assertEquals(2, hendelser.size)
-        assertThat(hendelser).containsExactlyInAnyOrder(hendelse, hendelse2)
+        assertTrue(hendelser.containsAll(listOf(hendelse, hendelse2)))
     }
 }
