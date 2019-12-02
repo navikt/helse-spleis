@@ -104,41 +104,38 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
         }
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
-        Arbeidsgiver(organisasjonsnummer, UUID.randomUUID()).also {
+        Arbeidsgiver(organisasjonsnummer).also {
             it.addObserver(this)
             sakObservers.forEach { sakObserver ->
                 it.addObserver(sakObserver)
             }
         }
 
-    internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
-
-        internal constructor(arbeidsgiverJson: ArbeidsgiverJson) : this(
-            arbeidsgiverJson.organisasjonsnummer,
-            arbeidsgiverJson.id
-        ) {
-            perioder.addAll(arbeidsgiverJson.saker.map { Vedtaksperiode.fromJson(it) })
-        }
-
+    private inner class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID) {
         private val perioder = mutableListOf<Vedtaksperiode>()
-
         private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
-        fun håndter(nySøknadHendelse: NySøknadHendelse) {
+        internal constructor(organisasjonsnummer: String): this(organisasjonsnummer, UUID.randomUUID())
+
+        internal constructor(json: ArbeidsgiverJson) : this(json.organisasjonsnummer, json.id) {
+            perioder.addAll(json.saker.map { Vedtaksperiode.fromJson(it) })
+        }
+
+        internal fun håndter(nySøknadHendelse: NySøknadHendelse) {
             if (!perioder.fold(false) { håndtert, periode ->
-                håndtert || periode.håndter(nySøknadHendelse)
-            }) {
+                    håndtert || periode.håndter(nySøknadHendelse)
+                }) {
                 nyVedtaksperiode().håndter(nySøknadHendelse)
             }
         }
 
-        fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
+        internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
             if (perioder.none { it.håndter(sendtSøknadHendelse) }) {
                 nyVedtaksperiode().håndter(sendtSøknadHendelse)
             }
         }
 
-        fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
+        internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
             if (perioder.none { it.håndter(inntektsmeldingHendelse) }) {
                 nyVedtaksperiode().håndter(inntektsmeldingHendelse)
             }
