@@ -13,8 +13,7 @@ import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.juli
 import no.nav.helse.juni
-import no.nav.helse.sak.TilstandType.NY_SØKNAD_MOTTATT
-import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -47,8 +46,8 @@ internal class SakTest {
             it.håndter(nySøknadHendelse())
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -57,9 +56,9 @@ internal class SakTest {
             it.håndter(sendtSøknadHendelse())
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -72,8 +71,8 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -94,8 +93,8 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -200,9 +199,9 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -262,9 +261,9 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
 
@@ -295,9 +294,9 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(INNTEKTSMELDING_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -427,8 +426,8 @@ internal class SakTest {
             )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret)
+        assertEquals(SENDT_SØKNAD_MOTTATT, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -437,7 +436,7 @@ internal class SakTest {
             it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
         }
 
-        assertFalse(tilstandsflytObserver.wasTriggered)
+        assertFalse(tilstandsflytObserver.vedtaksperiodeEndret)
         assertFalse(tilstandsflytObserver.sakEndret)
     }
 
@@ -469,9 +468,9 @@ internal class SakTest {
             )
         }
 
-        assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
-        assertEquals(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
         assertNotNull(needObserver.needEvent.find { it.behovType() == BehovsTyper.Sykepengehistorikk.name })
     }
 
@@ -515,7 +514,7 @@ internal class SakTest {
             )
         }
 
-        assertEquals(TilstandType.TIL_GODKJENNING, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TIL_GODKJENNING, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -555,7 +554,7 @@ internal class SakTest {
             )
         }
 
-        assertEquals(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -597,9 +596,9 @@ internal class SakTest {
                 )
             )
         }
-        assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
+        assertTrue(tilstandsflytObserver.vedtaksperiodeEndret, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
     @Test
@@ -623,29 +622,29 @@ internal class SakTest {
                 it.håndter(inntektsmeldingHendelse)
             }
 
-            assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
+            assertTrue(tilstandsflytObserver.vedtaksperiodeEndret, "skulle ha trigget observer")
             assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
 
             assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-            assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
+            assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
         }
     }
 
     private class TilstandsflytObserver : SakObserver {
 
-        internal var wasTriggered = false
+        internal var vedtaksperiodeEndret = false
         internal var sakEndret = false
         internal var forrigeVedtaksperiodetilstand: TilstandType? = null
-        internal var vedtaksperiodetilstand: TilstandType? = null
+        internal var gjeldendeVedtaksperiodetilstand: TilstandType? = null
 
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
             sakEndret = true
         }
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            wasTriggered = true
+            vedtaksperiodeEndret = true
             forrigeVedtaksperiodetilstand = event.previousState
-            vedtaksperiodetilstand = event.currentState
+            gjeldendeVedtaksperiodetilstand = event.currentState
         }
 
     }
