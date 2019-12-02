@@ -74,10 +74,8 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
     override fun toJson(): JsonNode {
         return (super.toJson() as ObjectNode).apply {
             put("type", SykdomshendelseType.InntektsmeldingMottatt.name)
-            set<ObjectNode>("inntektsmelding", inntektsmelding.toJson())
+            set<ObjectNode>("inntektsmelding", inntektsmelding.jsonNode)
         }
     }
-
-
 }
 
