@@ -78,7 +78,7 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(dagsats, Fødselsnummer(fødselsnummer, startdato(), sluttdato()))
+        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, startdato(), sluttdato()))
         this.accept(beregner)
         return beregner.results()
     }

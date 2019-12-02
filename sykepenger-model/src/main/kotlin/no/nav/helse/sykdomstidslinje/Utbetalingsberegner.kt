@@ -4,7 +4,7 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class Utbetalingsberegner(private val dagsats: Int, private val fødselsnummer: Fødselsnummer) : SykdomstidslinjeVisitor {
+internal class Utbetalingsberegner(private val dagsats: Int, private val alder: Alder) : SykdomstidslinjeVisitor {
 
     private var state: UtbetalingState = Initiell
     private val utbetalingslinjer = mutableListOf<InternUtbetalingslinje>()
@@ -91,13 +91,13 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
         if (burdeUtbetales(dagen)) {
             utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
             betalteSykedager += 1
-            if (fødselsnummer.harFylt67(dagen)) {
+            if (alder.harFylt67(dagen)) {
                 betalteSykepengerEtter67 +=1
             }
         }
     }
 
-    private fun burdeUtbetales(dagen: LocalDate) = fødselsnummer.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
+    private fun burdeUtbetales(dagen: LocalDate) = alder.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = state(Ugyldig)
@@ -217,7 +217,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val fødsel
             if (splitter.burdeUtbetales(dagen)) {
                 splitter.utbetalingslinjer.last().tom = dagen
                 splitter.betalteSykedager += 1
-                if (splitter.fødselsnummer.harFylt67(dagen)) {
+                if (splitter.alder.harFylt67(dagen)) {
                     splitter.betalteSykepengerEtter67 +=1
                 }
             }

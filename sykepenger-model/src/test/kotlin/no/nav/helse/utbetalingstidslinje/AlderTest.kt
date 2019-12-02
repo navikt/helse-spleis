@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Fødselsnummer
+import no.nav.helse.sykdomstidslinje.Alder
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class FødselsnummerTest {
+internal class AlderTest {
 
     private val startDato = LocalDate.of(2018, 1, 1)
     private val sluttDato = LocalDate.of(2019, 1, 1)
@@ -48,5 +48,5 @@ internal class FødselsnummerTest {
         assertFalse("12025012345".navBurdeBetale(60, LocalDate.of(2018, 2, 11)))
     }
 
-    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Fødselsnummer(this, startDato, sluttDato).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
+    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(this, startDato, sluttDato).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
 }
