@@ -12,7 +12,7 @@ private const val parameterizedPath = "$path{$aktørId}"
 
 internal fun Route.sak(sakMediator: SakMediator) {
     get(parameterizedPath) {
-        sakMediator.hentSak(call.parameters[aktørId]!!)?.let { call.respond(it.toString()) }
+        sakMediator.hentSak(call.parameters[aktørId]!!)?.let { call.respond(it.memento().state()) }
             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
     }
 }

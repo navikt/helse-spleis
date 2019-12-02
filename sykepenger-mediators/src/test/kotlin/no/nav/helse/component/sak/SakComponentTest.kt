@@ -234,10 +234,11 @@ internal class SakComponentTest {
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
 
         utbetalingsreferanse.hentUtbetaling {
+            println(this)
             assertTrue(this.contains(aktørID))
 
             assertDoesNotThrow {
-                Sak.fromJson(this)
+                Sak.restore(Sak.Memento.fromString(this))
             }
         }
     }

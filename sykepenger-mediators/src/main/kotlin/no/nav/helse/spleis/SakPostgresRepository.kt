@@ -15,7 +15,7 @@ class SakPostgresRepository(private val dataSource: DataSource,
                 it.string("data")
             }.asSingle)
         }?.let {
-            Sak.fromJson(it)
+            Sak.restore(Sak.Memento.fromString(it))
         }?.also {
             probe.sakLestFraDb()
         }

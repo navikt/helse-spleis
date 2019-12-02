@@ -4,6 +4,7 @@ import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
@@ -15,7 +16,6 @@ import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.juli
 import no.nav.helse.sak.TilstandType.*
-import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -230,12 +230,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertNotNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer)
-        assertEquals(1.juli.plusDays(361), vedtaksperiode.jsonRepresentation().maksdato)
-        assertEquals(31, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
-        assertEquals(17.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
-        assertEquals(19.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
-
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
     }
@@ -258,12 +252,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
         ))
-
-        assertNotNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer)
-        assertEquals(1.juli.plusDays(361), vedtaksperiode.jsonRepresentation().maksdato)
-        assertEquals(31, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("dagsats")?.intValue())
-        assertEquals(17.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("fom").safelyUnwrapDate())
-        assertEquals(19.juli, vedtaksperiode.jsonRepresentation().utbetalingslinjer?.get(0)?.get("tom").safelyUnwrapDate())
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
@@ -384,8 +372,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertNull(vedtaksperiode.jsonRepresentation().maksdato, "skal ikke sette maksdato når saken skal manuelt behandles")
-        assertNull(vedtaksperiode.jsonRepresentation().utbetalingslinjer, "skal ikke sette utbetalingslinjer når saken skal manuelt behandles")
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
     }
@@ -540,13 +526,14 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertEquals(TIL_UTBETALING, lastStateEvent.currentState)
         assertTrue(lastStateEvent.sykdomshendelse is ManuellSaksbehandlingHendelse)
 
-        val utbetalingsreferanse = vedtaksperiode.jsonRepresentation().utbetalingsreferanse
-        assertNotNull(utbetalingsreferanse, "skal sette utbetalingsreferanse når saken skal utbetales")
+        val memento = vedtaksperiode.memento().state()
+        val mementoAsJson = objectMapper.readTree(memento)
+        assertNotNull(mementoAsJson["utbetalingsreferanse"].takeUnless { it.isNull }, "skal sette utbetalingsreferanse når saken skal utbetales")
 
         assertTrue(behovsliste.any { it.behovType() == BehovsTyper.Utbetaling.name })
 
         val behov = behovsliste.first { it.behovType() == BehovsTyper.Utbetaling.name }
-        assertEquals(utbetalingsreferanse, behov["utbetalingsreferanse"]!!)
+        assertNotNull(behov["utbetalingsreferanse"])
     }
 
     @Test

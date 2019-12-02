@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
+import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.*
 import org.apache.commons.codec.binary.Base32
 import java.math.BigDecimal
@@ -331,23 +332,20 @@ internal class Vedtaksperiode internal constructor(
 
         private val sykdomshendelseDeserializer = SykdomshendelseDeserializer()
 
-        internal fun fromJson(vedtaksperiodeJson: VedtaksperiodeJson): Vedtaksperiode {
+        internal fun restore(memento: Memento): Vedtaksperiode {
             return Vedtaksperiode(
-                id = vedtaksperiodeJson.id,
-                aktørId = vedtaksperiodeJson.aktørId,
-                fødselsnummer = vedtaksperiodeJson.fødselsnummer,
-                organisasjonsnummer = vedtaksperiodeJson.organisasjonsnummer
-            ).apply {
-                tilstand = tilstandFraEnum(vedtaksperiodeJson.tilstandType)
-                sykdomstidslinje = vedtaksperiodeJson.sykdomstidslinje?.let {
-                    if (!it.isNull) {
-                        Sykdomstidslinje.fromJson(objectMapper.writeValueAsString(it), sykdomshendelseDeserializer)
-                    } else {
-                        null
+                id = memento.id,
+                aktørId = memento.aktørId,
+                fødselsnummer = memento.fødselsnummer,
+                organisasjonsnummer = memento.organisasjonsnummer
+            ).also {
+                it.tilstand = tilstandFraEnum(memento.tilstandType)
+                it.sykdomstidslinje = memento.sykdomstidslinje
+                    ?.let {
+                        Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
                     }
-                }
-                maksdato = vedtaksperiodeJson.maksdato
-                utbetalingslinjer = vedtaksperiodeJson.utbetalingslinjer?.map {
+                it.maksdato = memento.maksdato
+                it.utbetalingslinjer = memento.utbetalingslinjer?.map {
                     Utbetalingslinje(
                         fom = LocalDate.parse(it["fom"].textValue()),
                         tom = LocalDate.parse(it["tom"].textValue()),
@@ -357,7 +355,8 @@ internal class Vedtaksperiode internal constructor(
                         }
                     )
                 }
-                godkjentAv = vedtaksperiodeJson.godkjentAv
+                it.godkjentAv = memento.godkjentAv
+                it.utbetalingsreferanse = memento.utbetalingsreferanse
             }
         }
 
@@ -388,8 +387,8 @@ internal class Vedtaksperiode internal constructor(
             }
     }
 
-    internal fun jsonRepresentation(): VedtaksperiodeJson {
-        return VedtaksperiodeJson(
+    internal fun memento(): Memento {
+        return Memento(
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -448,18 +447,56 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    internal class VedtaksperiodeJson(
-        val id: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val tilstandType: TilstandType,
-        val sykdomstidslinje: JsonNode?,
-        val maksdato: LocalDate?,
-        val utbetalingslinjer: JsonNode?,
-        val godkjentAv: String?,
-        val utbetalingsreferanse: String?
-    )
+    internal class Memento internal constructor(
+        internal val id: UUID,
+        internal val aktørId: String,
+        internal val fødselsnummer: String,
+        internal val organisasjonsnummer: String,
+        internal val tilstandType: TilstandType,
+        internal val sykdomstidslinje: JsonNode?,
+        internal val maksdato: LocalDate?,
+        internal val utbetalingslinjer: JsonNode?,
+        internal val godkjentAv: String?,
+        internal val utbetalingsreferanse: String?
+    ) {
+
+        internal companion object {
+            private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+            fun fromString(state: String): Memento {
+                val json = objectMapper.readTree(state)
+
+                return Memento(
+                    id = UUID.fromString(json["id"].textValue()),
+                    aktørId = json["aktørId"].textValue(),
+                    fødselsnummer = json["fødselsnummer"].textValue(),
+                    organisasjonsnummer = json["organisasjonsnummer"].textValue(),
+                    tilstandType = valueOf(json["tilstandType"].textValue()),
+                    sykdomstidslinje = json["sykdomstidslinje"]?.takeUnless { it.isNull },
+                    maksdato = json["maksdato"].safelyUnwrapDate(),
+                    utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
+                    godkjentAv = json["godkjentAv"]?.textValue(),
+                    utbetalingsreferanse = json["utbetalingsreferanse"]?.textValue()
+                )
+            }
+        }
+
+        fun state(): String =
+            objectMapper.writeValueAsString(mapOf(
+                "id" to this.id,
+                "aktørId" to this.aktørId,
+                "fødselsnummer" to this.fødselsnummer,
+                "organisasjonsnummer" to this.organisasjonsnummer,
+                "tilstandType" to this.tilstandType,
+                "sykdomstidslinje" to this.sykdomstidslinje,
+                "maksdato" to this.maksdato,
+                "utbetalingslinjer" to this.utbetalingslinjer,
+                "godkjentAv" to this.godkjentAv,
+                "utbetalingsreferanse" to this.utbetalingsreferanse
+            ))
+    }
 
     override fun compareTo(other: Vedtaksperiode): Int = compare(
         leftFom = this.sykdomstidslinje?.startdato(),

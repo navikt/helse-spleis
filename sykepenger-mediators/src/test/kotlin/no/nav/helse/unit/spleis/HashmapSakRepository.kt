@@ -15,11 +15,11 @@ internal class HashmapSakRepository : SakRepository, SakObserver {
     private fun lagreSak(aktørId: String, memento: Sak.Memento) {
         map.computeIfAbsent(aktørId) {
             mutableListOf()
-        }.add(memento.toString())
+        }.add(memento.state())
     }
 
     override fun hentSak(aktørId: String): Sak? {
-        return map[aktørId]?.last()?.let { Sak.fromJson(it) }
+        return map[aktørId]?.last()?.let { Sak.restore(Sak.Memento.fromString(it)) }
     }
 
     fun hentHistorikk(aktørId: String): List<String> =

@@ -16,7 +16,7 @@ class LagreSakDao(private val dataSource: DataSource,
 
     private fun lagreSak(aktørId: String, memento: Sak.Memento) {
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO person (aktor_id, data) VALUES (?, (to_json(?::json)))", aktørId, memento.toString()).asExecute)
+            session.run(queryOf("INSERT INTO person (aktor_id, data) VALUES (?, (to_json(?::json)))", aktørId, memento.state()).asExecute)
         }.also {
             probe.sakSkrevetTilDb()
         }

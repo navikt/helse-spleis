@@ -39,7 +39,7 @@ internal class VedtaksperiodeTest {
             organisasjonsnummer = organisasjonsnummer
         )
 
-        val jsonRepresentation = vedtaksperiode.jsonRepresentation()
+        val jsonRepresentation = vedtaksperiode.memento()
 
         assertEquals(id, jsonRepresentation.id)
         assertEquals(aktørId, jsonRepresentation.aktørId)
@@ -60,13 +60,13 @@ internal class VedtaksperiodeTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer
-        ).jsonRepresentation()
+        ).memento()
 
-        val gjenopprettetJson = Vedtaksperiode.fromJson(originalJson)
+        val gjenopprettetJson = Vedtaksperiode.restore(originalJson)
 
         assertEquals(
-            objectMapper.valueToTree<JsonNode>(originalJson),
-            objectMapper.valueToTree<JsonNode>(gjenopprettetJson.jsonRepresentation())
+            objectMapper.valueToTree<JsonNode>(originalJson.state()),
+            objectMapper.valueToTree<JsonNode>(gjenopprettetJson.memento().state())
         )
     }
 
@@ -87,7 +87,7 @@ internal class VedtaksperiodeTest {
             objectMapper.convertValue<ObjectNode>(it)
         }
 
-        val jsonRepresentation = Vedtaksperiode.VedtaksperiodeJson(
+        val memento = Vedtaksperiode.Memento(
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -102,8 +102,8 @@ internal class VedtaksperiodeTest {
             utbetalingsreferanse = null
         )
 
-        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
-        val nyJson = gjenopprettetVedtaksperiode.jsonRepresentation()
+        val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(memento)
+        val nyJson = gjenopprettetVedtaksperiode.memento()
 
         val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
 
@@ -130,7 +130,7 @@ internal class VedtaksperiodeTest {
             it.set<DecimalNode>("dagsats", DecimalNode(dagsatsMedDesimal))
         }
 
-        val jsonRepresentation = Vedtaksperiode.VedtaksperiodeJson(
+        val jsonRepresentation = Vedtaksperiode.Memento(
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -145,8 +145,8 @@ internal class VedtaksperiodeTest {
             utbetalingsreferanse = null
         )
 
-        val gjenopprettetVedtaksperiode = Vedtaksperiode.fromJson(jsonRepresentation)
-        val nyJson = gjenopprettetVedtaksperiode.jsonRepresentation()
+        val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(jsonRepresentation)
+        val nyJson = gjenopprettetVedtaksperiode.memento()
 
         val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
 

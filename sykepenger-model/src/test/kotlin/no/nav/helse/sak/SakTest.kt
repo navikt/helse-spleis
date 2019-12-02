@@ -479,6 +479,7 @@ internal class SakTest {
         testSak.also {
             it.håndter(
                 nySøknadHendelse(
+                    fødselsnummer = fødselsnummer,
                     arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
                     søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
                     egenmeldinger = emptyList(),
@@ -487,6 +488,7 @@ internal class SakTest {
             )
             it.håndter(
                 sendtSøknadHendelse(
+                    fødselsnummer = fødselsnummer,
                     arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
                     søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
                     egenmeldinger = emptyList(),
@@ -495,6 +497,7 @@ internal class SakTest {
             )
             it.håndter(
                 inntektsmeldingHendelse(
+                    fødselsnummer = fødselsnummer,
                     virksomhetsnummer = organisasjonsnummer,
                     arbeidsgiverperioder = listOf(Periode(30.juni, 5.juli))
                 )

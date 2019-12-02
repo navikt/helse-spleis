@@ -17,23 +17,23 @@ internal class SakSerializationTest {
         // trigger endring på sak som gjør at vi kan få ut memento fra observer
         sak.håndter(nySøknadHendelse())
 
-        val json = testObserver.lastSakEndretEvent!!.memento.toString()
+        val json = testObserver.lastSakEndretEvent!!.memento.state()
 
         assertDoesNotThrow {
-            Sak.fromJson(json)
+            Sak.restore(Sak.Memento.fromString(json))
         }
     }
 
     @Test
     fun `deserialisering av en serialisert sak med gammelt skjema gir feil`() {
         val sakJson = "/serialisert_person_komplett_sak_med_gammel_versjon.json".readResource()
-        assertThrows<SakskjemaForGammelt> { Sak.fromJson(sakJson) }
+        assertThrows<SakskjemaForGammelt> { Sak.restore(Sak.Memento.fromString(sakJson)) }
     }
 
     @Test
     fun `deserialisering av en serialisert sak uten skjemaversjon gir feil`() {
         val sakJson = "/serialisert_person_komplett_sak_uten_versjon.json".readResource()
-        assertThrows<SakskjemaForGammelt> { Sak.fromJson(sakJson) }
+        assertThrows<SakskjemaForGammelt> { Sak.restore(Sak.Memento.fromString(sakJson)) }
     }
 
     private class TestObserver : SakObserver {

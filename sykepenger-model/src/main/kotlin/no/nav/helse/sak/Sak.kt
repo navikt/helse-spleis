@@ -1,6 +1,8 @@
 package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -9,7 +11,6 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -111,129 +112,69 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
             }
         }
 
-    private inner class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID) {
-        private val perioder = mutableListOf<Vedtaksperiode>()
-        private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
-
-        internal constructor(organisasjonsnummer: String): this(organisasjonsnummer, UUID.randomUUID())
-
-        internal constructor(json: ArbeidsgiverJson) : this(json.organisasjonsnummer, json.id) {
-            perioder.addAll(json.saker.map { Vedtaksperiode.fromJson(it) })
-        }
-
-        internal fun håndter(nySøknadHendelse: NySøknadHendelse) {
-            if (!perioder.fold(false) { håndtert, periode ->
-                    håndtert || periode.håndter(nySøknadHendelse)
-                }) {
-                nyVedtaksperiode().håndter(nySøknadHendelse)
-            }
-        }
-
-        internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (perioder.none { it.håndter(sendtSøknadHendelse) }) {
-                nyVedtaksperiode().håndter(sendtSøknadHendelse)
-            }
-        }
-
-        internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (perioder.none { it.håndter(inntektsmeldingHendelse) }) {
-                nyVedtaksperiode().håndter(inntektsmeldingHendelse)
-            }
-        }
-
-        internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            perioder.forEach { it.håndter(sykepengehistorikkHendelse) }
-        }
-
-        internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-            perioder.forEach { it.håndter(manuellSaksbehandlingHendelse) }
-        }
-
-        internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {
-            perioder.forEach { it.invaliderSak(hendelse) }
-        }
-
-        fun addObserver(observer: VedtaksperiodeObserver) {
-            vedtaksperiodeObservers.add(observer)
-            perioder.forEach { it.addVedtaksperiodeObserver(observer) }
-        }
-
-        private fun nyVedtaksperiode(): Vedtaksperiode {
-            return Vedtaksperiode(
-                id = UUID.randomUUID(),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer
-            ).also {
-                vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
-                perioder.add(it)
-            }
-        }
-
-        internal fun jsonRepresentation(): ArbeidsgiverJson {
-            return ArbeidsgiverJson(
-                organisasjonsnummer = organisasjonsnummer,
-                saker = perioder.map { it.jsonRepresentation() },
-                id = id
-            )
-        }
-
-    }
-
-    private fun memento() =
-        Memento(objectMapper.writeValueAsString(jsonRepresentation()))
-
-    private fun jsonRepresentation(): SakJson {
-        return SakJson(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            skjemaVersjon = skjemaVersjon,
-            arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
+    fun memento() =
+        Memento(
+            aktørId = this.aktørId,
+            fødselsnummer = this.fødselsnummer,
+            skjemaVersjon = this.skjemaVersjon,
+            arbeidsgivere = this.arbeidsgivere.values.map { it.memento() }
         )
+
+    class Memento internal constructor(
+        internal val aktørId: String,
+        internal val fødselsnummer: String,
+        internal val skjemaVersjon: Int,
+        internal val arbeidsgivere: List<Arbeidsgiver.Memento>
+    ) {
+
+        companion object {
+            private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+            fun fromString(state: String): Memento {
+                val jsonNode = objectMapper.readTree(state)
+
+                if (!jsonNode.hasNonNull("skjemaVersjon")) throw SakskjemaForGammelt(-1, CURRENT_SKJEMA_VERSJON)
+
+                val skjemaVersjon = jsonNode["skjemaVersjon"].intValue()
+
+                if (skjemaVersjon < CURRENT_SKJEMA_VERSJON) throw SakskjemaForGammelt(skjemaVersjon, CURRENT_SKJEMA_VERSJON)
+
+                return Memento(
+                    aktørId = jsonNode["aktørId"].textValue(),
+                    fødselsnummer = jsonNode["fødselsnummer"].textValue(),
+                    skjemaVersjon = skjemaVersjon,
+                    arbeidsgivere = jsonNode["arbeidsgivere"].map {
+                        Arbeidsgiver.Memento.fromString(it.toString())
+                    }
+                )
+            }
+        }
+
+        fun state(): String =
+            objectMapper.convertValue<ObjectNode>(mapOf(
+                "aktørId" to this.aktørId,
+                "fødselsnummer" to this.fødselsnummer,
+                "skjemaVersjon" to this.skjemaVersjon
+            )).also {
+                this.arbeidsgivere.fold(it.putArray("arbeidsgivere")) { result, current ->
+                    result.addRawValue(RawValue(current.state()))
+                }
+            }.toString()
     }
-
-    data class Memento(private val json: String) {
-        override fun toString() = json
-    }
-
-    override fun toString() = memento().toString()
-
-    internal data class ArbeidsgiverJson(
-        val organisasjonsnummer: String,
-        val saker: List<Vedtaksperiode.VedtaksperiodeJson>,
-        val id: UUID
-    )
-
-    private data class SakJson(
-        val aktørId: String,
-        val fødselsnummer: String,
-        val skjemaVersjon: Int,
-        val arbeidsgivere: List<ArbeidsgiverJson>
-    )
 
     companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromJson(json: String): Sak {
-            val jsonNode = objectMapper.readTree(json)
-
-            if (!jsonNode.hasNonNull("skjemaVersjon")) throw SakskjemaForGammelt(-1, CURRENT_SKJEMA_VERSJON)
-            if (jsonNode["skjemaVersjon"].intValue() < CURRENT_SKJEMA_VERSJON) throw SakskjemaForGammelt(
-                jsonNode["skjemaVersjon"].intValue(),
-                CURRENT_SKJEMA_VERSJON
-            )
-
-            val sakJson: SakJson = objectMapper.convertValue(jsonNode)
-            return Sak(sakJson.aktørId, sakJson.fødselsnummer)
+        fun restore(memento: Memento): Sak {
+            return Sak(memento.aktørId, memento.fødselsnummer)
                 .apply {
-                    arbeidsgivere.putAll(sakJson.arbeidsgivere
-                        .map {
-                            it.organisasjonsnummer to Arbeidsgiver(it).also { arbeidsgiver ->
-                                arbeidsgiver.addObserver(this)
-                            }
-                        })
+                    this.arbeidsgivere.putAll(memento.arbeidsgivere.map {
+                        Arbeidsgiver.restore(it).also {
+                            it.addObserver(this)
+                        }.let {
+                            it.organisasjonsnummer() to it
+                        }
+                    })
                 }
         }
     }
