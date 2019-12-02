@@ -105,21 +105,21 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
 
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
 
-        internal constructor(arbeidsgiverJson: ArbeidsgiverJson) : this(
+        internal constructor(arbeidsgiverJson: ArbeidsgiverJson) : this (
             arbeidsgiverJson.organisasjonsnummer,
             arbeidsgiverJson.id
         ) {
-            saker.addAll(arbeidsgiverJson.saker.map { Vedtaksperiode.fromJson(it) })
+            perioder.addAll(arbeidsgiverJson.saker.map { Vedtaksperiode.fromJson(it) })
         }
 
-        private val saker = mutableListOf<Vedtaksperiode>()
+        private val perioder = mutableListOf<Vedtaksperiode>()
 
         private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
-        internal fun tellVedtaksperioderSomIkkeErINySoknadTilstand() = saker.count { it.erIkkeINySøknadTilstand() }
+        internal fun tellVedtaksperioderSomIkkeErINySoknadTilstand() = perioder.count { it.erIkkeINySøknadTilstand() }
 
         fun håndter(nySøknadHendelse: NySøknadHendelse) {
-            if (saker.map { periode ->
+            if (perioder.map { periode ->
                     periode.håndter(nySøknadHendelse)
                 }.none { håndterteSoknad ->
                     håndterteSoknad
@@ -129,45 +129,45 @@ class Sak(val aktørId: String) : VedtaksperiodeObserver {
         }
 
         fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
-            if (saker.none { it.håndter(sendtSøknadHendelse) }) {
+            if (perioder.none { it.håndter(sendtSøknadHendelse) }) {
                 nyVedtaksperiode().håndter(sendtSøknadHendelse)
             }
         }
 
         fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            if (saker.none { it.håndter(inntektsmeldingHendelse) }) {
+            if (perioder.none { it.håndter(inntektsmeldingHendelse) }) {
                 nyVedtaksperiode().håndter(inntektsmeldingHendelse)
             }
         }
 
         internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-            saker.forEach { it.håndter(sykepengehistorikkHendelse) }
+            perioder.forEach { it.håndter(sykepengehistorikkHendelse) }
         }
 
         internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-            saker.forEach { it.håndter(manuellSaksbehandlingHendelse) }
+            perioder.forEach { it.håndter(manuellSaksbehandlingHendelse) }
         }
 
         internal fun invaliderSaker(hendelse: ArbeidstakerHendelse) {
-            saker.forEach { it.invaliderSak(hendelse) }
+            perioder.forEach { it.invaliderSak(hendelse) }
         }
 
         fun addObserver(observer: VedtaksperiodeObserver) {
             vedtaksperiodeObservers.add(observer)
-            saker.forEach { it.addVedtaksperiodeObserver(observer) }
+            perioder.forEach { it.addVedtaksperiodeObserver(observer) }
         }
 
         private fun nyVedtaksperiode(): Vedtaksperiode {
             return Vedtaksperiode(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
                 vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
-                saker.add(it)
+                perioder.add(it)
             }
         }
 
         internal fun jsonRepresentation(): ArbeidsgiverJson {
             return ArbeidsgiverJson(
                 organisasjonsnummer = organisasjonsnummer,
-                saker = saker.map { it.jsonRepresentation() },
+                saker = perioder.map { it.jsonRepresentation() },
                 id = id
             )
         }

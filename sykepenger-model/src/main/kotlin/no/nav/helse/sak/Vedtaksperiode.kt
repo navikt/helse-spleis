@@ -37,7 +37,7 @@ internal class Vedtaksperiode internal constructor(
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
-    internal fun erIkkeINySøknadTilstand() = tilstand != NY_SØKNAD_MOTTATT
+    internal fun erIkkeINySøknadTilstand() = tilstand.type != NY_SØKNAD_MOTTATT
 
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
@@ -275,9 +275,14 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            vedtaksperiode.emitTrengerLøsning(BehovsTyper.Utbetaling, mapOf(
-                    "utbetalingsreferanse" to utbetalingsreferanse
-            ))
+            vedtaksperiode.emitTrengerLøsning(
+                BehovsTyper.Utbetaling, mapOf(
+                    "utbetalingsreferanse" to utbetalingsreferanse,
+                    "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
+                    "maksdato" to (vedtaksperiode.maksdato ?: ""),
+                    "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
+                )
+            )
 
             val event = VedtaksperiodeObserver.UtbetalingEvent(
                     vedtaksperiodeId = vedtaksperiode.id,
@@ -423,11 +428,6 @@ internal class Vedtaksperiode internal constructor(
 
         params.putAll(additionalParams)
 
-        utbetalingslinjer?.let { params.put("utbetalingslinjer",
-            if (type == BehovsTyper.Utbetaling) it.joinForOppdrag() else it) }
-        maksdato?.let { params.put("maksdato", it) }
-        godkjentAv?.let { params.put("saksbehandler", it) }
-
         val behov = Behov.nyttBehov(type, params)
 
         observers.forEach { observer ->
@@ -448,7 +448,7 @@ internal class Vedtaksperiode internal constructor(
         val fødselsnummer: String?
     )
 
-    override fun compareTo(other: Vedtaksperiode): Int = Vedtaksperiode.compare(
+    override fun compareTo(other: Vedtaksperiode): Int = compare(
         leftFom = this.sykdomstidslinje?.startdato(),
         leftTom = this.sykdomstidslinje?.sluttdato(),
         rightFom = other.sykdomstidslinje?.startdato(),
