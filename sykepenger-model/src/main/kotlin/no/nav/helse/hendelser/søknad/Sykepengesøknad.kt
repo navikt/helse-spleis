@@ -15,6 +15,7 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!
     val aktørId = jsonNode["aktorId"].asText()!!
+    val fnr = jsonNode["fnr"].asText()!!
     val fom get() = jsonNode["fom"].asText().let { LocalDate.parse(it) }
     val tom get() = jsonNode["tom"].asText().let { LocalDate.parse(it) }
     val opprettet get() = jsonNode["opprettet"].asText().let { LocalDateTime.parse(it) }
@@ -43,10 +44,9 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val arbeidsgiver: Arbeidsgiver get() = jsonNode["arbeidsgiver"].let { Arbeidsgiver(it) }
 
     fun kanBehandles(): Boolean {
-        return jsonNode["arbeidsgiver"].isNotNull() && jsonNode["arbeidsgiver"]["orgnummer"].isNotNull()
+        return jsonNode.hasNonNull("fnr")
+            && jsonNode["arbeidsgiver"]?.hasNonNull("orgnummer") == true
     }
-
-    private fun JsonNode?.isNotNull() = this != null && !isNull
 
     fun toJson(): JsonNode = jsonNode
 

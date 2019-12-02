@@ -2,8 +2,8 @@ package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.hendelser.SykdomshendelseType
+import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
@@ -23,11 +23,11 @@ class SendtSøknadHendelse private constructor(hendelseId: String, private val s
         }
     }
 
-    override fun aktørId() =
-            søknad.aktørId
+    override fun aktørId() = søknad.aktørId
 
-    override fun nøkkelHendelseType() =
-            Søknad
+    override fun fødselsnummer() = søknad.fnr
+
+    override fun nøkkelHendelseType() = Søknad
 
     override fun kanBehandles(): Boolean {
         return søknad.kanBehandles()

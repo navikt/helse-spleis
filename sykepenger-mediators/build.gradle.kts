@@ -32,7 +32,7 @@ dependencies {
     }
 
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
-    testImplementation("no.nav.syfo.kafka:sykepengesoknad:191a7a91c115dab0038a7063be52dfae34f76c3a")
+    testImplementation("no.nav.syfo.kafka:sykepengesoknad:0b2a259676f7a78da70d65838851b05925d6de6f")
 
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")

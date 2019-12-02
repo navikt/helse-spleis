@@ -41,6 +41,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     private val aktørId = "1234567891011"
+    private val fødselsnummer = "01017045896"
     private val organisasjonsnummer = "123456789"
     private val vedtaksperiodeId = UUID.randomUUID()
 
@@ -581,9 +582,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     private fun beInStartTilstand(): Vedtaksperiode {
         return Vedtaksperiode(
-                aktørId = aktørId,
-                id = vedtaksperiodeId,
-                organisasjonsnummer = organisasjonsnummer
+            id = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer
         ).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }

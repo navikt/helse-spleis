@@ -2,9 +2,9 @@ package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -31,6 +31,8 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
 
     override fun aktørId() =
             søknad.aktørId
+
+    override fun fødselsnummer(): String = søknad.fnr
 
     override fun organisasjonsnummer(): String =
             søknad.arbeidsgiver.orgnummer

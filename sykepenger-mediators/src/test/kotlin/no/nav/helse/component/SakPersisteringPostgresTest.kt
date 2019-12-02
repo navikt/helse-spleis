@@ -9,8 +9,8 @@ import kotliquery.using
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
-import no.nav.helse.sak.Sak
 import no.nav.helse.runMigration
+import no.nav.helse.sak.Sak
 import no.nav.helse.spleis.LagreSakDao
 import no.nav.helse.spleis.SakPostgresRepository
 import org.junit.jupiter.api.AfterAll
@@ -57,7 +57,7 @@ class SakPersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
         val repo = SakPostgresRepository(dataSource)
 
-        val sak = Sak("2")
+        val sak = Sak("2", "fnr")
         sak.addObserver(LagreSakDao(dataSource))
         sak.håndter(nySøknadHendelse())
 
@@ -69,7 +69,7 @@ class SakPersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
 
         val aktørId = "3"
-        val sak = Sak(aktørId)
+        val sak = Sak(aktørId, "fnr")
         sak.addObserver(LagreSakDao(dataSource))
         sak.håndter(nySøknadHendelse())
         sak.håndter(sendtSøknadHendelse())

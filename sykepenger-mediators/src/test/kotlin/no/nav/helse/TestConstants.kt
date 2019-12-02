@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
@@ -11,8 +12,6 @@ import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
-import no.nav.helse.spleis.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.spleis.søknad.SøknadConsumer
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.math.BigDecimal
@@ -22,7 +21,7 @@ import java.time.Month
 import java.util.*
 
 internal object TestConstants {
-    private val objectMapper = jacksonObjectMapper()
+    internal val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
@@ -37,6 +36,7 @@ internal object TestConstants {
         id: String = UUID.randomUUID().toString(),
         status: SoknadsstatusDTO,
         aktørId: String = UUID.randomUUID().toString().substring(0, 13),
+        fødselsnummer: String = UUID.randomUUID().toString(),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -73,6 +73,7 @@ internal object TestConstants {
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = status,
         aktorId = aktørId,
+        fnr = fødselsnummer,
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = arbeidsgiver,
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
@@ -93,6 +94,7 @@ internal object TestConstants {
     fun sendtSøknadHendelse(
         id: String = UUID.randomUUID().toString(),
         aktørId: String = UUID.randomUUID().toString(),
+        fødselsnummer: String = UUID.randomUUID().toString(),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -129,6 +131,7 @@ internal object TestConstants {
             søknadDTO(
                 id = id,
                 aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
                 arbeidGjenopptatt = arbeidGjenopptatt,
                 korrigerer = korrigerer,
                 egenmeldinger = egenmeldinger,
@@ -144,6 +147,7 @@ internal object TestConstants {
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
         aktørId: String = UUID.randomUUID().toString(),
+        fødselsnummer: String = UUID.randomUUID().toString(),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -180,6 +184,7 @@ internal object TestConstants {
             søknadDTO(
                 id = id,
                 aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
                 arbeidGjenopptatt = arbeidGjenopptatt,
                 korrigerer = korrigerer,
                 egenmeldinger = egenmeldinger,
@@ -194,6 +199,7 @@ internal object TestConstants {
 
     fun inntektsmeldingHendelse(
         aktørId: String = "",
+        fødselsnummer: String = "",
         virksomhetsnummer: String? = "123456789",
         beregnetInntekt: BigDecimal? = 666.toBigDecimal(),
         førsteFraværsdag: LocalDate = 10.september,
@@ -211,6 +217,7 @@ internal object TestConstants {
             no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(
                 inntektsmeldingDTO(
                     aktørId,
+                    fødselsnummer,
                     virksomhetsnummer,
                     førsteFraværsdag,
                     arbeidsgiverperioder,
@@ -224,6 +231,7 @@ internal object TestConstants {
 
     fun inntektsmeldingDTO(
         aktørId: String = "",
+        fødselsnummer: String = "",
         virksomhetsnummer: String? = "123456789",
         førsteFraværsdag: LocalDate = 10.september,
         arbeidsgiverperioder: List<Periode> = listOf(
@@ -239,7 +247,7 @@ internal object TestConstants {
     ) =
         Inntektsmelding(
             inntektsmeldingId = "",
-            arbeidstakerFnr = "02129212345",
+            arbeidstakerFnr = fødselsnummer,
             arbeidstakerAktorId = aktørId,
             virksomhetsnummer = virksomhetsnummer,
             arbeidsgiverFnr = null,
@@ -273,13 +281,15 @@ internal object TestConstants {
         perioder: List<SpolePeriode>,
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
+        fødselsnummer: String = "2",
         vedtaksperiodeId: UUID = UUID.randomUUID()
     ): Sykepengehistorikk {
         val behov = Behov.nyttBehov(
             BehovsTyper.Sykepengehistorikk, mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "sakskompleksId" to vedtaksperiodeId.toString(),
-                "aktørId" to aktørId
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer
             )
         ).also {
             it.løsBehov(
@@ -294,6 +304,7 @@ internal object TestConstants {
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
+        fødselsnummer: String = "2",
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
@@ -303,6 +314,7 @@ internal object TestConstants {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "sakskompleksId" to vedtaksperiodeId,
                 "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
                 "saksbehandlerIdent" to saksbehandler
             )
         ).also {
@@ -315,26 +327,26 @@ internal object TestConstants {
     }
 }
 
-data class SpolePeriode(
+internal data class SpolePeriode(
     val fom: LocalDate,
     val tom: LocalDate,
     val grad: String
 )
 
-fun SykepengesoknadDTO.toJsonNode(): JsonNode = SøknadConsumer.søknadObjectMapper.valueToTree(this)
-fun Inntektsmelding.toJsonNode(): JsonNode = InntektsmeldingConsumer.inntektsmeldingObjectMapper.valueToTree(this)
+internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
-val Int.juni
+internal val Int.juni
     get() = LocalDate.of(2019, Month.JUNE, this)
 
-val Int.juli
+internal val Int.juli
     get() = LocalDate.of(2019, Month.JULY, this)
 
-val Int.august
+internal val Int.august
     get() = LocalDate.of(2019, Month.AUGUST, this)
 
-val Int.september
+internal val Int.september
     get() = LocalDate.of(2019, Month.SEPTEMBER, this)
 
-val Int.oktober
+internal val Int.oktober
     get() = LocalDate.of(2019, Month.OCTOBER, this)

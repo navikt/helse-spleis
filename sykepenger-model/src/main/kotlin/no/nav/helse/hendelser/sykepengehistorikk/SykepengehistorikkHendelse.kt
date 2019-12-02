@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser.sykepengehistorikk
 
-import no.nav.helse.sak.VedtaksperiodeHendelse
 import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.sak.VedtaksperiodeHendelse
 
 class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistorikk): ArbeidstakerHendelse,
     VedtaksperiodeHendelse {
@@ -11,6 +11,9 @@ class SykepengehistorikkHendelse(private val sykepengehistorikk: Sykepengehistor
 
     override fun aktørId() =
         sykepengehistorikk.aktørId
+
+    override fun fødselsnummer() =
+        sykepengehistorikk.fødselsnummer
 
     fun sisteFraværsdag() =
             sykepengehistorikk.perioder.maxBy { it.tom }?.tom

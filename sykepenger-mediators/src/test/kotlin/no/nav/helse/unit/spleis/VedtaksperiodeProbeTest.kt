@@ -18,6 +18,7 @@ internal class VedtaksperiodeProbeTest {
     private companion object {
         private val id = UUID.randomUUID()
         private val aktørId = "123456789123"
+        private val fødselsnummer = "5678"
 
         private val probe = VedtaksperiodeProbe
     }
@@ -62,6 +63,7 @@ internal class VedtaksperiodeProbeTest {
         VedtaksperiodeObserver.StateChangeEvent(
             id = id,
             aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = "orgnummer",
             currentState = currentState,
             previousState = previousState,

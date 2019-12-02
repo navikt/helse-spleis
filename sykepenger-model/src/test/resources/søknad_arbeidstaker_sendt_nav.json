@@ -3,6 +3,7 @@
   "type": "ARBEIDSTAKERE",
   "status": "SENDT",
   "aktorId": "1234567890123",
+  "fnr": "98765432111",
   "sykmeldingId": "71bd853d-36a1-49df-a34c-6e02cf727cfa",
   "arbeidsgiver": {
     "navn": "Nærbutikken AS",

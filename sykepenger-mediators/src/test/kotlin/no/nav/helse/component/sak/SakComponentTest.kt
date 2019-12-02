@@ -3,7 +3,6 @@ package no.nav.helse.component.sak
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -32,7 +31,6 @@ import no.nav.helse.behov.BehovsTyper.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.sak.Sak
 import no.nav.helse.sak.TilstandType
-import no.nav.helse.spleis.oppgave.GosysOppgaveProducer.OpprettGosysOppgaveDto
 import no.nav.helse.spleis.path
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -185,24 +183,25 @@ internal class SakComponentTest {
     @Test
     fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
         val aktørID = "87654321962"
+        val fødselsnummer = "01017000000"
         val virksomhetsnummer = "123456789"
 
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.START, currentState = TilstandType.NY_SØKNAD_MOTTATT)
-        sendSøknad(aktørID, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.NY_SØKNAD_MOTTATT, currentState = TilstandType.SENDT_SØKNAD_MOTTATT)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.SENDT_SØKNAD_MOTTATT, currentState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
+        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.START, currentState = TilstandType.NY_SØKNAD_MOTTATT)
+        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.NY_SØKNAD_MOTTATT, currentState = TilstandType.SENDT_SØKNAD_MOTTATT)
+        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.SENDT_SØKNAD_MOTTATT, currentState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
 
         val sykehistorikk = listOf(SpolePeriode(
             fom = søknad.fom!!.minusMonths(8),
             tom = søknad.fom!!.minusMonths(7),
             grad = "100"
         ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
+        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
 
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = TilstandType.TIL_GODKJENNING)
-        assertBehov(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = TilstandType.TIL_GODKJENNING)
+        assertBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
 
         aktørID.hentSak {
             assertTrue(this.contains("maksdato"))
@@ -214,23 +213,24 @@ internal class SakComponentTest {
     @Test
     fun `gitt en sak for utbetaling, skal vi kunne hente opp saken via utbetalingsreferanse`() {
         val aktørID = "87659123421962"
+        val fødselsnummer = "01018000000"
         val virksomhetsnummer = "123456789"
 
-        val søknad = sendNySøknad(aktørID, virksomhetsnummer)
-        sendSøknad(aktørID, virksomhetsnummer)
-        sendInnteksmelding(aktørID, virksomhetsnummer)
+        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
 
         val sykehistorikk = listOf(SpolePeriode(
                 fom = søknad.fom!!.minusMonths(8),
                 tom = søknad.fom!!.minusMonths(7),
                 grad = "100"
         ))
-        sendSykepengehistorikkløsning(aktørID, sykehistorikk)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, true, "en_saksbehandler_ident")
+        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer,true, "en_saksbehandler_ident")
 
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.TIL_GODKJENNING, currentState = TilstandType.TIL_UTBETALING)
+        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.TIL_GODKJENNING, currentState = TilstandType.TIL_UTBETALING)
 
-        val utbetalingsbehov = ventPåBehov(aktørId = aktørID, behovType = Utbetaling)
+        val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
 
         utbetalingsreferanse.hentUtbetaling {
@@ -245,9 +245,10 @@ internal class SakComponentTest {
     @Test
     fun `gitt en ny sak, så skal den kunne hentes ut på saken`() {
         val enAktørId = "1211109876543"
+        val fødselsnummer = "01019000000"
         val virksomhetsnummer = "123456789"
 
-        val nySøknad = sendNySøknad(enAktørId, virksomhetsnummer)
+        val nySøknad = sendNySøknad(enAktørId, fødselsnummer, virksomhetsnummer)
 
         enAktørId.hentSak {
             val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
@@ -280,8 +281,8 @@ internal class SakComponentTest {
         ("/api/utbetaling/" + this).httpGet(testBlock)
     }
 
-    private fun sendSykepengehistorikkløsning(aktørId: String, perioder: List<SpolePeriode>) {
-        val behov = ventPåBehov(aktørId, Sykepengehistorikk)
+    private fun sendSykepengehistorikkløsning(aktørId: String, fødselsnummer: String, perioder: List<SpolePeriode>) {
+        val behov = ventPåBehov(aktørId, fødselsnummer, Sykepengehistorikk)
 
         assertNotNull(behov["tom"])
 
@@ -291,8 +292,8 @@ internal class SakComponentTest {
         sendBehov(behov)
     }
 
-    private fun sendGodkjenningFraSaksbehandlerløsning(aktørId: String, utbetalingGodkjent: Boolean, saksbehandler: String) {
-        val behov = ventPåBehov(aktørId, GodkjenningFraSaksbehandler)
+    private fun sendGodkjenningFraSaksbehandlerløsning(aktørId: String, fødselsnummer: String, utbetalingGodkjent: Boolean, saksbehandler: String) {
+        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
         behov.løsBehov(mapOf(
             "godkjent" to utbetalingGodkjent
         ))
@@ -300,15 +301,15 @@ internal class SakComponentTest {
         sendBehov(behov)
     }
 
-    private fun sendInnteksmelding(aktorID: String, virksomhetsnummer: String, inntektsMelding: Inntektsmelding = inntektsmeldingDTO(aktørId = aktorID, virksomhetsnummer = virksomhetsnummer)) {
+    private fun sendInnteksmelding(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, inntektsMelding: Inntektsmelding = inntektsmeldingDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer)) {
         synchronousSendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode().toString())
     }
 
-    private fun sendSøknad(aktorID: String, virksomhetsnummer: String, sendtSøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.SENDT)) {
+    private fun sendSøknad(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, sendtSøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.SENDT)) {
         synchronousSendKafkaMessage(søknadTopic, sendtSøknad.id!!, sendtSøknad.toJsonNode().toString())
     }
 
-    private fun sendNySøknad(aktorID: String, virksomhetsnummer: String, nySøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.NY)): SykepengesoknadDTO {
+    private fun sendNySøknad(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, nySøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.NY)): SykepengesoknadDTO {
         synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode().toString())
         return nySøknad
     }
@@ -317,7 +318,7 @@ internal class SakComponentTest {
         sendKafkaMessage(behovTopic, behov.id().toString(), behov.toJson())
     }
 
-    private fun ventPåBehov(aktørId: String, behovType: BehovsTyper): Behov {
+    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: BehovsTyper): Behov {
         var behov: Behov? = null
 
         await()
@@ -326,7 +327,7 @@ internal class SakComponentTest {
                 behov = TestConsumer.records(behovTopic)
                     .map { Behov.fromJson(it.value()) }
                     .filter { it.behovType() == behovType.name }
-                    .firstOrNull { aktørId == it["aktørId"] }
+                    .firstOrNull { aktørId == it["aktørId"] && fødselsnummer == it["fødselsnummer"] }
 
                 behov != null
             }
@@ -334,7 +335,7 @@ internal class SakComponentTest {
         return behov!!
     }
 
-    private fun assertVedtaksperiodeEndretEvent(virksomhetsnummer: String, aktørId: String, previousState: TilstandType, currentState: TilstandType) {
+    private fun assertVedtaksperiodeEndretEvent(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, previousState: TilstandType, currentState: TilstandType) {
         await()
                 .atMost(5, SECONDS)
                 .untilAsserted {
@@ -342,6 +343,7 @@ internal class SakComponentTest {
                     val vedtaksperiodeEndretHendelser = meldingerPåTopic
                             .map { objectMapper.readTree(it.value()) }
                             .filter { aktørId == it["aktørId"].textValue() }
+                            .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                             .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
                             .filter { previousState == TilstandType.valueOf(it["previousState"].textValue())
                                     && currentState == TilstandType.valueOf(it["currentState"].textValue()) }
@@ -350,7 +352,7 @@ internal class SakComponentTest {
                 }
     }
 
-    private fun assertBehov(virksomhetsnummer: String, aktørId: String, typer: List<String>) {
+    private fun assertBehov(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
         await()
             .atMost(5, SECONDS)
             .untilAsserted {
@@ -358,22 +360,13 @@ internal class SakComponentTest {
                 val behov = meldingerPåTopic
                     .map { Behov.fromJson(it.value()) }
                     .filter { aktørId == it["aktørId"] }
+                    .filter { fødselsnummer == it["fødselsnummer"] }
                     .filter { virksomhetsnummer == it["organisasjonsnummer"] }
                     .filter { it.behovType() in typer }
                     .map(Behov::behovType)
                     .distinct()
 
                 assertEquals(typer, behov)
-            }
-    }
-
-    private fun assertOpprettGosysOppgave(aktørId: String) {
-        await()
-            .atMost(5, SECONDS)
-            .untilAsserted {
-                val opprettGosysOppgaveList = TestConsumer.records(opprettGosysOppgaveTopic)
-                    .map { objectMapper.readValue<OpprettGosysOppgaveDto>(it.value()) }
-                assertTrue(opprettGosysOppgaveList.any { aktørId == it.aktorId })
             }
     }
 

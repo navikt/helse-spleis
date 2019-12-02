@@ -2,9 +2,9 @@ package no.nav.helse.hendelser.inntektsmelding
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -29,7 +29,7 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
     fun endringIRefusjoner() =
             inntektsmelding.endringIRefusjoner
 
-    fun fødselsnummer() = inntektsmelding.arbeidstakerFnr
+    override fun fødselsnummer() = inntektsmelding.arbeidstakerFnr
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 

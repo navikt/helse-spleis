@@ -91,14 +91,14 @@ internal class SakMediator(private val sakRepository: SakRepository,
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         if (event.currentState == TIL_INFOTRYGD) {
-            gosysOppgaveProducer.opprettOppgave(event.aktørId)
+            gosysOppgaveProducer.opprettOppgave(event.aktørId, event.fødselsnummer)
         }
 
         vedtaksperiodeEventProducer.sendEndringEvent(event)
     }
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId())).also {
+            (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId(), fødselsnummer = arbeidstakerHendelse.fødselsnummer())).also {
                 it.addObserver(this)
                 it.addObserver(lagreSakDao)
                 it.addObserver(lagreUtbetalingDao)

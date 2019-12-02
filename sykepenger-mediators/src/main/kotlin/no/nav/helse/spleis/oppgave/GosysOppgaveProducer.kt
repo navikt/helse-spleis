@@ -8,14 +8,9 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
-import org.slf4j.LoggerFactory
 import java.util.*
 
 class GosysOppgaveProducer(commonKafkaProperties: Properties) {
-
-    private companion object {
-        private val log = LoggerFactory.getLogger(GosysOppgaveProducer::class.java)
-    }
 
     private val oppgaveProducerProperties = commonKafkaProperties.apply {
         put(ProducerConfig.ACKS_CONFIG, "all")
@@ -24,15 +19,15 @@ class GosysOppgaveProducer(commonKafkaProperties: Properties) {
 
     private val kafkaProducer = KafkaProducer<String, String>(oppgaveProducerProperties, StringSerializer(), StringSerializer())
 
-    fun opprettOppgave(aktørId: String) {
+    fun opprettOppgave(aktørId: String, fødselsnummer: String) {
         kafkaProducer.send(ProducerRecord(
                 Topics.opprettGosysOppgaveTopic,
                 aktørId,
-                OpprettGosysOppgaveDto(aktorId = aktørId).toJson()
+                OpprettGosysOppgaveDto(aktorId = aktørId, fødselsnummer = fødselsnummer).toJson()
         )).get()
     }
 
-    internal class OpprettGosysOppgaveDto(val aktorId: String) {
+    internal class OpprettGosysOppgaveDto(internal val aktorId: String, internal val fødselsnummer: String) {
         private companion object {
             private val objectMapper = jacksonObjectMapper()
                     .registerModule(JavaTimeModule())

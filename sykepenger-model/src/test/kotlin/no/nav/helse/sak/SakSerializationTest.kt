@@ -11,7 +11,7 @@ internal class SakSerializationTest {
     fun `restoring av lagret sak gir samme objekt`() {
         val testObserver = TestObserver()
 
-        val sak = Sak(aktørId = "id")
+        val sak = Sak(aktørId = "id", fødselsnummer = "fnr")
         sak.addObserver(testObserver)
 
         // trigger endring på sak som gjør at vi kan få ut memento fra observer

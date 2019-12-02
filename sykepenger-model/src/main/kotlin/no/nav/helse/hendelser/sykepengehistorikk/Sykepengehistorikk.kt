@@ -6,6 +6,7 @@ import java.time.LocalDate
 // Embedded document - json er output fra Spole
 data class Sykepengehistorikk(val jsonNode: JsonNode) {
     val aktørId = jsonNode["aktørId"].textValue()
+    val fødselsnummer = jsonNode["fødselsnummer"].textValue()
     val organisasjonsnummer = jsonNode["organisasjonsnummer"].textValue()
     val vedtaksperiodeId = jsonNode["sakskompleksId"].textValue()
     val perioder get() =

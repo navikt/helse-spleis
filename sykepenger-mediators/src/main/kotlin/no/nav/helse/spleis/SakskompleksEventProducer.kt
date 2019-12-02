@@ -27,6 +27,7 @@ class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
                 event.aktørId,
                 VedtaksperiodeEventDto(
                     aktørId = event.aktørId,
+                    fødselsnummer = event.fødselsnummer,
                     organisasjonsnummer = event.organisasjonsnummer,
                     vedtaksperiodeId = event.id,
                     currentState = event.currentState,
@@ -38,6 +39,7 @@ class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
 
     internal class VedtaksperiodeEventDto(
         val aktørId: String,
+        val fødselsnummer: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val currentState: TilstandType,

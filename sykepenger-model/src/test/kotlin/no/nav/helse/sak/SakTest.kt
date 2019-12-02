@@ -29,12 +29,13 @@ import kotlin.collections.set
 internal class SakTest {
 
     private val aktørId = "id"
+    private val fødselsnummer = "01017000000"
     private val organisasjonsnummer = "12"
     private val tilstandsflytObserver = TilstandsflytObserver()
     private val sakstilstandObserver = SakstilstandObserver()
     private val needObserver = NeedObserver()
 
-    private val testSak = Sak(aktørId = aktørId).also {
+    private val testSak = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
         it.addObserver(tilstandsflytObserver)
         it.addObserver(sakstilstandObserver)
         it.addObserver(needObserver)
@@ -64,9 +65,11 @@ internal class SakTest {
     @Test
     internal fun `inntektsmelding uten sak trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
-            it.håndter(inntektsmeldingHendelse(
+            it.håndter(
+                inntektsmeldingHendelse(
                     virksomhetsnummer = "123456789"
-            ))
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -76,14 +79,19 @@ internal class SakTest {
     @Test
     internal fun `inntektsmelding med sak trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(
+            it.håndter(
+                nySøknadHendelse(
                     arbeidsgiver = ArbeidsgiverDTO(
-                            orgnummer = organisasjonsnummer
-                    )))
+                        orgnummer = organisasjonsnummer
+                    )
+                )
+            )
 
-            it.håndter(inntektsmeldingHendelse(
+            it.håndter(
+                inntektsmeldingHendelse(
                     virksomhetsnummer = organisasjonsnummer
-            ))
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -93,8 +101,28 @@ internal class SakTest {
     @Test
     internal fun `ny sak blir opprettet når en ny søknad som ikke overlapper saken personen har fra før blir sendt inn`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 28.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 20.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 21.juli,
+                            tom = 28.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -106,8 +134,28 @@ internal class SakTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende saken`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 22.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 20.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 10.juli,
+                            tom = 22.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -119,9 +167,39 @@ internal class SakTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når vi mottar den andre sendte søknaden`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 30.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 20.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 20.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 10.juli,
+                            tom = 30.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -132,8 +210,28 @@ internal class SakTest {
     @Test
     internal fun `oppretter ny sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 20.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 21.juli, tom = 30.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 20.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 21.juli,
+                            tom = 30.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -144,8 +242,28 @@ internal class SakTest {
     @Test
     internal fun `ny sak må behandles i infotrygd når vi mottar den sendte søknaden først`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.juli, tom = 30.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 9.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 10.juli,
+                            tom = 30.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -157,9 +275,28 @@ internal class SakTest {
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når vi mottar den andre inntektsmeldngen`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = "12"), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = "12", førsteFraværsdag = 1.juli, arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))))
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = "12", førsteFraværsdag = 1.juli, arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = "12"),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = "12",
+                    førsteFraværsdag = 1.juli,
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
+                )
+            )
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = "12",
+                    førsteFraværsdag = 1.juli,
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -180,12 +317,14 @@ internal class SakTest {
     internal fun `ny søknad med periode som ikke er 100 % kaster exception`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(nySøknadHendelse(
+                it.håndter(
+                    nySøknadHendelse(
                         søknadsperioder = listOf(
-                                SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 60),
-                                SoknadsperiodeDTO(fom = Uke(1).fredag, tom = Uke(1).fredag, sykmeldingsgrad = 100)
+                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 60),
+                            SoknadsperiodeDTO(fom = Uke(1).fredag, tom = Uke(1).fredag, sykmeldingsgrad = 100)
                         )
-                ))
+                    )
+                )
             }
         }
     }
@@ -194,12 +333,14 @@ internal class SakTest {
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(sendtSøknadHendelse(
+                it.håndter(
+                    sendtSøknadHendelse(
                         søknadsperioder = listOf(
-                                SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100)
+                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100)
                         ),
                         sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
-                ))
+                    )
+                )
             }
         }
     }
@@ -208,12 +349,19 @@ internal class SakTest {
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(sendtSøknadHendelse(
+                it.håndter(
+                    sendtSøknadHendelse(
                         søknadsperioder = listOf(
-                                SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100),
-                                SoknadsperiodeDTO(fom = Uke(1).fredag, tom = Uke(1).fredag, sykmeldingsgrad = 100, faktiskGrad = 90)
+                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100),
+                            SoknadsperiodeDTO(
+                                fom = Uke(1).fredag,
+                                tom = Uke(1).fredag,
+                                sykmeldingsgrad = 100,
+                                faktiskGrad = 90
+                            )
                         )
-                ))
+                    )
+                )
             }
         }
     }
@@ -222,9 +370,11 @@ internal class SakTest {
     internal fun `søknad uten arbeidsgiver kaster exception`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(nySøknadHendelse(
+                it.håndter(
+                    nySøknadHendelse(
                         arbeidsgiver = null
-                ))
+                    )
+                )
             }
         }
     }
@@ -233,12 +383,14 @@ internal class SakTest {
     internal fun `ny søknad uten organisasjonsnummer kaster exception`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(nySøknadHendelse(
+                it.håndter(
+                    nySøknadHendelse(
                         arbeidsgiver = ArbeidsgiverDTO(
-                                navn = "En arbeidsgiver",
-                                orgnummer = null
+                            navn = "En arbeidsgiver",
+                            orgnummer = null
                         )
-                ))
+                    )
+                )
             }
         }
     }
@@ -247,12 +399,14 @@ internal class SakTest {
     internal fun `sendt søknad uten organisasjonsnummer kaster exception`() {
         testSak.also {
             assertThrows<UtenforOmfangException> {
-                it.håndter(sendtSøknadHendelse(
+                it.håndter(
+                    sendtSøknadHendelse(
                         arbeidsgiver = ArbeidsgiverDTO(
-                                navn = "En arbeidsgiver",
-                                orgnummer = null
+                            navn = "En arbeidsgiver",
+                            orgnummer = null
                         )
-                ))
+                    )
+                )
             }
         }
     }
@@ -260,16 +414,21 @@ internal class SakTest {
     @Test
     internal fun `sendt søknad trigger vedtaksperiode endret-hendelse`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(
+            it.håndter(
+                nySøknadHendelse(
                     arbeidsgiver = ArbeidsgiverDTO(
-                            orgnummer = organisasjonsnummer
-                    )))
-
-            it.håndter(sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                            orgnummer = organisasjonsnummer
+                        orgnummer = organisasjonsnummer
                     )
-            ))
+                )
+            )
+
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        orgnummer = organisasjonsnummer
+                    )
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.sakEndret)
         assertTrue(tilstandsflytObserver.wasTriggered)
@@ -289,10 +448,29 @@ internal class SakTest {
     @Test
     fun `komplett genererer sykepengehistorikk-needs`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
 
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = organisasjonsnummer, arbeidsgiverperioder = listOf(Periode(1. juli, 9. juli))))
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = organisasjonsnummer,
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
+                )
+            )
         }
 
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
@@ -304,19 +482,41 @@ internal class SakTest {
     @Test
     fun `sykepengehistorikk eldre enn seks måneder fører saken videre`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = organisasjonsnummer, arbeidsgiverperioder = listOf(Periode(30.juni, 5.juli))))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = organisasjonsnummer,
+                    arbeidsgiverperioder = listOf(Periode(30.juni, 5.juli))
+                )
+            )
 
             assertEquals(1, sakstilstandObserver.sakstilstander.size)
             val saksid = sakstilstandObserver.sakstilstander.keys.first()
 
-            it.håndter(sykepengehistorikkHendelse(
+            it.håndter(
+                sykepengehistorikkHendelse(
                     sisteHistoriskeSykedag = 1.juli.minusMonths(7),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = saksid
-            ))
+                )
+            )
         }
 
         assertEquals(TilstandType.TIL_GODKJENNING, tilstandsflytObserver.vedtaksperiodetilstand)
@@ -325,16 +525,38 @@ internal class SakTest {
     @Test
     fun `sykepengehistorikk med feil vedtaksperiodeid skal ikke føre noen saker videre`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = organisasjonsnummer, arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = organisasjonsnummer,
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
+                )
+            )
 
-            it.håndter(sykepengehistorikkHendelse(
+            it.håndter(
+                sykepengehistorikkHendelse(
                     sisteHistoriskeSykedag = 1.juli.minusMonths(7),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = UUID.randomUUID()
-            ))
+                )
+            )
         }
 
         assertEquals(TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, tilstandsflytObserver.vedtaksperiodetilstand)
@@ -343,19 +565,41 @@ internal class SakTest {
     @Test
     fun `sykepengehistorikk yngre enn seks måneder fører til at saken må behandles i infotrygd`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(sendtSøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
-            it.håndter(inntektsmeldingHendelse(virksomhetsnummer = organisasjonsnummer, arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
+            it.håndter(
+                inntektsmeldingHendelse(
+                    virksomhetsnummer = organisasjonsnummer,
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
+                )
+            )
 
             assertEquals(1, sakstilstandObserver.sakstilstander.size)
             val saksid = sakstilstandObserver.sakstilstander.keys.first()
 
-            it.håndter(sykepengehistorikkHendelse(
+            it.håndter(
+                sykepengehistorikkHendelse(
                     sisteHistoriskeSykedag = 1.juli.minusMonths(5),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = saksid
-            ))
+                )
+            )
         }
         assertTrue(tilstandsflytObserver.wasTriggered, "skulle ha trigget observer")
         assertTrue(tilstandsflytObserver.sakEndret, "skulle endret sak")
@@ -365,7 +609,14 @@ internal class SakTest {
     @Test
     fun `motta en inntektsmelding som ikke kan behandles etter ny søknad`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer), søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)), egenmeldinger = emptyList(), fravær = emptyList()))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    egenmeldinger = emptyList(),
+                    fravær = emptyList()
+                )
+            )
 
             val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
                 (it as ObjectNode).remove("virksomhetsnummer")

@@ -6,6 +6,7 @@ import java.util.*
 interface VedtaksperiodeObserver {
     data class StateChangeEvent(val id: UUID,
                                 val aktørId: String,
+                                val fødselsnummer: String,
                                 val organisasjonsnummer: String,
                                 val currentState: TilstandType,
                                 val previousState: TilstandType,
@@ -13,6 +14,7 @@ interface VedtaksperiodeObserver {
 
     data class UtbetalingEvent(val vedtaksperiodeId: UUID,
                                val aktørId: String,
+                               val fødselsnummer: String,
                                val organisasjonsnummer: String,
                                val utbetalingsreferanse: String)
 

@@ -2,8 +2,8 @@ package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
@@ -11,13 +11,14 @@ import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import java.util.*
 
-private const val CURRENT_SKJEMA_VERSJON = 2
+private const val CURRENT_SKJEMA_VERSJON = 3
 
-class Sak(private val aktørId: String) : VedtaksperiodeObserver {
+class Sak(private val aktørId: String, private val fødselsnummer: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
 
     private val sakObservers = mutableListOf<SakObserver>()
+
     fun håndter(nySøknadHendelse: NySøknadHendelse) {
         if (!nySøknadHendelse.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
@@ -36,14 +37,6 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
         }
 
         finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndter(sendtSøknadHendelse)
-    }
-
-    private fun harVedtaksperioderForAndreArbeidsgivere(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
-        return arbeidsgivere.size > 1 && arbeidsgivere.filterValues {
-            it.organisasjonsnummer != sendtSøknadHendelse.organisasjonsnummer()
-        }.filterValues {
-            it.tellVedtaksperioderSomIkkeErINySoknadTilstand() > 0
-        }.isNotEmpty()
     }
 
     fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
@@ -77,6 +70,14 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
     fun addObserver(observer: SakObserver) {
         sakObservers.add(observer)
         arbeidsgivere.values.forEach { it.addObserver(observer) }
+    }
+
+    private fun harVedtaksperioderForAndreArbeidsgivere(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
+        return arbeidsgivere.size > 1 && arbeidsgivere.filterValues {
+            it.organisasjonsnummer != sendtSøknadHendelse.organisasjonsnummer()
+        }.filterValues {
+            it.tellVedtaksperioderSomIkkeErINySoknadTilstand() > 0
+        }.isNotEmpty()
     }
 
     private fun invaliderAlleSaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
@@ -158,7 +159,12 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
         }
 
         private fun nyVedtaksperiode(): Vedtaksperiode {
-            return Vedtaksperiode(UUID.randomUUID(), aktørId, organisasjonsnummer).also {
+            return Vedtaksperiode(
+                id = UUID.randomUUID(),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer
+            ).also {
                 vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
                 perioder.add(it)
             }
@@ -180,6 +186,7 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
     private fun jsonRepresentation(): SakJson {
         return SakJson(
             aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
             skjemaVersjon = skjemaVersjon,
             arbeidsgivere = arbeidsgivere.map { it.value.jsonRepresentation() }
         )
@@ -199,6 +206,7 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
 
     private data class SakJson(
         val aktørId: String,
+        val fødselsnummer: String,
         val skjemaVersjon: Int,
         val arbeidsgivere: List<ArbeidsgiverJson>
     )
@@ -209,11 +217,13 @@ class Sak(private val aktørId: String) : VedtaksperiodeObserver {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         fun fromJson(json: String): Sak {
-            val sakJson: SakJson = objectMapper.readValue(json)
-            if (sakJson.skjemaVersjon < CURRENT_SKJEMA_VERSJON) {
-                throw SakskjemaForGammelt(sakJson.aktørId, sakJson.skjemaVersjon, CURRENT_SKJEMA_VERSJON)
-            }
-            return Sak(sakJson.aktørId)
+            val jsonNode = objectMapper.readTree(json)
+
+            if (!jsonNode.hasNonNull("skjemaVersjon")) throw SakskjemaForGammelt(-1, CURRENT_SKJEMA_VERSJON)
+            if (jsonNode["skjemaVersjon"].intValue() < CURRENT_SKJEMA_VERSJON)throw SakskjemaForGammelt(jsonNode["skjemaVersjon"].intValue(), CURRENT_SKJEMA_VERSJON)
+
+            val sakJson: SakJson = objectMapper.convertValue(jsonNode)
+            return Sak(sakJson.aktørId, sakJson.fødselsnummer)
                 .apply {
                     arbeidsgivere.putAll(sakJson.arbeidsgivere
                         .map {

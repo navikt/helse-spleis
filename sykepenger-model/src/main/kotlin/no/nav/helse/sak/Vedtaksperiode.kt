@@ -31,19 +31,16 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
 internal class Vedtaksperiode internal constructor(
     private val id: UUID,
     private val aktørId: String,
+    private val fødselsnummer: String,
     private val organisasjonsnummer: String
-): Comparable<Vedtaksperiode> {
+) : Comparable<Vedtaksperiode> {
     private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
-    internal fun erIkkeINySøknadTilstand() = tilstand.type != NY_SØKNAD_MOTTATT
-
     private var sykdomstidslinje: Sykdomstidslinje? = null
 
     private var maksdato: LocalDate? = null
-
-    private var fødselsnummer: String? = null
 
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
 
@@ -53,10 +50,13 @@ internal class Vedtaksperiode internal constructor(
 
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
-    private fun inntektsmeldingHendelse() =
-            this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
+    internal fun erIkkeINySøknadTilstand() = tilstand.type != NY_SØKNAD_MOTTATT
 
-    private fun sykepengegrunnlag() = (inntektsmeldingHendelse()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
+    private fun inntektsmeldingHendelse() =
+        this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
+
+    private fun sykepengegrunnlag() =
+        (inntektsmeldingHendelse()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
 
     private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
 
@@ -71,7 +71,6 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
-        fødselsnummer = inntektsmeldingHendelse.fødselsnummer()
         return overlapperMed(inntektsmeldingHendelse).also {
             if (it) {
                 tilstand.håndter(this, inntektsmeldingHendelse)
@@ -80,11 +79,17 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        if (id.toString() == sykepengehistorikkHendelse.vedtaksperiodeId()) tilstand.håndter(this, sykepengehistorikkHendelse)
+        if (id.toString() == sykepengehistorikkHendelse.vedtaksperiodeId()) tilstand.håndter(
+            this,
+            sykepengehistorikkHendelse
+        )
     }
 
     internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        if (id.toString() == manuellSaksbehandlingHendelse.vedtaksperiodeId()) tilstand.håndter(this, manuellSaksbehandlingHendelse)
+        if (id.toString() == manuellSaksbehandlingHendelse.vedtaksperiodeId()) tilstand.håndter(
+            this,
+            manuellSaksbehandlingHendelse
+        )
     }
 
     internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
@@ -92,7 +97,7 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-            this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+        this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 
     private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Vedtaksperiodetilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -108,8 +113,8 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun <HENDELSE> håndter(
-            hendelse: HENDELSE,
-            nesteTilstand: Vedtaksperiodetilstand
+        hendelse: HENDELSE,
+        nesteTilstand: Vedtaksperiodetilstand
     ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
         val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje()) ?: hendelse.sykdomstidslinje()
 
@@ -205,24 +210,28 @@ internal class Vedtaksperiode internal constructor(
         private const val seksMåneder = 180
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
+            vedtaksperiode.emitTrengerLøsning(
+                BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
                     "tom" to vedtaksperiode.sykdomstidslinje!!.startdato().minusDays(1)
-            ))
+                )
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             val tidslinje = vedtaksperiode.sykdomstidslinje
-                    ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
 
-            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(tidslinje.startdato()).count() <= seksMåneder)) {
+            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(
+                    tidslinje.startdato()
+                ).count() <= seksMåneder)
+            ) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
             val utbetalingsberegning = try {
-                val fnr = vedtaksperiode.fødselsnummer ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
-                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), fnr)
+                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
@@ -257,7 +266,10 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse
+        ) {
             if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
                 vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
                     vedtaksperiode.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
@@ -285,10 +297,11 @@ internal class Vedtaksperiode internal constructor(
             )
 
             val event = VedtaksperiodeObserver.UtbetalingEvent(
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    aktørId = vedtaksperiode.aktørId,
-                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    utbetalingsreferanse = utbetalingsreferanse
+                vedtaksperiodeId = vedtaksperiode.id,
+                aktørId = vedtaksperiode.aktørId,
+                fødselsnummer = vedtaksperiode.fødselsnummer,
+                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                utbetalingsreferanse = utbetalingsreferanse
             )
             vedtaksperiode.observers.forEach {
                 it.vedtaksperiodeTilUtbetaling(event)
@@ -300,8 +313,8 @@ internal class Vedtaksperiode internal constructor(
         private fun UUID.base32Encode(): String {
             val pad = '='
             return Base32(pad.toByte())
-                    .encodeAsString(this.byteArray())
-                    .replace(pad.toString(), "")
+                .encodeAsString(this.byteArray())
+                .replace(pad.toString(), "")
         }
 
         private fun UUID.byteArray() = ByteBuffer.allocate(Long.SIZE_BYTES * 2).apply {
@@ -324,6 +337,7 @@ internal class Vedtaksperiode internal constructor(
             return Vedtaksperiode(
                 id = vedtaksperiodeJson.id,
                 aktørId = vedtaksperiodeJson.aktørId,
+                fødselsnummer = vedtaksperiodeJson.fødselsnummer,
                 organisasjonsnummer = vedtaksperiodeJson.organisasjonsnummer
             ).apply {
                 tilstand = tilstandFraEnum(vedtaksperiodeJson.tilstandType)
@@ -346,7 +360,6 @@ internal class Vedtaksperiode internal constructor(
                     )
                 }
                 godkjentAv = vedtaksperiodeJson.godkjentAv
-                fødselsnummer = vedtaksperiodeJson.fødselsnummer
             }
         }
 
@@ -379,19 +392,19 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun jsonRepresentation(): VedtaksperiodeJson {
         return VedtaksperiodeJson(
-                id = id,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                tilstandType = tilstand.type,
-                sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
-                    objectMapper.readTree(it)
-                },
-                maksdato = maksdato,
-                utbetalingslinjer = utbetalingslinjer
-                    ?.let { objectMapper.convertValue<JsonNode>(it) },
-                godkjentAv = godkjentAv,
-                utbetalingsreferanse = utbetalingsreferanse,
-                fødselsnummer = fødselsnummer
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            tilstandType = tilstand.type,
+            sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
+                objectMapper.readTree(it)
+            },
+            maksdato = maksdato,
+            utbetalingslinjer = utbetalingslinjer
+                ?.let { objectMapper.convertValue<JsonNode>(it) },
+            godkjentAv = godkjentAv,
+            utbetalingsreferanse = utbetalingsreferanse
         )
     }
 
@@ -406,12 +419,13 @@ internal class Vedtaksperiode internal constructor(
         previousState: TilstandType
     ) {
         val event = StateChangeEvent(
-                id = id,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                currentState = currentState,
-                previousState = previousState,
-                sykdomshendelse = tidslinjeEvent
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            currentState = currentState,
+            previousState = previousState,
+            sykdomshendelse = tidslinjeEvent
         )
 
         observers.forEach { observer ->
@@ -421,9 +435,10 @@ internal class Vedtaksperiode internal constructor(
 
     private fun emitTrengerLøsning(type: BehovsTyper, additionalParams: Map<String, Any> = emptyMap()) {
         val params = mutableMapOf(
-                "sakskompleksId" to id,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer
+            "sakskompleksId" to id,
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer
         )
 
         params.putAll(additionalParams)
@@ -438,14 +453,14 @@ internal class Vedtaksperiode internal constructor(
     internal class VedtaksperiodeJson(
         val id: UUID,
         val aktørId: String,
+        val fødselsnummer: String,
         val organisasjonsnummer: String,
         val tilstandType: TilstandType,
         val sykdomstidslinje: JsonNode?,
         val maksdato: LocalDate?,
         val utbetalingslinjer: JsonNode?,
         val godkjentAv: String?,
-        val utbetalingsreferanse: String?,
-        val fødselsnummer: String?
+        val utbetalingsreferanse: String?
     )
 
     override fun compareTo(other: Vedtaksperiode): Int = compare(
