@@ -8,21 +8,36 @@ internal class Alder(fødselsnummer: String, private val startDato: LocalDate, p
     private val maksSykepengedager = 248
     private val maksSykepengedagerEtter67 = 60
     private val individnummer = fødselsnummer.substring(6, 9).toInt()
-    private val fødselsdag = LocalDate.of(fødselsnummer.substring(4, 6).toInt().toYear(individnummer), fødselsnummer.substring(2, 4).toInt(), fødselsnummer.substring(0, 2).toInt().toDay())
+    private val fødselsdag = LocalDate.of(
+        fødselsnummer.substring(4, 6).toInt().toYear(individnummer),
+        fødselsnummer.substring(2, 4).toInt(),
+        fødselsnummer.substring(0, 2).toInt().toDay()
+    )
     private val øvreAldersgrense = fødselsdag.plusYears(70)
     private val redusertYtelseAlder = fødselsdag.plusYears(67)
 
-    internal val navBurdeBetale get(): BurdeBetale {
-        return when {
-            redusertYtelseAlder.isAfter(sluttDato) ->
-                { antallDager: Int, _: Int, _: LocalDate -> antallDager < maksSykepengedager}
-            øvreAldersgrense.isBefore(startDato) ->
-                {_: Int, _: Int, _: LocalDate -> false}
-            redusertYtelseAlder.isAfter(startDato) ->
-                {antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate -> fyller67IPerioden(antallDager, antallDagerEtter60, dagen)}
-            else -> {antallDager: Int, _: Int, dagen: LocalDate -> antallDager < maksSykepengedagerEtter67 && dagen.isBefore(øvreAldersgrense)}
+    internal val navBurdeBetale
+        get(): BurdeBetale {
+            return when {
+                redusertYtelseAlder.isAfter(sluttDato) ->
+                    { antallDager: Int, _: Int, _: LocalDate -> antallDager < maksSykepengedager }
+                øvreAldersgrense.isBefore(startDato) ->
+                    { _: Int, _: Int, _: LocalDate -> false }
+                redusertYtelseAlder.isAfter(startDato) ->
+                    { antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate ->
+                        fyller67IPerioden(
+                            antallDager,
+                            antallDagerEtter60,
+                            dagen
+                        )
+                    }
+                else -> { antallDager: Int, _: Int, dagen: LocalDate ->
+                    antallDager < maksSykepengedagerEtter67 && dagen.isBefore(
+                        øvreAldersgrense
+                    )
+                }
+            }
         }
-    }
 
     private fun Int.toDay() = if (this > 40) this - 40 else this
     private fun Int.toYear(individnummer: Int): Int {
@@ -33,29 +48,44 @@ internal class Alder(fødselsnummer: String, private val startDato: LocalDate, p
             else -> 2000
         }
     }
+
     private fun fyller67IPerioden(antallDager: Int, antallDagerEtter67: Int, dagen: LocalDate): Boolean {
         if (dagen.isBefore(redusertYtelseAlder) && antallDager < maksSykepengedager) return true
         return antallDager < maksSykepengedager && antallDagerEtter67 < maksSykepengedagerEtter67
     }
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)
+
     fun maksdato(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
+        val aldersgrense = if (harFylt67(sisteUtbetalingsdag)) øvreAldersgrense.minusDays(1)
+            else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
+
+        return listOf(
+            sisteUtbetalingsdag.addWeekdays(gjenståendeDager(antallDager, antallDagerEtter67, sisteUtbetalingsdag)),
+            aldersgrense
+        ).min()!!
+    }
+
+    private fun LocalDate.addWeekdays(gjenståendeAntallUkedager: Int): LocalDate {
         val virkedagerIEnUke = 5
         val dagerIEnUke = 7
 
-        val gjenståendeSykedagerNAVBetaler = maksSykepengedager - antallDager
-
-        val heleUkerIgjen = gjenståendeSykedagerNAVBetaler / virkedagerIEnUke
+        val heleUkerIgjen = gjenståendeAntallUkedager / virkedagerIEnUke
         val heleUkerIDager = heleUkerIgjen * dagerIEnUke
 
-        val gjenståendeDagerISisteUke = gjenståendeSykedagerNAVBetaler % virkedagerIEnUke
+        val gjenståendeDagerISisteUke = gjenståendeAntallUkedager % virkedagerIEnUke
 
-        return sisteUtbetalingsdag
+        return this
             .trimHelg()
             .plusDays((heleUkerIDager).toLong())
             .leggTilGjenståendeDager(gjenståendeDagerISisteUke)
     }
 
+    private fun gjenståendeDager(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate): Int {
+        return if (harFylt67(sisteUtbetalingsdag)) {
+            maksSykepengedagerEtter67 - antallDagerEtter67
+        } else maksSykepengedager - antallDager
+    }
 
     private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
         (0..gjenståendeDagerISisteUke + 2)
