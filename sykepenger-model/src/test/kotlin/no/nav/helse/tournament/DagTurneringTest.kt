@@ -3,9 +3,7 @@ package no.nav.helse.tournament
 
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,5 +63,25 @@ internal class DagTurneringTest {
             tidslinje[Uke(1).torsdag] is Arbeidsdag,
             "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad"
         )
+    }
+
+    @Test
+    fun `sykedag fra arbeidsgiver taper mot syk helgedag fra sykmeldingen`() {
+        val turnering = DagTurnering()
+        val egenmeldingsdagFraArbeidsgiver = Egenmeldingsdag(
+            Uke(1).søndag, Testhendelse(
+                rapportertdato = Uke(1).søndag.atTime(9, 0),
+                hendelsetype = Dag.NøkkelHendelseType.Inntektsmelding
+            )
+        )
+        val sykhelgedag = SykHelgedag(
+            Uke(1).søndag, Testhendelse(
+                rapportertdato = Uke(1).søndag.atTime(8, 0),
+                hendelsetype = Dag.NøkkelHendelseType.Sykmelding
+            )
+        )
+        val vinner = turnering.slåss(egenmeldingsdagFraArbeidsgiver, sykhelgedag)
+
+        assertEquals(sykhelgedag, vinner)
     }
 }
