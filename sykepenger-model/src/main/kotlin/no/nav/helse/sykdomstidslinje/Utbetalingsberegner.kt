@@ -43,34 +43,8 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = fridag(sykHelgedag.dagen)
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         if(utbetalingslinjer.isNotEmpty()) {
-            val sykedagerNAVBetaler = 248
-            val virkedagerIEnUke = 5
-            val dagerIEnUke = 7
-
-            val gjenståendeSykedagerNAVBetaler = sykedagerNAVBetaler - betalteSykedager
-
-            val heleUkerIgjen = gjenståendeSykedagerNAVBetaler / virkedagerIEnUke
-            val heleUkerIDager = heleUkerIgjen * dagerIEnUke
-
-            val gjenståendeDagerISisteUke = gjenståendeSykedagerNAVBetaler % virkedagerIEnUke
-
-            maksdato = utbetalingslinjer.last().tom
-                .trimHelg()
-                .plusDays((heleUkerIDager).toLong())
-                .leggTilGjenståendeDager(gjenståendeDagerISisteUke)
+            maksdato = alder.maksdato(betalteSykedager, betalteSykepengerEtter67, utbetalingslinjer.last().tom)
         }
-    }
-
-    private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
-        (0..gjenståendeDagerISisteUke + 2)
-            .map { plusDays(it.toLong()) }
-            .filterNot { it.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
-            .get(gjenståendeDagerISisteUke)
-
-    private fun LocalDate.trimHelg() = when (dayOfWeek) {
-        DayOfWeek.SATURDAY -> minusDays(1)
-        DayOfWeek.SUNDAY -> minusDays(2)
-        else -> this
     }
 
     private fun arbeidsdag(dagen: LocalDate) {

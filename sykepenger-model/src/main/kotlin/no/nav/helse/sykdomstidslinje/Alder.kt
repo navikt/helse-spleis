@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 internal class Alder(fødselsnummer: String, private val startDato: LocalDate, private val sluttDato: LocalDate) {
@@ -38,6 +39,35 @@ internal class Alder(fødselsnummer: String, private val startDato: LocalDate, p
     }
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)
+    fun maksdato(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
+        val virkedagerIEnUke = 5
+        val dagerIEnUke = 7
+
+        val gjenståendeSykedagerNAVBetaler = maksSykepengedager - antallDager
+
+        val heleUkerIgjen = gjenståendeSykedagerNAVBetaler / virkedagerIEnUke
+        val heleUkerIDager = heleUkerIgjen * dagerIEnUke
+
+        val gjenståendeDagerISisteUke = gjenståendeSykedagerNAVBetaler % virkedagerIEnUke
+
+        return sisteUtbetalingsdag
+            .trimHelg()
+            .plusDays((heleUkerIDager).toLong())
+            .leggTilGjenståendeDager(gjenståendeDagerISisteUke)
+    }
+
+
+    private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
+        (0..gjenståendeDagerISisteUke + 2)
+            .map { plusDays(it.toLong()) }
+            .filterNot { it.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+            .get(gjenståendeDagerISisteUke)
+
+    private fun LocalDate.trimHelg() = when (dayOfWeek) {
+        DayOfWeek.SATURDAY -> minusDays(1)
+        DayOfWeek.SUNDAY -> minusDays(2)
+        else -> this
+    }
 
 }
 
