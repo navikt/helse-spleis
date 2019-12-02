@@ -12,6 +12,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
     private var sykedager = 0
     private var ikkeSykedager = 0
     private var fridager = 0
+    private var opphold180Dager = 0
 
     private var betalteSykedager = 0
     private var betalteSykepengerEtter67 = 0
@@ -73,6 +74,14 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
 
     private fun burdeUtbetales(dagen: LocalDate) = alder.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
 
+    private fun håndter180dagerOpphold() {
+        opphold180Dager += 1
+        if (opphold180Dager >= 180) {
+            betalteSykedager = 0
+            betalteSykepengerEtter67 = 0
+        }
+    }
+
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = state(Ugyldig)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = state(Ugyldig)
     override fun visitStudiedag(studiedag: Studiedag) = state(Ugyldig)
@@ -91,6 +100,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
 
     private object Initiell : UtbetalingState() {
         override fun entering(splitter: Utbetalingsberegner) {
+            splitter.opphold180Dager = splitter.ikkeSykedager
             splitter.sykedager = 0
             splitter.ikkeSykedager = 0
             splitter.fridager = 0
@@ -98,11 +108,24 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
 
         override fun færreEllerLik16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.sykedager = 1
+            splitter.opphold180Dager = 0
             splitter.state(ArbeidsgiverperiodeSykedager)
         }
 
         override fun merEnn16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.state(Ugyldig)
+        }
+
+        override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.håndter180dagerOpphold()
+        }
+
+        override fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.håndter180dagerOpphold()
+        }
+
+        override fun merEnn16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.håndter180dagerOpphold()
         }
     }
 
