@@ -112,22 +112,21 @@ internal class SakTest {
                     ), egenmeldinger = emptyList(), fravær = emptyList()
                 )
             )
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 21.juli,
-                            tom = 28.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+
+            assertThrows<UtenforOmfangException> {
+                it.håndter(
+                    nySøknadHendelse(
+                        søknadsperioder = listOf(
+                            SoknadsperiodeDTO(
+                                fom = 21.juli,
+                                tom = 28.juli,
+                                sykmeldingsgrad = 100
+                            )
+                        ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
-            )
+            }
         }
-        assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
 
@@ -145,22 +144,21 @@ internal class SakTest {
                     ), egenmeldinger = emptyList(), fravær = emptyList()
                 )
             )
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 10.juli,
-                            tom = 22.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+
+            assertThrows<UtenforOmfangException> {
+                it.håndter(
+                    nySøknadHendelse(
+                        søknadsperioder = listOf(
+                            SoknadsperiodeDTO(
+                                fom = 10.juli,
+                                tom = 22.juli,
+                                sykmeldingsgrad = 100
+                            )
+                        ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
-            )
+            }
         }
-        assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
 
@@ -208,7 +206,7 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `oppretter ny sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
+    internal fun `kaster ut sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
         testSak.also {
             it.håndter(
                 nySøknadHendelse(
@@ -221,22 +219,20 @@ internal class SakTest {
                     ), egenmeldinger = emptyList(), fravær = emptyList()
                 )
             )
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 21.juli,
-                            tom = 30.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+            assertThrows<UtenforOmfangException> {
+                it.håndter(
+                    nySøknadHendelse(
+                        søknadsperioder = listOf(
+                            SoknadsperiodeDTO(
+                                fom = 21.juli,
+                                tom = 30.juli,
+                                sykmeldingsgrad = 100
+                            )
+                        ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
-            )
+            }
         }
-        assertTrue(tilstandsflytObserver.sakEndret)
-        assertTrue(tilstandsflytObserver.wasTriggered)
-        assertEquals(TilstandType.START, tilstandsflytObserver.forrigeVedtaksperiodetilstand)
-        assertEquals(NY_SØKNAD_MOTTATT, tilstandsflytObserver.vedtaksperiodetilstand)
     }
 
     @Test

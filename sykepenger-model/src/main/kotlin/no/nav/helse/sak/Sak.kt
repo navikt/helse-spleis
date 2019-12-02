@@ -23,6 +23,12 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
         if (!nySøknadHendelse.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
         }
+
+        if (arbeidsgivere.isNotEmpty()) {
+            invaliderAlleSaker(nySøknadHendelse)
+            throw UtenforOmfangException("sak støtter ikke forlengelse eller flere arbeidsgivere", nySøknadHendelse)
+        }
+
         finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndter(nySøknadHendelse)
     }
 
@@ -31,9 +37,12 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
             throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
         }
 
-        if (harVedtaksperioderForAndreArbeidsgivere(sendtSøknadHendelse)) {
+        if (harAndreArbeidsgivere(sendtSøknadHendelse)) {
             invaliderAlleSaker(sendtSøknadHendelse)
-            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
+            throw UtenforOmfangException(
+                "sak forventer at vi har mottatt ny søknad for arbeidsgiver i sendt søknad, og bare én arbeidsgiver",
+                sendtSøknadHendelse
+            )
         }
 
         finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndter(sendtSøknadHendelse)
@@ -72,12 +81,10 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
-    private fun harVedtaksperioderForAndreArbeidsgivere(sendtSøknadHendelse: SendtSøknadHendelse): Boolean {
-        return arbeidsgivere.size > 1 && arbeidsgivere.filterValues {
-            it.organisasjonsnummer != sendtSøknadHendelse.organisasjonsnummer()
-        }.filterValues {
-            it.tellVedtaksperioderSomIkkeErINySoknadTilstand() > 0
-        }.isNotEmpty()
+    private fun harAndreArbeidsgivere(hendelse: ArbeidstakerHendelse): Boolean {
+        if (arbeidsgivere.isEmpty()) return false
+        if (arbeidsgivere.size > 1) return true
+        return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
     }
 
     private fun invaliderAlleSaker(arbeidstakerHendelse: ArbeidstakerHendelse) {
@@ -106,7 +113,7 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
     internal inner class Arbeidsgiver(val organisasjonsnummer: String, val id: UUID) {
 
-        internal constructor(arbeidsgiverJson: ArbeidsgiverJson) : this (
+        internal constructor(arbeidsgiverJson: ArbeidsgiverJson) : this(
             arbeidsgiverJson.organisasjonsnummer,
             arbeidsgiverJson.id
         ) {
@@ -117,14 +124,10 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
         private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
-        internal fun tellVedtaksperioderSomIkkeErINySoknadTilstand() = perioder.count { it.erIkkeINySøknadTilstand() }
-
         fun håndter(nySøknadHendelse: NySøknadHendelse) {
-            if (perioder.map { periode ->
-                    periode.håndter(nySøknadHendelse)
-                }.none { håndterteSoknad ->
-                    håndterteSoknad
-                }) {
+            if (!perioder.fold(false) { håndtert, periode ->
+                håndtert || periode.håndter(nySøknadHendelse)
+            }) {
                 nyVedtaksperiode().håndter(nySøknadHendelse)
             }
         }
@@ -220,7 +223,10 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
             val jsonNode = objectMapper.readTree(json)
 
             if (!jsonNode.hasNonNull("skjemaVersjon")) throw SakskjemaForGammelt(-1, CURRENT_SKJEMA_VERSJON)
-            if (jsonNode["skjemaVersjon"].intValue() < CURRENT_SKJEMA_VERSJON)throw SakskjemaForGammelt(jsonNode["skjemaVersjon"].intValue(), CURRENT_SKJEMA_VERSJON)
+            if (jsonNode["skjemaVersjon"].intValue() < CURRENT_SKJEMA_VERSJON) throw SakskjemaForGammelt(
+                jsonNode["skjemaVersjon"].intValue(),
+                CURRENT_SKJEMA_VERSJON
+            )
 
             val sakJson: SakJson = objectMapper.convertValue(jsonNode)
             return Sak(sakJson.aktørId, sakJson.fødselsnummer)

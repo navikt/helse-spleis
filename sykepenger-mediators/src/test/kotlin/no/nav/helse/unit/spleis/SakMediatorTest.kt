@@ -184,36 +184,53 @@ internal class SakMediatorTest {
     }
 
     @Test
-    fun `gitt en komplett sykdomstidslinje, når det kommer en til sendt søknad med en annen arbeidsgiver, så skal begge søknadene behandles manuelt av saksbehandler`() {
+    fun `gitt en sak med én arbeidsgiver, når det kommer ny søknad fra arbeidsgiver nr 2, så skal begge søknadene behandles manuelt av saksbehandler`() {
         val aktørID = "2345678901234"
         val fødselsnummer = "01017000000"
         val virksomhetsnummer_a = "234567890"
         val virksomhetsnummer_b = "098765432"
 
         sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
-        sendInntektsmelding(aktørID, fødselsnummer, virksomhetsnummer_a)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer_a,
-            previousState = INNTEKTSMELDING_MOTTATT,
-            currentState = KOMPLETT_SYKDOMSTIDSLINJE
+            previousState = START,
+            currentState = NY_SØKNAD_MOTTATT
         )
 
         sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_b)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer_b)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer_a,
-            previousState = KOMPLETT_SYKDOMSTIDSLINJE,
+            previousState = NY_SØKNAD_MOTTATT,
             currentState = TIL_INFOTRYGD
         )
+        assertOpprettGosysOppgave(aktørId = aktørID, fødselsnummer = fødselsnummer)
+    }
+
+    @Test
+    fun `gitt en sak med én arbeidsgiver, når det kommer ny søknad fra samme arbeidsgiver, så skal begge søknadene behandles manuelt av saksbehandler`() {
+        val aktørID = "2345678901234"
+        val fødselsnummer = "01017000000"
+        val virksomhetsnummer_a = "234567890"
+        val virksomhetsnummer_b = "098765432"
+
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer_b,
+            virksomhetsnummer = virksomhetsnummer_a,
+            previousState = START,
+            currentState = NY_SØKNAD_MOTTATT
+        )
+
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer_a,
             previousState = NY_SØKNAD_MOTTATT,
             currentState = TIL_INFOTRYGD
         )

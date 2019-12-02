@@ -50,8 +50,6 @@ internal class Vedtaksperiode internal constructor(
 
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
-    internal fun erIkkeINySøknadTilstand() = tilstand.type != NY_SØKNAD_MOTTATT
-
     private fun inntektsmeldingHendelse() =
         this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
 
