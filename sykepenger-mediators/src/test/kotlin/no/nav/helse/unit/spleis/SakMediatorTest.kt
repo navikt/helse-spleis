@@ -1,34 +1,13 @@
 package no.nav.helse.unit.spleis
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.mockk.*
-import no.nav.helse.SpolePeriode
-import no.nav.helse.TestConstants.inntektsmeldingDTO
-import no.nav.helse.TestConstants.responsFraSpole
-import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.behov.Behov
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
-import no.nav.helse.sak.TilstandType
+import no.nav.helse.sak.SakObserver
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
-import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class SakMediatorTest {
@@ -36,24 +15,16 @@ internal class SakMediatorTest {
     private val probe = mockk<VedtaksperiodeProbe>(relaxed = true)
     private val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
     private val vedtaksperiodeEventProducer = mockk<VedtaksperiodeEventProducer>(relaxed = true)
-
-    private val behovsliste = mutableListOf<Behov>()
-    private val behovProducer = mockk<BehovProducer>(relaxed = true).also {
-        every {
-            it.sendNyttBehov(match {
-                behovsliste.add(Behov.fromJson(it.toJson()))
-                true
-            })
-        } just runs
-    }
-    private val repo = HashmapSakRepository()
+    private val behovProducer = mockk<BehovProducer>(relaxed = true)
+    private val lagreSakDao = mockk<SakObserver>(relaxed = true)
+    private val repo = mockk<SakRepository>()
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
 
     private val sakMediator = SakMediator(
         vedtaksperiodeProbe = probe,
         sakRepository = repo,
-        lagreSakDao = repo,
+        lagreSakDao = lagreSakDao,
         utbetalingsreferanseRepository = utbetalingsRepo,
         lagreUtbetalingDao = lagreUtbetalingDao,
         behovProducer = behovProducer,
@@ -61,216 +32,22 @@ internal class SakMediatorTest {
         vedtaksperiodeEventProducer = vedtaksperiodeEventProducer
     )
 
-    private val sendtSøknadHendelse = sendtSøknadHendelse()
-
-    private companion object {
-        private val objectMapper = ObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
-    @BeforeEach
-    fun `setup behov`() {
-        behovsliste.clear()
-    }
+    private val nySøknadHendelse = nySøknadHendelse()
 
     @Test
-    fun `skal lage gosys-oppgave når saken må behandles i infotrygd`() {
-        beInMåBehandlesIInfotrygdState()
+    fun `sørger for at observers blir varslet om endring`() {
+        every {
+            repo.hentSak(any())
+        } returns null
+
+        sakMediator.håndter(nySøknadHendelse)
 
         verify(exactly = 1) {
-            oppgaveProducer.opprettOppgave(aktørId = sendtSøknadHendelse.aktørId(), fødselsnummer = sendtSøknadHendelse.fødselsnummer())
+            repo.hentSak(any())
+            lagreSakDao.sakEndret(any())
+            probe.sakEndret(any())
+            lagreUtbetalingDao.sakEndret(any())
+            vedtaksperiodeEventProducer.sendEndringEvent(any())
         }
-    }
-
-    @Test
-    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
-        val aktørID = "87654321962"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendInntektsmelding(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSykepengehistorikk(
-            listOf(
-                SpolePeriode(
-                    fom = søknad.fom!!.minusMonths(8),
-                    tom = søknad.fom!!.minusMonths(7),
-                    grad = "100"
-                )
-            )
-        )
-
-        assertBehov(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            behovsType = BehovsTyper.GodkjenningFraSaksbehandler
-        )
-    }
-
-    @Test
-    fun `gitt en sak for godkjenning, når utbetaling ikke er godkjent skal saken til Infotrygd`() {
-        val aktørID = "8787654421962"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "123456789"
-
-        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendInntektsmelding(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSykepengehistorikk(
-            listOf(
-                SpolePeriode(
-                    fom = søknad.fom!!.minusMonths(8),
-                    tom = søknad.fom!!.minusMonths(7),
-                    grad = "100"
-                )
-            )
-        )
-        sendGodkjenningFraSaksbehandler("en_saksbehandler_ident", false)
-
-        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID, fødselsnummer = fødselsnummer)
-    }
-
-    private fun sendNySøknad(
-        aktørId: String,
-        fødselsnummer: String,
-        virksomhetsnummer: String,
-        søknad: SykepengesoknadDTO? = null
-    ): SykepengesoknadDTO {
-        return (søknad ?: søknadDTO(
-            status = SoknadsstatusDTO.NY,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidsgiver = ArbeidsgiverDTO(
-                orgnummer = virksomhetsnummer,
-                navn = "en_arbeidsgiver"
-            )
-        )).also {
-            sakMediator.håndter(NySøknadHendelse(Sykepengesøknad(it.toJsonNode())))
-        }
-    }
-
-    private fun sendSøknad(
-        aktørId: String,
-        fødselsnummer: String,
-        virksomhetsnummer: String,
-        søknad: SykepengesoknadDTO? = null
-    ): SykepengesoknadDTO {
-        return (søknad ?: søknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidsgiver = ArbeidsgiverDTO(
-                orgnummer = virksomhetsnummer,
-                navn = "en_arbeidsgiver"
-            )
-        )).also {
-            sakMediator.håndter(SendtSøknadHendelse(Sykepengesøknad(it.toJsonNode())))
-        }
-    }
-
-    private fun sendInntektsmelding(
-        aktørId: String,
-        fødselsnummer: String,
-        virksomhetsnummer: String,
-        inntektsmelding: Inntektsmelding? = null
-    ): Inntektsmelding {
-        return (inntektsmelding ?: inntektsmeldingDTO(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer
-        )).also {
-            sakMediator.håndter(InntektsmeldingHendelse(no.nav.helse.hendelser.inntektsmelding.Inntektsmelding(it.toJsonNode())))
-        }
-    }
-
-    private fun beInMåBehandlesIInfotrygdState() {
-        sakMediator.håndter(sendtSøknadHendelse)
-    }
-
-    private fun sendSykepengehistorikk(perioder: List<SpolePeriode>) {
-        Sykepengehistorikk(objectMapper.readTree(løsSykepengehistorikkBehov(perioder).toJson())).let {
-            sakMediator.håndter(SykepengehistorikkHendelse(it))
-        }
-    }
-
-    private fun sendGodkjenningFraSaksbehandler(saksbehandlerIdent: String, utbetalingGodkjent: Boolean) {
-        løsManuellSaksbehandlingBehov(
-            saksbehandlerIdent = saksbehandlerIdent,
-            utbetalingGodkjent = utbetalingGodkjent
-        ).let {
-            sakMediator.håndter(ManuellSaksbehandlingHendelse(it))
-        }
-    }
-
-    private fun løsManuellSaksbehandlingBehov(saksbehandlerIdent: String, utbetalingGodkjent: Boolean): Behov {
-        return finnBehov(BehovsTyper.GodkjenningFraSaksbehandler).also {
-            it["saksbehandlerIdent"] = saksbehandlerIdent
-            it.løsBehov(
-                mapOf(
-                    "godkjent" to utbetalingGodkjent
-                )
-            )
-        }
-    }
-
-    private fun løsSykepengehistorikkBehov(perioder: List<SpolePeriode>): Behov {
-        return finnBehov(BehovsTyper.Sykepengehistorikk).also {
-            it.løsBehov(
-                responsFraSpole(
-                    perioder = perioder
-                )
-            )
-        }
-    }
-
-    private fun finnBehov(behovsType: BehovsTyper): Behov {
-        return behovsliste.first { it.behovType() == behovsType.name }
-    }
-
-    private fun assertVedtaksperiodeEndretEvent(
-        aktørId: String,
-        fødselsnummer: String,
-        virksomhetsnummer: String,
-        previousState: TilstandType,
-        currentState: TilstandType
-    ) {
-        verify(exactly = 1) {
-            vedtaksperiodeEventProducer.sendEndringEvent(match {
-                it.previousState == previousState
-                    && it.currentState == currentState
-                    && it.aktørId == aktørId
-                    && it.fødselsnummer == fødselsnummer
-                    && it.organisasjonsnummer == virksomhetsnummer
-            })
-        }
-    }
-
-    private fun assertOpprettGosysOppgaveNøyaktigEnGang(aktørId: String, fødselsnummer: String) {
-        verify(exactly = 1) {
-            oppgaveProducer.opprettOppgave(aktørId = aktørId, fødselsnummer = fødselsnummer)
-        }
-    }
-
-    private fun assertOpprettGosysOppgave(aktørId: String, fødselsnummer: String) {
-        verify(atLeast = 1) {
-            oppgaveProducer.opprettOppgave(aktørId = aktørId, fødselsnummer = fødselsnummer)
-        }
-    }
-
-    private fun assertBehov(
-        aktørId: String,
-        fødselsnummer: String,
-        virksomhetsnummer: String,
-        behovsType: BehovsTyper
-    ) {
-        assertEquals(1, behovsliste
-            .filter { it.behovType() == behovsType.name }
-            .filter { aktørId == it["aktørId"] }
-            .filter { fødselsnummer == it["fødselsnummer"] }
-            .filter { virksomhetsnummer == it["organisasjonsnummer"] }
-            .size)
     }
 }
