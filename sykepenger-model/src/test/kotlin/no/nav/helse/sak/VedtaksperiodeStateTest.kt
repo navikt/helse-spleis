@@ -232,6 +232,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+
+        assertTrue(behovsliste.any {
+            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
+        })
     }
 
     @Test
@@ -255,6 +259,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+
+        assertTrue(behovsliste.any {
+            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
+        })
     }
 
     @Test
@@ -278,6 +286,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
         assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+
+        assertFalse(behovsliste.any {
+            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
+        })
     }
 
     @Test
