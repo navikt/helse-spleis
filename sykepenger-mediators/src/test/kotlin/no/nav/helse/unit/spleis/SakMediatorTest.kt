@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.sak.TilstandType
-import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -82,130 +81,6 @@ internal class SakMediatorTest {
         verify(exactly = 1) {
             oppgaveProducer.opprettOppgave(aktørId = sendtSøknadHendelse.aktørId(), fødselsnummer = sendtSøknadHendelse.fødselsnummer())
         }
-    }
-
-    @Test
-    fun `innsendt Nysøknad, Søknad og Inntektmelding fører til at sykepengehistorikk blir etterspurt`() {
-        val aktørID = "1234567890123"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            previousState = START,
-            currentState = NY_SØKNAD_MOTTATT
-        )
-
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            previousState = NY_SØKNAD_MOTTATT,
-            currentState = SENDT_SØKNAD_MOTTATT
-        )
-
-        sendInntektsmelding(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            previousState = SENDT_SØKNAD_MOTTATT,
-            currentState = KOMPLETT_SYKDOMSTIDSLINJE
-        )
-
-        assertBehov(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            behovsType = BehovsTyper.Sykepengehistorikk
-        )
-    }
-
-    @Test
-    fun `innsendt Nysøknad, Inntektmelding og Søknad fører til at sykepengehistorikk blir etterspurt`() {
-        val aktørId = "0123456789012"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "012345678"
-
-        sendNySøknad(aktørId, fødselsnummer, virksomhetsnummer)
-        sendInntektsmelding(aktørId, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørId, fødselsnummer, virksomhetsnummer)
-
-        assertBehov(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            behovsType = BehovsTyper.Sykepengehistorikk
-        )
-    }
-
-    @Test
-    fun `sendt søknad uten uten ny søknad først skal behandles manuelt av saksbehandler`() {
-        val aktørID = "2345678901234"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "234567890"
-
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-
-        assertOpprettGosysOppgaveNøyaktigEnGang(aktørId = aktørID, fødselsnummer = fødselsnummer)
-    }
-
-    @Test
-    fun `gitt en sak med én arbeidsgiver, når det kommer ny søknad fra arbeidsgiver nr 2, så skal begge søknadene behandles manuelt av saksbehandler`() {
-        val aktørID = "2345678901234"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer_a = "234567890"
-        val virksomhetsnummer_b = "098765432"
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer_a,
-            previousState = START,
-            currentState = NY_SØKNAD_MOTTATT
-        )
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_b)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer_a,
-            previousState = NY_SØKNAD_MOTTATT,
-            currentState = TIL_INFOTRYGD
-        )
-        assertOpprettGosysOppgave(aktørId = aktørID, fødselsnummer = fødselsnummer)
-    }
-
-    @Test
-    fun `gitt en sak med én arbeidsgiver, når det kommer ny søknad fra samme arbeidsgiver, så skal begge søknadene behandles manuelt av saksbehandler`() {
-        val aktørID = "2345678901234"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer_a = "234567890"
-        val virksomhetsnummer_b = "098765432"
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer_a,
-            previousState = START,
-            currentState = NY_SØKNAD_MOTTATT
-        )
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer_a)
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer_a,
-            previousState = NY_SØKNAD_MOTTATT,
-            currentState = TIL_INFOTRYGD
-        )
-        assertOpprettGosysOppgave(aktørId = aktørID, fødselsnummer = fødselsnummer)
     }
 
     @Test

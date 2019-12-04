@@ -91,7 +91,7 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
-    internal fun invaliderSak(hendelse: ArbeidstakerHendelse) {
+    internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         setTilstand(hendelse, TilInfotrygdTilstand)
     }
 

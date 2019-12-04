@@ -6,11 +6,14 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
+import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.sak.TilstandType.*
@@ -18,10 +21,12 @@ import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.set
 
@@ -30,6 +35,10 @@ internal class SakTest {
     private val aktørId = "id"
     private val fødselsnummer = "01017000000"
     private val organisasjonsnummer = "12"
+
+    private val virksomhetsnummer_a = "234567890"
+    private val virksomhetsnummer_b = "098765432"
+
     private val tilstandsflytObserver = TilstandsflytObserver()
     private val sakstilstandObserver = SakstilstandObserver()
     private val needObserver = NeedObserver()
@@ -41,10 +50,22 @@ internal class SakTest {
     }
 
     @Test
-    fun `skal håndtere at virksomhetsnummer kan mangle`() {
+    fun `uten arbeidsgiver`() {
         assertThrows<UtenforOmfangException> { testSak.håndter(nySøknadHendelse(arbeidsgiver = null)) }
         assertThrows<UtenforOmfangException> { testSak.håndter(sendtSøknadHendelse(arbeidsgiver = null)) }
         assertThrows<UtenforOmfangException> { testSak.håndter(inntektsmeldingHendelse(virksomhetsnummer = null)) }
+    }
+
+    @Test
+    fun `flere arbeidsgivere`() {
+        assertThrows<UtenforOmfangException> {
+            enSakMedÉnArbeidsgiver(virksomhetsnummer_a).also {
+                it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer_b))
+            }
+        }
+
+        assertEquals(1, sakstilstandObserver.sakstilstander.size)
+        assertTrue(sakstilstandObserver.sakstilstander.values.all { it.currentState == TIL_INFOTRYGD })
     }
 
     @Test
@@ -135,7 +156,6 @@ internal class SakTest {
         }
     }
 
-
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende saken`() {
         testSak.also {
@@ -211,6 +231,7 @@ internal class SakTest {
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
+
     @Test
     internal fun `kaster ut sak når ny søknad kommer, som ikke overlapper med eksisterende`() {
         testSak.also {
@@ -273,7 +294,6 @@ internal class SakTest {
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
-
     @Test
     internal fun `eksisterende sak må behandles i infotrygd når vi mottar den andre inntektsmeldngen`() {
         testSak.also {
@@ -306,14 +326,6 @@ internal class SakTest {
         assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
     }
 
-    @Test
-    internal fun `inntektsmelding uten virksomhetsnummer kaster exception`() {
-        testSak.also {
-            assertThrows<UtenforOmfangException> {
-                it.håndter(inntektsmeldingHendelse(virksomhetsnummer = null))
-            }
-        }
-    }
 
     @Test
     internal fun `ny søknad med periode som ikke er 100 % kaster exception`() {
@@ -362,19 +374,6 @@ internal class SakTest {
                                 faktiskGrad = 90
                             )
                         )
-                    )
-                )
-            }
-        }
-    }
-
-    @Test
-    internal fun `søknad uten arbeidsgiver kaster exception`() {
-        testSak.also {
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    nySøknadHendelse(
-                        arbeidsgiver = null
                     )
                 )
             }
@@ -639,6 +638,26 @@ internal class SakTest {
             assertEquals(TIL_INFOTRYGD, tilstandsflytObserver.gjeldendeVedtaksperiodetilstand)
         }
     }
+
+    private fun enSakMedÉnArbeidsgiver(virksomhetsnummer: String) = testSak.also {
+        it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer))
+    }
+
+    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknadHendelse(
+        Sykepengesøknad(
+            søknadDTO(
+                id = UUID.randomUUID().toString(),
+                status = SoknadsstatusDTO.NY,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                arbeidsgiver = ArbeidsgiverDTO(
+                    orgnummer = virksomhetsnummer,
+                    navn = "en_arbeidsgiver"
+                ),
+                sendtNav = LocalDateTime.now()
+            ).toJsonNode()
+        )
+    )
 
     private class TilstandsflytObserver : SakObserver {
 
