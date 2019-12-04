@@ -84,40 +84,6 @@ internal class SakMediatorTest {
     }
 
     @Test
-    fun `gitt en sak for godkjenning, når utbetaling er godkjent skal vi produsere et utbetalingbehov`() {
-        val aktørId = "87654323421962"
-        val fødselsnummer = "01017000000"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(aktørId, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørId, fødselsnummer, virksomhetsnummer)
-        sendInntektsmelding(aktørId, fødselsnummer, virksomhetsnummer)
-
-        assertBehov(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            behovsType = BehovsTyper.Sykepengehistorikk
-        )
-
-        sendSykepengehistorikk(emptyList())
-
-        assertBehov(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            behovsType = BehovsTyper.GodkjenningFraSaksbehandler
-        )
-
-        sendGodkjenningFraSaksbehandler(
-            saksbehandlerIdent = "en_saksbehandler_ident",
-            utbetalingGodkjent = true
-        )
-
-        assertBehov(aktørId = aktørId, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, behovsType = BehovsTyper.Utbetaling)
-    }
-
-    @Test
     fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
         val aktørID = "87654321962"
         val fødselsnummer = "01017000000"
