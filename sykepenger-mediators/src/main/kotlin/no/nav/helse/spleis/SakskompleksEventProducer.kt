@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
-import no.nav.helse.sak.TilstandType
 import no.nav.helse.sak.VedtaksperiodeObserver
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -13,6 +12,12 @@ import org.apache.kafka.common.serialization.StringSerializer
 import java.util.*
 
 class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
+
+    private companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
 
     private val properties = commonKafkaProperties.apply {
         put(ProducerConfig.ACKS_CONFIG, "all")
@@ -25,32 +30,19 @@ class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
             ProducerRecord(
                 Topics.vedtaksperiodeEventTopic,
                 event.aktørId,
-                VedtaksperiodeEventDto(
-                    aktørId = event.aktørId,
-                    fødselsnummer = event.fødselsnummer,
-                    organisasjonsnummer = event.organisasjonsnummer,
-                    vedtaksperiodeId = event.id,
-                    currentState = event.currentState,
-                    previousState = event.previousState
-                ).toJson()
+                toJson(event)
             )
         )
     }
 
-    internal class VedtaksperiodeEventDto(
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID,
-        val currentState: TilstandType,
-        val previousState: TilstandType
-    ) {
-        private companion object {
-            private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        }
-
-        internal fun toJson() = objectMapper.writeValueAsString(this)
-    }
+    private fun toJson(event: VedtaksperiodeObserver.StateChangeEvent) = objectMapper.writeValueAsString(
+        mapOf(
+            "aktørId" to event.aktørId,
+            "fødselsnummer" to event.fødselsnummer,
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.id,
+            "currentState" to event.currentState,
+            "previousState" to event.previousState
+        )
+    )
 }
