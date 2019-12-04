@@ -41,6 +41,13 @@ internal class SakTest {
     }
 
     @Test
+    fun `skal håndtere at virksomhetsnummer kan mangle`() {
+        assertThrows<UtenforOmfangException> { testSak.håndter(nySøknadHendelse(arbeidsgiver = null)) }
+        assertThrows<UtenforOmfangException> { testSak.håndter(sendtSøknadHendelse(arbeidsgiver = null)) }
+        assertThrows<UtenforOmfangException> { testSak.håndter(inntektsmeldingHendelse(virksomhetsnummer = null)) }
+    }
+
+    @Test
     internal fun `ny søknad fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         testSak.also {
             it.håndter(nySøknadHendelse())

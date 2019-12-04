@@ -6,8 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.mockk.*
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.responsFraSpole
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.søknadDTO
@@ -75,33 +73,6 @@ internal class SakMediatorTest {
     @BeforeEach
     fun `setup behov`() {
         behovsliste.clear()
-    }
-
-    @Test
-    fun `skal håndtere feil ved ny søknad uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndter(nySøknadHendelse(arbeidsgiver = null))
-
-        verify(exactly = 1) {
-            probe.utenforOmfang(any<NySøknadHendelse>())
-        }
-    }
-
-    @Test
-    fun `skal håndtere feil ved sendt søknad uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndter(sendtSøknadHendelse(arbeidsgiver = null))
-
-        verify(exactly = 1) {
-            probe.utenforOmfang(any<SendtSøknadHendelse>())
-        }
-    }
-
-    @Test
-    fun `skal håndtere feil ved inntektsmelding uten virksomhetsnummer for arbeidsgiver`() {
-        sakMediator.håndter(inntektsmeldingHendelse(virksomhetsnummer = null))
-
-        verify(exactly = 1) {
-            probe.utenforOmfang(any<InntektsmeldingHendelse>())
-        }
     }
 
     @Test
