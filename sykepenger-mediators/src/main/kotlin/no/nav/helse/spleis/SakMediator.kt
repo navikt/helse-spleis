@@ -27,19 +27,19 @@ internal class SakMediator(private val sakRepository: SakRepository,
     }
 
     fun håndter(hendelse: NySøknadHendelse) =
-        finnSak(hendelse).also { medFeilhåndtering(it, hendelse) { sak -> sak.håndter(hendelse) } }
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun håndter(hendelse: SendtSøknadHendelse) =
-        finnSak(hendelse).also { medFeilhåndtering(it, hendelse) { sak -> sak.håndter(hendelse) } }
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun håndter(hendelse: InntektsmeldingHendelse) =
-        finnSak(hendelse).also { medFeilhåndtering(it, hendelse) { sak -> sak.håndter(hendelse) } }
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun håndter(hendelse: SykepengehistorikkHendelse) =
-        finnSak(hendelse).also { medFeilhåndtering(it, hendelse) { sak -> sak.håndter(hendelse) } }
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
-        finnSak(hendelse).also { medFeilhåndtering(it, hendelse) { sak -> sak.håndter(hendelse) } }
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)
 
@@ -65,13 +65,12 @@ internal class SakMediator(private val sakRepository: SakRepository,
                 it.addObserver(vedtaksperiodeProbe)
             }
 
-    private fun medFeilhåndtering(
-        sak: Sak,
+    private fun finnSak(
         hendelse: ArbeidstakerHendelse,
         block: (Sak) -> Unit
     ) {
         try {
-            block(sak)
+            block(finnSak(hendelse))
         } catch (err: UtenforOmfangException) {
             vedtaksperiodeProbe.utenforOmfang(hendelse)
         } catch (err: SakskjemaForGammelt) {
