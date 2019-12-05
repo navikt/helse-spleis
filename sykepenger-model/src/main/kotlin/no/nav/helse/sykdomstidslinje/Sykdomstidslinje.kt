@@ -112,7 +112,7 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingslinjer(inntektHistorie: InntektHistorie, fødselsnummer: String) =
-        UtbetalingBuilder(this, inntektHistorie, Alder(fødselsnummer, startdato(), sluttdato()))
+        UtbetalingBuilder(this, inntektHistorie, Alder(fødselsnummer, førsteFraværsdag(), sisteDag()))
             .result()
             .utbetalingslinjer(emptyList())
 
