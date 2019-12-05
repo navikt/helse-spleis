@@ -31,9 +31,9 @@ internal class CompositeSykdomstidslinje internal constructor(
 
     override fun flatten() = tidslinje
 
-    override fun startdato() = tidslinje.first().dagen
+    override fun førsteDag() = tidslinje.first().dagen
 
-    override fun sluttdato() = tidslinje.last().dagen
+    override fun sisteDag() = tidslinje.last().dagen
 
     override fun antallSykedagerHvorViIkkeTellerMedHelg() = tidslinje
         .sumBy { it.antallSykedagerHvorViIkkeTellerMedHelg() }

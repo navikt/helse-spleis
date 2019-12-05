@@ -13,8 +13,8 @@ internal class DateRangeTest {
     fun påfølgendeSykedager() {
         val sykedager = Sykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).onsdag, sendtSøknad)
 
-        assertEquals(Uke(1).tirsdag, sykedager.startdato())
-        assertEquals(Uke(1).onsdag, sykedager.sluttdato())
+        assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
+        assertEquals(Uke(1).onsdag, sykedager.sisteDag())
         assertEquals(2, sykedager.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -27,8 +27,8 @@ internal class DateRangeTest {
     fun sammeDagErEnDag() {
         val sykedager = Sykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).tirsdag, sendtSøknad)
 
-        assertEquals(Uke(1).tirsdag, sykedager.startdato())
-        assertEquals(Uke(1).tirsdag, sykedager.sluttdato())
+        assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
+        assertEquals(Uke(1).tirsdag, sykedager.sisteDag())
         assertEquals(1, sykedager.antallSykedagerHvorViTellerMedHelg())
     }
 

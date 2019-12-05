@@ -6,8 +6,6 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.toJsonNode
@@ -58,7 +56,7 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
+        assertEquals(Uke(1).mandag, tidslinje.førsteDag())
     }
 
     @Test
@@ -70,7 +68,7 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
+        assertEquals(Uke(1).mandag, tidslinje.førsteDag())
     }
 
     @Test
@@ -94,8 +92,8 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.startdato())
-        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.sluttdato())
+        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.førsteDag())
+        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.sisteDag())
     }
 
     @Test
@@ -110,8 +108,8 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
-        assertEquals(Uke(3).torsdag, tidslinje.sluttdato())
+        assertEquals(Uke(1).mandag, tidslinje.førsteDag())
+        assertEquals(Uke(3).torsdag, tidslinje.sisteDag())
         assertEquals(16, tidslinje.antallSykedagerHvorViTellerMedHelg())
         assertEquals(18, tidslinje.flatten().size)
     }

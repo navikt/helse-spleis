@@ -37,8 +37,8 @@ internal class CompositeLeafSykdomstidslinjeTest {
     internal fun sammenhengedeUkedager() {
         val interval = førsteTirsdag + førsteOnsdag
 
-        assertEquals(førsteTirsdag.startdato(), interval.startdato())
-        assertEquals(førsteOnsdag.sluttdato(), interval.sluttdato())
+        assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
+        assertEquals(førsteOnsdag.sisteDag(), interval.sisteDag())
         assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -46,8 +46,8 @@ internal class CompositeLeafSykdomstidslinjeTest {
     internal fun sammenhengedeUkedagerBaklengs() {
         val interval = førsteOnsdag + førsteTirsdag
 
-        assertEquals(førsteTirsdag.startdato(), interval.startdato())
-        assertEquals(førsteOnsdag.sluttdato(), interval.sluttdato())
+        assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
+        assertEquals(førsteOnsdag.sisteDag(), interval.sisteDag())
         assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -55,8 +55,8 @@ internal class CompositeLeafSykdomstidslinjeTest {
     internal fun ukedagerMedOpphold() {
         val interval = førsteTorsdag + førsteTirsdag
 
-        assertEquals(førsteTirsdag.startdato(), interval.startdato())
-        assertEquals(førsteTorsdag.sluttdato(), interval.sluttdato())
+        assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
+        assertEquals(førsteTorsdag.sisteDag(), interval.sisteDag())
         assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
         assertEquals(3, interval.flatten().size)
     }
@@ -65,8 +65,8 @@ internal class CompositeLeafSykdomstidslinjeTest {
     internal fun mandagTilMandag() {
         val interval = førsteMandag + andreMandag
 
-        assertEquals(førsteMandag.startdato(), interval.startdato())
-        assertEquals(andreMandag.sluttdato(), interval.sluttdato())
+        assertEquals(førsteMandag.førsteDag(), interval.førsteDag())
+        assertEquals(andreMandag.sisteDag(), interval.sisteDag())
         assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
         assertEquals(8, interval.flatten().size)
     }

@@ -18,8 +18,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagSykedagenDekker, sykedag.startdato())
-        assertEquals(dagSykedagenDekker, sykedag.sluttdato())
+        assertEquals(dagSykedagenDekker, sykedag.førsteDag())
+        assertEquals(dagSykedagenDekker, sykedag.sisteDag())
         assertEquals(1, sykedag.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -30,8 +30,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagFeriedagenDekker, feriedag.startdato())
-        assertEquals(dagFeriedagenDekker, feriedag.sluttdato())
+        assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
+        assertEquals(dagFeriedagenDekker, feriedag.sisteDag())
         assertEquals(0, feriedag.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -42,8 +42,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
-        assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
+        assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
+        assertEquals(arbeidsdagenGjelder, arbeidsdag.sisteDag())
         assertEquals(0, arbeidsdag.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -54,8 +54,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(helgedagenGjelder, helgedag.startdato())
-        assertEquals(helgedagenGjelder, helgedag.sluttdato())
+        assertEquals(helgedagenGjelder, helgedag.førsteDag())
+        assertEquals(helgedagenGjelder, helgedag.sisteDag())
         assertEquals(0, helgedag.antallSykedagerHvorViTellerMedHelg())
     }
 
@@ -66,8 +66,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagSykedagenDekker, studiedag.startdato())
-        assertEquals(dagSykedagenDekker, studiedag.sluttdato())
+        assertEquals(dagSykedagenDekker, studiedag.førsteDag())
+        assertEquals(dagSykedagenDekker, studiedag.sisteDag())
         assertEquals(0, studiedag.antallSykedagerHvorViTellerMedHelg())
     }
 }

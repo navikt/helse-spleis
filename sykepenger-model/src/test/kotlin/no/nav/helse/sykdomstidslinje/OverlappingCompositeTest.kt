@@ -129,8 +129,8 @@ internal class OverlappingCompositeTest {
 
 
     private fun assertInterval(startdag: LocalDate, sluttdag: LocalDate, antallSykedager: Int, forventetLengde: Int) {
-        assertEquals(startdag, sykdomstidslinje.startdato())
-        assertEquals(sluttdag, sykdomstidslinje.sluttdato())
+        assertEquals(startdag, sykdomstidslinje.førsteDag())
+        assertEquals(sluttdag, sykdomstidslinje.sisteDag())
         assertEquals(antallSykedager, sykdomstidslinje.antallSykedagerHvorViTellerMedHelg())
         assertEquals(forventetLengde, sykdomstidslinje.flatten().size)
     }

@@ -182,7 +182,7 @@ internal class UtbetalingslinjerTest {
         val sykdomstidslinje = 20.S
         val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
 
-        assertEquals(sykdomstidslinje.sluttdato().plusDays(342), maksdato)
+        assertEquals(sykdomstidslinje.sisteDag().plusDays(342), maksdato)
     }
 
     @Test

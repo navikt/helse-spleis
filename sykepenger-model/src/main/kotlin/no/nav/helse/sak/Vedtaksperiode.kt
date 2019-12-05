@@ -211,7 +211,7 @@ internal class Vedtaksperiode internal constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiode.emitTrengerLøsning(
                 BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
-                    "tom" to vedtaksperiode.sykdomstidslinje!!.startdato().minusDays(1)
+                    "tom" to vedtaksperiode.sykdomstidslinje!!.førsteDag().minusDays(1)
                 )
             )
         }
@@ -222,8 +222,8 @@ internal class Vedtaksperiode internal constructor(
 
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
 
-            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.startdato() || sisteFraværsdag.datesUntil(
-                    tidslinje.startdato()
+            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.førsteDag() || sisteFraværsdag.datesUntil(
+                    tidslinje.førsteDag()
                 ).count() <= seksMåneder)
             ) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
@@ -499,10 +499,10 @@ internal class Vedtaksperiode internal constructor(
     }
 
     override fun compareTo(other: Vedtaksperiode): Int = compare(
-        leftFom = this.sykdomstidslinje?.startdato(),
-        leftTom = this.sykdomstidslinje?.sluttdato(),
-        rightFom = other.sykdomstidslinje?.startdato(),
-        rightTom = other.sykdomstidslinje?.sluttdato()
+        leftFom = this.sykdomstidslinje?.førsteDag(),
+        leftTom = this.sykdomstidslinje?.sisteDag(),
+        rightFom = other.sykdomstidslinje?.førsteDag(),
+        rightTom = other.sykdomstidslinje?.sisteDag()
     )
 }
 

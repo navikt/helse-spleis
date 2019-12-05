@@ -402,7 +402,7 @@ internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(
     )
 )
 
-internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
+internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 internal fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
