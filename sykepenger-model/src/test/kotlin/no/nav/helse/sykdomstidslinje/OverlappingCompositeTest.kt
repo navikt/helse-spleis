@@ -28,7 +28,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(Uke(1).mandag, Uke(1).tirsdag, 0, 2)
+        assertInterval(Uke(1).mandag, Uke(1).tirsdag, 2)
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager2 + sykedager1
 
-        assertInterval(Uke(1).mandag, Uke(1).tirsdag, 2, 2)
+        assertInterval(Uke(1).mandag, Uke(1).tirsdag, 2)
     }
 
     @Test
@@ -48,7 +48,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(Uke(1).mandag, Uke(1).torsdag, 2, 4)
+        assertInterval(Uke(1).mandag, Uke(1).torsdag, 4)
     }
 
     @Test
@@ -58,7 +58,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(Uke(1).mandag, Uke(1).torsdag, 2, 4)
+        assertInterval(Uke(1).mandag, Uke(1).torsdag, 4)
     }
 
     @Test
@@ -68,7 +68,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(Uke(1).mandag, Uke(1).torsdag, 2, 4)
+        assertInterval(Uke(1).mandag, Uke(1).torsdag, 4)
     }
 
     @Test
@@ -78,7 +78,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + arbeidsdager
 
-        assertInterval(Uke(1).mandag, Uke(1).torsdag, 1, 4)
+        assertInterval(Uke(1).mandag, Uke(1).torsdag, 4)
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(Uke(1).onsdag, Uke(2).mandag, 4, 6)
+        assertInterval(Uke(1).onsdag, Uke(2).mandag, 6)
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class OverlappingCompositeTest {
 
         sykdomstidslinje = sykedager + ferie
 
-        assertInterval(Uke(1).onsdag, Uke(2).mandag, 4, 6)
+        assertInterval(Uke(1).onsdag, Uke(2).mandag, 6)
     }
 
 
@@ -128,10 +128,13 @@ internal class OverlappingCompositeTest {
     }
 
 
-    private fun assertInterval(startdag: LocalDate, sluttdag: LocalDate, antallSykedager: Int, forventetLengde: Int) {
-        assertEquals(startdag, sykdomstidslinje.startdato())
-        assertEquals(sluttdag, sykdomstidslinje.sluttdato())
-        assertEquals(antallSykedager, sykdomstidslinje.antallSykedagerHvorViTellerMedHelg())
+    private fun assertInterval(
+        startdag: LocalDate,
+        sluttdag: LocalDate,
+        forventetLengde: Int
+    ) {
+        assertEquals(startdag, sykdomstidslinje.førsteDag())
+        assertEquals(sluttdag, sykdomstidslinje.sisteDag())
         assertEquals(forventetLengde, sykdomstidslinje.flatten().size)
     }
 }

@@ -18,9 +18,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagSykedagenDekker, sykedag.startdato())
-        assertEquals(dagSykedagenDekker, sykedag.sluttdato())
-        assertEquals(1, sykedag.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(dagSykedagenDekker, sykedag.førsteDag())
+        assertEquals(dagSykedagenDekker, sykedag.sisteDag())
     }
 
     @Test
@@ -30,9 +29,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagFeriedagenDekker, feriedag.startdato())
-        assertEquals(dagFeriedagenDekker, feriedag.sluttdato())
-        assertEquals(0, feriedag.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
+        assertEquals(dagFeriedagenDekker, feriedag.sisteDag())
     }
 
     @Test
@@ -42,9 +40,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(arbeidsdagenGjelder, arbeidsdag.startdato())
-        assertEquals(arbeidsdagenGjelder, arbeidsdag.sluttdato())
-        assertEquals(0, arbeidsdag.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
+        assertEquals(arbeidsdagenGjelder, arbeidsdag.sisteDag())
     }
 
     @Test
@@ -54,9 +51,8 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(helgedagenGjelder, helgedag.startdato())
-        assertEquals(helgedagenGjelder, helgedag.sluttdato())
-        assertEquals(0, helgedag.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(helgedagenGjelder, helgedag.førsteDag())
+        assertEquals(helgedagenGjelder, helgedag.sisteDag())
     }
 
     @Test
@@ -66,8 +62,7 @@ internal class DagTest {
             rapporterthendelse
         )
 
-        assertEquals(dagSykedagenDekker, studiedag.startdato())
-        assertEquals(dagSykedagenDekker, studiedag.sluttdato())
-        assertEquals(0, studiedag.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(dagSykedagenDekker, studiedag.førsteDag())
+        assertEquals(dagSykedagenDekker, studiedag.sisteDag())
     }
 }

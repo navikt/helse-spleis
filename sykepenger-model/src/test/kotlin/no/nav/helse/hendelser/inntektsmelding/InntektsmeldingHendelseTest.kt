@@ -6,8 +6,7 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.toJsonNode
@@ -16,7 +15,6 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 internal class InntektsmeldingHendelseTest {
 
@@ -58,7 +56,10 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
+        assertEquals(Uke(1).mandag, tidslinje.førsteDag())
+        assertThrows<IllegalStateException> {
+            assertEquals(Uke(1).mandag, tidslinje.førsteFraværsdag())
+        }
     }
 
     @Test
@@ -70,7 +71,8 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
+        assertEquals(Uke(1).mandag.minusDays(16), tidslinje.førsteDag())
+        assertEquals(Uke(1).torsdag, tidslinje.førsteFraværsdag())
     }
 
     @Test
@@ -94,8 +96,9 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.startdato())
-        assertEquals(LocalDate.of(2019, 9, 10), tidslinje.sluttdato())
+        assertEquals(10.september, tidslinje.førsteDag())
+        assertEquals(10.september, tidslinje.førsteFraværsdag())
+        assertEquals(10.september, tidslinje.sisteDag())
     }
 
     @Test
@@ -110,10 +113,10 @@ internal class InntektsmeldingHendelseTest {
 
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
-        assertEquals(Uke(1).mandag, tidslinje.startdato())
-        assertEquals(Uke(3).torsdag, tidslinje.sluttdato())
-        assertEquals(16, tidslinje.antallSykedagerHvorViTellerMedHelg())
-        assertEquals(18, tidslinje.flatten().size)
+        assertEquals(Uke(1).mandag.minusDays(16), tidslinje.førsteDag())
+        assertEquals(Uke(1).mandag, tidslinje.førsteFraværsdag())
+        assertEquals(Uke(3).torsdag, tidslinje.sisteDag())
+        assertEquals(34, tidslinje.flatten().size)
     }
 
     @Test

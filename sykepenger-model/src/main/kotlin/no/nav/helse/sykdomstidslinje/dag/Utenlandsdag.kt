@@ -9,9 +9,6 @@ internal class Utenlandsdag internal constructor(gjelder: LocalDate, hendelse: S
         visitor.visitUtenlandsdag(this)
     }
 
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
-
     override fun toString() = formatter.format(dagen) + "\tUtenlandsdag"
 
     override fun dagType() = JsonDagType.UTENLANDSDAG

@@ -14,4 +14,4 @@ internal class Uke(ukenr: Long) {
     val søndag get() = mandag.plusDays(6)
 }
 
-internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.startdato() == index }
+internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }

@@ -16,10 +16,6 @@ internal class ImplisittDag internal constructor(gjelder: LocalDate, hendelse: S
         visitor.visitImplisittDag(this)
     }
 
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
-
-    override fun antallSykedagerHvorViIkkeTellerMedHelg(): Int = 0
-
     override fun toString() = formatter.format(dagen) + "\tImplisitt dag"
 
     override fun dagType(): JsonDagType = JsonDagType.IMPLISITT_DAG

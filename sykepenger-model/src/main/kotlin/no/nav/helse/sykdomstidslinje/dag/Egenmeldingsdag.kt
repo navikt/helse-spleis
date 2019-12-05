@@ -11,9 +11,6 @@ internal class Egenmeldingsdag internal constructor(gjelder: LocalDate, hendelse
         visitor.visitEgenmeldingsdag(this)
     }
 
-    override fun antallSykedagerHvorViTellerMedHelg() = 1
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
-
     override fun toString() = formatter.format(dagen) + "\tEgenmeldingsdag"
 
     override fun dagType() = JsonDagType.EGENMELDINGSDAG

@@ -23,35 +23,33 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 internal abstract class Sykdomstidslinje {
 
-    private var maksdato: LocalDate? = null
+    abstract fun førsteDag(): LocalDate
 
-    abstract fun startdato(): LocalDate
-    abstract fun sluttdato(): LocalDate
-    abstract fun antallSykedagerHvorViTellerMedHelg(): Int
-    abstract fun antallSykedagerHvorViIkkeTellerMedHelg(): Int
+    fun førsteFraværsdag(): LocalDate {
+        val visitor = FørsteFraværsdagVisitor()
+        accept(visitor)
+        return visitor.førsteFraværsdag()
+    }
+
+    abstract fun sisteDag(): LocalDate
     abstract fun hendelser(): Set<SykdomstidslinjeHendelse>
-    abstract fun flatten(): List<Dag>
-    abstract fun length(): Int
-    abstract fun accept(visitor: SykdomstidslinjeVisitor)
+
+    internal abstract fun flatten(): List<Dag>
+    internal abstract fun length(): Int
+    internal abstract fun accept(visitor: SykdomstidslinjeVisitor)
 
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
     internal abstract fun dag(dato: LocalDate): Dag?
 
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
-    private fun jsonRepresentation(): JsonTidslinje {
-        val dager = flatten().map { it.toJsonDag() }
-        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJson() }
-        return JsonTidslinje(dager = dager, hendelser = hendelser)
-    }
-
     fun plus(other: Sykdomstidslinje, gapDayCreator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
 
-        if (this.startdato().isAfter(other.startdato())) return other.plus(this, gapDayCreator)
+        if (this.førsteDag().isAfter(other.førsteDag())) return other.plus(this, gapDayCreator)
 
-        return CompositeSykdomstidslinje(this.startdato().datesUntil(this.sisteSluttdato(other).plusDays(1))
+        return CompositeSykdomstidslinje(this.førsteDag().datesUntil(this.sisteSluttdato(other).plusDays(1))
             .map {
                 beste(this.dag(it), other.dag(it)) ?: gapDayCreator(it, other.sisteHendelse())
             }.toList())
@@ -60,14 +58,6 @@ internal abstract class Sykdomstidslinje {
     operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
         return this.plus(other, Companion::implisittDag)
     }
-
-    fun antallDagerMellom(other: Sykdomstidslinje) =
-        when {
-            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
-            erDelAv(other) -> -min(this.length(), other.length())
-            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
-            else -> min(this.avstand(other), other.avstand(this))
-        }
 
     fun overlapperMed(other: Sykdomstidslinje) =
         when {
@@ -81,37 +71,44 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, startdato(), sluttdato()))
+        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, førsteFraværsdag(), sisteDag()))
         this.accept(beregner)
         return beregner.results()
     }
 
+    internal fun antallDagerMellom(other: Sykdomstidslinje) =
+        when {
+            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
+            erDelAv(other) -> -min(this.length(), other.length())
+            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
+            else -> min(this.avstand(other), other.avstand(this))
+        }
+
     private fun førsteStartdato(other: Sykdomstidslinje) =
-        if (this.startdato().isBefore(other.startdato())) this.startdato() else other.startdato()
+        if (this.førsteDag().isBefore(other.førsteDag())) this.førsteDag() else other.førsteDag()
 
     private fun sisteSluttdato(other: Sykdomstidslinje) =
-        if (this.sluttdato().isAfter(other.sluttdato())) this.sluttdato() else other.sluttdato()
+        if (this.sisteDag().isAfter(other.sisteDag())) this.sisteDag() else other.sisteDag()
 
     private fun avstand(other: Sykdomstidslinje) =
-        this.sluttdato().until(other.startdato(), ChronoUnit.DAYS).absoluteValue.toInt() - 1
+        this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() - 1
 
     private fun avstandMedOverlapp(other: Sykdomstidslinje) =
-        -(this.sluttdato().until(other.startdato(), ChronoUnit.DAYS).absoluteValue.toInt() + 1)
+        -(this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() + 1)
 
     private fun erDelAv(other: Sykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
     private fun harBeggeGrenseneInnenfor(other: Sykdomstidslinje) =
-        this.startdato() in other.startdato()..other.sluttdato() && this.sluttdato() in other.startdato()..other.sluttdato()
+        this.førsteDag() in other.førsteDag()..other.sisteDag() && this.sisteDag() in other.førsteDag()..other.sisteDag()
 
     private fun harGrenseInnenfor(other: Sykdomstidslinje) =
-        this.startdato() in (other.startdato()..other.sluttdato())
+        this.førsteDag() in (other.førsteDag()..other.sisteDag())
 
-    internal fun trim(): Sykdomstidslinje {
-        val days = flatten()
-            .dropWhile { it.antallSykedagerHvorViTellerMedHelg() < 1 }
-            .dropLastWhile { it.antallSykedagerHvorViTellerMedHelg() < 1 }
-        return CompositeSykdomstidslinje(days)
+    private fun jsonRepresentation(): JsonTidslinje {
+        val dager = flatten().map { it.toJsonDag() }
+        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJson() }
+        return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 
     fun utbetalingslinjer(inntektHistorie: InntektHistorie, fødselsnummer: String) =

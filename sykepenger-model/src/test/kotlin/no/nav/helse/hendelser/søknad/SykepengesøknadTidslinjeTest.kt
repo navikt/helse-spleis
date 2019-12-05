@@ -26,14 +26,14 @@ internal class SykepengesøknadTidslinjeTest {
 
         assertType(Sykedag::class, tidslinje[sykeperiodeFOM])
         assertType(SykHelgedag::class, tidslinje[sykeperiodeTOM])
-        assertEquals(sykeperiodeTOM, tidslinje.sluttdato())
+        assertEquals(sykeperiodeTOM, tidslinje.sisteDag())
     }
 
     @Test
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`() {
         val tidslinje = (sendtSøknadHendelse().sykdomstidslinje() + nySøknadHendelse().sykdomstidslinje())
 
-        assertEquals(egenmeldingFom, tidslinje.startdato())
+        assertEquals(egenmeldingFom, tidslinje.førsteDag())
         assertType(Egenmeldingsdag::class, tidslinje[egenmeldingFom])
         assertType(Egenmeldingsdag::class, tidslinje[egenmeldingTom])
     }

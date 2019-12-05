@@ -172,10 +172,8 @@ internal class SykdomstidslinjeJsonTest {
     }
 
     private fun assertSykdomstidslinjerEquals(expected: Sykdomstidslinje, actual: Sykdomstidslinje) {
-        assertEquals(expected.startdato(), actual.startdato())
-        assertEquals(expected.sluttdato(), actual.sluttdato())
-        assertEquals(expected.antallSykedagerHvorViIkkeTellerMedHelg(), actual.antallSykedagerHvorViIkkeTellerMedHelg())
-        assertEquals(expected.antallSykedagerHvorViTellerMedHelg(), actual.antallSykedagerHvorViTellerMedHelg())
+        assertEquals(expected.førsteDag(), actual.førsteDag())
+        assertEquals(expected.sisteDag(), actual.sisteDag())
         assertEquals(expected.length(), actual.length())
 
         val actualDager = actual.flatten()
@@ -186,8 +184,8 @@ internal class SykdomstidslinjeJsonTest {
 
     private fun assertDagEquals(expected: Dag, actual: Dag) {
         assertEquals(expected::class, actual::class)
-        assertEquals(expected.startdato(), actual.startdato())
-        assertEquals(expected.sluttdato(), actual.sluttdato())
+        assertEquals(expected.førsteDag(), actual.førsteDag())
+        assertEquals(expected.sisteDag(), actual.sisteDag())
         assertEquals(expected.dagerErstattet().size, actual.dagerErstattet().size)
 
         val actualDager = actual.dagerErstattet()

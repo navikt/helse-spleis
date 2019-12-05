@@ -33,8 +33,8 @@ internal abstract class Dag internal constructor(
         return alleHendelser
     }
 
-    override fun startdato() = dagen
-    override fun sluttdato() = dagen
+    override fun førsteDag() = dagen
+    override fun sisteDag() = dagen
     override fun hendelser(): Set<SykdomstidslinjeHendelse> = setOf(hendelse) + erstatter.flatMap { it.hendelser() }
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
