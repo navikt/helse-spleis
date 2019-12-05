@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.InntektHistorie
+import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -110,6 +113,11 @@ internal abstract class Sykdomstidslinje {
             .dropLastWhile { it.antallSykedagerHvorViTellerMedHelg() < 1 }
         return CompositeSykdomstidslinje(days)
     }
+
+    fun utbetalingslinjer(inntektHistorie: InntektHistorie, fødselsnummer: String) =
+        UtbetalingBuilder(this, inntektHistorie, Alder(fødselsnummer, startdato(), sluttdato()))
+            .result()
+            .utbetalingslinjer(emptyList())
 
     companion object {
 

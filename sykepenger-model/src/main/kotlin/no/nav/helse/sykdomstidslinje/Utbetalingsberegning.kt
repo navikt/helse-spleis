@@ -10,7 +10,7 @@ data class Utbetalingsberegning(
 
 data class Utbetalingslinje(
     val fom: LocalDate,
-    val tom: LocalDate,
+    var tom: LocalDate,
     val dagsats: Int
 )
 
