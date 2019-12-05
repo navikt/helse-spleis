@@ -65,7 +65,7 @@ object VedtaksperiodeProbe : SakObserver {
         }
     }
 
-    fun<T: SykdomstidslinjeHendelse> utenforOmfang(hendelse: T) {
+    fun utenforOmfang(hendelse: Any) {
         utenforOmfangCounter.labels(hendelse.javaClass.simpleName).inc()
     }
 
