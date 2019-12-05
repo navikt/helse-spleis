@@ -13,10 +13,6 @@ internal class Ubestemtdag internal constructor(dato: LocalDate, hendelse: Sykdo
         visitor.visitUbestemt(this)
     }
 
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
-
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
-
     override fun toString() = formatter.format(dagen) + "\tUbestemtdag"
 
     override fun dagType() = JsonDagType.UBESTEMTDAG

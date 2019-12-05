@@ -26,8 +26,6 @@ internal class StudieTest {
             testKildeHendelse
         )
         assertEquals(7, studiedager.length())
-        assertEquals(0, studiedager.antallSykedagerHvorViTellerMedHelg())
-        assertEquals(0, studiedager.antallSykedagerHvorViIkkeTellerMedHelg())
     }
 
     private val Int.juli get() = LocalDate.of(2019, Month.JULY, this)

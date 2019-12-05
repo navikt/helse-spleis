@@ -35,12 +35,6 @@ internal class CompositeSykdomstidslinje internal constructor(
 
     override fun sisteDag() = tidslinje.last().dagen
 
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = tidslinje
-        .sumBy { it.antallSykedagerHvorViIkkeTellerMedHelg() }
-
-    override fun antallSykedagerHvorViTellerMedHelg() = tidslinje
-        .sumBy { it.antallSykedagerHvorViTellerMedHelg() }
-
     override fun toString() = tidslinje.joinToString(separator = "\n") { it.toString() }
 
     companion object {

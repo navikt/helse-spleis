@@ -9,10 +9,6 @@ internal class Permisjonsdag internal constructor(gjelder: LocalDate, hendelse: 
         visitor.visitPermisjonsdag(this)
     }
 
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
-
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
-
     override fun toString() = formatter.format(dagen) + "\tPermisjonsdag"
 
     override fun dagType() = JsonDagType.PERMISJONSDAG

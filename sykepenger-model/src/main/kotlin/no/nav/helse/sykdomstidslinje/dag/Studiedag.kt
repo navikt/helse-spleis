@@ -9,10 +9,6 @@ internal class Studiedag internal constructor(gjelder: LocalDate, hendelse: Sykd
         visitor.visitStudiedag(this)
     }
 
-    override fun antallSykedagerHvorViIkkeTellerMedHelg() = 0
-
-    override fun antallSykedagerHvorViTellerMedHelg() = 0
-
     override fun toString() = formatter.format(dagen) + "\tStudiedag"
 
     override fun dagType() = JsonDagType.STUDIEDAG

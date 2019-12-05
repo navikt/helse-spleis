@@ -174,8 +174,6 @@ internal class SykdomstidslinjeJsonTest {
     private fun assertSykdomstidslinjerEquals(expected: Sykdomstidslinje, actual: Sykdomstidslinje) {
         assertEquals(expected.førsteDag(), actual.førsteDag())
         assertEquals(expected.sisteDag(), actual.sisteDag())
-        assertEquals(expected.antallSykedagerHvorViIkkeTellerMedHelg(), actual.antallSykedagerHvorViIkkeTellerMedHelg())
-        assertEquals(expected.antallSykedagerHvorViTellerMedHelg(), actual.antallSykedagerHvorViTellerMedHelg())
         assertEquals(expected.length(), actual.length())
 
         val actualDager = actual.flatten()

@@ -21,13 +21,19 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
 internal abstract class Sykdomstidslinje {
 
     abstract fun førsteDag(): LocalDate
+
+    fun førsteFraværsdag(): LocalDate {
+        val visitor = FørsteFraværsdagVisitor()
+        accept(visitor)
+        return visitor.førsteFraværsdag()
+    }
+
     abstract fun sisteDag(): LocalDate
-    abstract fun antallSykedagerHvorViTellerMedHelg(): Int
-    abstract fun antallSykedagerHvorViIkkeTellerMedHelg(): Int
     abstract fun hendelser(): Set<SykdomstidslinjeHendelse>
-    abstract fun flatten(): List<Dag>
-    abstract fun length(): Int
-    abstract fun accept(visitor: SykdomstidslinjeVisitor)
+
+    internal abstract fun flatten(): List<Dag>
+    internal abstract fun length(): Int
+    internal abstract fun accept(visitor: SykdomstidslinjeVisitor)
 
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
     internal abstract fun dag(dato: LocalDate): Dag?
@@ -50,14 +56,6 @@ internal abstract class Sykdomstidslinje {
         return this.plus(other, Companion::implisittDag)
     }
 
-    fun antallDagerMellom(other: Sykdomstidslinje) =
-        when {
-            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
-            erDelAv(other) -> -min(this.length(), other.length())
-            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
-            else -> min(this.avstand(other), other.avstand(this))
-        }
-
     fun overlapperMed(other: Sykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> false
@@ -70,10 +68,18 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, førsteDag(), sisteDag()))
+        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, førsteFraværsdag(), sisteDag()))
         this.accept(beregner)
         return beregner.results()
     }
+
+    internal fun antallDagerMellom(other: Sykdomstidslinje) =
+        when {
+            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
+            erDelAv(other) -> -min(this.length(), other.length())
+            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
+            else -> min(this.avstand(other), other.avstand(this))
+        }
 
     private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.førsteDag().isBefore(other.førsteDag())) this.førsteDag() else other.førsteDag()

@@ -39,7 +39,6 @@ internal class CompositeLeafSykdomstidslinjeTest {
 
         assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
         assertEquals(førsteOnsdag.sisteDag(), interval.sisteDag())
-        assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -48,7 +47,6 @@ internal class CompositeLeafSykdomstidslinjeTest {
 
         assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
         assertEquals(førsteOnsdag.sisteDag(), interval.sisteDag())
-        assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -57,7 +55,6 @@ internal class CompositeLeafSykdomstidslinjeTest {
 
         assertEquals(førsteTirsdag.førsteDag(), interval.førsteDag())
         assertEquals(førsteTorsdag.sisteDag(), interval.sisteDag())
-        assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
         assertEquals(3, interval.flatten().size)
     }
 
@@ -67,7 +64,6 @@ internal class CompositeLeafSykdomstidslinjeTest {
 
         assertEquals(førsteMandag.førsteDag(), interval.førsteDag())
         assertEquals(andreMandag.sisteDag(), interval.sisteDag())
-        assertEquals(2, interval.antallSykedagerHvorViTellerMedHelg())
         assertEquals(8, interval.flatten().size)
     }
 }

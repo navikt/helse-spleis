@@ -20,7 +20,6 @@ internal class DagTest {
 
         assertEquals(dagSykedagenDekker, sykedag.førsteDag())
         assertEquals(dagSykedagenDekker, sykedag.sisteDag())
-        assertEquals(1, sykedag.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -32,7 +31,6 @@ internal class DagTest {
 
         assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
         assertEquals(dagFeriedagenDekker, feriedag.sisteDag())
-        assertEquals(0, feriedag.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -44,7 +42,6 @@ internal class DagTest {
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
         assertEquals(arbeidsdagenGjelder, arbeidsdag.sisteDag())
-        assertEquals(0, arbeidsdag.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -56,7 +53,6 @@ internal class DagTest {
 
         assertEquals(helgedagenGjelder, helgedag.førsteDag())
         assertEquals(helgedagenGjelder, helgedag.sisteDag())
-        assertEquals(0, helgedag.antallSykedagerHvorViTellerMedHelg())
     }
 
     @Test
@@ -68,6 +64,5 @@ internal class DagTest {
 
         assertEquals(dagSykedagenDekker, studiedag.førsteDag())
         assertEquals(dagSykedagenDekker, studiedag.sisteDag())
-        assertEquals(0, studiedag.antallSykedagerHvorViTellerMedHelg())
     }
 }
