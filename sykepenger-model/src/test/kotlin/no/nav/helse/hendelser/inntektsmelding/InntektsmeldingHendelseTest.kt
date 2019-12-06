@@ -58,7 +58,7 @@ internal class InntektsmeldingHendelseTest {
 
         assertEquals(Uke(1).mandag, tidslinje.førsteDag())
         assertThrows<IllegalStateException> {
-            assertEquals(Uke(1).mandag, tidslinje.førsteFraværsdag())
+            assertEquals(Uke(1).mandag, tidslinje.utgangspunktForBeregningAvYtelse())
         }
     }
 
@@ -72,7 +72,7 @@ internal class InntektsmeldingHendelseTest {
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
         assertEquals(Uke(1).mandag.minusDays(16), tidslinje.førsteDag())
-        assertEquals(Uke(1).torsdag, tidslinje.førsteFraværsdag())
+        assertEquals(Uke(1).torsdag, tidslinje.utgangspunktForBeregningAvYtelse())
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class InntektsmeldingHendelseTest {
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
         assertEquals(10.september, tidslinje.førsteDag())
-        assertEquals(10.september, tidslinje.førsteFraværsdag())
+        assertEquals(10.september, tidslinje.utgangspunktForBeregningAvYtelse())
         assertEquals(10.september, tidslinje.sisteDag())
     }
 
@@ -114,7 +114,7 @@ internal class InntektsmeldingHendelseTest {
         val tidslinje = inntektsmeldingHendelse.sykdomstidslinje()
 
         assertEquals(Uke(1).mandag.minusDays(16), tidslinje.førsteDag())
-        assertEquals(Uke(1).mandag, tidslinje.førsteFraværsdag())
+        assertEquals(Uke(1).mandag, tidslinje.utgangspunktForBeregningAvYtelse())
         assertEquals(Uke(3).torsdag, tidslinje.sisteDag())
         assertEquals(34, tidslinje.flatten().size)
     }

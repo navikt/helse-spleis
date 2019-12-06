@@ -3,11 +3,11 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
 
-internal class FørsteFraværsdagVisitor : SykdomstidslinjeVisitor {
+internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor {
     private var førsteFraværsdagTilstand: FørsteFraværsdagTilstand = TrengerFørsteFraværsdag
     private var førsteFraværsdag: LocalDate? = null
 
-    fun førsteFraværsdag() =
+    fun utgangspunktForBeregningAvYtelse() =
         førsteFraværsdag ?: throw IllegalStateException("Første fraværsdag er null")
 
     override fun visitSykedag(sykedag: Sykedag) {
@@ -49,35 +49,35 @@ internal class FørsteFraværsdagVisitor : SykdomstidslinjeVisitor {
     }
 
     private interface FørsteFraværsdagTilstand {
-        fun fraværsdag(førsteFraværsdagVisitor: FørsteFraværsdagVisitor, dagen: LocalDate) {}
+        fun fraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {}
 
-        fun ikkeFraværsdag(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {}
+        fun ikkeFraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
 
-        fun ugyldigDag(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {
-            førsteFraværsdagVisitor.state(UgyldigTilstand)
+        fun ugyldigDag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(UgyldigTilstand)
         }
 
-        fun leaving(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {}
-        fun entering(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {}
+        fun leaving(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
+        fun entering(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
     }
 
     private object TrengerFørsteFraværsdag: FørsteFraværsdagTilstand {
-        override fun fraværsdag(førsteFraværsdagVisitor: FørsteFraværsdagVisitor, dagen: LocalDate) {
-            førsteFraværsdagVisitor.state(HarFørsteFraværsdag(dagen))
+        override fun fraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
         }
     }
 
     private class HarFørsteFraværsdag(private val førsteFraværsdag: LocalDate): FørsteFraværsdagTilstand {
-        override fun entering(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {
-            førsteFraværsdagVisitor.førsteFraværsdag = førsteFraværsdag
+        override fun entering(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.førsteFraværsdag = førsteFraværsdag
         }
 
-        override fun ikkeFraværsdag(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {
-            førsteFraværsdagVisitor.state(TrengerFørsteFraværsdag)
+        override fun ikkeFraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(TrengerFørsteFraværsdag)
         }
 
-        override fun leaving(førsteFraværsdagVisitor: FørsteFraværsdagVisitor) {
-            førsteFraværsdagVisitor.førsteFraværsdag = null
+        override fun leaving(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.førsteFraværsdag = null
         }
     }
 

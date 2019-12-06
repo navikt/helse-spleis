@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.InntektHistorie
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.DayOfWeek
@@ -25,10 +24,11 @@ internal abstract class Sykdomstidslinje {
 
     abstract fun førsteDag(): LocalDate
 
-    fun førsteFraværsdag(): LocalDate {
-        val visitor = FørsteFraværsdagVisitor()
+    // Første fraværsdag i den siste sammenhengende perioden
+    fun utgangspunktForBeregningAvYtelse(): LocalDate {
+        val visitor = UtgangspunktForBeregningAvYtelseVisitor()
         accept(visitor)
-        return visitor.førsteFraværsdag()
+        return visitor.utgangspunktForBeregningAvYtelse()
     }
 
     abstract fun sisteDag(): LocalDate
@@ -71,7 +71,7 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, førsteFraværsdag(), sisteDag()))
+        val beregner = Utbetalingsberegner(dagsats, Alder(fødselsnummer, utgangspunktForBeregningAvYtelse(), sisteDag()))
         this.accept(beregner)
         return beregner.results()
     }
@@ -112,7 +112,7 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingslinjer(inntektHistorie: InntektHistorie, fødselsnummer: String) =
-        UtbetalingBuilder(this, inntektHistorie, Alder(fødselsnummer, førsteFraværsdag(), sisteDag()))
+        UtbetalingBuilder(this, inntektHistorie, Alder(fødselsnummer, utgangspunktForBeregningAvYtelse(), sisteDag()))
             .result()
             .utbetalingslinjer(emptyList())
 

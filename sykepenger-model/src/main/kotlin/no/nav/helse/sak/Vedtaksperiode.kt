@@ -211,7 +211,7 @@ internal class Vedtaksperiode internal constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiode.emitTrengerLøsning(
                 BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
-                    "tom" to vedtaksperiode.sykdomstidslinje!!.førsteFraværsdag().minusDays(1)
+                    "tom" to vedtaksperiode.sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
                 )
             )
         }
@@ -222,8 +222,8 @@ internal class Vedtaksperiode internal constructor(
 
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
 
-            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.førsteFraværsdag() || sisteFraværsdag.datesUntil(
-                    tidslinje.førsteFraværsdag()
+            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse() || sisteFraværsdag.datesUntil(
+                    tidslinje.utgangspunktForBeregningAvYtelse()
                 ).count() <= seksMåneder)
             ) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)

@@ -96,6 +96,24 @@ internal class DagTurneringTest {
         val vinner = turnering.slåss(egenmeldingsdagFraArbeidsgiver, sykHelgedag)
         assertEquals(sykHelgedag, vinner)
     }
+    
+    @Test
+    internal fun `arbeidsdag fra inntektsmelding vinner over egenmelding fra søknad`() {
+        val egenmeldingsdag = mandag.egenmeldingsdag.fraSøknad.rapportertTidlig
+        val arbeidsdag = mandag.arbeidsdag.fraInntektsmelding.rapportertTidlig
+
+        val vinner = turnering.slåss(egenmeldingsdag, arbeidsdag)
+        assertEquals(arbeidsdag, vinner)
+    }
+
+    @Test
+    internal fun `arbeidsdag fra inntektsmelding vinner over sykedag fra sykmelding`() {
+        val sykedag = mandag.sykedag.fraSykmelding.rapportertTidlig
+        val arbeidsdag = mandag.arbeidsdag.fraInntektsmelding.rapportertTidlig
+
+        val vinner = turnering.slåss(sykedag, arbeidsdag)
+        assertEquals(arbeidsdag, vinner)
+    }
 
     private class TestHendelseBuilder(private val dato: LocalDate) {
         private var dagbuilder: ((LocalDate, SykdomstidslinjeHendelse) -> Dag)? = null
@@ -140,14 +158,14 @@ internal class DagTurneringTest {
             get() = dagbuilder!!(
                 dato, Testhendelse(
                     dato.atStartOfDay(),
-                    Dag.NøkkelHendelseType.Søknad
+                    hendelsetype ?: Dag.NøkkelHendelseType.Søknad
                 )
             )
         val rapportertSent
             get() = dagbuilder!!(
                 dato, Testhendelse(
                     dato.atTime(18, 0),
-                    Dag.NøkkelHendelseType.Søknad
+                    hendelsetype ?: Dag.NøkkelHendelseType.Søknad
                 )
             )
 

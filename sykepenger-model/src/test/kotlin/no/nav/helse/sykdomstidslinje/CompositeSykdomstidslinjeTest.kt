@@ -9,20 +9,13 @@ import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 
 internal class CompositeSykdomstidslinjeTest {
 
     companion object {
         private val tidspunktRapportert = Testhendelse(
-            rapportertdato = LocalDateTime.of(
-                2019,
-                7,
-                31,
-                20,
-                0
-            )
+            rapportertdato = LocalDateTime.of(2019, 7, 31, 20, 0)
         )
     }
 
@@ -31,7 +24,8 @@ internal class CompositeSykdomstidslinjeTest {
         val arbeidsgiverperiode1 = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, tidspunktRapportert)
         val arbeidsgiverperiode2 = Sykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, tidspunktRapportert)
 
-        val  arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, Sykdomstidslinje.Companion::ikkeSykedag)
+        val arbeidsgiverperiode =
+            arbeidsgiverperiode1.plus(arbeidsgiverperiode2, Sykdomstidslinje.Companion::ikkeSykedag)
 
         assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
         assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)
@@ -48,54 +42,6 @@ internal class CompositeSykdomstidslinjeTest {
     }
 
     @Test
-    internal fun `første fraværsdag er første egenmeldingsdag, sykedag eller sykhelgdag i en sammenhengende periode`() {
-        Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, tidspunktRapportert).also {
-            assertEquals(Uke(1).mandag, it.førsteFraværsdag())
-        }
-
-        Sykdomstidslinje.egenmeldingsdager(Uke(1).mandag, Uke(1).fredag, tidspunktRapportert).also {
-            assertEquals(Uke(1).mandag, it.førsteFraværsdag())
-        }
-
-        (Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert) + Sykdomstidslinje.sykedager(Uke(2).torsdag, Uke(2).fredag, tidspunktRapportert)).also {
-            assertEquals(Uke(2).torsdag, it.førsteFraværsdag())
-        }
-    }
-
-    @Test
-    internal fun `første fraværsdag på tidslinjer med ubestemte dager`() {
-        val sykedager1 = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
-        val sykedager2 = Sykdomstidslinje.sykedager(Uke(2).torsdag, Uke(2).fredag, tidspunktRapportert)
-
-        val ubestemtDag = Sykdomstidslinje.utenlandsdag(Uke(1).fredag, tidspunktRapportert)
-        val studiedag = Sykdomstidslinje.studiedag(Uke(1).fredag, tidspunktRapportert)
-
-        (sykedager1 + ubestemtDag + sykedager2).also {
-            assertThrows<IllegalStateException> {
-                it.førsteFraværsdag()
-            }
-        }
-
-        (sykedager1 + studiedag + sykedager2).also {
-            assertThrows<IllegalStateException> {
-                it.førsteFraværsdag()
-            }
-        }
-    }
-
-    @Test
-    internal fun `første fraværsdag på tidslinjer som slutter med arbeidsdager`() {
-        val sykedager = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
-        val ikkeSykedag = Sykdomstidslinje.utenlandsdag(Uke(1).fredag, tidspunktRapportert)
-
-        (sykedager + ikkeSykedag).also {
-            assertThrows<IllegalStateException> {
-                it.førsteFraværsdag()
-            }
-        }
-    }
-
-    @Test
     internal fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
         val førsteInterval = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
         val andreInterval = Sykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, tidspunktRapportert)
@@ -103,7 +49,7 @@ internal class CompositeSykdomstidslinjeTest {
         val interval = andreInterval + førsteInterval
 
         assertEquals(Uke(1).mandag, interval.førsteDag())
-        assertEquals(Uke(1).fredag, interval.førsteFraværsdag())
+        assertEquals(Uke(1).fredag, interval.utgangspunktForBeregningAvYtelse())
         assertEquals(Uke(2).mandag, interval.sisteDag())
         assertEquals(8, interval.flatten().size)
     }
