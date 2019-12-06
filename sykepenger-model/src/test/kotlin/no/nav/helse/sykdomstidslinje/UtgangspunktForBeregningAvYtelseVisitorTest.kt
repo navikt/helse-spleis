@@ -1,152 +1,98 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Testhendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.Uke
+import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.streams.toList
 
 internal class UtgangspunktForBeregningAvYtelseVisitorTest {
 
     @Test
-    fun `feiler når dagen er null`() {
-        assertThrows<IllegalStateException> {
-            UtgangspunktForBeregningAvYtelseVisitor()
-                .utgangspunktForBeregningAvYtelse()
-        }
-    }
-
-    private fun <DAG: Dag> assertUtgangspunktForBeregningAvYtelse(dagen: DAG, visit: UtgangspunktForBeregningAvYtelseVisitor.(DAG) -> Unit) {
-        UtgangspunktForBeregningAvYtelseVisitor().apply {
-            visit(dagen)
-        }.also {
-            assertEquals(dagen.dagen, it.utgangspunktForBeregningAvYtelse())
-        }
+    internal fun `kaster exception for ugyldige situasjoner`() {
+        assertThrows<IllegalStateException> { UtgangspunktForBeregningAvYtelseVisitor().utgangspunktForBeregningAvYtelse() }
+        assertUgyldigTilstand(1.utenlandsdager)
+        assertUgyldigTilstand(1.studieDager)
+        assertUgyldigTilstand(1.feriedager)
+        assertUgyldigTilstand(1.permisjonsdager)
+        assertUgyldigTilstand(1.implisittDager)
+        assertUgyldigTilstand(1.arbeidsdager)
+        assertUgyldigTilstand(1.sykedager + 1.utenlandsdager)
+        assertUgyldigTilstand(1.sykedager + 1.utenlandsdager + 1.sykedager)
+        assertUgyldigTilstand(1.sykedager + 1.studieDager)
+        assertUgyldigTilstand(1.sykedager + 1.studieDager + 1.sykedager)
     }
 
     @Test
-    fun `utgangspunkt for beregning er sykedag, egenmeldingsdag eller syk helgedag`() {
-        assertUtgangspunktForBeregningAvYtelse(sykedag, UtgangspunktForBeregningAvYtelseVisitor::visitSykedag)
-        assertUtgangspunktForBeregningAvYtelse(egenmeldingsdag, UtgangspunktForBeregningAvYtelseVisitor::visitEgenmeldingsdag)
-        assertUtgangspunktForBeregningAvYtelse(sykHelgedag, UtgangspunktForBeregningAvYtelseVisitor::visitSykHelgedag)
+    internal fun `utgangspunkt for beregning er sykedag, egenmeldingsdag eller syk helgedag`() {
+        assertDagenErUtgangspunktForBeregning(sykedag)
+        assertDagenErUtgangspunktForBeregning(egenmeldingsdag)
+        assertDagenErUtgangspunktForBeregning(sykHelgedag)
     }
 
     @Test
     internal fun `utgangspunkt for beregning av ytelse er første egenmeldingsdag, sykedag eller sykhelgdag i en sammenhengende periode`() {
-        5.sykedager.also {
-            assertEquals(it.førsteDag(), it.utgangspunktForBeregningAvYtelse())
-        }
-
-        5.egenmeldingsdager.also {
-            assertEquals(it.førsteDag(), it.utgangspunktForBeregningAvYtelse())
-        }
+        assertFørsteDagErUtgangspunktForBeregning(2.sykedager)
+        assertFørsteDagErUtgangspunktForBeregning(2.egenmeldingsdager)
 
         tidslinjeMedPerioder(2.sykedager, 2.implisittDager, 2.sykedager) { _, _, periode3 ->
-            assertEquals(periode3.førsteDag(), this.utgangspunktForBeregningAvYtelse())
+            assertFørsteDagErUtgangspunktForBeregning(periode3, this)
+        }
+        tidslinjeMedPerioder(2.sykedager, 2.feriedager, 2.sykedager) { periode1, _, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(periode1, this)
+        }
+        tidslinjeMedPerioder(2.sykedager, 2.permisjonsdager, 2.sykedager) { periode1, _, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
     }
 
     @Test
-    internal fun `ferie påvirker ikke utgangspunktet for beregning av ytelse`() {
-        tidslinjeMedPerioder(5.sykedager, 5.feriedager) { periode1, _ ->
-            assertEquals(periode1.førsteDag(), this.utgangspunktForBeregningAvYtelse())
+    internal fun `tidslinjer som slutter med ignorerte dager`() {
+        tidslinjeMedPerioder(2.sykedager, 2.feriedager) { periode1, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(periode1, this)
+        }
+        tidslinjeMedPerioder(2.sykedager, 2.permisjonsdager) { periode1, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
     }
 
     @Test
-    internal fun `utenlands- eller studiedager kan ikke håndteres`() {
-        assertThrows<IllegalStateException> {
-            (5.sykedager + 5.utenlandsdager).utgangspunktForBeregningAvYtelse()
-        }
-
-        assertThrows<IllegalStateException> {
-            (5.sykedager + 5.studieDager).utgangspunktForBeregningAvYtelse()
-        }
-    }
-
-    @Test
-    internal fun `utgangspunkt for beregning av ytelse på tidslinjer med ubestemte dager`() {
-        val sykedager1 = Sykdomstidslinje.sykedager(
-            Uke(1).mandag, Uke(1).tirsdag,
-            tidspunktRapportert
-        )
-        val sykedager2 = Sykdomstidslinje.sykedager(
-            Uke(2).torsdag, Uke(2).fredag,
-            tidspunktRapportert
-        )
-
-        val ubestemtDag = Sykdomstidslinje.utenlandsdag(
-            Uke(1).fredag,
-            tidspunktRapportert
-        )
-        val studiedag = Sykdomstidslinje.studiedag(Uke(1).fredag, tidspunktRapportert)
-
-        (sykedager1 + ubestemtDag + sykedager2).also {
-            assertThrows<IllegalStateException> {
-                it.utgangspunktForBeregningAvYtelse()
-            }
-        }
-
-        (sykedager1 + studiedag + sykedager2).also {
-            assertThrows<IllegalStateException> {
-                it.utgangspunktForBeregningAvYtelse()
-            }
-        }
-    }
-
-    @Test
-    internal fun `utgangspunkt for beregning av ytelse på tidslinjer som slutter med arbeidsdager`() {
-        val sykedager = Sykdomstidslinje.sykedager(
-            Uke(1).mandag, Uke(1).tirsdag,
-            tidspunktRapportert
-        )
-        val ikkeSykedag = Sykdomstidslinje.utenlandsdag(
-            Uke(1).fredag,
-            tidspunktRapportert
-        )
-
-        (sykedager + ikkeSykedag).also {
-            assertThrows<IllegalStateException> {
-                it.utgangspunktForBeregningAvYtelse()
-            }
-        }
+    internal fun `tidslinjer som slutter med dager som ikke er sykedager, egenmeldingsdager eller sykHelgedag`() {
+        assertUgyldigTilstand(1.sykedager + 1.arbeidsdager)
+        assertUgyldigTilstand(1.sykedager + 1.implisittDager)
     }
 
     private companion object {
-        private val tidspunktRapportert = Testhendelse(
+
+        private val testhendelse = Testhendelse(
             rapportertdato = LocalDateTime.of(2019, 7, 31, 20, 0)
         )
 
-        private val sykedag = Sykedag(LocalDate.now(), tidspunktRapportert)
-        private val egenmeldingsdag = Egenmeldingsdag(LocalDate.now(), tidspunktRapportert)
-        private val sykHelgedag = SykHelgedag(LocalDate.now(), tidspunktRapportert)
+        private val sykedag = Sykedag(LocalDate.now(), testhendelse)
+        private val egenmeldingsdag = Egenmeldingsdag(LocalDate.now(), testhendelse)
+        private val sykHelgedag = SykHelgedag(LocalDate.now(), testhendelse)
 
         private var dato = LocalDate.of(2019, 1, 1)
 
-        private val Int.sykedager get() = Sykdomstidslinje.sykedager(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
-        private val Int.egenmeldingsdager get() = Sykdomstidslinje.egenmeldingsdager(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
-        private val Int.implisittDager get() = Sykdomstidslinje.implisittdager(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
-        private val Int.studieDager get() = Sykdomstidslinje.studiedager(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
-        private val Int.utenlandsdager get() = Sykdomstidslinje.utenlandsdager(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
-        private val Int.feriedager get() = Sykdomstidslinje.ferie(dato, dato.plusDays(this.toLong()), tidspunktRapportert).also {
-            dato = it.sisteDag().plusDays(1)
-        }
+        private val Int.sykedager get() = lagTidslinje(this, ::Sykedag)
+        private val Int.egenmeldingsdager get() = lagTidslinje(this, ::Egenmeldingsdag)
+        private val Int.arbeidsdager get() = lagTidslinje(this, ::Arbeidsdag)
+        private val Int.implisittDager get() = lagTidslinje(this, ::ImplisittDag)
+        private val Int.studieDager get() = lagTidslinje(this, ::Studiedag)
+        private val Int.utenlandsdager get() = lagTidslinje(this, ::Utenlandsdag)
+        private val Int.feriedager get() = lagTidslinje(this, ::Feriedag)
+        private val Int.permisjonsdager get() = lagTidslinje(this, ::Permisjonsdag)
+
+        private fun lagTidslinje(antallDager: Int, generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje =
+            dato.datesUntil(dato.plusDays(antallDager.toLong()))
+                .map { generator(it, testhendelse) }
+                .let { CompositeSykdomstidslinje(it.toList()) }
+                .also {
+                    dato = dato.plusDays(antallDager.toLong())
+                }
 
         private fun tidslinjeMedPerioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
             (periode1 + periode2).test(periode1, periode2)
@@ -154,6 +100,28 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
 
         private fun tidslinjeMedPerioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, periode3: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
             (periode1 + periode2 + periode3).test(periode1, periode2, periode3)
+        }
+
+        private fun assertDagenErUtgangspunktForBeregning(dagen: Dag) {
+            assertDagenErUtgangspunktForBeregning(dagen.dagen, dagen)
+        }
+
+        private fun assertDagenErUtgangspunktForBeregning(dagen: LocalDate, sykdomstidslinje: Sykdomstidslinje) {
+            assertEquals(dagen, sykdomstidslinje.utgangspunktForBeregningAvYtelse())
+        }
+
+        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: Sykdomstidslinje) {
+            assertEquals(sykdomstidslinje.førsteDag(), sykdomstidslinje.utgangspunktForBeregningAvYtelse())
+        }
+
+        private fun assertFørsteDagErUtgangspunktForBeregning(perioden: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) {
+            assertDagenErUtgangspunktForBeregning(perioden.førsteDag(), sykdomstidslinje)
+        }
+
+        private fun assertUgyldigTilstand(sykdomstidslinje: Sykdomstidslinje) {
+            assertThrows<IllegalStateException> {
+                sykdomstidslinje.utgangspunktForBeregningAvYtelse()
+            }
         }
     }
 }
