@@ -15,14 +15,7 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 Interne henvendelser kan sendes via Slack i kanalen #område-helse.
 
 ## Regler
-
-Sykmelding --> Søknad // Inntektsmelding = ny sak
-
-Søknad (uten at sykmelding er mottatt) = manuell sak  
-
-Inntektsmelding (uten at sykmelding er mottatt) = manuell sak
-
-Sykmelding --> sykmelding eller andre varianter av 2 av en dokumenttype som overlapper = manuell sak
+Dagturnering: https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
 
 ## Bygge prosjektet
 For å bygge trenger man å oppgi en Github-bruker med lesetilgang til Github-repoet.
