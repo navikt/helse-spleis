@@ -1,22 +1,20 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
+import no.nav.helse.implisittDager
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.Uke
+import no.nav.helse.sykedager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VisitorTest {
-    private val sendtSøknad = Testhendelse(Uke(4).fredag.atTime(12, 0))
 
     @Test
     fun flereSykdomstilfellerSlåttSammen() {
         val visitor = VisitorCounter()
-        (Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, sendtSøknad) +
-                Sykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, sendtSøknad)).accept(visitor)
+        (3.sykedager + 1.implisittDager + 4.sykedager).accept(visitor)
 
         assertEquals(2, visitor.compositeCount)
         assertEquals(7, visitor.sykedagerCount)
@@ -26,7 +24,7 @@ internal class VisitorTest {
     @Test
     fun enkeltSykdomstilfelle() {
         val visitor = VisitorCounter()
-        Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, sendtSøknad).accept(visitor)
+        3.sykedager.accept(visitor)
 
         assertEquals(2, visitor.compositeCount)
         assertEquals(3, visitor.sykedagerCount)
