@@ -25,30 +25,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import kotlin.reflect.KClass
 
 internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
-    private var haveObserverBeenCalled: Boolean = false
-    private lateinit var lastStateEvent: VedtaksperiodeObserver.StateChangeEvent
-    private val behovsliste: MutableList<Behov> = mutableListOf()
-
-    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-        haveObserverBeenCalled = true
-        lastStateEvent = event
-    }
-
-    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        behovsliste.add(event)
-    }
-
-    private val aktørId = "1234567891011"
-    private val fødselsnummer = "01017045896"
-    private val organisasjonsnummer = "123456789"
-    private val vedtaksperiodeId = UUID.randomUUID()
-
-    @BeforeEach
-    fun `tilbakestill behovliste`() {
-        behovsliste.clear()
-    }
 
     @Test
     fun `motta ny søknad`() {
@@ -56,9 +35,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertEquals(START, lastStateEvent.previousState)
-        assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is NySøknadHendelse)
+        assertTilstandsendring(NY_SØKNAD_MOTTATT, START, NySøknadHendelse::class)
     }
 
     @Test
@@ -67,9 +44,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertEquals(START, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is SendtSøknadHendelse)
+        assertTilstandsendring(TIL_INFOTRYGD, START, SendtSøknadHendelse::class)
     }
 
     @Test
@@ -78,18 +53,21 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertEquals(START, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is InntektsmeldingHendelse)
+        assertTilstandsendring(TIL_INFOTRYGD, START, InntektsmeldingHendelse::class)
     }
 
     @Test
     fun `motta sykdomshistorikk på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(sisteHistoriskeSykedag = LocalDate.now(), vedtaksperiodeId = vedtaksperiodeId))
-
-        assertFalse(haveObserverBeenCalled)
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                sykepengehistorikkHendelse(
+                    sisteHistoriskeSykedag = LocalDate.now(),
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            )
+        }
     }
 
     @Test
@@ -98,8 +76,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.currentState)
+        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, NY_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -108,8 +85,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.currentState)
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, NY_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -118,8 +94,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertEquals(NY_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, NY_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -128,8 +103,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, SENDT_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -138,8 +112,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, SENDT_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -148,8 +121,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertEquals(SENDT_SØKNAD_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, SENDT_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -158,8 +130,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, INNTEKTSMELDING_MOTTATT)
     }
 
     @Test
@@ -168,8 +139,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, INNTEKTSMELDING_MOTTATT)
     }
 
     @Test
@@ -178,8 +148,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, INNTEKTSMELDING_MOTTATT)
     }
 
     @Test
@@ -197,18 +166,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse)
 
-        assertEquals(INNTEKTSMELDING_MOTTATT, lastStateEvent.previousState)
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, INNTEKTSMELDING_MOTTATT)
 
-        assertTrue(behovsliste.any {
-            it.behovType() == BehovsTyper.Sykepengehistorikk.name
-        })
+        assertBehov(BehovsTyper.Sykepengehistorikk)
 
-        val behov = behovsliste.first { it.behovType() == BehovsTyper.Sykepengehistorikk.name }
-        val historikkTom: LocalDate? = behov.get<LocalDate>("tom")
-
-        assertNotNull(historikkTom)
-        assertEquals(periodeFom.minusDays(1), historikkTom)
+        finnBehov(BehovsTyper.Sykepengehistorikk).get<LocalDate>("tom").also {
+            assertEquals(periodeFom.minusDays(1), it)
+        }
     }
 
     @Test
@@ -230,12 +194,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
-
-        assertTrue(behovsliste.any {
-            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
-        })
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -257,12 +217,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
-
-        assertTrue(behovsliste.any {
-            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
-        })
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -284,12 +240,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
-
-        assertFalse(behovsliste.any {
-            it.behovType() == BehovsTyper.GodkjenningFraSaksbehandler.name
-        })
+        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertIkkeBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -317,23 +269,22 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
     fun `gitt en komplett tidslinje, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
         val vedtaksperiode = beInKomplettTidslinje()
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
-
-        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                utbetalingGodkjent = true,
-                saksbehandler = "en_saksbehandler_ident"
-        ))
-
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.currentState)
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                manuellSaksbehandlingHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId.toString(),
+                    utbetalingGodkjent = true,
+                    saksbehandler = "en_saksbehandler_ident"
+                )
+            )
+        }
     }
 
     @Test
@@ -358,8 +309,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -384,8 +334,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -410,8 +359,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -438,8 +386,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -464,8 +411,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -492,8 +438,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -520,8 +465,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 vedtaksperiodeId = vedtaksperiodeId
         ))
 
-        assertEquals(KOMPLETT_SYKDOMSTIDSLINJE, lastStateEvent.previousState)
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
+        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -534,18 +478,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 saksbehandler = "en_saksbehandler_ident"
         ))
 
-        assertEquals(TIL_GODKJENNING, lastStateEvent.previousState)
-        assertEquals(TIL_UTBETALING, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is ManuellSaksbehandlingHendelse)
+        assertTilstandsendring(TIL_UTBETALING, TIL_GODKJENNING, ManuellSaksbehandlingHendelse::class)
+        assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
+        assertBehov(BehovsTyper.Utbetaling)
 
-        val memento = vedtaksperiode.memento().state()
-        val mementoAsJson = objectMapper.readTree(memento)
-        assertNotNull(mementoAsJson["utbetalingsreferanse"].takeUnless { it.isNull }, "skal sette utbetalingsreferanse når saken skal utbetales")
-
-        assertTrue(behovsliste.any { it.behovType() == BehovsTyper.Utbetaling.name })
-
-        val behov = behovsliste.first { it.behovType() == BehovsTyper.Utbetaling.name }
-        assertNotNull(behov["utbetalingsreferanse"])
+        finnBehov(BehovsTyper.Utbetaling).also {
+            assertNotNull(it["utbetalingsreferanse"])
+        }
     }
 
     @Test
@@ -558,25 +497,20 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 saksbehandler = "en_saksbehandler_ident"
         ))
 
-        assertEquals(TIL_GODKJENNING, lastStateEvent.previousState)
-        assertEquals(TIL_INFOTRYGD, lastStateEvent.currentState)
-        assertTrue(lastStateEvent.sykdomshendelse is ManuellSaksbehandlingHendelse)
+        assertTilstandsendring(TIL_INFOTRYGD, TIL_GODKJENNING, ManuellSaksbehandlingHendelse::class)
     }
 
     @Test
     fun `motta sykepengehistorikk etter klar til utbetaling skal ikke endre state`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
-
-        val previousState = lastStateEvent.previousState
-
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
-        ))
-
-        assertEquals(TIL_GODKJENNING, lastStateEvent.currentState)
-        assertEquals(previousState, lastStateEvent.previousState)
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                sykepengehistorikkHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            )
+        }
     }
 
     private fun beInStartTilstand(): Vedtaksperiode {
@@ -621,4 +555,78 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
                 håndter(sykepengehistorikkHendelse)
             }
+
+    private companion object {
+        private val aktørId = "1234567891011"
+        private val fødselsnummer = "01017045896"
+        private val organisasjonsnummer = "123456789"
+        private val vedtaksperiodeId = UUID.randomUUID()
+
+        private var haveObserverBeenCalled: Boolean = false
+        private var vedtaksperiodeEndringer = 0
+        private lateinit var lastStateEvent: VedtaksperiodeObserver.StateChangeEvent
+        private val behovsliste: MutableList<Behov> = mutableListOf()
+    }
+
+    @BeforeEach
+    fun `tilbakestill behovliste`() {
+        behovsliste.clear()
+    }
+
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+        haveObserverBeenCalled = true
+        lastStateEvent = event
+        vedtaksperiodeEndringer++
+    }
+
+    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
+        behovsliste.add(event)
+    }
+
+    private fun finnBehov(behovstype: BehovsTyper) =
+        behovsliste.first { it.behovType() == behovstype.name }
+
+    private fun harBehov(behovstype: BehovsTyper) =
+        behovsliste.any { it.behovType() == behovstype.name }
+
+    private fun assertTilstandsendring(
+        gjeldendeTilstandType: TilstandType,
+        forrigeTilstandType: TilstandType,
+        hendelsetype: KClass<out ArbeidstakerHendelse>? = null
+    ) {
+        assertEquals(forrigeTilstandType, lastStateEvent.previousState)
+        assertEquals(gjeldendeTilstandType, lastStateEvent.currentState)
+
+        hendelsetype?.also {
+            assertEquals(it, lastStateEvent.sykdomshendelse::class)
+        }
+    }
+
+    private fun assertIngenEndring(block: () -> Unit) {
+        val endringer = vedtaksperiodeEndringer
+
+        val gjeldendeTilstand = if (endringer > 0) lastStateEvent.currentState else null
+        val forrigeTilstand = if (endringer > 0) lastStateEvent.previousState else null
+
+        block()
+
+        assertEquals(vedtaksperiodeEndringer, endringer)
+
+        if (gjeldendeTilstand != null && forrigeTilstand != null) {
+            assertTilstandsendring(gjeldendeTilstand, forrigeTilstand)
+        }
+    }
+
+    private fun assertBehov(behovstype: BehovsTyper) {
+        assertTrue(harBehov(behovstype))
+    }
+
+    private fun assertIkkeBehov(behovstype: BehovsTyper) {
+        assertFalse(harBehov(behovstype))
+    }
+
+    private fun assertMementoHarFelt(vedtaksperiode: Vedtaksperiode, feltnavn: String) {
+        val jsonNode = objectMapper.readTree(vedtaksperiode.memento().state())
+        assertNotNull(jsonNode[feltnavn].takeUnless { it.isNull })
+    }
 }
