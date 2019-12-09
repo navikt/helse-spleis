@@ -34,6 +34,7 @@ internal object TestConstants {
     val egenmeldingTom = 15.september
     val ferieFom = 1.oktober
     val ferieTom = 4.oktober
+    val fakeFNR = "01019510000"
 
     fun søknadDTO(
         id: String = UUID.randomUUID().toString(),
@@ -150,7 +151,7 @@ internal object TestConstants {
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
         aktørId: String = UUID.randomUUID().toString(),
-        fødselsnummer: String = UUID.randomUUID().toString(),
+        fødselsnummer: String = fakeFNR,
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -187,7 +188,7 @@ internal object TestConstants {
             søknadDTO(
                 id = id,
                 aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = fakeFNR,
                 arbeidGjenopptatt = arbeidGjenopptatt,
                 korrigerer = korrigerer,
                 egenmeldinger = egenmeldinger,
@@ -206,7 +207,7 @@ internal object TestConstants {
 
     fun inntektsmeldingHendelse(
         aktørId: String = "",
-        fødselsnummer: String = "",
+        fødselsnummer: String = fakeFNR,
         virksomhetsnummer: String? = "123456789",
         beregnetInntekt: BigDecimal? = 666.toBigDecimal(),
         førsteFraværsdag: LocalDate = 10.september,
@@ -238,7 +239,7 @@ internal object TestConstants {
 
     fun inntektsmeldingDTO(
         aktørId: String = "",
-        fødselsnummer: String = "",
+        fødselsnummer: String = fakeFNR,
         virksomhetsnummer: String? = "123456789",
         førsteFraværsdag: LocalDate = 10.september,
         arbeidsgiverperioder: List<Periode> = listOf(
@@ -288,7 +289,7 @@ internal object TestConstants {
         perioder: List<SpolePeriode>,
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        fødselsnummer: String = "2",
+        fødselsnummer: String = fakeFNR,
         vedtaksperiodeId: UUID = UUID.randomUUID()
     ): Sykepengehistorikk {
         val behov = Behov.nyttBehov(
@@ -313,7 +314,7 @@ internal object TestConstants {
         perioder: List<SpolePeriode>? = null,
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        fødselsnummer: String = "2",
+        fødselsnummer: String = fakeFNR,
         vedtaksperiodeId: UUID = UUID.randomUUID()
     ) = SykepengehistorikkHendelse(sykepengehistorikk(
         perioder = perioder ?: sisteHistoriskeSykedag?.let {
@@ -334,7 +335,7 @@ internal object TestConstants {
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        fødselsnummer: String = "2",
+        fødselsnummer: String = fakeFNR,
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
@@ -359,7 +360,7 @@ internal object TestConstants {
     fun manuellSaksbehandlingHendelse(
         organisasjonsnummer: String = "123546564",
         aktørId: String = "1",
-        fødselsnummer: String = "2",
+        fødselsnummer: String = fakeFNR,
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String

@@ -20,11 +20,14 @@ import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -41,7 +44,7 @@ internal class SakTest {
 
     private val testSakObserver = TestSakObserver()
 
-    private val testSak = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
+    private val testSak get() = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
         it.addObserver(this.testSakObserver)
     }
 
@@ -82,7 +85,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, START)
+        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -96,7 +99,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, START)
+        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -118,7 +121,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(INNTEKTSMELDING_MOTTATT, NY_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT, INNTEKTSMELDING_MOTTATT)
     }
 
     @Test
@@ -223,7 +226,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -284,7 +287,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, START)
+        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -315,7 +318,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, INNTEKTSMELDING_MOTTATT)
+        assertVedtaksperiodetilstand(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
     }
 
 
@@ -429,13 +432,12 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `sykepengehistorikk lager ikke ny sak, selv om det ikke finnes noen fra før`() {
-        testSak.also {
-            it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
+    internal fun `sykepengehistorikk med arbeidsgiver som ikke finnes i modellen skal kaste exception`() {
+        assertThrows<IllegalStateException> {
+            testSak.also {
+                it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
+            }
         }
-
-        assertSakIkkeEndret()
-        assertVedtaksperiodeIkkeEndret()
     }
 
     @Test
@@ -468,7 +470,7 @@ internal class SakTest {
 
         assertVedtaksperiodeEndret()
         assertSakEndret()
-        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
         assertBehov(BehovsTyper.Sykepengehistorikk)
     }
 
@@ -479,7 +481,7 @@ internal class SakTest {
                 nySøknadHendelse(
                     fødselsnummer = fødselsnummer,
                     arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 30.juli, sykmeldingsgrad = 100)),
                     egenmeldinger = emptyList(),
                     fravær = emptyList()
                 )
@@ -488,7 +490,7 @@ internal class SakTest {
                 sendtSøknadHendelse(
                     fødselsnummer = fødselsnummer,
                     arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
+                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 30.juli, sykmeldingsgrad = 100)),
                     egenmeldinger = emptyList(),
                     fravær = emptyList()
                 )
@@ -515,7 +517,7 @@ internal class SakTest {
             )
         }
 
-        assertVedtaksperiodetilstand(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
         assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
@@ -556,7 +558,7 @@ internal class SakTest {
             )
         }
 
-        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -600,7 +602,7 @@ internal class SakTest {
         }
         assertVedtaksperiodeEndret()
         assertSakEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
 
     @Test
@@ -626,8 +628,70 @@ internal class SakTest {
 
             assertVedtaksperiodeEndret()
             assertSakEndret()
-            assertVedtaksperiodetilstand(TIL_INFOTRYGD, NY_SØKNAD_MOTTATT)
+            assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD)
         }
+    }
+
+    @Test
+    fun `vedtaksperiode uten utbetalingsdager skal ikke sendes til godkjenning`() {
+        testSak.also {
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        navn = "S.Vindel og Sønn",
+                        orgnummer = organisasjonsnummer
+                    ),
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 30.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                )
+            )
+
+            it.håndter(inntektsmeldingHendelse(
+                førsteFraværsdag = 1.juli,
+                arbeidsgiverperioder = listOf(),
+                virksomhetsnummer = organisasjonsnummer
+            ))
+
+            it.håndter(
+                sendtSøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        navn = "S.Vindel og Sønn",
+                        orgnummer = organisasjonsnummer
+                    ),
+                    søknadsperioder = listOf(
+                        SoknadsperiodeDTO(
+                            fom = 1.juli,
+                            tom = 30.juli,
+                            sykmeldingsgrad = 100
+                        )
+                    ),
+                    egenmeldinger = emptyList(),
+                    fravær = listOf(
+                        FravarDTO(
+                            fom = 2.juli,
+                            tom = 30.juli,
+                            type = FravarstypeDTO.FERIE
+                        )
+                    )
+                )
+            )
+
+            val saksid = this.testSakObserver.sakstilstander.keys.first()
+
+            it.håndter(
+                sykepengehistorikkHendelse(
+                    sisteHistoriskeSykedag = 1.juli.minusMonths(7),
+                    vedtaksperiodeId = saksid,
+                    organisasjonsnummer = organisasjonsnummer
+                )
+            )
+        }
+        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
 
     private fun enSakMedÉnArbeidsgiver(virksomhetsnummer: String) = testSak.also {
@@ -658,7 +722,10 @@ internal class SakTest {
         assertEquals(tilstandType, this.testSakObserver.gjeldendeVedtaksperiodetilstand)
     }
 
-    private fun assertVedtaksperiodetilstand(tilstandType: TilstandType, forrigeTilstandType: TilstandType) {
+    private fun assertVedtaksperiodetilstand(
+        forrigeTilstandType: TilstandType,
+        tilstandType: TilstandType
+    ) {
         assertVedtaksperiodetilstand(tilstandType)
         assertEquals(forrigeTilstandType, this.testSakObserver.forrigeVedtaksperiodetilstand)
     }

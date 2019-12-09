@@ -59,10 +59,12 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
     fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         finnArbeidsgiver(sykepengehistorikkHendelse)?.håndter(sykepengehistorikkHendelse)
+            ?: error("Fant ikke arbeidsgiver for sykepengehistorikkhendelse")
     }
 
     fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
+            ?: error("Fant ikke arbeidsgiver for ManuellSaksbehandlingHendelse")
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {

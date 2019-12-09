@@ -35,7 +35,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(NY_SØKNAD_MOTTATT, START, NySøknadHendelse::class)
+        assertTilstandsendring(START, NY_SØKNAD_MOTTATT, NySøknadHendelse::class)
     }
 
     @Test
@@ -44,7 +44,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, START, SendtSøknadHendelse::class)
+        assertTilstandsendring(START, TIL_INFOTRYGD, SendtSøknadHendelse::class)
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, START, InntektsmeldingHendelse::class)
+        assertTilstandsendring(START, TIL_INFOTRYGD, InntektsmeldingHendelse::class)
     }
 
     @Test
@@ -76,7 +76,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, NY_SØKNAD_MOTTATT)
+        assertTilstandsendring(NY_SØKNAD_MOTTATT, SENDT_SØKNAD_MOTTATT)
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, NY_SØKNAD_MOTTATT)
+        assertTilstandsendring(NY_SØKNAD_MOTTATT, INNTEKTSMELDING_MOTTATT)
     }
 
     @Test
@@ -94,7 +94,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, NY_SØKNAD_MOTTATT)
+        assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -103,7 +103,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, SENDT_SØKNAD_MOTTATT)
+        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, SENDT_SØKNAD_MOTTATT)
+        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -121,7 +121,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, SENDT_SØKNAD_MOTTATT)
+        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -130,7 +130,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, INNTEKTSMELDING_MOTTATT)
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
     }
 
     @Test
@@ -139,7 +139,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, INNTEKTSMELDING_MOTTATT)
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -148,7 +148,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(TIL_INFOTRYGD, INNTEKTSMELDING_MOTTATT)
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
     }
 
     @Test
@@ -156,17 +156,27 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val inntektsmeldingHendelse =
+            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInMottattInntektsmelding(
-                nySøknadHendelse = nySøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
         vedtaksperiode.håndter(sendtSøknadHendelse)
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, INNTEKTSMELDING_MOTTATT)
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
 
         assertBehov(BehovsTyper.Sykepengehistorikk)
 
@@ -180,21 +190,33 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val inntektsmeldingHendelse =
+            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = null,
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
         assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
@@ -203,21 +225,33 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val inntektsmeldingHendelse =
+            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
         assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
@@ -226,21 +260,33 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val inntektsmeldingHendelse =
+            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(5),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
         assertIkkeBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
@@ -249,27 +295,39 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val inntektsmeldingHendelse =
+            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 perioder = listOf(
-                        SpolePeriode(
-                                fom = periodeFom.minusMonths(1),
-                                tom = periodeFom.plusMonths(1),
-                                grad = "100"
-                        )
+                    SpolePeriode(
+                        fom = periodeFom.minusMonths(1),
+                        tom = periodeFom.plusMonths(1),
+                        grad = "100"
+                    )
                 ),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
 
     @Test
@@ -288,197 +346,276 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `hele perioden skal utbetales av arbeidsgiver når opphørsdato for refusjon er etter siste dag i utbetaling`(){
+    fun `hele perioden skal utbetales av arbeidsgiver når opphørsdato for refusjon er etter siste dag i utbetaling`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
     }
 
     @Test
-    fun `arbeidsgiver skal ikke utbetale hele perioden, så dette må vurderes i Infotrygd`(){
+    fun `arbeidsgiver skal ikke utbetale hele perioden, så dette må vurderes i Infotrygd`() {
         val periodeFom = 1.juli
         val periodeTom = 19.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                refusjon = Refusjon(opphoersdato = periodeTom)
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            refusjon = Refusjon(opphoersdato = periodeTom)
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `arbeidsgiver har ikke oppgitt opphørsdato for refusjon`(){
+    fun `arbeidsgiver har ikke oppgitt opphørsdato for refusjon`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                refusjon = Refusjon(opphoersdato = null)
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            refusjon = Refusjon(opphoersdato = null)
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
     }
 
     @Test
-    fun `arbeidsgiver enderer refusjonen etter utbetalingsperioden`(){
+    fun `arbeidsgiver enderer refusjonen etter utbetalingsperioden`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                endringerIRefusjoner = listOf(
-                        EndringIRefusjon(endringsdato = periodeTom.plusDays(1))
-                )
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            endringerIRefusjoner = listOf(
+                EndringIRefusjon(endringsdato = periodeTom.plusDays(1))
+            )
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
     }
 
     @Test
-    fun `arbeidsgiver enderer ikke refusjonen`(){
+    fun `arbeidsgiver enderer ikke refusjonen`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                endringerIRefusjoner = emptyList()
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            endringerIRefusjoner = emptyList()
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
     }
 
     @Test
-    fun `arbeidsgiver enderer refusjonen i utbetalingsperioden, så dette må vurderes i Infotrygd`(){
+    fun `arbeidsgiver enderer refusjonen i utbetalingsperioden, så dette må vurderes i Infotrygd`() {
         val periodeFom = 1.juli
         val periodeTom = 19.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                endringerIRefusjoner = listOf(
-                        EndringIRefusjon(endringsdato = periodeTom)
-                )
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            endringerIRefusjoner = listOf(
+                EndringIRefusjon(endringsdato = periodeTom)
+            )
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_INFOTRYGD, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `arbeidsgiver har ikke oppgitt dato for endering av refusjon`(){
+    fun `arbeidsgiver har ikke oppgitt dato for endering av refusjon`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
-        val sendtSøknadHendelse = sendtSøknadHendelse(søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)), egenmeldinger = emptyList(), fravær = emptyList())
+        val nySøknadHendelse = nySøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
+        val sendtSøknadHendelse = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        )
         val inntektsmeldingHendelse = inntektsmeldingHendelse(
-                arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-                endringerIRefusjoner = listOf(
-                        EndringIRefusjon(endringsdato = null)
-                )
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
+            endringerIRefusjoner = listOf(
+                EndringIRefusjon(endringsdato = null)
+            )
         )
 
         val vedtaksperiode = beInKomplettTidslinje(
-                nySøknadHendelse = nySøknadHendelse,
-                sendtSøknadHendelse = sendtSøknadHendelse,
-                inntektsmeldingHendelse = inntektsmeldingHendelse)
+            nySøknadHendelse = nySøknadHendelse,
+            sendtSøknadHendelse = sendtSøknadHendelse,
+            inntektsmeldingHendelse = inntektsmeldingHendelse
+        )
 
-        vedtaksperiode.håndter(sykepengehistorikkHendelse(
+        vedtaksperiode.håndter(
+            sykepengehistorikkHendelse(
                 sisteHistoriskeSykedag = periodeFom.minusMonths(7),
                 vedtaksperiodeId = vedtaksperiodeId
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_GODKJENNING, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
     }
 
     @Test
     fun `motta manuell saksbehandling med utbetaling godkjent etter klar til utbetaling`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
+        vedtaksperiode.håndter(
+            manuellSaksbehandlingHendelse(
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident"
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_UTBETALING, TIL_GODKJENNING, ManuellSaksbehandlingHendelse::class)
+        assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandlingHendelse::class)
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
         assertBehov(BehovsTyper.Utbetaling)
 
@@ -491,13 +628,15 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta manuell saksbehandling med utbetaling ikke godkjent etter klar til utbetaling`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        vedtaksperiode.håndter(manuellSaksbehandlingHendelse(
+        vedtaksperiode.håndter(
+            manuellSaksbehandlingHendelse(
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalingGodkjent = false,
                 saksbehandler = "en_saksbehandler_ident"
-        ))
+            )
+        )
 
-        assertTilstandsendring(TIL_INFOTRYGD, TIL_GODKJENNING, ManuellSaksbehandlingHendelse::class)
+        assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, ManuellSaksbehandlingHendelse::class)
     }
 
     @Test
@@ -525,36 +664,47 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     private fun beInNySøknad(nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-            beInStartTilstand().apply {
-                håndter(nySøknadHendelse)
-            }
+        beInStartTilstand().apply {
+            håndter(nySøknadHendelse)
+        }
 
-    private fun beInSendtSøknad(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-                                nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-            beInNySøknad(nySøknadHendelse).apply {
-                håndter(sendtSøknadHendelse)
-            }
+    private fun beInSendtSøknad(
+        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
+        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+    ) =
+        beInNySøknad(nySøknadHendelse).apply {
+            håndter(sendtSøknadHendelse)
+        }
 
-    private fun beInMottattInntektsmelding(inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-                                           nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-            beInNySøknad(nySøknadHendelse).apply {
-                håndter(inntektsmeldingHendelse)
-            }
+    private fun beInMottattInntektsmelding(
+        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
+        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+    ) =
+        beInNySøknad(nySøknadHendelse).apply {
+            håndter(inntektsmeldingHendelse)
+        }
 
-    private fun beInKomplettTidslinje(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-                                      inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-                                      nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-            beInMottattInntektsmelding(inntektsmeldingHendelse, nySøknadHendelse).apply {
-                håndter(sendtSøknadHendelse)
-            }
+    private fun beInKomplettTidslinje(
+        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
+        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
+        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+    ) =
+        beInMottattInntektsmelding(inntektsmeldingHendelse, nySøknadHendelse).apply {
+            håndter(sendtSøknadHendelse)
+        }
 
-    private fun beInTilGodkjenning(sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(vedtaksperiodeId = vedtaksperiodeId, sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)),
-                                   sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-                                   inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-                                   nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-            beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
-                håndter(sykepengehistorikkHendelse)
-            }
+    private fun beInTilGodkjenning(
+        sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(
+            vedtaksperiodeId = vedtaksperiodeId,
+            sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)
+        ),
+        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
+        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
+        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+    ) =
+        beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
+            håndter(sykepengehistorikkHendelse)
+        }
 
     private companion object {
         private val aktørId = "1234567891011"
@@ -590,8 +740,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         behovsliste.any { it.behovType() == behovstype.name }
 
     private fun assertTilstandsendring(
-        gjeldendeTilstandType: TilstandType,
         forrigeTilstandType: TilstandType,
+        gjeldendeTilstandType: TilstandType,
         hendelsetype: KClass<out ArbeidstakerHendelse>? = null
     ) {
         assertEquals(forrigeTilstandType, lastStateEvent.previousState)
@@ -613,7 +763,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertEquals(vedtaksperiodeEndringer, endringer)
 
         if (gjeldendeTilstand != null && forrigeTilstand != null) {
-            assertTilstandsendring(gjeldendeTilstand, forrigeTilstand)
+            assertTilstandsendring(forrigeTilstand, gjeldendeTilstand)
         }
     }
 

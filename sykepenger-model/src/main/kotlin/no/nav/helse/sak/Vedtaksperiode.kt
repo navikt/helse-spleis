@@ -220,12 +220,7 @@ internal class Vedtaksperiode internal constructor(
             val tidslinje = vedtaksperiode.sykdomstidslinje
                 ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
 
-            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag()
-
-            if (sisteFraværsdag != null && (sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse() || sisteFraværsdag.datesUntil(
-                    tidslinje.utgangspunktForBeregningAvYtelse()
-                ).count() <= seksMåneder)
-            ) {
+            if (harFraværsdagInnen6Mnd(sykepengehistorikkHendelse, tidslinje)) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
@@ -235,7 +230,7 @@ internal class Vedtaksperiode internal constructor(
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
-            if (!vedtaksperiode.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning)) {
+            if (utbetalingsberegning.utbetalingslinjer.isEmpty() || delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(vedtaksperiode, utbetalingsberegning)) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
@@ -245,16 +240,26 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        private fun Vedtaksperiode.helePeriodenSkalBetalesAvArbeidsgiver(utbetalingsberegning: Utbetalingsberegning): Boolean {
-            val inntektsmelding = this.inntektsmeldingHendelse() ?: return false
-            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return true
+        private fun harFraværsdagInnen6Mnd(sykepengehistorikkHendelse: SykepengehistorikkHendelse, tidslinje: Sykdomstidslinje): Boolean {
+            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag() ?: return false
+
+            return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
+                || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
+        }
+
+        private fun delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingsberegning: Utbetalingsberegning
+        ): Boolean {
+            val inntektsmelding = vedtaksperiode.inntektsmeldingHendelse() ?: return true
+            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return false
 
             val opphørsdato = inntektsmelding.refusjon().opphoersdato
             if (opphørsdato != null && opphørsdato <= sisteUtbetalingsdag) {
-                return false
+                return true
             }
 
-            return inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
+            return !inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
     }
 
