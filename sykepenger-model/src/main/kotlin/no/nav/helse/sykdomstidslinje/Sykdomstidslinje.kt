@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.InntektHistorie
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.DayOfWeek
@@ -118,13 +119,9 @@ internal abstract class Sykdomstidslinje {
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 
-    fun utbetalingslinjer(inntektHistorie: InntektHistorie, fødselsnummer: String) =
+    fun utbetalingslinjer(inntektHistorie: InntektHistorie) =
         UtbetalingBuilder(this, inntektHistorie,
-            Alder(
-                fødselsnummer,
-                utgangspunktForBeregningAvYtelse(),
-                sisteDag()
-            )
+            ArbeidsgiverRegler.Companion.NormalArbeidstaker
         )
             .result()
             .utbetalingslinjer(emptyList())

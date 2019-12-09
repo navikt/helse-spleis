@@ -37,7 +37,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
     }
 
     internal fun addNAVdag(inntekt: Double, dato: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.NAVDag(inntekt.roundToInt(), dato))
+        utbetalingsdager.add(Utbetalingsdag.NavDag(inntekt.roundToInt(), dato))
     }
 
     internal fun addArbeidsdag(dagen: LocalDate) {
@@ -59,7 +59,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             }
         }
 
-        internal class NAVDag(private val inntekt: Int, private val dato: LocalDate) :
+        internal class NavDag(private val inntekt: Int, private val dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitNAVDag(arbeidsgiverUtbetalingstidslinje, this)
@@ -96,7 +96,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
 
         abstract fun visitNAVDag(
             arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
-            NAVDag: Utbetalingsdag.NAVDag
+            NavDag: Utbetalingsdag.NavDag
         )
 
         open fun visitArbeidsdag(
@@ -114,7 +114,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         internal object IkkeSyk : HelseState() {
             override fun visitNAVDag(
                 arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
-                navDag: Utbetalingsdag.NAVDag
+                navDag: Utbetalingsdag.NavDag
             ) {
                 arbeidsgiverUtbetalingstidslinje.utbetalingslinjer.add(navDag.utbetalingslinje())
                 arbeidsgiverUtbetalingstidslinje.helseState = Syk
@@ -124,7 +124,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         internal object Syk : HelseState() {
             override fun visitNAVDag(
                 arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
-                navDag: Utbetalingsdag.NAVDag
+                navDag: Utbetalingsdag.NavDag
             ) {
                 navDag.oppdater(arbeidsgiverUtbetalingstidslinje.utbetalingslinjer.last())
             }
