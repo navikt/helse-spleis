@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.time.DayOfWeek
+import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 
 internal class Utbetalingsberegner(private val dagsats: Int, private val alder: Alder) : SykdomstidslinjeVisitor {

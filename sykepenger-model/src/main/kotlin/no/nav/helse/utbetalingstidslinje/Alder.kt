@@ -1,4 +1,4 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.utbetalingstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate

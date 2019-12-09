@@ -38,29 +38,44 @@ internal class UtbetalingBuilderTest {
     }
 
     @Test
-    fun `tjue dager gir 4 dager betalt av NAV`() {
-        val betalingslinjer = 19.S.utbetalingslinjer(inntektHistorie, fødselsnummer)
+    fun `en utbetalingslinje med tre dager`() {
+        val betalingslinjer = (16.S + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
-        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom)
+        assertEquals(17.januar, betalingslinjer.first().fom)
+        assertEquals(19.januar, betalingslinjer.first().tom)
     }
-//
-//    @Test
-//    fun `Sykedager med inneklemt ferie`() {
-//        val sykdomstidslinje = 21.S + 2.S + 2.F + S //6 utbetalingsdager
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(3, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer[0].fom)
-//        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer[0].tom)
-//
-//        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer[1].fom)
-//        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer[1].tom)
-//
-//        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer[2].fom)
-//        assertEquals(LocalDate.of(2018, 1, 26), betalingslinjer[2].tom)
-//    }
+
+    @Test
+    fun `en utbetalingslinje med helg`() {
+        val betalingslinjer = (16.S + 6.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assertEquals(17.januar, betalingslinjer.first().fom)
+        assertEquals(22.januar, betalingslinjer.first().tom)
+        assertEquals(1200, betalingslinjer.first().dagsats)
+    }
+
+    @Test
+    fun `utbetalingslinjer starter aldri med helg`() {
+        val betalingslinjer = (3.A + 16.S + 6.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assertEquals(22.januar, betalingslinjer.first().fom)
+        assertEquals(25.januar, betalingslinjer.first().tom)
+        assertEquals(1200, betalingslinjer.first().dagsats)
+    }
+
+    @Test
+    fun `Sykedager med inneklemte arbeidsdager`() {
+        val betalingslinjer = (16.S + 7.S + 2.A + 1.S).utbetalingslinjer(inntektHistorie, fødselsnummer) //6 utbetalingsdager
+
+        assertEquals(2, betalingslinjer.size)
+        assertEquals(17.januar, betalingslinjer.first().fom)
+        assertEquals(23.januar, betalingslinjer.first().tom)
+        assertEquals(26.januar, betalingslinjer.last().fom)
+        assertEquals(26.januar, betalingslinjer.last().tom)
+    }
 //
 //    @Test
 //    fun `Ferie i arbeidsgiverperiode`() {

@@ -40,9 +40,14 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         utbetalingsdager.add(Utbetalingsdag.NAVDag(inntekt.roundToInt(), dato))
     }
 
+    fun addArbeidsdag(dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(dagen))
+    }
+
     private sealed class Utbetalingsdag(private val inntekt: Int, private val dato: LocalDate) {
 
         abstract fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState)
+
         internal class ArbeidsgiverperiodeDag(private val inntekt: Int, private val dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
@@ -55,9 +60,17 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitNAVDag(arbeidsgiverUtbetalingstidslinje, this)
             }
+
             fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt)
             fun oppdater(last: Utbetalingslinje) {
                 last.tom = dato
+            }
+        }
+
+        internal class Arbeidsdag(private val dato: LocalDate) :
+            Utbetalingsdag(0, dato) {
+            override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
+                state.visitArbeidsdag(arbeidsgiverUtbetalingstidslinje, this)
             }
         }
     }
@@ -67,12 +80,19 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         open fun visitArbeidsgiverperiodeDag(
             arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
             arbeidsgiverperiodeDag: Utbetalingsdag.ArbeidsgiverperiodeDag
-        ){}
+        ) {
+        }
 
         abstract fun visitNAVDag(
             arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
             NAVDag: Utbetalingsdag.NAVDag
         )
+
+        open fun visitArbeidsdag(
+            arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
+            arbeidsdag: Utbetalingsdag.Arbeidsdag
+        ) {
+        }
 
         internal object IkkeSyk : HelseState() {
             override fun visitNAVDag(
@@ -82,8 +102,6 @@ internal class ArbeidsgiverUtbetalingstidslinje {
                 arbeidsgiverUtbetalingstidslinje.utbetalingslinjer.add(navDag.utbetalingslinje())
                 arbeidsgiverUtbetalingstidslinje.helseState = Syk
             }
-
-
         }
 
         internal object Syk : HelseState() {
@@ -101,6 +119,12 @@ internal class ArbeidsgiverUtbetalingstidslinje {
                 arbeidsgiverUtbetalingstidslinje.helseState = IkkeSyk
             }
 
+            override fun visitArbeidsdag(
+                arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
+                arbeidsdag: Utbetalingsdag.Arbeidsdag
+            ) {
+                arbeidsgiverUtbetalingstidslinje.helseState = IkkeSyk
+            }
         }
     }
 

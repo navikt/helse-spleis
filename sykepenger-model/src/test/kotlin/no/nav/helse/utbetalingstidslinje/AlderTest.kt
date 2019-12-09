@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Alder
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -82,6 +81,14 @@ internal class AlderTest {
     val Int.desember
         get() = LocalDate.of(2018, 12, this)
 
-    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(this, startDato, sluttDato).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
-    private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(this, startDato, sluttDato).maksdato(antallDager, antallDagerEtter67, dagen)
+    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(
+        this,
+        startDato,
+        sluttDato
+    ).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
+    private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(
+        this,
+        startDato,
+        sluttDato
+    ).maksdato(antallDager, antallDagerEtter67, dagen)
 }
