@@ -142,6 +142,13 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             ) {
                 arbeidsgiverUtbetalingstidslinje.helseState = IkkeSyk
             }
+
+            override fun visitFridag(
+                arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
+                fridag: Utbetalingsdag.Fridag
+            ) {
+                arbeidsgiverUtbetalingstidslinje.helseState = IkkeSyk
+            }
         }
     }
 

@@ -93,215 +93,148 @@ internal class UtbetalingBuilderTest {
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
     }
-//
-//    @Test
-//    fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
-//        val sykdomstidslinje = S + 2.F + A + S + 14.S + 3.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(1, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().tom)
-//    }
-//
-//    @Test
-//    fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
-//        val sykdomstidslinje = S + A + 2.F + S + 14.S + 3.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(1, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().tom)
-//    }
-//
-//    @Test
-//    fun `Ferie etter arbeidsgiverperioden`() {
-//        val sykdomstidslinje = 14.S + 2.S + 2.F + S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(1, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer.first().tom)
-//    }
-//
-//    @Test
-//    fun `Arbeidsdag etter ferie teller som gap`() {
-//        val sykdomstidslinje = 14.S + S + 2.F + A + S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(0, betalingslinjer.size)
-//
-//    }
-//
-//    @Test
-//    fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
-//        val sykdomstidslinje = 16.S + 16.F + A + 3.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(1, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.first().tom)
-//
-//    }
-//
-//    @Test
-//    fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
-//        val sykdomstidslinje = 15.S + 16.F + A + 3.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(0, betalingslinjer.size)
-//    }
-//
-//    @Test
-//    fun `Ferie og arbeid påvirker ikke initiell tilsand`() {
-//        val sykdomstidslinje = 2.F + 2.A + 16.S + 2.F
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertTrue(betalingslinjer.isEmpty())
-//    }
-//
-//    @Test
-//    fun `20 feriedager med påfølgende arbeidsdag resetter arbeidsgiverperioden`() {
-//        val sykdomstidslinje = 10.S + 20.F + A + 10.S + 20.F
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertTrue(betalingslinjer.isEmpty())
-//    }
-//
-//    @Test
-//    fun `Ferie fullfører arbeidsgiverperioden`() {
-//        val sykdomstidslinje = 10.S + 20.F + 10.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(2, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 31), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 2, 2), betalingslinjer.first().tom)
-//
-//        assertEquals(LocalDate.of(2018, 2, 5), betalingslinjer.last().fom)
-//        assertEquals(LocalDate.of(2018, 2, 9), betalingslinjer.last().tom)
-//    }
-//
-//    @Test
-//    fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode`() {
-//        val sykdomstidslinje = 20.S + 20.F + 10.S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(3, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer[0].fom)
-//        assertEquals(LocalDate.of(2018, 1, 19), betalingslinjer[0].tom)
-//
-//        assertEquals(LocalDate.of(2018, 2, 12), betalingslinjer[1].fom)
-//        assertEquals(LocalDate.of(2018, 2, 16), betalingslinjer[1].tom)
-//
-//        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer[2].fom)
-//        assertEquals(LocalDate.of(2018, 2, 19), betalingslinjer[2].tom)
-//    }
-//
+
+    @Test
+    fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
+        val betalingslinjer = (S + 2.F + A + S + 14.S + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
+    }
+
+    @Test
+    fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
+        val betalingslinjer = (S + A + 2.F + S + 14.S + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
+    }
+
+    @Test
+    fun `Ferie etter arbeidsgiverperioden`() {
+        val betalingslinjer = (16.S + 2.F + S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 19.januar, 19.januar, 1200)
+    }
+
+    @Test
+    fun `Arbeidsdag etter ferie teller som gap`() {
+        val betalingslinjer = (15.S + 2.F + A + S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
+        val betalingslinjer = (16.S + 16.F + A + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 5.februar, 5.februar, 1000)
+    }
+
+    @Test
+    fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
+        val betalingslinjer = (15.S + 16.F + A + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `Ferie og arbeid påvirker ikke initiell tilstand`() {
+        val betalingslinjer = (2.F + 2.A + 16.S + 2.F).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `Arbeidsgiverperioden resettes når det er opphold over 16 dager`() {
+        val betalingslinjer = (10.S + 20.F + A + 10.S + 20.F).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `Ferie fullfører arbeidsgiverperioden`() {
+        val betalingslinjer = (10.S + 20.F + 10.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 31.januar, 9.februar, 1200)
+    }
+
+    @Test
+    fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode`() {
+        val betalingslinjer = (20.S + 20.F + 10.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(2, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(betalingslinjer.last(), 12.februar, 19.februar, 1200)
+    }
+
+    @Test
+    fun `egenmelding sammen med sykdom oppfører seg som sykdom`() {
+        val betalingslinjer = (5.E + 15.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+    }
+
 //    @Test
 //    fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
-//        val sykdomstidslinje = 20.S
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (20.S).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //
 //        assertEquals(sykdomstidslinje.sluttdato().plusDays(342), maksdato)
 //    }
-//
+
 //    @Test
 //    fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-//        val sykdomstidslinje = 2.A + 20.S + 7.A + 20.S // Siste dag er 2018-02-18
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (2.A + 20.S + 7.A + 20.S // Siste dag er 2018-02-18).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //
 //        assertEquals(LocalDate.of(2019,1,8), maksdato)
 //    }
 //
 //    @Test
 //    fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
-//        val sykdomstidslinje = 351.S + 1.F + S
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (351.S + 1.F + S).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //        assertEquals(LocalDate.of(2018, 12, 31), maksdato)
 //    }
 //
 //    @Test
 //    fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
-//        val sykdomstidslinje = 23.S + 2.F + S
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (23.S + 2.F + S).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //        assertEquals(LocalDate.of(2019,1,1), maksdato )
 //
 //    }
 //
 //    @Test
 //    fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
-//        val sykdomstidslinje = 21.S + 3.F + S
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (21.S + 3.F + S).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //
 //        assertEquals(LocalDate.of(2019,1,2), maksdato)
 //    }
 //
 //    @Test
 //    fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
-//        val sykdomstidslinje = 21.S + 3.F
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (21.S + 3.F).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //
 //        assertEquals(LocalDate.of(2018,12,28), maksdato)
 //    }
 //
 //    @Test
 //    fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
-//        val sykdomstidslinje = 16.S
-//        val maksdato = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).maksdato
+//        val maksdato = (16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).maksdato
 //
 //        assertNull(maksdato)
 //    }
 //
-//    @Test
-//    fun `splitter utbetalingslinjer på helg`() {
-//        val sykdomstidslinje = 30.S
-//        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(3, linjer.size)
-//        assertEquals(LocalDate.of(2018,1,17), linjer[0].fom)
-//        assertEquals(LocalDate.of(2018,1,19), linjer[0].tom)
-//
-//        assertEquals(LocalDate.of(2018,1,22), linjer[1].fom)
-//        assertEquals(LocalDate.of(2018,1,26), linjer[1].tom)
-//
-//        assertEquals(LocalDate.of(2018,1,29), linjer[2].fom)
-//        assertEquals(LocalDate.of(2018,1,30), linjer[2].tom)
-//    }
-//
-//    @Test
-//    fun `de første 10 dagene av arbeidsgiverperioden er egenmeldingsdager`() {
-//        val start = startDato
-//        val sykdomstidslinje = 10.E + 30.S +
-//            Sykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25),
-//                inntektsmeldingHendelse
-//            )
-//        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(4, linjer.size)
-//        assertEquals(LocalDate.of(2018,1,17), linjer[0].fom)
-//        assertEquals(LocalDate.of(2018,1,19), linjer[0].tom)
-//
-//        assertEquals(LocalDate.of(2018,1,22), linjer[1].fom)
-//        assertEquals(LocalDate.of(2018,1,26), linjer[1].tom)
-//
-//        assertEquals(LocalDate.of(2018,1,29), linjer[2].fom)
-//        assertEquals(LocalDate.of(2018,2,2), linjer[2].tom)
-//
-//        assertEquals(LocalDate.of(2018,2,5), linjer[3].fom)
-//        assertEquals(LocalDate.of(2018,2,9), linjer[3].tom)
-//    }
+
 //
 //    @Test
 //    fun `arbeidsgiverperiode med to påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
-//        val sykdomstidslinje = 3.A + 18.S
-//        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
+//        val linjer = (3.A + 18.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer
 //        assertEquals(0, linjer.size)
 //    }
 //
 //    @Test
 //    fun `arbeidsgiverperioden slutter på en søndag`() {
-//        val sykdomstidslinje = 3.A + 5.S + 2.F + 13.S
-//        val linjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
+//        val linjer = (3.A + 5.S + 2.F + 13.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer
 //        assertEquals(1, linjer.size)
 //        assertEquals(LocalDate.of(2018,1,22), linjer[0].fom)
 //        assertEquals(LocalDate.of(2018,1,23), linjer[0].tom)
@@ -310,8 +243,7 @@ internal class UtbetalingBuilderTest {
 //    @Test
 //    fun `når rest av ukedager gjør at maksdato går over helg, så skal helgen ikke telle med som sykedag`() {
 //        startDato = LocalDate.of(2019,10,11)
-//        val sykdomstidslinje = 4.E + 4.S + 2.E + 5.S + 1.E + S + 14.S
-//        val utbetalingsberegning = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer)
+//        val (4.E + 4.S + 2.E + 5.S + 1.E + S + 14.S) = sykdomstidslinje.utbetalingslinjer(inntektHistorie, fødselsnummer)
 //        val utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
 //        assertEquals(2, utbetalingslinjer.size)
 //        assertEquals(LocalDate.of(2020,10,7), utbetalingsberegning.maksdato)
@@ -324,51 +256,44 @@ internal class UtbetalingBuilderTest {
 //
 //    @Test
 //    fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
-//        val sykdomstidslinje = 368.S
-//        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer)
+//        val beregning = (368.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
 //        assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
 //        assertEquals(LocalDate.of(2018, 12, 28), beregning.maksdato)
 //    }
 //
 //    @Test
 //    fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-//        val sykdomstidslinje = 16.S + 90.S
-//        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer67År)
+//        val beregning = (16.S + 90.S).utbetalingslinjer(inntektHistorie, fødselsnummer67År)
 //        assertEquals(LocalDate.of(2018, 4, 10), beregning.utbetalingslinjer.last().tom)
 //    }
 //
 //    @Test
 //    fun `når personen fyller 67 og 248 dager er brukt opp`() {
-//        val sykdomstidslinje = 400.S
-//        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, "01125112345")
+//        val beregning = (400.S).utbetalingslinjer(inntektHistorie, "01125112345")
 //        assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
 //    }
 //
 //    @Test
 //    fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-//        val sykdomstidslinje = 400.S
-//        val beregning = sykdomstidslinje.utbetalingsberegning(dagsats, "01024812345")
+//        val beregning = (400.S).utbetalingslinjer(inntektHistorie, "01024812345")
 //        assertEquals(LocalDate.of(2018, 1, 31), beregning.utbetalingslinjer.last().tom)
 //    }
 //
 //    @Test
 //    fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
-//        val sykdomstidslinje = 16.S + 4.S + 16.F + A + 16.S
-//        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+//        val sisteUtbetaling = (16.S + 4.S + 16.F + A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
 //        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
 //    }
 //
 //    @Test
 //    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
-//        val sykdomstidslinje = 16.S + 4.S + 16.A + 16.S
-//        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+//        val sisteUtbetaling = (16.S + 4.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
 //        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
 //    }
 //
 //    @Test
 //    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold der sykedager går over helg`() {
-//        val sykdomstidslinje = 16.S + 6.S + 16.A + 16.S
-//        val sisteUtbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.last()
+//        val sisteUtbetaling = (16.S + 6.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
 //        assertEquals(LocalDate.of(2018, 1, 22), sisteUtbetaling.tom)
 //    }
 

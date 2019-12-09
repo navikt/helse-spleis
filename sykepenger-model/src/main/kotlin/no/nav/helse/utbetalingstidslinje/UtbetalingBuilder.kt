@@ -2,10 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Feriedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 /**
@@ -35,13 +33,13 @@ internal class UtbetalingBuilder internal constructor(
         return tidslinje
     }
 
+    private fun LocalDate.erHelg() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
+
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = arbeidsdag(arbeidsdag.dagen)
     //    override fun visitImplisittDag(implisittDag: ImplisittDag) = if (implisittDag.erHelg()) fridag(implisittDag.dagen) else arbeidsdag(implisittDag.dagen)
     override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
-
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
-
-    //    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = if(egenmeldingsdag.erHelg()) fridag(egenmeldingsdag.dagen) else sykedag(egenmeldingsdag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = egenmeldingsdag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykHelgedag(sykHelgedag.dagen)
 //    override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
 //        if(utbetalingslinjer.isNotEmpty()) {
@@ -49,22 +47,20 @@ internal class UtbetalingBuilder internal constructor(
 //        }
 //    }
 
-    private fun sykedag(dagen: LocalDate) {
-        //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
+    private fun egenmeldingsdag(dagen: LocalDate) = if (dagen.erHelg()) sykHelgedag(dagen) else sykedag(dagen)
+
+    //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
+    private fun sykedag(dagen: LocalDate) =
         if (sykedager < 16) state.færreEllerLik16Sykedager(this, dagen) else state.merEnn16Sykedager(this, dagen)
-    }
 
-    private fun sykHelgedag(dagen: LocalDate) {
-        state.sykHelgedag(this, dagen)
-    }
+    private fun sykHelgedag(dagen: LocalDate) = state.sykHelgedag(this, dagen)
 
-    private fun arbeidsdag(dagen: LocalDate) {
-        //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
+    //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
+    private fun arbeidsdag(dagen: LocalDate) =
         if (ikkeSykedager < 16) state.færreEllerLik16arbeidsdager(this, dagen) else state.merEnn16arbeidsdager(
             this,
             dagen
         )
-    }
 
     private fun fridag(dagen: LocalDate) {
         state.fridag(this, dagen)
@@ -187,10 +183,11 @@ internal class UtbetalingBuilder internal constructor(
         }
 
         override fun færreEllerLik16Sykedager(splitter: UtbetalingBuilder, dagen: LocalDate) {
-            splitter.håndterArbeidsgiverdag(dagen)
             splitter.sykedager += splitter.fridager
-            splitter.state(if (splitter.sykedager >= 16) UtbetalingSykedager
-            else (ArbeidsgiverperiodeSykedager))
+            if (splitter.sykedager >= 16) splitter.state(UtbetalingSykedager)
+                .also { splitter.håndterNAVdag(dagen) }
+            else splitter.state(ArbeidsgiverperiodeSykedager)
+                .also { splitter.håndterArbeidsgiverdag(dagen) }
         }
 
         override fun færreEllerLik16arbeidsdager(splitter: UtbetalingBuilder, dagen: LocalDate) {
