@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.*
@@ -25,7 +26,8 @@ internal class UtbetalingBuilderTest {
     private val inntektHistorie = InntektHistorie()
 
     init {
-        inntektHistorie.add(1.januar.minusDays(1), 1200.00)
+        inntektHistorie.add(1.januar.minusDays(5), 1200.00)
+        inntektHistorie.add(23.januar, 1000.00)
     }
 
     private val fødselsnummer = "02029812345"
@@ -42,8 +44,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (16.S + 3.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(17.januar, betalingslinjer.first().fom)
-        assertEquals(19.januar, betalingslinjer.first().tom)
+        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
     @Test
@@ -51,9 +52,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (16.S + 6.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(17.januar, betalingslinjer.first().fom)
-        assertEquals(22.januar, betalingslinjer.first().tom)
-        assertEquals(1200, betalingslinjer.first().dagsats)
+        assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
     }
 
     @Test
@@ -61,9 +60,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (3.A + 16.S + 6.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
 
         assertEquals(1, betalingslinjer.size)
-        assertEquals(22.januar, betalingslinjer.first().fom)
-        assertEquals(25.januar, betalingslinjer.first().tom)
-        assertEquals(1200, betalingslinjer.first().dagsats)
+        assert(betalingslinjer.first(), 22.januar, 25.januar, 1200)
     }
 
     @Test
@@ -71,21 +68,31 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (16.S + 7.S + 2.A + 1.S).utbetalingslinjer(inntektHistorie, fødselsnummer) //6 utbetalingsdager
 
         assertEquals(2, betalingslinjer.size)
-        assertEquals(17.januar, betalingslinjer.first().fom)
-        assertEquals(23.januar, betalingslinjer.first().tom)
-        assertEquals(26.januar, betalingslinjer.last().fom)
-        assertEquals(26.januar, betalingslinjer.last().tom)
+        assert(betalingslinjer.first(), 17.januar, 23.januar, 1200)
+        assert(betalingslinjer.last(), 26.januar, 26.januar, 1000)
     }
-//
-//    @Test
-//    fun `Ferie i arbeidsgiverperiode`() {
-//        val sykdomstidslinje = S + 2.F + 13.S + S
-//        val betalingslinjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
-//
-//        assertEquals(1, betalingslinjer.size)
-//        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().fom)
-//        assertEquals(LocalDate.of(2018, 1, 17), betalingslinjer.first().tom)
-//    }
+
+    @Test
+    fun `Arbeidsdager i arbeidsgiverperioden`() {
+        val betalingslinjer = (15.S + 2.A + 1.S + 7.S).utbetalingslinjer(inntektHistorie, fødselsnummer) //6 utbetalingsdager
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 19.januar, 25.januar, 1200)
+    }
+
+    private fun assert(betalingslinje: Utbetalingslinje, fom: LocalDate, tom: LocalDate, dagsats: Int) {
+        assertEquals(fom, betalingslinje.fom)
+        assertEquals(tom, betalingslinje.tom)
+        assertEquals(dagsats, betalingslinje.dagsats)
+    }
+
+    @Test
+    fun `Ferie i arbeidsgiverperiode`() {
+        val betalingslinjer = (S + 2.F + 13.S + S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
+    }
 //
 //    @Test
 //    fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {

@@ -32,16 +32,20 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         return utbetalingslinjer
     }
 
-    fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
+    internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt.roundToInt(), dato))
     }
 
-    fun addNAVdag(inntekt: Double, dato: LocalDate) {
+    internal fun addNAVdag(inntekt: Double, dato: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.NAVDag(inntekt.roundToInt(), dato))
     }
 
-    fun addArbeidsdag(dagen: LocalDate) {
+    internal fun addArbeidsdag(dagen: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(dagen))
+    }
+
+    internal fun addFridag(dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Fridag(dagen))
     }
 
     private sealed class Utbetalingsdag(private val inntekt: Int, private val dato: LocalDate) {
@@ -73,6 +77,13 @@ internal class ArbeidsgiverUtbetalingstidslinje {
                 state.visitArbeidsdag(arbeidsgiverUtbetalingstidslinje, this)
             }
         }
+
+        internal class Fridag(private val dato: LocalDate) :
+            Utbetalingsdag(0, dato) {
+            override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
+                state.visitFridag(arbeidsgiverUtbetalingstidslinje, this)
+            }
+        }
     }
 
     private sealed class HelseState {
@@ -91,6 +102,12 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         open fun visitArbeidsdag(
             arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
             arbeidsdag: Utbetalingsdag.Arbeidsdag
+        ) {
+        }
+
+        open fun visitFridag(
+            arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
+            fridag: Utbetalingsdag.Fridag
         ) {
         }
 
