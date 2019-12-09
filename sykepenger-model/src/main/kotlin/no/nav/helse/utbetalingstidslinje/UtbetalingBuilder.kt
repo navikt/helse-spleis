@@ -36,7 +36,7 @@ internal class UtbetalingBuilder internal constructor(
     private fun LocalDate.erHelg() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = arbeidsdag(arbeidsdag.dagen)
-    //    override fun visitImplisittDag(implisittDag: ImplisittDag) = if (implisittDag.erHelg()) fridag(implisittDag.dagen) else arbeidsdag(implisittDag.dagen)
+    override fun visitImplisittDag(implisittDag: ImplisittDag) = implisittDag(implisittDag.dagen)
     override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = egenmeldingsdag(egenmeldingsdag.dagen)
@@ -48,6 +48,7 @@ internal class UtbetalingBuilder internal constructor(
 //    }
 
     private fun egenmeldingsdag(dagen: LocalDate) = if (dagen.erHelg()) sykHelgedag(dagen) else sykedag(dagen)
+    private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
 
     //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
     private fun sykedag(dagen: LocalDate) =
@@ -313,6 +314,7 @@ internal class UtbetalingBuilder internal constructor(
 
         override fun fridag(splitter: UtbetalingBuilder, dagen: LocalDate) {
             splitter.håndterFridag(dagen)
+            splitter.ikkeSykedager += 1
         }
     }
 

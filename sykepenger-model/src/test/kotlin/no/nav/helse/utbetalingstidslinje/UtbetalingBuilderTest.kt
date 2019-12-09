@@ -225,20 +225,39 @@ internal class UtbetalingBuilderTest {
 //    }
 //
 
-//
-//    @Test
-//    fun `arbeidsgiverperiode med to påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
-//        val linjer = (3.A + 18.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer
-//        assertEquals(0, linjer.size)
-//    }
-//
-//    @Test
-//    fun `arbeidsgiverperioden slutter på en søndag`() {
-//        val linjer = (3.A + 5.S + 2.F + 13.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer
-//        assertEquals(1, linjer.size)
-//        assertEquals(LocalDate.of(2018,1,22), linjer[0].fom)
-//        assertEquals(LocalDate.of(2018,1,23), linjer[0].tom)
-//    }
+
+    @Test
+    fun `arbeidsgiverperiode med to påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
+        val linjer = (3.A + 18.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(0, linjer.size)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode med tre påfølgende sykedager i helg`() {
+        val linjer = (3.A + 19.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, linjer.size)
+        assert(linjer.first(), 22.januar, 22.januar, 1200)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode med tre påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
+        val linjer = (2.A + 19.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, linjer.size)
+        assert(linjer.first(), 19.januar, 21.januar, 1200)
+    }
+
+    @Test
+    fun `arbeidsgiverperiode til fredag med sykedager over helg gir ingen betalingslinjer`() {
+        val linjer = (16.S + 3.A + 2.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(0, linjer.size)
+    }
+
+    @Test
+    fun `arbeidsgiverperioden slutter på en søndag`() {
+        val linjer = (3.A + 5.S + 2.F + 13.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, linjer.size)
+        assert(linjer.first(), 22.januar, 23.januar, 1200)
+    }
 //
 //    @Test
 //    fun `når rest av ukedager gjør at maksdato går over helg, så skal helgen ikke telle med som sykedag`() {
@@ -253,7 +272,7 @@ internal class UtbetalingBuilderTest {
 //        assertEquals(LocalDate.of(2019,11,4), utbetalingslinjer[1].fom)
 //        assertEquals(LocalDate.of(2019,11,8), utbetalingslinjer[1].tom)
 //    }
-//
+
 //    @Test
 //    fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
 //        val beregning = (368.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
@@ -279,23 +298,26 @@ internal class UtbetalingBuilderTest {
 //        assertEquals(LocalDate.of(2018, 1, 31), beregning.utbetalingslinjer.last().tom)
 //    }
 //
-//    @Test
-//    fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
-//        val sisteUtbetaling = (16.S + 4.S + 16.F + A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
-//        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
-//    }
-//
-//    @Test
-//    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
-//        val sisteUtbetaling = (16.S + 4.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
-//        assertEquals(LocalDate.of(2018, 1, 19), sisteUtbetaling.tom)
-//    }
-//
-//    @Test
-//    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold der sykedager går over helg`() {
-//        val sisteUtbetaling = (16.S + 6.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer).utbetalingslinjer.last()
-//        assertEquals(LocalDate.of(2018, 1, 22), sisteUtbetaling.tom)
-//    }
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
+        val betalingslinjer = (16.S + 4.S + 16.F + A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+    }
+
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
+        val betalingslinjer = (16.S + 4.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+    }
+
+    @Test
+    fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold der sykedager går over helg`() {
+        val betalingslinjer = (16.S + 6.S + 16.A + 16.S).utbetalingslinjer(inntektHistorie, fødselsnummer)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
+    }
 
     private val S
         get() = Sykdomstidslinje.sykedag(startDato,
