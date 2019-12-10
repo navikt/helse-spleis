@@ -13,16 +13,13 @@ import java.time.LocalDate
 /* Dette er en hjelpeklasse for å generere testdata. Det er viktig at defaults her holdes til absolutt minimum, slik at
  * en ikke ender opp med tester som er avhengig av sære defaults i søknaden
  */
-internal fun <Type, Builder> søknad(søknadtype: Søknadtype<Type, Builder>, block: Builder.() -> Unit) =
-    søknadtype.søknad(block)
+internal fun <Type, Builder> søknad(buildertype: Buildertype<Type, Builder>, block: Builder.() -> Unit) =
+    build(buildertype, block)
 
-internal interface Søknadtype<Type, Builder> {
-    fun søknad(block: Builder.() -> Unit): Type
-}
-
-internal object NySøknadHendelseWrapper : Søknadtype<NySøknadHendelse, SykepengesoknadDTOBuilder> {
-    override fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) =
-        NySøknadHendelseBuilder.søknad {
+internal object NySøknadHendelseWrapper :
+    Buildertype<NySøknadHendelse, SykepengesoknadDTOBuilder> {
+    override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
+        NySøknadHendelseBuilder.build {
             sykepengesøknad {
                 søknad {
                     status = SoknadsstatusDTO.NY
@@ -32,9 +29,10 @@ internal object NySøknadHendelseWrapper : Søknadtype<NySøknadHendelse, Sykepe
         }
 }
 
-internal object SendtSøknadHendelseWrapper : Søknadtype<SendtSøknadHendelse, SykepengesoknadDTOBuilder> {
-    override fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) =
-        SendtSøknadHendelseBuilder.søknad {
+internal object SendtSøknadHendelseWrapper :
+    Buildertype<SendtSøknadHendelse, SykepengesoknadDTOBuilder> {
+    override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
+        SendtSøknadHendelseBuilder.build {
             sykepengesøknad {
                 søknad {
                     status = SoknadsstatusDTO.SENDT
@@ -45,22 +43,24 @@ internal object SendtSøknadHendelseWrapper : Søknadtype<SendtSøknadHendelse, 
 
 }
 
-internal object SykepengesøknadWrapper : Søknadtype<Sykepengesøknad, SykepengesoknadDTOBuilder> {
-    override fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) =
-        SykepengesøknadBuilder.søknad { søknad(block) }
+internal object SykepengesøknadWrapper :
+    Buildertype<Sykepengesøknad, SykepengesoknadDTOBuilder> {
+    override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
+        SykepengesøknadBuilder.build { søknad(block) }
 }
 
 internal class NySøknadHendelseBuilder {
     private lateinit var sykepengesøknad: Sykepengesøknad
 
     internal fun sykepengesøknad(block: SykepengesøknadBuilder.() -> Unit) {
-        sykepengesøknad = SykepengesøknadBuilder.søknad(block)
+        sykepengesøknad = SykepengesøknadBuilder.build(block)
     }
 
     private fun build() = NySøknadHendelse(sykepengesøknad)
 
-    internal companion object Type : Søknadtype<NySøknadHendelse, NySøknadHendelseBuilder> {
-        override fun søknad(block: NySøknadHendelseBuilder.() -> Unit) =
+    internal companion object Type :
+        Buildertype<NySøknadHendelse, NySøknadHendelseBuilder> {
+        override fun build(block: NySøknadHendelseBuilder.() -> Unit) =
             NySøknadHendelseBuilder().apply(block).build()
     }
 }
@@ -69,13 +69,14 @@ internal class SendtSøknadHendelseBuilder {
     private lateinit var sykepengesøknad: Sykepengesøknad
 
     internal fun sykepengesøknad(block: SykepengesøknadBuilder.() -> Unit) {
-        sykepengesøknad = SykepengesøknadBuilder.søknad(block)
+        sykepengesøknad = SykepengesøknadBuilder.build(block)
     }
 
     private fun build() = SendtSøknadHendelse(sykepengesøknad)
 
-    internal companion object Type : Søknadtype<SendtSøknadHendelse, SendtSøknadHendelseBuilder> {
-        override fun søknad(block: SendtSøknadHendelseBuilder.() -> Unit) =
+    internal companion object Type :
+        Buildertype<SendtSøknadHendelse, SendtSøknadHendelseBuilder> {
+        override fun build(block: SendtSøknadHendelseBuilder.() -> Unit) =
             SendtSøknadHendelseBuilder().apply(block).build()
     }
 }
@@ -84,13 +85,14 @@ internal class SykepengesøknadBuilder {
     private lateinit var søknad: SykepengesoknadDTO
 
     internal fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) {
-        søknad = SykepengesoknadDTOBuilder.søknad(block)
+        søknad = SykepengesoknadDTOBuilder.build(block)
     }
 
     private fun build() = Sykepengesøknad(søknad.toJsonNode())
 
-    internal companion object Type : Søknadtype<Sykepengesøknad, SykepengesøknadBuilder> {
-        override fun søknad(block: SykepengesøknadBuilder.() -> Unit) =
+    internal companion object Type :
+        Buildertype<Sykepengesøknad, SykepengesøknadBuilder> {
+        override fun build(block: SykepengesøknadBuilder.() -> Unit) =
             SykepengesøknadBuilder().apply(block).build()
     }
 }
@@ -121,8 +123,9 @@ internal class SykepengesoknadDTOBuilder {
         )
     }
 
-    internal companion object Type : Søknadtype<SykepengesoknadDTO, SykepengesoknadDTOBuilder> {
-        override fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) =
+    internal companion object Type :
+        Buildertype<SykepengesoknadDTO, SykepengesoknadDTOBuilder> {
+        override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
             SykepengesoknadDTOBuilder().apply(block).build()
     }
 }
@@ -130,6 +133,13 @@ internal class SykepengesoknadDTOBuilder {
 internal class SøknadsperiodeBuilder {
     internal lateinit var fom: LocalDate
     internal lateinit var tom: LocalDate
+    internal var periode
+        set(value) {
+            fom = value.first
+            tom = value.second
+        }
+        get() = fom to tom
+
     private fun build() = SoknadsperiodeDTO(fom, tom)
 
     internal companion object {
@@ -141,6 +151,13 @@ internal class SøknadsperiodeBuilder {
 internal class PeriodeBuilder {
     internal lateinit var fom: LocalDate
     internal lateinit var tom: LocalDate
+    internal var periode
+        set(value) {
+            fom = value.first
+            tom = value.second
+        }
+        get() = fom to tom
+
     private fun build() = PeriodeDTO(fom, tom)
 
     internal companion object {
