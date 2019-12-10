@@ -363,6 +363,43 @@ internal class UtbetalingBuilderTest {
         assert(betalingslinjer.first(), 1.januar, 15.januar, 1200)
     }
 
+    @Test
+    fun `oppdeltArbeidsgiverutbetalingstidslinje har ingen sykedager betalt av nav`() {
+        val betalingslinjer = (50.S).arbeidsgiverutbetalingstidslinje(inntektHistorie, 0)
+            .subset(1.januar, 10.januar)
+            .utbetalingslinjer(emptyList())
+
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `oppdelt tidslinje i arbeidsgiverperioden`() {
+        val betalingslinjer = (50.S).arbeidsgiverutbetalingstidslinje(inntektHistorie, 0)
+            .subset(10.januar, 20.januar)
+            .utbetalingslinjer(emptyList())
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+    }
+
+    @Test
+    fun `oppdelt tidslinje etter arbeidsgiverperioden`() {
+        val betalingslinjer = (50.S).arbeidsgiverutbetalingstidslinje(inntektHistorie, 0)
+            .subset(21.januar, 30.januar)
+            .utbetalingslinjer(emptyList())
+
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 22.januar, 30.januar, 1200)
+    }
+
+    @Test
+    fun `oppdelt tidslinje blir bare helg`() {
+        val betalingslinjer = (21.S).arbeidsgiverutbetalingstidslinje(inntektHistorie, 0)
+            .subset(20.januar, 21.januar)
+            .utbetalingslinjer(emptyList())
+
+        assertEquals(0, betalingslinjer.size)
+    }
 
     private val S
         get() = Sykdomstidslinje.sykedag(startDato,

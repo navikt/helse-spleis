@@ -10,13 +10,20 @@ import kotlin.math.roundToInt
 
 internal class ArbeidsgiverUtbetalingstidslinje {
 
-    private val utbetalingsdager = mutableListOf<Utbetalingsdag>()
+    constructor() {
+        utbetalingsdager = mutableListOf()
+    }
+
+    private constructor(utbetalingsdager: List<Utbetalingsdag>) {
+        this.utbetalingsdager = utbetalingsdager.toMutableList()
+    }
+
+    private val utbetalingsdager: MutableList<Utbetalingsdag>
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var helseState: HelseState = HelseState.IkkeSyk
 
     fun utbetalingslinjer(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) =
         this
-            .limit(arbeidsgiverutbetalingstidslinjer)
             .filterByMinimumInntekt(arbeidsgiverutbetalingstidslinjer)
             .reduserAvSykdomsgrad(arbeidsgiverutbetalingstidslinjer)
             .utbetalingslinjer()
@@ -25,7 +32,9 @@ internal class ArbeidsgiverUtbetalingstidslinje {
 
     private fun reduserAvSykdomsgrad(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) = this
 
-    private fun limit(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) = this
+    internal fun subset(fom: LocalDate, tom: LocalDate) : ArbeidsgiverUtbetalingstidslinje {
+        return ArbeidsgiverUtbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
+    }
 
     private fun utbetalingslinjer(): List<Utbetalingslinje> {
         utbetalingsdager.forEach { it.accept(this, this.helseState) }
@@ -48,18 +57,23 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         utbetalingsdager.add(Utbetalingsdag.Fridag(dagen))
     }
 
-    private sealed class Utbetalingsdag(private val inntekt: Int, private val dato: LocalDate) {
+
+    private sealed class Utbetalingsdag(internal val inntekt: Int, internal val dato: LocalDate) {
+
+        companion object {
+            internal fun subset(liste: List<Utbetalingsdag>, fom: LocalDate, tom: LocalDate) = liste.filter { it.dato.isAfter(fom.minusDays(1)) && it.dato.isBefore(tom.plusDays(1)) }
+        }
 
         abstract fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState)
 
-        internal class ArbeidsgiverperiodeDag(private val inntekt: Int, private val dato: LocalDate) :
+        internal class ArbeidsgiverperiodeDag(inntekt: Int, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitArbeidsgiverperiodeDag(arbeidsgiverUtbetalingstidslinje, this)
             }
         }
 
-        internal class NavDag(private val inntekt: Int, private val dato: LocalDate) :
+        internal class NavDag(inntekt: Int, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitNAVDag(arbeidsgiverUtbetalingstidslinje, this)
@@ -71,14 +85,14 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             }
         }
 
-        internal class Arbeidsdag(private val dato: LocalDate) :
+        internal class Arbeidsdag(dato: LocalDate) :
             Utbetalingsdag(0, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitArbeidsdag(arbeidsgiverUtbetalingstidslinje, this)
             }
         }
 
-        internal class Fridag(private val dato: LocalDate) :
+        internal class Fridag(dato: LocalDate) :
             Utbetalingsdag(0, dato) {
             override fun accept(arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje, state: HelseState) {
                 state.visitFridag(arbeidsgiverUtbetalingstidslinje, this)
@@ -116,6 +130,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
                 arbeidsgiverUtbetalingstidslinje: ArbeidsgiverUtbetalingstidslinje,
                 navDag: Utbetalingsdag.NavDag
             ) {
+                if (navDag.inntekt == 0) return
                 arbeidsgiverUtbetalingstidslinje.utbetalingslinjer.add(navDag.utbetalingslinje())
                 arbeidsgiverUtbetalingstidslinje.helseState = Syk
             }

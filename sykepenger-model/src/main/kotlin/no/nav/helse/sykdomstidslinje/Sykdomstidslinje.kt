@@ -126,6 +126,12 @@ internal abstract class Sykdomstidslinje {
             .result()
             .utbetalingslinjer(emptyList())
 
+    fun arbeidsgiverutbetalingstidslinje(inntektHistorie: InntektHistorie, arbeidsgiverperiodeSeed: Int = 0) =
+        UtbetalingBuilder(this, inntektHistorie,
+            ArbeidsgiverRegler.Companion.NormalArbeidstaker, arbeidsgiverperiodeSeed
+        )
+            .result()
+
     companion object {
 
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
