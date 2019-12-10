@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -29,10 +30,6 @@ internal class UtbetalingBuilderTest {
         inntektHistorie.add(1.januar.minusDays(5), 1200.00)
         inntektHistorie.add(23.januar, 1000.00)
     }
-
-    private val fødselsnummer = "02029812345"
-
-    private val fødselsnummer67År = "01015112345"
 
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
@@ -319,6 +316,54 @@ internal class UtbetalingBuilderTest {
         assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
     }
 
+    @Test
+    fun `permisjon i en arbeidsgiverperiode telles som ferie`() {
+        val betalingslinjer = (4.S + 4.P + 9.S).utbetalingslinjer(inntektHistorie)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
+    }
+
+    @Test
+    fun `permisjon med påfølgende arbeidsdag teller som opphold i sykeperioden`() {
+        val betalingslinjer = (4.S + 4.P + 1.A + 16.S).utbetalingslinjer(inntektHistorie)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 22.januar, 25.januar, 1200)
+    }
+
+    @Test
+    fun `permisjon direkte etter arbeidsgiverperioden teller ikke som opphold`() {
+        val betalingslinjer = (16.S + 10.P + 15.A + 3.S).utbetalingslinjer(inntektHistorie)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 12.februar, 13.februar, 1000)
+    }
+
+    @Test
+    fun `resetter arbeidsgiverperioden etter 16 arbeidsdager`() {
+        val betalingslinjer = (15.S + 16.A + 14.S).utbetalingslinjer(inntektHistorie)
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `utlands-, ubestemt- og utdanningsdager teller som opphold`() {
+        val betalingslinjer = (15.S + 10.U + 4.EDU + 3.UT + 14.S).utbetalingslinjer(inntektHistorie)
+        assertEquals(0, betalingslinjer.size)
+    }
+
+    @Test
+    fun `intitialiserer arbeidsgiverperioden med 5 dager`() {
+        val betalingslinjer = (15.S).utbetalingslinjer(inntektHistorie, 5)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 12.januar, 15.januar, 1200)
+    }
+
+    @Test
+    fun `intitialiserer arbeidsgiverperioden med 16 dager`() {
+        val betalingslinjer = (15.S).utbetalingslinjer(inntektHistorie, 16)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 1.januar, 15.januar, 1200)
+    }
+
+
     private val S
         get() = Sykdomstidslinje.sykedag(startDato,
             sendtSykmelding
@@ -363,6 +408,31 @@ internal class UtbetalingBuilderTest {
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.P
+        get() = Sykdomstidslinje.permisjonsdager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.EDU
+        get() = Sykdomstidslinje.studiedager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.UT
+        get() = Sykdomstidslinje.utenlandsdager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
+    private val Int.U
+        get() = Sykdomstidslinje.ubestemtdager(startDato, startDato.plusDays(this.toLong() - 1),
+            sendtSykmelding
+        )
+            .also { startDato = startDato.plusDays(this.toLong()) }
+
 
     val Int.januar
         get() = LocalDate.of(2018, 1, this)
