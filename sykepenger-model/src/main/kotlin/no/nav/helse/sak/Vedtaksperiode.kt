@@ -10,6 +10,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
@@ -92,6 +93,13 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
+    internal fun håndter(påminnelse: Påminnelse) {
+        if (id.toString() == påminnelse.vedtaksperiodeId()) tilstand.håndter(
+            this,
+            påminnelse
+        )
+    }
+
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         setTilstand(hendelse, TilInfotrygdTilstand)
     }
@@ -151,6 +159,9 @@ internal class Vedtaksperiode internal constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) =
+            vedtaksperiode.setTilstand(påminnelse, TilInfotrygdTilstand)
 
         fun leaving() {
         }
@@ -215,12 +226,10 @@ internal class Vedtaksperiode internal constructor(
         private const val seksMåneder = 180
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(
-                BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
-                    "tom" to vedtaksperiode.sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
-                )
-            )
+            trengerSykepengehistorikk(vedtaksperiode)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) = trengerSykepengehistorikk(vedtaksperiode)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             val tidslinje = vedtaksperiode.sykdomstidslinje
@@ -267,6 +276,14 @@ internal class Vedtaksperiode internal constructor(
 
             return !inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
+
+        private fun trengerSykepengehistorikk(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.emitTrengerLøsning(
+                BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
+                    "tom" to vedtaksperiode.sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
+                )
+            )
+        }
     }
 
     private object TilGodkjenningTilstand : Vedtaksperiodetilstand {
@@ -294,6 +311,11 @@ internal class Vedtaksperiode internal constructor(
     private object TilUtbetalingTilstand : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
         override val timeout: Duration = Duration.ofDays(7)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            // TODO bør kanskje varsle saksbehandler hvis utbetaling ikke har skjedd?
+            //  Revisit når Spenn svarer på status for utbetaling
+        }
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)

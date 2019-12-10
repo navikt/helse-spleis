@@ -3,11 +3,13 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
@@ -376,6 +378,14 @@ internal object TestConstants {
             )
         )
     }
+
+    fun påminnelseHendelse(vedtaksperiodeId: UUID) = Påminnelse(objectMapper.convertValue(mapOf(
+        "aktørId" to "1",
+        "fødselsnummer" to fakeFNR,
+        "organisasjonsnummer" to "123546564",
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "antallGangerPåminnet" to 0
+    )))
 }
 
 internal data class SpolePeriode(

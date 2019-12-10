@@ -5,11 +5,13 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.objectMapper
+import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
@@ -79,6 +81,18 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
+    fun `motta påminnelse fra starttilstand, gå TilInfotrygd`() {
+        val vedtaksperiode = beInStartTilstand()
+
+        vedtaksperiode.håndter(
+            påminnelseHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+        assertTilstandsendring(START, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
     fun `motta sendt søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
 
@@ -105,6 +119,18 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(nySøknadHendelse())
 
         assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `motta påminnelse fra NySøknadMottatt, gå TilInfotrygd`() {
+        val vedtaksperiode = beInNySøknad()
+
+        vedtaksperiode.håndter(
+            påminnelseHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+        assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
     }
 
     @Test
@@ -136,6 +162,18 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
+    fun `motta påminnelse fra SendtSøknadMottatt, gå TilInfotrygd`() {
+        val vedtaksperiode = beInSendtSøknad()
+
+        vedtaksperiode.håndter(
+            påminnelseHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
     fun `motta sendt søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
@@ -160,6 +198,18 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `motta påminnelse fra InntektsmeldingMottatt, gå TilInfotrygd`() {
+        val vedtaksperiode = beInMottattInntektsmelding()
+
+        vedtaksperiode.håndter(
+            påminnelseHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
     }
 
     @Test
@@ -355,6 +405,21 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+    }
+
+    @Test
+    fun `motta påminnelse fra KomplettTidslinje, fører til at behov sendes på nytt`() {
+        val vedtaksperiode = beInKomplettTidslinje()
+
+        assertIngenEndringITilstand {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            )
+        }
+
+        assertBehov(BehovsTyper.Sykepengehistorikk)
     }
 
     @Test
@@ -665,6 +730,31 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
     }
 
+    @Test
+    fun `motta påminnelse fra TilGodkjenning, gå TilInfotrygd`() {
+        val vedtaksperiode = beInTilGodkjenning()
+
+        vedtaksperiode.håndter(
+            påminnelseHendelse(
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+        assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `motta påminnelse fra TilUtbetaling, fører ikke til noen endring fordi Spenn svarer ikke med status ennå`() {
+        val vedtaksperiode = beInTilUtbetaling()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            )
+        }
+    }
+
     private fun beInStartTilstand(): Vedtaksperiode {
         return Vedtaksperiode(
             id = vedtaksperiodeId,
@@ -724,6 +814,15 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             håndter(sykepengehistorikkHendelse)
         }
 
+    private fun beInTilUtbetaling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse = manuellSaksbehandlingHendelse(
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        utbetalingGodkjent = true,
+        saksbehandler = "en_saksbehandler_ident"
+    )) =
+        beInTilGodkjenning().apply {
+            håndter(manuellSaksbehandlingHendelse)
+        }
+
     private companion object {
         private val aktørId = "1234567891011"
         private val fødselsnummer = "01017045896"
@@ -774,7 +873,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertEquals(timeout, lastStateEvent.timeout)
     }
 
-    private fun assertIngenEndring(block: () -> Unit) {
+    private fun assertIngenEndringITilstand(block: () -> Unit) {
         val endringer = vedtaksperiodeEndringer
 
         val gjeldendeTilstand = if (endringer > 0) lastStateEvent.currentState else null
@@ -783,10 +882,19 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         block()
 
         assertEquals(vedtaksperiodeEndringer, endringer)
-
         if (gjeldendeTilstand != null && forrigeTilstand != null) {
             assertTilstandsendring(forrigeTilstand, gjeldendeTilstand)
         }
+    }
+
+    private fun assertIngenEndring(block: () -> Unit) {
+        val antallBehov = behovsliste.size
+
+        assertIngenEndringITilstand {
+            block()
+        }
+
+        assertEquals(antallBehov, behovsliste.size)
     }
 
     private fun assertBehov(behovstype: BehovsTyper) {
