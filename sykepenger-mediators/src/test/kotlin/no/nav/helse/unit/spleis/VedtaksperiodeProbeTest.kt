@@ -66,8 +66,8 @@ internal class VedtaksperiodeProbeTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = "orgnummer",
-            currentState = currentState,
-            previousState = previousState,
+            gjeldendeTilstand = currentState,
+            forrigeTilstand = previousState,
             sykdomshendelse = eventType,
             timeout = Duration.ZERO
         )

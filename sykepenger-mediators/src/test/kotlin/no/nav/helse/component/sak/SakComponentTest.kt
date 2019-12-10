@@ -443,8 +443,8 @@ internal class SakComponentTest {
                     .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
                     .filter { timeout == Duration.ofSeconds(it["timeout"].longValue()) }
                     .filter {
-                        previousState == TilstandType.valueOf(it["previousState"].textValue())
-                            && currentState == TilstandType.valueOf(it["currentState"].textValue())
+                        previousState == TilstandType.valueOf(it["forrigeTilstand"].textValue())
+                            && currentState == TilstandType.valueOf(it["gjeldendeTilstand"].textValue())
                     }
 
                 assertEquals(1, vedtaksperiodeEndretHendelser.size)

@@ -457,8 +457,8 @@ internal class Vedtaksperiode internal constructor(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            currentState = currentState,
-            previousState = previousState,
+            gjeldendeTilstand = currentState,
+            forrigeTilstand = previousState,
             sykdomshendelse = tidslinjeEvent,
             timeout = varighet
         )

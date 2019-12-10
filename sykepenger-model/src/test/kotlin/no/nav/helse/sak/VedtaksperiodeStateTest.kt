@@ -861,8 +861,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         gjeldendeTilstandType: TilstandType,
         hendelsetype: KClass<out ArbeidstakerHendelse>? = null
     ) {
-        assertEquals(forrigeTilstandType, lastStateEvent.previousState)
-        assertEquals(gjeldendeTilstandType, lastStateEvent.currentState)
+        assertEquals(forrigeTilstandType, lastStateEvent.forrigeTilstand)
+        assertEquals(gjeldendeTilstandType, lastStateEvent.gjeldendeTilstand)
 
         hendelsetype?.also {
             assertEquals(it, lastStateEvent.sykdomshendelse::class)
@@ -876,8 +876,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     private fun assertIngenEndringITilstand(block: () -> Unit) {
         val endringer = vedtaksperiodeEndringer
 
-        val gjeldendeTilstand = if (endringer > 0) lastStateEvent.currentState else null
-        val forrigeTilstand = if (endringer > 0) lastStateEvent.previousState else null
+        val gjeldendeTilstand = if (endringer > 0) lastStateEvent.gjeldendeTilstand else null
+        val forrigeTilstand = if (endringer > 0) lastStateEvent.forrigeTilstand else null
 
         block()
 

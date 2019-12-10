@@ -3,14 +3,13 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
-import no.nav.helse.sak.SakObserver
-import no.nav.helse.sak.SakskjemaForGammelt
-import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sak.SakObserver
+import no.nav.helse.sak.SakskjemaForGammelt
+import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import org.slf4j.LoggerFactory
 
 object VedtaksperiodeProbe : SakObserver {
@@ -48,9 +47,9 @@ object VedtaksperiodeProbe : SakObserver {
     }
 
     override fun vedtaksperiodeEndret(event: StateChangeEvent) {
-        tilstandCounter.labels(event.previousState.name, event.currentState.name, event.sykdomshendelse.javaClass.simpleName).inc()
+        tilstandCounter.labels(event.forrigeTilstand.name, event.gjeldendeTilstand.name, event.sykdomshendelse.javaClass.simpleName).inc()
 
-        log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.currentState} previousState=${event.previousState}")
+        log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.gjeldendeTilstand} previousState=${event.forrigeTilstand}")
 
         when (event.sykdomshendelse) {
             is InntektsmeldingHendelse -> {

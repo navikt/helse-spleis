@@ -50,7 +50,7 @@ internal class SakMediator(private val sakRepository: SakRepository,
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-        if (event.currentState == TIL_INFOTRYGD) {
+        if (event.gjeldendeTilstand == TIL_INFOTRYGD) {
             gosysOppgaveProducer.opprettOppgave(event.aktørId, event.fødselsnummer)
         }
 

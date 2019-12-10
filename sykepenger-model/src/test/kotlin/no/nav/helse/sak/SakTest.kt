@@ -19,15 +19,10 @@ import no.nav.helse.juni
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -731,7 +726,7 @@ internal class SakTest {
     }
 
     private fun assertAlleVedtaksperiodetilstander(tilstandType: TilstandType) {
-        assertTrue(this.testSakObserver.sakstilstander.values.all { it.currentState == tilstandType })
+        assertTrue(this.testSakObserver.sakstilstander.values.all { it.gjeldendeTilstand == tilstandType })
     }
 
     private fun assertSakEndret() {
@@ -768,8 +763,8 @@ internal class SakTest {
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             vedtaksperiodeEndret = true
-            forrigeVedtaksperiodetilstand = event.previousState
-            gjeldendeVedtaksperiodetilstand = event.currentState
+            forrigeVedtaksperiodetilstand = event.forrigeTilstand
+            gjeldendeVedtaksperiodetilstand = event.gjeldendeTilstand
 
             sakstilstander[event.id] = event
         }
