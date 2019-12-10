@@ -13,11 +13,12 @@ import java.time.LocalDate
 internal class UtbetalingBuilder internal constructor(
     private val sykdomstidslinje: Sykdomstidslinje,
     private val inntektHistorie: InntektHistorie,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler
+    private val arbeidsgiverRegler: ArbeidsgiverRegler,
+    arbeidsgiverperiodeSeed: Int
 ) : SykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
-    private var sykedager = 0
+    private var sykedager = arbeidsgiverperiodeSeed
     private var ikkeSykedager = 0
     private var fridager = 0
 
@@ -143,7 +144,9 @@ internal class UtbetalingBuilder internal constructor(
         }
 
         override fun sykedagerEtterArbeidsgiverperioden(splitter: UtbetalingBuilder, dagen: LocalDate) {
-            splitter.state(Ugyldig)
+            splitter.setNåværendeInntekt(dagen.minusDays(1))
+            splitter.håndterNAVdag(dagen)
+            splitter.state(UtbetalingSykedager)
         }
 
         override fun sykHelgedag(splitter: UtbetalingBuilder, dagen: LocalDate) {

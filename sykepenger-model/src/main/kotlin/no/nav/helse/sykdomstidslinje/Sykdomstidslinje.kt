@@ -119,9 +119,9 @@ internal abstract class Sykdomstidslinje {
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 
-    fun utbetalingslinjer(inntektHistorie: InntektHistorie) =
+    fun utbetalingslinjer(inntektHistorie: InntektHistorie, arbeidsgiverperiodeSeed: Int = 0) =
         UtbetalingBuilder(this, inntektHistorie,
-            ArbeidsgiverRegler.Companion.NormalArbeidstaker
+            ArbeidsgiverRegler.Companion.NormalArbeidstaker, arbeidsgiverperiodeSeed
         )
             .result()
             .utbetalingslinjer(emptyList())

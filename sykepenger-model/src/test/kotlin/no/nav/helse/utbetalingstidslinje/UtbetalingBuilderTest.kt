@@ -31,10 +31,6 @@ internal class UtbetalingBuilderTest {
         inntektHistorie.add(23.januar, 1000.00)
     }
 
-    private val fødselsnummer = "02029812345"
-
-    private val fødselsnummer67År = "01015112345"
-
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
         assertEquals(0, 2.S.utbetalingslinjer(inntektHistorie).size)
@@ -352,6 +348,21 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (15.S + 10.U + 4.EDU + 3.UT + 14.S).utbetalingslinjer(inntektHistorie)
         assertEquals(0, betalingslinjer.size)
     }
+
+    @Test
+    fun `intitialiserer arbeidsgiverperioden med 5 dager`() {
+        val betalingslinjer = (15.S).utbetalingslinjer(inntektHistorie, 5)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 12.januar, 15.januar, 1200)
+    }
+
+    @Test
+    fun `intitialiserer arbeidsgiverperioden med 16 dager`() {
+        val betalingslinjer = (15.S).utbetalingslinjer(inntektHistorie, 16)
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 1.januar, 15.januar, 1200)
+    }
+
 
     private val S
         get() = Sykdomstidslinje.sykedag(startDato,
