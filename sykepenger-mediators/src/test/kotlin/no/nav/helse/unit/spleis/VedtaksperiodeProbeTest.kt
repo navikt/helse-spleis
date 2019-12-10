@@ -11,6 +11,7 @@ import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.spleis.VedtaksperiodeProbe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.util.*
 
 internal class VedtaksperiodeProbeTest {
@@ -67,7 +68,8 @@ internal class VedtaksperiodeProbeTest {
             organisasjonsnummer = "orgnummer",
             currentState = currentState,
             previousState = previousState,
-            sykdomshendelse = eventType
+            sykdomshendelse = eventType,
+            timeout = Duration.ZERO
         )
 
     private fun getCounterValue(name: String, labelValues: List<String> = emptyList()) =

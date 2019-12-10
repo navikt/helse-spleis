@@ -1,6 +1,7 @@
 package no.nav.helse.sak
 
 import no.nav.helse.behov.Behov
+import java.time.Duration
 import java.util.*
 
 interface VedtaksperiodeObserver {
@@ -10,7 +11,8 @@ interface VedtaksperiodeObserver {
                                 val organisasjonsnummer: String,
                                 val currentState: TilstandType,
                                 val previousState: TilstandType,
-                                val sykdomshendelse: ArbeidstakerHendelse)
+                                val sykdomshendelse: ArbeidstakerHendelse,
+                                val timeout: Duration)
 
     data class UtbetalingEvent(val vedtaksperiodeId: UUID,
                                val aktørId: String,

@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base32
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
+import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
@@ -108,7 +109,7 @@ internal class Vedtaksperiode internal constructor(
 
         tilstand.entering(this)
 
-        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName)
+        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, tilstand.timeout)
     }
 
     private fun <HENDELSE> håndter(
@@ -130,6 +131,7 @@ internal class Vedtaksperiode internal constructor(
     private interface Vedtaksperiodetilstand {
 
         val type: TilstandType
+        val timeout: Duration
 
         // Default implementasjoner av transisjonene
         fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
@@ -165,7 +167,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override val type = START
-
+        override val timeout: Duration = Duration.ofDays(30)
     }
 
     private object NySøknadMottattTilstand : Vedtaksperiodetilstand {
@@ -179,6 +181,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override val type = NY_SØKNAD_MOTTATT
+        override val timeout: Duration = Duration.ofDays(30)
 
     }
 
@@ -189,6 +192,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
+        override val timeout: Duration = Duration.ofDays(30)
 
     }
 
@@ -199,12 +203,14 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
+        override val timeout: Duration = Duration.ofDays(30)
 
     }
 
     private object KomplettSykdomstidslinjeTilstand : Vedtaksperiodetilstand {
 
         override val type = KOMPLETT_SYKDOMSTIDSLINJE
+        override val timeout: Duration = Duration.ofHours(1)
 
         private const val seksMåneder = 180
 
@@ -265,6 +271,7 @@ internal class Vedtaksperiode internal constructor(
 
     private object TilGodkjenningTilstand : Vedtaksperiodetilstand {
         override val type = TIL_GODKJENNING
+        override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiode.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
@@ -286,6 +293,7 @@ internal class Vedtaksperiode internal constructor(
 
     private object TilUtbetalingTilstand : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
+        override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
@@ -329,6 +337,7 @@ internal class Vedtaksperiode internal constructor(
 
     private object TilInfotrygdTilstand : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
+        override val timeout: Duration = Duration.ZERO
 
     }
 
@@ -418,7 +427,8 @@ internal class Vedtaksperiode internal constructor(
     private fun emitVedtaksperiodeEndret(
         currentState: TilstandType,
         tidslinjeEvent: ArbeidstakerHendelse,
-        previousState: TilstandType
+        previousState: TilstandType,
+        varighet: Duration
     ) {
         val event = StateChangeEvent(
             id = id,
@@ -427,7 +437,8 @@ internal class Vedtaksperiode internal constructor(
             organisasjonsnummer = organisasjonsnummer,
             currentState = currentState,
             previousState = previousState,
-            sykdomshendelse = tidslinjeEvent
+            sykdomshendelse = tidslinjeEvent,
+            timeout = varighet
         )
 
         observers.forEach { observer ->

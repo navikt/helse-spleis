@@ -58,6 +58,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.Duration
 import java.time.Duration.ofMillis
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
@@ -75,7 +76,8 @@ internal class SakComponentTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics = listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic)
+        private val topics =
+            listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -156,8 +158,9 @@ internal class SakComponentTest {
             stubFor(jwtStub.stubbedJwkProvider())
             stubFor(jwtStub.stubbedConfigProvider())
 
-            embeddedServer = embeddedServer(Netty, createTestApplicationConfig(applicationConfig(wireMockServer.baseUrl())))
-                .start(wait = false)
+            embeddedServer =
+                embeddedServer(Netty, createTestApplicationConfig(applicationConfig(wireMockServer.baseUrl())))
+                    .start(wait = false)
         }
 
         @AfterAll
@@ -187,21 +190,56 @@ internal class SakComponentTest {
         val virksomhetsnummer = "123456789"
 
         val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.START, currentState = TilstandType.NY_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.START,
+            currentState = TilstandType.NY_SØKNAD_MOTTATT,
+            timeout = Duration.ofDays(30)
+        )
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.NY_SØKNAD_MOTTATT, currentState = TilstandType.SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.NY_SØKNAD_MOTTATT,
+            currentState = TilstandType.SENDT_SØKNAD_MOTTATT,
+            timeout = Duration.ofDays(30)
+        )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.SENDT_SØKNAD_MOTTATT, currentState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.SENDT_SØKNAD_MOTTATT,
+            currentState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE,
+            timeout = Duration.ofHours(1)
+        )
 
-        val sykehistorikk = listOf(SpolePeriode(
-            fom = søknad.fom!!.minusMonths(8),
-            tom = søknad.fom!!.minusMonths(7),
-            grad = "100"
-        ))
+        val sykehistorikk = listOf(
+            SpolePeriode(
+                fom = søknad.fom!!.minusMonths(8),
+                tom = søknad.fom!!.minusMonths(7),
+                grad = "100"
+            )
+        )
         sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
 
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE, currentState = TilstandType.TIL_GODKJENNING)
-        assertBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, typer = listOf(GodkjenningFraSaksbehandler.name))
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE,
+            currentState = TilstandType.TIL_GODKJENNING,
+            timeout = Duration.ofDays(7)
+        )
+        assertBehov(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            typer = listOf(GodkjenningFraSaksbehandler.name)
+        )
 
         aktørID.hentSak {
             assertTrue(this.contains("maksdato"))
@@ -220,15 +258,24 @@ internal class SakComponentTest {
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
 
-        val sykehistorikk = listOf(SpolePeriode(
+        val sykehistorikk = listOf(
+            SpolePeriode(
                 fom = søknad.fom!!.minusMonths(8),
                 tom = søknad.fom!!.minusMonths(7),
                 grad = "100"
-        ))
+            )
+        )
         sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer,true, "en_saksbehandler_ident")
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
 
-        assertVedtaksperiodeEndretEvent(aktørId = aktørID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer, previousState = TilstandType.TIL_GODKJENNING, currentState = TilstandType.TIL_UTBETALING)
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.TIL_GODKJENNING,
+            currentState = TilstandType.TIL_UTBETALING,
+            timeout = Duration.ofDays(7)
+        )
 
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)
         val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
@@ -258,15 +305,15 @@ internal class SakComponentTest {
 
     private fun String.httpGet(testBlock: String.() -> Unit) {
         val token = jwtStub.createTokenFor(
-                subject = "en_saksbehandler_ident",
-                groups = listOf("sykepenger-saksbehandler-gruppe"),
-                audience = "spleis_azure_ad_app_id"
+            subject = "en_saksbehandler_ident",
+            groups = listOf("sykepenger-saksbehandler-gruppe"),
+            audience = "spleis_azure_ad_app_id"
         )
 
         val connection = embeddedServer.handleRequest(HttpMethod.Get, this,
-                builder = {
-                    setRequestProperty(Authorization, "Bearer $token")
-                })
+            builder = {
+                setRequestProperty(Authorization, "Bearer $token")
+            })
 
         assertEquals(HttpStatusCode.OK.value, connection.responseCode)
 
@@ -286,30 +333,72 @@ internal class SakComponentTest {
 
         assertNotNull(behov["tom"])
 
-        behov.løsBehov(TestConstants.responsFraSpole(
-            perioder = perioder
-        ))
+        behov.løsBehov(
+            TestConstants.responsFraSpole(
+                perioder = perioder
+            )
+        )
         sendBehov(behov)
     }
 
-    private fun sendGodkjenningFraSaksbehandlerløsning(aktørId: String, fødselsnummer: String, utbetalingGodkjent: Boolean, saksbehandler: String) {
+    private fun sendGodkjenningFraSaksbehandlerløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        utbetalingGodkjent: Boolean,
+        saksbehandler: String
+    ) {
         val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
-        behov.løsBehov(mapOf(
-            "godkjent" to utbetalingGodkjent
-        ))
+        behov.løsBehov(
+            mapOf(
+                "godkjent" to utbetalingGodkjent
+            )
+        )
         behov["saksbehandlerIdent"] = saksbehandler
         sendBehov(behov)
     }
 
-    private fun sendInnteksmelding(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, inntektsMelding: Inntektsmelding = inntektsmeldingDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, virksomhetsnummer = virksomhetsnummer)) {
-        synchronousSendKafkaMessage(inntektsmeldingTopic, inntektsMelding.inntektsmeldingId, inntektsMelding.toJsonNode().toString())
+    private fun sendInnteksmelding(
+        aktorID: String,
+        fødselsnummer: String,
+        virksomhetsnummer: String,
+        inntektsMelding: Inntektsmelding = inntektsmeldingDTO(
+            aktørId = aktorID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer
+        )
+    ) {
+        synchronousSendKafkaMessage(
+            inntektsmeldingTopic,
+            inntektsMelding.inntektsmeldingId,
+            inntektsMelding.toJsonNode().toString()
+        )
     }
 
-    private fun sendSøknad(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, sendtSøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.SENDT)) {
+    private fun sendSøknad(
+        aktorID: String,
+        fødselsnummer: String,
+        virksomhetsnummer: String,
+        sendtSøknad: SykepengesoknadDTO = søknadDTO(
+            aktørId = aktorID,
+            fødselsnummer = fødselsnummer,
+            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+            status = SoknadsstatusDTO.SENDT
+        )
+    ) {
         synchronousSendKafkaMessage(søknadTopic, sendtSøknad.id!!, sendtSøknad.toJsonNode().toString())
     }
 
-    private fun sendNySøknad(aktorID: String, fødselsnummer: String, virksomhetsnummer: String, nySøknad: SykepengesoknadDTO = søknadDTO(aktørId = aktorID, fødselsnummer = fødselsnummer, arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer), status = SoknadsstatusDTO.NY)): SykepengesoknadDTO {
+    private fun sendNySøknad(
+        aktorID: String,
+        fødselsnummer: String,
+        virksomhetsnummer: String,
+        nySøknad: SykepengesoknadDTO = søknadDTO(
+            aktørId = aktorID,
+            fødselsnummer = fødselsnummer,
+            arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
+            status = SoknadsstatusDTO.NY
+        )
+    ): SykepengesoknadDTO {
         synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode().toString())
         return nySøknad
     }
@@ -335,21 +424,31 @@ internal class SakComponentTest {
         return behov!!
     }
 
-    private fun assertVedtaksperiodeEndretEvent(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, previousState: TilstandType, currentState: TilstandType) {
+    private fun assertVedtaksperiodeEndretEvent(
+        fødselsnummer: String,
+        virksomhetsnummer: String,
+        aktørId: String,
+        previousState: TilstandType,
+        currentState: TilstandType,
+        timeout: Duration
+    ) {
         await()
-                .atMost(5, SECONDS)
-                .untilAsserted {
-                    val meldingerPåTopic = TestConsumer.records(vedtaksperiodeEventTopic)
-                    val vedtaksperiodeEndretHendelser = meldingerPåTopic
-                            .map { objectMapper.readTree(it.value()) }
-                            .filter { aktørId == it["aktørId"].textValue() }
-                            .filter { fødselsnummer == it["fødselsnummer"].textValue() }
-                            .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
-                            .filter { previousState == TilstandType.valueOf(it["previousState"].textValue())
-                                    && currentState == TilstandType.valueOf(it["currentState"].textValue()) }
+            .atMost(5, SECONDS)
+            .untilAsserted {
+                val meldingerPåTopic = TestConsumer.records(vedtaksperiodeEventTopic)
+                val vedtaksperiodeEndretHendelser = meldingerPåTopic
+                    .map { objectMapper.readTree(it.value()) }
+                    .filter { aktørId == it["aktørId"].textValue() }
+                    .filter { fødselsnummer == it["fødselsnummer"].textValue() }
+                    .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
+                    .filter { timeout == Duration.ofSeconds(it["timeout"].longValue()) }
+                    .filter {
+                        previousState == TilstandType.valueOf(it["previousState"].textValue())
+                            && currentState == TilstandType.valueOf(it["currentState"].textValue())
+                    }
 
-                    assertEquals(1, vedtaksperiodeEndretHendelser.size)
-                }
+                assertEquals(1, vedtaksperiodeEndretHendelser.size)
+            }
     }
 
     private fun assertBehov(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
@@ -389,7 +488,8 @@ internal class SakComponentTest {
         await()
             .atMost(5, SECONDS)
             .untilAsserted {
-                val offsetAndMetadataMap = adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
+                val offsetAndMetadataMap =
+                    adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
                 val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
                 val currentPositionOfSentMessage = recordMetadata.offset()
                 val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
@@ -401,9 +501,10 @@ internal class SakComponentTest {
     private object TestConsumer {
         private val records = mutableListOf<ConsumerRecord<String, String>>()
 
-        private val kafkaConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer()).also {
-            it.subscribe(topics)
-        }
+        private val kafkaConsumer =
+            KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer()).also {
+                it.subscribe(topics)
+            }
 
         fun reset() {
             records.clear()

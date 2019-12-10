@@ -23,6 +23,7 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
@@ -36,6 +37,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(nySøknadHendelse())
 
         assertTilstandsendring(START, NY_SØKNAD_MOTTATT, NySøknadHendelse::class)
+        assertPåminnelse(Duration.ofDays(30))
+    }
+
+    @Test
+    fun `skal ikke påminnes hvis "TilInfotrygd"`() {
+        beInTilInfotrygd()
+        assertPåminnelse(Duration.ZERO)
     }
 
     @Test
@@ -77,6 +85,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
         assertTilstandsendring(NY_SØKNAD_MOTTATT, SENDT_SØKNAD_MOTTATT)
+        assertPåminnelse(Duration.ofDays(30))
     }
 
     @Test
@@ -86,6 +95,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertTilstandsendring(NY_SØKNAD_MOTTATT, INNTEKTSMELDING_MOTTATT)
+        assertPåminnelse(Duration.ofDays(30))
     }
 
     @Test
@@ -113,6 +123,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
         assertTilstandsendring(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertPåminnelse(Duration.ofHours(1))
     }
 
     @Test
@@ -217,6 +228,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertPåminnelse(Duration.ofDays(7))
         assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
     }
 
@@ -616,6 +628,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandlingHendelse::class)
+        assertPåminnelse(Duration.ofDays(7))
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
         assertBehov(BehovsTyper.Utbetaling)
 
@@ -662,6 +675,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
+
+    private fun beInTilInfotrygd() =
+        beInStartTilstand().apply {
+            håndter(sendtSøknadHendelse())
+        }
 
     private fun beInNySøknad(nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
         beInStartTilstand().apply {
@@ -750,6 +768,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         hendelsetype?.also {
             assertEquals(it, lastStateEvent.sykdomshendelse::class)
         }
+    }
+
+    private fun assertPåminnelse(timeout: Duration) {
+        assertEquals(timeout, lastStateEvent.timeout)
     }
 
     private fun assertIngenEndring(block: () -> Unit) {

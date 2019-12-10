@@ -42,7 +42,8 @@ class VedtaksperiodeEventProducer(commonKafkaProperties: Properties) {
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.id,
             "currentState" to event.currentState,
-            "previousState" to event.previousState
+            "previousState" to event.previousState,
+            "timeout" to event.timeout.toSeconds()
         )
     )
 }
