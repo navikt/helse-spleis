@@ -254,6 +254,15 @@ internal abstract class Sykdomstidslinje {
                 hendelse
             )
 
+        internal fun implisittDag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
+            if (erArbeidsdag(gjelder)) ImplisittDag(
+                gjelder,
+                hendelse
+            ) else ImplisittDag(
+                gjelder,
+                hendelse
+            )
+
         fun permisjonsdager(
             fra: LocalDate,
             til: LocalDate,
@@ -275,6 +284,18 @@ internal abstract class Sykdomstidslinje {
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
                     .map { implisittDag(it, hendelse) }
+                    .toList())
+        }
+
+        fun ubestemtdager(
+            fra: LocalDate,
+            til: LocalDate,
+            hendelse: SykdomstidslinjeHendelse
+        ): Sykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(
+                fra.datesUntil(til.plusDays(1))
+                    .map { Ubestemtdag(it, hendelse) }
                     .toList())
         }
 
@@ -317,14 +338,5 @@ internal abstract class Sykdomstidslinje {
 
         private fun erArbeidsdag(dato: LocalDate) =
             dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
-
-        internal fun implisittDag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) ImplisittDag(
-                gjelder,
-                hendelse
-            ) else ImplisittDag(
-                gjelder,
-                hendelse
-            )
     }
 }
