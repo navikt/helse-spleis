@@ -104,6 +104,12 @@ internal class Vedtaksperiode internal constructor(
         setTilstand(hendelse, TilInfotrygdTilstand)
     }
 
+    internal fun accept(visitor: SykdomstidslinjeVisitor) {
+        visitor.preVisitVedtaksperiode(this)
+        sykdomstidslinje?.accept(visitor)
+        visitor.postVisitVedtaksperiode(this)
+    }
+
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
         this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
 

@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -65,6 +66,12 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
     fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
             ?: error("Fant ikke arbeidsgiver for ManuellSaksbehandlingHendelse")
+    }
+
+    internal fun accept(visitor: SykdomstidslinjeVisitor) {
+        visitor.preVisitSak(this)
+        arbeidsgivere.values.forEach { it.accept(visitor) }
+        visitor.postVisitSak(this)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
