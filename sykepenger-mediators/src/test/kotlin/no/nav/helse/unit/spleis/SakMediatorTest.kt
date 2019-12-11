@@ -37,13 +37,13 @@ internal class SakMediatorTest {
     @Test
     fun `sørger for at observers blir varslet om endring`() {
         every {
-            repo.hentSak(any(), any())
+            repo.hentSak(any())
         } returns null
 
         sakMediator.håndter(nySøknadHendelse)
 
         verify(exactly = 1) {
-            repo.hentSak(any(), any())
+            repo.hentSak(any())
             lagreSakDao.sakEndret(any())
             probe.sakEndret(any())
             lagreUtbetalingDao.sakEndret(any())

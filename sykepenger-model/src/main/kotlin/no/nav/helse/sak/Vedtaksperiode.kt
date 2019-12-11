@@ -509,13 +509,13 @@ internal class Vedtaksperiode internal constructor(
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-            fun fromString(state: String, fødselsnummer: String): Memento {
+            fun fromString(state: String): Memento {
                 val json = objectMapper.readTree(state)
 
                 return Memento(
                     id = UUID.fromString(json["id"].textValue()),
                     aktørId = json["aktørId"].textValue(),
-                    fødselsnummer = json["fødselsnummer"]?.takeUnless { it.isNull }?.textValue() ?: fødselsnummer,
+                    fødselsnummer = json["fødselsnummer"].textValue(),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     tilstandType = valueOf(json["tilstandType"].textValue()),
                     sykdomstidslinje = json["sykdomstidslinje"]?.takeUnless { it.isNull },

@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 
-private const val CURRENT_SKJEMA_VERSJON = 2
+private const val CURRENT_SKJEMA_VERSJON = 3
 
 class Sak(private val aktørId: String, private val fødselsnummer: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
@@ -141,7 +141,7 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-            fun fromString(state: String, fødselsnummer: String): Memento {
+            fun fromString(state: String): Memento {
                 val jsonNode = objectMapper.readTree(state)
 
                 if (!jsonNode.hasNonNull("skjemaVersjon")) throw SakskjemaForGammelt(-1, CURRENT_SKJEMA_VERSJON)
@@ -150,13 +150,12 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
                 if (skjemaVersjon < CURRENT_SKJEMA_VERSJON) throw SakskjemaForGammelt(skjemaVersjon, CURRENT_SKJEMA_VERSJON)
 
-                val patchetFødselsnummer = jsonNode["fødselsnummer"]?.takeUnless { it.isNull }?.textValue() ?: fødselsnummer
                 return Memento(
                     aktørId = jsonNode["aktørId"].textValue(),
-                    fødselsnummer = patchetFødselsnummer,
+                    fødselsnummer = jsonNode["fødselsnummer"].textValue(),
                     skjemaVersjon = skjemaVersjon,
                     arbeidsgivere = jsonNode["arbeidsgivere"].map {
-                        Arbeidsgiver.Memento.fromString(it.toString(), patchetFødselsnummer)
+                        Arbeidsgiver.Memento.fromString(it.toString())
                     }
                 )
             }

@@ -284,7 +284,7 @@ internal class SakComponentTest {
             assertTrue(this.contains(aktørID))
 
             assertDoesNotThrow {
-                Sak.restore(Sak.Memento.fromString(this, ""))
+                Sak.restore(Sak.Memento.fromString(this))
             }
         }
     }

@@ -49,7 +49,7 @@ class SakPersisteringPostgresTest {
     internal fun `skal gi null når sak ikke finnes`() {
         val repo = SakPostgresRepository(HikariDataSource(hikariConfig))
 
-        assertNull(repo.hentSak("1", ""))
+        assertNull(repo.hentSak("1"))
     }
 
     @Test
@@ -61,7 +61,7 @@ class SakPersisteringPostgresTest {
         sak.addObserver(LagreSakDao(dataSource))
         sak.håndter(nySøknadHendelse())
 
-        assertNotNull(repo.hentSak("2", ""))
+        assertNotNull(repo.hentSak("2"))
     }
 
     @Test
@@ -76,7 +76,7 @@ class SakPersisteringPostgresTest {
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {
-                Sak.restore(Sak.Memento.fromString(it.string("data"), ""))
+                Sak.restore(Sak.Memento.fromString(it.string("data")))
             }.asList)
         }
         assertEquals(2, alleVersjoner.size, "Antall versjoner av sakaggregat skal være 2, men var ${alleVersjoner.size}")

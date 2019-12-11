@@ -26,13 +26,13 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
             private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
 
-            fun fromString(state: String, fødselsnummer: String): Memento {
+            fun fromString(state: String): Memento {
                 val json = objectMapper.readTree(state)
                 return Memento(
                     id = UUID.fromString(json["id"].textValue()),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     saker = json["saker"].map {
-                        Vedtaksperiode.Memento.fromString(it.toString(), fødselsnummer)
+                        Vedtaksperiode.Memento.fromString(it.toString())
                     }
                 )
             }
