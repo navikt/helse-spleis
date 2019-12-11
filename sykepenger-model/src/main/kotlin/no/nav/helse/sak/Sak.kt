@@ -150,12 +150,13 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
                 if (skjemaVersjon < CURRENT_SKJEMA_VERSJON) throw SakskjemaForGammelt(skjemaVersjon, CURRENT_SKJEMA_VERSJON)
 
+                val patchetFødselsnummer = jsonNode["fødselsnummer"]?.takeUnless { it.isNull }?.textValue() ?: fødselsnummer
                 return Memento(
                     aktørId = jsonNode["aktørId"].textValue(),
-                    fødselsnummer = jsonNode["fødselsnummer"]?.takeUnless { it.isNull }?.textValue() ?: fødselsnummer,
+                    fødselsnummer = patchetFødselsnummer,
                     skjemaVersjon = skjemaVersjon,
                     arbeidsgivere = jsonNode["arbeidsgivere"].map {
-                        Arbeidsgiver.Memento.fromString(it.toString())
+                        Arbeidsgiver.Memento.fromString(it.toString(), patchetFødselsnummer)
                     }
                 )
             }
