@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.AlderRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.InntektHistorie
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
@@ -74,7 +74,7 @@ internal abstract class Sykdomstidslinje {
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
         val beregner = Utbetalingsberegner(dagsats,
-            Alder(
+            AlderRegler(
                 fødselsnummer,
                 utgangspunktForBeregningAvYtelse(),
                 sisteDag()

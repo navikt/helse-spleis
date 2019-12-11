@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.AlderRegler
 import java.time.LocalDate
 
-internal class Utbetalingsberegner(private val dagsats: Int, private val alder: Alder) : SykdomstidslinjeVisitor {
+internal class Utbetalingsberegner(private val dagsats: Int, private val alderRegler: AlderRegler) : SykdomstidslinjeVisitor {
 
     private var state: UtbetalingState = Initiell
     private val utbetalingslinjer = mutableListOf<InternUtbetalingslinje>()
@@ -44,7 +44,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = fridag(sykHelgedag.dagen)
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         if(utbetalingslinjer.isNotEmpty()) {
-            maksdato = alder.maksdato(betalteSykedager, betalteSykepengerEtter67, utbetalingslinjer.last().tom)
+            maksdato = alderRegler.maksdato(betalteSykedager, betalteSykepengerEtter67, utbetalingslinjer.last().tom)
         }
     }
 
@@ -66,13 +66,13 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
         if (burdeUtbetales(dagen)) {
             utbetalingslinjer.add(InternUtbetalingslinje(dagen, dagsats))
             betalteSykedager += 1
-            if (alder.harFylt67(dagen)) {
+            if (alderRegler.harFylt67(dagen)) {
                 betalteSykepengerEtter67 +=1
             }
         }
     }
 
-    private fun burdeUtbetales(dagen: LocalDate) = alder.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
+    private fun burdeUtbetales(dagen: LocalDate) = alderRegler.navBurdeBetale(betalteSykedager, betalteSykepengerEtter67, dagen)
 
     private fun håndter180dagerOpphold() {
         opphold180Dager += 1
@@ -214,7 +214,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alder: 
             if (splitter.burdeUtbetales(dagen)) {
                 splitter.utbetalingslinjer.last().tom = dagen
                 splitter.betalteSykedager += 1
-                if (splitter.alder.harFylt67(dagen)) {
+                if (splitter.alderRegler.harFylt67(dagen)) {
                     splitter.betalteSykepengerEtter67 +=1
                 }
             }

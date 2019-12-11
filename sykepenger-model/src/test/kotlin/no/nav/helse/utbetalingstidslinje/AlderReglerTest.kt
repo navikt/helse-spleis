@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class AlderTest {
+internal class AlderReglerTest {
 
     private val startDato = 1.januar
     private val sluttDato = 1.januar.plusYears(1)
@@ -81,12 +81,12 @@ internal class AlderTest {
     val Int.desember
         get() = LocalDate.of(2018, 12, this)
 
-    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(
+    private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = AlderRegler(
         this,
         startDato,
         sluttDato
     ).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
-    private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = Alder(
+    private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = AlderRegler(
         this,
         startDato,
         sluttDato

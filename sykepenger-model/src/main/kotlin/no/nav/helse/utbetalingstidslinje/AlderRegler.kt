@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class Alder(fødselsnummer: String, private val startDato: LocalDate, private val sluttDato: LocalDate) {
+internal class AlderRegler(fødselsnummer: String, private val startDato: LocalDate, private val sluttDato: LocalDate) {
 
     private val maksSykepengedager = 248
     private val maksSykepengedagerEtter67 = 60
