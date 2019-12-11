@@ -10,13 +10,14 @@ internal class AlderReglerTest {
     private val sluttDato = 1.januar.plusYears(1)
 
     companion object {
-        const val UNG_PERSON_FNR = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val PERSON_67_ÅR_FNR_2018 = "01015112345"
     }
 
     @Test
     fun `ung person`() {
-        assertTrue(UNG_PERSON_FNR.navBurdeBetale(247, 28.desember))
-        assertFalse(UNG_PERSON_FNR.navBurdeBetale(248, 28.desember))
+        assertTrue(UNG_PERSON_FNR_2018.navBurdeBetale(247, 28.desember))
+        assertFalse(UNG_PERSON_FNR_2018.navBurdeBetale(248, 28.desember))
     }
 
     @Test
@@ -54,11 +55,11 @@ internal class AlderReglerTest {
 
     @Test
     fun `ung person får korrekt maksdato`() {
-        assertEquals(15.mai, UNG_PERSON_FNR.maksdato(248, 15.mai))
-        assertEquals(18.mai, UNG_PERSON_FNR.maksdato(244, 14.mai))
-        assertEquals(21.mai, UNG_PERSON_FNR.maksdato(243, 14.mai))
-        assertEquals(22.mai, UNG_PERSON_FNR.maksdato(242, 14.mai))
-        assertEquals(28.desember, UNG_PERSON_FNR.maksdato(1, 17.januar))
+        assertEquals(15.mai, UNG_PERSON_FNR_2018.maksdato(248, 15.mai))
+        assertEquals(18.mai, UNG_PERSON_FNR_2018.maksdato(244, 14.mai))
+        assertEquals(21.mai, UNG_PERSON_FNR_2018.maksdato(243, 14.mai))
+        assertEquals(22.mai, UNG_PERSON_FNR_2018.maksdato(242, 14.mai))
+        assertEquals(28.desember, UNG_PERSON_FNR_2018.maksdato(1, 17.januar))
     }
 
     @Test

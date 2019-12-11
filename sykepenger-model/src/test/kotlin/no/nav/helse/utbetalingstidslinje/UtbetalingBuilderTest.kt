@@ -6,7 +6,7 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SakSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.testhelpers.Uke
-import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR
+import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -168,7 +168,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (5.E + 15.S).tidslinje()
 
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
 //    @Test
@@ -238,7 +238,7 @@ internal class UtbetalingBuilderTest {
     fun `arbeidsgiverperiode med tre påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
         val linjer = (2.A + 19.S).tidslinje()
         assertEquals(1, linjer.size)
-        assert(linjer.first(), 19.januar, 21.januar, 1200)
+        assert(linjer.first(), 19.januar, 19.januar, 1200)
     }
 
     @Test
@@ -268,43 +268,43 @@ internal class UtbetalingBuilderTest {
 //        assertEquals(LocalDate.of(2019,11,8), utbetalingslinjer[1].tom)
 //    }
 
-    //    @Test
-//    fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
-//        val beregning = (368.S).tidslinje(
-//        assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
-//        assertEquals(LocalDate.of(2018, 12, 28), beregning.maksdato)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-//        val beregning = (16.S + 90.S).utbetalingslinjer(inntektHistorie67År)
-//        assertEquals(LocalDate.of(2018, 4, 10), beregning.utbetalingslinjer.last().tom)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 67 og 248 dager er brukt opp`() {
-//        val beregning = (400.S).utbetalingslinjer(inntektHistorie, "01125112345")
-//        assertEquals(LocalDate.of(2018, 12, 28), beregning.utbetalingslinjer.last().tom)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-//        val beregning = (400.S).utbetalingslinjer(inntektHistorie, "01024812345")
-//        assertEquals(LocalDate.of(2018, 1, 31), beregning.utbetalingslinjer.last().tom)
-//    }
-//
+    @Test
+    fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
+        val linjer = (368.S).tidslinje()
+        assertEquals(1, linjer.size)
+        assert(linjer.first(), 17.januar, 28.desember, 1200)
+    }
+
+    @Test
+    fun `når personen fyller 67 blir antall gjenværende dager 60`() {
+        val linjer = (16.S + 90.S).tidslinje(fødselsnummer = AlderReglerTest.PERSON_67_ÅR_FNR_2018)
+        assert(linjer.first(), 17.januar, 10.april, 1200)
+    }
+
+    @Test
+    fun `når personen fyller 67 og 248 dager er brukt opp`() {
+        val linjer = (400.S).tidslinje(fødselsnummer = "01125112345")
+        assert(linjer.first(), 17.januar, 28.desember, 1200)
+    }
+
+    @Test
+    fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
+        val linjer = (400.S).tidslinje(fødselsnummer = "01024812345")
+        assert(linjer.first(), 17.januar, 31.januar, 1200)
+    }
+
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
         val betalingslinjer = (16.S + 4.S + 16.F + A + 16.S).tidslinje()
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
         val betalingslinjer = (16.S + 4.S + 16.A + 16.S).tidslinje()
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
     @Test
@@ -470,13 +470,14 @@ internal class UtbetalingBuilderTest {
     private fun ConcreteSykdomstidslinje.tidslinje(
         førsteDag: LocalDate = this.førsteDag(),
         sisteDag: LocalDate = this.sisteDag(),
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
         arbeidsgiverperiodeSeed: Int = 0
     ): List<Utbetalingslinje> {
         val arbeidsgiverSykdomstidslinje =
             ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektHistorie, arbeidsgiverperiodeSeed)
         return SakSykdomstidslinje(
             listOf(arbeidsgiverSykdomstidslinje),
-            AlderRegler(UNG_PERSON_FNR, this.førsteDag(), this.sisteDag()),
+            AlderRegler(fødselsnummer, this.førsteDag(), this.sisteDag()),
             arbeidsgiverSykdomstidslinje,
             førsteDag,
             sisteDag
@@ -488,6 +489,9 @@ internal class UtbetalingBuilderTest {
 
     val Int.februar
         get() = LocalDate.of(2018, 2, this)
+
+    val Int.april
+        get() = LocalDate.of(2018, 4, this)
 
     val Int.mai
         get() = LocalDate.of(2018, 5, this)
