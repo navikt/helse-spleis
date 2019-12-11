@@ -41,6 +41,13 @@ internal class SykdomstidslinjeTestHelpersTest {
             assertEquals(it[1].dagen.plusDays(1), it[2].dagen)
             assertEquals(it[2].dagen.plusDays(1), it[3].dagen)
         }
+
+        (2.sykedager.fra(torsdag) + 2.sykHelgdager + 1.sykedager + 2.feriedager.fra(onsdag)).also {
+            assertEquals(6, it.length())
+        }.flatten().also {
+            assertEquals(onsdag, it.first().dagen)
+            assertEquals(søndag.plusDays(1), it.last().dagen)
+        }
     }
 
     @Test

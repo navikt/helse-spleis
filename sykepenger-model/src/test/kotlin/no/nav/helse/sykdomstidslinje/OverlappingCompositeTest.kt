@@ -64,8 +64,8 @@ internal class OverlappingCompositeTest {
 
     @Test
     internal fun sykHelgMedLedendeHelg() {
-        perioder(5.sykedager.fra(torsdag, nySøknad), 2.feriedager.fra(onsdag, sendtSøknad)) { sykedager, ferie ->
-            assertInterval(ferie.førsteDag(), sykedager.sisteDag(), 6)
+        perioder(2.sykedager.fra(torsdag, nySøknad), 2.sykHelgdager.fra(nySøknad), 1.sykedager, 2.feriedager.fra(onsdag, sendtSøknad)) { _, _, sykedagerEtterHelg, ferie ->
+            assertInterval(ferie.førsteDag(), sykedagerEtterHelg.sisteDag(), 6)
         }
     }
 

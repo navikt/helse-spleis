@@ -19,6 +19,7 @@ internal val søndag = lørdag.plusDays(1)
 private val testhendelse = Testhendelse(rapportertdato = mandag.atStartOfDay())
 
 internal val Int.sykedager get() = lagTidslinje(this, ::Sykedag)
+internal val Int.sykHelgdager get() = lagTidslinje(this, ::SykHelgedag)
 internal val Int.egenmeldingsdager get() = lagTidslinje(this, ::Egenmeldingsdag)
 internal val Int.arbeidsdager get() = lagTidslinje(this, ::Arbeidsdag)
 internal val Int.implisittDager get() = lagTidslinje(this, ::ImplisittDag)
@@ -33,6 +34,14 @@ internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, te
 
 internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, periode3: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
     (periode1 + periode2 + periode3).test(periode1, periode2, periode3)
+}
+
+internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, periode3: Sykdomstidslinje, periode4: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
+    (periode1 + periode2 + periode3 + periode4).test(periode1, periode2, periode3, periode4)
+}
+
+internal fun Sykdomstidslinje.fra(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+    return this.fra(this.førsteDag(), hendelse)
 }
 
 internal fun Sykdomstidslinje.fra(fraOgMed: LocalDate, hendelse: SykdomstidslinjeHendelse = testhendelse): Sykdomstidslinje {
