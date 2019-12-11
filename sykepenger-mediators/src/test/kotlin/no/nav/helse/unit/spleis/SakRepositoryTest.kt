@@ -29,7 +29,7 @@ internal class SakRepositoryTest {
                 aktørId = "1234"
         ))
 
-        assertNotNull(repo.hentSak("1234"))
+        assertNotNull(repo.hentSak("1234", "12345"))
         assertEquals(1, repo.hentHistorikk("1234").size)
     }
 
@@ -51,7 +51,7 @@ internal class SakRepositoryTest {
         ))
 
 
-        val sakEtterNySøknad = repo.hentSak(aktørId)
+        val sakEtterNySøknad = repo.hentSak(aktørId, "12345")
         assertNotNull(sakEtterNySøknad)
         assertEquals(1, repo.hentHistorikk(aktørId).size)
 
@@ -59,7 +59,7 @@ internal class SakRepositoryTest {
                 aktørId = aktørId
         ))
 
-        val sakEtterSøknad = repo.hentSak(aktørId)
+        val sakEtterSøknad = repo.hentSak(aktørId, "12345")
         assertNotNull(sakEtterSøknad)
         assertEquals(2, repo.hentHistorikk(aktørId).size)
 

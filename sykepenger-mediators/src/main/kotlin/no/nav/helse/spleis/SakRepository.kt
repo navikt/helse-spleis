@@ -4,6 +4,6 @@ import no.nav.helse.sak.Sak
 
 internal interface SakRepository {
 
-    fun hentSak(aktørId: String): Sak?
+    fun hentSak(aktørId: String, fødselsnummer: String): Sak?
 
 }

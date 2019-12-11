@@ -18,8 +18,8 @@ internal class HashmapSakRepository : SakRepository, SakObserver {
         }.add(memento.state())
     }
 
-    override fun hentSak(aktørId: String): Sak? {
-        return map[aktørId]?.last()?.let { Sak.restore(Sak.Memento.fromString(it)) }
+    override fun hentSak(aktørId: String, fødselsnummer: String): Sak? {
+        return map[aktørId]?.last()?.let { Sak.restore(Sak.Memento.fromString(it, fødselsnummer)) }
     }
 
     fun hentHistorikk(aktørId: String): List<String> =

@@ -41,11 +41,11 @@ internal class SakMediator(private val sakRepository: SakRepository,
     fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
         finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
-    fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)
+    fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId, "")
 
     fun hentSakForUtbetaling(utbetalingsreferanse: String): Sak? {
         return utbetalingsreferanseRepository.hentUtbetaling(utbetalingsreferanse)?.let {
-            sakRepository.hentSak(it.aktørId)
+            sakRepository.hentSak(it.aktørId, "")
         }
     }
 
@@ -58,7 +58,7 @@ internal class SakMediator(private val sakRepository: SakRepository,
     }
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId(), fødselsnummer = arbeidstakerHendelse.fødselsnummer())).also {
+            (sakRepository.hentSak(arbeidstakerHendelse.aktørId(), arbeidstakerHendelse.fødselsnummer()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId(), fødselsnummer = arbeidstakerHendelse.fødselsnummer())).also {
                 it.addObserver(this)
                 it.addObserver(lagreSakDao)
                 it.addObserver(lagreUtbetalingDao)
