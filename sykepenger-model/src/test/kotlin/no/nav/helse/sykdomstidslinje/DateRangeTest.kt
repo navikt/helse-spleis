@@ -11,7 +11,7 @@ internal class DateRangeTest {
 
     @Test
     fun påfølgendeSykedager() {
-        val sykedager = Sykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).onsdag, sendtSøknad)
+        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).onsdag, sendtSøknad)
 
         assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
         assertEquals(Uke(1).onsdag, sykedager.sisteDag())
@@ -19,12 +19,12 @@ internal class DateRangeTest {
 
     @Test
     fun sluttForStartFeiler() {
-        assertThrows<IllegalArgumentException> { Sykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).tirsdag, sendtSøknad) }
+        assertThrows<IllegalArgumentException> { ConcreteSykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).tirsdag, sendtSøknad) }
     }
 
     @Test
     fun sammeDagErEnDag() {
-        val sykedager = Sykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).tirsdag, sendtSøknad)
+        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).tirsdag, sendtSøknad)
 
         assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
         assertEquals(Uke(1).tirsdag, sykedager.sisteDag())
@@ -32,7 +32,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagIkkeSyk() {
-        val interval = Sykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
+        val interval = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
 
         val dager = interval.flatten()
 
@@ -41,7 +41,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagSyk() {
-        val interval = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
+        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)
@@ -49,7 +49,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagVirkedagerSyk() {
-        val interval = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
+        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, sendtSøknad)
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)

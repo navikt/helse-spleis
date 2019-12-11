@@ -22,10 +22,11 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-internal abstract class Sykdomstidslinje {
+internal interface SykdomstidslinjeElement {
+    fun accept(visitor: SykdomstidslinjeVisitor)
+}
 
-    abstract fun førsteDag(): LocalDate
-
+internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     // Første fraværsdag i den siste sammenhengende perioden
     fun utgangspunktForBeregningAvYtelse(): LocalDate {
         val visitor = UtgangspunktForBeregningAvYtelseVisitor()
@@ -33,35 +34,40 @@ internal abstract class Sykdomstidslinje {
         return visitor.utgangspunktForBeregningAvYtelse()
     }
 
+    abstract fun førsteDag(): LocalDate
     abstract fun sisteDag(): LocalDate
     abstract fun hendelser(): Set<SykdomstidslinjeHendelse>
 
     internal abstract fun flatten(): List<Dag>
     internal abstract fun length(): Int
-    internal abstract fun accept(visitor: SykdomstidslinjeVisitor)
 
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
     internal abstract fun dag(dato: LocalDate): Dag?
 
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
-    fun plus(other: Sykdomstidslinje, gapDayCreator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje {
+    fun plus(
+        other: ConcreteSykdomstidslinje,
+        gapDayCreator: (LocalDate, SykdomstidslinjeHendelse) -> Dag
+    ): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
 
         if (this.førsteDag().isAfter(other.førsteDag())) return other.plus(this, gapDayCreator)
 
-        return CompositeSykdomstidslinje(this.førsteDag().datesUntil(this.sisteSluttdato(other).plusDays(1))
-            .map {
-                beste(this.dag(it), other.dag(it)) ?: gapDayCreator(it, other.sisteHendelse())
-            }.toList())
+        return CompositeSykdomstidslinje(
+            this.førsteDag().datesUntil(this.sisteSluttdato(other).plusDays(1))
+                .map {
+                    beste(this.dag(it), other.dag(it)) ?: gapDayCreator(it, other.sisteHendelse())
+                }.toList()
+        )
     }
 
-    operator fun plus(other: Sykdomstidslinje): Sykdomstidslinje {
+    operator fun plus(other: ConcreteSykdomstidslinje): ConcreteSykdomstidslinje {
         return this.plus(other, Companion::implisittDag)
     }
 
-    fun overlapperMed(other: Sykdomstidslinje) =
+    fun overlapperMed(other: ConcreteSykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> false
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
@@ -73,7 +79,8 @@ internal abstract class Sykdomstidslinje {
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(dagsats,
+        val beregner = Utbetalingsberegner(
+            dagsats,
             AlderRegler(
                 fødselsnummer,
                 utgangspunktForBeregningAvYtelse(),
@@ -84,7 +91,7 @@ internal abstract class Sykdomstidslinje {
         return beregner.results()
     }
 
-    internal fun antallDagerMellom(other: Sykdomstidslinje) =
+    internal fun antallDagerMellom(other: ConcreteSykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
             erDelAv(other) -> -min(this.length(), other.length())
@@ -92,25 +99,25 @@ internal abstract class Sykdomstidslinje {
             else -> min(this.avstand(other), other.avstand(this))
         }
 
-    private fun førsteStartdato(other: Sykdomstidslinje) =
+    private fun førsteStartdato(other: ConcreteSykdomstidslinje) =
         if (this.førsteDag().isBefore(other.førsteDag())) this.førsteDag() else other.førsteDag()
 
-    private fun sisteSluttdato(other: Sykdomstidslinje) =
+    private fun sisteSluttdato(other: ConcreteSykdomstidslinje) =
         if (this.sisteDag().isAfter(other.sisteDag())) this.sisteDag() else other.sisteDag()
 
-    private fun avstand(other: Sykdomstidslinje) =
+    private fun avstand(other: ConcreteSykdomstidslinje) =
         this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() - 1
 
-    private fun avstandMedOverlapp(other: Sykdomstidslinje) =
+    private fun avstandMedOverlapp(other: ConcreteSykdomstidslinje) =
         -(this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() + 1)
 
-    private fun erDelAv(other: Sykdomstidslinje) =
+    private fun erDelAv(other: ConcreteSykdomstidslinje) =
         this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
 
-    private fun harBeggeGrenseneInnenfor(other: Sykdomstidslinje) =
+    private fun harBeggeGrenseneInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in other.førsteDag()..other.sisteDag() && this.sisteDag() in other.førsteDag()..other.sisteDag()
 
-    private fun harGrenseInnenfor(other: Sykdomstidslinje) =
+    private fun harGrenseInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in (other.førsteDag()..other.sisteDag())
 
     private fun jsonRepresentation(): JsonTidslinje {
@@ -118,19 +125,6 @@ internal abstract class Sykdomstidslinje {
         val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJson() }
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
-
-    fun utbetalingslinjer(inntektHistorie: InntektHistorie, arbeidsgiverperiodeSeed: Int = 0) =
-        UtbetalingBuilder(this, inntektHistorie,
-            ArbeidsgiverRegler.Companion.NormalArbeidstaker, arbeidsgiverperiodeSeed
-        )
-            .result()
-            .utbetalingslinjer(emptyList())
-
-    fun arbeidsgiverutbetalingstidslinje(inntektHistorie: InntektHistorie, arbeidsgiverperiodeSeed: Int = 0) =
-        UtbetalingBuilder(this, inntektHistorie,
-            ArbeidsgiverRegler.Companion.NormalArbeidstaker, arbeidsgiverperiodeSeed
-        )
-            .result()
 
     companion object {
 
@@ -170,7 +164,7 @@ internal abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        fun sykedager(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedag(
@@ -184,7 +178,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 egenmeldingsdag(
@@ -194,7 +188,7 @@ internal abstract class Sykdomstidslinje {
             }.toList())
         }
 
-        fun ferie(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        fun ferie(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ferie(
@@ -208,7 +202,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 ikkeSykedag(
@@ -222,7 +216,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 utenlandsdag(
@@ -241,7 +235,7 @@ internal abstract class Sykdomstidslinje {
                 hendelse
             )
 
-        fun studiedager(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        fun studiedager(fra: LocalDate, til: LocalDate, hendelse: SykdomstidslinjeHendelse): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 studiedag(
@@ -273,7 +267,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
@@ -285,7 +279,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
@@ -297,7 +291,7 @@ internal abstract class Sykdomstidslinje {
             fra: LocalDate,
             til: LocalDate,
             hendelse: SykdomstidslinjeHendelse
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
                 fra.datesUntil(til.plusDays(1))
@@ -308,7 +302,7 @@ internal abstract class Sykdomstidslinje {
         fun fromJson(
             json: String,
             deserializer: SykdomstidslinjeHendelse.Deserializer
-        ): Sykdomstidslinje {
+        ): ConcreteSykdomstidslinje {
             val jsonTidslinje = objectMapper.readTree(json)
 
             val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"], deserializer)

@@ -100,7 +100,7 @@ internal class OverlappingCompositeTest {
     }
 
 
-    private fun Sykdomstidslinje.assertInterval(
+    private fun ConcreteSykdomstidslinje.assertInterval(
         startdag: LocalDate,
         sluttdag: LocalDate,
         forventetLengde: Int

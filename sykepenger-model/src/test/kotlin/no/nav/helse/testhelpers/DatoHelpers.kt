@@ -1,6 +1,6 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import java.time.LocalDate
 
 internal class Uke(ukenr: Long) {
@@ -14,4 +14,4 @@ internal class Uke(ukenr: Long) {
     val søndag get() = mandag.plusDays(6)
 }
 
-internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
+internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }

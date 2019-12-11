@@ -68,12 +68,6 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
             ?: error("Fant ikke arbeidsgiver for ManuellSaksbehandlingHendelse")
     }
 
-    internal fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitSak(this)
-        arbeidsgivere.values.forEach { it.accept(visitor) }
-        visitor.postVisitSak(this)
-    }
-
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         sakObservers.forEach {
             it.sakEndret(

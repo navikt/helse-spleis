@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 internal data class Syketilfelle(
-    val arbeidsgiverperiode: Sykdomstidslinje,
-    val dagerEtterArbeidsgiverperiode: Sykdomstidslinje?
+    val arbeidsgiverperiode: ConcreteSykdomstidslinje,
+    val dagerEtterArbeidsgiverperiode: ConcreteSykdomstidslinje?
 ) {
     val tidslinje
         get() = when {

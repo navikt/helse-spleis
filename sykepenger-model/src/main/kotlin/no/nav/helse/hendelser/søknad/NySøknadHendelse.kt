@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
@@ -44,8 +44,8 @@ class NySøknadHendelse private constructor(hendelseId: String, private val søk
             søknad.opprettet.compareTo(other.rapportertdato())
 
     private val sykeperiodeTidslinje
-        get(): List<Sykdomstidslinje> = søknad.sykeperioder
-                .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+        get(): List<ConcreteSykdomstidslinje> = søknad.sykeperioder
+                .map { ConcreteSykdomstidslinje.sykedager(it.fom, it.tom, this) }
 
     override fun sykdomstidslinje() =
             sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->

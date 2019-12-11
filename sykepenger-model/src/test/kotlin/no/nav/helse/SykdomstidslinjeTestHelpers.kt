@@ -2,7 +2,7 @@ package no.nav.helse
 
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
@@ -28,23 +28,24 @@ internal val Int.utenlandsdager get() = lagTidslinje(this, ::Utenlandsdag)
 internal val Int.feriedager get() = lagTidslinje(this, ::Feriedag)
 internal val Int.permisjonsdager get() = lagTidslinje(this, ::Permisjonsdag)
 
-internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
+internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
     (periode1 + periode2).test(periode1, periode2)
 }
 
-internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, periode3: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
+internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, periode3: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
     (periode1 + periode2 + periode3).test(periode1, periode2, periode3)
 }
 
-internal fun perioder(periode1: Sykdomstidslinje, periode2: Sykdomstidslinje, periode3: Sykdomstidslinje, periode4: Sykdomstidslinje, test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit) {
+
+internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, periode3: ConcreteSykdomstidslinje, periode4: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
     (periode1 + periode2 + periode3 + periode4).test(periode1, periode2, periode3, periode4)
 }
 
-internal fun Sykdomstidslinje.fra(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+internal fun ConcreteSykdomstidslinje.fra(hendelse: SykdomstidslinjeHendelse): ConcreteSykdomstidslinje {
     return this.fra(this.førsteDag(), hendelse)
 }
 
-internal fun Sykdomstidslinje.fra(fraOgMed: LocalDate, hendelse: SykdomstidslinjeHendelse = testhendelse): Sykdomstidslinje {
+internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelse: SykdomstidslinjeHendelse = testhendelse): ConcreteSykdomstidslinje {
     val builder = SykdomstidslinjeBuilder(hendelse, fraOgMed)
         .antallDager(1)
 
@@ -69,7 +70,7 @@ internal fun fra(sykdomstidslinjeHendelse: SykdomstidslinjeHendelse): Sykdomstid
     return SykdomstidslinjeBuilder(sykdomstidslinjeHendelse)
 }
 
-private fun lagTidslinje(antallDager: Int, generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje =
+private fun lagTidslinje(antallDager: Int, generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): ConcreteSykdomstidslinje =
     SykdomstidslinjeBuilder(testhendelse).antallDager(antallDager).lagTidslinje(generator)
 
 internal class SykdomstidslinjeBuilder(private val hendelse: SykdomstidslinjeHendelse, startdato: LocalDate? = null) {
@@ -112,7 +113,7 @@ internal class SykdomstidslinjeBuilder(private val hendelse: SykdomstidslinjeHen
         internal val permisjonsdager get() = lagTidslinje(::Permisjonsdag)
         internal val ubestemtdag get() = lagTidslinje(::Ubestemtdag)
 
-        internal fun lagTidslinje(generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): Sykdomstidslinje {
+        internal fun lagTidslinje(generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): ConcreteSykdomstidslinje {
             return CompositeSykdomstidslinje(dager.map { generator(it, hendelse) }.toList())
 
         }

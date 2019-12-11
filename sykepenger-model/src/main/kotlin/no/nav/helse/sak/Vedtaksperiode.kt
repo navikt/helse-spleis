@@ -41,7 +41,7 @@ internal class Vedtaksperiode internal constructor(
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
-    private var sykdomstidslinje: Sykdomstidslinje? = null
+    private var sykdomstidslinje: ConcreteSykdomstidslinje? = null
 
     private var maksdato: LocalDate? = null
 
@@ -102,12 +102,6 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         setTilstand(hendelse, TilInfotrygdTilstand)
-    }
-
-    internal fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitVedtaksperiode(this)
-        sykdomstidslinje?.accept(visitor)
-        visitor.postVisitVedtaksperiode(this)
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
@@ -261,7 +255,7 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        private fun harFraværsdagInnen6Mnd(sykepengehistorikkHendelse: SykepengehistorikkHendelse, tidslinje: Sykdomstidslinje): Boolean {
+        private fun harFraværsdagInnen6Mnd(sykepengehistorikkHendelse: SykepengehistorikkHendelse, tidslinje: ConcreteSykdomstidslinje): Boolean {
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag() ?: return false
 
             return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
@@ -384,7 +378,7 @@ internal class Vedtaksperiode internal constructor(
                 it.tilstand = tilstandFraEnum(memento.tilstandType)
                 it.sykdomstidslinje = memento.sykdomstidslinje
                     ?.let {
-                        Sykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
+                        ConcreteSykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
                     }
                 it.maksdato = memento.maksdato
                 it.utbetalingslinjer = memento.utbetalingslinjer?.map {

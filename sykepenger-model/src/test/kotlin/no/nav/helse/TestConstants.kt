@@ -16,7 +16,7 @@ import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.math.BigDecimal
@@ -413,7 +413,7 @@ internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(
     )
 )
 
-internal operator fun Sykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
+internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 internal fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

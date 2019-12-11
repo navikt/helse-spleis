@@ -80,19 +80,19 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
             assertDagenErUtgangspunktForBeregning(dagen.dagen, dagen)
         }
 
-        private fun assertDagenErUtgangspunktForBeregning(dagen: LocalDate, sykdomstidslinje: Sykdomstidslinje) {
+        private fun assertDagenErUtgangspunktForBeregning(dagen: LocalDate, sykdomstidslinje: ConcreteSykdomstidslinje) {
             assertEquals(dagen, sykdomstidslinje.utgangspunktForBeregningAvYtelse())
         }
 
-        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: Sykdomstidslinje) {
+        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: ConcreteSykdomstidslinje) {
             assertEquals(sykdomstidslinje.førsteDag(), sykdomstidslinje.utgangspunktForBeregningAvYtelse())
         }
 
-        private fun assertFørsteDagErUtgangspunktForBeregning(perioden: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) {
+        private fun assertFørsteDagErUtgangspunktForBeregning(perioden: ConcreteSykdomstidslinje, sykdomstidslinje: ConcreteSykdomstidslinje) {
             assertDagenErUtgangspunktForBeregning(perioden.førsteDag(), sykdomstidslinje)
         }
 
-        private fun assertUgyldigTilstand(sykdomstidslinje: Sykdomstidslinje) {
+        private fun assertUgyldigTilstand(sykdomstidslinje: ConcreteSykdomstidslinje) {
             assertThrows<IllegalStateException> {
                 sykdomstidslinje.utgangspunktForBeregningAvYtelse()
             }

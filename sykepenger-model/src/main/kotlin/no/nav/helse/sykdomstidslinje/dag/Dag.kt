@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
@@ -11,7 +11,7 @@ internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
     internal val hendelse: SykdomstidslinjeHendelse
 ) :
-    Sykdomstidslinje() {
+    ConcreteSykdomstidslinje() {
 
     internal val erstatter: MutableList<Dag> = mutableListOf()
 

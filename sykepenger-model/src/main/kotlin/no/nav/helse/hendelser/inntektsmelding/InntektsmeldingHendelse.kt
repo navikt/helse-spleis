@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
@@ -51,10 +51,10 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         return inntektsmelding.kanBehandles()
     }
 
-    override fun sykdomstidslinje(): Sykdomstidslinje {
+    override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
         val arbeidsgiverperiode = inntektsmelding.arbeidsgiverperioder
             .takeIf { it.isNotEmpty() }
-            ?.map { Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
+            ?.map { ConcreteSykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
             ?.reduce { acc, sykdomstidslinje ->
                 if (acc.overlapperMed(sykdomstidslinje)) {
                     throw UtenforOmfangException(
@@ -62,9 +62,9 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
                         this
                     )
                 }
-                acc.plus(sykdomstidslinje, Sykdomstidslinje.Companion::ikkeSykedag)
+                acc.plus(sykdomstidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
             }?.let {
-                Sykdomstidslinje.ikkeSykedager(
+                ConcreteSykdomstidslinje.ikkeSykedager(
                     it.førsteDag().minusDays(16),
                     it.førsteDag().minusDays(1),
                     this
@@ -72,14 +72,14 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
             }
 
         val ferietidslinje = inntektsmelding.ferie
-            .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+            .map { ConcreteSykdomstidslinje.ferie(it.fom, it.tom, this) }
             .takeUnless { it.isEmpty() }
             ?.reduce { resultat, sykdomstidslinje -> resultat + sykdomstidslinje }
 
         return arbeidsgiverperiode.plus(ferietidslinje) ?: egenmeldingsdag(inntektsmelding.førsteFraværsdag, this)
     }
 
-    private fun Sykdomstidslinje?.plus(other: Sykdomstidslinje?): Sykdomstidslinje? {
+    private fun ConcreteSykdomstidslinje?.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje? {
         if (other == null) return this
         return this?.plus(other) ?: other
     }

@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.*
@@ -252,7 +252,7 @@ internal class UtbetalingslinjerTest {
     fun `de første 10 dagene av arbeidsgiverperioden er egenmeldingsdager`() {
         val start = startDato
         val sykdomstidslinje = 10.E + 30.S +
-                Sykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25),
+                ConcreteSykdomstidslinje.egenmeldingsdager(start.plusDays(15), start.plusDays(25),
                     inntektsmeldingHendelse
                 )
         val linjer = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
@@ -353,14 +353,14 @@ internal class UtbetalingslinjerTest {
     }
 
     private val S
-        get() = Sykdomstidslinje.sykedag(startDato,
+        get() = ConcreteSykdomstidslinje.sykedag(startDato,
             sendtSykmelding
         ).also {
             startDato = startDato.plusDays(1)
         }
 
     private val A
-        get() = Sykdomstidslinje.ikkeSykedag(startDato,
+        get() = ConcreteSykdomstidslinje.ikkeSykedag(startDato,
             sendtSykmelding
         ).also {
             startDato = startDato.plusDays(1)
@@ -368,31 +368,31 @@ internal class UtbetalingslinjerTest {
 
 
     private val Int.S
-        get() = Sykdomstidslinje.sykedager(startDato, startDato.plusDays(this.toLong() - 1),
+        get() = ConcreteSykdomstidslinje.sykedager(startDato, startDato.plusDays(this.toLong() - 1),
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.F
-        get() = Sykdomstidslinje.ferie(startDato, startDato.plusDays(this.toLong() - 1),
+        get() = ConcreteSykdomstidslinje.ferie(startDato, startDato.plusDays(this.toLong() - 1),
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.A
-        get() = Sykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1),
+        get() = ConcreteSykdomstidslinje.ikkeSykedager(startDato, startDato.plusDays(this.toLong() - 1),
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.I
-        get() = Sykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1),
+        get() = ConcreteSykdomstidslinje.implisittdager(startDato, startDato.plusDays(this.toLong() - 1),
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
     private val Int.E
-        get() = Sykdomstidslinje.egenmeldingsdager(startDato, startDato.plusDays(this.toLong() - 1),
+        get() = ConcreteSykdomstidslinje.egenmeldingsdager(startDato, startDato.plusDays(this.toLong() - 1),
             sendtSykmelding
         )
             .also { startDato = startDato.plusDays(this.toLong()) }

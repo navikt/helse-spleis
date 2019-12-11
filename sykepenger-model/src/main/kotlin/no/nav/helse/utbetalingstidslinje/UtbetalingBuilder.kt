@@ -1,6 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.DayOfWeek
@@ -11,16 +13,17 @@ import java.time.LocalDate
  */
 
 internal class UtbetalingBuilder internal constructor(
-    private val sykdomstidslinje: Sykdomstidslinje,
-    private val inntektHistorie: InntektHistorie,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler,
-    arbeidsgiverperiodeSeed: Int
+    private val sykdomstidslinje: ArbeidsgiverSykdomstidslinje
 ) : SykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
-    private var sykedager = arbeidsgiverperiodeSeed
+    private var sykedager = sykdomstidslinje.arbeidsgiverperiodeSeed
     private var ikkeSykedager = 0
     private var fridager = 0
+
+    private val arbeidsgiverRegler = sykdomstidslinje.arbeidsgiverRegler
+
+    private val inntektHistorie = sykdomstidslinje.inntektHistorie
 
     private var nåværendeInntekt = 0.00
 

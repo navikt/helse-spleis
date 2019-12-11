@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
@@ -16,7 +16,7 @@ internal class Testhendelse(
     SykdomstidslinjeHendelse(UUID.randomUUID().toString()) {
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType = hendelsetype
 
-    override fun sykdomstidslinje(): Sykdomstidslinje {
+    override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

@@ -10,12 +10,12 @@ internal class GapDaysTest {
 
     @Test
     internal fun tidslinjerMedAvstandMellom() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(
+        val førsteTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).mandag,
             Uke(1).tirsdag,
             sendtSøknad
         )
-        val andreTidslinje = Sykdomstidslinje.sykedager(
+        val andreTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).fredag,
             Uke(2).mandag,
             sendtSøknad
@@ -27,12 +27,12 @@ internal class GapDaysTest {
 
     @Test
     internal fun tidslinjerSammenhengende() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(
+        val førsteTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).mandag,
             Uke(1).tirsdag,
             sendtSøknad
         )
-        val andreTidslinje = Sykdomstidslinje.sykedager(
+        val andreTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).onsdag,
             Uke(1).fredag,
             sendtSøknad
@@ -44,12 +44,12 @@ internal class GapDaysTest {
 
     @Test
     internal fun overlappendeTidslinjer() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(
+        val førsteTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).mandag,
             Uke(1).onsdag,
             sendtSøknad
         )
-        val andreTidslinje = Sykdomstidslinje.sykedager(
+        val andreTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).tirsdag,
             Uke(1).fredag,
             sendtSøknad
@@ -61,12 +61,12 @@ internal class GapDaysTest {
 
     @Test
     internal fun denEneSomDelAvDenAndre() {
-        val førsteTidslinje = Sykdomstidslinje.sykedager(
+        val førsteTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).mandag,
             Uke(2).mandag,
             sendtSøknad
         )
-        val andreTidslinje = Sykdomstidslinje.sykedager(
+        val andreTidslinje = ConcreteSykdomstidslinje.sykedager(
             Uke(1).onsdag,
             Uke(1).fredag,
             sendtSøknad

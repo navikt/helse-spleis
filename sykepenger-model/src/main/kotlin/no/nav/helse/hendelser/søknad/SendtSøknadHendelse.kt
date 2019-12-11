@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDateTime
@@ -46,30 +46,30 @@ class SendtSøknadHendelse private constructor(hendelseId: String, private val s
             søknad.opprettet.compareTo(other.rapportertdato())
 
     private val sykeperiodeTidslinje
-        get(): List<Sykdomstidslinje> = søknad.sykeperioder
-                .map { Sykdomstidslinje.sykedager(it.fom, it.tom, this) }
+        get(): List<ConcreteSykdomstidslinje> = søknad.sykeperioder
+                .map { ConcreteSykdomstidslinje.sykedager(it.fom, it.tom, this) }
 
     private val egenmeldingsTidslinje
-        get(): List<Sykdomstidslinje> = søknad.egenmeldinger
-                .map { Sykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
+        get(): List<ConcreteSykdomstidslinje> = søknad.egenmeldinger
+                .map { ConcreteSykdomstidslinje.egenmeldingsdager(it.fom, it.tom, this) }
 
     private val ferieTidslinje
-        get(): List<Sykdomstidslinje> = søknad.fraværsperioder
+        get(): List<ConcreteSykdomstidslinje> = søknad.fraværsperioder
                 .filter { it.type == Sykepengesøknad.Fraværstype.FERIE }
-                .map { Sykdomstidslinje.ferie(it.fom, it.tom, this) }
+                .map { ConcreteSykdomstidslinje.ferie(it.fom, it.tom, this) }
 
     private val permisjonTidslinje
-        get(): List<Sykdomstidslinje> = søknad.fraværsperioder
+        get(): List<ConcreteSykdomstidslinje> = søknad.fraværsperioder
                 .filter { it.type == Sykepengesøknad.Fraværstype.PERMISJON }
-                .map { Sykdomstidslinje.permisjonsdager(it.fom, it.tom, this) }
+                .map { ConcreteSykdomstidslinje.permisjonsdager(it.fom, it.tom, this) }
 
     private val arbeidGjenopptattTidslinje
-        get(): List<Sykdomstidslinje> = søknad.arbeidGjenopptatt
-                ?.let { listOf(Sykdomstidslinje.ikkeSykedager(it, søknad.tom, this)) }
+        get(): List<ConcreteSykdomstidslinje> = søknad.arbeidGjenopptatt
+                ?.let { listOf(ConcreteSykdomstidslinje.ikkeSykedager(it, søknad.tom, this)) }
                 ?: emptyList()
 
     private val studiedagertidslinje = søknad.utdanningsperioder.map {
-        Sykdomstidslinje.studiedager(it.fom, søknad.tom, this)
+        ConcreteSykdomstidslinje.studiedager(it.fom, søknad.tom, this)
     }
 
     override fun sykdomstidslinje() =

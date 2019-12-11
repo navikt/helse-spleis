@@ -2,7 +2,7 @@ package no.nav.helse.tournament
 
 
 import no.nav.helse.hendelser.Testhendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -66,7 +66,7 @@ internal class DagTurneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val nySøknad = Sykdomstidslinje.sykedager(
+        val nySøknad = ConcreteSykdomstidslinje.sykedager(
             Uke(1).mandag, Uke(1).fredag, Testhendelse(
                 rapportertdato = Uke(1).mandag.atTime(9, 0)
             )
@@ -74,8 +74,8 @@ internal class DagTurneringTest {
         val sendtSøknad = Testhendelse(
             rapportertdato = Uke(1).mandag.atTime(12, 0)
         )
-        val sendtSøknadSykedager = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, sendtSøknad)
-        val sendtSøknadArbeidsdager = Sykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, sendtSøknad)
+        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, sendtSøknad)
+        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, sendtSøknad)
 
         val tidslinje = nySøknad + (sendtSøknadSykedager + sendtSøknadArbeidsdager)
         assertTrue(
@@ -96,7 +96,7 @@ internal class DagTurneringTest {
         val vinner = turnering.slåss(egenmeldingsdagFraArbeidsgiver, sykHelgedag)
         assertEquals(sykHelgedag, vinner)
     }
-    
+
     @Test
     internal fun `arbeidsdag fra inntektsmelding vinner over egenmelding fra søknad`() {
         val egenmeldingsdag = mandag.egenmeldingsdag.fraSøknad.rapportertTidlig
@@ -121,19 +121,19 @@ internal class DagTurneringTest {
 
         val sykedag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> Sykdomstidslinje.sykedag(dato, hendelse) }
+                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.sykedag(dato, hendelse) }
                 return this
             }
 
         val arbeidsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> Sykdomstidslinje.ikkeSykedag(dato, hendelse) }
+                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.ikkeSykedag(dato, hendelse) }
                 return this
             }
 
         val egenmeldingsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> Sykdomstidslinje.egenmeldingsdag(dato, hendelse) }
+                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.egenmeldingsdag(dato, hendelse) }
                 return this
             }
 

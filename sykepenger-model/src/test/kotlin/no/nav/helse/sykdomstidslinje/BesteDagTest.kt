@@ -16,11 +16,11 @@ internal class BesteDagTest {
 
         private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmeldingHendelse)
         private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknadHendelse)
-        private val ferieFraInntektsmelding get() = Sykdomstidslinje.ferie(Uke(2).mandag, inntektsmeldingHendelse)
-        private val egenmeldingFraInntektsmelding get() = Sykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmeldingHendelse)
-        private val ferieFraSøknad get() = Sykdomstidslinje.ferie(Uke(2).mandag, sendtSøknadHendelse)
-        private val sykdomFraSendtSøknad get() = Sykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknadHendelse)
-        private val utenlandsFraSendtSøknad get() = Sykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknadHendelse)
+        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, inntektsmeldingHendelse)
+        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmeldingHendelse)
+        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, sendtSøknadHendelse)
+        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknadHendelse)
+        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknadHendelse)
     }
 
     @Test

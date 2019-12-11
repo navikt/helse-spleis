@@ -14,7 +14,7 @@ internal class DagTest {
     @Test
     internal fun sykedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val sykedag = Sykdomstidslinje.sykedag(dagSykedagenDekker,
+        val sykedag = ConcreteSykdomstidslinje.sykedag(dagSykedagenDekker,
             rapporterthendelse
         )
 
@@ -25,7 +25,7 @@ internal class DagTest {
     @Test
     internal fun feriedag() {
         val dagFeriedagenDekker = LocalDate.of(2019,9,24)
-        val feriedag = Sykdomstidslinje.ferie(dagFeriedagenDekker,
+        val feriedag = ConcreteSykdomstidslinje.ferie(dagFeriedagenDekker,
             rapporterthendelse
         )
 
@@ -36,7 +36,7 @@ internal class DagTest {
     @Test
     internal fun arbeidsdag() {
         val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
-        val arbeidsdag = Sykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder,
+        val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder,
             rapporterthendelse
         )
 
@@ -47,7 +47,7 @@ internal class DagTest {
     @Test
     internal fun helgedag() {
         val helgedagenGjelder = LocalDate.of(2019,9,28)
-        val helgedag = Sykdomstidslinje.ikkeSykedag(helgedagenGjelder,
+        val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(helgedagenGjelder,
             rapporterthendelse
         )
 
@@ -58,7 +58,7 @@ internal class DagTest {
     @Test
     internal fun studiedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val studiedag = Sykdomstidslinje.studiedag(dagSykedagenDekker,
+        val studiedag = ConcreteSykdomstidslinje.studiedag(dagSykedagenDekker,
             rapporterthendelse
         )
 

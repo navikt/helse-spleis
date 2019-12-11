@@ -109,12 +109,6 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    internal fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitArbeidsgiver(this)
-        perioder.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgiver(this)
-    }
-
     fun addObserver(observer: VedtaksperiodeObserver) {
         vedtaksperiodeObservers.add(observer)
         perioder.forEach { it.addVedtaksperiodeObserver(observer) }

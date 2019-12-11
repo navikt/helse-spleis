@@ -4,15 +4,15 @@ import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 
-internal class CompositeSykdomstidslinje internal constructor(
-    tidslinjer: List<Sykdomstidslinje>
-) : Sykdomstidslinje() {
+internal open class CompositeSykdomstidslinje internal constructor(
+    tidslinjer: List<ConcreteSykdomstidslinje>
+) : ConcreteSykdomstidslinje() {
 
     init {
         assert(tidslinjer.isNotEmpty()) { "En tom tidslinje skal representeres med null og ikke en tom liste" }
     }
 
-    private val tidslinje = tidslinjer.flatMap { it.flatten() }
+    internal val tidslinje = tidslinjer.flatMap { it.flatten() }
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitComposite(this)

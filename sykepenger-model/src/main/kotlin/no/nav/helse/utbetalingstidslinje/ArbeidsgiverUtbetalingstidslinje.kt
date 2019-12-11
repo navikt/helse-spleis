@@ -22,17 +22,24 @@ internal class ArbeidsgiverUtbetalingstidslinje {
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var helseState: HelseState = HelseState.IkkeSyk
 
-    fun utbetalingslinjer(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) =
+    fun utbetalingslinjer(others: List<ArbeidsgiverUtbetalingstidslinje>, alderRegler: AlderRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
         this
-            .filterByMinimumInntekt(arbeidsgiverutbetalingstidslinjer)
-            .reduserAvSykdomsgrad(arbeidsgiverutbetalingstidslinjer)
+            .avgrens(others, alderRegler)
+            .filterByMinimumInntekt(others, alderRegler)
+            .reduserAvSykdomsgrad(others)
+            .subset(førsteDag, sisteDag)
             .utbetalingslinjer()
 
-    private fun filterByMinimumInntekt(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) = this
+    private fun avgrens(others: List<ArbeidsgiverUtbetalingstidslinje>, alderRegler: AlderRegler) = this
 
-    private fun reduserAvSykdomsgrad(arbeidsgiverutbetalingstidslinjer: List<ArbeidsgiverUtbetalingstidslinje>) = this
+    private fun filterByMinimumInntekt(
+        others: List<ArbeidsgiverUtbetalingstidslinje>,
+        alderRegler: AlderRegler
+    ) = this
 
-    internal fun subset(fom: LocalDate, tom: LocalDate) : ArbeidsgiverUtbetalingstidslinje {
+    private fun reduserAvSykdomsgrad(others: List<ArbeidsgiverUtbetalingstidslinje>) = this
+
+    private fun subset(fom: LocalDate, tom: LocalDate) : ArbeidsgiverUtbetalingstidslinje {
         return ArbeidsgiverUtbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
     }
 

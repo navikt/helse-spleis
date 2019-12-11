@@ -12,7 +12,7 @@ internal class HendelserTest {
     fun `kan hente ut hendelser av en tidslinje`() {
         val hendelse = Testhendelse()
 
-        val tidslinje = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, hendelse)
+        val tidslinje = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, hendelse)
         val hendelser = tidslinje.hendelser()
 
         assertEquals(1, hendelser.size)
@@ -24,7 +24,7 @@ internal class HendelserTest {
         val hendelse = Testhendelse()
         val hendelse2 = Testhendelse()
 
-        val tidslinje = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, hendelse) + Sykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(1).fredag, hendelse2)
+        val tidslinje = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, hendelse) + ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(1).fredag, hendelse2)
         val hendelser = tidslinje.hendelser()
 
         assertEquals(2, hendelser.size)

@@ -21,11 +21,11 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `kan bestemme hvilken type dager mellom to perioder skal ha`() {
-        val arbeidsgiverperiode1 = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, tidspunktRapportert)
-        val arbeidsgiverperiode2 = Sykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, tidspunktRapportert)
+        val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, tidspunktRapportert)
+        val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, tidspunktRapportert)
 
         val arbeidsgiverperiode =
-            arbeidsgiverperiode1.plus(arbeidsgiverperiode2, Sykdomstidslinje.Companion::ikkeSykedag)
+            arbeidsgiverperiode1.plus(arbeidsgiverperiode2, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
 
         assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
         assertEquals(Sykedag::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)
@@ -43,8 +43,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
-        val førsteInterval = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
-        val andreInterval = Sykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, tidspunktRapportert)
+        val førsteInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
+        val andreInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, tidspunktRapportert)
 
         val interval = andreInterval + førsteInterval
 
@@ -56,8 +56,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `tidslinje med ubestemt dag er utenfor omfang`() {
-        val studiedag = Sykdomstidslinje.studiedag(Uke(1).mandag, tidspunktRapportert)
-        val sykedag = Sykdomstidslinje.sykedag(Uke(1).mandag, tidspunktRapportert)
+        val studiedag = ConcreteSykdomstidslinje.studiedag(Uke(1).mandag, tidspunktRapportert)
+        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, tidspunktRapportert)
         val tidslinje = studiedag + sykedag
 
         assertTrue(tidslinje.erUtenforOmfang())
@@ -65,7 +65,7 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `tidslinje med permisjonsdag er utenfor omfang`() {
-        val permisjonsdag = Sykdomstidslinje.permisjonsdag(Uke(1).mandag, tidspunktRapportert)
+        val permisjonsdag = ConcreteSykdomstidslinje.permisjonsdag(Uke(1).mandag, tidspunktRapportert)
         assertTrue(permisjonsdag.erUtenforOmfang())
     }
 }

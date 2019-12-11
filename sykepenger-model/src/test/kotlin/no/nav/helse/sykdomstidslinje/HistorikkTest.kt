@@ -9,10 +9,10 @@ internal class HistorikkTest {
 
     @Test
     fun `dager med overlapp gir historikk`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
+        val sykmeldingsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
             Testhendelse()
         )
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
+        val søknadsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag,
             Testhendelse()
         )
 
@@ -27,10 +27,10 @@ internal class HistorikkTest {
 
     @Test
     fun `dager uten overlapp gir ikke historikk`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag,
+        val sykmeldingsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag,
             Testhendelse()
         )
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).fredag,
+        val søknadsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).fredag,
             Testhendelse()
         )
 
@@ -47,13 +47,13 @@ internal class HistorikkTest {
 
     @Test
     fun `bevarer historikk fra forrige overlapp`() {
-        val sykmeldingsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
+        val sykmeldingsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
             Testhendelse()
         )
-        val søknadsperiode = Sykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
+        val søknadsperiode = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag,
             Testhendelse()
         )
-        val inntektsmeldingsperiode = Sykdomstidslinje.ferie(Uke(1).mandag, Uke(1).onsdag,
+        val inntektsmeldingsperiode = ConcreteSykdomstidslinje.ferie(Uke(1).mandag, Uke(1).onsdag,
             Testhendelse()
         )
 

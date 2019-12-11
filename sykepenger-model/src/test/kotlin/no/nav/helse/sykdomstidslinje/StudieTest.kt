@@ -22,7 +22,7 @@ internal class StudieTest {
 
     @Test
     fun `studiedager`() {
-        val studiedager = Sykdomstidslinje.studiedager(1.juli, 7.juli,
+        val studiedager = ConcreteSykdomstidslinje.studiedager(1.juli, 7.juli,
             testKildeHendelse
         )
         assertEquals(7, studiedager.length())
