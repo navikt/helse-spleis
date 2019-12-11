@@ -58,12 +58,19 @@ internal class SakMediator(private val sakRepository: SakRepository,
     }
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (sakRepository.hentSak(arbeidstakerHendelse.aktørId(), arbeidstakerHendelse.fødselsnummer()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId(), fødselsnummer = arbeidstakerHendelse.fødselsnummer())).also {
+        try {
+            arbeidstakerHendelse.fødselsnummer()
+        } catch (err: NullPointerException) { null }.let { fødselsnummer ->
+            (sakRepository.hentSak(arbeidstakerHendelse.aktørId(), fødselsnummer ?: "") ?: Sak(
+                aktørId = arbeidstakerHendelse.aktørId(),
+                fødselsnummer = fødselsnummer ?: ""
+            )).also {
                 it.addObserver(this)
                 it.addObserver(lagreSakDao)
                 it.addObserver(lagreUtbetalingDao)
                 it.addObserver(vedtaksperiodeProbe)
             }
+        }
 
     private fun finnSak(
         hendelse: ArbeidstakerHendelse,
