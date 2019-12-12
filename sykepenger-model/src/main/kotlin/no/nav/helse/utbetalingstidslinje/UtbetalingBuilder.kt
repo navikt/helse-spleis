@@ -1,8 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.DayOfWeek
@@ -27,9 +25,9 @@ internal class UtbetalingBuilder internal constructor(
 
     private var nåværendeInntekt = 0.00
 
-    private val tidslinje = ArbeidsgiverUtbetalingstidslinje()
+    private val tidslinje = Utbetalingstidslinje()
 
-    fun result(): ArbeidsgiverUtbetalingstidslinje {
+    fun result(): Utbetalingstidslinje {
         sykdomstidslinje.accept(this)
         return tidslinje
     }

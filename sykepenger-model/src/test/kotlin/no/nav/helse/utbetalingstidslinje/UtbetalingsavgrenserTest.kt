@@ -60,8 +60,8 @@ internal class UtbetalingsavgrenserTest {
     }
 
     private fun tidslinjeOf(
-        vararg dagPairs: Pair<Int, ArbeidsgiverUtbetalingstidslinje.(Double, LocalDate) -> Unit>
-    ) = ArbeidsgiverUtbetalingstidslinje().apply {
+        vararg dagPairs: Pair<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit>
+    ) = Utbetalingstidslinje().apply {
         var startDato = LocalDate.of(2018, 1, 1)
         for ((antallDager, utbetalingsdag) in dagPairs) {
             val sluttDato = startDato.plusDays(antallDager.toLong())
@@ -72,17 +72,17 @@ internal class UtbetalingsavgrenserTest {
         }
     }
 
-    private fun ArbeidsgiverUtbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
+    private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
         Utbetalingsavgrenser(
             this,
             AlderRegler(fnr,
                 LocalDate.of(2018,1,1),
                 LocalDate.of(2019, 12, 31)
             )).ubetalteDager().map { it.dag }
-    private val Int.AP get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addArbeidsgiverperiodedag)
-    private val Int.N get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addNAVdag)
-    private val Int.A get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addArbeidsdag)
-    private val Int.F get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addFridag)
+    private val Int.AP get() = Pair(this, Utbetalingstidslinje::addArbeidsgiverperiodedag)
+    private val Int.N get() = Pair(this, Utbetalingstidslinje::addNAVdag)
+    private val Int.A get() = Pair(this, Utbetalingstidslinje::addArbeidsdag)
+    private val Int.F get() = Pair(this, Utbetalingstidslinje::addFridag)
 
     private val Int.januar get() = this.januar(2018)
     private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)

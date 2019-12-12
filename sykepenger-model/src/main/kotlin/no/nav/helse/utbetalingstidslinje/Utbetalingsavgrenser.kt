@@ -2,19 +2,19 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 
-internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalingstidslinje,
+internal class Utbetalingsavgrenser(private val tidslinje: Utbetalingstidslinje,
                                     private val alderRegler: AlderRegler):
-    ArbeidsgiverUtbetalingstidslinje.UtbetalingsdagVisitor() {
+    Utbetalingstidslinje.UtbetalingsdagVisitor() {
     private var state: State = State.Initiell
     private var betalteDager = 0
     private var opphold = 0
-    private val ubetalteDager = mutableListOf<ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag>()
+    private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
 
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7-1
     }
 
-    internal fun ubetalteDager(): List<ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag> {
+    internal fun ubetalteDager(): List<Utbetalingstidslinje.Utbetalingsdag.AvvistDag> {
         tidslinje.accept(this)
         return ubetalteDager
     }
@@ -25,7 +25,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
         state.entering(this)
     }
 
-    override fun visitNavDag(dag: ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.NavDag) {
+    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
         if (alderRegler.navBurdeBetale(betalteDager, 0, dag.dato)) {
             state.betalbarDag(this, dag.dato)
         } else {
@@ -33,15 +33,15 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
         }
     }
 
-    override fun visitArbeidsdag(dag: ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
         arbeidsdag(dag.dato)
     }
 
-    override fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
         arbeidsdag(dag.dato)
     }
 
-    override fun visitFridag(dag: ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
         arbeidsdag(dag.dato)
     }
 
@@ -84,7 +84,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
             }
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
+                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
             }
 
             override fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
@@ -101,7 +101,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
             }
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
+                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
                 avgrenser.state(Syk)
             }
 
