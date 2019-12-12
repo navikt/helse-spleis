@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.Topics
 import no.nav.helse.sak.SakObserver
+import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.spleis.LagreUtbetalingDao
 import no.nav.helse.spleis.SakMediator
 import no.nav.helse.spleis.SakRepository
@@ -13,6 +14,8 @@ import no.nav.helse.spleis.UtbetalingsreferanseRepository
 import no.nav.helse.spleis.VedtaksperiodeProbe
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class SakMediatorTest {
 
@@ -36,9 +39,7 @@ internal class SakMediatorTest {
 
     @Test
     fun `sørger for at observers blir varslet om endring`() {
-        every {
-            repo.hentSak(any())
-        } returns null
+        every { repo.hentSak(any()) } returns null
 
         sakMediator.håndter(nySøknadHendelse)
 
@@ -48,6 +49,25 @@ internal class SakMediatorTest {
             probe.sakEndret(any())
             lagreUtbetalingDao.sakEndret(any())
             producer.send(match { it.topic() == Topics.vedtaksperiodeEventTopic })
+        }
+    }
+
+    @Test
+    fun `skal sende utbetalingsevent ved utbetaling`() {
+        sakMediator.vedtaksperiodeTilUtbetaling(
+            VedtaksperiodeObserver.UtbetalingEvent(
+                UUID.randomUUID(),
+                "aktørId",
+                "fødselsnummer",
+                "organisasjonsnummer",
+                "utbetalingsreferanse",
+                listOf(),
+                LocalDate.of(2019, 12, 12)
+            )
+        )
+
+        verify(exactly = 1) {
+            producer.send(match { it.topic() == Topics.utbetalingEventTopic })
         }
     }
 }

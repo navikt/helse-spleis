@@ -66,6 +66,10 @@ internal class SakMediator(
         producer.send(event.producerRecord())
     }
 
+    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
+        producer.send(event.producerRecord())
+    }
+
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
         (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(
             aktørId = arbeidstakerHendelse.aktørId(),
