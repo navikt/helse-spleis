@@ -99,7 +99,7 @@ internal class UtbetalingBuilder internal constructor(
     private fun håndterArbeidsdag(dagen: LocalDate) {
         inkrementerIkkeSykedager()
         setNåværendeInntekt(dagen)
-        tidslinje.addArbeidsdag(dagen)
+        tidslinje.addArbeidsdag(nåværendeInntekt, dagen)
     }
 
     private fun inkrementerIkkeSykedager() {
@@ -109,7 +109,7 @@ internal class UtbetalingBuilder internal constructor(
 
     private fun håndterFridag(dagen: LocalDate) {
         fridager += 1
-        tidslinje.addFridag(dagen)
+        tidslinje.addFridag(nåværendeInntekt, dagen)
     }
 
     private fun state(state: UtbetalingState) {

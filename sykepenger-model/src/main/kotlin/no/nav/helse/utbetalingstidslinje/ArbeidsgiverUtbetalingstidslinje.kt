@@ -85,19 +85,19 @@ internal class ArbeidsgiverUtbetalingstidslinje {
     }
 
     internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt.roundToInt(), dato))
+        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
     }
 
     internal fun addNAVdag(inntekt: Double, dato: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.NavDag(inntekt.roundToInt(), dato))
+        utbetalingsdager.add(Utbetalingsdag.NavDag(inntekt, dato))
     }
 
-    internal fun addArbeidsdag(dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(dagen))
+    internal fun addArbeidsdag(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(inntekt, dagen))
     }
 
-    internal fun addFridag(dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.Fridag(dagen))
+    internal fun addFridag(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Fridag(inntekt, dagen))
     }
 
     internal abstract class UtbetalingsdagVisitor {
@@ -107,7 +107,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         open fun visitFridag(dag: Utbetalingsdag.Fridag) {}
     }
 
-    internal sealed class Utbetalingsdag(internal val inntekt: Int, internal val dato: LocalDate) {
+    internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) {
 
         companion object {
             internal fun subset(liste: List<Utbetalingsdag>, fom: LocalDate, tom: LocalDate) = liste.filter { it.dato.isAfter(fom.minusDays(1)) && it.dato.isBefore(tom.plusDays(1)) }
@@ -116,7 +116,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         abstract fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje)
         abstract fun accept(visitor: UtbetalingsdagVisitor)
 
-        internal class ArbeidsgiverperiodeDag(inntekt: Int, dato: LocalDate) :
+        internal class ArbeidsgiverperiodeDag(inntekt: Double, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje) {
                 tidslinje.helseState.visitArbeidsgiverperiodeDag(tidslinje, this)
@@ -125,7 +125,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsgiverperiodeDag(this)
         }
 
-        internal class NavDag(inntekt: Int, dato: LocalDate) :
+        internal class NavDag(inntekt: Double, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
             override fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje) {
                 tidslinje.helseState.visitNAVDag(tidslinje, this)
@@ -133,14 +133,14 @@ internal class ArbeidsgiverUtbetalingstidslinje {
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
 
-            fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt)
+            fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt.roundToInt())
             fun oppdater(last: Utbetalingslinje) {
                 last.tom = dato
             }
         }
 
-        internal class Arbeidsdag(dato: LocalDate) :
-            Utbetalingsdag(0, dato) {
+        internal class Arbeidsdag(inntekt: Double, dagen: LocalDate) :
+            Utbetalingsdag(inntekt, dagen) {
             override fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje) {
                 tidslinje.helseState.visitArbeidsdag(tidslinje, this)
             }
@@ -148,8 +148,8 @@ internal class ArbeidsgiverUtbetalingstidslinje {
 
         }
 
-        internal class Fridag(dato: LocalDate) :
-            Utbetalingsdag(0, dato) {
+        internal class Fridag(inntekt: Double, dato: LocalDate) :
+            Utbetalingsdag(inntekt, dato) {
             override fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje) {
                 tidslinje.helseState.visitFridag(tidslinje, this)
             }
@@ -187,7 +187,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
                 tidslinje: ArbeidsgiverUtbetalingstidslinje,
                 navDag: Utbetalingsdag.NavDag
             ) {
-                if (navDag.inntekt == 0) return
+                if (navDag.inntekt == 0.0) return
                 tidslinje.utbetalingslinjer.add(navDag.utbetalingslinje())
                 tidslinje.helseState = Syk
             }
