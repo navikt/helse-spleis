@@ -19,7 +19,7 @@ internal class SakSykdomstidslinje(
         visitor.postVisitSak(this)
     }
 
-    fun utbetalingslinjer(): List<Utbetalingslinje> {
+    internal fun utbetalingslinjer(): List<Utbetalingslinje> {
         val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje).result()
         val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it).result() }
         return tidslinje.utbetalingslinjer(tidslinjer, alderRegler, førsteDag, sisteDag)
