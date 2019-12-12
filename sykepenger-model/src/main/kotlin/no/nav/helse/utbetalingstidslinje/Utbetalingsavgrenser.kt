@@ -8,13 +8,13 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
     private var state: State = State.Initiell
     private var betalteDager = 0
     private var opphold = 0
-    private val ubetalteDager = mutableListOf<LocalDate>()
+    private val ubetalteDager = mutableListOf<ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag>()
 
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7-1
     }
 
-    internal fun ubetalteDager(): List<LocalDate> {
+    internal fun ubetalteDager(): List<ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag> {
         tidslinje.accept(this)
         return ubetalteDager
     }
@@ -84,7 +84,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
             }
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(dagen)
+                avgrenser.ubetalteDager.add(ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
             }
 
             override fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
@@ -101,7 +101,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: ArbeidsgiverUtbetalin
             }
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsavgrenser, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(dagen)
+                avgrenser.ubetalteDager.add(ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
                 avgrenser.state(Syk)
             }
 

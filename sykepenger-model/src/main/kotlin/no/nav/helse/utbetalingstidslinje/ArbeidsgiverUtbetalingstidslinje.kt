@@ -105,6 +105,7 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         open fun visitNavDag(dag: Utbetalingsdag.NavDag) {}
         open fun visitArbeidsdag(dag: Utbetalingsdag.Arbeidsdag) {}
         open fun visitFridag(dag: Utbetalingsdag.Fridag) {}
+        open fun visitAvvistDag(dag: Utbetalingsdag.AvvistDag) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) {
@@ -155,6 +156,16 @@ internal class ArbeidsgiverUtbetalingstidslinje {
             }
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitFridag(this)
         }
+
+        internal class AvvistDag(internal val dag: LocalDate, internal val begrunnelse: Begrunnelse) :
+            Utbetalingsdag(0.0, dag) {
+            override fun accept(tidslinje: ArbeidsgiverUtbetalingstidslinje) {
+                tidslinje.helseState.visitAvvistDag(tidslinje, this)
+            }
+
+            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitAvvistDag(this)
+
+        }
     }
 
     private sealed class HelseState {
@@ -179,6 +190,12 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         open fun visitFridag(
             tidslinje: ArbeidsgiverUtbetalingstidslinje,
             fridag: Utbetalingsdag.Fridag
+        ) {
+        }
+
+        open fun visitAvvistDag(
+            tidslinje: ArbeidsgiverUtbetalingstidslinje,
+            avvistDag: ArbeidsgiverUtbetalingstidslinje.Utbetalingsdag.AvvistDag
         ) {
         }
 
@@ -224,4 +241,8 @@ internal class ArbeidsgiverUtbetalingstidslinje {
         }
     }
 
+}
+
+enum class Begrunnelse {
+    SykepengedagerOppbrukt
 }

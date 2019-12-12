@@ -78,7 +78,7 @@ internal class UtbetalingsavgrenserTest {
             AlderRegler(fnr,
                 LocalDate.of(2018,1,1),
                 LocalDate.of(2019, 12, 31)
-            )).ubetalteDager()
+            )).ubetalteDager().map { it.dag }
     private val Int.AP get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addArbeidsgiverperiodedag)
     private val Int.N get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addNAVdag)
     private val Int.A get() = Pair(this, ArbeidsgiverUtbetalingstidslinje::addArbeidsdag)
