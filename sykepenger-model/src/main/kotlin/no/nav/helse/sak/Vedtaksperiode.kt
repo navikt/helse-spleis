@@ -15,17 +15,29 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.TilstandType.*
+import no.nav.helse.sak.TilstandType.INNTEKTSMELDING_MOTTATT
+import no.nav.helse.sak.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE
+import no.nav.helse.sak.TilstandType.NY_SØKNAD_MOTTATT
+import no.nav.helse.sak.TilstandType.SENDT_SØKNAD_MOTTATT
+import no.nav.helse.sak.TilstandType.START
+import no.nav.helse.sak.TilstandType.TIL_GODKJENNING
+import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.sak.TilstandType.TIL_UTBETALING
+import no.nav.helse.sak.TilstandType.valueOf
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Utbetalingsberegning
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
@@ -335,7 +347,9 @@ internal class Vedtaksperiode internal constructor(
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                utbetalingsreferanse = utbetalingsreferanse
+                utbetalingsreferanse = utbetalingsreferanse,
+                utbetalingslinjer = vedtaksperiode.utbetalingslinjer ?: emptyList(),
+                opprettet = LocalDate.now()
             )
             vedtaksperiode.observers.forEach {
                 it.vedtaksperiodeTilUtbetaling(event)

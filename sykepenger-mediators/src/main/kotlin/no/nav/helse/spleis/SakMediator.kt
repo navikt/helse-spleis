@@ -1,30 +1,43 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovProducer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.*
-import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
+import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.sak.Sak
+import no.nav.helse.sak.SakObserver
+import no.nav.helse.sak.SakskjemaForGammelt
+import no.nav.helse.sak.UtenforOmfangException
+import no.nav.helse.sak.VedtaksperiodeObserver
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.LoggerFactory
 
-internal class SakMediator(private val sakRepository: SakRepository,
-                           private val lagreSakDao: SakObserver,
-                           private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
-                           private val lagreUtbetalingDao: SakObserver,
-                           private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
-                           private val behovProducer: BehovProducer,
-                           private val gosysOppgaveProducer: GosysOppgaveProducer,
-                           private val vedtaksperiodeEventProducer: VedtaksperiodeEventProducer) : SakObserver {
+internal class SakMediator(
+    private val sakRepository: SakRepository,
+    private val lagreSakDao: SakObserver,
+    private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
+    private val lagreUtbetalingDao: SakObserver,
+    private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
+    private val producer: KafkaProducer<String, String>
+) : SakObserver {
+
+    private val log = LoggerFactory.getLogger("SakMediator")
 
     override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {}
 
     override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        behovProducer.sendNyttBehov(event)
+        producer.send(event.producerRecord()).also {
+            log.info("produserte behov=$event, recordMetadata=$it")
+        }
     }
+
+    private fun Behov.producerRecord() =
+        ProducerRecord<String, String>(Topics.behovTopic, id().toString(), toJson())
 
     fun håndter(hendelse: NySøknadHendelse) =
         finnSak(hendelse) { sak -> sak.håndter(hendelse) }
@@ -50,20 +63,19 @@ internal class SakMediator(private val sakRepository: SakRepository,
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-        if (event.gjeldendeTilstand == TIL_INFOTRYGD) {
-            gosysOppgaveProducer.opprettOppgave(event.aktørId, event.fødselsnummer)
-        }
-
-        vedtaksperiodeEventProducer.sendEndringEvent(event)
+        producer.send(event.producerRecord())
     }
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(aktørId = arbeidstakerHendelse.aktørId(), fødselsnummer = arbeidstakerHendelse.fødselsnummer())).also {
-                it.addObserver(this)
-                it.addObserver(lagreSakDao)
-                it.addObserver(lagreUtbetalingDao)
-                it.addObserver(vedtaksperiodeProbe)
-            }
+        (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(
+            aktørId = arbeidstakerHendelse.aktørId(),
+            fødselsnummer = arbeidstakerHendelse.fødselsnummer()
+        )).also {
+            it.addObserver(this)
+            it.addObserver(lagreSakDao)
+            it.addObserver(lagreUtbetalingDao)
+            it.addObserver(vedtaksperiodeProbe)
+        }
 
     private fun finnSak(
         hendelse: ArbeidstakerHendelse,

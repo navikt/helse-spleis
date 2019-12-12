@@ -4,22 +4,24 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.TestConstants.nySøknadHendelse
-import no.nav.helse.behov.BehovProducer
+import no.nav.helse.Topics
 import no.nav.helse.sak.SakObserver
-import no.nav.helse.spleis.*
-import no.nav.helse.spleis.oppgave.GosysOppgaveProducer
+import no.nav.helse.spleis.LagreUtbetalingDao
+import no.nav.helse.spleis.SakMediator
+import no.nav.helse.spleis.SakRepository
+import no.nav.helse.spleis.UtbetalingsreferanseRepository
+import no.nav.helse.spleis.VedtaksperiodeProbe
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Test
 
 internal class SakMediatorTest {
 
     private val probe = mockk<VedtaksperiodeProbe>(relaxed = true)
-    private val oppgaveProducer = mockk<GosysOppgaveProducer>(relaxed = true)
-    private val vedtaksperiodeEventProducer = mockk<VedtaksperiodeEventProducer>(relaxed = true)
-    private val behovProducer = mockk<BehovProducer>(relaxed = true)
     private val lagreSakDao = mockk<SakObserver>(relaxed = true)
     private val repo = mockk<SakRepository>()
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
+    private val producer = mockk<KafkaProducer<String, String>>(relaxed = true)
 
     private val sakMediator = SakMediator(
         vedtaksperiodeProbe = probe,
@@ -27,9 +29,7 @@ internal class SakMediatorTest {
         lagreSakDao = lagreSakDao,
         utbetalingsreferanseRepository = utbetalingsRepo,
         lagreUtbetalingDao = lagreUtbetalingDao,
-        behovProducer = behovProducer,
-        gosysOppgaveProducer = oppgaveProducer,
-        vedtaksperiodeEventProducer = vedtaksperiodeEventProducer
+        producer = producer
     )
 
     private val nySøknadHendelse = nySøknadHendelse()
@@ -47,7 +47,7 @@ internal class SakMediatorTest {
             lagreSakDao.sakEndret(any())
             probe.sakEndret(any())
             lagreUtbetalingDao.sakEndret(any())
-            vedtaksperiodeEventProducer.sendEndringEvent(any())
+            producer.send(match { it.topic() == Topics.vedtaksperiodeEventTopic })
         }
     }
 }

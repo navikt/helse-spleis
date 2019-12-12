@@ -14,7 +14,8 @@ data class Utbetalingslinje(
     val dagsats: Int
 )
 
-/** Oppdrag expects a continuous payment timeline spanning weekends.
+/**
+ * Oppdrag expects a continuous payment timeline spanning weekends.
  * They need to know about the weekends for tax calculation, but have rules for not paying for them
  */
 internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
@@ -33,5 +34,4 @@ internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
         }
     }
     return results.toList()
-
 }

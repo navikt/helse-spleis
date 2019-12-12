@@ -20,9 +20,7 @@ internal class SakRepositoryTest {
                 lagreSakDao = repo,
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
-                behovProducer = mockk(),
-                gosysOppgaveProducer = mockk(),
-                vedtaksperiodeEventProducer = mockk(relaxed = true)
+                producer = mockk(relaxed = true)
         )
 
         mediator.håndter(nySøknadHendelse(
@@ -42,9 +40,7 @@ internal class SakRepositoryTest {
                 lagreSakDao = repo,
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
-                behovProducer = mockk(),
-                gosysOppgaveProducer = mockk(),
-                vedtaksperiodeEventProducer = mockk(relaxed = true)
+                producer = mockk(relaxed = true)
         )
         mediator.håndter(nySøknadHendelse(
                 aktørId = aktørId

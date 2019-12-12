@@ -1,7 +1,7 @@
 package no.nav.helse.behov
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class Behov internal constructor(private val pakke: Pakke) {
 
@@ -58,5 +58,4 @@ class Behov internal constructor(private val pakke: Pakke) {
     operator fun set(key: String, value: Any) {
         pakke[key] = value
     }
-
 }
