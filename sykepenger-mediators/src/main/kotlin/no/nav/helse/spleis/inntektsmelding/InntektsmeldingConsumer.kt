@@ -16,8 +16,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class InntektsmeldingConsumer(
     streamsBuilder: StreamsBuilder,
     private val inntektsmeldingKafkaTopic: String,
-    private val sakMediator: SakMediator,
-    private val probe: InntektsmeldingProbe = InntektsmeldingProbe
+    private val mediator: SakMediator
 ) {
 
     companion object {
@@ -42,7 +41,7 @@ internal class InntektsmeldingConsumer(
             .foreach{_, inntektsmelding -> håndter(inntektsmelding)}
 
     private fun håndter(inntektsmelding: Inntektsmelding) {
-        sakMediator.håndter(InntektsmeldingHendelse(inntektsmelding))
+        mediator.håndter(InntektsmeldingHendelse(inntektsmelding))
     }
 
 }

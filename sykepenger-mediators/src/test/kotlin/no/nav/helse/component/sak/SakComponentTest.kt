@@ -23,6 +23,7 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
+import no.nav.helse.Topics.påminnelseTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.Topics.vedtaksperiodeEventTopic
 import no.nav.helse.behov.Behov
@@ -77,7 +78,7 @@ internal class SakComponentTest {
         private const val kafkaApplicationId = "spleis-v1"
 
         private val topics =
-            listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic)
+            listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic, påminnelseTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 

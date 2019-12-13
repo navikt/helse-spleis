@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
@@ -28,17 +29,6 @@ internal class SakMediator(
 
     private val log = LoggerFactory.getLogger("SakMediator")
 
-    override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {}
-
-    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        producer.send(event.producerRecord()).also {
-            log.info("produserte behov=$event, recordMetadata=$it")
-        }
-    }
-
-    private fun Behov.producerRecord() =
-        ProducerRecord<String, String>(Topics.behovTopic, id().toString(), toJson())
-
     fun håndter(hendelse: NySøknadHendelse) =
         finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
@@ -54,11 +44,23 @@ internal class SakMediator(
     fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
         finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
+    fun håndter(påminnelse: Påminnelse) {
+        finnSak(påminnelse) { sak -> sak.håndter(påminnelse) }
+    }
+
     fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)
 
     fun hentSakForUtbetaling(utbetalingsreferanse: String): Sak? {
         return utbetalingsreferanseRepository.hentUtbetaling(utbetalingsreferanse)?.let {
             sakRepository.hentSak(it.aktørId)
+        }
+    }
+
+    override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {}
+
+    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
+        producer.send(event.producerRecord()).also {
+            log.info("produserte behov=$event, recordMetadata=$it")
         }
     }
 
@@ -69,6 +71,9 @@ internal class SakMediator(
     override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
         producer.send(event.producerRecord())
     }
+
+    private fun Behov.producerRecord() =
+        ProducerRecord<String, String>(Topics.behovTopic, id().toString(), toJson())
 
     private fun finnSak(arbeidstakerHendelse: ArbeidstakerHendelse) =
         (sakRepository.hentSak(arbeidstakerHendelse.aktørId()) ?: Sak(

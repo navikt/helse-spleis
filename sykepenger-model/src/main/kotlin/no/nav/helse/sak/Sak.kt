@@ -7,11 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -60,12 +60,14 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
     fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
         finnArbeidsgiver(sykepengehistorikkHendelse)?.håndter(sykepengehistorikkHendelse)
-            ?: error("Fant ikke arbeidsgiver for sykepengehistorikkhendelse")
     }
 
     fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
-            ?: error("Fant ikke arbeidsgiver for ManuellSaksbehandlingHendelse")
+    }
+
+    fun håndter(påminnelse: Påminnelse) {
+        finnArbeidsgiver(påminnelse)?.håndter(påminnelse)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {

@@ -381,10 +381,13 @@ internal object TestConstants {
         )
     }
 
-    fun påminnelseHendelse(vedtaksperiodeId: UUID, tilstand: TilstandType) = Påminnelse.fraJson(objectMapper.convertValue(mapOf(
-        "aktørId" to "1",
+    fun påminnelseHendelse(vedtaksperiodeId: UUID,
+                           tilstand: TilstandType,
+                           aktørId: String = "1",
+                           organisasjonsnummer: String = "123456789") = Påminnelse.fraJson(objectMapper.writeValueAsString(mapOf(
+        "aktørId" to aktørId,
         "fødselsnummer" to fakeFNR,
-        "organisasjonsnummer" to "123546564",
+        "organisasjonsnummer" to organisasjonsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "tilstand" to tilstand.toString(),
         "antallGangerPåminnet" to 0,

@@ -17,8 +17,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class SøknadConsumer(
     streamsBuilder: StreamsBuilder,
     private val søknadKafkaTopic: String,
-    private val sakMediatorMediator: SakMediator,
-    private val probe: SøknadProbe = SøknadProbe
+    private val mediator: SakMediator
 ) {
 
     init {
@@ -47,9 +46,9 @@ internal class SøknadConsumer(
 
     private fun håndter(søknad: Sykepengesøknad) {
         when (søknad.status) {
-            "NY" -> sakMediatorMediator.håndter(NySøknadHendelse(søknad))
-            "FREMTIDIG" -> sakMediatorMediator.håndter(NySøknadHendelse(søknad))
-            "SENDT" -> sakMediatorMediator.håndter(SendtSøknadHendelse(søknad))
+            "NY" -> mediator.håndter(NySøknadHendelse(søknad))
+            "FREMTIDIG" -> mediator.håndter(NySøknadHendelse(søknad))
+            "SENDT" -> mediator.håndter(SendtSøknadHendelse(søknad))
         }
     }
 }

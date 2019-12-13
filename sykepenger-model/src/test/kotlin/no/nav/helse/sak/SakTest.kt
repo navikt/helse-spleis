@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikkHendelse
 import no.nav.helse.TestConstants.søknadDTO
@@ -71,6 +72,25 @@ internal class SakTest {
         assertSakEndret()
         assertVedtaksperiodeEndret()
         assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT)
+    }
+
+    @Test
+    internal fun `påminnelse blir delegert til perioden`() {
+        testSak.also {
+            it.håndter(nySøknadHendelse(
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
+            ))
+            it.håndter(påminnelseHendelse(
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeIdForSak(),
+                tilstand = NY_SØKNAD_MOTTATT
+            ))
+        }
+
+        assertSakEndret()
+        assertVedtaksperiodeEndret()
+        assertVedtaksperiodetilstand(TIL_INFOTRYGD)
     }
 
     @Test
@@ -427,12 +447,13 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `sykepengehistorikk med arbeidsgiver som ikke finnes i modellen skal kaste exception`() {
-        assertThrows<IllegalStateException> {
-            testSak.also {
-                it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
-            }
+    internal fun `sykepengehistorikk lager ikke ny sak, selv om det ikke finnes noen fra før`() {
+        testSak.also {
+            it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
         }
+
+        assertSakIkkeEndret()
+        assertVedtaksperiodeIkkeEndret()
     }
 
     @Test
@@ -499,7 +520,7 @@ internal class SakTest {
             )
 
             assertEquals(1, this.testSakObserver.sakstilstander.size)
-            val saksid = this.testSakObserver.sakstilstander.keys.first()
+            val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
                 sykepengehistorikkHendelse(
@@ -583,7 +604,7 @@ internal class SakTest {
             )
 
             assertEquals(1, this.testSakObserver.sakstilstander.size)
-            val saksid = this.testSakObserver.sakstilstander.keys.first()
+            val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
                 sykepengehistorikkHendelse(
@@ -676,7 +697,7 @@ internal class SakTest {
                 )
             )
 
-            val saksid = this.testSakObserver.sakstilstander.keys.first()
+            val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
                 sykepengehistorikkHendelse(
@@ -688,6 +709,9 @@ internal class SakTest {
         }
         assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
     }
+
+    private fun vedtaksperiodeIdForSak() =
+        testSakObserver.sakstilstander.keys.first()
 
     private fun enSakMedÉnArbeidsgiver(virksomhetsnummer: String) = testSak.also {
         it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer))

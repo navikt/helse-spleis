@@ -15,7 +15,7 @@ import org.apache.kafka.streams.kstream.Consumed
 internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
         private val behovTopic: String,
-        private val sakMediatorMediator: SakMediator
+        private val mediator: SakMediator
 ) {
 
     init {
@@ -58,10 +58,10 @@ internal class BehovConsumer(
     private fun håndter(løsning: Behov) {
         when (løsning.behovType()) {
             BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
-                sakMediatorMediator.håndter(SykepengehistorikkHendelse(it))
+                mediator.håndter(SykepengehistorikkHendelse(it))
             }
             BehovsTyper.GodkjenningFraSaksbehandler.name -> ManuellSaksbehandlingHendelse(løsning).let {
-                sakMediatorMediator.håndter(it)
+                mediator.håndter(it)
             }
         }
     }

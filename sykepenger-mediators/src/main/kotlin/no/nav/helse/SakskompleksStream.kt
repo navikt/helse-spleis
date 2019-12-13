@@ -24,6 +24,7 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
+import no.nav.helse.Topics.påminnelseTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.BehovConsumer
 import no.nav.helse.spleis.LagreSakDao
@@ -34,6 +35,7 @@ import no.nav.helse.spleis.UtbetalingsreferansePostgresRepository
 import no.nav.helse.spleis.http.getJson
 import no.nav.helse.spleis.inntektsmelding.InntektsmeldingConsumer
 import no.nav.helse.spleis.producerConfig
+import no.nav.helse.spleis.påminnelse.PåminnelseConsumer
 import no.nav.helse.spleis.sak
 import no.nav.helse.spleis.streamsConfig
 import no.nav.helse.spleis.søknad.SøknadConsumer
@@ -89,6 +91,7 @@ fun Application.vedtaksperiodeApplication(): KafkaStreams {
     SøknadConsumer(builder, søknadTopic, sakMediator)
     InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakMediator)
     BehovConsumer(builder, behovTopic, sakMediator)
+    PåminnelseConsumer(builder, påminnelseTopic, sakMediator)
 
     return KafkaStreams(builder.build(), environment.config.streamsConfig()).apply {
         addShutdownHook(this)
