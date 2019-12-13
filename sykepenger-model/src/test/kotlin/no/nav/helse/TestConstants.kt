@@ -16,9 +16,11 @@ import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.sak.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -379,13 +381,17 @@ internal object TestConstants {
         )
     }
 
-    fun påminnelseHendelse(vedtaksperiodeId: UUID) = Påminnelse(objectMapper.convertValue(mapOf(
+    fun påminnelseHendelse(vedtaksperiodeId: UUID, tilstand: TilstandType) = Påminnelse.fraJson(objectMapper.convertValue(mapOf(
         "aktørId" to "1",
         "fødselsnummer" to fakeFNR,
         "organisasjonsnummer" to "123546564",
         "vedtaksperiodeId" to vedtaksperiodeId,
-        "antallGangerPåminnet" to 0
-    )))
+        "tilstand" to tilstand.toString(),
+        "antallGangerPåminnet" to 0,
+        "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
+        "påminnelsestidspunkt" to LocalDateTime.now().toString(),
+        "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
+    ))) ?: fail { "påminnelse er null" }
 }
 
 internal data class SpolePeriode(

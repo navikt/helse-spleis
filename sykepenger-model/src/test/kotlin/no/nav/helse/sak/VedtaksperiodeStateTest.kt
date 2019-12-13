@@ -86,10 +86,25 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                tilstand = START
             )
         )
         assertTilstandsendring(START, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn starttilstand`() {
+        val vedtaksperiode = beInStartTilstand()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = NY_SØKNAD_MOTTATT
+                )
+            )
+        }
     }
 
     @Test
@@ -127,10 +142,25 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                tilstand = NY_SØKNAD_MOTTATT
             )
         )
         assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn NY_SØKNAD_MOTTATT`() {
+        val vedtaksperiode = beInNySøknad()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = INNTEKTSMELDING_MOTTATT
+                )
+            )
+        }
     }
 
     @Test
@@ -167,10 +197,25 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                tilstand = SENDT_SØKNAD_MOTTATT
             )
         )
         assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn SENDT_SØKNAD_MOTTATT`() {
+        val vedtaksperiode = beInSendtSøknad()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = INNTEKTSMELDING_MOTTATT
+                )
+            )
+        }
     }
 
     @Test
@@ -206,10 +251,25 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                tilstand = INNTEKTSMELDING_MOTTATT
             )
         )
         assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn INNTEKTSMELDING_MOTTATT`() {
+        val vedtaksperiode = beInMottattInntektsmelding()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = NY_SØKNAD_MOTTATT
+                )
+            )
+        }
     }
 
     @Test
@@ -414,12 +474,27 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertIngenEndringITilstand {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = KOMPLETT_SYKDOMSTIDSLINJE
                 )
             )
         }
 
         assertBehov(BehovsTyper.Sykepengehistorikk)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn KOMPLETT_SYKDOMSTIDSLINJE`() {
+        val vedtaksperiode = beInKomplettTidslinje()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = INNTEKTSMELDING_MOTTATT
+                )
+            )
+        }
     }
 
     @Test
@@ -736,10 +811,25 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                tilstand = TIL_GODKJENNING
             )
         )
         assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, Påminnelse::class)
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn TIL_GODKJENNING`() {
+        val vedtaksperiode = beInTilGodkjenning()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = KOMPLETT_SYKDOMSTIDSLINJE
+                )
+            )
+        }
     }
 
     @Test
@@ -749,7 +839,22 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertIngenEndring {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = TIL_UTBETALING
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `ignorer påminnelse for en annen tilstand enn TIL_UTBETALING`() {
+        val vedtaksperiode = beInTilUtbetaling()
+
+        assertIngenEndring {
+            vedtaksperiode.håndter(
+                påminnelseHendelse(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    tilstand = TIL_GODKJENNING
                 )
             )
         }

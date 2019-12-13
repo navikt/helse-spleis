@@ -172,8 +172,10 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) =
+        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.tilstand != type) return
             vedtaksperiode.setTilstand(påminnelse, TilInfotrygdTilstand)
+        }
 
         fun leaving() {
         }
@@ -241,7 +243,10 @@ internal class Vedtaksperiode internal constructor(
             trengerSykepengehistorikk(vedtaksperiode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) = trengerSykepengehistorikk(vedtaksperiode)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.tilstand != type) return
+            trengerSykepengehistorikk(vedtaksperiode)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
             val tidslinje = vedtaksperiode.sykdomstidslinje
