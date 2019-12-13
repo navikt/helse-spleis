@@ -3,19 +3,17 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
@@ -290,51 +288,43 @@ internal object TestConstants {
     )
 
     fun sykepengehistorikk(
-        perioder: List<SpolePeriode>,
-        organisasjonsnummer: String = "123546564",
-        aktørId: String = "1",
-        fødselsnummer: String = fakeFNR,
-        vedtaksperiodeId: UUID = UUID.randomUUID()
-    ): Sykepengehistorikk {
-        val behov = Behov.nyttBehov(
-            BehovsTyper.Sykepengehistorikk, mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to vedtaksperiodeId.toString(),
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer
-            )
-        ).also {
-            it.løsBehov(
-                responsFraSpole(
-                    perioder = perioder
-                )
-            )
-        }
-        return Sykepengehistorikk(objectMapper.readTree(behov.toJson()))
+        perioder: List<SpolePeriode> = emptyList(),
+        sisteHistoriskeSykedag: LocalDate? = null
+    ): Map<String, Any> {
+        return responsFraSpole(
+            perioder = sisteHistoriskeSykedag?.let {
+                listOf(SpolePeriode(
+                    fom = it.minusMonths(1),
+                    tom = it,
+                    grad = "100"
+                ))
+            } ?: perioder
+        )
     }
 
-    fun sykepengehistorikkHendelse(
-        sisteHistoriskeSykedag: LocalDate? = LocalDate.now(),
-        perioder: List<SpolePeriode>? = null,
-        organisasjonsnummer: String = "123546564",
+    fun ytelser(
         aktørId: String = "1",
         fødselsnummer: String = fakeFNR,
-        vedtaksperiodeId: UUID = UUID.randomUUID()
-    ) = SykepengehistorikkHendelse(sykepengehistorikk(
-        perioder = perioder ?: sisteHistoriskeSykedag?.let {
-            listOf(
-                SpolePeriode(
-                    fom = sisteHistoriskeSykedag.minusMonths(1),
-                    tom = sisteHistoriskeSykedag,
-                    grad = "100"
+        organisasjonsnummer: String = "123546564",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
+        sykepengehistorikk: Map<String, Any>
+
+    ) = Ytelser(
+        Ytelser.lagBehov(
+            vedtaksperiodeId,
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            utgangspunktForBeregningAvYtelse
+        ).also {
+            it.løsBehov(
+                mapOf(
+                    "Sykepengehistorikk" to sykepengehistorikk
                 )
             )
-        } ?: emptyList(),
-        organisasjonsnummer = organisasjonsnummer,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        vedtaksperiodeId = vedtaksperiodeId
-    ))
+        }.let { Behov.fromJson(it.toJson()) }
+    )
 
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
@@ -345,7 +335,7 @@ internal object TestConstants {
         saksbehandler: String
     ): Behov {
         return Behov.nyttBehov(
-            BehovsTyper.Sykepengehistorikk, mapOf(
+            listOf(Behovtype.Sykepengehistorikk), mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "sakskompleksId" to vedtaksperiodeId,
                 "aktørId" to aktørId,

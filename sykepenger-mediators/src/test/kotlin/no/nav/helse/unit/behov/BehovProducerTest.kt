@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.Behovtype
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -25,11 +25,11 @@ internal class BehovProducerTest {
         } returns DummyFuture(RecordMetadata(TopicPartition(topic, 0), 0L, 0L, 0L, 0L, 0, 0))
 
         BehovProducer(topic, producer)
-                .sendNyttBehov(Behov.nyttBehov(BehovsTyper.Sykepengehistorikk, emptyMap()))
+                .sendNyttBehov(Behov.nyttBehov(listOf(Behovtype.Sykepengehistorikk), emptyMap()))
 
         verify(exactly = 1) {
             producer.send(match { record ->
-                record.value().contains(BehovsTyper.Sykepengehistorikk.name)
+                record.value().contains(Behovtype.Sykepengehistorikk.name)
             })
         }
     }

@@ -9,9 +9,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.ytelser.Ytelser
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -58,8 +58,8 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
         finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndter(inntektsmeldingHendelse)
     }
 
-    fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        finnArbeidsgiver(sykepengehistorikkHendelse)?.håndter(sykepengehistorikkHendelse)
+    fun håndter(ytelser: Ytelser) {
+        finnArbeidsgiver(ytelser)?.håndter(ytelser)
     }
 
     fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {

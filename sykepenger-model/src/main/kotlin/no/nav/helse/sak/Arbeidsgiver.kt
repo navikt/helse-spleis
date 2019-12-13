@@ -8,9 +8,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.ytelser.Ytelser
 import java.util.*
 
 internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID) {
@@ -97,8 +97,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        perioder.forEach { it.håndter(sykepengehistorikkHendelse) }
+    internal fun håndter(ytelser: Ytelser) {
+        perioder.forEach { it.håndter(ytelser) }
     }
 
     internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {

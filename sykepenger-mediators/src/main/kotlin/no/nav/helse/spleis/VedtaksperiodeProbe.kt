@@ -52,7 +52,7 @@ object VedtaksperiodeProbe : SakObserver {
         Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
 
     override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        behovCounter.labels(event.behovType()).inc()
+        event.behovType().forEach { behovCounter.labels(it).inc() }
     }
 
     override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {

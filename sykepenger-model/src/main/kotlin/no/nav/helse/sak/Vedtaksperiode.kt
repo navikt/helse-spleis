@@ -7,14 +7,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.Behovtype
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
@@ -79,10 +80,10 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    internal fun håndter(sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
-        if (id.toString() == sykepengehistorikkHendelse.vedtaksperiodeId()) tilstand.håndter(
+    internal fun håndter(ytelser: Ytelser) {
+        if (id.toString() == ytelser.vedtaksperiodeId()) tilstand.håndter(
             this,
-            sykepengehistorikkHendelse
+            ytelser
         )
     }
 
@@ -135,6 +136,20 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
+    private fun trengerYtelser() {
+        val behov = Ytelser.lagBehov(
+            vedtaksperiodeId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utgangspunktForBeregningAvYtelse = sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
+        )
+
+        observers.forEach { observer ->
+            observer.vedtaksperiodeTrengerLøsning(behov)
+        }
+    }
+
     // Gang of four State pattern
     private interface Vedtaksperiodetilstand {
 
@@ -154,7 +169,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
@@ -229,27 +244,27 @@ internal class Vedtaksperiode internal constructor(
         private const val seksMåneder = 180
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            trengerSykepengehistorikk(vedtaksperiode)
+            vedtaksperiode.trengerYtelser()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.tilstand != type) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
-            trengerSykepengehistorikk(vedtaksperiode)
+            vedtaksperiode.trengerYtelser()
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykepengehistorikkHendelse: SykepengehistorikkHendelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             val tidslinje = vedtaksperiode.sykdomstidslinje
-                ?: return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                ?: return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
 
-            if (harFraværsdagInnen6Mnd(sykepengehistorikkHendelse, tidslinje)) {
-                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+            if (harFraværsdagInnen6Mnd(ytelser, tidslinje)) {
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
             val utbetalingsberegning = try {
                 tidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
-                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
             if (utbetalingsberegning.utbetalingslinjer.isEmpty() || delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(
@@ -257,20 +272,20 @@ internal class Vedtaksperiode internal constructor(
                     utbetalingsberegning
                 )
             ) {
-                return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
-            vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilGodkjenningTilstand) {
+            vedtaksperiode.setTilstand(ytelser, TilGodkjenningTilstand) {
                 vedtaksperiode.maksdato = utbetalingsberegning.maksdato
                 vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
             }
         }
 
         private fun harFraværsdagInnen6Mnd(
-            sykepengehistorikkHendelse: SykepengehistorikkHendelse,
+            ytelser: Ytelser,
             tidslinje: ConcreteSykdomstidslinje
         ): Boolean {
-            val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag() ?: return false
+            val sisteFraværsdag = ytelser.sykepengehistorikk().sisteFraværsdag() ?: return false
 
             return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
                 || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
@@ -290,14 +305,6 @@ internal class Vedtaksperiode internal constructor(
 
             return !inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
-
-        private fun trengerSykepengehistorikk(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(
-                BehovsTyper.Sykepengehistorikk, mapOf<String, Any>(
-                    "tom" to vedtaksperiode.sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
-                )
-            )
-        }
     }
 
     private object TilGodkjenningTilstand : Vedtaksperiodetilstand {
@@ -305,7 +312,10 @@ internal class Vedtaksperiode internal constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(BehovsTyper.GodkjenningFraSaksbehandler)
+            vedtaksperiode.emitTrengerLøsning(
+                Hendelsetype.ManuellSaksbehandling,
+                listOf(Behovtype.GodkjenningFraSaksbehandler)
+            )
         }
 
         override fun håndter(
@@ -338,7 +348,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
             vedtaksperiode.emitTrengerLøsning(
-                BehovsTyper.Utbetaling, mapOf(
+                Hendelsetype.Utbetaling, listOf(Behovtype.Utbetaling), mapOf(
                     "utbetalingsreferanse" to utbetalingsreferanse,
                     "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
                     "maksdato" to (vedtaksperiode.maksdato ?: ""),
@@ -492,8 +502,13 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    private fun emitTrengerLøsning(type: BehovsTyper, additionalParams: Map<String, Any> = emptyMap()) {
+    private fun emitTrengerLøsning(
+        hendelsetype: Hendelsetype,
+        behovsliste: List<Behovtype>,
+        additionalParams: Map<String, Any> = emptyMap()
+    ) {
         val params = mutableMapOf(
+            "hendelse" to hendelsetype.name,
             "sakskompleksId" to id,
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
@@ -502,7 +517,7 @@ internal class Vedtaksperiode internal constructor(
 
         params.putAll(additionalParams)
 
-        val behov = Behov.nyttBehov(type, params)
+        val behov = Behov.nyttBehov(behovsliste, params)
 
         observers.forEach { observer ->
             observer.vedtaksperiodeTrengerLøsning(behov)

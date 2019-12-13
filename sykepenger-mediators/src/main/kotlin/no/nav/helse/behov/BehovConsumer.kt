@@ -3,14 +3,12 @@ package no.nav.helse.behov
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.spleis.SakMediator
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
+import org.apache.kafka.streams.kstream.KStream
 
 internal class BehovConsumer(
         streamsBuilder: StreamsBuilder,
@@ -39,31 +37,18 @@ internal class BehovConsumer(
                     } catch (err: Exception) {
                         null
                     }
-                }
+                }.filterNotNull()
                 .filter { _, behov ->
-                    behov != null
-                }
-                .mapValues { _, behov ->
-                    behov as Behov
-                }
-                .filter { _, behov ->
-                    behov.harLøsning()
+                    behov.erLøst()
                 }
                 .peek { _, behov -> BehovProbe.mottattBehov(behov) }
-                .foreach { _, behov -> håndter(behov) }
+                .foreach { _, behov -> mediator.håndter(behov) }
 
         return builder
     }
 
-    private fun håndter(løsning: Behov) {
-        when (løsning.behovType()) {
-            BehovsTyper.Sykepengehistorikk.name -> Sykepengehistorikk(objectMapper.readTree(løsning.toJson())).let {
-                mediator.håndter(SykepengehistorikkHendelse(it))
-            }
-            BehovsTyper.GodkjenningFraSaksbehandler.name -> ManuellSaksbehandlingHendelse(løsning).let {
-                mediator.håndter(it)
-            }
-        }
-    }
+    private inline fun <reified V> KStream<*, V?>.filterNotNull(): KStream<*, V> =
+        this.filter { _, value -> value != null }
+            .mapValues { _, value -> value as V }
 }
 

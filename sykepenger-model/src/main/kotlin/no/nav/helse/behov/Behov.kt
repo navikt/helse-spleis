@@ -1,7 +1,8 @@
 package no.nav.helse.behov
 
+import no.nav.helse.hendelser.Hendelsetype
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class Behov internal constructor(private val pakke: Pakke) {
 
@@ -12,9 +13,9 @@ class Behov internal constructor(private val pakke: Pakke) {
         private const val LøsningsKey = "@løsning"
 
 
-        fun nyttBehov(type: BehovsTyper, additionalParams: Map<String, Any>): Behov {
+        fun nyttBehov(behov: List<Behovtype>, additionalParams: Map<String, Any>): Behov {
             val pakke = Pakke(additionalParams + mapOf(
-                    BehovKey to type.name,
+                    BehovKey to behov.map { it.name },
                     IdKey to UUID.randomUUID().toString(),
                     OpprettetKey to LocalDateTime.now().toString()
             ))
@@ -30,9 +31,11 @@ class Behov internal constructor(private val pakke: Pakke) {
 
     }
 
-    fun behovType(): String = pakke[BehovKey] as String
+    fun behovType(): List<String> = requireNotNull(get(BehovKey))
     fun id(): UUID = UUID.fromString(pakke[IdKey] as String)
     fun opprettet(): LocalDateTime = LocalDateTime.parse(pakke[OpprettetKey] as String)
+
+    fun hendelsetype() = Hendelsetype.valueOf(requireNotNull(this.get<String>("hendelse")))
 
     override fun toString() = "${behovType()}:${id()}"
     fun toJson(): String {
@@ -41,10 +44,11 @@ class Behov internal constructor(private val pakke: Pakke) {
 
     fun løsBehov(løsning: Any) {
         pakke[LøsningsKey] = løsning
+        pakke["final"] = true
     }
 
-    fun harLøsning(): Boolean {
-        return løsning() != null
+    fun erLøst(): Boolean {
+        return (pakke["final"] as Boolean?) ?: false
     }
 
     fun løsning() =

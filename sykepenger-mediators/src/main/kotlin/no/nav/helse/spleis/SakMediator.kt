@@ -2,18 +2,14 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.Sak
-import no.nav.helse.sak.SakObserver
-import no.nav.helse.sak.SakskjemaForGammelt
-import no.nav.helse.sak.UtenforOmfangException
-import no.nav.helse.sak.VedtaksperiodeObserver
+import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.sak.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -38,15 +34,22 @@ internal class SakMediator(
     fun håndter(hendelse: InntektsmeldingHendelse) =
         finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
-    fun håndter(hendelse: SykepengehistorikkHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
-
-    fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
+    fun håndter(behov: Behov) {
+        when (behov.hendelsetype()) {
+            Hendelsetype.Ytelser -> håndter(Ytelser(behov))
+            Hendelsetype.ManuellSaksbehandling -> håndter(ManuellSaksbehandlingHendelse(behov))
+        }
+    }
 
     fun håndter(påminnelse: Påminnelse) {
         finnSak(påminnelse) { sak -> sak.håndter(påminnelse) }
     }
+
+    private fun håndter(hendelse: Ytelser) =
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
+
+    private fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
+        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
 
     fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)
 

@@ -1,30 +1,27 @@
 package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.TestConstants.sykepengehistorikkHendelse
+import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Uke
+import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
-import no.nav.helse.juli
-import no.nav.helse.juni
 import no.nav.helse.sak.TilstandType.*
-import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.set
@@ -447,9 +444,9 @@ internal class SakTest {
     }
 
     @Test
-    internal fun `sykepengehistorikk lager ikke ny sak, selv om det ikke finnes noen fra før`() {
+    internal fun `ytelser lager ikke ny sak, selv om det ikke finnes noen fra før`() {
         testSak.also {
-            it.håndter(sykepengehistorikkHendelse(LocalDate.now()))
+            it.håndter(ytelser(sykepengehistorikk = sykepengehistorikk()))
         }
 
         assertSakIkkeEndret()
@@ -487,7 +484,7 @@ internal class SakTest {
         assertVedtaksperiodeEndret()
         assertSakEndret()
         assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
-        assertBehov(BehovsTyper.Sykepengehistorikk)
+        assertBehov(Behovtype.Sykepengehistorikk)
     }
 
     @Test
@@ -523,8 +520,16 @@ internal class SakTest {
             val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
-                sykepengehistorikkHendelse(
-                    sisteHistoriskeSykedag = 1.juli.minusMonths(7),
+                ytelser(
+                    sykepengehistorikk = sykepengehistorikk(
+                        perioder = listOf(
+                            SpolePeriode(
+                                fom = 1.juli.minusMonths(7).minusMonths(1),
+                                tom = 1.juli.minusMonths(7),
+                                grad = "100"
+                            )
+                        )
+                    ),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,
@@ -534,7 +539,7 @@ internal class SakTest {
         }
 
         assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
-        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -564,8 +569,16 @@ internal class SakTest {
             )
 
             it.håndter(
-                sykepengehistorikkHendelse(
-                    sisteHistoriskeSykedag = 1.juli.minusMonths(7),
+                ytelser(
+                    sykepengehistorikk = sykepengehistorikk(
+                        perioder = listOf(
+                            SpolePeriode(
+                                fom = 1.juli.minusMonths(7).minusMonths(1),
+                                tom = 1.juli.minusMonths(7),
+                                grad = "100"
+                            )
+                        )
+                    ),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,
@@ -607,8 +620,16 @@ internal class SakTest {
             val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
-                sykepengehistorikkHendelse(
-                    sisteHistoriskeSykedag = 1.juli.minusMonths(5),
+                ytelser(
+                    sykepengehistorikk = sykepengehistorikk(
+                        perioder = listOf(
+                            SpolePeriode(
+                                fom = 1.juli.minusMonths(5).minusMonths(1),
+                                tom = 1.juli.minusMonths(5),
+                                grad = "100"
+                            )
+                        )
+                    ),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,
@@ -700,10 +721,20 @@ internal class SakTest {
             val saksid = vedtaksperiodeIdForSak()
 
             it.håndter(
-                sykepengehistorikkHendelse(
-                    sisteHistoriskeSykedag = 1.juli.minusMonths(7),
-                    vedtaksperiodeId = saksid,
-                    organisasjonsnummer = organisasjonsnummer
+                ytelser(
+                    sykepengehistorikk = sykepengehistorikk(
+                        perioder = listOf(
+                            SpolePeriode(
+                                fom = 1.juli.minusMonths(7).minusMonths(1),
+                                tom = 1.juli.minusMonths(7),
+                                grad = "100"
+                            )
+                        )
+                    ),
+                    organisasjonsnummer = organisasjonsnummer,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = saksid
                 )
             )
         }
@@ -769,8 +800,8 @@ internal class SakTest {
         assertFalse(this.testSakObserver.sakEndret)
     }
 
-    private fun assertBehov(behovtype: BehovsTyper) {
-        assertNotNull(this.testSakObserver.needEvent.find { it.behovType() == behovtype.name })
+    private fun assertBehov(vararg behovtype: Behovtype) {
+        assertTrue(behovtype.all { behov -> testSakObserver.needEvent.any { it.behovType().contains(behov.name) } })
     }
 
     private class TestSakObserver : SakObserver {

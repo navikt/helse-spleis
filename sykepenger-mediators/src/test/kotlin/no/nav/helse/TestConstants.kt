@@ -6,12 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.Sykepengehistorikk
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.math.BigDecimal
@@ -278,53 +277,43 @@ internal object TestConstants {
     )
 
     fun sykepengehistorikk(
-        perioder: List<SpolePeriode>,
-        organisasjonsnummer: String = "123546564",
-        aktørId: String = "1",
-        fødselsnummer: String = "2",
-        vedtaksperiodeId: UUID = UUID.randomUUID()
-    ): Sykepengehistorikk {
-        val behov = Behov.nyttBehov(
-            BehovsTyper.Sykepengehistorikk, mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to vedtaksperiodeId.toString(),
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer
-            )
-        ).also {
-            it.løsBehov(
-                responsFraSpole(
-                    perioder = perioder
-                )
-            )
-        }
-        return Sykepengehistorikk(objectMapper.readTree(behov.toJson()))
+        perioder: List<SpolePeriode> = emptyList(),
+        sisteHistoriskeSykedag: LocalDate? = null
+    ): Map<String, Any> {
+        return responsFraSpole(
+            perioder = sisteHistoriskeSykedag?.let {
+                listOf(SpolePeriode(
+                    fom = it.minusMonths(1),
+                    tom = it,
+                    grad = "100"
+                ))
+            } ?: perioder
+        )
     }
 
-    fun manuellSaksbehandlingLøsning(
-        organisasjonsnummer: String = "123546564",
+    fun ytelser(
         aktørId: String = "1",
         fødselsnummer: String = "2",
-        vedtaksperiodeId: String = UUID.randomUUID().toString(),
-        utbetalingGodkjent: Boolean,
-        saksbehandler: String
-    ): Behov {
-        return Behov.nyttBehov(
-            BehovsTyper.Sykepengehistorikk, mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "sakskompleksId" to vedtaksperiodeId,
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "saksbehandlerIdent" to saksbehandler
-            )
+        organisasjonsnummer: String = "123546564",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
+        sykepengehistorikk: Map<String, Any>
+
+    ) = Ytelser(
+        Ytelser.lagBehov(
+            vedtaksperiodeId,
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            utgangspunktForBeregningAvYtelse
         ).also {
             it.løsBehov(
                 mapOf(
-                    "godkjent" to utbetalingGodkjent
+                    "Sykepengehistorikk" to sykepengehistorikk
                 )
             )
-        }
-    }
+        }.let { Behov.fromJson(it.toJson()) }
+    )
 }
 
 internal data class SpolePeriode(

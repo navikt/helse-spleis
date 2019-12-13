@@ -13,6 +13,8 @@ internal object BehovProbe {
 
     fun mottattBehov(behov: Behov) {
         sikkerLogg.info(behov.toJson())
-        mottattBehovCounter.labels(behov.behovType()).inc()
+        behov.behovType().forEach {
+            mottattBehovCounter.labels(it).inc()
+        }
     }
 }

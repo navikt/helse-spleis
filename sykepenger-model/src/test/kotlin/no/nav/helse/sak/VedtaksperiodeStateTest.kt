@@ -7,15 +7,16 @@ import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.TestConstants.sykepengehistorikkHendelse
+import no.nav.helse.TestConstants.sykepengehistorikk
+import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
+import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.juli
 import no.nav.helse.sak.TilstandType.*
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
@@ -72,9 +73,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertIngenEndring {
             vedtaksperiode.håndter(
-                sykepengehistorikkHendelse(
-                    sisteHistoriskeSykedag = LocalDate.now(),
-                    vedtaksperiodeId = vedtaksperiodeId
+                ytelser(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    sykepengehistorikk = sykepengehistorikk(
+                        sisteHistoriskeSykedag = LocalDate.now()
+                        )
                 )
             )
         }
@@ -305,9 +308,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertTilstandsendring(INNTEKTSMELDING_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
 
-        assertBehov(BehovsTyper.Sykepengehistorikk)
+        assertBehov(Behovtype.Sykepengehistorikk)
 
-        finnBehov(BehovsTyper.Sykepengehistorikk).get<LocalDate>("tom").also {
+        finnBehov(Behovtype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
             assertEquals(periodeFom.minusDays(1), it)
         }
     }
@@ -337,15 +340,15 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = null,
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
 
         assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
         assertPåminnelse(Duration.ofDays(7))
-        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -373,14 +376,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
 
         assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
-        assertBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -408,14 +413,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(5),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(5)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
 
         assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
-        assertIkkeBehov(BehovsTyper.GodkjenningFraSaksbehandler)
+        assertIkkeBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -443,12 +450,14 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                perioder = listOf(
-                    SpolePeriode(
-                        fom = periodeFom.minusMonths(1),
-                        tom = periodeFom.plusMonths(1),
-                        grad = "100"
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    perioder = listOf(
+                        SpolePeriode(
+                            fom = periodeFom.minusMonths(1),
+                            tom = periodeFom.plusMonths(1),
+                            grad = "100"
+                        )
                     )
                 ),
                 vedtaksperiodeId = vedtaksperiodeId
@@ -486,7 +495,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         }
 
-        assertBehov(BehovsTyper.Sykepengehistorikk)
+        assertBehov(Behovtype.Sykepengehistorikk)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -532,8 +541,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -568,8 +579,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -604,8 +617,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -642,8 +657,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -678,8 +695,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -716,8 +735,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -754,8 +775,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            sykepengehistorikkHendelse(
-                sisteHistoriskeSykedag = periodeFom.minusMonths(7),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                ),
                 vedtaksperiodeId = vedtaksperiodeId
             )
         )
@@ -778,9 +801,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandlingHendelse::class)
         assertPåminnelse(Duration.ofDays(7))
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
-        assertBehov(BehovsTyper.Utbetaling)
+        assertBehov(Behovtype.Utbetaling)
 
-        finnBehov(BehovsTyper.Utbetaling).also {
+        finnBehov(Behovtype.Utbetaling).also {
             assertNotNull(it["utbetalingsreferanse"])
         }
     }
@@ -806,8 +829,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertIngenEndring {
             vedtaksperiode.håndter(
-                sykepengehistorikkHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId
+                ytelser(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    sykepengehistorikk = sykepengehistorikk()
                 )
             )
         }
@@ -919,23 +943,36 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInTilGodkjenning(
-        sykepengehistorikkHendelse: SykepengehistorikkHendelse = sykepengehistorikkHendelse(
+        ytelser: Ytelser = ytelser(
             vedtaksperiodeId = vedtaksperiodeId,
-            sisteHistoriskeSykedag = LocalDate.now().minusMonths(12)
+            organisasjonsnummer = organisasjonsnummer,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            sykepengehistorikk = sykepengehistorikk(
+                perioder = listOf(
+                    SpolePeriode(
+                        fom = LocalDate.now().minusMonths(12).minusMonths(1),
+                        tom = LocalDate.now().minusMonths(12),
+                        grad = "100"
+                    )
+                )
+            )
         ),
         sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
         inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
         nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
     ) =
         beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
-            håndter(sykepengehistorikkHendelse)
+            håndter(ytelser)
         }
 
-    private fun beInTilUtbetaling(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse = manuellSaksbehandlingHendelse(
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        utbetalingGodkjent = true,
-        saksbehandler = "en_saksbehandler_ident"
-    )) =
+    private fun beInTilUtbetaling(
+        manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse = manuellSaksbehandlingHendelse(
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            utbetalingGodkjent = true,
+            saksbehandler = "en_saksbehandler_ident"
+        )
+    ) =
         beInTilGodkjenning().apply {
             håndter(manuellSaksbehandlingHendelse)
         }
@@ -973,11 +1010,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         behovsliste.add(event)
     }
 
-    private fun finnBehov(behovstype: BehovsTyper) =
-        behovsliste.first { it.behovType() == behovstype.name }
+    private fun finnBehov(behovstype: Behovtype) =
+        behovsliste.first { it.behovType().contains(behovstype.name) }
 
-    private fun harBehov(behovstype: BehovsTyper) =
-        behovsliste.any { it.behovType() == behovstype.name }
+    private fun harBehov(behovstype: Behovtype) =
+        behovsliste.any { it.behovType().contains(behovstype.name) }
 
     private fun assertTilstandsendring(
         forrigeTilstandType: TilstandType,
@@ -1020,11 +1057,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertEquals(antallBehov, behovsliste.size)
     }
 
-    private fun assertBehov(behovstype: BehovsTyper) {
+    private fun assertBehov(behovstype: Behovtype) {
         assertTrue(harBehov(behovstype))
     }
 
-    private fun assertIkkeBehov(behovstype: BehovsTyper) {
+    private fun assertIkkeBehov(behovstype: Behovtype) {
         assertFalse(harBehov(behovstype))
     }
 

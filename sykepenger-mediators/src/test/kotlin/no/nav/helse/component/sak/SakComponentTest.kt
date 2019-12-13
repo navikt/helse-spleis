@@ -27,8 +27,8 @@ import no.nav.helse.Topics.påminnelseTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.Topics.vedtaksperiodeEventTopic
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovsTyper
-import no.nav.helse.behov.BehovsTyper.*
+import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovtype.*
 import no.nav.helse.component.JwtStub
 import no.nav.helse.sak.Sak
 import no.nav.helse.sak.TilstandType
@@ -332,13 +332,13 @@ internal class SakComponentTest {
     private fun sendSykepengehistorikkløsning(aktørId: String, fødselsnummer: String, perioder: List<SpolePeriode>) {
         val behov = ventPåBehov(aktørId, fødselsnummer, Sykepengehistorikk)
 
-        assertNotNull(behov["tom"])
+        assertNotNull(behov["utgangspunktForBeregningAvYtelse"])
 
-        behov.løsBehov(
-            TestConstants.responsFraSpole(
+        behov.løsBehov(mapOf(
+            "Sykepengehistorikk" to TestConstants.responsFraSpole(
                 perioder = perioder
             )
-        )
+        ))
         sendBehov(behov)
     }
 
@@ -408,7 +408,7 @@ internal class SakComponentTest {
         sendKafkaMessage(behovTopic, behov.id().toString(), behov.toJson())
     }
 
-    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: BehovsTyper): Behov {
+    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovtype): Behov {
         var behov: Behov? = null
 
         await()
@@ -416,7 +416,7 @@ internal class SakComponentTest {
             .until {
                 behov = TestConsumer.records(behovTopic)
                     .map { Behov.fromJson(it.value()) }
-                    .filter { it.behovType() == behovType.name }
+                    .filter { it.behovType().contains(behovType.name) }
                     .firstOrNull { aktørId == it["aktørId"] && fødselsnummer == it["fødselsnummer"] }
 
                 behov != null
@@ -462,8 +462,8 @@ internal class SakComponentTest {
                     .filter { aktørId == it["aktørId"] }
                     .filter { fødselsnummer == it["fødselsnummer"] }
                     .filter { virksomhetsnummer == it["organisasjonsnummer"] }
-                    .filter { it.behovType() in typer }
-                    .map(Behov::behovType)
+                    .filter { it.behovType().containsAll(typer) }
+                    .flatMap(Behov::behovType)
                     .distinct()
 
                 assertEquals(typer, behov)
