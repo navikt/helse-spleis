@@ -11,35 +11,43 @@ internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor
         førsteFraværsdag ?: throw IllegalStateException("Første fraværsdag er null")
 
     override fun visitSykedag(sykedag: Sykedag) {
-        førsteFraværsdagTilstand.fraværsdag(this, sykedag.dagen)
+        førsteFraværsdagTilstand.sykedag(this, sykedag.dagen)
     }
 
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
-        førsteFraværsdagTilstand.fraværsdag(this, egenmeldingsdag.dagen)
+        førsteFraværsdagTilstand.egenmeldingsdag(this, egenmeldingsdag.dagen)
     }
 
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
-        førsteFraværsdagTilstand.fraværsdag(this, sykHelgedag.dagen)
+        førsteFraværsdagTilstand.sykHelgedag(this, sykHelgedag.dagen)
     }
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {
-        førsteFraværsdagTilstand.ikkeFraværsdag(this)
+        førsteFraværsdagTilstand.arbeidsdag(this)
+    }
+
+    override fun visitFeriedag(feriedag: Feriedag) {
+        førsteFraværsdagTilstand.feriedag(this)
+    }
+
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) {
+        førsteFraværsdagTilstand.permisjonsdag(this)
     }
 
     override fun visitImplisittDag(implisittDag: ImplisittDag) {
-        førsteFraværsdagTilstand.ikkeFraværsdag(this)
+        førsteFraværsdagTilstand.implisittdag(this)
     }
 
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
-        førsteFraværsdagTilstand.ugyldigDag(this)
+        førsteFraværsdagTilstand.utenlandsdag(this)
     }
 
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
-        førsteFraværsdagTilstand.ugyldigDag(this)
+        førsteFraværsdagTilstand.ubestemtdag(this)
     }
 
     override fun visitStudiedag(studiedag: Studiedag) {
-        førsteFraværsdagTilstand.ugyldigDag(this)
+        førsteFraværsdagTilstand.studiedag(this)
     }
 
     private fun state(nyTilstand: FørsteFraværsdagTilstand) {
@@ -49,11 +57,20 @@ internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor
     }
 
     private interface FørsteFraværsdagTilstand {
-        fun fraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {}
-
-        fun ikkeFraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
-
-        fun ugyldigDag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+        fun sykedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {}
+        fun egenmeldingsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {}
+        fun sykHelgedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {}
+        fun implisittdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
+        fun arbeidsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
+        fun feriedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
+        fun permisjonsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {}
+        fun studiedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(UgyldigTilstand)
+        }
+        fun utenlandsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(UgyldigTilstand)
+        }
+        fun ubestemtdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
             utgangspunktForBeregningAvYtelseVisitor.state(UgyldigTilstand)
         }
 
@@ -62,7 +79,15 @@ internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor
     }
 
     private object TrengerFørsteFraværsdag: FørsteFraværsdagTilstand {
-        override fun fraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+        override fun sykedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
+        }
+
+        override fun egenmeldingsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
+        }
+
+        override fun sykHelgedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
             utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
         }
     }
@@ -72,12 +97,38 @@ internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor
             utgangspunktForBeregningAvYtelseVisitor.førsteFraværsdag = førsteFraværsdag
         }
 
-        override fun ikkeFraværsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+        override fun arbeidsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
             utgangspunktForBeregningAvYtelseVisitor.state(TrengerFørsteFraværsdag)
+        }
+
+        override fun implisittdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(MuligOpphold(førsteFraværsdag))
         }
 
         override fun leaving(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
             utgangspunktForBeregningAvYtelseVisitor.førsteFraværsdag = null
+        }
+    }
+
+    private class MuligOpphold(private val kanskjeFørsteFraværsdag: LocalDate): FørsteFraværsdagTilstand {
+        override fun arbeidsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(TrengerFørsteFraværsdag)
+        }
+
+        override fun feriedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(kanskjeFørsteFraværsdag))
+        }
+
+        override fun sykedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
+        }
+
+        override fun egenmeldingsdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
+        }
+
+        override fun sykHelgedag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor, dagen: LocalDate) {
+            utgangspunktForBeregningAvYtelseVisitor.state(HarFørsteFraværsdag(dagen))
         }
     }
 

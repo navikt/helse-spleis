@@ -27,6 +27,9 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
         assertUgyldigTilstand(1.sykedager + 1.utenlandsdager + 1.sykedager)
         assertUgyldigTilstand(1.sykedager + 1.studieDager)
         assertUgyldigTilstand(1.sykedager + 1.studieDager + 1.sykedager)
+        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.arbeidsdager)
+        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.studieDager)
+        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.utenlandsdager)
     }
 
     @Test
@@ -50,6 +53,12 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
         perioder(2.sykedager, 2.permisjonsdager, 2.sykedager) { periode1, _, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
+        perioder(2.sykedager, 2.implisittDager, 1.sykHelgdager) { _, _ , sisteSykedager ->
+            assertFørsteDagErUtgangspunktForBeregning(sisteSykedager, this)
+        }
+        perioder(2.sykedager, 2.implisittDager, 1.egenmeldingsdager) { _, _ , sisteSykedager ->
+            assertFørsteDagErUtgangspunktForBeregning(sisteSykedager, this)
+        }
     }
 
     @Test
@@ -59,6 +68,13 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
         }
         perioder(2.sykedager, 2.permisjonsdager) { periode1, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
+        }
+    }
+
+    @Test
+    internal fun `ferie i framtiden`() {
+        perioder(2.sykedager, 2.implisittDager, 2.feriedager) { sykedager, _, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
@@ -80,7 +96,10 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
             assertDagenErUtgangspunktForBeregning(dagen.dagen, dagen)
         }
 
-        private fun assertDagenErUtgangspunktForBeregning(dagen: LocalDate, sykdomstidslinje: ConcreteSykdomstidslinje) {
+        private fun assertDagenErUtgangspunktForBeregning(
+            dagen: LocalDate,
+            sykdomstidslinje: ConcreteSykdomstidslinje
+        ) {
             assertEquals(dagen, sykdomstidslinje.utgangspunktForBeregningAvYtelse())
         }
 
@@ -88,7 +107,10 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
             assertEquals(sykdomstidslinje.førsteDag(), sykdomstidslinje.utgangspunktForBeregningAvYtelse())
         }
 
-        private fun assertFørsteDagErUtgangspunktForBeregning(perioden: ConcreteSykdomstidslinje, sykdomstidslinje: ConcreteSykdomstidslinje) {
+        private fun assertFørsteDagErUtgangspunktForBeregning(
+            perioden: ConcreteSykdomstidslinje,
+            sykdomstidslinje: ConcreteSykdomstidslinje
+        ) {
             assertDagenErUtgangspunktForBeregning(perioden.førsteDag(), sykdomstidslinje)
         }
 
