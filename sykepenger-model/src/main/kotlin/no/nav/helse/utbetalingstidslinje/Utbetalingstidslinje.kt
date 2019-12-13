@@ -33,31 +33,9 @@ internal class Utbetalingstidslinje {
             .utbetalingslinjer()
 
     private fun avgrens(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler) : Utbetalingstidslinje {
-        val startDato =  utbetalingsdager.first().dato
-        val sisteUtbetalingsdag = merge(others)
-            .betalingsperiode(alderRegler)
-
-        return this.subset(startDato, sisteUtbetalingsdag)
-    }
-
-    private fun betalingsperiode(alderRegler: AlderRegler): LocalDate {
-        var betalteDager = 0
-        var redusertYtelseDager = 0
-        var sisteBetalteDag = utbetalingsdager.first().dato
-        for (dag in utbetalingsdager) {
-            if (dag is Utbetalingsdag.NavDag && dag.inntekt > 0) {
-                if (alderRegler.navBurdeBetale(betalteDager, redusertYtelseDager, dag.dato)) {
-                    sisteBetalteDag = dag.dato
-                }
-
-                if (alderRegler.harFylt67(dag.dato)) {
-                    redusertYtelseDager++
-                }
-
-                betalteDager ++
-            }
-        }
-        return sisteBetalteDag
+        val ubetalteDager = Utbetalingsavgrenser(this.merge(others), alderRegler).ubetalteDager()
+        return Utbetalingstidslinje(this.utbetalingsdager
+            .map { utbetalingdag -> ubetalteDager.firstOrNull(){ it.dag.isEqual(utbetalingdag.dato) } ?: utbetalingdag })
     }
 
     private fun merge(others: List<Utbetalingstidslinje>): Utbetalingstidslinje {

@@ -168,7 +168,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (5.E + 15.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
     }
 
     @Test
@@ -198,7 +198,7 @@ internal class UtbetalingBuilderTest {
         val utebetalingslinjer = (16.S + 15.F + A + 10.S).utbetalingslinjer()
 
         assertEquals(1, utebetalingslinjer.size)
-        assert(utebetalingslinjer.first(), 2.februar, 9.februar, 1000)
+        assert(utebetalingslinjer.first(), 2.februar, 11.februar, 1000)
     }
 
     @Test
@@ -215,7 +215,7 @@ internal class UtbetalingBuilderTest {
         val utebetalingslinjer = (21.S + A + 15.F + 10.S).utbetalingslinjer()
 
         assertEquals(1, utebetalingslinjer.size)
-        assert(utebetalingslinjer.first(), 17.januar, 19.januar, 1200)
+        assert(utebetalingslinjer.first(), 17.januar, 21.januar, 1200)
     }
 
     @Test
@@ -302,7 +302,7 @@ internal class UtbetalingBuilderTest {
     fun `arbeidsgiverperiode med tre påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
         val linjer = (2.A + 19.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
-        assert(linjer.first(), 19.januar, 19.januar, 1200)
+        assert(linjer.first(), 19.januar, 21.januar, 1200)
     }
 
     @Test
@@ -336,7 +336,7 @@ internal class UtbetalingBuilderTest {
     fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
         val linjer = (368.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
-        assert(linjer.first(), 17.januar, 28.desember, 1200)
+        assert(linjer.first(), 17.januar, 30.desember, 1200)
     }
 
     @Test
@@ -348,7 +348,7 @@ internal class UtbetalingBuilderTest {
     @Test
     fun `når personen fyller 67 og 248 dager er brukt opp`() {
         val linjer = (400.S).utbetalingslinjer(fødselsnummer = "01125112345")
-        assert(linjer.first(), 17.januar, 28.desember, 1200)
+        assert(linjer.first(), 17.januar, 30.desember, 1200)
     }
 
     @Test
@@ -362,7 +362,7 @@ internal class UtbetalingBuilderTest {
         val betalingslinjer = (16.S + 6.S + 16.F + A + 16.S).utbetalingslinjer()
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
-        assert(betalingslinjer.last(), 9.februar, 23.februar, 1000)
+        assert(betalingslinjer.last(), 9.februar, 24.februar, 1000)
     }
 
     @Test
@@ -436,7 +436,7 @@ internal class UtbetalingBuilderTest {
     fun `oppdelt tidslinje i arbeidsgiverperioden`() {
         val betalingslinjer = (50.S).utbetalingslinjer(10.januar, 20.januar)
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
     }
 
     @Test

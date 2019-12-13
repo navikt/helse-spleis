@@ -27,6 +27,7 @@ internal class Utbetalingsavgrenser(private val tidslinje: Utbetalingstidslinje,
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+        if (dag.inntekt == 0.0) return
         if (alderRegler.navBurdeBetale(betalteDager, gammelmannDager, dag.dato)) {
             state.betalbarDag(this, dag.dato)
         } else {
