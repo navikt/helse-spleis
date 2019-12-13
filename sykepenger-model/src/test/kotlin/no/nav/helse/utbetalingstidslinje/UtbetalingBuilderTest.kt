@@ -31,12 +31,12 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `to dager blir betalt av arbeidsgiver`() {
-        assertEquals(0, 2.S.tidslinje().size)
+        assertEquals(0, 2.S.utbetalingslinjer().size)
     }
 
     @Test
     fun `en utbetalingslinje med tre dager`() {
-        val betalingslinjer = (16.S + 3.S).tidslinje()
+        val betalingslinjer = (16.S + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
@@ -44,7 +44,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `en utbetalingslinje med helg`() {
-        val betalingslinjer = (16.S + 6.S).tidslinje()
+        val betalingslinjer = (16.S + 6.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
@@ -52,7 +52,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `utbetalingslinjer starter aldri med helg`() {
-        val betalingslinjer = (3.A + 16.S + 6.S).tidslinje()
+        val betalingslinjer = (3.A + 16.S + 6.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 25.januar, 1200)
@@ -60,7 +60,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Sykedager med inneklemte arbeidsdager`() {
-        val betalingslinjer = (16.S + 7.S + 2.A + 1.S).tidslinje() //6 utbetalingsdager
+        val betalingslinjer = (16.S + 7.S + 2.A + 1.S).utbetalingslinjer() //6 utbetalingsdager
 
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 23.januar, 1200)
@@ -69,7 +69,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdager i arbeidsgiverperioden`() {
-        val betalingslinjer = (15.S + 2.A + 1.S + 7.S).tidslinje() //6 utbetalingsdager
+        val betalingslinjer = (15.S + 2.A + 1.S + 7.S).utbetalingslinjer() //6 utbetalingsdager
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 19.januar, 25.januar, 1200)
@@ -83,7 +83,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie i arbeidsgiverperiode`() {
-        val betalingslinjer = (S + 2.F + 13.S + S).tidslinje()
+        val betalingslinjer = (S + 2.F + 13.S + S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
@@ -91,7 +91,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
-        val betalingslinjer = (S + 2.F + A + S + 14.S + 3.S).tidslinje()
+        val betalingslinjer = (S + 2.F + A + S + 14.S + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
@@ -99,7 +99,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
-        val betalingslinjer = (S + A + 2.F + S + 14.S + 3.S).tidslinje()
+        val betalingslinjer = (S + A + 2.F + S + 14.S + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
@@ -107,7 +107,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie etter arbeidsgiverperioden`() {
-        val betalingslinjer = (16.S + 2.F + S).tidslinje()
+        val betalingslinjer = (16.S + 2.F + S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 19.januar, 19.januar, 1200)
@@ -115,14 +115,14 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag etter ferie teller som gap`() {
-        val betalingslinjer = (15.S + 2.F + A + S).tidslinje()
+        val betalingslinjer = (15.S + 2.F + A + S).utbetalingslinjer()
 
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
-        val betalingslinjer = (16.S + 16.F + A + 3.S).tidslinje()
+        val betalingslinjer = (16.S + 16.F + A + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 5.februar, 5.februar, 1000)
@@ -130,25 +130,25 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
-        val betalingslinjer = (15.S + 16.F + A + 3.S).tidslinje()
+        val betalingslinjer = (15.S + 16.F + A + 3.S).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie og arbeid påvirker ikke initiell tilstand`() {
-        val betalingslinjer = (2.F + 2.A + 16.S + 2.F).tidslinje()
+        val betalingslinjer = (2.F + 2.A + 16.S + 2.F).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Arbeidsgiverperioden resettes når det er opphold over 16 dager`() {
-        val betalingslinjer = (10.S + 20.F + A + 10.S + 20.F).tidslinje()
+        val betalingslinjer = (10.S + 20.F + A + 10.S + 20.F).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie fullfører arbeidsgiverperioden`() {
-        val betalingslinjer = (10.S + 20.F + 10.S).tidslinje()
+        val betalingslinjer = (10.S + 20.F + 10.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 31.januar, 9.februar, 1200)
@@ -156,7 +156,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie mer enn 16 dager gir ikke ny arbeidsgiverperiode`() {
-        val betalingslinjer = (20.S + 20.F + 10.S).tidslinje()
+        val betalingslinjer = (20.S + 20.F + 10.S).utbetalingslinjer()
 
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
@@ -165,10 +165,74 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `egenmelding sammen med sykdom oppfører seg som sykdom`() {
-        val betalingslinjer = (5.E + 15.S).tidslinje()
+        val betalingslinjer = (5.E + 15.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
+    }
+
+    @Test
+    fun `16 dagers opphold etter en utbetaling gir ny arbeidsgiverperiode ved påfølgende sykdom`() {
+        val utebetalingslinjer = (22.S + 16.A + 10.S).utbetalingslinjer()
+
+        assertEquals(1, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 17.januar, 22.januar, 1200)
+    }
+
+    @Test
+    fun `Ferie i arbeidsgiverperioden direkte etterfulgt av en arbeidsdag gjør at ferien teller som opphold`() {
+        val utebetalingslinjer = (10.S + 15.F + A + 10.S).utbetalingslinjer()
+
+        assertEquals(0, utebetalingslinjer.size)
+    }
+
+    @Test
+    fun `Ferie etter arbeidsdag i arbeidsgiverperioden gjør at ferien teller som opphold`() {
+        val utebetalingslinjer = (10.S + A + 15.F + 10.S).utbetalingslinjer()
+
+        assertEquals(0, utebetalingslinjer.size)
+    }
+
+    @Test
+    fun `Ferie direkte etter arbeidsgiverperioden teller ikke som opphold, selv om det er en direkte etterfølgende arbeidsdag`() {
+        val utebetalingslinjer = (16.S + 15.F + A + 10.S).utbetalingslinjer()
+
+        assertEquals(1, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 2.februar, 9.februar, 1000)
+    }
+
+    @Test
+    fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, selv om det er en direkte etterfølgende arbeidsdag`() {
+        val utebetalingslinjer = (20.S + 15.F + A + 10.S).utbetalingslinjer()
+
+        assertEquals(2, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(utebetalingslinjer.last(), 6.februar, 15.februar, 1000)
+    }
+
+    @Test
+    fun `Ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold`() {
+        val utebetalingslinjer = (21.S + A + 15.F + 10.S).utbetalingslinjer()
+
+        assertEquals(1, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 17.januar, 19.januar, 1200)
+    }
+
+    @Test
+    fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, mens ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold, så A + 15F gir ett opphold på 16 dager og dette resulterer i to arbeidsgiverperioder`() {
+        val utebetalingslinjer = (17.S + 4.F + A + 15.F + 10.S).utbetalingslinjer()
+
+        assertEquals(1, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 17.januar, 17.januar, 1200)
+    }
+
+    @Test
+    fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, mens ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold, så A + 14F gir ett opphold på 15 dager og dette resulterer i en arbeidsgiverperiode`() {
+        val utebetalingslinjer = (17.S + 3.F + A + 14.F + 10.S).utbetalingslinjer()
+
+        assertEquals(2, utebetalingslinjer.size)
+        assert(utebetalingslinjer.first(), 17.januar, 17.januar, 1200)
+        assert(utebetalingslinjer.last(), 5.februar, 14.februar, 1200)
     }
 
 //    @Test
@@ -223,33 +287,33 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `arbeidsgiverperiode med to påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
-        val linjer = (3.A + 18.S).tidslinje()
+        val linjer = (3.A + 18.S).utbetalingslinjer()
         assertEquals(0, linjer.size)
     }
 
     @Test
     fun `arbeidsgiverperiode med tre påfølgende sykedager i helg`() {
-        val linjer = (3.A + 19.S).tidslinje()
+        val linjer = (3.A + 19.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
         assert(linjer.first(), 22.januar, 22.januar, 1200)
     }
 
     @Test
     fun `arbeidsgiverperiode med tre påfølgende sykedager i helg blir ingen utbetalingslinjer`() {
-        val linjer = (2.A + 19.S).tidslinje()
+        val linjer = (2.A + 19.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
         assert(linjer.first(), 19.januar, 19.januar, 1200)
     }
 
     @Test
     fun `arbeidsgiverperiode til fredag med sykedager over helg gir ingen betalingslinjer`() {
-        val linjer = (16.S + 3.A + 2.S).tidslinje()
+        val linjer = (16.S + 3.A + 2.S).utbetalingslinjer()
         assertEquals(0, linjer.size)
     }
 
     @Test
     fun `arbeidsgiverperioden slutter på en søndag`() {
-        val linjer = (3.A + 5.S + 2.F + 13.S).tidslinje()
+        val linjer = (3.A + 5.S + 2.F + 13.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
         assert(linjer.first(), 22.januar, 23.januar, 1200)
     }
@@ -270,120 +334,121 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
-        val linjer = (368.S).tidslinje()
+        val linjer = (368.S).utbetalingslinjer()
         assertEquals(1, linjer.size)
         assert(linjer.first(), 17.januar, 28.desember, 1200)
     }
 
     @Test
     fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-        val linjer = (16.S + 90.S).tidslinje(fødselsnummer = AlderReglerTest.PERSON_67_ÅR_FNR_2018)
+        val linjer = (16.S + 90.S).utbetalingslinjer(fødselsnummer = AlderReglerTest.PERSON_67_ÅR_FNR_2018)
         assert(linjer.first(), 17.januar, 10.april, 1200)
     }
 
     @Test
     fun `når personen fyller 67 og 248 dager er brukt opp`() {
-        val linjer = (400.S).tidslinje(fødselsnummer = "01125112345")
+        val linjer = (400.S).utbetalingslinjer(fødselsnummer = "01125112345")
         assert(linjer.first(), 17.januar, 28.desember, 1200)
     }
 
     @Test
     fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-        val linjer = (400.S).tidslinje(fødselsnummer = "01024812345")
+        val linjer = (400.S).utbetalingslinjer(fødselsnummer = "01024812345")
         assert(linjer.first(), 17.januar, 31.januar, 1200)
     }
 
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
-        val betalingslinjer = (16.S + 4.S + 16.F + A + 16.S).tidslinje()
-        assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
+        val betalingslinjer = (16.S + 6.S + 16.F + A + 16.S).utbetalingslinjer()
+        assertEquals(2, betalingslinjer.size)
+        assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
+        assert(betalingslinjer.last(), 9.februar, 23.februar, 1000)
     }
 
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold`() {
-        val betalingslinjer = (16.S + 4.S + 16.A + 16.S).tidslinje()
+        val betalingslinjer = (16.S + 6.S + 16.A + 16.S).utbetalingslinjer()
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
     }
 
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, arbeidsdageropphold der sykedager går over helg`() {
-        val betalingslinjer = (16.S + 6.S + 16.A + 16.S).tidslinje()
+        val betalingslinjer = (16.S + 6.S + 16.A + 16.S).utbetalingslinjer()
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
     }
 
     @Test
     fun `permisjon i en arbeidsgiverperiode telles som ferie`() {
-        val betalingslinjer = (4.S + 4.P + 9.S).tidslinje()
+        val betalingslinjer = (4.S + 4.P + 9.S).utbetalingslinjer()
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
     }
 
     @Test
     fun `permisjon med påfølgende arbeidsdag teller som opphold i sykeperioden`() {
-        val betalingslinjer = (4.S + 4.P + 1.A + 16.S).tidslinje()
+        val betalingslinjer = (4.S + 4.P + 1.A + 16.S).utbetalingslinjer()
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 25.januar, 1200)
     }
 
     @Test
     fun `permisjon direkte etter arbeidsgiverperioden teller ikke som opphold`() {
-        val betalingslinjer = (16.S + 10.P + 15.A + 3.S).tidslinje()
+        val betalingslinjer = (16.S + 10.P + 15.A + 3.S).utbetalingslinjer()
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 12.februar, 13.februar, 1000)
     }
 
     @Test
     fun `resetter arbeidsgiverperioden etter 16 arbeidsdager`() {
-        val betalingslinjer = (15.S + 16.A + 14.S).tidslinje()
+        val betalingslinjer = (15.S + 16.A + 14.S).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `utlands-, ubestemt- og utdanningsdager teller som opphold`() {
-        val betalingslinjer = (15.S + 10.U + 4.EDU + 3.UT + 14.S).tidslinje()
+        val betalingslinjer = (15.S + 10.U + 4.EDU + 3.UT + 14.S).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `intitialiserer arbeidsgiverperioden med 5 dager`() {
-        val betalingslinjer = (15.S).tidslinje(arbeidsgiverperiodeSeed = 5)
+        val betalingslinjer = (15.S).utbetalingslinjer(arbeidsgiverperiodeSeed = 5)
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 12.januar, 15.januar, 1200)
     }
 
     @Test
     fun `intitialiserer arbeidsgiverperioden med 16 dager`() {
-        val betalingslinjer = (15.S).tidslinje(arbeidsgiverperiodeSeed = 16)
+        val betalingslinjer = (15.S).utbetalingslinjer(arbeidsgiverperiodeSeed = 16)
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 1.januar, 15.januar, 1200)
     }
 
     @Test
     fun `oppdeltArbeidsgiverutbetalingstidslinje har ingen sykedager betalt av nav`() {
-        val betalingslinjer = (50.S).tidslinje(1.januar, 10.januar)
+        val betalingslinjer = (50.S).utbetalingslinjer(1.januar, 10.januar)
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `oppdelt tidslinje i arbeidsgiverperioden`() {
-        val betalingslinjer = (50.S).tidslinje(10.januar, 20.januar)
+        val betalingslinjer = (50.S).utbetalingslinjer(10.januar, 20.januar)
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
     @Test
     fun `oppdelt tidslinje etter arbeidsgiverperioden`() {
-        val betalingslinjer = (50.S).tidslinje(21.januar, 30.januar)
+        val betalingslinjer = (50.S).utbetalingslinjer(21.januar, 30.januar)
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 30.januar, 1200)
     }
 
     @Test
     fun `oppdelt tidslinje blir bare helg`() {
-        val betalingslinjer = (21.S).tidslinje(20.januar, 21.januar)
+        val betalingslinjer = (21.S).utbetalingslinjer(20.januar, 21.januar)
         assertEquals(0, betalingslinjer.size)
     }
 
@@ -467,7 +532,7 @@ internal class UtbetalingBuilderTest {
         )
             .also { startDato = startDato.plusDays(this.toLong()) }
 
-    private fun ConcreteSykdomstidslinje.tidslinje(
+    private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         førsteDag: LocalDate = this.førsteDag(),
         sisteDag: LocalDate = this.sisteDag(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,

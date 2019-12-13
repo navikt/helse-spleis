@@ -307,8 +307,8 @@ internal class UtbetalingBuilder internal constructor(
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingBuilder, dagen: LocalDate) {
             splitter.håndterArbeidsdag(dagen)
-            splitter.ikkeSykedager = splitter.fridager + 1
-            splitter.state(if (splitter.arbeidsgiverRegler.burdeStarteNyArbeidsgiverperiode(splitter.ikkeSykedager)) Initiell else UtbetalingOpphold)
+            splitter.ikkeSykedager = 1
+            splitter.state(UtbetalingOpphold)
         }
 
         override fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingBuilder, dagen: LocalDate) {
