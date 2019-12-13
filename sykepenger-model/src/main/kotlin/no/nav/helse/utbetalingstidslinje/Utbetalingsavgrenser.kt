@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 internal class Utbetalingsavgrenser(private val tidslinje: Utbetalingstidslinje,
                                     private val alderRegler: AlderRegler):
-    Utbetalingstidslinje.UtbetalingsdagVisitor() {
+    Utbetalingstidslinje.UtbetalingsdagVisitor {
     private var state: State = State.Initiell
     private var betalteDager = 0
     private var opphold = 0

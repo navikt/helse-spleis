@@ -19,8 +19,6 @@ internal class Utbetalingstidslinje {
     }
 
     private val utbetalingsdager: MutableList<Utbetalingsdag>
-    private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
-    private var helseState: HelseState = HelseState.IkkeSyk
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         utbetalingsdager.forEach { it.accept(visitor) }
@@ -79,10 +77,7 @@ internal class Utbetalingstidslinje {
         return Utbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
     }
 
-    private fun utbetalingslinjer(): List<Utbetalingslinje> {
-        utbetalingsdager.forEach { it.accept(this) }
-        return utbetalingslinjer
-    }
+    private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
 
     internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
@@ -100,12 +95,12 @@ internal class Utbetalingstidslinje {
         utbetalingsdager.add(Utbetalingsdag.Fridag(inntekt, dagen))
     }
 
-    internal abstract class UtbetalingsdagVisitor {
-        open fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
-        open fun visitNavDag(dag: Utbetalingsdag.NavDag) {}
-        open fun visitArbeidsdag(dag: Utbetalingsdag.Arbeidsdag) {}
-        open fun visitFridag(dag: Utbetalingsdag.Fridag) {}
-        open fun visitAvvistDag(dag: Utbetalingsdag.AvvistDag) {}
+    internal interface UtbetalingsdagVisitor {
+        fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
+        fun visitNavDag(dag: Utbetalingsdag.NavDag) {}
+        fun visitArbeidsdag(dag: Utbetalingsdag.Arbeidsdag) {}
+        fun visitFridag(dag: Utbetalingsdag.Fridag) {}
+        fun visitAvvistDag(dag: Utbetalingsdag.AvvistDag) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) {
@@ -114,23 +109,16 @@ internal class Utbetalingstidslinje {
             internal fun subset(liste: List<Utbetalingsdag>, fom: LocalDate, tom: LocalDate) = liste.filter { it.dato.isAfter(fom.minusDays(1)) && it.dato.isBefore(tom.plusDays(1)) }
         }
 
-        abstract fun accept(tidslinje: Utbetalingstidslinje)
         abstract fun accept(visitor: UtbetalingsdagVisitor)
 
         internal class ArbeidsgiverperiodeDag(inntekt: Double, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
-            override fun accept(tidslinje: Utbetalingstidslinje) {
-                tidslinje.helseState.visitArbeidsgiverperiodeDag(tidslinje, this)
-            }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsgiverperiodeDag(this)
         }
 
         internal class NavDag(inntekt: Double, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
-            override fun accept(tidslinje: Utbetalingstidslinje) {
-                tidslinje.helseState.visitNAVDag(tidslinje, this)
-            }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
 
@@ -142,102 +130,22 @@ internal class Utbetalingstidslinje {
 
         internal class Arbeidsdag(inntekt: Double, dagen: LocalDate) :
             Utbetalingsdag(inntekt, dagen) {
-            override fun accept(tidslinje: Utbetalingstidslinje) {
-                tidslinje.helseState.visitArbeidsdag(tidslinje, this)
-            }
+
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsdag(this)
 
         }
 
         internal class Fridag(inntekt: Double, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
-            override fun accept(tidslinje: Utbetalingstidslinje) {
-                tidslinje.helseState.visitFridag(tidslinje, this)
-            }
+
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitFridag(this)
         }
 
         internal class AvvistDag(internal val dag: LocalDate, internal val begrunnelse: Begrunnelse) :
             Utbetalingsdag(0.0, dag) {
-            override fun accept(tidslinje: Utbetalingstidslinje) {
-                tidslinje.helseState.visitAvvistDag(tidslinje, this)
-            }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitAvvistDag(this)
 
-        }
-    }
-
-    private sealed class HelseState {
-
-        open fun visitArbeidsgiverperiodeDag(
-            tidslinje: Utbetalingstidslinje,
-            arbeidsgiverperiodeDag: Utbetalingsdag.ArbeidsgiverperiodeDag
-        ) {
-        }
-
-        abstract fun visitNAVDag(
-            tidslinje: Utbetalingstidslinje,
-            NavDag: Utbetalingsdag.NavDag
-        )
-
-        open fun visitArbeidsdag(
-            tidslinje: Utbetalingstidslinje,
-            arbeidsdag: Utbetalingsdag.Arbeidsdag
-        ) {
-        }
-
-        open fun visitFridag(
-            tidslinje: Utbetalingstidslinje,
-            fridag: Utbetalingsdag.Fridag
-        ) {
-        }
-
-        open fun visitAvvistDag(
-            tidslinje: Utbetalingstidslinje,
-            avvistDag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-        ) {
-        }
-
-        internal object IkkeSyk : HelseState() {
-            override fun visitNAVDag(
-                tidslinje: Utbetalingstidslinje,
-                navDag: Utbetalingsdag.NavDag
-            ) {
-                if (navDag.inntekt == 0.0) return
-                tidslinje.utbetalingslinjer.add(navDag.utbetalingslinje())
-                tidslinje.helseState = Syk
-            }
-        }
-
-        internal object Syk : HelseState() {
-            override fun visitNAVDag(
-                tidslinje: Utbetalingstidslinje,
-                navDag: Utbetalingsdag.NavDag
-            ) {
-                navDag.oppdater(tidslinje.utbetalingslinjer.last())
-            }
-
-            override fun visitArbeidsgiverperiodeDag(
-                tidslinje: Utbetalingstidslinje,
-                arbeidsgiverperiodeDag: Utbetalingsdag.ArbeidsgiverperiodeDag
-            ) {
-                tidslinje.helseState = IkkeSyk
-            }
-
-            override fun visitArbeidsdag(
-                tidslinje: Utbetalingstidslinje,
-                arbeidsdag: Utbetalingsdag.Arbeidsdag
-            ) {
-                tidslinje.helseState = IkkeSyk
-            }
-
-            override fun visitFridag(
-                tidslinje: Utbetalingstidslinje,
-                fridag: Utbetalingsdag.Fridag
-            ) {
-                tidslinje.helseState = IkkeSyk
-            }
         }
     }
 
