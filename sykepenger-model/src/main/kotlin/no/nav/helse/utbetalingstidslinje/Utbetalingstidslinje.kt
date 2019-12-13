@@ -96,11 +96,13 @@ internal class Utbetalingstidslinje {
     }
 
     internal interface UtbetalingsdagVisitor {
+        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
         fun visitNavDag(dag: Utbetalingsdag.NavDag) {}
         fun visitArbeidsdag(dag: Utbetalingsdag.Arbeidsdag) {}
         fun visitFridag(dag: Utbetalingsdag.Fridag) {}
         fun visitAvvistDag(dag: Utbetalingsdag.AvvistDag) {}
+        fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) {
