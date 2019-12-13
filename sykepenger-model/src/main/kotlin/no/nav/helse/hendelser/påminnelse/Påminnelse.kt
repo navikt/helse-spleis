@@ -12,11 +12,11 @@ import java.time.LocalDateTime
 
 class Påminnelse private constructor(private val json: JsonNode) : ArbeidstakerHendelse, VedtaksperiodeHendelse {
 
-    internal val antallGangerPåminnet = json["antallGangerPåminnet"].intValue()
-    internal val tilstand = TilstandType.valueOf(json["tilstand"].textValue())
-    internal val tilstandsendringstidspunkt = LocalDateTime.parse(json["tilstandsendringstidspunkt"].textValue())
-    internal val påminnelsestidspunkt = LocalDateTime.parse(json["påminnelsestidspunkt"].textValue())
-    internal val nestePåminnelsestidspunkt = LocalDateTime.parse(json["nestePåminnelsestidspunkt"].textValue())
+    val antallGangerPåminnet = json["antallGangerPåminnet"].intValue()
+    val tilstand = TilstandType.valueOf(json["tilstand"].textValue())
+    val tilstandsendringstidspunkt = LocalDateTime.parse(json["tilstandsendringstidspunkt"].textValue())
+    val påminnelsestidspunkt = LocalDateTime.parse(json["påminnelsestidspunkt"].textValue())
+    val nestePåminnelsestidspunkt = LocalDateTime.parse(json["nestePåminnelsestidspunkt"].textValue())
 
     override fun aktørId(): String = json["aktørId"].textValue()
 

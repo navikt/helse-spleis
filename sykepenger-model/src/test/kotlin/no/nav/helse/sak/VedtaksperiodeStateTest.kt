@@ -147,6 +147,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
         assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -161,6 +162,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     @Test
@@ -202,6 +204,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
         assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -216,6 +219,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     @Test
@@ -256,6 +260,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
         assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -270,6 +275,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     @Test
@@ -481,6 +487,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
         assertBehov(BehovsTyper.Sykepengehistorikk)
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -495,6 +502,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     @Test
@@ -816,6 +824,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
         assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, Påminnelse::class)
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -830,6 +839,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     @Test
@@ -844,6 +854,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
     @Test
@@ -858,6 +869,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
+        assertNull(forrigePåminnelse)
     }
 
     private fun beInStartTilstand(): Vedtaksperiode {
@@ -938,17 +950,23 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         private var vedtaksperiodeEndringer = 0
         private lateinit var lastStateEvent: VedtaksperiodeObserver.StateChangeEvent
         private val behovsliste: MutableList<Behov> = mutableListOf()
+        private var forrigePåminnelse: Påminnelse? = null
     }
 
     @BeforeEach
     fun `tilbakestill behovliste`() {
         behovsliste.clear()
+        forrigePåminnelse = null
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
         haveObserverBeenCalled = true
         lastStateEvent = event
         vedtaksperiodeEndringer++
+    }
+
+    override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+        forrigePåminnelse = påminnelse
     }
 
     override fun vedtaksperiodeTrengerLøsning(event: Behov) {

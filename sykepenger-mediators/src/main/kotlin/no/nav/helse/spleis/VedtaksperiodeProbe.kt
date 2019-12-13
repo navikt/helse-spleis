@@ -5,6 +5,7 @@ import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sak.SakObserver
@@ -31,6 +32,10 @@ object VedtaksperiodeProbe : SakObserver {
     private val utenforOmfangCounter = Counter.build("utenfor_omfang_totals", "Antall ganger en sak er utenfor omfang")
             .labelNames("dokumentType")
             .register()
+
+    private val vedtaksperiodePåminnetCounter = Counter.build("vedtaksperiode_paminnet_totals", "Antall ganger en vedtaksperiode er blitt påminnet")
+        .labelNames("tilstand")
+        .register()
 
     private val sakMementoStørrelse = Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
 
@@ -62,6 +67,15 @@ object VedtaksperiodeProbe : SakObserver {
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
             }
         }
+    }
+
+    override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+        log.info("mottok påminnelse nr.${påminnelse.antallGangerPåminnet}, sendt: ${påminnelse.påminnelsestidspunkt} for " +
+            "vedtaksperiode: ${påminnelse.vedtaksperiodeId()} som gikk i tilstand: ${påminnelse.tilstand} på ${påminnelse.tilstandsendringstidspunkt}." +
+            "Neste påminnelsetidspunkt er: ${påminnelse.nestePåminnelsestidspunkt}")
+        vedtaksperiodePåminnetCounter
+            .labels(påminnelse.tilstand.toString())
+            .inc()
     }
 
     fun utenforOmfang(hendelse: Any) {

@@ -1,6 +1,7 @@
 package no.nav.helse.sak
 
 import no.nav.helse.behov.Behov
+import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import java.time.Duration
 import java.time.LocalDate
@@ -31,6 +32,7 @@ interface VedtaksperiodeObserver {
         val opprettet: LocalDate
     )
 
+    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: StateChangeEvent) {}
 

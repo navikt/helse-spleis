@@ -15,29 +15,17 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.sykepengehistorikk.SykepengehistorikkHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.sak.TilstandType.INNTEKTSMELDING_MOTTATT
-import no.nav.helse.sak.TilstandType.KOMPLETT_SYKDOMSTIDSLINJE
-import no.nav.helse.sak.TilstandType.NY_SØKNAD_MOTTATT
-import no.nav.helse.sak.TilstandType.SENDT_SØKNAD_MOTTATT
-import no.nav.helse.sak.TilstandType.START
-import no.nav.helse.sak.TilstandType.TIL_GODKJENNING
-import no.nav.helse.sak.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.sak.TilstandType.TIL_UTBETALING
-import no.nav.helse.sak.TilstandType.valueOf
+import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.Utbetalingsberegning
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
-import no.nav.helse.sykdomstidslinje.joinForOppdrag
+import no.nav.helse.sykdomstidslinje.*
 import org.apache.commons.codec.binary.Base32
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
@@ -174,6 +162,7 @@ internal class Vedtaksperiode internal constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.tilstand != type) return
+            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.setTilstand(påminnelse, TilInfotrygdTilstand)
         }
 
@@ -245,6 +234,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.tilstand != type) return
+            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             trengerSykepengehistorikk(vedtaksperiode)
         }
 
@@ -262,7 +252,11 @@ internal class Vedtaksperiode internal constructor(
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
-            if (utbetalingsberegning.utbetalingslinjer.isEmpty() || delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(vedtaksperiode, utbetalingsberegning)) {
+            if (utbetalingsberegning.utbetalingslinjer.isEmpty() || delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(
+                    vedtaksperiode,
+                    utbetalingsberegning
+                )
+            ) {
                 return vedtaksperiode.setTilstand(sykepengehistorikkHendelse, TilInfotrygdTilstand)
             }
 
@@ -272,7 +266,10 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        private fun harFraværsdagInnen6Mnd(sykepengehistorikkHendelse: SykepengehistorikkHendelse, tidslinje: ConcreteSykdomstidslinje): Boolean {
+        private fun harFraværsdagInnen6Mnd(
+            sykepengehistorikkHendelse: SykepengehistorikkHendelse,
+            tidslinje: ConcreteSykdomstidslinje
+        ): Boolean {
             val sisteFraværsdag = sykepengehistorikkHendelse.sisteFraværsdag() ?: return false
 
             return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
@@ -330,6 +327,8 @@ internal class Vedtaksperiode internal constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.tilstand != type) return
+            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             // TODO bør kanskje varsle saksbehandler hvis utbetaling ikke har skjedd?
             //  Revisit når Spenn svarer på status for utbetaling
         }
@@ -487,6 +486,12 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
+    private fun emitVedtaksperiodePåminnet(påminnelse: Påminnelse) {
+        observers.forEach { observer ->
+            observer.vedtaksperiodePåminnet(påminnelse)
+        }
+    }
+
     private fun emitTrengerLøsning(type: BehovsTyper, additionalParams: Map<String, Any> = emptyMap()) {
         val params = mutableMapOf(
             "sakskompleksId" to id,
@@ -541,18 +546,20 @@ internal class Vedtaksperiode internal constructor(
         }
 
         fun state(): String =
-            objectMapper.writeValueAsString(mapOf(
-                "id" to this.id,
-                "aktørId" to this.aktørId,
-                "fødselsnummer" to this.fødselsnummer,
-                "organisasjonsnummer" to this.organisasjonsnummer,
-                "tilstandType" to this.tilstandType,
-                "sykdomstidslinje" to this.sykdomstidslinje,
-                "maksdato" to this.maksdato,
-                "utbetalingslinjer" to this.utbetalingslinjer,
-                "godkjentAv" to this.godkjentAv,
-                "utbetalingsreferanse" to this.utbetalingsreferanse
-            ))
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "id" to this.id,
+                    "aktørId" to this.aktørId,
+                    "fødselsnummer" to this.fødselsnummer,
+                    "organisasjonsnummer" to this.organisasjonsnummer,
+                    "tilstandType" to this.tilstandType,
+                    "sykdomstidslinje" to this.sykdomstidslinje,
+                    "maksdato" to this.maksdato,
+                    "utbetalingslinjer" to this.utbetalingslinjer,
+                    "godkjentAv" to this.godkjentAv,
+                    "utbetalingsreferanse" to this.utbetalingsreferanse
+                )
+            )
     }
 
     override fun compareTo(other: Vedtaksperiode): Int = compare(
