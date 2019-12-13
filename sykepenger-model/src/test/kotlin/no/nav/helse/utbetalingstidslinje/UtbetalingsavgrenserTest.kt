@@ -9,6 +9,7 @@ internal class UtbetalingsavgrenserTest {
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val PERSON_70_ÅR_FNR_2018 = "10014812345"
+        private const val PERSON_67_ÅR_FNR_2018 = "10015112345"
     }
 
     @Test
@@ -57,6 +58,18 @@ internal class UtbetalingsavgrenserTest {
     fun `opphold på mindre enn 26 uker skal ikke nullstille telleren`() {
         val tidslinje = tidslinjeOf(248.N, (26*7 - 1).F, 1.N)
         assertEquals(listOf(6.mars(2019)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test
+    fun `sjekk 60 dagers grense for 67 åringer`() {
+        val tidslinje = tidslinjeOf(10.N, 61.N)
+        assertEquals(listOf(12.mars), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018))
+    }
+
+    @Test
+    fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
+        val tidslinje = tidslinjeOf(10.N, 60.N, (26*7).A, 60.N)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018))
     }
 
     private fun tidslinjeOf(
