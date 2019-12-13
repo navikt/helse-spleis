@@ -11,7 +11,8 @@ import java.time.LocalDate
  */
 
 internal class UtbetalingBuilder internal constructor(
-    private val sykdomstidslinje: ArbeidsgiverSykdomstidslinje
+    private val sykdomstidslinje: ArbeidsgiverSykdomstidslinje,
+    private val sisteDag: LocalDate
 ) : SykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
@@ -28,7 +29,7 @@ internal class UtbetalingBuilder internal constructor(
     private val tidslinje = Utbetalingstidslinje()
 
     fun result(): Utbetalingstidslinje {
-        sykdomstidslinje.accept(this)
+        (sykdomstidslinje.kutt(sisteDag)).accept(this)
         return tidslinje
     }
 

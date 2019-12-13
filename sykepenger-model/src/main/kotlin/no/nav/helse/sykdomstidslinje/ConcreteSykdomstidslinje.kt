@@ -67,6 +67,12 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return this.plus(other, Companion::implisittDag)
     }
 
+    internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
+        if (kuttDag.isBefore(førsteDag())) return null
+        if ( !(kuttDag.isBefore(sisteDag()) )) return this
+        return CompositeSykdomstidslinje(this.flatten().filterNot { it.dagen.isAfter(kuttDag) })
+    }
+
     fun overlapperMed(other: ConcreteSykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> false
@@ -119,6 +125,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun harGrenseInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in (other.førsteDag()..other.sisteDag())
+
 
     private fun jsonRepresentation(): JsonTidslinje {
         val dager = flatten().map { it.toJsonDag() }

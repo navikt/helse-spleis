@@ -371,7 +371,7 @@ internal class UtbetalingBuilderTest {
     fun `oppdelt tidslinje i arbeidsgiverperioden`() {
         val betalingslinjer = (50.S).tidslinje(10.januar, 20.januar)
         assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
+        assert(betalingslinjer.first(), 17.januar, 19.januar, 1200)
     }
 
     @Test

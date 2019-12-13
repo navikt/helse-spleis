@@ -20,8 +20,8 @@ internal class SakSykdomstidslinje(
     }
 
     internal fun utbetalingslinjer(): List<Utbetalingslinje> {
-        val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje).result()
-        val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it).result() }
+        val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje,sisteDag).result()
+        val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it,sisteDag).result() }
         return tidslinje.utbetalingslinjer(tidslinjer, alderRegler, førsteDag, sisteDag)
     }
 }
