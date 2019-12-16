@@ -21,7 +21,6 @@ import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.*
 import org.apache.commons.codec.binary.Base32
-import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.Duration
@@ -32,17 +31,25 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-internal class Vedtaksperiode internal constructor(
+internal class Vedtaksperiode private constructor(
     private val id: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
-    private val organisasjonsnummer: String
+    private val organisasjonsnummer: String,
+    private var sykdomstidslinje: ConcreteSykdomstidslinje
 ) {
+
+    internal constructor(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        hendelse: SykdomstidslinjeHendelse
+    ): this(id, aktørId, fødselsnummer, organisasjonsnummer, hendelse.sykdomstidslinje())
+
     private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
-
-    private var sykdomstidslinje: ConcreteSykdomstidslinje? = null
 
     private var maksdato: LocalDate? = null
 
@@ -55,10 +62,10 @@ internal class Vedtaksperiode internal constructor(
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
-        this.sykdomstidslinje?.hendelser()?.førsteAvType<InntektsmeldingHendelse>()
+        this.sykdomstidslinje.hendelser().førsteAvType<InntektsmeldingHendelse>()
 
     private fun sykepengegrunnlag() =
-        (inntektsmeldingHendelse()?.beregnetInntekt() as BigDecimal).times(12.toBigDecimal())
+        inntektsmeldingHendelse().beregnetInntekt().times(12.toBigDecimal())
 
     private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
 
@@ -108,7 +115,7 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        this.sykdomstidslinje?.overlapperMed(hendelse.sykdomstidslinje()) ?: true
+        this.sykdomstidslinje.overlapperMed(hendelse.sykdomstidslinje())
 
     private fun setTilstand(event: ArbeidstakerHendelse, nyTilstand: Vedtaksperiodetilstand, block: () -> Unit = {}) {
         tilstand.leaving()
@@ -127,7 +134,7 @@ internal class Vedtaksperiode internal constructor(
         hendelse: HENDELSE,
         nesteTilstand: Vedtaksperiodetilstand
     ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
-        val tidslinje = this.sykdomstidslinje?.plus(hendelse.sykdomstidslinje()) ?: hendelse.sykdomstidslinje()
+        val tidslinje = this.sykdomstidslinje.plus(hendelse.sykdomstidslinje())
 
         if (tidslinje.erUtenforOmfang()) {
             setTilstand(hendelse, TilInfotrygdTilstand)
@@ -144,7 +151,7 @@ internal class Vedtaksperiode internal constructor(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            utgangspunktForBeregningAvYtelse = sykdomstidslinje!!.utgangspunktForBeregningAvYtelse().minusDays(1)
+            utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
         )
 
         observers.forEach { observer ->
@@ -194,7 +201,12 @@ internal class Vedtaksperiode internal constructor(
     private object StartTilstand : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
-            vedtaksperiode.håndter(nySøknadHendelse, NySøknadMottattTilstand)
+            val tidslinje = nySøknadHendelse.sykdomstidslinje()
+            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
+
+            vedtaksperiode.setTilstand(nySøknadHendelse, NySøknadMottattTilstand) {
+                vedtaksperiode.sykdomstidslinje = tidslinje
+            }
         }
 
         override val type = START
@@ -256,15 +268,12 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
-            val tidslinje = vedtaksperiode.sykdomstidslinje
-                ?: return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
-
-            if (harFraværsdagInnen6Mnd(ytelser, tidslinje)) {
+            if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
             val utbetalingsberegning = try {
-                tidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
+                vedtaksperiode.sykdomstidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
@@ -297,7 +306,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsberegning: Utbetalingsberegning
         ): Boolean {
-            val inntektsmelding = vedtaksperiode.inntektsmeldingHendelse() ?: return true
+            val inntektsmelding = vedtaksperiode.inntektsmeldingHendelse()
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return false
 
             val opphørsdato = inntektsmelding.refusjon().opphoersdato
@@ -403,13 +412,10 @@ internal class Vedtaksperiode internal constructor(
                 id = memento.id,
                 aktørId = memento.aktørId,
                 fødselsnummer = memento.fødselsnummer,
-                organisasjonsnummer = memento.organisasjonsnummer
+                organisasjonsnummer = memento.organisasjonsnummer,
+                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString(), sykdomshendelseDeserializer)
             ).also {
                 it.tilstand = tilstandFraEnum(memento.tilstandType)
-                it.sykdomstidslinje = memento.sykdomstidslinje
-                    ?.let {
-                        ConcreteSykdomstidslinje.fromJson(it.toString(), sykdomshendelseDeserializer)
-                    }
                 it.maksdato = memento.maksdato
                 it.utbetalingslinjer = memento.utbetalingslinjer?.map {
                     Utbetalingslinje(
@@ -437,6 +443,45 @@ internal class Vedtaksperiode internal constructor(
             TIL_INFOTRYGD -> TilInfotrygdTilstand
         }
 
+        fun nyPeriode(hendelse: NySøknadHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
+            return Vedtaksperiode(
+                id = UUID.randomUUID(),
+                aktørId = hendelse.aktørId(),
+                fødselsnummer = hendelse.fødselsnummer(),
+                organisasjonsnummer = hendelse.organisasjonsnummer(),
+                sykdomstidslinje = hendelse.sykdomstidslinje()
+            ).apply {
+                observers.forEach { addVedtaksperiodeObserver(it) }
+                tilstand.håndter(this, hendelse)
+            }
+        }
+
+        fun nyPeriode(hendelse: SendtSøknadHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
+            return Vedtaksperiode(
+                id = UUID.randomUUID(),
+                aktørId = hendelse.aktørId(),
+                fødselsnummer = hendelse.fødselsnummer(),
+                organisasjonsnummer = hendelse.organisasjonsnummer(),
+                sykdomstidslinje = hendelse.sykdomstidslinje()
+            ).apply {
+                observers.forEach { addVedtaksperiodeObserver(it) }
+                tilstand.håndter(this, hendelse)
+            }
+        }
+
+        fun nyPeriode(hendelse: InntektsmeldingHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
+            return Vedtaksperiode(
+                id = UUID.randomUUID(),
+                aktørId = hendelse.aktørId(),
+                fødselsnummer = hendelse.fødselsnummer(),
+                organisasjonsnummer = hendelse.organisasjonsnummer(),
+                sykdomstidslinje = hendelse.sykdomstidslinje()
+            ).apply {
+                observers.forEach { addVedtaksperiodeObserver(it) }
+                tilstand.håndter(this, hendelse)
+            }
+        }
+
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -449,9 +494,7 @@ internal class Vedtaksperiode internal constructor(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             tilstandType = tilstand.type,
-            sykdomstidslinje = sykdomstidslinje?.toJson()?.let {
-                objectMapper.readTree(it)
-            },
+            sykdomstidslinje = objectMapper.readTree(sykdomstidslinje.toJson()),
             maksdato = maksdato,
             utbetalingslinjer = utbetalingslinjer
                 ?.let { objectMapper.convertValue<JsonNode>(it) },
@@ -519,7 +562,7 @@ internal class Vedtaksperiode internal constructor(
         internal val fødselsnummer: String,
         internal val organisasjonsnummer: String,
         internal val tilstandType: TilstandType,
-        internal val sykdomstidslinje: JsonNode?,
+        internal val sykdomstidslinje: JsonNode,
         internal val maksdato: LocalDate?,
         internal val utbetalingslinjer: JsonNode?,
         internal val godkjentAv: String?,
@@ -540,7 +583,7 @@ internal class Vedtaksperiode internal constructor(
                     fødselsnummer = json["fødselsnummer"].textValue(),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     tilstandType = valueOf(json["tilstandType"].textValue()),
-                    sykdomstidslinje = json["sykdomstidslinje"]?.takeUnless { it.isNull },
+                    sykdomstidslinje = json["sykdomstidslinje"],
                     maksdato = json["maksdato"].safelyUnwrapDate(),
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),

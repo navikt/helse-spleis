@@ -1,6 +1,7 @@
 package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -36,7 +37,8 @@ internal class VedtaksperiodeTest {
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer
+            organisasjonsnummer = organisasjonsnummer,
+            hendelse = nySøknadHendelse()
         )
 
         val jsonRepresentation = vedtaksperiode.memento()
@@ -45,7 +47,7 @@ internal class VedtaksperiodeTest {
         assertEquals(aktørId, jsonRepresentation.aktørId)
         assertEquals(fødselsnummer, jsonRepresentation.fødselsnummer)
         assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
-        assertNull(jsonRepresentation.sykdomstidslinje)
+        assertNotNull(jsonRepresentation.sykdomstidslinje)
     }
 
     @Test
@@ -59,7 +61,8 @@ internal class VedtaksperiodeTest {
             id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer
+            organisasjonsnummer = organisasjonsnummer,
+            hendelse = nySøknadHendelse()
         ).memento()
 
         val gjenopprettetJson = Vedtaksperiode.restore(originalJson)
@@ -97,7 +100,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = null,
+            sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null
         )
@@ -140,7 +143,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = null,
+            sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null
         )
@@ -154,26 +157,13 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `nytt vedtaksperiode godtar ny søknad`() {
-        val vedtaksperiode = Vedtaksperiode(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId",
-            fødselsnummer = "5678",
-            organisasjonsnummer = ""
-        )
-        assertTrue(vedtaksperiode.håndter(nySøknadHendelse()))
-    }
-
-    @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
         val vedtaksperiode = Vedtaksperiode(
             id = UUID.randomUUID(),
             aktørId = "aktørId",
             fødselsnummer = "fnr",
-            organisasjonsnummer = ""
-        )
-        vedtaksperiode.håndter(
-            nySøknadHendelse(
+            organisasjonsnummer = "",
+            hendelse = nySøknadHendelse(
                 søknadsperioder = listOf(
                     SoknadsperiodeDTO(
                         fom = 1.juli,

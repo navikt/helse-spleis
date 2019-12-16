@@ -11,10 +11,11 @@ import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
 
 internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID) {
-    internal constructor(organisasjonsnummer: String): this(organisasjonsnummer, UUID.randomUUID())
+    internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID())
 
     internal class Memento internal constructor(
         internal val id: UUID,
@@ -40,10 +41,12 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
 
         fun state(): String =
-            objectMapper.convertValue<ObjectNode>(mapOf(
-                "id" to this.id,
-                "organisasjonsnummer" to this.organisasjonsnummer
-            )).also {
+            objectMapper.convertValue<ObjectNode>(
+                mapOf(
+                    "id" to this.id,
+                    "organisasjonsnummer" to this.organisasjonsnummer
+                )
+            ).also {
                 this.saker.fold(it.putArray("saker")) { result, current ->
                     result.addRawValue(RawValue(current.state()))
                 }
@@ -118,12 +121,12 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder.forEach { it.addVedtaksperiodeObserver(observer) }
     }
 
-    private fun nyVedtaksperiode(hendelse: ArbeidstakerHendelse): Vedtaksperiode {
+    private fun <Hendelse> nyVedtaksperiode(hendelse: Hendelse): Vedtaksperiode where Hendelse : SykdomstidslinjeHendelse, Hendelse : ArbeidstakerHendelse {
         return Vedtaksperiode(
-            id = UUID.randomUUID(),
             aktørId = hendelse.aktørId(),
             fødselsnummer = hendelse.fødselsnummer(),
-            organisasjonsnummer = organisasjonsnummer
+            organisasjonsnummer = hendelse.organisasjonsnummer(),
+            hendelse = hendelse
         ).also {
             vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
             perioder.add(it)
