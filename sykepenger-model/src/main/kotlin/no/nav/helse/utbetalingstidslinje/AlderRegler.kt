@@ -56,12 +56,12 @@ internal class AlderRegler(fødselsnummer: String, private val startDato: LocalD
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)
 
-    fun maksdato(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
+    fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
         val aldersgrense = if (harFylt67(sisteUtbetalingsdag)) øvreAldersgrense.minusDays(1)
             else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
 
         return listOf(
-            sisteUtbetalingsdag.addWeekdays(gjenståendeDager(antallDager, antallDagerEtter67, sisteUtbetalingsdag)),
+            sisteUtbetalingsdag.addWeekdays(gjenståendeDager(antallDager, gammelpersonDager, sisteUtbetalingsdag)),
             aldersgrense
         ).min()!!
     }

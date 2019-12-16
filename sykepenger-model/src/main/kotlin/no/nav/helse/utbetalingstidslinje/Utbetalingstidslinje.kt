@@ -10,9 +10,14 @@ import kotlin.math.roundToInt
 
 internal class Utbetalingstidslinje {
 
+    private lateinit var visitor: Utbetalingsgrense
+
     constructor() {
         utbetalingsdager = mutableListOf()
     }
+
+    internal fun maksdato() = visitor.maksdato()
+    internal fun antallBetalteSykedager() = visitor.antallBetalteSykedager()
 
     private constructor(utbetalingsdager: List<Utbetalingsdag>) {
         this.utbetalingsdager = utbetalingsdager.toMutableList()
@@ -33,9 +38,11 @@ internal class Utbetalingstidslinje {
             .utbetalingslinjer()
 
     private fun avgrens(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler) : Utbetalingstidslinje {
-        val ubetalteDager = Utbetalingsavgrenser(this.merge(others), alderRegler).ubetalteDager()
+        visitor = Utbetalingsgrense(alderRegler)
+        this.merge(others).accept(visitor)
+
         return Utbetalingstidslinje(this.utbetalingsdager
-            .map { utbetalingdag -> ubetalteDager.firstOrNull(){ it.dag.isEqual(utbetalingdag.dato) } ?: utbetalingdag })
+            .map { utbetalingdag -> visitor.ubetalteDager().firstOrNull(){ it.dag.isEqual(utbetalingdag.dato) } ?: utbetalingdag })
     }
 
     private fun merge(others: List<Utbetalingstidslinje>): Utbetalingstidslinje {

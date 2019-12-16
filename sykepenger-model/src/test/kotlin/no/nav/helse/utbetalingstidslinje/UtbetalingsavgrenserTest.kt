@@ -86,12 +86,13 @@ internal class UtbetalingsavgrenserTest {
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
-        Utbetalingsavgrenser(
-            this,
+        Utbetalingsgrense(
             AlderRegler(fnr,
                 LocalDate.of(2018,1,1),
                 LocalDate.of(2019, 12, 31)
-            )).ubetalteDager().map { it.dag }
+            ))
+            .also { this.accept(it) }
+            .ubetalteDager().map { it.dag }
     private val Int.AP get() = Pair(this, Utbetalingstidslinje::addArbeidsgiverperiodedag)
     private val Int.N get() = Pair(this, Utbetalingstidslinje::addNAVdag)
     private val Int.A get() = Pair(this, Utbetalingstidslinje::addArbeidsdag)

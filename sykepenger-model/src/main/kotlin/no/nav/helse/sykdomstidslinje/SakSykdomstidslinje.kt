@@ -13,6 +13,12 @@ internal class SakSykdomstidslinje(
 
 ) : SykdomstidslinjeElement {
 
+    private var maksdato: LocalDate? = null
+    private var antallBetalteSykedager: Int = 0
+
+    internal fun maksdato() = maksdato
+    internal fun antallBetalteSykedager() = antallBetalteSykedager
+
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSak(this)
         sykdomstidslinjer.forEach { it.accept(visitor) }
@@ -23,5 +29,8 @@ internal class SakSykdomstidslinje(
         val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje,sisteDag).result()
         val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it,sisteDag).result() }
         return tidslinje.utbetalingslinjer(tidslinjer, alderRegler, førsteDag, sisteDag)
+            .also {
+                maksdato = tidslinje.maksdato()
+                antallBetalteSykedager = tidslinje.antallBetalteSykedager()}
     }
 }
