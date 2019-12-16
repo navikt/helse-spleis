@@ -33,7 +33,7 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
         }
     }
 
-    val type = jsonNode["type"].asText()!!
+    val type = jsonNode["soknadstype"]?.textValue() ?: jsonNode["type"].textValue()
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!
@@ -48,16 +48,16 @@ data class Sykepengesøknad(private val jsonNode: JsonNode) {
     val fraværsperioder
         get() = jsonNode["fravar"]?.filterNot {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(
-                    Fraværstype.UTDANNING_FULLTID,
-                    Fraværstype.UTDANNING_DELTID
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
             )
         }?.map { FraværsPeriode(it) } ?: emptyList()
 
     val utdanningsperioder
         get() = jsonNode["fravar"]?.filter {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(
-                    Fraværstype.UTDANNING_FULLTID,
-                    Fraværstype.UTDANNING_DELTID
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
             )
         }?.map { Utdanningsfraværsperiode(it) } ?: emptyList()
 
