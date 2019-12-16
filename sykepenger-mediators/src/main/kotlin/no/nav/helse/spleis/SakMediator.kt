@@ -2,19 +2,14 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.BehovProbe
 import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.*
-import no.nav.helse.spleis.inntektsmelding.InntektsmeldingProbe
-import no.nav.helse.spleis.søknad.SøknadProbe
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -29,9 +24,11 @@ internal class SakMediator(
     hendelseConsumer: HendelseConsumer
 ) : SakObserver, HendelseConsumer.MessageListener {
 
+    private val hendelseProbe = HendelseProbe()
     private val log = LoggerFactory.getLogger(SakMediator::class.java)
 
     init {
+        hendelseConsumer.addListener(hendelseProbe)
         hendelseConsumer.addListener(this)
     }
 
@@ -40,48 +37,28 @@ internal class SakMediator(
     }
 
     override fun onLøstBehov(behov: Behov) {
-        BehovProbe.mottattBehov(behov)
-
-        when (behov.hendelsetype()) {
-            Hendelsetype.Ytelser -> Ytelser(behov).also {
-                finnSak(it) { sak -> sak.håndter(it) }
+        finnSak(behov).also {sak ->
+            when (behov.hendelsetype()) {
+                Hendelsetype.Ytelser -> Ytelser(behov).also {
+                    sak.håndter(it)
+                }
+                Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandlingHendelse(behov).also {
+                    sak.håndter(it)
+                }
             }
-            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandlingHendelse(behov).also {
-                finnSak(it) { sak -> sak.håndter(it) }
-            }
         }
     }
 
-    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
-        InntektsmeldingProbe.mottattInntektsmelding(inntektsmelding)
-
-        InntektsmeldingHendelse(inntektsmelding).also {
-            finnSak(it) { sak -> sak.håndter(it) }
-        }
+    override fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {
+        finnSak(inntektsmelding) { sak -> sak.håndter(inntektsmelding) }
     }
 
-    override fun onFremtidigSøknad(søknad: Sykepengesøknad) {
-        SøknadProbe.mottattSøknad(søknad)
-
-        NySøknadHendelse(søknad).also {
-            finnSak(it) { sak -> sak.håndter(it) }
-        }
+    override fun onNySøknad(søknad: NySøknadHendelse) {
+        finnSak(søknad) { sak -> sak.håndter(søknad) }
     }
 
-    override fun onNySøknad(søknad: Sykepengesøknad) {
-        SøknadProbe.mottattSøknad(søknad)
-
-        NySøknadHendelse(søknad).also {
-            finnSak(it) { sak -> sak.håndter(it) }
-        }
-    }
-
-    override fun onSendtSøknad(søknad: Sykepengesøknad) {
-        SøknadProbe.mottattSøknad(søknad)
-
-        SendtSøknadHendelse(søknad).also {
-            finnSak(it) { sak -> sak.håndter(it) }
-        }
+    override fun onSendtSøknad(søknad: SendtSøknadHendelse) {
+        finnSak(søknad) { sak -> sak.håndter(søknad) }
     }
 
     fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)

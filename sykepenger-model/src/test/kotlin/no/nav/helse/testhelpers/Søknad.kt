@@ -2,7 +2,6 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
@@ -21,10 +20,8 @@ internal object NySøknadHendelseWrapper :
     override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
         NySøknadHendelseBuilder.build {
             sykepengesøknad {
-                søknad {
-                    status = SoknadsstatusDTO.NY
-                    apply(block)
-                }
+                status = SoknadsstatusDTO.NY
+                apply(block)
             }
         }
 }
@@ -34,29 +31,20 @@ internal object SendtSøknadHendelseWrapper :
     override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
         SendtSøknadHendelseBuilder.build {
             sykepengesøknad {
-                søknad {
-                    status = SoknadsstatusDTO.SENDT
-                    apply(block)
-                }
+                status = SoknadsstatusDTO.SENDT
+                apply(block)
             }
         }
-
-}
-
-internal object SykepengesøknadWrapper :
-    Buildertype<Sykepengesøknad, SykepengesoknadDTOBuilder> {
-    override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
-        SykepengesøknadBuilder.build { søknad(block) }
 }
 
 internal class NySøknadHendelseBuilder {
-    private lateinit var sykepengesøknad: Sykepengesøknad
+    private lateinit var sykepengesøknad: SykepengesoknadDTO
 
-    internal fun sykepengesøknad(block: SykepengesøknadBuilder.() -> Unit) {
-        sykepengesøknad = SykepengesøknadBuilder.build(block)
+    internal fun sykepengesøknad(block: SykepengesoknadDTOBuilder.() -> Unit) {
+        sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = NySøknadHendelse(sykepengesøknad)
+    private fun build() = NySøknadHendelse(sykepengesøknad.toJsonNode())
 
     internal companion object Type :
         Buildertype<NySøknadHendelse, NySøknadHendelseBuilder> {
@@ -66,34 +54,18 @@ internal class NySøknadHendelseBuilder {
 }
 
 internal class SendtSøknadHendelseBuilder {
-    private lateinit var sykepengesøknad: Sykepengesøknad
+    private lateinit var sykepengesøknad: SykepengesoknadDTO
 
-    internal fun sykepengesøknad(block: SykepengesøknadBuilder.() -> Unit) {
-        sykepengesøknad = SykepengesøknadBuilder.build(block)
+    internal fun sykepengesøknad(block: SykepengesoknadDTOBuilder.() -> Unit) {
+        sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = SendtSøknadHendelse(sykepengesøknad)
+    private fun build() = SendtSøknadHendelse(sykepengesøknad.toJsonNode())
 
     internal companion object Type :
         Buildertype<SendtSøknadHendelse, SendtSøknadHendelseBuilder> {
         override fun build(block: SendtSøknadHendelseBuilder.() -> Unit) =
             SendtSøknadHendelseBuilder().apply(block).build()
-    }
-}
-
-internal class SykepengesøknadBuilder {
-    private lateinit var søknad: SykepengesoknadDTO
-
-    internal fun søknad(block: SykepengesoknadDTOBuilder.() -> Unit) {
-        søknad = SykepengesoknadDTOBuilder.build(block)
-    }
-
-    private fun build() = Sykepengesøknad(søknad.toJsonNode())
-
-    internal companion object Type :
-        Buildertype<Sykepengesøknad, SykepengesøknadBuilder> {
-        override fun build(block: SykepengesøknadBuilder.() -> Unit) =
-            SykepengesøknadBuilder().apply(block).build()
     }
 }
 

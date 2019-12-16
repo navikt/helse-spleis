@@ -507,17 +507,15 @@ internal class Vedtaksperiode internal constructor(
         behovsliste: List<Behovtype>,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
-        val params = mutableMapOf(
-            "hendelse" to hendelsetype.name,
-            "sakskompleksId" to id,
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer
+        val behov = Behov.nyttBehov(
+            hendelsetype = hendelsetype,
+            behov = behovsliste,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
+            additionalParams = additionalParams
         )
-
-        params.putAll(additionalParams)
-
-        val behov = Behov.nyttBehov(behovsliste, params)
 
         observers.forEach { observer ->
             observer.vedtaksperiodeTrengerLøsning(behov)

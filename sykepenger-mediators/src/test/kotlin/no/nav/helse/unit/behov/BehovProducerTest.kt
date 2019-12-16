@@ -6,10 +6,12 @@ import io.mockk.verify
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.Behovtype
+import no.nav.helse.hendelser.Hendelsetype
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
+import java.util.*
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -25,7 +27,17 @@ internal class BehovProducerTest {
         } returns DummyFuture(RecordMetadata(TopicPartition(topic, 0), 0L, 0L, 0L, 0L, 0, 0))
 
         BehovProducer(topic, producer)
-                .sendNyttBehov(Behov.nyttBehov(listOf(Behovtype.Sykepengehistorikk), emptyMap()))
+            .sendNyttBehov(
+                Behov.nyttBehov(
+                    Hendelsetype.Ytelser,
+                    listOf(Behovtype.Sykepengehistorikk),
+                    "aktørId",
+                    "fnr",
+                    "orgnr",
+                    UUID.randomUUID(),
+                    emptyMap()
+                )
+            )
 
         verify(exactly = 1) {
             producer.send(match { record ->

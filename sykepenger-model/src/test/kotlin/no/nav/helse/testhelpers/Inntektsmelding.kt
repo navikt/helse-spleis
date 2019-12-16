@@ -1,6 +1,5 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
@@ -23,44 +22,22 @@ internal fun <Type, Builder> inntektsmelding(
 internal object InntektsmeldingHendelseWrapper :
     Buildertype<InntektsmeldingHendelse, InntektsmeldingkontraktBuilder> {
     override fun build(block: InntektsmeldingkontraktBuilder.() -> Unit) =
-        InntektsmeldingHendelseBuilder.build { inntektsmelding { inntektsmelding(block) } }
-}
-
-internal object InntektsmeldingWrapper :
-    Buildertype<Inntektsmelding, InntektsmeldingkontraktBuilder> {
-    override fun build(block: InntektsmeldingkontraktBuilder.() -> Unit) =
-        InntektsmeldingBuilder.build { inntektsmelding(block) }
+        InntektsmeldingHendelseBuilder.build { inntektsmelding(block) }
 }
 
 internal class InntektsmeldingHendelseBuilder {
-    private lateinit var inntektsmelding: Inntektsmelding
-
-    internal fun inntektsmelding(block: InntektsmeldingBuilder.() -> Unit) {
-        inntektsmelding = InntektsmeldingBuilder.build(block)
-    }
-
-    private fun build() = InntektsmeldingHendelse(inntektsmelding)
-
-    internal companion object Type :
-        Buildertype<InntektsmeldingHendelse, InntektsmeldingHendelseBuilder> {
-        override fun build(block: InntektsmeldingHendelseBuilder.() -> Unit) =
-            InntektsmeldingHendelseBuilder().apply(block).build()
-    }
-}
-
-internal class InntektsmeldingBuilder {
     private lateinit var inntektsmelding: Inntektsmeldingkontrakt
 
     internal fun inntektsmelding(block: InntektsmeldingkontraktBuilder.() -> Unit) {
         inntektsmelding = InntektsmeldingkontraktBuilder.build(block)
     }
 
-    private fun build() = Inntektsmelding(inntektsmelding.toJsonNode())
+    private fun build() = InntektsmeldingHendelse(inntektsmelding.toJsonNode())
 
     internal companion object Type :
-        Buildertype<Inntektsmelding, InntektsmeldingBuilder> {
-        override fun build(block: InntektsmeldingBuilder.() -> Unit) =
-            InntektsmeldingBuilder().apply(block).build()
+        Buildertype<InntektsmeldingHendelse, InntektsmeldingHendelseBuilder> {
+        override fun build(block: InntektsmeldingHendelseBuilder.() -> Unit) =
+            InntektsmeldingHendelseBuilder().apply(block).build()
     }
 }
 

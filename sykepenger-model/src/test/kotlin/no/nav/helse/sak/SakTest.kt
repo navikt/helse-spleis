@@ -12,10 +12,8 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.sak.TilstandType.*
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -37,9 +35,10 @@ internal class SakTest {
 
     private val testSakObserver = TestSakObserver()
 
-    private val testSak get() = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
-        it.addObserver(this.testSakObserver)
-    }
+    private val testSak
+        get() = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
+            it.addObserver(this.testSakObserver)
+        }
 
     @Test
     fun `uten arbeidsgiver`() {
@@ -74,15 +73,19 @@ internal class SakTest {
     @Test
     internal fun `påminnelse blir delegert til perioden`() {
         testSak.also {
-            it.håndter(nySøknadHendelse(
-                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
-            ))
-            it.håndter(påminnelseHendelse(
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeIdForSak(),
-                tilstand = NY_SØKNAD_MOTTATT
-            ))
+            it.håndter(
+                nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
+                )
+            )
+            it.håndter(
+                påminnelseHendelse(
+                    aktørId = aktørId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeIdForSak(),
+                    tilstand = NY_SØKNAD_MOTTATT
+                )
+            )
         }
 
         assertSakEndret()
@@ -657,7 +660,7 @@ internal class SakTest {
             val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
                 (it as ObjectNode).remove("virksomhetsnummer")
             }
-            val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+            val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
             assertThrows<UtenforOmfangException> {
                 it.håndter(inntektsmeldingHendelse)
@@ -688,11 +691,13 @@ internal class SakTest {
                 )
             )
 
-            it.håndter(inntektsmeldingHendelse(
-                førsteFraværsdag = 1.juli,
-                arbeidsgiverperioder = listOf(),
-                virksomhetsnummer = organisasjonsnummer
-            ))
+            it.håndter(
+                inntektsmeldingHendelse(
+                    førsteFraværsdag = 1.juli,
+                    arbeidsgiverperioder = listOf(),
+                    virksomhetsnummer = organisasjonsnummer
+                )
+            )
 
             it.håndter(
                 sendtSøknadHendelse(
@@ -749,19 +754,17 @@ internal class SakTest {
     }
 
     private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknadHendelse(
-        Sykepengesøknad(
-            søknadDTO(
-                id = UUID.randomUUID().toString(),
-                status = SoknadsstatusDTO.NY,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                arbeidsgiver = ArbeidsgiverDTO(
-                    orgnummer = virksomhetsnummer,
-                    navn = "en_arbeidsgiver"
-                ),
-                sendtNav = LocalDateTime.now()
-            ).toJsonNode()
-        )
+        søknadDTO(
+            id = UUID.randomUUID().toString(),
+            status = SoknadsstatusDTO.NY,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            arbeidsgiver = ArbeidsgiverDTO(
+                orgnummer = virksomhetsnummer,
+                navn = "en_arbeidsgiver"
+            ),
+            sendtNav = LocalDateTime.now()
+        ).toJsonNode()
     )
 
     private fun assertAntallSakerEndret(antall: Int) {

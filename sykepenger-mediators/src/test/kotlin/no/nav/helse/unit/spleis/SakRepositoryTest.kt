@@ -1,9 +1,9 @@
 package no.nav.helse.unit.spleis
 
 import io.mockk.mockk
-import no.nav.helse.TestConstants.søknad
+import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.spleis.SakMediator
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -11,12 +11,10 @@ import org.junit.jupiter.api.Test
 internal class SakRepositoryTest {
 
     private val aktørId = "1234"
-    private val nySøknad = søknad(
-        status = SoknadsstatusDTO.NY,
+    private val nySøknad = nySøknadHendelse(
         aktørId = aktørId
     )
-    private val sendtSøknad = søknad(
-        status = SoknadsstatusDTO.SENDT,
+    private val sendtSøknad = sendtSøknadHendelse(
         aktørId = aktørId
     )
 

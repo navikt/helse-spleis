@@ -7,17 +7,16 @@ import no.nav.helse.sak.VedtaksperiodeHendelse
 class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse,
     VedtaksperiodeHendelse {
 
-    fun saksbehandler(): String =
-            manuellSaksbehandling["saksbehandlerIdent"]!!
+    fun saksbehandler(): String = requireNotNull(manuellSaksbehandling["saksbehandlerIdent"])
 
     fun utbetalingGodkjent(): Boolean =
             (manuellSaksbehandling.løsning() as Map<*, *>?)?.get("godkjent") == true
 
-    override fun vedtaksperiodeId(): String = manuellSaksbehandling["sakskompleksId"]!!
+    override fun vedtaksperiodeId(): String = manuellSaksbehandling.vedtaksperiodeId()
 
-    override fun aktørId(): String = manuellSaksbehandling["aktørId"]!!
+    override fun aktørId(): String = manuellSaksbehandling.aktørId()
 
-    override fun fødselsnummer(): String = manuellSaksbehandling["fødselsnummer"]!!
+    override fun fødselsnummer(): String = manuellSaksbehandling.fødselsnummer()
 
-    override fun organisasjonsnummer(): String = manuellSaksbehandling["organisasjonsnummer"]!!
+    override fun organisasjonsnummer(): String = manuellSaksbehandling.organisasjonsnummer()
 }

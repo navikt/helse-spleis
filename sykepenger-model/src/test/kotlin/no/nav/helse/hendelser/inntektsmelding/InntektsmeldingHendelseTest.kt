@@ -124,7 +124,7 @@ internal class InntektsmeldingHendelseTest {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("mottattDato")
         }
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
@@ -134,7 +134,7 @@ internal class InntektsmeldingHendelseTest {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("foersteFravaersdag")
         }
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
@@ -144,7 +144,7 @@ internal class InntektsmeldingHendelseTest {
         val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
             (it as ObjectNode).remove("virksomhetsnummer")
         }
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
@@ -152,7 +152,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding med refusjon beløp == null er ikke gyldig`() {
         val inntektsmeldingJson = inntektsmeldingDTO(refusjon = Refusjon(null)).toJsonNode()
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }
@@ -163,7 +163,7 @@ internal class InntektsmeldingHendelseTest {
                 beregnetInntekt = 700.toBigDecimal(),
                 refusjon = Refusjon(beloepPrMnd = 700.toBigDecimal())
         ).toJsonNode()
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertTrue(inntektsmeldingHendelse.kanBehandles())
     }
@@ -174,7 +174,7 @@ internal class InntektsmeldingHendelseTest {
                 beregnetInntekt = 700.toBigDecimal(),
                 refusjon = Refusjon(beloepPrMnd = 321.toBigDecimal())
         ).toJsonNode()
-        val inntektsmeldingHendelse = InntektsmeldingHendelse(Inntektsmelding(inntektsmeldingJson))
+        val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
 
         assertFalse(inntektsmeldingHendelse.kanBehandles())
     }

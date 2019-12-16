@@ -26,6 +26,8 @@ internal class KombineringAvHendelserTest {
             }
         }
 
+        println(inntektsmeldingHendelse.arbeidsgiverperioder)
+
         val resultat = søknadHendelse.sykdomstidslinje() + inntektsmeldingHendelse.sykdomstidslinje()
         assertTrue(resultat.flatten().take(16).all { dag -> dag !is Egenmeldingsdag })
         assertEquals(Uke(1).torsdag, resultat.utgangspunktForBeregningAvYtelse())

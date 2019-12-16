@@ -2,15 +2,18 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.Sykepengesøknad
+import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.SøknadHendelse
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.ValueMapper
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
@@ -78,7 +81,6 @@ internal class HendelseConsumer {
             inntektsmeldinger { notifyListeners(MessageListener::onInntektsmelding, it) }
             søknader().apply {
                 nyeSøknader { notifyListeners(MessageListener::onNySøknad, it) }
-                fremtidigeSøknader { notifyListeners(MessageListener::onFremtidigSøknad, it) }
                 sendteSøknader { notifyListeners(MessageListener::onSendtSøknad, it) }
             }
         }.build()
@@ -116,28 +118,28 @@ internal class HendelseConsumer {
                 .foreach(onMessage)
         }
 
-        private fun StreamsBuilder.inntektsmeldinger(onMessage: (Inntektsmelding) -> Unit) {
+        private fun StreamsBuilder.inntektsmeldinger(onMessage: (InntektsmeldingHendelse) -> Unit) {
             stream<String, String>(listOf(Topics.inntektsmeldingTopic), consumeStrings)
-                .mapValues(Inntektsmelding.Companion::fromJson)
+                .mapValues(ValueMapper<String, InntektsmeldingHendelse> { InntektsmeldingHendelse.fromInntektsmelding(it) })
                 .filterNotNull()
                 .foreach(onMessage)
         }
 
-        private fun KStream<String, Sykepengesøknad>.fremtidigeSøknader(onMessage: (Sykepengesøknad) -> Unit) {
-            filterValues { it.status == "FREMTIDIG" }.foreach(onMessage)
+        private fun KStream<String, SøknadHendelse>.nyeSøknader(onMessage: (NySøknadHendelse) -> Unit) {
+            filterValues { it is NySøknadHendelse }
+                .mapValues(ValueMapper<SøknadHendelse, NySøknadHendelse> { it as NySøknadHendelse })
+                .foreach(onMessage)
         }
 
-        private fun KStream<String, Sykepengesøknad>.nyeSøknader(onMessage: (Sykepengesøknad) -> Unit) {
-            filterValues { it.status == "NY" }.foreach(onMessage)
+        private fun KStream<String, SøknadHendelse>.sendteSøknader(onMessage: (SendtSøknadHendelse) -> Unit) {
+            filterValues { it is SendtSøknadHendelse }
+                .mapValues(ValueMapper<SøknadHendelse, SendtSøknadHendelse> { it as SendtSøknadHendelse })
+                .foreach(onMessage)
         }
 
-        private fun KStream<String, Sykepengesøknad>.sendteSøknader(onMessage: (Sykepengesøknad) -> Unit) {
-            filterValues { it.status == "SENDT" }.foreach(onMessage)
-        }
-
-        private fun StreamsBuilder.søknader(): KStream<String, Sykepengesøknad> {
+        private fun StreamsBuilder.søknader(): KStream<String, SøknadHendelse> {
             return stream<String, String>(listOf(Topics.søknadTopic), consumeStrings)
-                .mapValues(Sykepengesøknad.Companion::fromJson)
+                .mapValues(SøknadHendelse.Companion::fromSøknad)
                 .filterNotNull()
         }
     }
@@ -145,10 +147,9 @@ internal class HendelseConsumer {
     interface MessageListener {
         fun onPåminnelse(påminnelse: Påminnelse) {}
         fun onLøstBehov(behov: Behov) {}
-        fun onInntektsmelding(inntektsmelding: Inntektsmelding) {}
-        fun onFremtidigSøknad(søknad: Sykepengesøknad) {}
-        fun onNySøknad(søknad: Sykepengesøknad) {}
-        fun onSendtSøknad(søknad: Sykepengesøknad) {}
+        fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {}
+        fun onNySøknad(søknad: NySøknadHendelse) {}
+        fun onSendtSøknad(søknad: SendtSøknadHendelse) {}
     }
 }
 

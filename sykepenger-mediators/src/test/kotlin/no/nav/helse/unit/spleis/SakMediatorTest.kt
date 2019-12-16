@@ -3,12 +3,11 @@ package no.nav.helse.unit.spleis
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.TestConstants
+import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.Topics
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.VedtaksperiodeObserver
 import no.nav.helse.spleis.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -34,10 +33,7 @@ internal class SakMediatorTest {
         hendelseConsumer = hendelseConsumer
     )
 
-    private val nySøknad = TestConstants.søknad(
-        status = SoknadsstatusDTO.NY,
-        aktørId = "1234"
-    )
+    private val nySøknad = nySøknadHendelse()
 
     @Test
     fun `sørger for at observers blir varslet om endring`() {

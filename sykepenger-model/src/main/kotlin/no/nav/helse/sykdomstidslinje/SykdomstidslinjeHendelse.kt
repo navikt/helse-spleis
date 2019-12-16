@@ -1,15 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
 
 abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Comparable<SykdomstidslinjeHendelse> {
-
-    internal companion object {
-        private val objectMapper = ObjectMapper()
-    }
 
     fun hendelseId() = hendelseId
 
@@ -20,11 +15,7 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
 
-    internal open fun toJson(): JsonNode {
-        return objectMapper.valueToTree(mapOf(
-            "hendelseId" to hendelseId()
-        ))
-    }
+    abstract fun toJson(): JsonNode
 
     interface Deserializer{
         fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse

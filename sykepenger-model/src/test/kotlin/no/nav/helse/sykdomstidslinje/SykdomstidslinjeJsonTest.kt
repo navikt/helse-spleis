@@ -2,8 +2,8 @@ package no.nav.helse.sykdomstidslinje
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.ferie
@@ -228,7 +228,10 @@ internal class SykdomstidslinjeJsonTest {
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
         override fun toJson(): JsonNode {
-            return (super.toJson() as ObjectNode).put("type", HendelseType.Inntektsmelding.name)
+            return objectMapper.convertValue(mapOf(
+                "hendelseId" to hendelseId(),
+                "type" to HendelseType.Inntektsmelding.name
+            ))
         }
     }
 
@@ -246,7 +249,10 @@ internal class SykdomstidslinjeJsonTest {
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 
         override fun toJson(): JsonNode {
-            return (super.toJson() as ObjectNode).put("type", HendelseType.SendtSøknad.name)
+            return objectMapper.convertValue(mapOf(
+                "hendelseId" to hendelseId(),
+                "type" to HendelseType.SendtSøknad.name
+            ))
         }
     }
 }

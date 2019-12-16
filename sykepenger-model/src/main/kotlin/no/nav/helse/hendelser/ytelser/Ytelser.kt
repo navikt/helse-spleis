@@ -13,7 +13,7 @@ import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.*
 
-class Ytelser(private val behov: Behov): ArbeidstakerHendelse, VedtaksperiodeHendelse {
+class Ytelser(private val behov: Behov) : ArbeidstakerHendelse, VedtaksperiodeHendelse {
 
     companion object {
 
@@ -29,15 +29,18 @@ class Ytelser(private val behov: Behov): ArbeidstakerHendelse, VedtaksperiodeHen
             utgangspunktForBeregningAvYtelse: LocalDate
         ): Behov {
             val params = mutableMapOf(
-                "hendelse" to Hendelsetype.Ytelser.name,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
                 "utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse
             )
 
-            return Behov.nyttBehov(listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger, Behovtype.Svangerskapspenger), params)
+            return Behov.nyttBehov(
+                hendelsetype = Hendelsetype.Ytelser,
+                behov = listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger, Behovtype.Svangerskapspenger),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                additionalParams = params
+            )
         }
     }
 
@@ -50,28 +53,19 @@ class Ytelser(private val behov: Behov): ArbeidstakerHendelse, VedtaksperiodeHen
     }
 
     internal fun sykepengehistorikk(): Sykepengehistorikk {
-        println("json er ${behov.toJson()}")
         val løsning = behov.løsning() as Map<*, *>
         val sykepengehistorikkløsninger = løsning["Sykepengehistorikk"] as Map<*, *>
 
         return Sykepengehistorikk(objectMapper.convertValue<JsonNode>(sykepengehistorikkløsninger))
     }
 
-    override fun aktørId(): String {
-        return requireNotNull(behov["aktørId"])
-    }
+    override fun aktørId() = behov.aktørId()
 
-    override fun fødselsnummer(): String {
-        return requireNotNull(behov["fødselsnummer"])
-    }
+    override fun fødselsnummer() = behov.fødselsnummer()
 
-    override fun organisasjonsnummer(): String {
-        return requireNotNull(behov["organisasjonsnummer"])
-    }
+    override fun organisasjonsnummer() = behov.organisasjonsnummer()
 
-    override fun vedtaksperiodeId(): String {
-        return requireNotNull(behov["vedtaksperiodeId"])
-    }
+    override fun vedtaksperiodeId() = behov.vedtaksperiodeId()
 
     internal class Foreldrepenger {}
 
