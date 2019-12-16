@@ -74,6 +74,8 @@ The following summarizes the rules:
 insurance has been purchased. This is captured in ArbeidsgiverRegler (EmployerRules)
   * 248 days are typical with arbeidsgivere, and is the only ArbeidsgiverRegler currently
   implemented
+  * When conflicts exist with which ArbeidsgiverRegler to use (amongst different
+  inntekt sources), a primary ArbeidsgiverRegler is selected for limit analysis.
 
 With the Utbetalingstidslinje already calculated for each Arbeidsgiver, we must merge
 these Utbetalingstidslinje for limit analysis. *(This is not implemented yet, and is
