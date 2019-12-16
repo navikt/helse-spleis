@@ -53,6 +53,7 @@ internal class HendelseConsumer {
     private fun stopOnError() =
         KafkaStreams.StateListener { newState, _ ->
             if (newState == KafkaStreams.State.ERROR) {
+                log.error("stopping stream because stream went into error state")
                 stop()
             }
         }

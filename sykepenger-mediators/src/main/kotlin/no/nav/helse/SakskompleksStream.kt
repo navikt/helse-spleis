@@ -23,7 +23,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
 import org.slf4j.LoggerFactory
 import java.net.URL
-import java.time.Duration
 import kotlin.system.exitProcess
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
@@ -53,9 +52,11 @@ fun Application.vedtaksperiodeApplication() {
     val dataSource = getDataSource(createHikariConfigFromEnvironment())
 
     val hendelseConsumer = HendelseConsumer().apply {
-        addStateListener(KafkaStreams.StateListener { newState, _ ->
+        addStateListener(KafkaStreams.StateListener { newState, oldState ->
+            log.info("From state={} to state={}", oldState, newState)
+
             if (newState == KafkaStreams.State.ERROR) {
-                log.error("exiting application because the kafka stream has died")
+                log.error("exiting JVM process because the kafka stream has died")
                 exitProcess(1)
             }
         })
@@ -157,20 +158,4 @@ private fun Application.restInterface(
         }
     }
 
-}
-
-private fun Application.addShutdownHook(streams: KafkaStreams) {
-    streams.setStateListener { newState, oldState ->
-        log.info("From state={} to state={}", oldState, newState)
-
-        if (newState == KafkaStreams.State.ERROR) {
-            // if the stream has died there is no reason to keep spinning
-            log.warn("closing stream because it went into error state")
-            streams.close(Duration.ofSeconds(10))
-        }
-    }
-    streams.setUncaughtExceptionHandler { _, err ->
-        log.error("Caught exception in stream: ${err.message}", err)
-        streams.close(Duration.ofSeconds(10))
-    }
 }
