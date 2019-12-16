@@ -12,6 +12,7 @@ import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.juli
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -28,22 +29,22 @@ internal class VedtaksperiodeTest {
 
     @Test
     internal fun `gyldig jsonrepresentasjon av tomt vedtaksperiode`() {
-        val id = UUID.randomUUID()
         val aktørId = "1234"
         val fødselsnummer = "5678"
         val organisasjonsnummer = "123456789"
 
-        val vedtaksperiode = Vedtaksperiode(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            hendelse = nySøknadHendelse()
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+            nySøknadHendelse(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                arbeidsgiver = ArbeidsgiverDTO(
+                    orgnummer = organisasjonsnummer
+                )
+            )
         )
 
         val jsonRepresentation = vedtaksperiode.memento()
 
-        assertEquals(id, jsonRepresentation.id)
         assertEquals(aktørId, jsonRepresentation.aktørId)
         assertEquals(fødselsnummer, jsonRepresentation.fødselsnummer)
         assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
@@ -52,17 +53,18 @@ internal class VedtaksperiodeTest {
 
     @Test
     internal fun `gyldig vedtaksperiode fra jsonrepresentasjon av tomt vedtaksperiode`() {
-        val id = UUID.randomUUID()
         val aktørId = "1234"
         val fødselsnummer = "5678"
         val organisasjonsnummer = "123456789"
 
-        val originalJson = Vedtaksperiode(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            hendelse = nySøknadHendelse()
+        val originalJson = Vedtaksperiode.nyPeriode(
+            nySøknadHendelse(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                arbeidsgiver = ArbeidsgiverDTO(
+                    orgnummer = organisasjonsnummer
+                )
+            )
         ).memento()
 
         val gjenopprettetJson = Vedtaksperiode.restore(originalJson)
@@ -158,12 +160,8 @@ internal class VedtaksperiodeTest {
 
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
-        val vedtaksperiode = Vedtaksperiode(
-            id = UUID.randomUUID(),
-            aktørId = "aktørId",
-            fødselsnummer = "fnr",
-            organisasjonsnummer = "",
-            hendelse = nySøknadHendelse(
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+            nySøknadHendelse(
                 søknadsperioder = listOf(
                     SoknadsperiodeDTO(
                         fom = 1.juli,

@@ -39,14 +39,6 @@ internal class Vedtaksperiode private constructor(
     private var sykdomstidslinje: ConcreteSykdomstidslinje
 ) {
 
-    internal constructor(
-        id: UUID = UUID.randomUUID(),
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        hendelse: SykdomstidslinjeHendelse
-    ): this(id, aktørId, fødselsnummer, organisasjonsnummer, hendelse.sykdomstidslinje())
-
     private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
@@ -443,43 +435,14 @@ internal class Vedtaksperiode private constructor(
             TIL_INFOTRYGD -> TilInfotrygdTilstand
         }
 
-        fun nyPeriode(hendelse: NySøknadHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
+        internal fun <Hendelse> nyPeriode(hendelse: Hendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode where Hendelse: ArbeidstakerHendelse, Hendelse: SykdomstidslinjeHendelse {
             return Vedtaksperiode(
-                id = UUID.randomUUID(),
+                id = id,
                 aktørId = hendelse.aktørId(),
                 fødselsnummer = hendelse.fødselsnummer(),
                 organisasjonsnummer = hendelse.organisasjonsnummer(),
                 sykdomstidslinje = hendelse.sykdomstidslinje()
-            ).apply {
-                observers.forEach { addVedtaksperiodeObserver(it) }
-                tilstand.håndter(this, hendelse)
-            }
-        }
-
-        fun nyPeriode(hendelse: SendtSøknadHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
-            return Vedtaksperiode(
-                id = UUID.randomUUID(),
-                aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                sykdomstidslinje = hendelse.sykdomstidslinje()
-            ).apply {
-                observers.forEach { addVedtaksperiodeObserver(it) }
-                tilstand.håndter(this, hendelse)
-            }
-        }
-
-        fun nyPeriode(hendelse: InntektsmeldingHendelse, observers: List<VedtaksperiodeObserver>): Vedtaksperiode {
-            return Vedtaksperiode(
-                id = UUID.randomUUID(),
-                aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                sykdomstidslinje = hendelse.sykdomstidslinje()
-            ).apply {
-                observers.forEach { addVedtaksperiodeObserver(it) }
-                tilstand.håndter(this, hendelse)
-            }
+            )
         }
 
         private val objectMapper = jacksonObjectMapper()

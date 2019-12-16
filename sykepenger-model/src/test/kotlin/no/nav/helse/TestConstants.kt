@@ -187,7 +187,7 @@ internal object TestConstants {
         søknadDTO(
             id = id,
             aktørId = aktørId,
-            fødselsnummer = fakeFNR,
+            fødselsnummer = fødselsnummer,
             arbeidGjenopptatt = arbeidGjenopptatt,
             korrigerer = korrigerer,
             egenmeldinger = egenmeldinger,

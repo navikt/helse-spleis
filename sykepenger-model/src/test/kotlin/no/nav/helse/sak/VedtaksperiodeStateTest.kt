@@ -19,10 +19,10 @@ import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.juli
 import no.nav.helse.sak.TilstandType.*
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +36,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `motta ny søknad`() {
-        val vedtaksperiode = beInStartTilstand(nySøknadHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
@@ -52,7 +52,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `motta sendt søknad på feil tidspunkt`() {
-        val vedtaksperiode = beInStartTilstand(sendtSøknadHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
@@ -61,7 +61,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `motta inntektsmelding på feil tidspunkt`() {
-        val vedtaksperiode = beInStartTilstand(inntektsmeldingHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
@@ -70,7 +70,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `motta sykdomshistorikk på feil tidspunkt`() {
-        val vedtaksperiode = beInStartTilstand(nySøknadHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         assertIngenEndring {
             vedtaksperiode.håndter(
@@ -80,7 +80,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     vedtaksperiodeId = vedtaksperiodeId,
                     sykepengehistorikk = sykepengehistorikk(
                         sisteHistoriskeSykedag = LocalDate.now()
-                        )
+                    )
                 )
             )
         }
@@ -88,7 +88,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `motta påminnelse fra starttilstand, gå TilInfotrygd`() {
-        val vedtaksperiode = beInStartTilstand(nySøknadHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         vedtaksperiode.håndter(
             påminnelseHendelse(
@@ -101,7 +101,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `ignorer påminnelse for en annen tilstand enn starttilstand`() {
-        val vedtaksperiode = beInStartTilstand(nySøknadHendelse())
+        val vedtaksperiode = beInStartTilstand()
 
         assertIngenEndring {
             vedtaksperiode.håndter(
@@ -923,21 +923,29 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertNull(forrigePåminnelse)
     }
 
-    private fun beInStartTilstand(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
-        return Vedtaksperiode(
-            id = vedtaksperiodeId,
+    private fun beInStartTilstand(
+        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            hendelse = hendelse
-        ).apply {
+            arbeidsgiver = ArbeidsgiverDTO(
+                orgnummer = organisasjonsnummer
+            )
+        )
+    ): Vedtaksperiode {
+        return Vedtaksperiode.nyPeriode(nySøknadHendelse, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
 
-    private fun beInTilInfotrygd() =
-        beInStartTilstand(sendtSøknadHendelse()).apply {
-            håndter(sendtSøknadHendelse())
+    private fun beInStartTilstand(sendtSøknadHendelse: SendtSøknadHendelse): Vedtaksperiode {
+        return Vedtaksperiode.nyPeriode(sendtSøknadHendelse, vedtaksperiodeId).apply {
+            addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
+        }
+    }
+
+    private fun beInTilInfotrygd(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse()) =
+        beInStartTilstand(sendtSøknadHendelse).apply {
+            håndter(sendtSøknadHendelse)
         }
 
     private fun beInNySøknad(nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
@@ -994,7 +1002,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             håndter(
                 Sak(aktørId, fødselsnummer),
                 Arbeidsgiver(organisasjonsnummer),
-                ytelser)
+                ytelser
+            )
         }
 
     private fun beInTilUtbetaling(
