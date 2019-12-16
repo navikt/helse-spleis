@@ -8,8 +8,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.AlderRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.InntektHistorie
-import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -89,8 +87,9 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             dagsats,
             AlderRegler(
                 fødselsnummer,
-                utgangspunktForBeregningAvYtelse(),
-                sisteDag()
+                førsteDag(),
+                sisteDag(),
+                ArbeidsgiverRegler.Companion.NormalArbeidstaker
             )
         )
         this.accept(beregner)

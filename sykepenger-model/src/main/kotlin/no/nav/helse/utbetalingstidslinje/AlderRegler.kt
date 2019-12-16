@@ -3,9 +3,12 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class AlderRegler(fødselsnummer: String, private val startDato: LocalDate, private val sluttDato: LocalDate) {
+internal class AlderRegler(fødselsnummer: String,
+                           private val startDato: LocalDate,
+                           private val sluttDato: LocalDate,
+                           private val arbeidsgiverRegler: ArbeidsgiverRegler) {
 
-    private val maksSykepengedager = 248
+    private val maksSykepengedager = arbeidsgiverRegler.maksSykepengedager()
     private val maksSykepengedagerEtter67 = 60
     private val individnummer = fødselsnummer.substring(6, 9).toInt()
     private val fødselsdag = LocalDate.of(
@@ -56,7 +59,7 @@ internal class AlderRegler(fødselsnummer: String, private val startDato: LocalD
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)
 
-    fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
+    internal fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
         val aldersgrense = if (harFylt67(sisteUtbetalingsdag)) øvreAldersgrense.minusDays(1)
             else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
 

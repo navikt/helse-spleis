@@ -548,7 +548,7 @@ internal class UtbetalingBuilderTest {
             ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektHistorie, arbeidsgiverperiodeSeed)
         SakSykdomstidslinje(
             listOf(arbeidsgiverSykdomstidslinje),
-            AlderRegler(fødselsnummer, this.førsteDag(), this.sisteDag()),
+            AlderRegler(fødselsnummer, this.førsteDag(), this.sisteDag(), NormalArbeidstaker),
             arbeidsgiverSykdomstidslinje,
             førsteDag,
             sisteDag

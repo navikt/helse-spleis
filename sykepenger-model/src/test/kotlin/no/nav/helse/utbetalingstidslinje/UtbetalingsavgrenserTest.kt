@@ -89,7 +89,8 @@ internal class UtbetalingsavgrenserTest {
         Utbetalingsgrense(
             AlderRegler(fnr,
                 LocalDate.of(2018,1,1),
-                LocalDate.of(2019, 12, 31)
+                LocalDate.of(2019, 12, 31),
+                ArbeidsgiverRegler.Companion.NormalArbeidstaker
             ))
             .also { this.accept(it) }
             .ubetalteDager().map { it.dag }

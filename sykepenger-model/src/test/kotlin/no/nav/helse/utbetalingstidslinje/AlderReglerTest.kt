@@ -90,11 +90,13 @@ internal class AlderReglerTest {
     private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = AlderRegler(
         this,
         startDato,
-        sluttDato
+        sluttDato,
+        ArbeidsgiverRegler.Companion.NormalArbeidstaker
     ).navBurdeBetale(antallDager, antallDagerEtter67, dagen)
     private fun String.maksdato(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = AlderRegler(
         this,
         startDato,
-        sluttDato
+        sluttDato,
+        ArbeidsgiverRegler.Companion.NormalArbeidstaker
     ).maksdato(antallDager, antallDagerEtter67, dagen)
 }
