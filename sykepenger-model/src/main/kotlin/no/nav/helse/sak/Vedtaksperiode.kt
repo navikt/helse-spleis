@@ -546,7 +546,7 @@ internal class Vedtaksperiode private constructor(
                     fødselsnummer = json["fødselsnummer"].textValue(),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     tilstandType = valueOf(json["tilstandType"].textValue()),
-                    sykdomstidslinje = json["sykdomstidslinje"],
+                    sykdomstidslinje = json["sykdomstidslinje"].takeUnless { it.isNull } ?: throw SakskjemaForGammelt(-1, -1),
                     maksdato = json["maksdato"].safelyUnwrapDate(),
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),
