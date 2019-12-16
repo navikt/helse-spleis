@@ -61,8 +61,6 @@ internal class SakMediator(
     }
 
     override fun onFremtidigSøknad(søknad: Sykepengesøknad) {
-        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
-
         SøknadProbe.mottattSøknad(søknad)
 
         NySøknadHendelse(søknad).also {
@@ -71,8 +69,6 @@ internal class SakMediator(
     }
 
     override fun onNySøknad(søknad: Sykepengesøknad) {
-        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
-
         SøknadProbe.mottattSøknad(søknad)
 
         NySøknadHendelse(søknad).also {
@@ -81,8 +77,6 @@ internal class SakMediator(
     }
 
     override fun onSendtSøknad(søknad: Sykepengesøknad) {
-        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
-
         SøknadProbe.mottattSøknad(søknad)
 
         SendtSøknadHendelse(søknad).also {
