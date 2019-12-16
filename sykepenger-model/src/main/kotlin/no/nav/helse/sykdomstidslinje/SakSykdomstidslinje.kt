@@ -17,7 +17,7 @@ internal class SakSykdomstidslinje(
     private var antallGjenståendeSykedager: Int = 0
 
     internal fun maksdato() = maksdato
-    internal fun antallBetalteSykedager() = antallGjenståendeSykedager
+    internal fun antallGjenståendeSykedager() = antallGjenståendeSykedager
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSak(this)

@@ -3,10 +3,12 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class AlderRegler(fødselsnummer: String,
-                           private val startDato: LocalDate,
-                           private val sluttDato: LocalDate,
-                           private val arbeidsgiverRegler: ArbeidsgiverRegler) {
+internal class AlderRegler(
+    fødselsnummer: String,
+    private val startDato: LocalDate,
+    private val sluttDato: LocalDate,
+    arbeidsgiverRegler: ArbeidsgiverRegler
+) {
 
     private val maksSykepengedager = arbeidsgiverRegler.maksSykepengedager()
     private val maksSykepengedagerEtter67 = 60
@@ -61,10 +63,16 @@ internal class AlderRegler(fødselsnummer: String,
 
     internal fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate?): LocalDate {
         val aldersgrense = if (harFylt67(sisteDag(sisteUtbetalingsdag))) øvreAldersgrense.minusDays(1)
-            else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
+        else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
 
         return listOf(
-            sisteDag(sisteUtbetalingsdag).addWeekdays(gjenståendeDager(antallDager, gammelpersonDager, sisteDag(sisteUtbetalingsdag))),
+            sisteDag(sisteUtbetalingsdag).addWeekdays(
+                gjenståendeDager(
+                    antallDager,
+                    gammelpersonDager,
+                    sisteDag(sisteUtbetalingsdag)
+                )
+            ),
             aldersgrense
         ).min()!!
     }
@@ -88,8 +96,29 @@ internal class AlderRegler(fødselsnummer: String,
 
     internal fun gjenståendeDager(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate?): Int {
         return if (harFylt67(sisteDag(sisteUtbetalingsdag))) {
-            maksSykepengedagerEtter67 - antallDagerEtter67
-        } else maksSykepengedager - antallDager
+            listOf(
+                maksSykepengedager - antallDager,
+                maksSykepengedagerEtter67 - antallDagerEtter67,
+                ukedagerTilØvreAldersgrense(sisteDag(sisteUtbetalingsdag))
+            ).min()!!
+        } else
+            listOf(
+                maksSykepengedager - antallDager,
+                ukedagerTilRedusertYtelseAlder(sisteDag(sisteUtbetalingsdag)) + 61
+            ).min()!!
+    }
+
+    private fun ukedagerTilØvreAldersgrense(sisteDag: LocalDate): Int {
+        if (!sisteDag.isBefore(øvreAldersgrense)) return 0
+        return sisteDag.datesUntil(øvreAldersgrense)
+            .filter { !it.erHelg() }
+            .count().toInt()
+    }
+
+    private fun ukedagerTilRedusertYtelseAlder(sisteDag: LocalDate): Int {
+        return sisteDag.datesUntil(redusertYtelseAlder)
+            .filter { !it.erHelg() }
+            .count().toInt()
     }
 
     private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
@@ -104,6 +133,7 @@ internal class AlderRegler(fødselsnummer: String,
         else -> this
     }
 
+    private fun LocalDate.erHelg() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
 }
 
 internal typealias BurdeBetale = (Int, Int, LocalDate) -> Boolean

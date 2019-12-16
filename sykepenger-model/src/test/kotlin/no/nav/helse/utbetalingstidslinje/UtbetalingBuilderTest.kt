@@ -25,7 +25,7 @@ internal class UtbetalingBuilderTest {
     private val inntektHistorie = InntektHistorie()
     private var betalingslinjer = emptyList<Utbetalingslinje>()
     private var maksdato: LocalDate? = null
-    private var antallBetalteSykedager = 0
+    private var antallGjenståendeSykedager = 0
 
         init {
         inntektHistorie.add(1.januar.minusDays(5), 1200.00)
@@ -243,49 +243,56 @@ internal class UtbetalingBuilderTest {
    fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
        (20.S).utbetalingslinjer()
        assertEquals(betalingslinjer.last().tom.plusDays(342), maksdato)
+       assertEquals(245, antallGjenståendeSykedager)
    }
 
     @Test
     fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-        (2.A + 20.S + 7.A + 20.S).utbetalingslinjer()
+        (2.A + 20.S + 7.A + 20.S).utbetalingslinjer() //18feb
         assertEquals(8.januar(2019), maksdato)
+        assertEquals(232, antallGjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
         (351.S + 1.F + S).utbetalingslinjer()
         assertEquals(31.desember, maksdato)
+        assertEquals(8, antallGjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
         (23.S + 2.F + S).utbetalingslinjer()
         assertEquals(1.januar(2019), maksdato )
-
+        assertEquals(242, antallGjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
         (21.S + 3.F + S).utbetalingslinjer()
         assertEquals(2.januar(2019), maksdato)
+        assertEquals(244, antallGjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
         (21.S + 3.F).utbetalingslinjer()
         assertEquals(28.desember, maksdato)
+        assertEquals(245, antallGjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() {
         (21.S + 3.F + A).utbetalingslinjer()
         assertEquals(28.desember, maksdato)
+        assertEquals(245, antallGjenståendeSykedager)
     }
 
     @Test
-    fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
+    fun `maksdato beregnes ut ifra siste dag i perioden om vi ikke har noen utbetalingsdager`() {
         (16.S).utbetalingslinjer()
         assertEquals(28.desember, maksdato)
+        assertEquals(248, antallGjenståendeSykedager)
     }
 
 
@@ -554,7 +561,7 @@ internal class UtbetalingBuilderTest {
         ).also {
             betalingslinjer = it.utbetalingslinjer()
             maksdato = it.maksdato()
-            antallBetalteSykedager = it.antallBetalteSykedager()
+            antallGjenståendeSykedager = it.antallGjenståendeSykedager()
         }
 
     }
