@@ -14,10 +14,10 @@ internal class SakSykdomstidslinje(
 ) : SykdomstidslinjeElement {
 
     private var maksdato: LocalDate? = null
-    private var antallBetalteSykedager: Int = 0
+    private var antallGjenståendeSykedager: Int = 0
 
     internal fun maksdato() = maksdato
-    internal fun antallBetalteSykedager() = antallBetalteSykedager
+    internal fun antallBetalteSykedager() = antallGjenståendeSykedager
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSak(this)
@@ -31,6 +31,6 @@ internal class SakSykdomstidslinje(
         return tidslinje.utbetalingslinjer(tidslinjer, alderRegler, førsteDag, sisteDag)
             .also {
                 maksdato = tidslinje.maksdato()
-                antallBetalteSykedager = tidslinje.antallBetalteSykedager()}
+                antallGjenståendeSykedager = tidslinje.antallGjenståendeSykedager()}
     }
 }

@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.Uke
 import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -286,7 +285,7 @@ internal class UtbetalingBuilderTest {
     @Test
     fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
         (16.S).utbetalingslinjer()
-        assertNull(maksdato)
+        assertEquals(28.desember, maksdato)
     }
 
 

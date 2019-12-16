@@ -15,8 +15,8 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7-1
     }
 
-    internal fun maksdato():LocalDate? = sisteBetalteDag?.let { alderRegler.maksdato(betalteDager, gammelpersonDager, it) }
-    internal fun antallBetalteSykedager() = betalteDager
+    internal fun maksdato() = alderRegler.maksdato(betalteDager, gammelpersonDager, sisteBetalteDag)
+    internal fun antallGjenståendeSykedager() = alderRegler.gjenståendeDager(betalteDager, gammelpersonDager, sisteBetalteDag)
 
     internal fun ubetalteDager(): List<Utbetalingstidslinje.Utbetalingsdag.AvvistDag> {
         return ubetalteDager

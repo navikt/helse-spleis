@@ -17,7 +17,7 @@ internal class Utbetalingstidslinje {
     }
 
     internal fun maksdato() = visitor.maksdato()
-    internal fun antallBetalteSykedager() = visitor.antallBetalteSykedager()
+    internal fun antallGjenståendeSykedager() = visitor.antallGjenståendeSykedager()
 
     private constructor(utbetalingsdager: List<Utbetalingsdag>) {
         this.utbetalingsdager = utbetalingsdager.toMutableList()

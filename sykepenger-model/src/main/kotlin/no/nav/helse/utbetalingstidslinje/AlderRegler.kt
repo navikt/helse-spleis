@@ -59,15 +59,17 @@ internal class AlderRegler(fødselsnummer: String,
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)
 
-    internal fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate): LocalDate {
-        val aldersgrense = if (harFylt67(sisteUtbetalingsdag)) øvreAldersgrense.minusDays(1)
+    internal fun maksdato(antallDager: Int, gammelpersonDager: Int, sisteUtbetalingsdag: LocalDate?): LocalDate {
+        val aldersgrense = if (harFylt67(sisteDag(sisteUtbetalingsdag))) øvreAldersgrense.minusDays(1)
             else redusertYtelseAlder.addWeekdays(maksSykepengedagerEtter67)
 
         return listOf(
-            sisteUtbetalingsdag.addWeekdays(gjenståendeDager(antallDager, gammelpersonDager, sisteUtbetalingsdag)),
+            sisteDag(sisteUtbetalingsdag).addWeekdays(gjenståendeDager(antallDager, gammelpersonDager, sisteDag(sisteUtbetalingsdag))),
             aldersgrense
         ).min()!!
     }
+
+    private fun sisteDag(sisteUtbetalingsdag: LocalDate?) = (sisteUtbetalingsdag ?: sluttDato)
 
     private fun LocalDate.addWeekdays(gjenståendeAntallUkedager: Int): LocalDate {
         val virkedagerIEnUke = 5
@@ -84,8 +86,8 @@ internal class AlderRegler(fødselsnummer: String,
             .leggTilGjenståendeDager(gjenståendeDagerISisteUke)
     }
 
-    private fun gjenståendeDager(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate): Int {
-        return if (harFylt67(sisteUtbetalingsdag)) {
+    internal fun gjenståendeDager(antallDager: Int, antallDagerEtter67: Int, sisteUtbetalingsdag: LocalDate?): Int {
+        return if (harFylt67(sisteDag(sisteUtbetalingsdag))) {
             maksSykepengedagerEtter67 - antallDagerEtter67
         } else maksSykepengedager - antallDager
     }
