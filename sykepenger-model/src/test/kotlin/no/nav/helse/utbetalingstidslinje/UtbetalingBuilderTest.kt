@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.Uke
 import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -239,54 +240,55 @@ internal class UtbetalingBuilderTest {
         assert(betalingslinjer.last(), 5.februar, 14.februar, 1200)
     }
 
-//    @Test
-//    fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
-//        val maksdato = (20.S).tidslinje(.maksdato
-//
-//        assertEquals(sykdomstidslinje.sluttdato().plusDays(342), maksdato)
-//    }
+   @Test
+   fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
+       (20.S).utbetalingslinjer()
+       assertEquals(betalingslinjer.last().tom.plusDays(342), maksdato)
+   }
 
-//    @Test
-//    fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-//        val maksdato = (2.A + 20.S + 7.A + 20.S // Siste dag er 2018-02-18).tidslinje(.maksdato
-//
-//        assertEquals(LocalDate.of(2019,1,8), maksdato)
-//    }
-//
-//    @Test
-//    fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
-//        val maksdato = (351.S + 1.F + S).tidslinje(.maksdato
-//        assertEquals(LocalDate.of(2018, 12, 31), maksdato)
-//    }
-//
-//    @Test
-//    fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
-//        val maksdato = (23.S + 2.F + S).tidslinje(.maksdato
-//        assertEquals(LocalDate.of(2019,1,1), maksdato )
-//
-//    }
-//
-//    @Test
-//    fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
-//        val maksdato = (21.S + 3.F + S).tidslinje(.maksdato
-//
-//        assertEquals(LocalDate.of(2019,1,2), maksdato)
-//    }
-//
-//    @Test
-//    fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
-//        val maksdato = (21.S + 3.F).tidslinje(.maksdato
-//
-//        assertEquals(LocalDate.of(2018,12,28), maksdato)
-//    }
-//
-//    @Test
-//    fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
-//        val maksdato = (16.S).tidslinje(.maksdato
-//
-//        assertNull(maksdato)
-//    }
-//
+    @Test
+    fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
+        (2.A + 20.S + 7.A + 20.S).utbetalingslinjer()
+        assertEquals(8.januar(2019), maksdato)
+    }
+
+    @Test
+    fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
+        (351.S + 1.F + S).utbetalingslinjer()
+        assertEquals(31.desember, maksdato)
+    }
+
+    @Test
+    fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
+        (23.S + 2.F + S).utbetalingslinjer()
+        assertEquals(1.januar(2019), maksdato )
+
+    }
+
+    @Test
+    fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
+        (21.S + 3.F + S).utbetalingslinjer()
+        assertEquals(2.januar(2019), maksdato)
+    }
+
+    @Test
+    fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
+        (21.S + 3.F).utbetalingslinjer()
+        assertEquals(28.desember, maksdato)
+    }
+
+    @Test
+    fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() {
+        (21.S + 3.F + A).utbetalingslinjer()
+        assertEquals(28.desember, maksdato)
+    }
+
+    @Test
+    fun `maksdato er null om vi ikke har noen utbetalingsdager`() {
+        (16.S).utbetalingslinjer()
+        assertNull(maksdato)
+    }
+
 
 
     @Test
@@ -558,20 +560,22 @@ internal class UtbetalingBuilderTest {
 
     }
 
-    val Int.januar
+    private val Int.januar
         get() = LocalDate.of(2018, 1, this)
+    private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)
 
-    val Int.februar
+    private val Int.februar
         get() = LocalDate.of(2018, 2, this)
 
-    val Int.april
+    private val Int.april
         get() = LocalDate.of(2018, 4, this)
 
-    val Int.mai
+    private val Int.mai
         get() = LocalDate.of(2018, 5, this)
 
-    val Int.desember
+    private val Int.desember
         get() = LocalDate.of(2018, 12, this)
+    private fun Int.desember(år: Int) = LocalDate.of(år, 12, this)
 
 }
 
