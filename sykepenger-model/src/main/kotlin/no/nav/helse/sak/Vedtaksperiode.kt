@@ -80,8 +80,10 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    internal fun håndter(ytelser: Ytelser) {
+    internal fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, ytelser: Ytelser) {
         if (id.toString() == ytelser.vedtaksperiodeId()) tilstand.håndter(
+            sak,
+            arbeidsgiver,
             this,
             ytelser
         )
@@ -169,7 +171,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+        fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
@@ -253,7 +255,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.trengerYtelser()
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+        override fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             val tidslinje = vedtaksperiode.sykdomstidslinje
                 ?: return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
 

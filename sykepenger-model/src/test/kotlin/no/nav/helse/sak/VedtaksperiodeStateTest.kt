@@ -73,6 +73,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertIngenEndring {
             vedtaksperiode.håndter(
+                Sak(aktørId, fødselsnummer),
+                Arbeidsgiver(organisasjonsnummer),
                 ytelser(
                     vedtaksperiodeId = vedtaksperiodeId,
                     sykepengehistorikk = sykepengehistorikk(
@@ -340,6 +342,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(),
                 vedtaksperiodeId = vedtaksperiodeId
@@ -376,6 +380,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -413,6 +419,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(5)
@@ -450,6 +458,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     perioder = listOf(
@@ -541,6 +551,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -579,6 +591,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -617,6 +631,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -657,6 +673,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -695,6 +713,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -735,6 +755,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -775,6 +797,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
+            Sak(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
             ytelser(
                 sykepengehistorikk = sykepengehistorikk(
                     sisteHistoriskeSykedag = periodeFom.minusMonths(7)
@@ -829,6 +853,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertIngenEndring {
             vedtaksperiode.håndter(
+                Sak(aktørId, fødselsnummer),
+                Arbeidsgiver(organisasjonsnummer),
                 ytelser(
                     vedtaksperiodeId = vedtaksperiodeId,
                     sykepengehistorikk = sykepengehistorikk()
@@ -963,7 +989,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
     ) =
         beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
-            håndter(ytelser)
+            håndter(
+                Sak(aktørId, fødselsnummer),
+                Arbeidsgiver(organisasjonsnummer),
+                ytelser)
         }
 
     private fun beInTilUtbetaling(

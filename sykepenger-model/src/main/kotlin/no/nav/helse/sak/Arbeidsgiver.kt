@@ -97,8 +97,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(ytelser: Ytelser) {
-        perioder.forEach { it.håndter(ytelser) }
+    internal fun håndter(sak: Sak, ytelser: Ytelser) {
+        perioder.forEach { it.håndter(sak, this, ytelser) }
     }
 
     internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {

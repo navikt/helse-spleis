@@ -59,7 +59,7 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
     }
 
     fun håndter(ytelser: Ytelser) {
-        finnArbeidsgiver(ytelser)?.håndter(ytelser)
+        finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
     }
 
     fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
