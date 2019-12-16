@@ -37,7 +37,7 @@ internal class Vedtaksperiode internal constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String
-) : Comparable<Vedtaksperiode> {
+) {
     private val `6G` = (6 * 99858).toBigDecimal()
 
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
@@ -438,17 +438,6 @@ internal class Vedtaksperiode internal constructor(
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun compare(leftFom: LocalDate?, leftTom: LocalDate?, rightFom: LocalDate?, rightTom: LocalDate?): Int =
-            when {
-                rightFom == null && leftFom != null -> 1
-                rightFom != null && leftFom == null -> -1
-                rightFom == null && rightTom == null && leftFom == null && leftTom == null -> 0
-                leftFom != rightFom -> leftFom!!.compareTo(rightFom)
-                rightTom == null && leftTom != null -> -1
-                rightTom != null && leftTom == null -> 1
-                else -> leftTom!!.compareTo(rightTom)
-            }
     }
 
     internal fun memento(): Memento {
@@ -574,12 +563,5 @@ internal class Vedtaksperiode internal constructor(
                 )
             )
     }
-
-    override fun compareTo(other: Vedtaksperiode): Int = compare(
-        leftFom = this.sykdomstidslinje?.førsteDag(),
-        leftTom = this.sykdomstidslinje?.sisteDag(),
-        rightFom = other.sykdomstidslinje?.førsteDag(),
-        rightTom = other.sykdomstidslinje?.sisteDag()
-    )
 }
 
