@@ -1,13 +1,35 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.safelyUnwrapDate
+import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonDeserialize(using = InntektsmeldingDeserializer::class)
 data class Inntektsmelding(val jsonNode: JsonNode) {
+    companion object {
+        private val log = LoggerFactory.getLogger(Companion::class.java)
+
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun fromJson(json: String): Inntektsmelding? {
+            return try {
+                Inntektsmelding(objectMapper.readTree(json))
+            } catch (err: IOException) {
+                log.info("kunne ikke lese inntektsmelding som json: ${err.message}", err)
+                null
+            }
+        }
+    }
+
     val arbeidsgiverFnr: String? get() = jsonNode["arbeidsgiverFnr"]?.textValue()
     val førsteFraværsdag: LocalDate get() = LocalDate.parse(jsonNode["foersteFravaersdag"].textValue())
     val mottattDato: LocalDateTime get() = LocalDateTime.parse(jsonNode["mottattDato"].textValue())

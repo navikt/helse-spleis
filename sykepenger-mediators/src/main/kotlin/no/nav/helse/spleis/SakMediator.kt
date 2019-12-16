@@ -2,14 +2,19 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovProbe
 import no.nav.helse.hendelser.Hendelsetype
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.Sykepengesøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.*
+import no.nav.helse.spleis.inntektsmelding.InntektsmeldingProbe
+import no.nav.helse.spleis.søknad.SøknadProbe
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -20,36 +25,70 @@ internal class SakMediator(
     private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
     private val lagreUtbetalingDao: SakObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
-    private val producer: KafkaProducer<String, String>
-) : SakObserver {
+    private val producer: KafkaProducer<String, String>,
+    hendelseConsumer: HendelseConsumer
+) : SakObserver, HendelseConsumer.MessageListener {
 
-    private val log = LoggerFactory.getLogger("SakMediator")
+    private val log = LoggerFactory.getLogger(SakMediator::class.java)
 
-    fun håndter(hendelse: NySøknadHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
-
-    fun håndter(hendelse: SendtSøknadHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
-
-    fun håndter(hendelse: InntektsmeldingHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
-
-    fun håndter(behov: Behov) {
-        when (behov.hendelsetype()) {
-            Hendelsetype.Ytelser -> håndter(Ytelser(behov))
-            Hendelsetype.ManuellSaksbehandling -> håndter(ManuellSaksbehandlingHendelse(behov))
-        }
+    init {
+        hendelseConsumer.addListener(this)
     }
 
-    fun håndter(påminnelse: Påminnelse) {
+    override fun onPåminnelse(påminnelse: Påminnelse) {
         finnSak(påminnelse) { sak -> sak.håndter(påminnelse) }
     }
 
-    private fun håndter(hendelse: Ytelser) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
+    override fun onLøstBehov(behov: Behov) {
+        BehovProbe.mottattBehov(behov)
 
-    private fun håndter(hendelse: ManuellSaksbehandlingHendelse) =
-        finnSak(hendelse) { sak -> sak.håndter(hendelse) }
+        when (behov.hendelsetype()) {
+            Hendelsetype.Ytelser -> Ytelser(behov).also {
+                finnSak(it) { sak -> sak.håndter(it) }
+            }
+            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandlingHendelse(behov).also {
+                finnSak(it) { sak -> sak.håndter(it) }
+            }
+        }
+    }
+
+    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
+        InntektsmeldingProbe.mottattInntektsmelding(inntektsmelding)
+
+        InntektsmeldingHendelse(inntektsmelding).also {
+            finnSak(it) { sak -> sak.håndter(it) }
+        }
+    }
+
+    override fun onFremtidigSøknad(søknad: Sykepengesøknad) {
+        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
+
+        SøknadProbe.mottattSøknad(søknad)
+
+        NySøknadHendelse(søknad).also {
+            finnSak(it) { sak -> sak.håndter(it) }
+        }
+    }
+
+    override fun onNySøknad(søknad: Sykepengesøknad) {
+        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
+
+        SøknadProbe.mottattSøknad(søknad)
+
+        NySøknadHendelse(søknad).also {
+            finnSak(it) { sak -> sak.håndter(it) }
+        }
+    }
+
+    override fun onSendtSøknad(søknad: Sykepengesøknad) {
+        if (søknad.type !in listOf("ARBEIDSTAKERE", "SELVSTENDIGE_OG_FRILANSERE")) return
+
+        SøknadProbe.mottattSøknad(søknad)
+
+        SendtSøknadHendelse(søknad).also {
+            finnSak(it) { sak -> sak.håndter(it) }
+        }
+    }
 
     fun hentSak(aktørId: String): Sak? = sakRepository.hentSak(aktørId)
 

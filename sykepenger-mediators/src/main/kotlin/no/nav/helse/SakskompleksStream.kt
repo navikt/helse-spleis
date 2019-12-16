@@ -2,13 +2,7 @@ package no.nav.helse
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.zaxxer.hikari.HikariConfig
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationStarted
-import io.ktor.application.ApplicationStopping
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
+import io.ktor.application.*
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
@@ -22,31 +16,15 @@ import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
-import no.nav.helse.Topics.behovTopic
-import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.påminnelseTopic
-import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.behov.BehovConsumer
-import no.nav.helse.spleis.LagreSakDao
-import no.nav.helse.spleis.LagreUtbetalingDao
-import no.nav.helse.spleis.SakMediator
-import no.nav.helse.spleis.SakPostgresRepository
-import no.nav.helse.spleis.UtbetalingsreferansePostgresRepository
+import no.nav.helse.spleis.*
 import no.nav.helse.spleis.http.getJson
-import no.nav.helse.spleis.inntektsmelding.InntektsmeldingConsumer
-import no.nav.helse.spleis.producerConfig
-import no.nav.helse.spleis.påminnelse.PåminnelseConsumer
-import no.nav.helse.spleis.sak
-import no.nav.helse.spleis.streamsConfig
-import no.nav.helse.spleis.søknad.SøknadConsumer
-import no.nav.helse.spleis.utbetaling
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
-import org.apache.kafka.streams.StreamsBuilder
 import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.Duration
+import kotlin.system.exitProcess
 
 fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
     HikariConfig().apply {
@@ -69,41 +47,41 @@ fun Application.createHikariConfigFromEnvironment() =
     )
 
 @KtorExperimentalAPI
-fun Application.vedtaksperiodeApplication(): KafkaStreams {
+fun Application.vedtaksperiodeApplication() {
     migrate(createHikariConfigFromEnvironment())
 
     val dataSource = getDataSource(createHikariConfigFromEnvironment())
 
+    val hendelseConsumer = HendelseConsumer().apply {
+        addStateListener(KafkaStreams.StateListener { newState, _ ->
+            if (newState == KafkaStreams.State.ERROR) {
+                log.error("exiting application because the kafka stream has died")
+                exitProcess(1)
+            }
+        })
+
+        environment.monitor.subscribe(ApplicationStarted) {
+            start(environment.config.streamsConfig())
+        }
+
+        environment.monitor.subscribe(ApplicationStopping) {
+            stop()
+        }
+    }
+
     val producer =
         KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
+
     val sakMediator = SakMediator(
         sakRepository = SakPostgresRepository(dataSource),
         lagreSakDao = LagreSakDao(dataSource),
         utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
         lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
-        producer = producer
+        producer = producer,
+        hendelseConsumer = hendelseConsumer
     )
 
     restInterface(sakMediator)
-
-    val builder = StreamsBuilder()
-
-    SøknadConsumer(builder, søknadTopic, sakMediator)
-    InntektsmeldingConsumer(builder, inntektsmeldingTopic, sakMediator)
-    BehovConsumer(builder, behovTopic, sakMediator)
-    PåminnelseConsumer(builder, påminnelseTopic, sakMediator)
-
-    return KafkaStreams(builder.build(), environment.config.streamsConfig()).apply {
-        addShutdownHook(this)
-
-        environment.monitor.subscribe(ApplicationStarted) {
-            start()
-        }
-
-        environment.monitor.subscribe(ApplicationStopping) {
-            close(Duration.ofSeconds(10))
-        }
-    }
 }
 
 private val httpTraceLog = LoggerFactory.getLogger("HttpTraceLog")

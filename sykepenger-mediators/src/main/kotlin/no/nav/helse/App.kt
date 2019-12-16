@@ -60,11 +60,11 @@ private fun String.readFile() =
             null
         }
 
+private val applicationLog = LoggerFactory.getLogger("no.nav.helse.Spleis")
 @KtorExperimentalAPI
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
-        LoggerFactory.getLogger("main")
-            .error("uncaught exception in thread ${thread.name}: ${err.message}", err)
+        applicationLog.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
     }
     val config = createConfigFromEnvironment(System.getenv())
 
@@ -81,14 +81,14 @@ fun main() {
 fun createApplicationEnvironment(appConfig: ApplicationConfig) = applicationEngineEnvironment {
     config = appConfig
 
+    log = applicationLog
+
     connector {
         port = appConfig.property("server.port").getString().toInt()
     }
 
     module {
-        val streams = vedtaksperiodeApplication()
-        nais(
-            isAliveCheck = { streams.state().isRunning }
-        )
+        vedtaksperiodeApplication()
+        nais()
     }
 }

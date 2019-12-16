@@ -1,9 +1,14 @@
 package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.safelyUnwrapDate
+import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -11,6 +16,24 @@ import java.time.LocalDateTime
 @JsonDeserialize(using = SykepengesøknadDeserializer::class)
 data class Sykepengesøknad(private val jsonNode: JsonNode) {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(Companion::class.java)
+
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun fromJson(json: String): Sykepengesøknad? {
+            return try {
+                Sykepengesøknad(objectMapper.readTree(json))
+            } catch (err: IOException) {
+                log.info("kunne ikke lese sykepengesøknad som json: ${err.message}", err)
+                null
+            }
+        }
+    }
+
+    val type = jsonNode["type"].asText()!!
     val id = jsonNode["id"].asText()!!
     val sykmeldingId = jsonNode["sykmeldingId"].asText()!!
     val status = jsonNode["status"].asText()!!

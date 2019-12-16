@@ -90,6 +90,14 @@ internal object TestConstants {
         fravar = fravær
     )
 
+    fun søknad(status: SoknadsstatusDTO, aktørId: String = UUID.randomUUID().toString()) =
+        Sykepengesøknad(
+            søknadDTO(
+                aktørId = aktørId,
+                status = status
+            ).toJsonNode()
+        )
+
     fun sendtSøknadHendelse(
         id: String = UUID.randomUUID().toString(),
         aktørId: String = UUID.randomUUID().toString(),

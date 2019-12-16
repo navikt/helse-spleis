@@ -3,19 +3,16 @@ package no.nav.helse.unit.spleis
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants
 import no.nav.helse.Topics
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.VedtaksperiodeObserver
-import no.nav.helse.spleis.LagreUtbetalingDao
-import no.nav.helse.spleis.SakMediator
-import no.nav.helse.spleis.SakRepository
-import no.nav.helse.spleis.UtbetalingsreferanseRepository
-import no.nav.helse.spleis.VedtaksperiodeProbe
+import no.nav.helse.spleis.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class SakMediatorTest {
 
@@ -25,6 +22,7 @@ internal class SakMediatorTest {
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
     private val producer = mockk<KafkaProducer<String, String>>(relaxed = true)
+    private val hendelseConsumer = mockk<HendelseConsumer>(relaxed = true)
 
     private val sakMediator = SakMediator(
         vedtaksperiodeProbe = probe,
@@ -32,16 +30,20 @@ internal class SakMediatorTest {
         lagreSakDao = lagreSakDao,
         utbetalingsreferanseRepository = utbetalingsRepo,
         lagreUtbetalingDao = lagreUtbetalingDao,
-        producer = producer
+        producer = producer,
+        hendelseConsumer = hendelseConsumer
     )
 
-    private val nySøknadHendelse = nySøknadHendelse()
+    private val nySøknad = TestConstants.søknad(
+        status = SoknadsstatusDTO.NY,
+        aktørId = "1234"
+    )
 
     @Test
     fun `sørger for at observers blir varslet om endring`() {
         every { repo.hentSak(any()) } returns null
 
-        sakMediator.håndter(nySøknadHendelse)
+        sakMediator.onNySøknad(nySøknad)
 
         verify(exactly = 1) {
             repo.hentSak(any())
