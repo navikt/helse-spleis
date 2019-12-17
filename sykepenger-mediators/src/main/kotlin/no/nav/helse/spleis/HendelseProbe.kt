@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.hendelser.søknad.SøknadHendelse
 import org.slf4j.LoggerFactory
 
-class HendelseProbe: HendelseConsumer.MessageListener {
+class HendelseProbe: HendelseListener {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 

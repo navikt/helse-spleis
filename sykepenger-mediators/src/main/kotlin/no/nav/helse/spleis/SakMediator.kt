@@ -21,7 +21,7 @@ internal class SakMediator(
     private val lagreUtbetalingDao: SakObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
     private val producer: KafkaProducer<String, String>
-) : SakObserver, HendelseConsumer.MessageListener {
+) : SakObserver, HendelseListener {
 
     private val log = LoggerFactory.getLogger(SakMediator::class.java)
 

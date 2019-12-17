@@ -51,7 +51,22 @@ fun Application.vedtaksperiodeApplication() {
 
     val dataSource = getDataSource(createHikariConfigFromEnvironment())
 
-    val hendelseConsumer = HendelseConsumer().apply {
+    val producer =
+        KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
+
+    val sakMediator = SakMediator(
+        sakRepository = SakPostgresRepository(dataSource),
+        lagreSakDao = LagreSakDao(dataSource),
+        utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
+        lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
+        producer = producer
+    )
+
+    HendelseMediator().apply {
+        addListener(HendelseProbe())
+        addListener(LagreHendelseDao(dataSource))
+        addListener(sakMediator)
+
         addStateListener(KafkaStreams.StateListener { newState, oldState ->
             log.info("From state={} to state={}", oldState, newState)
 
@@ -69,23 +84,6 @@ fun Application.vedtaksperiodeApplication() {
             stop()
         }
     }
-
-    val producer =
-        KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
-
-    val sakMediator = SakMediator(
-        sakRepository = SakPostgresRepository(dataSource),
-        lagreSakDao = LagreSakDao(dataSource),
-        utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
-        lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
-        producer = producer
-    )
-
-    val hendelseMediator = HendelseMediator(
-        consumer = hendelseConsumer,
-        lagreHendelseDao = LagreHendelseDao(dataSource),
-        sakMediator = sakMediator
-    )
 
     restInterface(sakMediator)
 }
