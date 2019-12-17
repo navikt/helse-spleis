@@ -49,43 +49,29 @@ fun Application.createHikariConfigFromEnvironment() =
 fun Application.vedtaksperiodeApplication() {
     migrate(createHikariConfigFromEnvironment())
 
-    val dataSource = getDataSource(createHikariConfigFromEnvironment())
-
-    val producer =
-        KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
-
-    val sakMediator = SakMediator(
-        sakRepository = SakPostgresRepository(dataSource),
-        lagreSakDao = LagreSakDao(dataSource),
-        utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
-        lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
-        producer = producer
+    val helseBuilder = HelseBuilder(
+        dataSource = getDataSource(createHikariConfigFromEnvironment()),
+        hendelseProducer = KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
     )
 
-    HendelseMediator().apply {
-        addListener(HendelseProbe())
-        addListener(LagreHendelseDao(dataSource))
-        addListener(sakMediator)
+    helseBuilder.addStateListener(KafkaStreams.StateListener { newState, oldState ->
+        log.info("From state={} to state={}", oldState, newState)
 
-        addStateListener(KafkaStreams.StateListener { newState, oldState ->
-            log.info("From state={} to state={}", oldState, newState)
-
-            if (newState == KafkaStreams.State.ERROR) {
-                log.error("exiting JVM process because the kafka stream has died")
-                exitProcess(1)
-            }
-        })
-
-        environment.monitor.subscribe(ApplicationStarted) {
-            start(environment.config.streamsConfig())
+        if (newState == KafkaStreams.State.ERROR) {
+            log.error("exiting JVM process because the kafka stream has died")
+            exitProcess(1)
         }
+    })
 
-        environment.monitor.subscribe(ApplicationStopping) {
-            stop()
-        }
+    environment.monitor.subscribe(ApplicationStarted) {
+        helseBuilder.start(environment.config.streamsConfig())
     }
 
-    restInterface(sakMediator)
+    environment.monitor.subscribe(ApplicationStopping) {
+        helseBuilder.stop()
+    }
+
+    restInterface(helseBuilder.sakMediator)
 }
 
 private val httpTraceLog = LoggerFactory.getLogger("HttpTraceLog")

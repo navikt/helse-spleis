@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
 import no.nav.helse.sak.ArbeidstakerHendelse
 import javax.sql.DataSource
 
-class LagreHendelseDao(private val dataSource: DataSource,
+class HendelseRecorder(private val dataSource: DataSource,
                        private val probe: PostgresProbe = PostgresProbe) : HendelseListener {
 
     override fun onNySøknad(søknad: NySøknadHendelse) {

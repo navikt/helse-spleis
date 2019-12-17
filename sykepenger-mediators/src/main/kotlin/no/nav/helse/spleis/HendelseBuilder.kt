@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
-internal class HendelseMediator() {
+internal class HendelseBuilder() {
 
-    private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
+    private val log = LoggerFactory.getLogger(HendelseBuilder::class.java)
 
     private val messageListeners = mutableListOf<HendelseListener>()
     private val stateListeners = mutableListOf<KafkaStreams.StateListener>()

@@ -12,7 +12,7 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
 import no.nav.helse.runMigration
 import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.spleis.LagreHendelseDao
+import no.nav.helse.spleis.HendelseRecorder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -49,7 +49,7 @@ class HendelsePersisteringPostgresTest {
     @Test
     internal fun `hendelser skal lagres`() {
         val dataSource = HikariDataSource(hikariConfig)
-        val dao = LagreHendelseDao(dataSource)
+        val dao = HendelseRecorder(dataSource)
 
         nySøknadHendelse().also {
             dao.onNySøknad(it)
