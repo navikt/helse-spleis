@@ -15,6 +15,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -48,22 +49,19 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         }
     }
 
-    val arbeidsgiverFnr: String? get() = inntektsmelding["arbeidsgiverFnr"]?.textValue()
-    val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
-    val mottattDato: LocalDateTime get() = LocalDateTime.parse(inntektsmelding["mottattDato"].textValue())
-    val ferie get() = inntektsmelding["ferieperioder"]?.map { Periode(it) } ?: emptyList()
-    val inntektsmeldingId = inntektsmelding["inntektsmeldingId"].asText() as String
-    val arbeidstakerAktorId = inntektsmelding["arbeidstakerAktorId"].textValue() as String
-    val arbeidstakerFnr = inntektsmelding["arbeidstakerFnr"].textValue() as String
-    val virksomhetsnummer: String? get() = inntektsmelding["virksomhetsnummer"]?.textValue()
-    val arbeidsgiverAktorId: String? get() = inntektsmelding["arbeidsgiverAktorId"]?.textValue()
-    val arbeidsgiverperioder get() = inntektsmelding["arbeidsgiverperioder"]?.map { Periode(it) } ?: emptyList()
-    val beregnetInntekt
+    private val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
+    private val mottattDato: LocalDateTime get() = LocalDateTime.parse(inntektsmelding["mottattDato"].textValue())
+    private val ferie get() = inntektsmelding["ferieperioder"]?.map { Periode(it) } ?: emptyList()
+    private val arbeidstakerAktorId = inntektsmelding["arbeidstakerAktorId"].textValue() as String
+    private val arbeidstakerFnr = inntektsmelding["arbeidstakerFnr"].textValue() as String
+    private val virksomhetsnummer: String? get() = inntektsmelding["virksomhetsnummer"]?.textValue()
+    private val arbeidsgiverperioder get() = inntektsmelding["arbeidsgiverperioder"]?.map { Periode(it) } ?: emptyList()
+    private val beregnetInntekt
         get() = inntektsmelding["beregnetInntekt"]
             ?.takeUnless { it.isNull }
             ?.textValue()?.toBigDecimal()
-    val refusjon get() = Refusjon(inntektsmelding["refusjon"])
-    val endringIRefusjoner
+    private val refusjon get() = Refusjon(inntektsmelding["refusjon"])
+    private val endringIRefusjoner
         get() = inntektsmelding["endringIRefusjoner"]
             .mapNotNull { it["endringsdato"].safelyUnwrapDate() }
 
@@ -77,12 +75,6 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         && inntektsmelding["beregnetInntekt"] != null && !inntektsmelding["beregnetInntekt"].isNull
         && inntektsmelding["arbeidstakerFnr"] != null
         && inntektsmelding["refusjon"]?.let { Refusjon(it) }?.beloepPrMnd == beregnetInntekt ?: false
-
-    fun beregnetInntekt() = checkNotNull(beregnetInntekt) { "Vi kan ikke håndtere inntektsmeldinger uten beregnet inntekt" }
-
-    fun refusjon() = refusjon
-
-    fun endringIRefusjoner() = endringIRefusjoner
 
     override fun fødselsnummer() = arbeidstakerFnr
 
@@ -133,18 +125,39 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         return objectMapper.readTree(toJson())
     }
 
-    override fun toJson(): String = objectMapper.writeValueAsString(mapOf(
-        "hendelseId" to hendelseId(),
-        "type" to SykdomshendelseType.InntektsmeldingMottatt.name,
-        "inntektsmelding" to inntektsmelding
-    ))
+    override fun toJson(): String = objectMapper.writeValueAsString(
+        mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to SykdomshendelseType.InntektsmeldingMottatt.name,
+            "inntektsmelding" to inntektsmelding
+        )
+    )
 
-    data class Periode(val jsonNode: JsonNode) {
+    fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
+        refusjon.opphoersdato?.also {
+            if (it <= sisteUtbetalingsdag) {
+                return true
+            }
+        }
+
+        return endringIRefusjoner.any { it <= sisteUtbetalingsdag }
+    }
+
+    fun dagsats(`6G`: Int): Int {
+        val beregnetInntekt = checkNotNull(beregnetInntekt) { "kan ikke regne ut dagsats fra inntektsmeldinger uten beregnet inntekt" }
+        return beregnetInntekt
+            .times(12.toBigDecimal())
+            .min(`6G`.toBigDecimal())
+            .divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP)
+            .toInt()
+    }
+
+    private class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
     }
 
-    data class Refusjon(val jsonNode: JsonNode) {
+    private class Refusjon(val jsonNode: JsonNode) {
         val opphoersdato get() = jsonNode["opphoersdato"].safelyUnwrapDate()
         val beloepPrMnd get() = jsonNode["beloepPrMnd"]?.textValue()?.toBigDecimal()
     }

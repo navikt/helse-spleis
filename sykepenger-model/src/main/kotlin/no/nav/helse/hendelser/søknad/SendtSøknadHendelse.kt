@@ -3,8 +3,10 @@ package no.nav.helse.hendelser.søknad
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseType
+import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -17,6 +19,29 @@ class SendtSøknadHendelse private constructor(hendelseId: String, søknad: Json
             return SendtSøknadHendelse(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
         }
     }
+
+    private val fom get() = søknad["fom"].asText().let { LocalDate.parse(it) }
+    private val tom get() = søknad["tom"].asText().let { LocalDate.parse(it) }
+    private val sendtNav = søknad["sendtNav"]?.takeUnless { it.isNull }?.let { LocalDateTime.parse(it.asText()) }
+
+    private val egenmeldinger get() = søknad["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
+    private val fraværsperioder
+        get() = søknad["fravar"]?.filterNot {
+            Fraværstype.valueOf(it["type"].textValue()) in listOf(
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
+            )
+        }?.map { FraværsPeriode(it) } ?: emptyList()
+
+    private val utdanningsperioder
+        get() = søknad["fravar"]?.filter {
+            Fraværstype.valueOf(it["type"].textValue()) in listOf(
+                Fraværstype.UTDANNING_FULLTID,
+                Fraværstype.UTDANNING_DELTID
+            )
+        }?.map { Utdanningsfraværsperiode(it) } ?: emptyList()
+
+    private val arbeidGjenopptatt get() = søknad["arbeidGjenopptatt"]?.safelyUnwrapDate()
 
     override fun opprettet() = requireNotNull(sendtNav)
 
@@ -66,5 +91,29 @@ class SendtSøknadHendelse private constructor(hendelseId: String, søknad: Json
 
     override fun hendelsetype(): Hendelsetype {
         return Hendelsetype.SendtSøknad
+    }
+
+    private class Periode(val jsonNode: JsonNode) {
+        val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+        val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+    }
+
+    private class FraværsPeriode(val jsonNode: JsonNode) {
+        val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+        val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+        val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
+    }
+
+    private class Utdanningsfraværsperiode(val jsonNode: JsonNode) {
+        val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+        val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
+    }
+
+    private enum class Fraværstype {
+        FERIE,
+        PERMISJON,
+        UTLANDSOPPHOLD,
+        UTDANNING_FULLTID,
+        UTDANNING_DELTID
     }
 }

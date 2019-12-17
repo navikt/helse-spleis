@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
 import no.nav.helse.hendelser.påminnelse.Påminnelse
 import no.nav.helse.hendelser.søknad.NySøknadHendelse
 import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
-import no.nav.helse.hendelser.søknad.SøknadHendelse
 import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {
@@ -49,20 +48,17 @@ class HendelseProbe: HendelseListener {
     }
 
     override fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {
-        sikkerLogg.info("${inntektsmelding.toJson()}")
+        sikkerLogg.info(inntektsmelding.toJson())
         inntektsmeldingMottattCounter.inc()
     }
 
     override fun onNySøknad(søknad: NySøknadHendelse) {
-        søknad(søknad)
+        sikkerLogg.info(søknad.toJson())
+        søknadCounter.labels("NY").inc()
     }
 
     override fun onSendtSøknad(søknad: SendtSøknadHendelse) {
-        søknad(søknad)
-    }
-
-    private fun søknad(søknad: SøknadHendelse) {
-        sikkerLogg.info(søknad.toJson().toString())
-        søknadCounter.labels(søknad.status).inc()
+        sikkerLogg.info(søknad.toJson())
+        søknadCounter.labels("SENDT").inc()
     }
 }

@@ -19,7 +19,10 @@ import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.math.RoundingMode
 import java.nio.ByteBuffer
@@ -40,7 +43,7 @@ internal class Vedtaksperiode private constructor(
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 ) {
 
-    private val `6G` = (6 * 99858).toBigDecimal()
+    private val `6G` = (6 * 99858)
 
     private var maksdato: LocalDate? = null
 
@@ -55,12 +58,7 @@ internal class Vedtaksperiode private constructor(
     private fun inntektsmeldingHendelse() =
         this.sykdomstidslinje.hendelser().førsteAvType<InntektsmeldingHendelse>()
 
-    private fun sykepengegrunnlag() =
-        inntektsmeldingHendelse().beregnetInntekt().times(12.toBigDecimal())
-
-    private fun beregningsgrunnlag() = sykepengegrunnlag().min(`6G`)
-
-    internal fun dagsats() = beregningsgrunnlag().divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP).toInt()
+    internal fun dagsats() = inntektsmeldingHendelse().dagsats(`6G`)
 
     internal fun håndter(nySøknadHendelse: NySøknadHendelse) = overlapperMed(nySøknadHendelse).also {
         if (it) tilstand.håndter(this, nySøknadHendelse)
@@ -269,11 +267,8 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
-            if (utbetalingsberegning.utbetalingslinjer.isEmpty() || delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(
-                    vedtaksperiode,
-                    utbetalingsberegning
-                )
-            ) {
+            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
+            if (sisteUtbetalingsdag == null || vedtaksperiode.inntektsmeldingHendelse().harEndringIRefusjon(sisteUtbetalingsdag))  {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
             }
 
@@ -291,21 +286,6 @@ internal class Vedtaksperiode private constructor(
 
             return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
                 || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
-        }
-
-        private fun delerAvPeriodenSkalIkkeBetalesAvArbeidsgiver(
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingsberegning: Utbetalingsberegning
-        ): Boolean {
-            val inntektsmelding = vedtaksperiode.inntektsmeldingHendelse()
-            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom ?: return false
-
-            val opphørsdato = inntektsmelding.refusjon().opphoersdato
-            if (opphørsdato != null && opphørsdato <= sisteUtbetalingsdag) {
-                return true
-            }
-
-            return !inntektsmelding.endringIRefusjoner().all { it > sisteUtbetalingsdag }
         }
     }
 

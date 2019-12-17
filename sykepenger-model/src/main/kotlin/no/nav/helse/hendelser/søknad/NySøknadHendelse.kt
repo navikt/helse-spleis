@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,6 +19,8 @@ class NySøknadHendelse private constructor(hendelseId: String, søknad: JsonNod
             return NySøknadHendelse(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
         }
     }
+
+    private val opprettet get() = søknad["opprettetDato"]?.takeUnless { it.isNull }?.let { LocalDate.parse(it.textValue()).atStartOfDay() } ?: LocalDateTime.parse(søknad["opprettet"].asText())
 
     override fun opprettet() = opprettet
 
