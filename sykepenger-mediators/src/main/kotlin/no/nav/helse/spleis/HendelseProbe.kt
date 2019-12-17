@@ -2,10 +2,10 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SendtSøknad
 import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {

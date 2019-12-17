@@ -12,8 +12,8 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.sak.TilstandType.*
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*

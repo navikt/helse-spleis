@@ -1,4 +1,4 @@
-package no.nav.helse.hendelser.ytelser
+package no.nav.helse.hendelser
 
 import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.sykepengehistorikk

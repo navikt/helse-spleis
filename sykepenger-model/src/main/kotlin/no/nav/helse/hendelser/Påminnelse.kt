@@ -1,10 +1,9 @@
-package no.nav.helse.hendelser.påminnelse
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.sak.VedtaksperiodeHendelse

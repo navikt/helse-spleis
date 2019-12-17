@@ -1,11 +1,9 @@
-package no.nav.helse.hendelser.inntektsmelding
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.serde.safelyUnwrapDate
@@ -34,7 +32,11 @@ class Inntektsmelding private constructor(hendelseId: String, private val inntek
 
         fun fromInntektsmelding(json: String): Inntektsmelding? {
             return try {
-                Inntektsmelding(objectMapper.readTree(json))
+                Inntektsmelding(
+                    objectMapper.readTree(
+                        json
+                    )
+                )
             } catch (err: IOException) {
                 log.info("kunne ikke lese inntektsmelding som json: ${err.message}", err)
                 null
@@ -51,11 +53,19 @@ class Inntektsmelding private constructor(hendelseId: String, private val inntek
 
     private val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
     private val mottattDato: LocalDateTime get() = LocalDateTime.parse(inntektsmelding["mottattDato"].textValue())
-    private val ferie get() = inntektsmelding["ferieperioder"]?.map { Periode(it) } ?: emptyList()
+    private val ferie get() = inntektsmelding["ferieperioder"]?.map {
+        Periode(
+            it
+        )
+    } ?: emptyList()
     private val arbeidstakerAktorId = inntektsmelding["arbeidstakerAktorId"].textValue() as String
     private val arbeidstakerFnr = inntektsmelding["arbeidstakerFnr"].textValue() as String
     private val virksomhetsnummer: String? get() = inntektsmelding["virksomhetsnummer"]?.textValue()
-    private val arbeidsgiverperioder get() = inntektsmelding["arbeidsgiverperioder"]?.map { Periode(it) } ?: emptyList()
+    private val arbeidsgiverperioder get() = inntektsmelding["arbeidsgiverperioder"]?.map {
+        Periode(
+            it
+        )
+    } ?: emptyList()
     private val beregnetInntekt
         get() = inntektsmelding["beregnetInntekt"]
             ?.takeUnless { it.isNull }

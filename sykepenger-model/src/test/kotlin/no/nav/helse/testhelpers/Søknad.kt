@@ -1,7 +1,7 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO

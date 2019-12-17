@@ -6,12 +6,7 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
-import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.hendelser.*
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 

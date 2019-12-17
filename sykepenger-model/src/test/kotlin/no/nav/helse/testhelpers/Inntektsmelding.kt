@@ -1,6 +1,6 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Periode

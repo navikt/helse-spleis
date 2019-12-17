@@ -1,8 +1,6 @@
-package no.nav.helse.hendelser.søknad
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
@@ -16,7 +14,10 @@ class SendtSøknad private constructor(hendelseId: String, søknad: JsonNode) : 
 
     companion object {
         fun fromJson(jsonNode: JsonNode): SendtSøknad {
-            return SendtSøknad(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
+            return SendtSøknad(
+                jsonNode["hendelseId"].textValue(),
+                jsonNode["søknad"]
+            )
         }
     }
 
@@ -24,7 +25,11 @@ class SendtSøknad private constructor(hendelseId: String, søknad: JsonNode) : 
     private val tom get() = søknad["tom"].asText().let { LocalDate.parse(it) }
     private val sendtNav = søknad["sendtNav"]?.takeUnless { it.isNull }?.let { LocalDateTime.parse(it.asText()) }
 
-    private val egenmeldinger get() = søknad["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
+    private val egenmeldinger get() = søknad["egenmeldinger"]?.map {
+        Periode(
+            it
+        )
+    } ?: emptyList()
     private val fraværsperioder
         get() = søknad["fravar"]?.filterNot {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(

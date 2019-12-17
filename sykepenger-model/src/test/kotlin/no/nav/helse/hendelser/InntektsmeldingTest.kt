@@ -1,4 +1,4 @@
-package no.nav.helse.hendelser.inntektsmelding
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.TestConstants.inntektsmeldingDTO

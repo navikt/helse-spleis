@@ -1,8 +1,6 @@
-package no.nav.helse.hendelser.søknad
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -16,7 +14,10 @@ class NySøknad private constructor(hendelseId: String, søknad: JsonNode) : Sø
 
     companion object {
         fun fromJson(jsonNode: JsonNode): NySøknad {
-            return NySøknad(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
+            return NySøknad(
+                jsonNode["hendelseId"].textValue(),
+                jsonNode["søknad"]
+            )
         }
     }
 

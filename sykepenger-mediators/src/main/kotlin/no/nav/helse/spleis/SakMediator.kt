@@ -2,13 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
-import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.sak.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

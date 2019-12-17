@@ -6,10 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
-import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Ytelser
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.math.BigDecimal

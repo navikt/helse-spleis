@@ -1,4 +1,4 @@
-package no.nav.helse.hendelser.ytelser
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate

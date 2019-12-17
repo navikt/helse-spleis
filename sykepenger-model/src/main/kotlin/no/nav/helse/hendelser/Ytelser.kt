@@ -1,4 +1,4 @@
-package no.nav.helse.hendelser.ytelser
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDate
@@ -56,7 +55,11 @@ class Ytelser(private val behov: Behov) : ArbeidstakerHendelse, VedtaksperiodeHe
         val løsning = behov.løsning() as Map<*, *>
         val sykepengehistorikkløsninger = løsning["Sykepengehistorikk"] as Map<*, *>
 
-        return Sykepengehistorikk(objectMapper.convertValue<JsonNode>(sykepengehistorikkløsninger))
+        return Sykepengehistorikk(
+            objectMapper.convertValue<JsonNode>(
+                sykepengehistorikkløsninger
+            )
+        )
     }
 
     override fun aktørId() = behov.aktørId()

@@ -4,9 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sak.ArbeidstakerHendelse
 import javax.sql.DataSource
 

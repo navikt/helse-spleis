@@ -1,12 +1,12 @@
 package no.nav.helse.sak
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.påminnelse.Påminnelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 interface VedtaksperiodeObserver {
     data class StateChangeEvent(

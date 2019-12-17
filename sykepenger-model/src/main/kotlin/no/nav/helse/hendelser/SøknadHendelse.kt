@@ -1,10 +1,9 @@
-package no.nav.helse.hendelser.søknad
+package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import org.slf4j.LoggerFactory
@@ -46,9 +45,18 @@ abstract class SøknadHendelse protected constructor(
     private val aktørId = søknad["aktorId"].asText()!!
     private val fnr = søknad["fnr"].asText()!!
 
-    protected val sykeperioder get() = søknad["soknadsperioder"]?.map { Sykeperiode(it) } ?: emptyList()
+    protected val sykeperioder get() = søknad["soknadsperioder"]?.map {
+        Sykeperiode(
+            it
+        )
+    } ?: emptyList()
 
-    private val arbeidsgiver: Arbeidsgiver get() = søknad["arbeidsgiver"].let { Arbeidsgiver(it) }
+    private val arbeidsgiver: Arbeidsgiver
+        get() = søknad["arbeidsgiver"].let {
+            Arbeidsgiver(
+                it
+            )
+        }
 
     override fun aktørId() = aktørId
 

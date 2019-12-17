@@ -1,7 +1,6 @@
-package no.nav.helse.hendelser.saksbehandling
+package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.VedtaksperiodeHendelse
 

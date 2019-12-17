@@ -3,11 +3,7 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.SykdomshendelseType
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.SakskjemaForGammelt
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent

@@ -8,14 +8,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.SykdomshendelseDeserializer
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
-import no.nav.helse.hendelser.ytelser.Ytelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate

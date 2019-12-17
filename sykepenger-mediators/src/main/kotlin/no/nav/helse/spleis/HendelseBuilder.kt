@@ -4,11 +4,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
-import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknad
-import no.nav.helse.hendelser.søknad.SendtSøknad
-import no.nav.helse.hendelser.søknad.SøknadHendelse
+import no.nav.helse.hendelser.*
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
