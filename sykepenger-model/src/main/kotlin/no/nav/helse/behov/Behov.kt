@@ -1,12 +1,10 @@
 package no.nav.helse.behov
 
 import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.util.*
 
-class Behov internal constructor(private val pakke: Pakke) : ArbeidstakerHendelse, VedtaksperiodeHendelse {
+class Behov internal constructor(private val pakke: Pakke) {
 
     companion object {
         private const val BehovKey = "@behov"
@@ -62,41 +60,36 @@ class Behov internal constructor(private val pakke: Pakke) : ArbeidstakerHendels
     fun behovType(): List<String> = requireNotNull(get(BehovKey))
     fun id(): UUID = UUID.fromString(pakke[IdKey] as String)
 
-    override fun opprettet() = LocalDateTime.parse(pakke[OpprettetKey] as String)
+    fun opprettet() = LocalDateTime.parse(pakke[OpprettetKey] as String)
 
     fun besvart(): LocalDateTime? {
         return pakke[BesvartKey]?.let { LocalDateTime.parse(it as String) }
     }
 
-    override fun hendelsetype(): Hendelsetype {
+    fun hendelsetype(): Hendelsetype {
         return Hendelsetype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
     }
 
-    override fun aktørId(): String {
+    fun aktørId(): String {
         return requireNotNull(get<String>(AktørIdKey))
     }
 
-    override fun fødselsnummer(): String {
+    fun fødselsnummer(): String {
         return requireNotNull(get<String>(FødselsnummerKey))
     }
 
-    override fun organisasjonsnummer(): String {
+    fun organisasjonsnummer(): String {
         return requireNotNull(get<String>(OrganisasjonsnummerKey))
     }
 
-    override fun vedtaksperiodeId(): String {
+    fun vedtaksperiodeId(): String {
         return requireNotNull(get<String>(VedtaksperiodeIdKey))
     }
 
     override fun toString() = "${behovType()}:${id()}"
 
-    override fun toJson(): String {
+    fun toJson(): String {
         return pakke.toJson()
-    }
-
-    fun løsBehov(løsning: Any) {
-        pakke[LøsningsKey] = løsning
-        pakke["final"] = true
     }
 
     fun erLøst(): Boolean {

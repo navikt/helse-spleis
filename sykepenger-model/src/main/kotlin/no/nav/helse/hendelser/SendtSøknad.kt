@@ -8,18 +8,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class SendtSøknad private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.SendtSøknadMottatt, søknad) {
+class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsetype.SendtSøknad, søknad) {
 
-    constructor(søknad: JsonNode) : this(UUID.randomUUID().toString(), søknad)
-
-    companion object {
-        fun fromJson(jsonNode: JsonNode): SendtSøknad {
-            return SendtSøknad(
-                jsonNode["hendelseId"].textValue(),
-                jsonNode["søknad"]
-            )
-        }
-    }
+    constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
 
     private val fom get() = søknad["fom"].asText().let { LocalDate.parse(it) }
     private val tom get() = søknad["tom"].asText().let { LocalDate.parse(it) }
@@ -93,10 +84,6 @@ class SendtSøknad private constructor(hendelseId: String, søknad: JsonNode) : 
                     .reduce { resultatTidslinje, delTidslinje ->
                         resultatTidslinje + delTidslinje
                     }
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.SendtSøknad
-    }
 
     private class Periode(val jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())

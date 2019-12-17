@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.sak.TilstandType
@@ -309,13 +310,11 @@ internal object TestConstants {
             fødselsnummer,
             organisasjonsnummer,
             utgangspunktForBeregningAvYtelse
-        ).also {
-            it.løsBehov(
-                mapOf(
-                    "Sykepengehistorikk" to sykepengehistorikk
-                )
+        ).løsBehov(
+            mapOf(
+                "Sykepengehistorikk" to sykepengehistorikk
             )
-        }.let { Behov.fromJson(it.toJson()) }
+        )
     )
 
     fun manuellSaksbehandlingLøsning(
@@ -336,13 +335,11 @@ internal object TestConstants {
             mapOf(
                 "saksbehandlerIdent" to saksbehandler
             )
-        ).also {
-            it.løsBehov(
-                mapOf(
-                    "godkjent" to utbetalingGodkjent
-                )
+        ).løsBehov(
+            mapOf(
+                "godkjent" to utbetalingGodkjent
             )
-        }
+        )
     }
 
     fun manuellSaksbehandlingHendelse(
@@ -385,6 +382,14 @@ internal object TestConstants {
             )
         )
     ) ?: fail { "påminnelse er null" }
+}
+
+private fun Behov.løsBehov(løsning: Any): Behov {
+    val pakke = Pakke.fromJson(this.toJson())
+    pakke["@besvart"] = LocalDateTime.now().toString()
+    pakke["@løsning"] = løsning
+    pakke["final"] = true
+    return Behov.fromJson(pakke.toJson())
 }
 
 internal data class SpolePeriode(

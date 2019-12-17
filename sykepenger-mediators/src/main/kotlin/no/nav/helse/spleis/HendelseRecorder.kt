@@ -4,9 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.sak.ArbeidstakerHendelse
 import javax.sql.DataSource
 
@@ -26,7 +24,14 @@ class HendelseRecorder(private val dataSource: DataSource,
     }
 
     override fun onLøstBehov(behov: Behov) {
-        lagreHendelse(behov)
+        when (behov.hendelsetype()) {
+            Hendelsetype.Ytelser -> Ytelser(behov).also {
+                lagreHendelse(it)
+            }
+            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
+                lagreHendelse(it)
+            }
+        }
     }
 
     private fun lagreHendelse(hendelse: ArbeidstakerHendelse) {

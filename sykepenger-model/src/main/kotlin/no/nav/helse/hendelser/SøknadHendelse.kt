@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.LocalDate
+import java.util.*
 
 abstract class SøknadHendelse protected constructor(
-    hendelseId: String,
-    private val hendelsetype: SykdomshendelseType,
+    hendelseId: UUID,
+    hendelsetype: Hendelsetype,
     protected val søknad: JsonNode
-): ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
+) : SykdomstidslinjeHendelse(hendelseId, hendelsetype) {
 
     companion object {
         private val log = LoggerFactory.getLogger(SøknadHendelse::class.java)
@@ -23,12 +23,20 @@ abstract class SøknadHendelse protected constructor(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
+        private val nySøknadtyper = listOf(
+            Hendelsetype.NySøknad.name,
+            SykdomshendelseType.NySøknadMottatt.name
+        )
+        private val sendtSøknadtyper = listOf(
+            Hendelsetype.SendtSøknad.name,
+            SykdomshendelseType.SendtSøknadMottatt.name
+        )
+
         fun fromSøknad(json: String): SøknadHendelse? {
             return try {
                 objectMapper.readTree(json).let { jsonNode ->
                     when (val type = jsonNode["status"].textValue()) {
-                        "NY" -> NySøknad(jsonNode)
-                        "FREMTIDIG" -> NySøknad(jsonNode)
+                        in listOf("NY", "FREMTIDIG") -> NySøknad(jsonNode)
                         "SENDT" -> SendtSøknad(jsonNode)
                         else -> null.also {
                             log.info("kunne ikke lese sykepengesøknad, ukjent type: $type")
@@ -40,16 +48,27 @@ abstract class SøknadHendelse protected constructor(
                 null
             }
         }
+
+        fun fromJson(json: String): SøknadHendelse {
+            return objectMapper.readTree(json).let {
+                when (it["type"].textValue()) {
+                    in nySøknadtyper -> NySøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
+                    in sendtSøknadtyper -> SendtSøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
+                    else -> throw IllegalArgumentException("json er ikke en søknad hendelse")
+                }
+            }
+        }
     }
 
     private val aktørId = søknad["aktorId"].asText()!!
     private val fnr = søknad["fnr"].asText()!!
 
-    protected val sykeperioder get() = søknad["soknadsperioder"]?.map {
-        Sykeperiode(
-            it
-        )
-    } ?: emptyList()
+    protected val sykeperioder
+        get() = søknad["soknadsperioder"]?.map {
+            Sykeperiode(
+                it
+            )
+        } ?: emptyList()
 
     private val arbeidsgiver: Arbeidsgiver
         get() = søknad["arbeidsgiver"].let {
@@ -76,11 +95,13 @@ abstract class SøknadHendelse protected constructor(
         return objectMapper.readTree(toJson())
     }
 
-    override fun toJson(): String = objectMapper.writeValueAsString(mapOf(
-        "hendelseId" to hendelseId(),
-        "type" to hendelsetype.name,
-        "søknad" to søknad
-    ))
+    override fun toJson(): String = objectMapper.writeValueAsString(
+        mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to hendelsetype(),
+            "søknad" to søknad
+        )
+    )
 
     protected class Arbeidsgiver(val jsonNode: JsonNode) {
         val orgnummer: String get() = jsonNode["orgnummer"].textValue()

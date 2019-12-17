@@ -19,6 +19,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
+import no.nav.helse.TestConstants.responsFraSpole
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
@@ -334,12 +335,11 @@ internal class SakComponentTest {
 
         assertNotNull(behov["utgangspunktForBeregningAvYtelse"])
 
-        behov.løsBehov(mapOf(
-            "Sykepengehistorikk" to TestConstants.responsFraSpole(
+        sendBehov(behov.løsBehov(mapOf(
+            "Sykepengehistorikk" to responsFraSpole(
                 perioder = perioder
             )
-        ))
-        sendBehov(behov)
+        )))
     }
 
     private fun sendGodkjenningFraSaksbehandlerløsning(
@@ -348,8 +348,7 @@ internal class SakComponentTest {
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ) {
-        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
-        behov.løsBehov(
+        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler).løsBehov(
             mapOf(
                 "godkjent" to utbetalingGodkjent
             )

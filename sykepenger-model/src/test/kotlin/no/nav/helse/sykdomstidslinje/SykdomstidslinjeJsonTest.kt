@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.ikkeSykedag
@@ -44,10 +45,10 @@ internal class SykdomstidslinjeJsonTest {
 
         val tidslinjeJson = objectMapper.readTree(tidslinje.toJson())
         tidslinjeJson["hendelser"].elements().forEach {
-            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelseId"].asText())
+            assertEquals(sendtSøknadHendelse.hendelseId(), UUID.fromString(it["hendelseId"].asText()))
         }
         tidslinjeJson["dager"].elements().forEach {
-            assertEquals(sendtSøknadHendelse.hendelseId(), it["hendelseId"].asText())
+            assertEquals(sendtSøknadHendelse.hendelseId(), UUID.fromString(it["hendelseId"].asText()))
         }
     }
 
@@ -197,11 +198,11 @@ internal class SykdomstidslinjeJsonTest {
     private class TestHendelseDeserializer : SykdomstidslinjeHendelse.Deserializer {
         override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
             return when (jsonNode["type"].textValue()) {
-                HendelseType.Inntektsmelding.name -> InntektsmeldingHendelse(
-                    jsonNode["hendelseId"].asText()
+                Hendelsetype.Inntektsmelding.name -> InntektsmeldingHendelse(
+                    UUID.fromString(jsonNode["hendelseId"].asText())
                 )
-                HendelseType.SendtSøknad.name -> InntektsmeldingHendelse(
-                    jsonNode["hendelseId"].asText()
+                Hendelsetype.SendtSøknad.name -> SendtSøknadHendelse(
+                    UUID.fromString(jsonNode["hendelseId"].asText())
                 )
                 else -> throw RuntimeException("ukjent type")
             }
@@ -209,13 +210,8 @@ internal class SykdomstidslinjeJsonTest {
 
     }
 
-    private enum class HendelseType {
-        Inntektsmelding,
-        SendtSøknad
-    }
-
-    private class InntektsmeldingHendelse(hendelseId: String = UUID.randomUUID().toString()) :
-        SykdomstidslinjeHendelse(hendelseId) {
+    private class InntektsmeldingHendelse(hendelseId: UUID = UUID.randomUUID()) :
+        SykdomstidslinjeHendelse(hendelseId, Hendelsetype.Inntektsmelding) {
 
         override fun rapportertdato(): LocalDateTime {
             return LocalDateTime.now()
@@ -227,16 +223,36 @@ internal class SykdomstidslinjeJsonTest {
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
+        override fun opprettet(): LocalDateTime {
+            TODO("not implemented")
+        }
+
+        override fun aktørId(): String {
+            TODO("not implemented")
+        }
+
+        override fun fødselsnummer(): String {
+            TODO("not implemented")
+        }
+
+        override fun organisasjonsnummer(): String {
+            TODO("not implemented")
+        }
+
+        override fun toJson(): String {
+            TODO("not implemented")
+        }
+
         override fun toJsonNode(): JsonNode {
             return objectMapper.convertValue(mapOf(
                 "hendelseId" to hendelseId(),
-                "type" to HendelseType.Inntektsmelding.name
+                "type" to Hendelsetype.Inntektsmelding.name
             ))
         }
     }
 
-    private class SendtSøknadHendelse(hendelseId: String = UUID.randomUUID().toString()) :
-        SykdomstidslinjeHendelse(hendelseId) {
+    private class SendtSøknadHendelse(hendelseId: UUID = UUID.randomUUID()) :
+        SykdomstidslinjeHendelse(hendelseId, Hendelsetype.SendtSøknad) {
 
         override fun rapportertdato(): LocalDateTime {
             return LocalDateTime.now()
@@ -248,10 +264,30 @@ internal class SykdomstidslinjeJsonTest {
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 
+        override fun opprettet(): LocalDateTime {
+            TODO("not implemented")
+        }
+
+        override fun aktørId(): String {
+            TODO("not implemented")
+        }
+
+        override fun fødselsnummer(): String {
+            TODO("not implemented")
+        }
+
+        override fun organisasjonsnummer(): String {
+            TODO("not implemented")
+        }
+
+        override fun toJson(): String {
+            TODO("not implemented")
+        }
+
         override fun toJsonNode(): JsonNode {
             return objectMapper.convertValue(mapOf(
                 "hendelseId" to hendelseId(),
-                "type" to HendelseType.SendtSøknad.name
+                "type" to Hendelsetype.SendtSøknad.name
             ))
         }
     }

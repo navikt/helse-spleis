@@ -6,6 +6,7 @@ import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
@@ -87,7 +88,7 @@ internal abstract class Dag internal constructor(
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<String, SykdomstidslinjeHendelse>): Dag =
+        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<UUID, SykdomstidslinjeHendelse>): Dag =
             jsonDag.type.creator(
                 jsonDag.dato,
                 hendelseMap.getOrElse(jsonDag.hendelseId,

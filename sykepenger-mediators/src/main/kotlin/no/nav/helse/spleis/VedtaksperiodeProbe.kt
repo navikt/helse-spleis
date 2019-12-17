@@ -3,7 +3,7 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.SakskjemaForGammelt
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
@@ -65,22 +65,12 @@ object VedtaksperiodeProbe : SakObserver {
         tilstandCounter.labels(
             event.forrigeTilstand.name,
             event.gjeldendeTilstand.name,
-            event.sykdomshendelse.javaClass.simpleName
+            event.sykdomshendelse.hendelsetype().name
         ).inc()
 
-        log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.gjeldendeTilstand} previousState=${event.forrigeTilstand}")
+        log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.hendelsetype().name} state=${event.gjeldendeTilstand} previousState=${event.forrigeTilstand}")
 
-        when (event.sykdomshendelse) {
-            is Inntektsmelding -> {
-                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.InntektsmeldingMottatt.name).inc()
-            }
-            is NySøknad -> {
-                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.NySøknadMottatt.name).inc()
-            }
-            is SendtSøknad -> {
-                dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
-            }
-        }
+        dokumenterKobletTilSakCounter.labels(event.sykdomshendelse.hendelsetype().name).inc()
     }
 
     override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {

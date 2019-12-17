@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.sak.ArbeidstakerHendelse
 import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {
@@ -16,16 +17,8 @@ class HendelseProbe: HendelseListener {
             .labelNames("type")
             .register()
 
-        private val innteksmeldingerMottattCounterName = "inntektsmeldinger_mottatt_totals"
-
-        private val inntektsmeldingMottattCounter =
-            Counter.build(innteksmeldingerMottattCounterName, "Antall inntektsmeldinger mottatt")
-                .register()
-
-        private val søknadCounterName = "nye_soknader_totals"
-
-        private val søknadCounter = Counter.build(søknadCounterName, "Antall søknader mottatt")
-            .labelNames("status")
+        private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
+            .labelNames("type")
             .register()
 
         private val påminnetCounter =
@@ -38,6 +31,7 @@ class HendelseProbe: HendelseListener {
         påminnetCounter
             .labels(påminnelse.tilstand.toString())
             .inc()
+        påminnelse.tell()
     }
 
     override fun onLøstBehov(behov: Behov) {
@@ -48,17 +42,19 @@ class HendelseProbe: HendelseListener {
     }
 
     override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
-        sikkerLogg.info(inntektsmelding.toJson())
-        inntektsmeldingMottattCounter.inc()
+        inntektsmelding.tell()
     }
 
     override fun onNySøknad(søknad: NySøknad) {
-        sikkerLogg.info(søknad.toJson())
-        søknadCounter.labels("NY").inc()
+        søknad.tell()
     }
 
     override fun onSendtSøknad(søknad: SendtSøknad) {
-        sikkerLogg.info(søknad.toJson())
-        søknadCounter.labels("SENDT").inc()
+        søknad.tell()
+    }
+
+    private fun ArbeidstakerHendelse.tell() {
+        sikkerLogg.info(this.toJson())
+        hendelseCounter.labels(this.hendelsetype().name).inc()
     }
 }

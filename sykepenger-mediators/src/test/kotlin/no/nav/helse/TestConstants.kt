@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
@@ -302,14 +303,20 @@ internal object TestConstants {
             fødselsnummer,
             organisasjonsnummer,
             utgangspunktForBeregningAvYtelse
-        ).also {
-            it.løsBehov(
-                mapOf(
-                    "Sykepengehistorikk" to sykepengehistorikk
-                )
+        ).løsBehov(
+            mapOf(
+                "Sykepengehistorikk" to sykepengehistorikk
             )
-        }.let { Behov.fromJson(it.toJson()) }
+        )
     )
+}
+
+internal fun Behov.løsBehov(løsning: Any): Behov {
+    val pakke = objectMapper.readTree(this.toJson()) as ObjectNode
+    pakke.put("@besvart", LocalDateTime.now().toString())
+    pakke.set<JsonNode>("@løsning", objectMapper.valueToTree<JsonNode>(løsning))
+    pakke.put("final", true)
+    return Behov.fromJson(pakke.toString())
 }
 
 internal data class SpolePeriode(

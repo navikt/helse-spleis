@@ -8,18 +8,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class NySøknad private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.NySøknadMottatt, søknad) {
+class NySøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsetype.NySøknad, søknad) {
 
-    constructor(søknad: JsonNode) : this(UUID.randomUUID().toString(), søknad)
-
-    companion object {
-        fun fromJson(jsonNode: JsonNode): NySøknad {
-            return NySøknad(
-                jsonNode["hendelseId"].textValue(),
-                jsonNode["søknad"]
-            )
-        }
-    }
+    constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
 
     private val opprettet get() = søknad["opprettetDato"]?.takeUnless { it.isNull }?.let { LocalDate.parse(it.textValue()).atStartOfDay() } ?: LocalDateTime.parse(søknad["opprettet"].asText())
 
@@ -42,8 +33,4 @@ class NySøknad private constructor(hendelseId: String, søknad: JsonNode) : Sø
             }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.NySøknad
-    }
 }

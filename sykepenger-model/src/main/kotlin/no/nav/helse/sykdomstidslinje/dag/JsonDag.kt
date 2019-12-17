@@ -2,11 +2,12 @@ package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate
+import java.util.*
 
 internal data class JsonDag(
     val type: JsonDagType,
     val dato: LocalDate,
-    val hendelseId: String,
+    val hendelseId: UUID,
     val erstatter: List<JsonDag>
 )
 

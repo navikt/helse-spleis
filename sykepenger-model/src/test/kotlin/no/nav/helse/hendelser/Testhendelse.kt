@@ -13,15 +13,35 @@ internal class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
     private val hendelsetype: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad
 ) :
-    SykdomstidslinjeHendelse(UUID.randomUUID().toString()) {
+    SykdomstidslinjeHendelse(UUID.randomUUID(), Hendelsetype.SendtSøknad) {
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType = hendelsetype
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun aktørId(): String {
+        TODO("not implemented")
+    }
+
+    override fun fødselsnummer(): String {
+        TODO("not implemented")
+    }
+
+    override fun organisasjonsnummer(): String {
+        TODO("not implemented")
+    }
+
+    override fun opprettet(): LocalDateTime {
+        return rapportertdato
+    }
+
     override fun rapportertdato(): LocalDateTime {
         return rapportertdato
+    }
+
+    override fun toJson(): String {
+        TODO("not implemented")
     }
 
     override fun compareTo(other: SykdomstidslinjeHendelse): Int {

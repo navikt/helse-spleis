@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -18,54 +17,53 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class Inntektsmelding private constructor(hendelseId: String, private val inntektsmelding: JsonNode) :
-    ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
-    constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID().toString(), inntektsmelding)
+class Inntektsmelding private constructor(hendelseId: UUID, private val inntektsmelding: JsonNode) :
+    SykdomstidslinjeHendelse(hendelseId, Hendelsetype.Inntektsmelding) {
+
+    constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID(), inntektsmelding)
 
     companion object {
-
         private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
-
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         fun fromInntektsmelding(json: String): Inntektsmelding? {
             return try {
-                Inntektsmelding(
-                    objectMapper.readTree(
-                        json
-                    )
-                )
+                Inntektsmelding(objectMapper.readTree(json))
             } catch (err: IOException) {
                 log.info("kunne ikke lese inntektsmelding som json: ${err.message}", err)
                 null
             }
         }
 
-        fun fromJson(jsonNode: JsonNode): Inntektsmelding {
-            return Inntektsmelding(
-                jsonNode["hendelseId"].textValue(),
-                jsonNode["inntektsmelding"]
-            )
+        fun fromJson(json: String): Inntektsmelding {
+            return objectMapper.readTree(json).let {
+                Inntektsmelding(
+                    UUID.fromString(it["hendelseId"].textValue()),
+                    it["inntektsmelding"]
+                )
+            }
         }
     }
 
     private val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
     private val mottattDato: LocalDateTime get() = LocalDateTime.parse(inntektsmelding["mottattDato"].textValue())
-    private val ferie get() = inntektsmelding["ferieperioder"]?.map {
-        Periode(
-            it
-        )
-    } ?: emptyList()
+    private val ferie
+        get() = inntektsmelding["ferieperioder"]?.map {
+            Periode(
+                it
+            )
+        } ?: emptyList()
     private val arbeidstakerAktorId = inntektsmelding["arbeidstakerAktorId"].textValue() as String
     private val arbeidstakerFnr = inntektsmelding["arbeidstakerFnr"].textValue() as String
     private val virksomhetsnummer: String? get() = inntektsmelding["virksomhetsnummer"]?.textValue()
-    private val arbeidsgiverperioder get() = inntektsmelding["arbeidsgiverperioder"]?.map {
-        Periode(
-            it
-        )
-    } ?: emptyList()
+    private val arbeidsgiverperioder
+        get() = inntektsmelding["arbeidsgiverperioder"]?.map {
+            Periode(
+                it
+            )
+        } ?: emptyList()
     private val beregnetInntekt
         get() = inntektsmelding["beregnetInntekt"]
             ?.takeUnless { it.isNull }
@@ -74,10 +72,6 @@ class Inntektsmelding private constructor(hendelseId: String, private val inntek
     private val endringIRefusjoner
         get() = inntektsmelding["endringIRefusjoner"]
             .mapNotNull { it["endringsdato"].safelyUnwrapDate() }
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.Inntektsmelding
-    }
 
     override fun kanBehandles() = inntektsmelding["mottattDato"] != null
         && inntektsmelding["foersteFravaersdag"] != null
@@ -138,7 +132,7 @@ class Inntektsmelding private constructor(hendelseId: String, private val inntek
     override fun toJson(): String = objectMapper.writeValueAsString(
         mapOf(
             "hendelseId" to hendelseId(),
-            "type" to SykdomshendelseType.InntektsmeldingMottatt.name,
+            "type" to hendelsetype(),
             "inntektsmelding" to inntektsmelding
         )
     )
@@ -154,7 +148,8 @@ class Inntektsmelding private constructor(hendelseId: String, private val inntek
     }
 
     fun dagsats(`6G`: Int): Int {
-        val beregnetInntekt = checkNotNull(beregnetInntekt) { "kan ikke regne ut dagsats fra inntektsmeldinger uten beregnet inntekt" }
+        val beregnetInntekt =
+            checkNotNull(beregnetInntekt) { "kan ikke regne ut dagsats fra inntektsmeldinger uten beregnet inntekt" }
         return beregnetInntekt
             .times(12.toBigDecimal())
             .min(`6G`.toBigDecimal())

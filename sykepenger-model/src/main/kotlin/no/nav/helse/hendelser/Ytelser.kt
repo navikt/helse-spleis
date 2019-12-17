@@ -12,7 +12,9 @@ import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.*
 
-class Ytelser(private val behov: Behov) : ArbeidstakerHendelse, VedtaksperiodeHendelse {
+class Ytelser(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
+
+    constructor(behov: Behov) : this(UUID.randomUUID(), behov)
 
     companion object {
 
@@ -69,10 +71,6 @@ class Ytelser(private val behov: Behov) : ArbeidstakerHendelse, VedtaksperiodeHe
     override fun organisasjonsnummer() = behov.organisasjonsnummer()
 
     override fun vedtaksperiodeId() = behov.vedtaksperiodeId()
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.Ytelser
-    }
 
     override fun opprettet() = requireNotNull(behov.besvart())
 

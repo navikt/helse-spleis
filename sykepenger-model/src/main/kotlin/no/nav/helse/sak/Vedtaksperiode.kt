@@ -112,10 +112,7 @@ internal class Vedtaksperiode private constructor(
         emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, tilstand.timeout)
     }
 
-    private fun <HENDELSE> håndter(
-        hendelse: HENDELSE,
-        nesteTilstand: Vedtaksperiodetilstand
-    ) where HENDELSE : SykdomstidslinjeHendelse, HENDELSE : ArbeidstakerHendelse {
+    private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         val tidslinje = this.sykdomstidslinje.plus(hendelse.sykdomstidslinje())
 
         if (tidslinje.erUtenforOmfang()) {
@@ -403,7 +400,7 @@ internal class Vedtaksperiode private constructor(
             TIL_INFOTRYGD -> TilInfotrygd
         }
 
-        internal fun <Hendelse> nyPeriode(hendelse: Hendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode where Hendelse: ArbeidstakerHendelse, Hendelse: SykdomstidslinjeHendelse {
+        internal fun nyPeriode(hendelse: SykdomstidslinjeHendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode {
             return Vedtaksperiode(
                 id = id,
                 aktørId = hendelse.aktørId(),

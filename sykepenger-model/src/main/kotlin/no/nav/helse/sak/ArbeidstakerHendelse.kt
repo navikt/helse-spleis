@@ -2,15 +2,27 @@ package no.nav.helse.sak
 
 import no.nav.helse.hendelser.Hendelsetype
 import java.time.LocalDateTime
+import java.util.*
 
-interface ArbeidstakerHendelse {
-    fun hendelsetype(): Hendelsetype
-    fun opprettet(): LocalDateTime
+abstract class ArbeidstakerHendelse protected constructor(
+    private val hendelseId: UUID,
+    private val hendelsetype: Hendelsetype
+) {
+    fun hendelseId() = hendelseId
+    fun hendelsetype() = hendelsetype
 
-    fun aktørId(): String
-    fun fødselsnummer(): String
-    fun organisasjonsnummer(): String
-    fun kanBehandles() = true
+    abstract fun opprettet(): LocalDateTime
 
-    fun toJson(): String
+    abstract fun aktørId(): String
+    abstract fun fødselsnummer(): String
+    abstract fun organisasjonsnummer(): String
+
+    open fun kanBehandles() = true
+
+    abstract fun toJson(): String
+
+    override fun equals(other: Any?) =
+        other is ArbeidstakerHendelse && other.hendelseId == this.hendelseId
+
+    override fun hashCode() = hendelseId.hashCode()
 }

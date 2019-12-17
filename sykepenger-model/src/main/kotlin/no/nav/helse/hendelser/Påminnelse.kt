@@ -9,8 +9,11 @@ import no.nav.helse.sak.TilstandType
 import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.io.IOException
 import java.time.LocalDateTime
+import java.util.*
 
-class Påminnelse private constructor(private val json: JsonNode) : ArbeidstakerHendelse, VedtaksperiodeHendelse {
+class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNode) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Påminnelse), VedtaksperiodeHendelse {
+
+    private constructor(json: JsonNode) : this(UUID.randomUUID(), json)
 
     val antallGangerPåminnet = json["antallGangerPåminnet"].intValue()
     val tilstand = TilstandType.valueOf(json["tilstand"].textValue())
@@ -26,10 +29,6 @@ class Påminnelse private constructor(private val json: JsonNode) : Arbeidstaker
     override fun vedtaksperiodeId(): String = json["vedtaksperiodeId"].textValue()
 
     override fun opprettet() = påminnelsestidspunkt
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.Påminnelse
-    }
 
     override fun toJson(): String {
         return json.toString()

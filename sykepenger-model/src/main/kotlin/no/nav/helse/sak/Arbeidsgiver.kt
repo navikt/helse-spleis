@@ -114,7 +114,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder.forEach { it.addVedtaksperiodeObserver(observer) }
     }
 
-    private fun <Hendelse> nyVedtaksperiode(hendelse: Hendelse): Vedtaksperiode where Hendelse : SykdomstidslinjeHendelse, Hendelse : ArbeidstakerHendelse {
+    private fun nyVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(hendelse).also {
             vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
             perioder.add(it)

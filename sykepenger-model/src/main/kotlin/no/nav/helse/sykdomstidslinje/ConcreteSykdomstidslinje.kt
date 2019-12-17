@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -327,7 +328,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             return JsonDag(
                 JsonDagType.valueOf(it["type"].asText()),
                 LocalDate.parse(it["dato"].asText()),
-                it["hendelseId"].asText(),
+                UUID.fromString(it["hendelseId"].asText()),
                 it["erstatter"].map { jsonDagFromJson(it) })
         }
 
@@ -335,7 +336,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         private fun gruppererHendelserPrHendelsesId(
             json: JsonNode,
             deserializer: SykdomstidslinjeHendelse.Deserializer
-        ): Map<String, SykdomstidslinjeHendelse> {
+        ): Map<UUID, SykdomstidslinjeHendelse> {
             return json.map { deserializer.deserialize(it) }
                 .groupBy(keySelector = { it.hendelseId() })
                 .mapValues { (_, v) -> v.first() }

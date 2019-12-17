@@ -3,30 +3,29 @@ package no.nav.helse.hendelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.VedtaksperiodeHendelse
+import java.util.*
 
-class ManuellSaksbehandling(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse,
-    VedtaksperiodeHendelse {
+class ManuellSaksbehandling private constructor(hendelseId: UUID, private val behov: Behov) :
+    ArbeidstakerHendelse(hendelseId, Hendelsetype.ManuellSaksbehandling), VedtaksperiodeHendelse {
 
-    fun saksbehandler(): String = requireNotNull(manuellSaksbehandling["saksbehandlerIdent"])
+    constructor(behov: Behov) : this(UUID.randomUUID(), behov)
+
+    fun saksbehandler(): String = requireNotNull(behov["saksbehandlerIdent"])
 
     fun utbetalingGodkjent(): Boolean =
-            (manuellSaksbehandling.løsning() as Map<*, *>?)?.get("godkjent") == true
+        (behov.løsning() as Map<*, *>?)?.get("godkjent") == true
 
-    override fun vedtaksperiodeId(): String = manuellSaksbehandling.vedtaksperiodeId()
+    override fun vedtaksperiodeId(): String = behov.vedtaksperiodeId()
 
-    override fun aktørId(): String = manuellSaksbehandling.aktørId()
+    override fun aktørId(): String = behov.aktørId()
 
-    override fun fødselsnummer(): String = manuellSaksbehandling.fødselsnummer()
+    override fun fødselsnummer(): String = behov.fødselsnummer()
 
-    override fun organisasjonsnummer(): String = manuellSaksbehandling.organisasjonsnummer()
+    override fun organisasjonsnummer(): String = behov.organisasjonsnummer()
 
-    override fun opprettet() = requireNotNull(manuellSaksbehandling.besvart())
-
-    override fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.ManuellSaksbehandling
-    }
+    override fun opprettet() = requireNotNull(behov.besvart())
 
     override fun toJson(): String {
-        return manuellSaksbehandling.toJson()
+        return behov.toJson()
     }
 }
