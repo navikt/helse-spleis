@@ -30,6 +30,8 @@ class HendelseRecorder(private val dataSource: DataSource,
     }
 
     private fun lagreHendelse(hendelse: ArbeidstakerHendelse) {
+        if (!hendelse.kanBehandles()) return
+
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf("INSERT INTO hendelse (aktor_id, type, opprettet, data) VALUES (?, ?, ?, (to_json(?::json)))", hendelse.aktørId(), hendelse.hendelsetype().name, hendelse.opprettet(), hendelse.toJson()).asExecute)
         }.also {
