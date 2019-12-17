@@ -316,14 +316,9 @@ internal class Vedtaksperiode private constructor(
 
     private object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
-        override val timeout: Duration = Duration.ofDays(7)
+        override val timeout: Duration = Duration.ZERO
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.tilstand != type) return
-            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
-            // TODO bør kanskje varsle saksbehandler hvis utbetaling ikke har skjedd?
-            //  Revisit når Spenn svarer på status for utbetaling
-        }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
@@ -371,6 +366,7 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
     // Gang of four Memento pattern

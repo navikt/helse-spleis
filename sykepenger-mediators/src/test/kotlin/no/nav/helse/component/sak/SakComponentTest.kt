@@ -275,7 +275,7 @@ internal class SakComponentTest {
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.TIL_GODKJENNING,
             currentState = TilstandType.TIL_UTBETALING,
-            timeout = Duration.ofDays(7)
+            timeout = Duration.ZERO
         )
 
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)

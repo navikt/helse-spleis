@@ -824,7 +824,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandlingHendelse::class)
-        assertPåminnelse(Duration.ofDays(7))
+        assertPåminnelse(Duration.ZERO)
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
         assertBehov(Behovtype.Utbetaling)
 
@@ -905,7 +905,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         }
-        assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
+        assertNull(forrigePåminnelse)
     }
 
     @Test
