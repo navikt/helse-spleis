@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
+import java.time.LocalDateTime
 import java.util.*
 
 class SendtSøknadHendelse private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.SendtSøknadMottatt, søknad) {
@@ -16,6 +17,10 @@ class SendtSøknadHendelse private constructor(hendelseId: String, søknad: Json
             return SendtSøknadHendelse(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
         }
     }
+
+    override fun opprettet() = requireNotNull(sendtNav)
+
+    override fun rapportertdato(): LocalDateTime = requireNotNull(sendtNav)
 
     override fun nøkkelHendelseType() = Søknad
 

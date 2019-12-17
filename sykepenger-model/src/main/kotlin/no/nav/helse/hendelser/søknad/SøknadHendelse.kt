@@ -53,10 +53,10 @@ abstract class SøknadHendelse protected constructor(
     val fnr = søknad["fnr"].asText()!!
     val fom get() = søknad["fom"].asText().let { LocalDate.parse(it) }
     val tom get() = søknad["tom"].asText().let { LocalDate.parse(it) }
-    val opprettet get() = søknad["opprettet"].asText().let { LocalDateTime.parse(it) }
+    val opprettet get() = søknad["opprettetDato"]?.takeUnless { it.isNull }?.let { LocalDate.parse(it.textValue()).atStartOfDay() } ?: LocalDateTime.parse(søknad["opprettet"].asText())
     val egenmeldinger get() = søknad["egenmeldinger"]?.map { Periode(it) } ?: emptyList()
     val sykeperioder get() = søknad["soknadsperioder"]?.map { Sykeperiode(it) } ?: emptyList()
-    val sendtNav = søknad["sendtNav"]?.let { if (it.isNull) null else LocalDateTime.parse(it.asText()) }
+    val sendtNav = søknad["sendtNav"]?.takeUnless { it.isNull }?.let { LocalDateTime.parse(it.asText()) }
     val fraværsperioder
         get() = søknad["fravar"]?.filterNot {
             Fraværstype.valueOf(it["type"].textValue()) in listOf(
@@ -84,13 +84,8 @@ abstract class SøknadHendelse protected constructor(
 
     override fun organisasjonsnummer(): String = arbeidsgiver.orgnummer
 
-    override fun opprettet() = opprettet
-
-    override fun rapportertdato(): LocalDateTime = opprettet
-
     override fun compareTo(other: SykdomstidslinjeHendelse): Int =
-        opprettet.compareTo(other.rapportertdato())
-
+        rapportertdato().compareTo(other.rapportertdato())
 
     override fun kanBehandles(): Boolean {
         return søknad.hasNonNull("fnr")

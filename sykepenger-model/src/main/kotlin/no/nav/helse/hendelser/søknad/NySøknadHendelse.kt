@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import java.time.LocalDateTime
 import java.util.*
 
 class NySøknadHendelse private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.NySøknadMottatt, søknad) {
@@ -17,6 +18,10 @@ class NySøknadHendelse private constructor(hendelseId: String, søknad: JsonNod
             return NySøknadHendelse(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
         }
     }
+
+    override fun opprettet() = opprettet
+
+    override fun rapportertdato(): LocalDateTime = opprettet
 
     override fun kanBehandles(): Boolean {
         return super.kanBehandles() && sykeperioder.all { it.sykmeldingsgrad == 100 }
