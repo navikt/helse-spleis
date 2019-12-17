@@ -3,11 +3,11 @@ package no.nav.helse.spleis
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.*
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -34,21 +34,21 @@ internal class SakMediator(
             Hendelsetype.Ytelser -> Ytelser(behov).also {
                 finnSak(it) { sak -> sak.håndter(it) }
             }
-            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandlingHendelse(behov).also {
+            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
                 finnSak(it) { sak -> sak.håndter(it) }
             }
         }
     }
 
-    override fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {
+    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         finnSak(inntektsmelding) { sak -> sak.håndter(inntektsmelding) }
     }
 
-    override fun onNySøknad(søknad: NySøknadHendelse) {
+    override fun onNySøknad(søknad: NySøknad) {
         finnSak(søknad) { sak -> sak.håndter(søknad) }
     }
 
-    override fun onSendtSøknad(søknad: SendtSøknadHendelse) {
+    override fun onSendtSøknad(søknad: SendtSøknad) {
         finnSak(søknad) { sak -> sak.håndter(søknad) }
     }
 

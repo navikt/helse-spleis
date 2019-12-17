@@ -2,10 +2,10 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {
@@ -47,17 +47,17 @@ class HendelseProbe: HendelseListener {
         }
     }
 
-    override fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {
+    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         sikkerLogg.info(inntektsmelding.toJson())
         inntektsmeldingMottattCounter.inc()
     }
 
-    override fun onNySøknad(søknad: NySøknadHendelse) {
+    override fun onNySøknad(søknad: NySøknad) {
         sikkerLogg.info(søknad.toJson())
         søknadCounter.labels("NY").inc()
     }
 
-    override fun onSendtSøknad(søknad: SendtSøknadHendelse) {
+    override fun onSendtSøknad(søknad: SendtSøknad) {
         sikkerLogg.info(søknad.toJson())
         søknadCounter.labels("SENDT").inc()
     }

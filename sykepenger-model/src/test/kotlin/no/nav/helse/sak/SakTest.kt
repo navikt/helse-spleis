@@ -12,8 +12,8 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.søknad.NySøknad
 import no.nav.helse.sak.TilstandType.*
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -660,7 +660,7 @@ internal class SakTest {
             val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
                 (it as ObjectNode).remove("virksomhetsnummer")
             }
-            val inntektsmeldingHendelse = InntektsmeldingHendelse(inntektsmeldingJson)
+            val inntektsmeldingHendelse = Inntektsmelding(inntektsmeldingJson)
 
             assertThrows<UtenforOmfangException> {
                 it.håndter(inntektsmeldingHendelse)
@@ -753,7 +753,7 @@ internal class SakTest {
         it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer))
     }
 
-    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknadHendelse(
+    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknad(
         søknadDTO(
             id = UUID.randomUUID().toString(),
             status = SoknadsstatusDTO.NY,

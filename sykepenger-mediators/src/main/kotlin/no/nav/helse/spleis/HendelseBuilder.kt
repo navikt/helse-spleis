@@ -4,10 +4,10 @@ package no.nav.helse.spleis
 
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.søknad.SøknadHendelse
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
@@ -74,7 +74,7 @@ internal class HendelseBuilder() {
     }
 
     private fun onInntektsmelding(json: String) {
-        InntektsmeldingHendelse.fromInntektsmelding(json)?.let {
+        Inntektsmelding.fromInntektsmelding(json)?.let {
             notifyListeners(HendelseListener::onInntektsmelding, it)
         }
     }
@@ -82,8 +82,8 @@ internal class HendelseBuilder() {
     private fun onSøknad(json: String) {
         SøknadHendelse.fromSøknad(json)?.also {
             when (it) {
-                is NySøknadHendelse -> notifyListeners(HendelseListener::onNySøknad, it)
-                is SendtSøknadHendelse -> notifyListeners(HendelseListener::onSendtSøknad, it)
+                is NySøknad -> notifyListeners(HendelseListener::onNySøknad, it)
+                is SendtSøknad -> notifyListeners(HendelseListener::onSendtSøknad, it)
             }
         }
     }

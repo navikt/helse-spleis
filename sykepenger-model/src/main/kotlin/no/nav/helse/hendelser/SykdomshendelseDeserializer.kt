@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 enum class SykdomshendelseType {
@@ -17,9 +17,9 @@ internal class SykdomshendelseDeserializer : SykdomstidslinjeHendelse.Deserializ
     override fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse {
          val type = jsonNode["type"].asText()
          return when (type) {
-             SykdomshendelseType.InntektsmeldingMottatt.name -> InntektsmeldingHendelse.fromJson(jsonNode)
-             SykdomshendelseType.NySøknadMottatt.name -> NySøknadHendelse.fromJson(jsonNode)
-             SykdomshendelseType.SendtSøknadMottatt.name -> SendtSøknadHendelse.fromJson(jsonNode)
+             SykdomshendelseType.InntektsmeldingMottatt.name -> Inntektsmelding.fromJson(jsonNode)
+             SykdomshendelseType.NySøknadMottatt.name -> NySøknad.fromJson(jsonNode)
+             SykdomshendelseType.SendtSøknadMottatt.name -> SendtSøknad.fromJson(jsonNode)
              else -> throw RuntimeException("ukjent type: $type for melding ${jsonNode["hendelseId"]?.asText()}")
          }
      }

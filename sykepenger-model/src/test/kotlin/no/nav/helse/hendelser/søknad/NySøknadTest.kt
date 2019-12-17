@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class NySøknadHendelseTest {
+internal class NySøknadTest {
 
     companion object {
 
@@ -79,7 +79,7 @@ internal class NySøknadHendelseTest {
             json.set<ObjectNode>("status", JsonNodeFactory.instance.textNode("NY"))
             json.set<ObjectNode>("soknadsperioder", (objectMapper.readTree(overlappendePerioder)))
 
-            NySøknadHendelse(json).sykdomstidslinje()
+            NySøknad(json).sykdomstidslinje()
         }
     }
 }

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
@@ -78,23 +78,23 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         saker = this.perioder.map { it.memento() }
     )
 
-    internal fun håndter(nySøknadHendelse: NySøknadHendelse) {
+    internal fun håndter(nySøknad: NySøknad) {
         if (!perioder.fold(false) { håndtert, periode ->
-                håndtert || periode.håndter(nySøknadHendelse)
+                håndtert || periode.håndter(nySøknad)
             }) {
-            nyVedtaksperiode(nySøknadHendelse).håndter(nySøknadHendelse)
+            nyVedtaksperiode(nySøknad).håndter(nySøknad)
         }
     }
 
-    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
-        if (perioder.none { it.håndter(sendtSøknadHendelse) }) {
-            nyVedtaksperiode(sendtSøknadHendelse).håndter(sendtSøknadHendelse)
+    internal fun håndter(sendtSøknad: SendtSøknad) {
+        if (perioder.none { it.håndter(sendtSøknad) }) {
+            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)
         }
     }
 
-    internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-        if (perioder.none { it.håndter(inntektsmeldingHendelse) }) {
-            nyVedtaksperiode(inntektsmeldingHendelse).håndter(inntektsmeldingHendelse)
+    internal fun håndter(inntektsmelding: Inntektsmelding) {
+        if (perioder.none { it.håndter(inntektsmelding) }) {
+            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding)
         }
     }
 
@@ -102,8 +102,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder.forEach { it.håndter(sak, this, ytelser) }
     }
 
-    internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        perioder.forEach { it.håndter(manuellSaksbehandlingHendelse) }
+    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+        perioder.forEach { it.håndter(manuellSaksbehandling) }
     }
 
     internal fun håndter(påminnelse: Påminnelse) {

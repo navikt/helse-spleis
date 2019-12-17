@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.VedtaksperiodeHendelse
 
-class ManuellSaksbehandlingHendelse(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse,
+class ManuellSaksbehandling(private val manuellSaksbehandling: Behov) : ArbeidstakerHendelse,
     VedtaksperiodeHendelse {
 
     fun saksbehandler(): String = requireNotNull(manuellSaksbehandling["saksbehandlerIdent"])

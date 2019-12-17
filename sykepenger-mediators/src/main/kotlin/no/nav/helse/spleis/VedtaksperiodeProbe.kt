@@ -4,10 +4,10 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.SykdomshendelseType
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.sak.SakObserver
 import no.nav.helse.sak.SakskjemaForGammelt
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
@@ -75,13 +75,13 @@ object VedtaksperiodeProbe : SakObserver {
         log.info("vedtaksperiode=${event.id} event=${event.sykdomshendelse.javaClass.simpleName} state=${event.gjeldendeTilstand} previousState=${event.forrigeTilstand}")
 
         when (event.sykdomshendelse) {
-            is InntektsmeldingHendelse -> {
+            is Inntektsmelding -> {
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.InntektsmeldingMottatt.name).inc()
             }
-            is NySøknadHendelse -> {
+            is NySøknad -> {
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.NySøknadMottatt.name).inc()
             }
-            is SendtSøknadHendelse -> {
+            is SendtSøknad -> {
                 dokumenterKobletTilSakCounter.labels(SykdomshendelseType.SendtSøknadMottatt.name).inc()
             }
         }

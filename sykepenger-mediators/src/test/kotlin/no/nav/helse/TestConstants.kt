@@ -6,9 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal object TestConstants {
     internal val objectMapper = jacksonObjectMapper()
@@ -124,7 +125,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknadHendelse(
+    ) = SendtSøknad(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -175,7 +176,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknadHendelse(
+    ) = NySøknad(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -207,7 +208,7 @@ internal object TestConstants {
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
     ) =
-        InntektsmeldingHendelse(
+        Inntektsmelding(
             inntektsmeldingDTO(
                 aktørId,
                 fødselsnummer,
@@ -237,7 +238,7 @@ internal object TestConstants {
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList(),
         beregnetInntekt: BigDecimal? = 666.toBigDecimal()
     ) =
-        Inntektsmelding(
+        Inntektsmeldingkontrakt(
             inntektsmeldingId = "",
             arbeidstakerFnr = fødselsnummer,
             arbeidstakerAktorId = aktørId,
@@ -318,7 +319,7 @@ internal data class SpolePeriode(
 )
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
-internal fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
 internal val Int.juni
     get() = LocalDate.of(2019, Month.JUNE, this)

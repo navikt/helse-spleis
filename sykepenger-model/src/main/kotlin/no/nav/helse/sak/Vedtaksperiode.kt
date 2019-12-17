@@ -10,11 +10,11 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseDeserializer
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sak.VedtaksperiodeObserver.StateChangeEvent
@@ -56,22 +56,22 @@ internal class Vedtaksperiode private constructor(
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
-        this.sykdomstidslinje.hendelser().førsteAvType<InntektsmeldingHendelse>()
+        this.sykdomstidslinje.hendelser().førsteAvType<Inntektsmelding>()
 
     internal fun dagsats() = inntektsmeldingHendelse().dagsats(`6G`)
 
-    internal fun håndter(nySøknadHendelse: NySøknadHendelse) = overlapperMed(nySøknadHendelse).also {
-        if (it) tilstand.håndter(this, nySøknadHendelse)
+    internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
+        if (it) tilstand.håndter(this, nySøknad)
     }
 
-    internal fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) = overlapperMed(sendtSøknadHendelse).also {
-        if (it) tilstand.håndter(this, sendtSøknadHendelse)
+    internal fun håndter(sendtSøknad: SendtSøknad) = overlapperMed(sendtSøknad).also {
+        if (it) tilstand.håndter(this, sendtSøknad)
     }
 
-    internal fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse): Boolean {
-        return overlapperMed(inntektsmeldingHendelse).also {
+    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
+        return overlapperMed(inntektsmelding).also {
             if (it) {
-                tilstand.håndter(this, inntektsmeldingHendelse)
+                tilstand.håndter(this, inntektsmelding)
             }
         }
     }
@@ -85,10 +85,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        if (id.toString() == manuellSaksbehandlingHendelse.vedtaksperiodeId()) tilstand.håndter(
+    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+        if (id.toString() == manuellSaksbehandling.vedtaksperiodeId()) tilstand.håndter(
             this,
-            manuellSaksbehandlingHendelse
+            manuellSaksbehandling
         )
     }
 
@@ -155,22 +155,22 @@ internal class Vedtaksperiode private constructor(
         val timeout: Duration
 
         // Default implementasjoner av transisjonene
-        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
-            vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygd)
+        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
+            vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.setTilstand(sendtSøknadHendelse, TilInfotrygd)
+        fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygd)
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
         }
 
         fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ManuellSaksbehandling) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -189,11 +189,11 @@ internal class Vedtaksperiode private constructor(
 
     private object StartTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
-            val tidslinje = nySøknadHendelse.sykdomstidslinje()
-            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygd)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
+            val tidslinje = nySøknad.sykdomstidslinje()
+            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
 
-            vedtaksperiode.setTilstand(nySøknadHendelse, MottattNySøknad) {
+            vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomstidslinje = tidslinje
             }
         }
@@ -204,12 +204,12 @@ internal class Vedtaksperiode private constructor(
 
     private object MottattNySøknad : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.håndter(sendtSøknadHendelse, MottattSendtSøknad)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.håndter(inntektsmeldingHendelse, MottattInntektsmelding)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -219,8 +219,8 @@ internal class Vedtaksperiode private constructor(
 
     private object MottattSendtSøknad : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.håndter(inntektsmeldingHendelse, BeregnUtbetaling)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndter(inntektsmelding, BeregnUtbetaling)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
@@ -230,8 +230,8 @@ internal class Vedtaksperiode private constructor(
 
     private object MottattInntektsmelding : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.håndter(sendtSøknadHendelse, BeregnUtbetaling)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.håndter(sendtSøknad, BeregnUtbetaling)
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
@@ -302,14 +302,14 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse
+            manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
-                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilUtbetaling) {
-                    vedtaksperiode.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
+            if (manuellSaksbehandling.utbetalingGodkjent()) {
+                vedtaksperiode.setTilstand(manuellSaksbehandling, TilUtbetaling) {
+                    vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler()
                 }
             } else {
-                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygd)
+                vedtaksperiode.setTilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
     }

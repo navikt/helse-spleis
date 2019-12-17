@@ -8,11 +8,11 @@ import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.Hendelsetype
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -24,6 +24,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal object TestConstants {
     internal val objectMapper = jacksonObjectMapper()
@@ -132,7 +133,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknadHendelse(
+    ) = SendtSøknad(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -183,7 +184,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknadHendelse(
+    ) = NySøknad(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -219,7 +220,7 @@ internal object TestConstants {
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
     ) =
-        InntektsmeldingHendelse(
+        Inntektsmelding(
             inntektsmeldingDTO(
                 aktørId,
                 fødselsnummer,
@@ -249,7 +250,7 @@ internal object TestConstants {
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList(),
         beregnetInntekt: BigDecimal? = 666.toBigDecimal()
     ) =
-        Inntektsmelding(
+        Inntektsmeldingkontrakt(
             inntektsmeldingId = "",
             arbeidstakerFnr = fødselsnummer,
             arbeidstakerAktorId = aktørId,
@@ -356,8 +357,8 @@ internal object TestConstants {
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
-    ): ManuellSaksbehandlingHendelse {
-        return ManuellSaksbehandlingHendelse(
+    ): ManuellSaksbehandling {
+        return ManuellSaksbehandling(
             manuellSaksbehandlingLøsning(
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
@@ -408,7 +409,7 @@ internal class Uke(ukenr: Long) {
     val søndag get() = mandag.plusDays(6)
 }
 
-internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(
+internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad(
     this.copy(
         status = SoknadsstatusDTO.SENDT
     ).toJsonNode()
@@ -417,7 +418,7 @@ internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknadHendelse(
 internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
-internal fun Inntektsmelding.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
 internal val Int.juni
     get() = LocalDate.of(2019, Month.JUNE, this)

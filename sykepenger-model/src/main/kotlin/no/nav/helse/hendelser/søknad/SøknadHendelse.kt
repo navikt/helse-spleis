@@ -28,9 +28,9 @@ abstract class SøknadHendelse protected constructor(
             return try {
                 objectMapper.readTree(json).let { jsonNode ->
                     when (val type = jsonNode["status"].textValue()) {
-                        "NY" -> NySøknadHendelse(jsonNode)
-                        "FREMTIDIG" -> NySøknadHendelse(jsonNode)
-                        "SENDT" -> SendtSøknadHendelse(jsonNode)
+                        "NY" -> NySøknad(jsonNode)
+                        "FREMTIDIG" -> NySøknad(jsonNode)
+                        "SENDT" -> SendtSøknad(jsonNode)
                         else -> null.also {
                             log.info("kunne ikke lese sykepengesøknad, ukjent type: $type")
                         }

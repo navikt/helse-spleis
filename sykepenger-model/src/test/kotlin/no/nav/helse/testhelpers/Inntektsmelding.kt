@@ -1,6 +1,6 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -20,7 +20,7 @@ internal fun <Type, Builder> inntektsmelding(
 ) = build(buildertype, block)
 
 internal object InntektsmeldingHendelseWrapper :
-    Buildertype<InntektsmeldingHendelse, InntektsmeldingkontraktBuilder> {
+    Buildertype<Inntektsmelding, InntektsmeldingkontraktBuilder> {
     override fun build(block: InntektsmeldingkontraktBuilder.() -> Unit) =
         InntektsmeldingHendelseBuilder.build { inntektsmelding(block) }
 }
@@ -32,10 +32,10 @@ internal class InntektsmeldingHendelseBuilder {
         inntektsmelding = InntektsmeldingkontraktBuilder.build(block)
     }
 
-    private fun build() = InntektsmeldingHendelse(inntektsmelding.toJsonNode())
+    private fun build() = Inntektsmelding(inntektsmelding.toJsonNode())
 
     internal companion object Type :
-        Buildertype<InntektsmeldingHendelse, InntektsmeldingHendelseBuilder> {
+        Buildertype<Inntektsmelding, InntektsmeldingHendelseBuilder> {
         override fun build(block: InntektsmeldingHendelseBuilder.() -> Unit) =
             InntektsmeldingHendelseBuilder().apply(block).build()
     }

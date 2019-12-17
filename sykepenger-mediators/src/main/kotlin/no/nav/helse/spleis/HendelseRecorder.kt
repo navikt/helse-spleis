@@ -4,24 +4,24 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.sak.ArbeidstakerHendelse
 import javax.sql.DataSource
 
 class HendelseRecorder(private val dataSource: DataSource,
                        private val probe: PostgresProbe = PostgresProbe) : HendelseListener {
 
-    override fun onNySøknad(søknad: NySøknadHendelse) {
+    override fun onNySøknad(søknad: NySøknad) {
         lagreHendelse(søknad)
     }
 
-    override fun onInntektsmelding(inntektsmelding: InntektsmeldingHendelse) {
+    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         lagreHendelse(inntektsmelding)
     }
 
-    override fun onSendtSøknad(søknad: SendtSøknadHendelse) {
+    override fun onSendtSøknad(søknad: SendtSøknad) {
         lagreHendelse(søknad)
     }
 

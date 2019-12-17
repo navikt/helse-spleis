@@ -10,13 +10,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class SendtSøknadHendelse private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.SendtSøknadMottatt, søknad) {
+class SendtSøknad private constructor(hendelseId: String, søknad: JsonNode) : SøknadHendelse(hendelseId, SykdomshendelseType.SendtSøknadMottatt, søknad) {
 
     constructor(søknad: JsonNode) : this(UUID.randomUUID().toString(), søknad)
 
     companion object {
-        fun fromJson(jsonNode: JsonNode): SendtSøknadHendelse {
-            return SendtSøknadHendelse(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
+        fun fromJson(jsonNode: JsonNode): SendtSøknad {
+            return SendtSøknad(jsonNode["hendelseId"].textValue(), jsonNode["søknad"])
         }
     }
 

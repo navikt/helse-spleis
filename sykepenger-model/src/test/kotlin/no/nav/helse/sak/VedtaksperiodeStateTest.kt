@@ -11,11 +11,11 @@ import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 import no.nav.helse.juli
 import no.nav.helse.sak.TilstandType.*
@@ -40,7 +40,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(START, NY_SØKNAD_MOTTATT, NySøknadHendelse::class)
+        assertTilstandsendring(START, NY_SØKNAD_MOTTATT, NySøknad::class)
         assertPåminnelse(Duration.ofDays(30))
     }
 
@@ -56,7 +56,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(START, TIL_INFOTRYGD, SendtSøknadHendelse::class)
+        assertTilstandsendring(START, TIL_INFOTRYGD, SendtSøknad::class)
     }
 
     @Test
@@ -65,7 +65,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(START, TIL_INFOTRYGD, InntektsmeldingHendelse::class)
+        assertTilstandsendring(START, TIL_INFOTRYGD, Inntektsmelding::class)
     }
 
     @Test
@@ -303,8 +303,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInMottattInntektsmelding(
-            nySøknadHendelse = nySøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(sendtSøknadHendelse)
@@ -337,9 +337,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -375,9 +375,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -414,9 +414,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -453,9 +453,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -546,9 +546,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -586,9 +586,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -626,9 +626,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -668,9 +668,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -708,9 +708,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -750,9 +750,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -792,9 +792,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
-            nySøknadHendelse = nySøknadHendelse,
-            sendtSøknadHendelse = sendtSøknadHendelse,
-            inntektsmeldingHendelse = inntektsmeldingHendelse
+            nySøknad = nySøknadHendelse,
+            sendtSøknad = sendtSøknadHendelse,
+            inntektsmelding = inntektsmeldingHendelse
         )
 
         vedtaksperiode.håndter(
@@ -823,7 +823,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandlingHendelse::class)
+        assertTilstandsendring(TIL_GODKJENNING, TIL_UTBETALING, ManuellSaksbehandling::class)
         assertPåminnelse(Duration.ZERO)
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
         assertBehov(Behovtype.Utbetaling)
@@ -845,7 +845,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, ManuellSaksbehandlingHendelse::class)
+        assertTilstandsendring(TIL_GODKJENNING, TIL_INFOTRYGD, ManuellSaksbehandling::class)
     }
 
     @Test
@@ -924,7 +924,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     private fun beInStartTilstand(
-        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse(
+        nySøknad: NySøknad = nySøknadHendelse(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             arbeidsgiver = ArbeidsgiverDTO(
@@ -932,50 +932,50 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
     ): Vedtaksperiode {
-        return Vedtaksperiode.nyPeriode(nySøknadHendelse, vedtaksperiodeId).apply {
+        return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
 
-    private fun beInStartTilstand(sendtSøknadHendelse: SendtSøknadHendelse): Vedtaksperiode {
-        return Vedtaksperiode.nyPeriode(sendtSøknadHendelse, vedtaksperiodeId).apply {
+    private fun beInStartTilstand(sendtSøknad: SendtSøknad): Vedtaksperiode {
+        return Vedtaksperiode.nyPeriode(sendtSøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
 
-    private fun beInTilInfotrygd(sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse()) =
-        beInStartTilstand(sendtSøknadHendelse).apply {
-            håndter(sendtSøknadHendelse)
+    private fun beInTilInfotrygd(sendtSøknad: SendtSøknad = sendtSøknadHendelse()) =
+        beInStartTilstand(sendtSøknad).apply {
+            håndter(sendtSøknad)
         }
 
-    private fun beInNySøknad(nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()) =
-        beInStartTilstand(nySøknadHendelse).apply {
-            håndter(nySøknadHendelse)
+    private fun beInNySøknad(nySøknad: NySøknad = nySøknadHendelse()) =
+        beInStartTilstand(nySøknad).apply {
+            håndter(nySøknad)
         }
 
     private fun beInSendtSøknad(
-        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+        sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
+        nySøknad: NySøknad = nySøknadHendelse()
     ) =
-        beInNySøknad(nySøknadHendelse).apply {
-            håndter(sendtSøknadHendelse)
+        beInNySøknad(nySøknad).apply {
+            håndter(sendtSøknad)
         }
 
     private fun beInMottattInntektsmelding(
-        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+        inntektsmelding: Inntektsmelding = inntektsmeldingHendelse(),
+        nySøknad: NySøknad = nySøknadHendelse()
     ) =
-        beInNySøknad(nySøknadHendelse).apply {
-            håndter(inntektsmeldingHendelse)
+        beInNySøknad(nySøknad).apply {
+            håndter(inntektsmelding)
         }
 
     private fun beInBeregnUtbetaling(
-        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+        sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
+        inntektsmelding: Inntektsmelding = inntektsmeldingHendelse(),
+        nySøknad: NySøknad = nySøknadHendelse()
     ) =
-        beInMottattInntektsmelding(inntektsmeldingHendelse, nySøknadHendelse).apply {
-            håndter(sendtSøknadHendelse)
+        beInMottattInntektsmelding(inntektsmelding, nySøknad).apply {
+            håndter(sendtSøknad)
         }
 
     private fun beInTilGodkjenning(
@@ -994,11 +994,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         ),
-        sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
-        inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
-        nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
+        sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
+        inntektsmelding: Inntektsmelding = inntektsmeldingHendelse(),
+        nySøknad: NySøknad = nySøknadHendelse()
     ) =
-        beInBeregnUtbetaling(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
+        beInBeregnUtbetaling(sendtSøknad, inntektsmelding, nySøknad).apply {
             håndter(
                 Sak(aktørId, fødselsnummer),
                 Arbeidsgiver(organisasjonsnummer),
@@ -1007,14 +1007,14 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInTilUtbetaling(
-        manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse = manuellSaksbehandlingHendelse(
+        manuellSaksbehandling: ManuellSaksbehandling = manuellSaksbehandlingHendelse(
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingGodkjent = true,
             saksbehandler = "en_saksbehandler_ident"
         )
     ) =
         beInTilGodkjenning().apply {
-            håndter(manuellSaksbehandlingHendelse)
+            håndter(manuellSaksbehandling)
         }
 
     private companion object {

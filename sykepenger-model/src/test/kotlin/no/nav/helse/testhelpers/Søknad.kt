@@ -1,7 +1,7 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
@@ -16,7 +16,7 @@ internal fun <Type, Builder> søknad(buildertype: Buildertype<Type, Builder>, bl
     build(buildertype, block)
 
 internal object NySøknadHendelseWrapper :
-    Buildertype<NySøknadHendelse, SykepengesoknadDTOBuilder> {
+    Buildertype<NySøknad, SykepengesoknadDTOBuilder> {
     override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
         NySøknadHendelseBuilder.build {
             sykepengesøknad {
@@ -27,7 +27,7 @@ internal object NySøknadHendelseWrapper :
 }
 
 internal object SendtSøknadHendelseWrapper :
-    Buildertype<SendtSøknadHendelse, SykepengesoknadDTOBuilder> {
+    Buildertype<SendtSøknad, SykepengesoknadDTOBuilder> {
     override fun build(block: SykepengesoknadDTOBuilder.() -> Unit) =
         SendtSøknadHendelseBuilder.build {
             sykepengesøknad {
@@ -44,10 +44,10 @@ internal class NySøknadHendelseBuilder {
         sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = NySøknadHendelse(sykepengesøknad.toJsonNode())
+    private fun build() = NySøknad(sykepengesøknad.toJsonNode())
 
     internal companion object Type :
-        Buildertype<NySøknadHendelse, NySøknadHendelseBuilder> {
+        Buildertype<NySøknad, NySøknadHendelseBuilder> {
         override fun build(block: NySøknadHendelseBuilder.() -> Unit) =
             NySøknadHendelseBuilder().apply(block).build()
     }
@@ -60,10 +60,10 @@ internal class SendtSøknadHendelseBuilder {
         sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = SendtSøknadHendelse(sykepengesøknad.toJsonNode())
+    private fun build() = SendtSøknad(sykepengesøknad.toJsonNode())
 
     internal companion object Type :
-        Buildertype<SendtSøknadHendelse, SendtSøknadHendelseBuilder> {
+        Buildertype<SendtSøknad, SendtSøknadHendelseBuilder> {
         override fun build(block: SendtSøknadHendelseBuilder.() -> Unit) =
             SendtSøknadHendelseBuilder().apply(block).build()
     }

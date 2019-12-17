@@ -20,29 +20,29 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class InntektsmeldingHendelse private constructor(hendelseId: String, private val inntektsmelding: JsonNode) :
+class Inntektsmelding private constructor(hendelseId: String, private val inntektsmelding: JsonNode) :
     ArbeidstakerHendelse, SykdomstidslinjeHendelse(hendelseId) {
     constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID().toString(), inntektsmelding)
 
     companion object {
 
-        private val log = LoggerFactory.getLogger(InntektsmeldingHendelse::class.java)
+        private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
 
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        fun fromInntektsmelding(json: String): InntektsmeldingHendelse? {
+        fun fromInntektsmelding(json: String): Inntektsmelding? {
             return try {
-                InntektsmeldingHendelse(objectMapper.readTree(json))
+                Inntektsmelding(objectMapper.readTree(json))
             } catch (err: IOException) {
                 log.info("kunne ikke lese inntektsmelding som json: ${err.message}", err)
                 null
             }
         }
 
-        fun fromJson(jsonNode: JsonNode): InntektsmeldingHendelse {
-            return InntektsmeldingHendelse(
+        fun fromJson(jsonNode: JsonNode): Inntektsmelding {
+            return Inntektsmelding(
                 jsonNode["hendelseId"].textValue(),
                 jsonNode["inntektsmelding"]
             )

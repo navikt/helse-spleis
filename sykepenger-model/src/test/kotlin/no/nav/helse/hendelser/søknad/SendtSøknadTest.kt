@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class SendtSøknadHendelseTest {
+internal class SendtSøknadTest {
 
     @Test
     fun `en sendt søknad hvor bruker har ført opp grad mindre enn 100% fører til en hendelse som ikke kan behandles`() {

@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingHendelse
+import no.nav.helse.hendelser.inntektsmelding.Inntektsmelding
 import no.nav.helse.hendelser.påminnelse.Påminnelse
-import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandlingHendelse
-import no.nav.helse.hendelser.søknad.NySøknadHendelse
-import no.nav.helse.hendelser.søknad.SendtSøknadHendelse
+import no.nav.helse.hendelser.saksbehandling.ManuellSaksbehandling
+import no.nav.helse.hendelser.søknad.NySøknad
+import no.nav.helse.hendelser.søknad.SendtSøknad
 import no.nav.helse.hendelser.ytelser.Ytelser
 
 private const val CURRENT_SKJEMA_VERSJON = 3
@@ -21,49 +21,49 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
 
     private val sakObservers = mutableListOf<SakObserver>()
 
-    fun håndter(nySøknadHendelse: NySøknadHendelse) {
-        if (!nySøknadHendelse.kanBehandles()) {
-            throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknadHendelse)
+    fun håndter(nySøknad: NySøknad) {
+        if (!nySøknad.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknad)
         }
 
         if (arbeidsgivere.isNotEmpty()) {
-            invaliderAlleSaker(nySøknadHendelse)
-            throw UtenforOmfangException("sak støtter ikke forlengelse eller flere arbeidsgivere", nySøknadHendelse)
+            invaliderAlleSaker(nySøknad)
+            throw UtenforOmfangException("sak støtter ikke forlengelse eller flere arbeidsgivere", nySøknad)
         }
 
-        finnEllerOpprettArbeidsgiver(nySøknadHendelse).håndter(nySøknadHendelse)
+        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(sendtSøknadHendelse: SendtSøknadHendelse) {
-        if (!sendtSøknadHendelse.kanBehandles()) {
-            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknadHendelse)
+    fun håndter(sendtSøknad: SendtSøknad) {
+        if (!sendtSøknad.kanBehandles()) {
+            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknad)
         }
 
-        if (harAndreArbeidsgivere(sendtSøknadHendelse)) {
-            invaliderAlleSaker(sendtSøknadHendelse)
+        if (harAndreArbeidsgivere(sendtSøknad)) {
+            invaliderAlleSaker(sendtSøknad)
             throw UtenforOmfangException(
                 "sak forventer at vi har mottatt ny søknad for arbeidsgiver i sendt søknad, og bare én arbeidsgiver",
-                sendtSøknadHendelse
+                sendtSøknad
             )
         }
 
-        finnEllerOpprettArbeidsgiver(sendtSøknadHendelse).håndter(sendtSøknadHendelse)
+        finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
-    fun håndter(inntektsmeldingHendelse: InntektsmeldingHendelse) {
-        if (!inntektsmeldingHendelse.kanBehandles()) {
-            invaliderAlleSaker(inntektsmeldingHendelse)
-            throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmeldingHendelse)
+    fun håndter(inntektsmelding: Inntektsmelding) {
+        if (!inntektsmelding.kanBehandles()) {
+            invaliderAlleSaker(inntektsmelding)
+            throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmelding)
         }
-        finnEllerOpprettArbeidsgiver(inntektsmeldingHendelse).håndter(inntektsmeldingHendelse)
+        finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
 
     fun håndter(ytelser: Ytelser) {
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
     }
 
-    fun håndter(manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse) {
-        finnArbeidsgiver(manuellSaksbehandlingHendelse)?.håndter(manuellSaksbehandlingHendelse)
+    fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
     }
 
     fun håndter(påminnelse: Påminnelse) {
