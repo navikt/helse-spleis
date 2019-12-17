@@ -1,5 +1,3 @@
-@file:JvmName("HendelseMediatorMediatorKt")
-
 package no.nav.helse.spleis
 
 import no.nav.helse.Topics
@@ -60,12 +58,18 @@ internal class HendelseBuilder() {
         val behov = try {
             Behov.fromJson(json)
         } catch (err: Exception) {
-            log.info("kan ikke lese behov som json: ${err.message}", err)
-            null
+            return log.info("kan ikke lese behov som json: ${err.message}", err)
         }
 
-        behov?.takeIf(Behov::erLøst)?.let {
-            notifyListeners(HendelseListener::onLøstBehov, it)
+        if (!behov.erLøst()) return
+
+        when (behov.hendelsetype()) {
+            Hendelsetype.Ytelser -> Ytelser(behov).also {
+                notifyListeners(HendelseListener::onYtelser, it)
+            }
+            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
+                notifyListeners(HendelseListener::onManuellSaksbehandling, it)
+            }
         }
     }
 

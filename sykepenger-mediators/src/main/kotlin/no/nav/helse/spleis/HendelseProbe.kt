@@ -1,21 +1,13 @@
 package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
-import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.sak.ArbeidstakerHendelse
 import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
-
-        private val mottattBehovCounter = Counter.build("mottatt_behov_totals", "Antall behov mottatt")
-            .labelNames("type")
-            .register()
 
         private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
             .labelNames("type")
@@ -34,11 +26,12 @@ class HendelseProbe: HendelseListener {
         påminnelse.tell()
     }
 
-    override fun onLøstBehov(behov: Behov) {
-        sikkerLogg.info(behov.toJson())
-        behov.behovType().forEach {
-            mottattBehovCounter.labels(it).inc()
-        }
+    override fun onYtelser(ytelser: Ytelser) {
+        ytelser.tell()
+    }
+
+    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+        manuellSaksbehandling.tell()
     }
 
     override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {

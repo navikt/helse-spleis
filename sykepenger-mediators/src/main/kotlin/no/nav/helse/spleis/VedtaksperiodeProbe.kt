@@ -14,7 +14,7 @@ object VedtaksperiodeProbe : SakObserver {
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
     private val behovCounter = Counter.build("behov_totals", "Antall behov opprettet")
-        .labelNames("behovType")
+        .labelNames("behovType", "hendelsetype")
         .register()
 
     private val dokumenterKobletTilSakCounter = Counter.build(
@@ -48,7 +48,7 @@ object VedtaksperiodeProbe : SakObserver {
         Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
 
     override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        event.behovType().forEach { behovCounter.labels(it).inc() }
+        event.behovType().forEach { behovCounter.labels(it, event.hendelsetype().name).inc() }
     }
 
     override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {

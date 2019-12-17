@@ -3,7 +3,6 @@ package no.nav.helse.spleis
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
 import no.nav.helse.sak.ArbeidstakerHendelse
 import javax.sql.DataSource
@@ -23,22 +22,20 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(søknad)
     }
 
-    override fun onLøstBehov(behov: Behov) {
-        when (behov.hendelsetype()) {
-            Hendelsetype.Ytelser -> Ytelser(behov).also {
-                lagreHendelse(it)
-            }
-            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
-                lagreHendelse(it)
-            }
-        }
+    override fun onYtelser(ytelser: Ytelser) {
+        lagreHendelse(ytelser)
+    }
+
+    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+        lagreHendelse(manuellSaksbehandling)
     }
 
     private fun lagreHendelse(hendelse: ArbeidstakerHendelse) {
         if (!hendelse.kanBehandles()) return
 
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO hendelse (aktor_id, type, opprettet, data) VALUES (?, ?, ?, (to_json(?::json)))", hendelse.aktørId(), hendelse.hendelsetype().name, hendelse.opprettet(), hendelse.toJson()).asExecute)
+            session.run(queryOf("INSERT INTO hendelse (aktor_id, type, opprettet, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                hendelse.aktørId(), hendelse.hendelsetype().name, hendelse.opprettet(), hendelse.toJson()).asExecute)
         }.also {
             probe.hendelseSkrevetTilDb()
         }

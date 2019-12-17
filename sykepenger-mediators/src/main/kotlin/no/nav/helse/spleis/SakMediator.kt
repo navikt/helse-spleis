@@ -23,15 +23,12 @@ internal class SakMediator(
         finnSak(påminnelse) { sak -> sak.håndter(påminnelse) }
     }
 
-    override fun onLøstBehov(behov: Behov) {
-        when (behov.hendelsetype()) {
-            Hendelsetype.Ytelser -> Ytelser(behov).also {
-                finnSak(it) { sak -> sak.håndter(it) }
-            }
-            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
-                finnSak(it) { sak -> sak.håndter(it) }
-            }
-        }
+    override fun onYtelser(ytelser: Ytelser) {
+        finnSak(ytelser) { sak -> sak.håndter(ytelser) }
+    }
+
+    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+        finnSak(manuellSaksbehandling) { sak -> sak.håndter(manuellSaksbehandling) }
     }
 
     override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
