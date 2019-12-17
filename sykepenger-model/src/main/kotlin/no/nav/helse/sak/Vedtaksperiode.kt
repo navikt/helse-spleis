@@ -36,12 +36,11 @@ internal class Vedtaksperiode private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private var sykdomstidslinje: ConcreteSykdomstidslinje
+    private var sykdomstidslinje: ConcreteSykdomstidslinje,
+    private var tilstand: Vedtaksperiodetilstand = StartTilstand
 ) {
 
     private val `6G` = (6 * 99858).toBigDecimal()
-
-    private var tilstand: Vedtaksperiodetilstand = StartTilstand
 
     private var maksdato: LocalDate? = null
 

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.fixtures.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -87,18 +88,6 @@ internal class AlderReglerTest {
         assertEquals(13.februar, "12025112345".maksdato(246, 9.februar, 0))
         assertEquals(2, "12025112345".antallGjenståendeSykedager(246, 9.februar, 0))
     }
-
-    val Int.januar
-        get() = LocalDate.of(2018, 1, this)
-
-    val Int.februar
-        get() = LocalDate.of(2018, 2, this)
-
-    val Int.mai
-        get() = LocalDate.of(2018, 5, this)
-
-    val Int.desember
-        get() = LocalDate.of(2018, 12, this)
 
     private fun String.navBurdeBetale(antallDager: Int, dagen: LocalDate, antallDagerEtter67: Int = 0) = AlderRegler(
         this,

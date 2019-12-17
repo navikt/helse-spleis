@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.fixtures.*
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
-import java.time.LocalDate
 
 internal class UtbetalingslinjerJoinTest {
 
@@ -71,14 +71,4 @@ internal class UtbetalingslinjerJoinTest {
     }
 
 }
-
-internal val Int.mandag
-    get() = LocalDate.of(2018, 1, 1)
-        .plusWeeks(this.toLong() - 1L)
-internal val Int.tirsdag get() = this.mandag.plusDays(1)
-internal val Int.onsdag get() = this.mandag.plusDays(2)
-internal val Int.torsdag get() = this.mandag.plusDays(3)
-internal val Int.fredag get() = this.mandag.plusDays(4)
-internal val Int.lørdag get() = this.mandag.plusDays(5)
-internal val Int.søndag get() = this.mandag.plusDays(6)
 

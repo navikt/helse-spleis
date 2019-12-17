@@ -1,35 +1,32 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
+import no.nav.helse.fixtures.*
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SakSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
-import no.nav.helse.testhelpers.Uke
 import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtbetalingBuilderTest {
-
-    companion object {
-        private val sendtSykmelding =
-            Testhendelse(Uke(3).mandag.atStartOfDay())
-    }
-
-    //Mandag
-    private var startDato = 1.januar
 
     private val inntektHistorie = InntektHistorie()
     private var betalingslinjer = emptyList<Utbetalingslinje>()
     private var maksdato: LocalDate? = null
     private var antallGjenståendeSykedager = 0
 
-        init {
+    init {
         inntektHistorie.add(1.januar.minusDays(5), 1200.00)
         inntektHistorie.add(23.januar, 1000.00)
+    }
+
+    @BeforeEach
+    fun reset() {
+        resetSeed()
     }
 
     @Test
@@ -87,7 +84,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie i arbeidsgiverperiode`() {
-        (S + 2.F + 13.S + S).utbetalingslinjer()
+        (1.S + 2.F + 13.S + 1.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
@@ -95,7 +92,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag etter feire i arbeidsgiverperioden`() {
-        (S + 2.F + A + S + 14.S + 3.S).utbetalingslinjer()
+        (1.S + 2.F + 1.A + 1.S + 14.S + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
@@ -103,7 +100,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag før ferie i arbeidsgiverperioden`() {
-        (S + A + 2.F + S + 14.S + 3.S).utbetalingslinjer()
+        (1.S + 1.A + 2.F + 1.S + 14.S + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 22.januar, 1200)
@@ -111,7 +108,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie etter arbeidsgiverperioden`() {
-        (16.S + 2.F + S).utbetalingslinjer()
+        (16.S + 2.F + 1.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 19.januar, 19.januar, 1200)
@@ -119,14 +116,14 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsdag etter ferie teller som gap`() {
-        (15.S + 2.F + A + S).utbetalingslinjer()
+        (15.S + 2.F + 1.A + 1.S).utbetalingslinjer()
 
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
-        (16.S + 16.F + A + 3.S).utbetalingslinjer()
+        (16.S + 16.F + 1.A + 3.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 5.februar, 5.februar, 1000)
@@ -134,7 +131,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
-        (15.S + 16.F + A + 3.S).utbetalingslinjer()
+        (15.S + 16.F + 1.A + 3.S).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
@@ -146,7 +143,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Arbeidsgiverperioden resettes når det er opphold over 16 dager`() {
-        (10.S + 20.F + A + 10.S + 20.F).utbetalingslinjer()
+        (10.S + 20.F + 1.A + 10.S + 20.F).utbetalingslinjer()
         assertEquals(0, betalingslinjer.size)
     }
 
@@ -185,21 +182,21 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie i arbeidsgiverperioden direkte etterfulgt av en arbeidsdag gjør at ferien teller som opphold`() {
-        (10.S + 15.F + A + 10.S).utbetalingslinjer()
+        (10.S + 15.F + 1.A + 10.S).utbetalingslinjer()
 
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie etter arbeidsdag i arbeidsgiverperioden gjør at ferien teller som opphold`() {
-        (10.S + A + 15.F + 10.S).utbetalingslinjer()
+        (10.S + 1.A + 15.F + 10.S).utbetalingslinjer()
 
         assertEquals(0, betalingslinjer.size)
     }
 
     @Test
     fun `Ferie direkte etter arbeidsgiverperioden teller ikke som opphold, selv om det er en direkte etterfølgende arbeidsdag`() {
-        (16.S + 15.F + A + 10.S).utbetalingslinjer()
+        (16.S + 15.F + 1.A + 10.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 2.februar, 11.februar, 1000)
@@ -207,7 +204,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, selv om det er en direkte etterfølgende arbeidsdag`() {
-        (20.S + 15.F + A + 10.S).utbetalingslinjer()
+        (20.S + 15.F + 1.A + 10.S).utbetalingslinjer()
 
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 20.januar, 1200)
@@ -216,7 +213,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold`() {
-        (21.S + A + 15.F + 10.S).utbetalingslinjer()
+        (21.S + 1.A + 15.F + 10.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 21.januar, 1200)
@@ -224,7 +221,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, mens ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold, så A + 15F gir ett opphold på 16 dager og dette resulterer i to arbeidsgiverperioder`() {
-        (17.S + 4.F + A + 15.F + 10.S).utbetalingslinjer()
+        (17.S + 4.F + 1.A + 15.F + 10.S).utbetalingslinjer()
 
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
@@ -232,7 +229,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `Ferie direkte etter en sykedag utenfor arbeidsgiverperioden teller ikke som opphold, mens ferie direkte etter en arbeidsdag utenfor arbeidsgiverperioden teller som opphold, så A + 14F gir ett opphold på 15 dager og dette resulterer i en arbeidsgiverperiode`() {
-        (17.S + 3.F + A + 14.F + 10.S).utbetalingslinjer()
+        (17.S + 3.F + 1.A + 14.F + 10.S).utbetalingslinjer()
 
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 17.januar, 1200)
@@ -255,21 +252,21 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
-        (351.S + 1.F + S).utbetalingslinjer()
+        (351.S + 1.F + 1.S).utbetalingslinjer()
         assertEquals(31.desember, maksdato)
         assertEquals(8, antallGjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
-        (23.S + 2.F + S).utbetalingslinjer()
+        (23.S + 2.F + 1.S).utbetalingslinjer()
         assertEquals(1.januar(2019), maksdato )
         assertEquals(242, antallGjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
-        (21.S + 3.F + S).utbetalingslinjer()
+        (21.S + 3.F + 1.S).utbetalingslinjer()
         assertEquals(2.januar(2019), maksdato)
         assertEquals(244, antallGjenståendeSykedager)
     }
@@ -283,7 +280,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() {
-        (21.S + 3.F + A).utbetalingslinjer()
+        (21.S + 3.F + 1.A).utbetalingslinjer()
         assertEquals(28.desember, maksdato)
         assertEquals(245, antallGjenståendeSykedager)
     }
@@ -371,7 +368,7 @@ internal class UtbetalingBuilderTest {
 
     @Test
     fun `ta hensyn til en andre arbeidsgiverperiode, ferieopphold`() {
-        (16.S + 6.S + 16.F + A + 16.S).utbetalingslinjer()
+        (16.S + 6.S + 16.F + 1.A + 16.S).utbetalingslinjer()
         assertEquals(2, betalingslinjer.size)
         assert(betalingslinjer.first(), 17.januar, 22.januar, 1200)
         assert(betalingslinjer.last(), 9.februar, 24.februar, 1000)
@@ -464,86 +461,6 @@ internal class UtbetalingBuilderTest {
         assertEquals(0, betalingslinjer.size)
     }
 
-    private val S
-        get() = ConcreteSykdomstidslinje.sykedag(
-            startDato,
-            sendtSykmelding
-        ).also {
-            startDato = startDato.plusDays(1)
-        }
-
-    private val A
-        get() = ConcreteSykdomstidslinje.ikkeSykedag(
-            startDato,
-            sendtSykmelding
-        ).also {
-            startDato = startDato.plusDays(1)
-        }
-
-
-    private val Int.S
-        get() = ConcreteSykdomstidslinje.sykedager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.F
-        get() = ConcreteSykdomstidslinje.ferie(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.A
-        get() = ConcreteSykdomstidslinje.ikkeSykedager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.I
-        get() = ConcreteSykdomstidslinje.implisittdager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.E
-        get() = ConcreteSykdomstidslinje.egenmeldingsdager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.P
-        get() = ConcreteSykdomstidslinje.permisjonsdager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.EDU
-        get() = ConcreteSykdomstidslinje.studiedager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.UT
-        get() = ConcreteSykdomstidslinje.utenlandsdager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
-    private val Int.U
-        get() = ConcreteSykdomstidslinje.ubestemtdager(
-            startDato, startDato.plusDays(this.toLong() - 1),
-            sendtSykmelding
-        )
-            .also { startDato = startDato.plusDays(this.toLong()) }
-
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         førsteDag: LocalDate = this.førsteDag(),
         sisteDag: LocalDate = this.sisteDag(),
@@ -565,23 +482,6 @@ internal class UtbetalingBuilderTest {
         }
 
     }
-
-    private val Int.januar
-        get() = LocalDate.of(2018, 1, this)
-    private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)
-
-    private val Int.februar
-        get() = LocalDate.of(2018, 2, this)
-
-    private val Int.april
-        get() = LocalDate.of(2018, 4, this)
-
-    private val Int.mai
-        get() = LocalDate.of(2018, 5, this)
-
-    private val Int.desember
-        get() = LocalDate.of(2018, 12, this)
-    private fun Int.desember(år: Int) = LocalDate.of(år, 12, this)
 
 }
 

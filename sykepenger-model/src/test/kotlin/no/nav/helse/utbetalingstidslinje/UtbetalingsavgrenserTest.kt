@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.fixtures.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -98,11 +99,4 @@ internal class UtbetalingsavgrenserTest {
     private val Int.N get() = Pair(this, Utbetalingstidslinje::addNAVdag)
     private val Int.A get() = Pair(this, Utbetalingstidslinje::addArbeidsdag)
     private val Int.F get() = Pair(this, Utbetalingstidslinje::addFridag)
-
-    private val Int.januar get() = this.januar(2018)
-    private fun Int.januar(år: Int) = LocalDate.of(år, 1, this)
-    private val Int.mars get() = this.mars(2018)
-    private fun Int.mars(år: Int) = LocalDate.of(år, 3, this)
-    private val Int.september get() = this.september(2018)
-    private fun Int.september(år: Int) = LocalDate.of(år, 9, this)
 }
