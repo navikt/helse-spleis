@@ -227,7 +227,7 @@ internal class SykdomstidslinjeJsonTest {
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
-        override fun toJson(): JsonNode {
+        override fun toJsonNode(): JsonNode {
             return objectMapper.convertValue(mapOf(
                 "hendelseId" to hendelseId(),
                 "type" to HendelseType.Inntektsmelding.name
@@ -248,7 +248,7 @@ internal class SykdomstidslinjeJsonTest {
 
         override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 
-        override fun toJson(): JsonNode {
+        override fun toJsonNode(): JsonNode {
             return objectMapper.convertValue(mapOf(
                 "hendelseId" to hendelseId(),
                 "type" to HendelseType.SendtSøknad.name

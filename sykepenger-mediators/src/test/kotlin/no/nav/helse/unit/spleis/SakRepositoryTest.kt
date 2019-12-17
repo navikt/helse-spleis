@@ -26,8 +26,7 @@ internal class SakRepositoryTest {
                 lagreSakDao = repo,
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
-                producer = mockk(relaxed = true),
-                hendelseConsumer = mockk(relaxed = true)
+                producer = mockk(relaxed = true)
         )
 
         mediator.onNySøknad(nySøknad)
@@ -44,8 +43,7 @@ internal class SakRepositoryTest {
                 lagreSakDao = repo,
                 utbetalingsreferanseRepository = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
-                producer = mockk(relaxed = true),
-                hendelseConsumer = mockk(relaxed = true)
+                producer = mockk(relaxed = true)
         )
         mediator.onNySøknad(nySøknad)
 

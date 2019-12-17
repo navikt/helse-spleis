@@ -128,7 +128,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun jsonRepresentation(): JsonTidslinje {
         val dager = flatten().map { it.toJsonDag() }
-        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJson() }
+        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { it.toJsonNode() }
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 

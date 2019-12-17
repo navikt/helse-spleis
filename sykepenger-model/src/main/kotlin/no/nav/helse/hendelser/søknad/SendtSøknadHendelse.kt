@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
@@ -57,4 +58,8 @@ class SendtSøknadHendelse private constructor(hendelseId: String, søknad: Json
                     .reduce { resultatTidslinje, delTidslinje ->
                         resultatTidslinje + delTidslinje
                     }
+
+    override fun hendelsetype(): Hendelsetype {
+        return Hendelsetype.SendtSøknad
+    }
 }

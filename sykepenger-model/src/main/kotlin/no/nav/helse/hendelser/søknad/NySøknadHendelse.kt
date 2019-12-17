@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser.søknad
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -32,4 +33,8 @@ class NySøknadHendelse private constructor(hendelseId: String, søknad: JsonNod
             }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
+
+    override fun hendelsetype(): Hendelsetype {
+        return Hendelsetype.NySøknad
+    }
 }

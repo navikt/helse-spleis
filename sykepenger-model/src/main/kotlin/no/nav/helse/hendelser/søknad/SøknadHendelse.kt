@@ -3,7 +3,6 @@ package no.nav.helse.hendelser.søknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
@@ -85,6 +84,8 @@ abstract class SøknadHendelse protected constructor(
 
     override fun organisasjonsnummer(): String = arbeidsgiver.orgnummer
 
+    override fun opprettet() = opprettet
+
     override fun rapportertdato(): LocalDateTime = opprettet
 
     override fun compareTo(other: SykdomstidslinjeHendelse): Int =
@@ -96,7 +97,11 @@ abstract class SøknadHendelse protected constructor(
             && søknad["arbeidsgiver"]?.hasNonNull("orgnummer") == true
     }
 
-    override fun toJson(): JsonNode = objectMapper.convertValue(mapOf(
+    override fun toJsonNode(): JsonNode {
+        return objectMapper.readTree(toJson())
+    }
+
+    override fun toJson(): String = objectMapper.writeValueAsString(mapOf(
         "hendelseId" to hendelseId(),
         "type" to hendelsetype.name,
         "søknad" to søknad

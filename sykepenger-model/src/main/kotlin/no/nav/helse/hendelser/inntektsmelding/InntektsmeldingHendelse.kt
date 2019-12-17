@@ -3,8 +3,8 @@ package no.nav.helse.hendelser.inntektsmelding
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.hendelser.SykdomshendelseType
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.UtenforOmfangException
@@ -67,6 +67,10 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         get() = inntektsmelding["endringIRefusjoner"]
             .mapNotNull { it["endringsdato"].safelyUnwrapDate() }
 
+    override fun hendelsetype(): Hendelsetype {
+        return Hendelsetype.Inntektsmelding
+    }
+
     override fun kanBehandles() = inntektsmelding["mottattDato"] != null
         && inntektsmelding["foersteFravaersdag"] != null
         && inntektsmelding["virksomhetsnummer"] != null && !inntektsmelding["virksomhetsnummer"].isNull
@@ -86,9 +90,11 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
 
     override fun aktørId() = arbeidstakerAktorId
 
+    override fun opprettet() = mottattDato
+
     override fun rapportertdato() = mottattDato
 
-    override fun organisasjonsnummer() = virksomhetsnummer!!
+    override fun organisasjonsnummer() = requireNotNull(virksomhetsnummer)
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
         val arbeidsgiverperiode = arbeidsgiverperioder
@@ -123,8 +129,11 @@ class InntektsmeldingHendelse private constructor(hendelseId: String, private va
         return this?.plus(other) ?: other
     }
 
+    override fun toJsonNode(): JsonNode {
+        return objectMapper.readTree(toJson())
+    }
 
-    override fun toJson(): JsonNode = objectMapper.convertValue(mapOf(
+    override fun toJson(): String = objectMapper.writeValueAsString(mapOf(
         "hendelseId" to hendelseId(),
         "type" to SykdomshendelseType.InntektsmeldingMottatt.name,
         "inntektsmelding" to inntektsmelding

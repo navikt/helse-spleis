@@ -67,6 +67,16 @@ class Ytelser(private val behov: Behov) : ArbeidstakerHendelse, VedtaksperiodeHe
 
     override fun vedtaksperiodeId() = behov.vedtaksperiodeId()
 
+    override fun hendelsetype(): Hendelsetype {
+        return Hendelsetype.Ytelser
+    }
+
+    override fun opprettet() = requireNotNull(behov.besvart())
+
+    override fun toJson(): String {
+        return behov.toJson()
+    }
+
     internal class Foreldrepenger {}
 
     internal class Svangerskapspenger {}

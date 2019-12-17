@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.sak.VedtaksperiodeHendelse
@@ -24,6 +25,16 @@ class Påminnelse private constructor(private val json: JsonNode) : Arbeidstaker
 
     override fun organisasjonsnummer() = json["organisasjonsnummer"].textValue()
     override fun vedtaksperiodeId(): String = json["vedtaksperiodeId"].textValue()
+
+    override fun opprettet() = påminnelsestidspunkt
+
+    override fun hendelsetype(): Hendelsetype {
+        return Hendelsetype.Påminnelse
+    }
+
+    override fun toJson(): String {
+        return json.toString()
+    }
 
     companion object {
         private val objectMapper = jacksonObjectMapper()

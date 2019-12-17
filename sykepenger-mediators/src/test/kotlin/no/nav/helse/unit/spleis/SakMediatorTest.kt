@@ -21,7 +21,6 @@ internal class SakMediatorTest {
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
     private val producer = mockk<KafkaProducer<String, String>>(relaxed = true)
-    private val hendelseConsumer = mockk<HendelseConsumer>(relaxed = true)
 
     private val sakMediator = SakMediator(
         vedtaksperiodeProbe = probe,
@@ -29,8 +28,7 @@ internal class SakMediatorTest {
         lagreSakDao = lagreSakDao,
         utbetalingsreferanseRepository = utbetalingsRepo,
         lagreUtbetalingDao = lagreUtbetalingDao,
-        producer = producer,
-        hendelseConsumer = hendelseConsumer
+        producer = producer
     )
 
     private val nySøknad = nySøknadHendelse()

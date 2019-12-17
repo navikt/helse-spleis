@@ -12,6 +12,7 @@ class Behov internal constructor(private val pakke: Pakke) : ArbeidstakerHendels
         private const val BehovKey = "@behov"
         private const val IdKey = "@id"
         private const val OpprettetKey = "@opprettet"
+        private const val BesvartKey = "@besvart"
         private const val LøsningsKey = "@løsning"
 
         private const val HendelsetypeKey = "hendelse"
@@ -60,9 +61,14 @@ class Behov internal constructor(private val pakke: Pakke) : ArbeidstakerHendels
 
     fun behovType(): List<String> = requireNotNull(get(BehovKey))
     fun id(): UUID = UUID.fromString(pakke[IdKey] as String)
-    fun opprettet(): LocalDateTime = LocalDateTime.parse(pakke[OpprettetKey] as String)
 
-    fun hendelsetype(): Hendelsetype {
+    override fun opprettet() = LocalDateTime.parse(pakke[OpprettetKey] as String)
+
+    fun besvart(): LocalDateTime? {
+        return pakke[BesvartKey]?.let { LocalDateTime.parse(it as String) }
+    }
+
+    override fun hendelsetype(): Hendelsetype {
         return Hendelsetype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
     }
 
@@ -84,7 +90,7 @@ class Behov internal constructor(private val pakke: Pakke) : ArbeidstakerHendels
 
     override fun toString() = "${behovType()}:${id()}"
 
-    fun toJson(): String {
+    override fun toJson(): String {
         return pakke.toJson()
     }
 

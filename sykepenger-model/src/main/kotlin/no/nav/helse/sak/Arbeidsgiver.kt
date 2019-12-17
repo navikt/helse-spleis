@@ -60,9 +60,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
                 organisasjonsnummer = memento.organisasjonsnummer
             ).apply {
                 this.perioder.addAll(memento.saker.map {
-                    Vedtaksperiode.restore(it).also {
-                        this.vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
-                    }
+                    Vedtaksperiode.restore(it)
                 })
             }
         }

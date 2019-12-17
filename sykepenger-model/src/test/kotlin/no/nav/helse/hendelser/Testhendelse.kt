@@ -28,7 +28,7 @@ internal class Testhendelse(
         return this.rapportertdato().compareTo(other.rapportertdato())
     }
 
-    override fun toJson(): JsonNode {
+    override fun toJsonNode(): JsonNode {
         return ObjectMapper().readValue("{}")
     }
 

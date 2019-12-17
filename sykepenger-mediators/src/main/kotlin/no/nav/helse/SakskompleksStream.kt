@@ -78,8 +78,13 @@ fun Application.vedtaksperiodeApplication() {
         lagreSakDao = LagreSakDao(dataSource),
         utbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource),
         lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
-        producer = producer,
-        hendelseConsumer = hendelseConsumer
+        producer = producer
+    )
+
+    val hendelseMediator = HendelseMediator(
+        consumer = hendelseConsumer,
+        lagreHendelseDao = LagreHendelseDao(dataSource),
+        sakMediator = sakMediator
     )
 
     restInterface(sakMediator)

@@ -20,17 +20,10 @@ internal class SakMediator(
     private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository,
     private val lagreUtbetalingDao: SakObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
-    private val producer: KafkaProducer<String, String>,
-    hendelseConsumer: HendelseConsumer
+    private val producer: KafkaProducer<String, String>
 ) : SakObserver, HendelseConsumer.MessageListener {
 
-    private val hendelseProbe = HendelseProbe()
     private val log = LoggerFactory.getLogger(SakMediator::class.java)
-
-    init {
-        hendelseConsumer.addListener(hendelseProbe)
-        hendelseConsumer.addListener(this)
-    }
 
     override fun onPåminnelse(påminnelse: Påminnelse) {
         finnSak(påminnelse) { sak -> sak.håndter(påminnelse) }

@@ -15,7 +15,7 @@ abstract class SykdomstidslinjeHendelse(private val hendelseId: String): Compara
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
 
-    abstract fun toJson(): JsonNode
+    internal abstract fun toJsonNode(): JsonNode
 
     interface Deserializer{
         fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse
