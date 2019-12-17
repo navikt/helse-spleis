@@ -143,7 +143,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta påminnelse fra NySøknadMottatt, gå TilInfotrygd`() {
+    fun `motta påminnelse fra MottattNySøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInNySøknad()
 
         vedtaksperiode.håndter(
@@ -157,7 +157,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `ignorer påminnelse for en annen tilstand enn NY_SØKNAD_MOTTATT`() {
+    fun `ignorer påminnelse for en annen tilstand enn MottattNySøknad`() {
         val vedtaksperiode = beInNySøknad()
 
         assertIngenEndring {
@@ -200,7 +200,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta påminnelse fra SendtSøknadMottatt, gå TilInfotrygd`() {
+    fun `motta påminnelse fra MottattSendtSøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInSendtSøknad()
 
         vedtaksperiode.håndter(
@@ -256,7 +256,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta påminnelse fra InntektsmeldingMottatt, gå TilInfotrygd`() {
+    fun `motta påminnelse fra MottattInntektsmelding, gå TilInfotrygd`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
         vedtaksperiode.håndter(
@@ -270,7 +270,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `ignorer påminnelse for en annen tilstand enn INNTEKTSMELDING_MOTTATT`() {
+    fun `ignorer påminnelse for en annen tilstand enn MottattInntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
         assertIngenEndring {
@@ -285,7 +285,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `når saken er komplett, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
+    fun `når tilstand er BeregnUtbetaling, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
@@ -319,7 +319,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta tom sykepengehistorikk når saken er komplett`() {
+    fun `motta tom sykepengehistorikk når tilstand er BeregnUtbetaling`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
@@ -336,7 +336,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val inntektsmeldingHendelse =
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -357,7 +357,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta sykepengehistorikk når saken er komplett og historikken er utenfor seks måneder`() {
+    fun `motta sykepengehistorikk når tilstand er BeregnUtbetaling, og historikken er utenfor seks måneder`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
@@ -374,7 +374,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val inntektsmeldingHendelse =
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -413,7 +413,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val inntektsmeldingHendelse =
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -452,7 +452,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val inntektsmeldingHendelse =
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -479,8 +479,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `gitt en komplett tidslinje, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
-        val vedtaksperiode = beInKomplettTidslinje()
+    fun `gitt tilstand BeregnUtbetaling, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
+        val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndring {
             vedtaksperiode.håndter(
@@ -494,8 +494,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta påminnelse fra KomplettTidslinje, fører til at behov sendes på nytt`() {
-        val vedtaksperiode = beInKomplettTidslinje()
+    fun `motta påminnelse fra BeregnUtbetaling, fører til at behov sendes på nytt`() {
+        val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndringITilstand {
             vedtaksperiode.håndter(
@@ -511,8 +511,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `ignorer påminnelse for en annen tilstand enn KOMPLETT_SYKDOMSTIDSLINJE`() {
-        val vedtaksperiode = beInKomplettTidslinje()
+    fun `ignorer påminnelse for en annen tilstand enn BeregnUtbetaling`() {
+        val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndring {
             vedtaksperiode.håndter(
@@ -545,7 +545,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -585,7 +585,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             refusjon = Refusjon(opphoersdato = periodeTom)
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -625,7 +625,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             refusjon = Refusjon(opphoersdato = null)
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -667,7 +667,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -707,7 +707,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             endringerIRefusjoner = emptyList()
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -749,7 +749,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -791,7 +791,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        val vedtaksperiode = beInKomplettTidslinje(
+        val vedtaksperiode = beInBeregnUtbetaling(
             nySøknadHendelse = nySøknadHendelse,
             sendtSøknadHendelse = sendtSøknadHendelse,
             inntektsmeldingHendelse = inntektsmeldingHendelse
@@ -969,7 +969,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             håndter(inntektsmeldingHendelse)
         }
 
-    private fun beInKomplettTidslinje(
+    private fun beInBeregnUtbetaling(
         sendtSøknadHendelse: SendtSøknadHendelse = sendtSøknadHendelse(),
         inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
         nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
@@ -998,7 +998,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         inntektsmeldingHendelse: InntektsmeldingHendelse = inntektsmeldingHendelse(),
         nySøknadHendelse: NySøknadHendelse = nySøknadHendelse()
     ) =
-        beInKomplettTidslinje(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
+        beInBeregnUtbetaling(sendtSøknadHendelse, inntektsmeldingHendelse, nySøknadHendelse).apply {
             håndter(
                 Sak(aktørId, fødselsnummer),
                 Arbeidsgiver(organisasjonsnummer),

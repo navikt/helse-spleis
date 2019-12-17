@@ -100,7 +100,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
-        setTilstand(hendelse, TilInfotrygdTilstand)
+        setTilstand(hendelse, TilInfotrygd)
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
@@ -126,7 +126,7 @@ internal class Vedtaksperiode private constructor(
         val tidslinje = this.sykdomstidslinje.plus(hendelse.sykdomstidslinje())
 
         if (tidslinje.erUtenforOmfang()) {
-            setTilstand(hendelse, TilInfotrygdTilstand)
+            setTilstand(hendelse, TilInfotrygd)
         } else {
             setTilstand(hendelse, nesteTilstand) {
                 sykdomstidslinje = tidslinje
@@ -156,15 +156,15 @@ internal class Vedtaksperiode private constructor(
 
         // Default implementasjoner av transisjonene
         fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
-            vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
+            vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.setTilstand(sendtSøknadHendelse, TilInfotrygdTilstand)
+            vedtaksperiode.setTilstand(sendtSøknadHendelse, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygdTilstand)
+            vedtaksperiode.setTilstand(inntektsmeldingHendelse, TilInfotrygd)
         }
 
         fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
@@ -176,7 +176,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.tilstand != type) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
-            vedtaksperiode.setTilstand(påminnelse, TilInfotrygdTilstand)
+            vedtaksperiode.setTilstand(påminnelse, TilInfotrygd)
         }
 
         fun leaving() {
@@ -191,9 +191,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknadHendelse: NySøknadHendelse) {
             val tidslinje = nySøknadHendelse.sykdomstidslinje()
-            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygdTilstand)
+            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknadHendelse, TilInfotrygd)
 
-            vedtaksperiode.setTilstand(nySøknadHendelse, NySøknadMottattTilstand) {
+            vedtaksperiode.setTilstand(nySøknadHendelse, MottattNySøknad) {
                 vedtaksperiode.sykdomstidslinje = tidslinje
             }
         }
@@ -202,14 +202,14 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
     }
 
-    private object NySøknadMottattTilstand : Vedtaksperiodetilstand {
+    private object MottattNySøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.håndter(sendtSøknadHendelse, SendtSøknadMottattTilstand)
+            vedtaksperiode.håndter(sendtSøknadHendelse, MottattSendtSøknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.håndter(inntektsmeldingHendelse, InntektsmeldingMottattTilstand)
+            vedtaksperiode.håndter(inntektsmeldingHendelse, MottattInntektsmelding)
         }
 
         override val type = NY_SØKNAD_MOTTATT
@@ -217,10 +217,10 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    private object SendtSøknadMottattTilstand : Vedtaksperiodetilstand {
+    private object MottattSendtSøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingHendelse: InntektsmeldingHendelse) {
-            vedtaksperiode.håndter(inntektsmeldingHendelse, KomplettSykdomstidslinjeTilstand)
+            vedtaksperiode.håndter(inntektsmeldingHendelse, BeregnUtbetaling)
         }
 
         override val type = SENDT_SØKNAD_MOTTATT
@@ -228,10 +228,10 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    private object InntektsmeldingMottattTilstand : Vedtaksperiodetilstand {
+    private object MottattInntektsmelding : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknadHendelse: SendtSøknadHendelse) {
-            vedtaksperiode.håndter(sendtSøknadHendelse, KomplettSykdomstidslinjeTilstand)
+            vedtaksperiode.håndter(sendtSøknadHendelse, BeregnUtbetaling)
         }
 
         override val type = INNTEKTSMELDING_MOTTATT
@@ -239,7 +239,7 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    private object KomplettSykdomstidslinjeTilstand : Vedtaksperiodetilstand {
+    private object BeregnUtbetaling : Vedtaksperiodetilstand {
 
         override val type = KOMPLETT_SYKDOMSTIDSLINJE
         override val timeout: Duration = Duration.ofHours(1)
@@ -258,21 +258,21 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
             val utbetalingsberegning = try {
                 vedtaksperiode.sykdomstidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
             if (sisteUtbetalingsdag == null || vedtaksperiode.inntektsmeldingHendelse().harEndringIRefusjon(sisteUtbetalingsdag))  {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygdTilstand)
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
-            vedtaksperiode.setTilstand(ytelser, TilGodkjenningTilstand) {
+            vedtaksperiode.setTilstand(ytelser, TilGodkjenning) {
                 vedtaksperiode.maksdato = utbetalingsberegning.maksdato
                 vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
             }
@@ -289,7 +289,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private object TilGodkjenningTilstand : Vedtaksperiodetilstand {
+    private object TilGodkjenning : Vedtaksperiodetilstand {
         override val type = TIL_GODKJENNING
         override val timeout: Duration = Duration.ofDays(7)
 
@@ -305,16 +305,16 @@ internal class Vedtaksperiode private constructor(
             manuellSaksbehandlingHendelse: ManuellSaksbehandlingHendelse
         ) {
             if (manuellSaksbehandlingHendelse.utbetalingGodkjent()) {
-                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilUtbetalingTilstand) {
+                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilUtbetaling) {
                     vedtaksperiode.godkjentAv = manuellSaksbehandlingHendelse.saksbehandler()
                 }
             } else {
-                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygdTilstand)
+                vedtaksperiode.setTilstand(manuellSaksbehandlingHendelse, TilInfotrygd)
             }
         }
     }
 
-    private object TilUtbetalingTilstand : Vedtaksperiodetilstand {
+    private object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
         override val timeout: Duration = Duration.ofDays(7)
 
@@ -367,7 +367,7 @@ internal class Vedtaksperiode private constructor(
         }.array()
     }
 
-    private object TilInfotrygdTilstand : Vedtaksperiodetilstand {
+    private object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
 
@@ -405,13 +405,13 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstandFraEnum(tilstand: TilstandType) = when (tilstand) {
             START -> StartTilstand
-            NY_SØKNAD_MOTTATT -> NySøknadMottattTilstand
-            SENDT_SØKNAD_MOTTATT -> SendtSøknadMottattTilstand
-            INNTEKTSMELDING_MOTTATT -> InntektsmeldingMottattTilstand
-            KOMPLETT_SYKDOMSTIDSLINJE -> KomplettSykdomstidslinjeTilstand
-            TIL_GODKJENNING -> TilGodkjenningTilstand
-            TIL_UTBETALING -> TilUtbetalingTilstand
-            TIL_INFOTRYGD -> TilInfotrygdTilstand
+            NY_SØKNAD_MOTTATT -> MottattNySøknad
+            SENDT_SØKNAD_MOTTATT -> MottattSendtSøknad
+            INNTEKTSMELDING_MOTTATT -> MottattInntektsmelding
+            KOMPLETT_SYKDOMSTIDSLINJE -> BeregnUtbetaling
+            TIL_GODKJENNING -> TilGodkjenning
+            TIL_UTBETALING -> TilUtbetaling
+            TIL_INFOTRYGD -> TilInfotrygd
         }
 
         internal fun <Hendelse> nyPeriode(hendelse: Hendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode where Hendelse: ArbeidstakerHendelse, Hendelse: SykdomstidslinjeHendelse {
