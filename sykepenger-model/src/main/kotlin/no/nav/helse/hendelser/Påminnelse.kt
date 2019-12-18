@@ -15,18 +15,19 @@ class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNo
 
     private constructor(json: JsonNode) : this(UUID.randomUUID(), json)
 
-    val antallGangerPåminnet = json["antallGangerPåminnet"].intValue()
-    val tilstand = json["tilstand"].textValue().let { oldTilstander[it] ?: TilstandType.valueOf(it) }
-    val tilstandsendringstidspunkt = LocalDateTime.parse(json["tilstandsendringstidspunkt"].textValue())
-    val påminnelsestidspunkt = LocalDateTime.parse(json["påminnelsestidspunkt"].textValue())
-    val nestePåminnelsestidspunkt = LocalDateTime.parse(json["nestePåminnelsestidspunkt"].textValue())
-
     private val oldTilstander = mapOf(
         "NY_SØKNAD_MOTTATT" to TilstandType.MOTTATT_NY_SØKNAD,
         "SENDT_SØKNAD_MOTTATT" to TilstandType.MOTTATT_SENDT_SØKNAD,
         "INNTEKTSMELDING_MOTTATT" to TilstandType.MOTTATT_INNTEKTSMELDING,
         "KOMPLETT_SYKDOMSTIDSLINJE" to TilstandType.BEREGN_UTBETALING
     )
+
+    val antallGangerPåminnet = json["antallGangerPåminnet"].intValue()
+    val tilstand = json["tilstand"].textValue().let { oldTilstander[it] ?: TilstandType.valueOf(it) }
+    val tilstandsendringstidspunkt = LocalDateTime.parse(json["tilstandsendringstidspunkt"].textValue())
+    val påminnelsestidspunkt = LocalDateTime.parse(json["påminnelsestidspunkt"].textValue())
+
+    val nestePåminnelsestidspunkt = LocalDateTime.parse(json["nestePåminnelsestidspunkt"].textValue())
 
     fun gjelderTilstand(tilstandType: TilstandType) = tilstandType == tilstand
 
