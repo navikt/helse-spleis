@@ -12,6 +12,7 @@ class Behov internal constructor(private val pakke: Pakke) {
         private const val OpprettetKey = "@opprettet"
         private const val BesvartKey = "@besvart"
         private const val LøsningsKey = "@løsning"
+        private const val FinalKey = "@final"
 
         private const val HendelsetypeKey = "hendelse"
         private const val AktørIdKey = "aktørId"
@@ -93,7 +94,7 @@ class Behov internal constructor(private val pakke: Pakke) {
     }
 
     fun erLøst(): Boolean {
-        return (pakke["final"] as Boolean?) ?: false
+        return (pakke[FinalKey] as Boolean?) ?: false
     }
 
     fun løsning() =

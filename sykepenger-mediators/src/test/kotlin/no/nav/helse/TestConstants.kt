@@ -315,7 +315,7 @@ internal fun Behov.løsBehov(løsning: Any): Behov {
     val pakke = objectMapper.readTree(this.toJson()) as ObjectNode
     pakke.put("@besvart", LocalDateTime.now().toString())
     pakke.set<JsonNode>("@løsning", objectMapper.valueToTree<JsonNode>(løsning))
-    pakke.put("final", true)
+    pakke.put("@final", true)
     return Behov.fromJson(pakke.toString())
 }
 

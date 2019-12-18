@@ -55,7 +55,7 @@ internal class BehovTest {
 
         val behov = Behov.fromJson(orignalBehov.toJson())
         assertFalse(behov.erLøst())
-        behov["final"] = true
+        behov["@final"] = true
         assertTrue(behov.erLøst())
 
         val json = behov.toJson()

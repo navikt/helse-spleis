@@ -389,7 +389,7 @@ private fun Behov.løsBehov(løsning: Any): Behov {
     val pakke = Pakke.fromJson(this.toJson())
     pakke["@besvart"] = LocalDateTime.now().toString()
     pakke["@løsning"] = løsning
-    pakke["final"] = true
+    pakke["@final"] = true
     return Behov.fromJson(pakke.toJson())
 }
 
