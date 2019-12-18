@@ -32,14 +32,18 @@ internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslin
         helseState.betalingsdag(dag)
     }
 
+    override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+        helseState.betalingsdag(dag)
+    }
+
     private interface HelseState {
         fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag)
+        fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
         fun ikkeBetalingsdag() {}
     }
 
     internal inner class Ubetalt : HelseState {
         override fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            if (dag.inntekt == 0.0) return
             utbetalingslinjer.add(dag.utbetalingslinje())
             helseState = Betalt()
         }
@@ -51,6 +55,10 @@ internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslin
         }
 
         override fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+            dag.oppdater(utbetalingslinjer.last())
+        }
+
+        override fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dag.oppdater(utbetalingslinjer.last())
         }
     }

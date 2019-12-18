@@ -81,13 +81,14 @@ internal class Utbetalingstidslinje {
     }
 
     internal fun addHelg(inntekt: Double, dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.NavDag(0.0, dagen))
+        utbetalingsdager.add(Utbetalingsdag.NavHelgDag(0.0, dagen))
     }
 
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
         fun visitNavDag(dag: Utbetalingsdag.NavDag) {}
+        fun visitNavHelgDag(dag: Utbetalingsdag.NavHelgDag) {}
         fun visitArbeidsdag(dag: Utbetalingsdag.Arbeidsdag) {}
         fun visitFridag(dag: Utbetalingsdag.Fridag) {}
         fun visitAvvistDag(dag: Utbetalingsdag.AvvistDag) {}
@@ -114,6 +115,16 @@ internal class Utbetalingstidslinje {
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
 
             fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt.roundToInt())
+            fun oppdater(last: Utbetalingslinje) {
+                last.tom = dato
+            }
+        }
+
+        internal class NavHelgDag(inntekt: Double, dato: LocalDate) :
+            Utbetalingsdag(0.0, dato) {
+
+            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavHelgDag(this)
+
             fun oppdater(last: Utbetalingslinje) {
                 last.tom = dato
             }

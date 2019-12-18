@@ -92,7 +92,7 @@ internal class UtbetalingBuilder internal constructor(
     }
 
     private fun håndterNAVHelgedag(dagen: LocalDate) {
-        tidslinje.addNAVdag(0.0, dagen)
+        tidslinje.addHelg(0.0, dagen)
     }
 
     private fun håndterArbeidsdag(dagen: LocalDate) {
