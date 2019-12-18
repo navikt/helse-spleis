@@ -306,13 +306,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                     .toList())
         }
 
-        fun fromJson(
-            json: String,
-            deserializer: SykdomstidslinjeHendelse.Deserializer
-        ): ConcreteSykdomstidslinje {
+        fun fromJson(json: String): ConcreteSykdomstidslinje {
             val jsonTidslinje = objectMapper.readTree(json)
 
-            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"], deserializer)
+            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"])
             val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
 
             return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
@@ -333,11 +330,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         }
 
 
-        private fun gruppererHendelserPrHendelsesId(
-            json: JsonNode,
-            deserializer: SykdomstidslinjeHendelse.Deserializer
-        ): Map<UUID, SykdomstidslinjeHendelse> {
-            return json.map { deserializer.deserialize(it) }
+        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<UUID, SykdomstidslinjeHendelse> {
+            return json.map { SykdomstidslinjeHendelse.fromJson(it.toString()) }
                 .groupBy(keySelector = { it.hendelseId() })
                 .mapValues { (_, v) -> v.first() }
         }

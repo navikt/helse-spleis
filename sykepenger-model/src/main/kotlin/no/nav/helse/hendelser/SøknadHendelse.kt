@@ -23,15 +23,6 @@ abstract class SøknadHendelse protected constructor(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val nySøknadtyper = listOf(
-            Hendelsetype.NySøknad.name,
-            SykdomshendelseType.NySøknadMottatt.name
-        )
-        private val sendtSøknadtyper = listOf(
-            Hendelsetype.SendtSøknad.name,
-            SykdomshendelseType.SendtSøknadMottatt.name
-        )
-
         fun fromSøknad(json: String): SøknadHendelse? {
             return try {
                 objectMapper.readTree(json).let { jsonNode ->
@@ -46,16 +37,6 @@ abstract class SøknadHendelse protected constructor(
             } catch (err: IOException) {
                 log.info("kunne ikke lese sykepengesøknad som json: ${err.message}", err)
                 null
-            }
-        }
-
-        fun fromJson(json: String): SøknadHendelse {
-            return objectMapper.readTree(json).let {
-                when (it["type"].textValue()) {
-                    in nySøknadtyper -> NySøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
-                    in sendtSøknadtyper -> SendtSøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
-                    else -> throw IllegalArgumentException("json er ikke en søknad hendelse")
-                }
             }
         }
     }

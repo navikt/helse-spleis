@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
@@ -11,6 +14,18 @@ import java.util.*
 class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsetype.SendtSøknad, søknad) {
 
     constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
+
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun fromJson(json: String): SendtSøknad {
+            return objectMapper.readTree(json).let {
+                SendtSøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
+            }
+        }
+    }
 
     private val fom get() = søknad["fom"].asText().let { LocalDate.parse(it) }
     private val tom get() = søknad["tom"].asText().let { LocalDate.parse(it) }

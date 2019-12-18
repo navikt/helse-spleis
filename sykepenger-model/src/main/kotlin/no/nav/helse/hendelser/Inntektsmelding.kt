@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class Inntektsmelding private constructor(hendelseId: UUID, private val inntektsmelding: JsonNode) :
+class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
     SykdomstidslinjeHendelse(hendelseId, Hendelsetype.Inntektsmelding) {
 
     constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID(), inntektsmelding)

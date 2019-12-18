@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
+import no.nav.helse.sak.ArbeidstakerHendelse
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
@@ -64,10 +65,10 @@ internal class HendelseBuilder() {
         if (!behov.erLøst()) return
 
         when (behov.hendelsetype()) {
-            Hendelsetype.Ytelser -> Ytelser(behov).also {
+            ArbeidstakerHendelse.Hendelsetype.Ytelser -> Ytelser(behov).also {
                 notifyListeners(HendelseListener::onYtelser, it)
             }
-            Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
+            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
                 notifyListeners(HendelseListener::onManuellSaksbehandling, it)
             }
         }

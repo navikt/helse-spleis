@@ -2,6 +2,8 @@ package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -12,7 +14,7 @@ import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.*
 
-class Ytelser(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
+class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
 
     constructor(behov: Behov) : this(UUID.randomUUID(), behov)
 
@@ -42,6 +44,12 @@ class Ytelser(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse
                 vedtaksperiodeId = vedtaksperiodeId,
                 additionalParams = params
             )
+        }
+
+        fun fromJson(json: String): Ytelser {
+            return objectMapper.readTree(json).let {
+                Ytelser(UUID.fromString(it["hendelseId"].textValue()), Behov.fromJson(it["ytelser"].toString()))
+            }
         }
     }
 
@@ -75,7 +83,12 @@ class Ytelser(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse
     override fun opprettet() = requireNotNull(behov.besvart())
 
     override fun toJson(): String {
-        return behov.toJson()
+        return objectMapper.convertValue<ObjectNode>(mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to hendelsetype()
+        ))
+            .putRawValue("ytelser", RawValue(behov.toJson()))
+            .toString()
     }
 
     internal class Foreldrepenger {}

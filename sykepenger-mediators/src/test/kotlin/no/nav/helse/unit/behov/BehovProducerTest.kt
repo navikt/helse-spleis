@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.Hendelsetype
+import no.nav.helse.sak.ArbeidstakerHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -29,7 +29,7 @@ internal class BehovProducerTest {
         BehovProducer(topic, producer)
             .sendNyttBehov(
                 Behov.nyttBehov(
-                    Hendelsetype.Ytelser,
+                    ArbeidstakerHendelse.Hendelsetype.Ytelser,
                     listOf(Behovtype.Sykepengehistorikk),
                     "aktørId",
                     "fnr",

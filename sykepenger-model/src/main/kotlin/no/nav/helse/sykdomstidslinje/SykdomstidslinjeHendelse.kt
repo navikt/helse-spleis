@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Hendelsetype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
@@ -18,7 +17,12 @@ abstract class SykdomstidslinjeHendelse(hendelseId: UUID, hendelsetype: Hendelse
 
     internal abstract fun toJsonNode(): JsonNode
 
-    interface Deserializer{
-        fun deserialize(jsonNode: JsonNode): SykdomstidslinjeHendelse
+    companion object Builder {
+        fun fromJson(json: String): SykdomstidslinjeHendelse {
+            return when (val hendelse = ArbeidstakerHendelse.fromJson(json)) {
+                is SykdomstidslinjeHendelse -> hendelse
+                else -> throw RuntimeException("kjenner ikke hendelsetypen ${hendelse.hendelsetype()}")
+            }
+        }
     }
 }

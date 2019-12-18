@@ -1,6 +1,6 @@
 package no.nav.helse.behov
 
-import no.nav.helse.hendelser.Hendelsetype
+import no.nav.helse.sak.ArbeidstakerHendelse
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,7 +20,7 @@ class Behov internal constructor(private val pakke: Pakke) {
         private const val VedtaksperiodeIdKey = "vedtaksperiodeId"
 
         fun nyttBehov(
-            hendelsetype: Hendelsetype,
+            hendelsetype: ArbeidstakerHendelse.Hendelsetype,
             behov: List<Behovtype>,
             aktørId: String,
             fødselsnummer: String,
@@ -66,8 +66,8 @@ class Behov internal constructor(private val pakke: Pakke) {
         return pakke[BesvartKey]?.let { LocalDateTime.parse(it as String) }
     }
 
-    fun hendelsetype(): Hendelsetype {
-        return Hendelsetype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
+    fun hendelsetype(): ArbeidstakerHendelse.Hendelsetype {
+        return ArbeidstakerHendelse.Hendelsetype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
     }
 
     fun aktørId(): String {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.Hendelsetype
+import no.nav.helse.sak.ArbeidstakerHendelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,7 +14,7 @@ internal class BehovTest {
     @Test
     fun `Opprette ett nytt behov`() {
         val behov = Behov.nyttBehov(
-            Hendelsetype.Ytelser,
+            ArbeidstakerHendelse.Hendelsetype.Ytelser,
             listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger, Behovtype.Svangerskapspenger),
             "aktørid",
             "fnr",
@@ -43,7 +43,7 @@ internal class BehovTest {
     fun `En behovsløser må kunne opprette et behov fra json, og legge på løsning, og lage json`() {
 
         val orignalBehov = Behov.nyttBehov(
-            Hendelsetype.Ytelser,
+            ArbeidstakerHendelse.Hendelsetype.Ytelser,
             listOf(Behovtype.Sykepengehistorikk),
             "aktørid",
             "fnr",

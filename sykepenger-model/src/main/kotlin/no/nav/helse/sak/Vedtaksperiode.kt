@@ -285,7 +285,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiode.emitTrengerLøsning(
-                Hendelsetype.ManuellSaksbehandling,
+                ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling,
                 listOf(Behovtype.GodkjenningFraSaksbehandler)
             )
         }
@@ -315,7 +315,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
             vedtaksperiode.emitTrengerLøsning(
-                Hendelsetype.Utbetaling, listOf(Behovtype.Utbetaling), mapOf(
+                ArbeidstakerHendelse.Hendelsetype.Utbetaling, listOf(Behovtype.Utbetaling), mapOf(
                     "utbetalingsreferanse" to utbetalingsreferanse,
                     "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
                     "maksdato" to (vedtaksperiode.maksdato ?: ""),
@@ -362,15 +362,13 @@ internal class Vedtaksperiode private constructor(
     // Gang of four Memento pattern
     companion object {
 
-        private val sykdomshendelseDeserializer = SykdomshendelseDeserializer()
-
         internal fun restore(memento: Memento): Vedtaksperiode {
             return Vedtaksperiode(
                 id = memento.id,
                 aktørId = memento.aktørId,
                 fødselsnummer = memento.fødselsnummer,
                 organisasjonsnummer = memento.organisasjonsnummer,
-                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString(), sykdomshendelseDeserializer)
+                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString())
             ).also {
                 it.tilstand = tilstandFraEnum(memento.tilstandType)
                 it.maksdato = memento.maksdato
@@ -465,7 +463,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun emitTrengerLøsning(
-        hendelsetype: Hendelsetype,
+        hendelsetype: ArbeidstakerHendelse.Hendelsetype,
         behovsliste: List<Behovtype>,
         additionalParams: Map<String, Any> = emptyMap()
     ) {

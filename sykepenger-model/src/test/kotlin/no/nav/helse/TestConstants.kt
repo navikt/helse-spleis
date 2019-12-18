@@ -10,6 +10,7 @@ import no.nav.helse.behov.Behovtype
 import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
@@ -326,7 +327,7 @@ internal object TestConstants {
         saksbehandler: String
     ): Behov {
         return Behov.nyttBehov(
-            Hendelsetype.ManuellSaksbehandling,
+            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling,
             listOf(Behovtype.GodkjenningFraSaksbehandler),
             aktørId,
             fødselsnummer,
