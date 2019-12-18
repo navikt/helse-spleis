@@ -123,10 +123,6 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
         return this?.plus(other) ?: other
     }
 
-    override fun toJsonNode(): JsonNode {
-        return objectMapper.readTree(toJson())
-    }
-
     override fun toJson(): String = objectMapper.writeValueAsString(
         mapOf(
             "hendelseId" to hendelseId(),

@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -38,10 +35,6 @@ internal class Testhendelse(
 
     override fun toJson(): String {
         TODO("not implemented")
-    }
-
-    override fun toJsonNode(): JsonNode {
-        return ObjectMapper().readValue("{}")
     }
 
     override fun equals(other: Any?): Boolean = this === other

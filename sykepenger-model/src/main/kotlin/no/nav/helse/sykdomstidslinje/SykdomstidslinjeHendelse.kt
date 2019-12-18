@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
@@ -10,8 +9,6 @@ abstract class SykdomstidslinjeHendelse(hendelseId: UUID, hendelsetype: Hendelse
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
-
-    internal abstract fun toJsonNode(): JsonNode
 
     companion object Builder {
         fun fromJson(json: String): SykdomstidslinjeHendelse {

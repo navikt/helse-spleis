@@ -69,10 +69,6 @@ abstract class SøknadHendelse protected constructor(
             && søknad["arbeidsgiver"]?.hasNonNull("orgnummer") == true
     }
 
-    override fun toJsonNode(): JsonNode {
-        return objectMapper.readTree(toJson())
-    }
-
     override fun toJson(): String = objectMapper.writeValueAsString(
         mapOf(
             "hendelseId" to hendelseId(),
