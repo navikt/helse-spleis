@@ -23,7 +23,7 @@ fun randomPort(): Int = ServerSocket(0).use {
 
 @KtorExperimentalAPI
 fun createTestApplicationConfig(config: Map<String, String> = emptyMap()) =
-        createApplicationEnvironment(createConfigFromEnvironment(mapOf(
+        ApplicationBuilder.configureKtorEnvironment(ApplicationBuilder.createConfigFromEnvironment(mapOf(
                 "HTTP_PORT" to "${randomPort()}"
         ) + config))
 

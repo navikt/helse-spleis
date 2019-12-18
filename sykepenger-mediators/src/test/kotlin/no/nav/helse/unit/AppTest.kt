@@ -1,7 +1,7 @@
 package no.nav.helse.unit
 
 import io.ktor.util.KtorExperimentalAPI
-import no.nav.helse.createConfigFromEnvironment
+import no.nav.helse.ApplicationBuilder.Companion.createConfigFromEnvironment
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
