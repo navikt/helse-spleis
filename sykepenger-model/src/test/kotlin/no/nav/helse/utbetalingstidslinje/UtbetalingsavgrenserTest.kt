@@ -46,7 +46,7 @@ internal class UtbetalingsavgrenserTest {
     @Test
     fun `noe som helst sykdom i opphold resetter teller`() {
         val tidslinje = tidslinjeOf(248.N, (24*7).A, 7.N, (2*7).A, 10.N)
-        assertEquals(17, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+        assertEquals(7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test
@@ -71,6 +71,18 @@ internal class UtbetalingsavgrenserTest {
     fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
         val tidslinje = tidslinjeOf(10.N, 60.N, (26*7).A, 60.N)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018))
+    }
+
+    @Test
+    fun `sjekk at 26 uker med syk etter karantene starter utbetaling`() {
+        val tidslinje = tidslinjeOf(248.N, (26*7).N, 60.N)
+        assertEquals((26*7), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+    }
+
+    @Test
+    fun `sjekk at 26 uker med syk etter karantene starter utbetaling gammel person`() {
+        val tidslinje = tidslinjeOf(60.N, (26*7).N, 60.N)
+        assertEquals((26*7), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
     }
 
     private fun tidslinjeOf(

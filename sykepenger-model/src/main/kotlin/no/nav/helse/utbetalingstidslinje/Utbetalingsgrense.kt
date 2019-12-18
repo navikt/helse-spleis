@@ -12,7 +12,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
     private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
 
     companion object {
-        const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7-1
+        const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7
     }
 
     internal fun maksdato() = alderRegler.maksdato(betalteDager, gammelpersonDager, sisteBetalteDag)
@@ -39,22 +39,23 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
     }
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
-        arbeidsdag(dag.dato)
+        oppholdsdag(dag.dato)
     }
 
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-        arbeidsdag(dag.dato)
+        oppholdsdag(dag.dato)
     }
 
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
-        arbeidsdag(dag.dato)
+        oppholdsdag(dag.dato)
     }
 
-    private fun arbeidsdag(dagen: LocalDate) {
+    private fun oppholdsdag(dagen: LocalDate) {
+        opphold += 1
         if (opphold < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
             state.arbeidsdagIOppholdsperiode(this, dagen)
         } else {
-            state.arbeidsdagEtterOppholdsperiode(this, dagen)
+            state(State.Initiell)
         }
     }
 
@@ -62,7 +63,6 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
         open fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
         open fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
         open fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
-        open fun arbeidsdagEtterOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
         open fun entering(avgrenser: Utbetalingsgrense) {}
         open fun leaving(avgrenser: Utbetalingsgrense) {}
 
@@ -70,6 +70,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
             override fun entering(avgrenser: Utbetalingsgrense) {
                 avgrenser.gammelpersonDager = 0
                 avgrenser.betalteDager = 0
+                avgrenser.opphold = 0
             }
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.betalteDager = 1
@@ -90,6 +91,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
+                avgrenser.state(Karantene)
             }
 
             override fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
@@ -108,18 +110,17 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
 
             override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
-                avgrenser.state(Syk)
-            }
-
-            override fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.opphold += 1
+                avgrenser.state(Karantene)
             }
+        }
 
-            override fun arbeidsdagEtterOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.opphold = 0
-                avgrenser.state(Initiell)
+        internal object Karantene: State() {
+            override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+                avgrenser.opphold += 1
+                if (avgrenser.opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return avgrenser.state(Initiell)
+                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
             }
-
         }
 
     }
