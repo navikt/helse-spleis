@@ -47,8 +47,6 @@ fun Application.createHikariConfigFromEnvironment() =
 
 @KtorExperimentalAPI
 fun Application.vedtaksperiodeApplication() {
-    migrate(createHikariConfigFromEnvironment())
-
     val helseBuilder = HelseBuilder(
         dataSource = getDataSource(createHikariConfigFromEnvironment()),
         hendelseProducer = KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
@@ -64,6 +62,7 @@ fun Application.vedtaksperiodeApplication() {
     })
 
     environment.monitor.subscribe(ApplicationStarted) {
+        migrate(createHikariConfigFromEnvironment())
         helseBuilder.start(environment.config.streamsConfig())
     }
 
