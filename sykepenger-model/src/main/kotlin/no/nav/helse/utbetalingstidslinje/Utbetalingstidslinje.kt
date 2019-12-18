@@ -80,6 +80,10 @@ internal class Utbetalingstidslinje {
         utbetalingsdager.add(Utbetalingsdag.Fridag(inntekt, dagen))
     }
 
+    internal fun addHelg(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.NavDag(0.0, dagen))
+    }
+
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}

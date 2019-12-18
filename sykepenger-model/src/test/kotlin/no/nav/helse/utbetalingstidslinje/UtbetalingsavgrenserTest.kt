@@ -85,6 +85,24 @@ internal class UtbetalingsavgrenserTest {
         assertEquals((26*7), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
     }
 
+    @Test
+    fun `helgedager teller som opphold`() {
+        val tidslinje = tidslinjeOf(248.N, (26*7).H, 60.N)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test
+    fun `helgedager sammen med utbetalingsdager teller som opphold`() {
+        val tidslinje = tidslinjeOf(248.N, (20*7).H, 7.N, (5*7).H, 60.N)
+        assertEquals(7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+    }
+
+    @Test
+    fun `helgedager innimellom utbetalingsdager betales ikke`() {
+        val tidslinje = tidslinjeOf(200.N, 40.H, 48.N, 1.N)
+        assertEquals(listOf(16.oktober), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
     private fun tidslinjeOf(
         vararg dagPairs: Pair<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit>
     ) = Utbetalingstidslinje().apply {
@@ -111,4 +129,5 @@ internal class UtbetalingsavgrenserTest {
     private val Int.N get() = Pair(this, Utbetalingstidslinje::addNAVdag)
     private val Int.A get() = Pair(this, Utbetalingstidslinje::addArbeidsdag)
     private val Int.F get() = Pair(this, Utbetalingstidslinje::addFridag)
+    private val Int.H get() = Pair(this, Utbetalingstidslinje::addHelg)
 }

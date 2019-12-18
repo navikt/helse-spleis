@@ -29,7 +29,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-        if (dag.inntekt == 0.0) return
+        if (dag.inntekt == 0.0) return oppholdsdag(dag.dato)
         if (alderRegler.navBurdeBetale(betalteDager, gammelpersonDager, dag.dato)) {
             sisteBetalteDag = dag.dato
             state.betalbarDag(this, dag.dato)
