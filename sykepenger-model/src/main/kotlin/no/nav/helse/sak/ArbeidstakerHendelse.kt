@@ -22,14 +22,6 @@ abstract class ArbeidstakerHendelse protected constructor(
         Påminnelse
     }
 
-    // old enums, replaced by Hendelsetype.
-    // kept around to patch json when deserializing
-    internal enum class SykdomshendelseType {
-        SendtSøknadMottatt,
-        NySøknadMottatt,
-        InntektsmeldingMottatt
-    }
-
     fun hendelseId() = hendelseId
     fun hendelsetype() = hendelsetype
 
@@ -54,28 +46,14 @@ abstract class ArbeidstakerHendelse protected constructor(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val inntektsmeldingtyper = listOf(
-            Hendelsetype.Inntektsmelding.name,
-            SykdomshendelseType.InntektsmeldingMottatt.name
-        )
-
-        private val nySøknadtyper = listOf(
-            Hendelsetype.NySøknad.name,
-            SykdomshendelseType.NySøknadMottatt.name
-        )
-        private val sendtSøknadtyper = listOf(
-            Hendelsetype.SendtSøknad.name,
-            SykdomshendelseType.SendtSøknadMottatt.name
-        )
-
         fun fromJson(json: String): ArbeidstakerHendelse {
             return objectMapper.readTree(json).let {
-                when (val hendelsetype = it["type"].textValue()) {
-                    in inntektsmeldingtyper -> Inntektsmelding.fromJson(json)
-                    in nySøknadtyper -> NySøknad.fromJson(json)
-                    in sendtSøknadtyper -> SendtSøknad.fromJson(json)
-                    Hendelsetype.Ytelser.name -> Ytelser.fromJson(json)
-                    Hendelsetype.ManuellSaksbehandling.name -> ManuellSaksbehandling.fromJson(json)
+                when (val hendelsetype = Hendelsetype.valueOf(it["type"].textValue())) {
+                    Hendelsetype.Inntektsmelding -> Inntektsmelding.fromJson(json)
+                    Hendelsetype.NySøknad -> NySøknad.fromJson(json)
+                    Hendelsetype.SendtSøknad -> SendtSøknad.fromJson(json)
+                    Hendelsetype.Ytelser -> Ytelser.fromJson(json)
+                    Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)
                     else -> throw RuntimeException("kjenner ikke hendelsetypen $hendelsetype")
                 }
             }

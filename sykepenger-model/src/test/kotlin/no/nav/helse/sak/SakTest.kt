@@ -67,7 +67,7 @@ internal class SakTest {
 
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD)
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class SakTest {
                     aktørId = aktørId,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeIdForSak(),
-                    tilstand = NY_SØKNAD_MOTTATT
+                    tilstand = MOTTATT_NY_SØKNAD
                 )
             )
         }
@@ -136,7 +136,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT, INNTEKTSMELDING_MOTTATT)
+        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING)
     }
 
     @Test
@@ -241,7 +241,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, TIL_INFOTRYGD)
     }
 
     @Test
@@ -333,7 +333,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(MOTTATT_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
 
@@ -443,7 +443,7 @@ internal class SakTest {
         }
         assertSakEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT)
+        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD)
     }
 
     @Test
@@ -486,7 +486,7 @@ internal class SakTest {
 
         assertVedtaksperiodeEndret()
         assertSakEndret()
-        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, BEREGN_UTBETALING)
         assertBehov(Behovtype.Sykepengehistorikk)
     }
 
@@ -541,7 +541,7 @@ internal class SakTest {
             )
         }
 
-        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_GODKJENNING)
         assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
@@ -590,7 +590,7 @@ internal class SakTest {
             )
         }
 
-        assertVedtaksperiodetilstand(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, BEREGN_UTBETALING)
     }
 
     @Test
@@ -642,7 +642,7 @@ internal class SakTest {
         }
         assertVedtaksperiodeEndret()
         assertSakEndret()
-        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -668,7 +668,7 @@ internal class SakTest {
 
             assertVedtaksperiodeEndret()
             assertSakEndret()
-            assertVedtaksperiodetilstand(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+            assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD)
         }
     }
 
@@ -743,7 +743,7 @@ internal class SakTest {
                 )
             )
         }
-        assertVedtaksperiodetilstand(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     private fun vedtaksperiodeIdForSak() =

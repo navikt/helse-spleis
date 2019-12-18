@@ -35,7 +35,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(START, NY_SØKNAD_MOTTATT, NySøknad::class)
+        assertTilstandsendring(START, MOTTATT_NY_SØKNAD, NySøknad::class)
         assertPåminnelse(Duration.ofDays(30))
     }
 
@@ -102,7 +102,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = NY_SØKNAD_MOTTATT
+                    tilstand = MOTTATT_NY_SØKNAD
                 )
             )
         }
@@ -114,7 +114,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(NY_SØKNAD_MOTTATT, SENDT_SØKNAD_MOTTATT)
+        assertTilstandsendring(MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD)
         assertPåminnelse(Duration.ofDays(30))
     }
 
@@ -124,7 +124,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(NY_SØKNAD_MOTTATT, INNTEKTSMELDING_MOTTATT)
+        assertTilstandsendring(MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING)
         assertPåminnelse(Duration.ofDays(30))
     }
 
@@ -134,7 +134,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+        assertTilstandsendring(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD)
     }
 
     @Test
@@ -144,10 +144,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = NY_SØKNAD_MOTTATT
+                tilstand = MOTTATT_NY_SØKNAD
             )
         )
-        assertTilstandsendring(NY_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertTilstandsendring(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD, Påminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -159,7 +159,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = INNTEKTSMELDING_MOTTATT
+                    tilstand = MOTTATT_INNTEKTSMELDING
                 )
             )
         }
@@ -172,7 +172,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+        assertTilstandsendring(MOTTATT_SENDT_SØKNAD, TIL_INFOTRYGD)
     }
 
     @Test
@@ -181,7 +181,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(MOTTATT_SENDT_SØKNAD, BEREGN_UTBETALING)
         assertPåminnelse(Duration.ofHours(1))
     }
 
@@ -191,7 +191,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD)
+        assertTilstandsendring(MOTTATT_SENDT_SØKNAD, TIL_INFOTRYGD)
     }
 
     @Test
@@ -201,10 +201,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = SENDT_SØKNAD_MOTTATT
+                tilstand = MOTTATT_SENDT_SØKNAD
             )
         )
-        assertTilstandsendring(SENDT_SØKNAD_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertTilstandsendring(MOTTATT_SENDT_SØKNAD, TIL_INFOTRYGD, Påminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -216,7 +216,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = INNTEKTSMELDING_MOTTATT
+                    tilstand = MOTTATT_INNTEKTSMELDING
                 )
             )
         }
@@ -229,7 +229,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(MOTTATT_INNTEKTSMELDING, BEREGN_UTBETALING)
     }
 
     @Test
@@ -238,7 +238,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(nySøknadHendelse())
 
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
+        assertTilstandsendring(MOTTATT_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -247,7 +247,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD)
+        assertTilstandsendring(MOTTATT_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -257,10 +257,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = INNTEKTSMELDING_MOTTATT
+                tilstand = MOTTATT_INNTEKTSMELDING
             )
         )
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, TIL_INFOTRYGD, Påminnelse::class)
+        assertTilstandsendring(MOTTATT_INNTEKTSMELDING, TIL_INFOTRYGD, Påminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -272,7 +272,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = NY_SØKNAD_MOTTATT
+                    tilstand = MOTTATT_NY_SØKNAD
                 )
             )
         }
@@ -304,7 +304,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse)
 
-        assertTilstandsendring(INNTEKTSMELDING_MOTTATT, KOMPLETT_SYKDOMSTIDSLINJE)
+        assertTilstandsendring(MOTTATT_INNTEKTSMELDING, BEREGN_UTBETALING)
 
         assertBehov(Behovtype.Sykepengehistorikk)
 
@@ -346,7 +346,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
         assertPåminnelse(Duration.ofDays(7))
         assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
@@ -386,7 +386,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
         assertBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
@@ -425,7 +425,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_INFOTRYGD)
         assertIkkeBehov(Behovtype.GodkjenningFraSaksbehandler)
     }
 
@@ -470,7 +470,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -496,7 +496,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = KOMPLETT_SYKDOMSTIDSLINJE
+                    tilstand = BEREGN_UTBETALING
                 )
             )
         }
@@ -513,7 +513,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = INNTEKTSMELDING_MOTTATT
+                    tilstand = MOTTATT_INNTEKTSMELDING
                 )
             )
         }
@@ -557,7 +557,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test
@@ -597,7 +597,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -637,7 +637,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test
@@ -679,7 +679,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test
@@ -719,7 +719,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test
@@ -761,7 +761,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_INFOTRYGD)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -803,7 +803,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        assertTilstandsendring(KOMPLETT_SYKDOMSTIDSLINJE, TIL_GODKJENNING)
+        assertTilstandsendring(BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test
@@ -881,7 +881,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = KOMPLETT_SYKDOMSTIDSLINJE
+                    tilstand = BEREGN_UTBETALING
                 )
             )
         }

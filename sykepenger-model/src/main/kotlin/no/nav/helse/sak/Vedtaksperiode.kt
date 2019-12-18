@@ -202,7 +202,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
         }
 
-        override val type = NY_SØKNAD_MOTTATT
+        override val type = MOTTATT_NY_SØKNAD
         override val timeout: Duration = Duration.ofDays(30)
 
     }
@@ -213,7 +213,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, BeregnUtbetaling)
         }
 
-        override val type = SENDT_SØKNAD_MOTTATT
+        override val type = MOTTATT_SENDT_SØKNAD
         override val timeout: Duration = Duration.ofDays(30)
 
     }
@@ -224,14 +224,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(sendtSøknad, BeregnUtbetaling)
         }
 
-        override val type = INNTEKTSMELDING_MOTTATT
+        override val type = MOTTATT_INNTEKTSMELDING
         override val timeout: Duration = Duration.ofDays(30)
 
     }
 
     private object BeregnUtbetaling : Vedtaksperiodetilstand {
 
-        override val type = KOMPLETT_SYKDOMSTIDSLINJE
+        override val type = BEREGN_UTBETALING
         override val timeout: Duration = Duration.ofHours(1)
 
         private const val seksMåneder = 180
@@ -389,10 +389,10 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstandFraEnum(tilstand: TilstandType) = when (tilstand) {
             START -> StartTilstand
-            NY_SØKNAD_MOTTATT -> MottattNySøknad
-            SENDT_SØKNAD_MOTTATT -> MottattSendtSøknad
-            INNTEKTSMELDING_MOTTATT -> MottattInntektsmelding
-            KOMPLETT_SYKDOMSTIDSLINJE -> BeregnUtbetaling
+            MOTTATT_NY_SØKNAD -> MottattNySøknad
+            MOTTATT_SENDT_SØKNAD -> MottattSendtSøknad
+            MOTTATT_INNTEKTSMELDING -> MottattInntektsmelding
+            BEREGN_UTBETALING -> BeregnUtbetaling
             TIL_GODKJENNING -> TilGodkjenning
             TIL_UTBETALING -> TilUtbetaling
             TIL_INFOTRYGD -> TilInfotrygd
@@ -509,7 +509,7 @@ internal class Vedtaksperiode private constructor(
                     fødselsnummer = json["fødselsnummer"].textValue(),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     tilstandType = valueOf(json["tilstandType"].textValue()),
-                    sykdomstidslinje = json["sykdomstidslinje"].takeUnless { it.isNull } ?: throw SakskjemaForGammelt(-1, -1),
+                    sykdomstidslinje = json["sykdomstidslinje"],
                     maksdato = json["maksdato"].safelyUnwrapDate(),
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),

@@ -197,7 +197,7 @@ internal class SakComponentTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.START,
-            currentState = TilstandType.NY_SØKNAD_MOTTATT,
+            currentState = TilstandType.MOTTATT_NY_SØKNAD,
             timeout = Duration.ofDays(30)
         )
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
@@ -205,8 +205,8 @@ internal class SakComponentTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.NY_SØKNAD_MOTTATT,
-            currentState = TilstandType.SENDT_SØKNAD_MOTTATT,
+            previousState = TilstandType.MOTTATT_NY_SØKNAD,
+            currentState = TilstandType.MOTTATT_SENDT_SØKNAD,
             timeout = Duration.ofDays(30)
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
@@ -214,8 +214,8 @@ internal class SakComponentTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.SENDT_SØKNAD_MOTTATT,
-            currentState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE,
+            previousState = TilstandType.MOTTATT_SENDT_SØKNAD,
+            currentState = TilstandType.BEREGN_UTBETALING,
             timeout = Duration.ofHours(1)
         )
 
@@ -232,7 +232,7 @@ internal class SakComponentTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.KOMPLETT_SYKDOMSTIDSLINJE,
+            previousState = TilstandType.BEREGN_UTBETALING,
             currentState = TilstandType.TIL_GODKJENNING,
             timeout = Duration.ofDays(7)
         )
