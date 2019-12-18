@@ -11,12 +11,12 @@ class UtbetalingsreferansePostgresRepository(private val dataSource: DataSource,
 
     override fun hentUtbetaling(utbetalingsreferanse: String): Utbetalingsreferanse? {
         return using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT id, aktor_id, orgnr, sakskompleks_id FROM utbetalingsreferanse WHERE id = ? LIMIT 1", utbetalingsreferanse).map {
+            session.run(queryOf("SELECT id, aktor_id, orgnr, vedtaksperiode_id FROM utbetalingsreferanse WHERE id = ? LIMIT 1", utbetalingsreferanse).map {
                 Utbetalingsreferanse(
                         id = it.string("id"),
                         aktørId = it.string("aktor_id"),
                         orgnummer = it.string("orgnr"),
-                        vedtaksperiodeId = UUID.fromString(it.string("sakskompleks_id"))
+                        vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id"))
                 )
             }.asSingle)
         }?.also {
