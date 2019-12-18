@@ -32,23 +32,3 @@ jobs:
         docker push $(cat .docker_image):$(cat .docker_tag)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: deploy to dev
-      uses: navikt/deployment-cli/action@0.4.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AWAIT_SECONDS: 0
-      with:
-        cluster: dev-fss
-        team: tbd
-        resources: deploy/preprod.yaml
-        rawresources: deploy/alerts-preprod.yaml
-    - name: deploy to prod
-      uses: navikt/deployment-cli/action@0.4.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AWAIT_SECONDS: 0
-      with:
-        cluster: prod-fss
-        team: tbd
-        resources: deploy/prod.yaml
-        rawresources: deploy/alerts-prod.yaml
