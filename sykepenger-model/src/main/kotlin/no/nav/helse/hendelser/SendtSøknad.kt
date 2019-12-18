@@ -54,8 +54,6 @@ class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendel
 
     private val arbeidGjenopptatt get() = søknad["arbeidGjenopptatt"]?.safelyUnwrapDate()
 
-    override fun opprettet() = requireNotNull(sendtNav)
-
     override fun rapportertdato(): LocalDateTime = requireNotNull(sendtNav)
 
     override fun nøkkelHendelseType() = Søknad

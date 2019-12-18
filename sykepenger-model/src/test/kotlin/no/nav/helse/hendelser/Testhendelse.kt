@@ -32,20 +32,12 @@ internal class Testhendelse(
         TODO("not implemented")
     }
 
-    override fun opprettet(): LocalDateTime {
-        return rapportertdato
-    }
-
     override fun rapportertdato(): LocalDateTime {
         return rapportertdato
     }
 
     override fun toJson(): String {
         TODO("not implemented")
-    }
-
-    override fun compareTo(other: SykdomstidslinjeHendelse): Int {
-        return this.rapportertdato().compareTo(other.rapportertdato())
     }
 
     override fun toJsonNode(): JsonNode {

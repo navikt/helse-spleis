@@ -28,7 +28,7 @@ class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNo
     override fun organisasjonsnummer() = json["organisasjonsnummer"].textValue()
     override fun vedtaksperiodeId(): String = json["vedtaksperiodeId"].textValue()
 
-    override fun opprettet() = påminnelsestidspunkt
+    override fun rapportertdato() = påminnelsestidspunkt
 
     override fun toJson(): String {
         return json.toString()

@@ -34,8 +34,8 @@ class HendelseRecorder(private val dataSource: DataSource,
         if (!hendelse.kanBehandles()) return
 
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO hendelse (id, aktor_id, type, opprettet, data) VALUES (?, ?, ?, ?, (to_json(?::json)))",
-                hendelse.hendelseId().toString(), hendelse.aktørId(), hendelse.hendelsetype().name, hendelse.opprettet(), hendelse.toJson()).asExecute)
+            session.run(queryOf("INSERT INTO hendelse (id, aktor_id, type, rapportertdato, data) VALUES (?, ?, ?, ?, (to_json(?::json)))",
+                hendelse.hendelseId().toString(), hendelse.aktørId(), hendelse.hendelsetype().name, hendelse.rapportertdato(), hendelse.toJson()).asExecute)
         }.also {
             probe.hendelseSkrevetTilDb()
         }

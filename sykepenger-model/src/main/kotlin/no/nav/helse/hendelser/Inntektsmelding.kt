@@ -86,8 +86,6 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
 
     override fun aktørId() = arbeidstakerAktorId
 
-    override fun opprettet() = mottattDato
-
     override fun rapportertdato() = mottattDato
 
     override fun organisasjonsnummer() = requireNotNull(virksomhetsnummer)

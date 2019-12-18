@@ -80,7 +80,7 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : 
 
     override fun vedtaksperiodeId() = behov.vedtaksperiodeId()
 
-    override fun opprettet() = requireNotNull(behov.besvart())
+    override fun rapportertdato() = requireNotNull(behov.besvart())
 
     override fun toJson(): String {
         return objectMapper.convertValue<ObjectNode>(mapOf(

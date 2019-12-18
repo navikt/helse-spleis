@@ -27,9 +27,10 @@ class NySøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseI
         }
     }
 
-    private val opprettet get() = søknad["opprettetDato"]?.takeUnless { it.isNull }?.let { LocalDate.parse(it.textValue()).atStartOfDay() } ?: LocalDateTime.parse(søknad["opprettet"].asText())
-
-    override fun opprettet() = opprettet
+    private val opprettet
+        get() = søknad["opprettetDato"]?.takeUnless { it.isNull }?.let {
+            LocalDate.parse(it.textValue()).atStartOfDay()
+        } ?: LocalDateTime.parse(søknad["opprettet"].asText())
 
     override fun rapportertdato(): LocalDateTime = opprettet
 
@@ -39,13 +40,16 @@ class NySøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseI
 
     private val sykeperiodeTidslinje
         get(): List<ConcreteSykdomstidslinje> = sykeperioder
-                .map { ConcreteSykdomstidslinje.sykedager(it.fom, it.tom, this) }
+            .map { ConcreteSykdomstidslinje.sykedager(it.fom, it.tom, this) }
 
     override fun sykdomstidslinje() =
-            sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
-                if (resultatTidslinje.overlapperMed(delTidslinje)) throw UtenforOmfangException("Søknaden inneholder overlappende sykdomsperioder", this)
-                resultatTidslinje + delTidslinje
-            }
+        sykeperiodeTidslinje.reduce { resultatTidslinje, delTidslinje ->
+            if (resultatTidslinje.overlapperMed(delTidslinje)) throw UtenforOmfangException(
+                "Søknaden inneholder overlappende sykdomsperioder",
+                this
+            )
+            resultatTidslinje + delTidslinje
+        }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
 }

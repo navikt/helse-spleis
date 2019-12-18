@@ -64,9 +64,6 @@ abstract class SøknadHendelse protected constructor(
 
     override fun organisasjonsnummer(): String = arbeidsgiver.orgnummer
 
-    override fun compareTo(other: SykdomstidslinjeHendelse): Int =
-        rapportertdato().compareTo(other.rapportertdato())
-
     override fun kanBehandles(): Boolean {
         return søknad.hasNonNull("fnr")
             && søknad["arbeidsgiver"]?.hasNonNull("orgnummer") == true
