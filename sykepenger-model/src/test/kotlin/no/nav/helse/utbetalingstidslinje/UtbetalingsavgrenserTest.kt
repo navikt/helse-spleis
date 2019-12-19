@@ -98,6 +98,12 @@ internal class UtbetalingsavgrenserTest {
     }
 
     @Test
+    fun `sjekk at sykdom i arbgiver periode ikke ødelegger oppholdsperioden`() {
+        val tidslinje = tidslinjeOf(50.N, (25*7).A, 7.AP, 248.N)
+        assertEquals(0, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+    }
+
+    @Test
     fun `helgedager innimellom utbetalingsdager betales ikke`() {
         val tidslinje = tidslinjeOf(200.N, 40.H, 48.N, 1.N)
         assertEquals(listOf(16.oktober), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
