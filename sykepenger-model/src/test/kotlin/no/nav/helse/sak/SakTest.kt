@@ -545,15 +545,12 @@ internal class SakTest {
 
             it.håndter(
                 ytelser(
-                    sykepengehistorikk = sykepengehistorikk(
-                        perioder = listOf(
-                            SpolePeriode(
-                                fom = 1.juli.minusMonths(7).minusMonths(1),
-                                tom = 1.juli.minusMonths(7),
-                                grad = "100"
-                            )
-                        )
-                    ),
+                    sykepengehistorikk = listOf(
+                        SpolePeriode(
+                            fom = 1.juli.minusMonths(7).minusMonths(1),
+                            tom = 1.juli.minusMonths(7),
+                            grad = "100"
+                        )),
                     organisasjonsnummer = organisasjonsnummer,
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,

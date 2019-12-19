@@ -14,7 +14,8 @@ import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.*
 
-class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
+class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
+    ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
 
     constructor(behov: Behov) : this(UUID.randomUUID(), behov)
 
@@ -63,7 +64,7 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : 
 
     internal fun sykepengehistorikk(): Sykepengehistorikk {
         val løsning = behov.løsning() as Map<*, *>
-        val sykepengehistorikkløsninger = løsning["Sykepengehistorikk"] as Map<*, *>
+        val sykepengehistorikkløsninger = løsning["Sykepengehistorikk"] as List<*>
 
         return Sykepengehistorikk(
             objectMapper.convertValue<JsonNode>(
@@ -83,10 +84,12 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : 
     override fun rapportertdato() = requireNotNull(behov.besvart())
 
     override fun toJson(): String {
-        return objectMapper.convertValue<ObjectNode>(mapOf(
-            "hendelseId" to hendelseId(),
-            "type" to hendelsetype()
-        ))
+        return objectMapper.convertValue<ObjectNode>(
+            mapOf(
+                "hendelseId" to hendelseId(),
+                "type" to hendelsetype()
+            )
+        )
             .putRawValue("ytelser", RawValue(behov.toJson()))
             .toString()
     }
@@ -94,4 +97,18 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : 
     internal class Foreldrepenger {}
 
     internal class Svangerskapspenger {}
+
+    // Embedded document - json er output fra Spole
+    internal data class Sykepengehistorikk(private val jsonNode: JsonNode) {
+        private val perioder get() = jsonNode.map { Periode(it) }
+
+        fun sisteFraværsdag() =
+            perioder.maxBy { it.tom }?.tom
+
+        internal data class Periode(val jsonNode: JsonNode) {
+            val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
+            val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
+            val grad = jsonNode["grad"].textValue()
+        }
+    }
 }

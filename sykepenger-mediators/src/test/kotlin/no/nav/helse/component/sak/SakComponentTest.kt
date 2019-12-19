@@ -17,7 +17,6 @@ import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.påminnelseHendelse
-import no.nav.helse.TestConstants.responsFraSpole
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
@@ -375,9 +374,7 @@ internal class SakComponentTest {
         assertNotNull(behov["utgangspunktForBeregningAvYtelse"])
 
         sendBehov(behov.løsBehov(mapOf(
-            "Sykepengehistorikk" to responsFraSpole(
-                perioder = perioder
-            )
+            "Sykepengehistorikk" to perioder
         )))
     }
 

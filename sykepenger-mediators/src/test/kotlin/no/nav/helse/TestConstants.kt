@@ -260,55 +260,6 @@ internal object TestConstants {
             mottattDato = LocalDateTime.now()
         )
 
-    fun responsFraSpole(perioder: List<SpolePeriode>) = mapOf<String, Any>(
-        "perioder" to perioder.map {
-            mapOf<String, Any>(
-                "fom" to "${it.fom}",
-                "tom" to "${it.tom}",
-                "grad" to it.grad
-            )
-        }
-    )
-
-    fun sykepengehistorikk(
-        perioder: List<SpolePeriode> = emptyList(),
-        sisteHistoriskeSykedag: LocalDate? = null
-    ): Map<String, Any> {
-        return responsFraSpole(
-            perioder = sisteHistoriskeSykedag?.let {
-                listOf(
-                    SpolePeriode(
-                        fom = it.minusMonths(1),
-                        tom = it,
-                        grad = "100"
-                    )
-                )
-            } ?: perioder
-        )
-    }
-
-    fun ytelser(
-        aktørId: String = "1",
-        fødselsnummer: String = "2",
-        organisasjonsnummer: String = "123546564",
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
-        sykepengehistorikk: Map<String, Any>
-
-    ) = Ytelser(
-        Ytelser.lagBehov(
-            vedtaksperiodeId,
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            utgangspunktForBeregningAvYtelse
-        ).løsBehov(
-            mapOf(
-                "Sykepengehistorikk" to sykepengehistorikk
-            )
-        )
-    )
-
     fun påminnelseHendelse(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
