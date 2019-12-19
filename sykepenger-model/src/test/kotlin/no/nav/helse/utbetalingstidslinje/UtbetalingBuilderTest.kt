@@ -274,15 +274,15 @@ internal class UtbetalingBuilderTest {
     @Test
     fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
         (21.S + 3.F).utbetalingslinjer()
-        assertEquals(28.desember, maksdato)
         assertEquals(245, antallGjenståendeSykedager)
+        assertEquals(28.desember, maksdato)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() {
         (21.S + 3.F + 1.A).utbetalingslinjer()
-        assertEquals(28.desember, maksdato)
         assertEquals(245, antallGjenståendeSykedager)
+        assertEquals(28.desember, maksdato)
     }
 
     @Test

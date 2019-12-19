@@ -21,6 +21,7 @@ internal class AlderRegler(
     private val øvreAldersgrense = fødselsdag.plusYears(70)
     private val redusertYtelseAlder = fødselsdag.plusYears(67)
 
+    @Deprecated("Denne skal bort når Utbetalingsberegner blir skrevet om")
     internal val navBurdeBetale
         get(): BurdeBetale {
             return when {
@@ -44,6 +45,29 @@ internal class AlderRegler(
             }
         }
 
+    internal val burdeBetale
+        get(): BurdeBetale {
+            return when {
+                redusertYtelseAlder.isAfter(sluttDato) ->
+                    { antallDager: Int, _: Int, _: LocalDate -> antallDager <= maksSykepengedager }
+                øvreAldersgrense.isBefore(startDato) ->
+                    { _: Int, _: Int, _: LocalDate -> false }
+                redusertYtelseAlder.isAfter(startDato) ->
+                    { antallDager: Int, antallDagerEtter60: Int, dagen: LocalDate ->
+                        fyller67IPeriode(
+                            antallDager,
+                            antallDagerEtter60,
+                            dagen
+                        )
+                    }
+                else -> { antallDager: Int, _: Int, dagen: LocalDate ->
+                    antallDager <= maksSykepengedagerEtter67 && dagen.isBefore(
+                        øvreAldersgrense
+                    )
+                }
+            }
+        }
+
     private fun Int.toDay() = if (this > 40) this - 40 else this
     private fun Int.toYear(individnummer: Int): Int {
         return this + when {
@@ -57,6 +81,11 @@ internal class AlderRegler(
     private fun fyller67IPerioden(antallDager: Int, antallDagerEtter67: Int, dagen: LocalDate): Boolean {
         if (dagen.isBefore(redusertYtelseAlder) && antallDager < maksSykepengedager) return true
         return antallDager < maksSykepengedager && antallDagerEtter67 < maksSykepengedagerEtter67
+    }
+
+    private fun fyller67IPeriode(antallDager: Int, antallDagerEtter67: Int, dagen: LocalDate): Boolean {
+        if (dagen <= redusertYtelseAlder && antallDager <= maksSykepengedager) return true
+        return antallDager <= maksSykepengedager && antallDagerEtter67 <= maksSykepengedagerEtter67
     }
 
     internal fun harFylt67(dagen: LocalDate) = dagen.isAfter(redusertYtelseAlder)

@@ -29,12 +29,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-        if (alderRegler.navBurdeBetale(betalteDager, gammelpersonDager, dag.dato)) {
-            sisteBetalteDag = dag.dato
-            state.betalbarDag(this, dag.dato)
-        } else {
-            state.ikkeBetalbarDag(this, dag.dato)
-        }
+        state.betalbarDag(this, dag.dato)
     }
 
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
@@ -55,17 +50,17 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
 
     private fun oppholdsdag(dagen: LocalDate) {
         opphold += 1
-        if (opphold < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            state.arbeidsdagIOppholdsperiode(this, dagen)
-        } else {
-            state(State.Initiell)
-        }
+        state.oppholdsdag(this, dagen)
+    }
+
+    private fun nextState(dagen: LocalDate) : State? {
+        if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return State.Initiell
+        return if (alderRegler.burdeBetale(betalteDager+1, gammelpersonDager+1, dagen.plusDays(1))) null else State.Karantene
     }
 
     private sealed class State {
         open fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
-        open fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
-        open fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
+        open fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
         open fun entering(avgrenser: Utbetalingsgrense) {}
         open fun leaving(avgrenser: Utbetalingsgrense) {}
 
@@ -78,6 +73,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.betalteDager = 1
                 if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager = 1
+                avgrenser.sisteBetalteDag = dagen
                 avgrenser.state(Syk)
             }
         }
@@ -90,15 +86,11 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.betalteDager += 1
                 if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager += 1
+                avgrenser.sisteBetalteDag = dagen
+                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
-            override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
-                avgrenser.state(Karantene)
-            }
-
-            override fun arbeidsdagIOppholdsperiode(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.opphold = 1
+            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.state(Opphold)
             }
         }
@@ -108,21 +100,24 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.betalteDager += 1
                 if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager += 1
-                avgrenser.state(Syk)
+                avgrenser.sisteBetalteDag = dagen
+                avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 
-            override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
-                avgrenser.opphold += 1
-                avgrenser.state(Karantene)
+            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
 
         internal object Karantene: State() {
-            override fun ikkeBetalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                if (avgrenser.opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return avgrenser.state(Initiell)
                 avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
+                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+            }
+
+            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
 
