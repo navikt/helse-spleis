@@ -22,16 +22,11 @@ fun randomPort(): Int = ServerSocket(0).use {
 }
 
 @KtorExperimentalAPI
-fun createTestApplicationConfig(config: Map<String, String> = emptyMap()) =
-        ApplicationBuilder.configureKtorEnvironment(ApplicationBuilder.createConfigFromEnvironment(mapOf(
-                "HTTP_PORT" to "${randomPort()}"
-        ) + config))
-
-
-@KtorExperimentalAPI
-fun testServer(shutdownTimeoutMs: Long = 10000,
-               environment: ApplicationEngineEnvironment,
-               test: ApplicationEngine.() -> Unit) = embeddedServer(Netty, environment).apply {
+fun testServer(
+    shutdownTimeoutMs: Long = 10000,
+    environment: ApplicationEngineEnvironment,
+    test: ApplicationEngine.() -> Unit
+) = embeddedServer(Netty, environment).apply {
     val stopper = GlobalScope.launch {
         delay(shutdownTimeoutMs)
         this@apply.application.log.info("stopping server after timeout")
@@ -46,10 +41,12 @@ fun testServer(shutdownTimeoutMs: Long = 10000,
     }
 }
 
-fun ApplicationEngine.handleRequest(method: HttpMethod,
-                                    path: String,
-                                    builder: HttpURLConnection.() -> Unit = {},
-                                    test: HttpURLConnection.(HttpStatusCode) -> Unit) {
+fun ApplicationEngine.handleRequest(
+    method: HttpMethod,
+    path: String,
+    builder: HttpURLConnection.() -> Unit = {},
+    test: HttpURLConnection.(HttpStatusCode) -> Unit
+) {
     val url = environment.connectors[0].let { connector ->
         URL("${connector.type.name.toLowerCase()}://${connector.host}:${connector.port}$path")
     }
@@ -64,12 +61,12 @@ fun ApplicationEngine.handleRequest(method: HttpMethod,
     con.test(HttpStatusCode.fromValue(con.responseCode))
 }
 
-fun ApplicationEngine.handleRequest(method: HttpMethod,
-                                    path: String,
-                                    builder: HttpURLConnection.() -> Unit = {}): HttpURLConnection {
-    val url = environment.connectors[0].let { connector ->
-        URL("${connector.type.name.toLowerCase()}://${connector.host}:${connector.port}$path")
-    }
+fun String.handleRequest(
+    method: HttpMethod,
+    path: String,
+    builder: HttpURLConnection.() -> Unit = {}
+): HttpURLConnection {
+    val url = URL("$this$path")
     val con = url.openConnection() as HttpURLConnection
     con.requestMethod = method.value
 
@@ -81,14 +78,15 @@ fun ApplicationEngine.handleRequest(method: HttpMethod,
     return con
 }
 
-val HttpURLConnection.responseBody: String get() {
-    val stream: InputStream? = if (responseCode in 200..299) {
-        inputStream
-    } else {
-        errorStream
-    }
+val HttpURLConnection.responseBody: String
+    get() {
+        val stream: InputStream? = if (responseCode in 200..299) {
+            inputStream
+        } else {
+            errorStream
+        }
 
-    return stream?.use {
-        it.bufferedReader().readText()
-    } ?: ""
-}
+        return stream?.use {
+            it.bufferedReader().readText()
+        } ?: ""
+    }

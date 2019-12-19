@@ -12,9 +12,6 @@ import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
@@ -103,9 +100,10 @@ internal class SakComponentTest {
         private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
         private lateinit var jwtStub: JwtStub
 
-        private lateinit var embeddedServer: ApplicationEngine
+        private lateinit var app: ApplicationBuilder
+        private lateinit var appBaseUrl: String
 
-        private fun applicationConfig(wiremockBaseUrl: String): Map<String, String> {
+        private fun applicationConfig(wiremockBaseUrl: String, port: Int): Map<String, String> {
             return mapOf(
                 "KAFKA_APP_ID" to kafkaApplicationId,
                 "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
@@ -116,7 +114,8 @@ internal class SakComponentTest {
                 "AZURE_CONFIG_URL" to "$wiremockBaseUrl/config",
                 "AZURE_CLIENT_ID" to "spleis_azure_ad_app_id",
                 "AZURE_CLIENT_SECRET" to "el_secreto",
-                "AZURE_REQUIRED_GROUP" to "sykepenger-saksbehandler-gruppe"
+                "AZURE_REQUIRED_GROUP" to "sykepenger-saksbehandler-gruppe",
+                "HTTP_PORT" to "$port"
             )
         }
 
@@ -160,15 +159,17 @@ internal class SakComponentTest {
             stubFor(jwtStub.stubbedJwkProvider())
             stubFor(jwtStub.stubbedConfigProvider())
 
-            embeddedServer =
-                embeddedServer(Netty, createTestApplicationConfig(applicationConfig(wireMockServer.baseUrl())))
-                    .start(wait = false)
+            val port = randomPort()
+            appBaseUrl = "http://localhost:$port"
+            app = ApplicationBuilder(applicationConfig(wireMockServer.baseUrl(), port)).apply {
+                start()
+            }
         }
 
         @AfterAll
         @JvmStatic
         internal fun `stop embedded environment`() {
-            embeddedServer.stop(1, 1, SECONDS)
+            app.stop()
             wireMockServer.stop()
             TestConsumer.close()
             adminClient.close()
@@ -312,7 +313,7 @@ internal class SakComponentTest {
             audience = "spleis_azure_ad_app_id"
         )
 
-        val connection = embeddedServer.handleRequest(HttpMethod.Get, this,
+        val connection = appBaseUrl.handleRequest(HttpMethod.Get, this,
             builder = {
                 setRequestProperty(Authorization, "Bearer $token")
             })
