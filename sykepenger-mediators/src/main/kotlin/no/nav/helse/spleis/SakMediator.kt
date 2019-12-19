@@ -67,6 +67,10 @@ internal class SakMediator(
         producer.send(event.producerRecord())
     }
 
+    override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: SakObserver.VedtaksperiodeIkkeFunnetEvent) {
+        producer.send(vedtaksperiodeEvent.producerRecord())
+    }
+
     private fun Behov.producerRecord() =
         ProducerRecord<String, String>(Topics.behovTopic, id().toString(), toJson())
 

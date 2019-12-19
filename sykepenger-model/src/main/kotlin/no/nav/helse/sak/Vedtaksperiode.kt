@@ -27,7 +27,7 @@ private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
 
-internal class Vedtaksperiode private constructor(
+internal class Vedtaksperiode internal constructor(
     private val id: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
@@ -85,11 +85,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndter(påminnelse: Påminnelse) {
-        if (id.toString() == påminnelse.vedtaksperiodeId()) tilstand.håndter(
-            this,
-            påminnelse
-        )
+    internal fun håndter(påminnelse: Påminnelse): Boolean {
+        if (id.toString() != påminnelse.vedtaksperiodeId()) return false
+        tilstand.håndter(this, påminnelse)
+        return true
     }
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
@@ -139,7 +138,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     // Gang of four State pattern
-    private interface Vedtaksperiodetilstand {
+    internal interface Vedtaksperiodetilstand {
 
         val type: TilstandType
         val timeout: Duration

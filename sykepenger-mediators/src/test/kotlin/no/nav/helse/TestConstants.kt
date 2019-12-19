@@ -7,12 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.*
+import no.nav.helse.sak.TilstandType
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -309,6 +308,28 @@ internal object TestConstants {
             )
         )
     )
+
+    fun påminnelseHendelse(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        aktørId: String = "1",
+        organisasjonsnummer: String = "123456789",
+        fødselsnummer: String
+    ) = Påminnelse.fraJson(
+        objectMapper.writeValueAsString(
+            mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "tilstand" to tilstand.toString(),
+                "antallGangerPåminnet" to 0,
+                "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
+                "påminnelsestidspunkt" to LocalDateTime.now().toString(),
+                "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
+            )
+        )
+    ) ?: fail { "påminnelse er null" }
 }
 
 internal fun Behov.løsBehov(løsning: Any): Behov {

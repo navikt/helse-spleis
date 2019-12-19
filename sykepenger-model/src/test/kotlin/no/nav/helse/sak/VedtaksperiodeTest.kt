@@ -9,7 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.fixtures.S
 import no.nav.helse.juli
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -184,5 +186,14 @@ internal class VedtaksperiodeTest {
             )
         )
 
+    }
+
+    @Test
+    fun `påminnelse returnerer boolean`() {
+        val id = UUID.randomUUID()
+        val vedtaksperiode = Vedtaksperiode(id, "123", "123", "123", 1.S)
+
+        assertFalse(vedtaksperiode.håndter(påminnelseHendelse(UUID.randomUUID(), TilstandType.START)))
+        assertTrue(vedtaksperiode.håndter(påminnelseHendelse(id, TilstandType.START)))
     }
 }

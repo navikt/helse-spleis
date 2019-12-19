@@ -33,10 +33,11 @@ internal class SakTest {
     private val virksomhetsnummer_a = "234567890"
     private val virksomhetsnummer_b = "098765432"
 
-    private val testSakObserver = TestSakObserver()
+    private lateinit var testSakObserver: TestSakObserver
 
     private val testSak
         get() = Sak(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
+            testSakObserver = TestSakObserver()
             it.addObserver(this.testSakObserver)
         }
 
@@ -91,6 +92,26 @@ internal class SakTest {
         assertSakEndret()
         assertVedtaksperiodeEndret()
         assertVedtaksperiodetilstand(TIL_INFOTRYGD)
+        assertFalse(testSakObserver.vedtaksperiodeIkkeFunnet)
+    }
+
+    @Test
+    internal fun `påminnelse for periode som ikke finnes`() {
+        val påminnelse = påminnelseHendelse(
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = UUID.randomUUID(),
+            tilstand = MOTTATT_NY_SØKNAD
+        )
+        testSak.also { it.håndter(påminnelse) }
+
+        assertSakIkkeEndret()
+        assertVedtaksperiodeIkkeEndret()
+        assertTrue(testSakObserver.vedtaksperiodeIkkeFunnet)
+        assertEquals(påminnelse.vedtaksperiodeId(), testSakObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.vedtaksperiodeId.toString())
+        assertEquals(påminnelse.aktørId(), testSakObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.aktørId)
+        assertEquals(påminnelse.organisasjonsnummer(), testSakObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.organisasjonsnummer)
+        assertEquals(påminnelse.fødselsnummer(), testSakObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.fødselsnummer)
     }
 
     @Test
@@ -814,9 +835,16 @@ internal class SakTest {
         internal var sakEndret = false
         internal var forrigeVedtaksperiodetilstand: TilstandType? = null
         internal var gjeldendeVedtaksperiodetilstand: TilstandType? = null
+        internal var vedtaksperiodeIkkeFunnet = false
+        internal var forrigeVedtaksperiodeIkkeFunnetEvent: SakObserver.VedtaksperiodeIkkeFunnetEvent? = null
 
         override fun sakEndret(sakEndretEvent: SakObserver.SakEndretEvent) {
             sakEndret = true
+        }
+
+        override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: SakObserver.VedtaksperiodeIkkeFunnetEvent) {
+            vedtaksperiodeIkkeFunnet = true
+            forrigeVedtaksperiodeIkkeFunnetEvent = vedtaksperiodeEvent
         }
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {

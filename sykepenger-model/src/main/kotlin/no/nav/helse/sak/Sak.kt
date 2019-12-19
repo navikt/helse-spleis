@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
+import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -62,7 +63,15 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
     }
 
     fun håndter(påminnelse: Påminnelse) {
-        finnArbeidsgiver(påminnelse)?.håndter(påminnelse)
+        if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
+        sakObservers.forEach {
+            it.vedtaksperiodeIkkeFunnet(SakObserver.VedtaksperiodeIkkeFunnetEvent(
+                vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId()),
+                aktørId = påminnelse.aktørId(),
+                fødselsnummer = påminnelse.fødselsnummer(),
+                organisasjonsnummer = påminnelse.organisasjonsnummer()
+            ))
+        }
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {

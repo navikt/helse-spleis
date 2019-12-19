@@ -16,6 +16,7 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
+import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.responsFraSpole
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.behovTopic
@@ -24,10 +25,12 @@ import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.påminnelseTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.Topics.vedtaksperiodeEventTopic
+import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.behov.Behovtype.*
 import no.nav.helse.component.JwtStub
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.sak.Sak
 import no.nav.helse.sak.TilstandType
 import no.nav.helse.spleis.path
@@ -60,6 +63,7 @@ import java.sql.Connection
 import java.time.Duration
 import java.time.Duration.ofMillis
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
@@ -76,7 +80,7 @@ internal class SakComponentTest {
         private const val kafkaApplicationId = "spleis-v1"
 
         private val topics =
-            listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic, påminnelseTopic)
+            listOf(søknadTopic, inntektsmeldingTopic, behovTopic, opprettGosysOppgaveTopic, vedtaksperiodeEventTopic, påminnelseTopic, vedtaksperiodeSlettetEventTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -303,6 +307,40 @@ internal class SakComponentTest {
         enAktørId.hentSak {
             val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
             assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
+        }
+    }
+
+    @Test
+    fun `påminnelse for vedtaksperiode som ikke finnes`() {
+        val enAktørId = "1211108676544"
+        val fødselsnummer = "01019000000"
+        val organisasjonsnummer = "123456789"
+
+        val påminnelse: Påminnelse = sendNyPåminnelse(enAktørId, fødselsnummer, organisasjonsnummer)
+
+        await("Venter på beskjed om at vedtaksperiode ikke finnes")
+            .atMost(30L, TimeUnit.SECONDS)
+            .untilAsserted {
+                assertNotNull(
+                    TestConsumer.records(vedtaksperiodeSlettetEventTopic)
+                        .map { objectMapper.readTree(it.value()) }
+                        .filter { enAktørId == it["aktørId"].textValue() }
+                        .filter { fødselsnummer == it["fødselsnummer"].textValue() }
+                        .filter { organisasjonsnummer == it["organisasjonsnummer"].textValue() }
+                        .firstOrNull { påminnelse.vedtaksperiodeId() == it["vedtaksperiodeId"].textValue() }
+                )
+            }
+    }
+
+    private fun sendNyPåminnelse(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): Påminnelse {
+        return påminnelseHendelse(
+            vedtaksperiodeId = UUID.randomUUID(),
+            tilstand = TilstandType.START,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            fødselsnummer = fødselsnummer
+        ).also {
+            synchronousSendKafkaMessage(påminnelseTopic, aktørId, it.toJson())
         }
     }
 
