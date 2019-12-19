@@ -15,7 +15,7 @@ internal class BehovTest {
     fun `Opprette ett nytt behov`() {
         val behov = Behov.nyttBehov(
             ArbeidstakerHendelse.Hendelsetype.Ytelser,
-            listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger, Behovtype.Svangerskapspenger),
+            listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger),
             "aktørid",
             "fnr",
             "orgnr",
@@ -27,7 +27,7 @@ internal class BehovTest {
 
         ObjectMapper().readTree(json)["@behov"].also {
             assertTrue(it.isArray)
-            assertEquals(3, (it as ArrayNode).size())
+            assertEquals(2, (it as ArrayNode).size())
         }
 
         assertTrue(json.contains("1123"))

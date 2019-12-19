@@ -37,7 +37,7 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) : 
 
             return Behov.nyttBehov(
                 hendelsetype = Hendelsetype.Ytelser,
-                behov = listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger, Behovtype.Svangerskapspenger),
+                behov = listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
