@@ -106,13 +106,11 @@ internal class UtbetalingsavgrenserTest {
     private fun tidslinjeOf(
         vararg dagPairs: Pair<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit>
     ) = Utbetalingstidslinje().apply {
-        var startDato = LocalDate.of(2018, 1, 1)
-        for ((antallDager, utbetalingsdag) in dagPairs) {
-            val sluttDato = startDato.plusDays(antallDager.toLong())
-            startDato.datesUntil(sluttDato).forEach {
-                this.utbetalingsdag(1200.0, it)
+        dagPairs.fold(LocalDate.of(2018, 1, 1)){ startDato, (antallDager, utbetalingsdag) ->
+            (0 until antallDager).forEach {
+                this.utbetalingsdag(1200.0, startDato.plusDays(it.toLong()))
             }
-            startDato = sluttDato
+            startDato.plusDays(antallDager.toLong())
         }
     }
 
