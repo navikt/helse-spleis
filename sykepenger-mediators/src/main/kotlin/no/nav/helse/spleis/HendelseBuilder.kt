@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
@@ -17,6 +18,7 @@ import java.util.*
 internal class HendelseBuilder() {
 
     private val log = LoggerFactory.getLogger(HendelseBuilder::class.java)
+    private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
     private val messageListeners = mutableListOf<HendelseListener>()
     private val stateListeners = mutableListOf<KafkaStreams.StateListener>()
@@ -50,12 +52,15 @@ internal class HendelseBuilder() {
     }
 
     private fun onPåminnelse(json: String) {
+        json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Påminnelse.name)
         Påminnelse.fraJson(json)?.also {
             notifyListeners(HendelseListener::onPåminnelse, it)
         }
     }
 
     private fun onBehov(json: String) {
+        json.loggHendelse("Behov")
+
         val behov = try {
             Behov.fromJson(json)
         } catch (err: Exception) {
@@ -65,28 +70,43 @@ internal class HendelseBuilder() {
         if (!behov.erLøst()) return
 
         when (behov.hendelsetype()) {
-            ArbeidstakerHendelse.Hendelsetype.Ytelser -> Ytelser(behov).also {
-                notifyListeners(HendelseListener::onYtelser, it)
+            ArbeidstakerHendelse.Hendelsetype.Ytelser -> {
+                json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Ytelser.name)
+                Ytelser(behov).also {
+                    notifyListeners(HendelseListener::onYtelser, it)
+                }
             }
-            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling(behov).also {
-                notifyListeners(HendelseListener::onManuellSaksbehandling, it)
+            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling -> {
+                json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling.name)
+                ManuellSaksbehandling(behov).also {
+                    notifyListeners(HendelseListener::onManuellSaksbehandling, it)
+                }
             }
         }
     }
 
     private fun onInntektsmelding(json: String) {
+        json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Inntektsmelding.name)
         Inntektsmelding.fromInntektsmelding(json)?.let {
             notifyListeners(HendelseListener::onInntektsmelding, it)
         }
     }
 
     private fun onSøknad(json: String) {
+        json.loggHendelse("Søknad")
+
         SøknadHendelse.fromSøknad(json)?.also {
             when (it) {
                 is NySøknad -> notifyListeners(HendelseListener::onNySøknad, it)
                 is SendtSøknad -> notifyListeners(HendelseListener::onSendtSøknad, it)
             }
         }
+    }
+
+    private fun String.loggHendelse(hendelsetype: String) {
+        sikkerLogg.info(this, keyValue(
+            "hendelsetype", hendelsetype
+        ))
     }
 
     private fun stopOnError() =

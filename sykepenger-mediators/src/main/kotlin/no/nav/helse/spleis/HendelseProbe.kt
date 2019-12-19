@@ -3,11 +3,9 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.*
 import no.nav.helse.sak.ArbeidstakerHendelse
-import org.slf4j.LoggerFactory
 
 class HendelseProbe: HendelseListener {
     private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
         private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
             .labelNames("type")
@@ -47,7 +45,6 @@ class HendelseProbe: HendelseListener {
     }
 
     private fun ArbeidstakerHendelse.tell() {
-        sikkerLogg.info(this.toJson())
         hendelseCounter.labels(this.hendelsetype().name).inc()
     }
 }
