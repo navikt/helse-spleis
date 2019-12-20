@@ -1,6 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
+import no.nav.helse.fixtures.januar
+import no.nav.helse.fixtures.mars
+import no.nav.helse.fixtures.oktober
+import no.nav.helse.fixtures.september
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -76,13 +79,13 @@ internal class UtbetalingsavgrenserTest {
     @Test
     fun `sjekk at 26 uker med syk etter karantene starter utbetaling`() {
         val tidslinje = tidslinjeOf(248.N, (26*7).N, 60.N)
-        assertEquals((26*7), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+        assertEquals(26*7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test
     fun `sjekk at 26 uker med syk etter karantene starter utbetaling gammel person`() {
         val tidslinje = tidslinjeOf(60.N, (26*7).N, 60.N)
-        assertEquals((26*7), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
+        assertEquals(26*7, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
     }
 
     @Test
@@ -100,7 +103,7 @@ internal class UtbetalingsavgrenserTest {
     @Test
     fun `sjekk at sykdom i arbgiver periode ikke ødelegger oppholdsperioden`() {
         val tidslinje = tidslinjeOf(50.N, (25*7).A, 7.AP, 248.N)
-        assertEquals(0, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test
