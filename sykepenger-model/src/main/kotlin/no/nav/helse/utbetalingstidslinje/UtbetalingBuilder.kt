@@ -28,7 +28,7 @@ internal class UtbetalingBuilder internal constructor(
 
     private val tidslinje = Utbetalingstidslinje()
 
-    fun result(): Utbetalingstidslinje {
+    internal fun result(): Utbetalingstidslinje {
         (sykdomstidslinje.kutt(sisteDag)).accept(this)
         return tidslinje
     }

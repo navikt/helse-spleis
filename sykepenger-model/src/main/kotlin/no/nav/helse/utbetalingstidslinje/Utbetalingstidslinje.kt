@@ -12,7 +12,7 @@ internal class Utbetalingstidslinje {
 
     private lateinit var visitor: Utbetalingsgrense
 
-    constructor() {
+    internal constructor() {
         utbetalingsdager = mutableListOf()
     }
 
@@ -26,7 +26,9 @@ internal class Utbetalingstidslinje {
     private val utbetalingsdager: MutableList<Utbetalingsdag>
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
+        visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
+        visitor.postVisitUtbetalingstidslinje(this)
     }
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
@@ -36,6 +38,26 @@ internal class Utbetalingstidslinje {
             .reduserAvSykdomsgrad(others)
             .subset(førsteDag, sisteDag)
             .utbetalingslinjer()
+
+    internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
+    }
+
+    internal fun addNAVdag(inntekt: Double, dato: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.NavDag(inntekt, dato))
+    }
+
+    internal fun addArbeidsdag(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(inntekt, dagen))
+    }
+
+    internal fun addFridag(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.Fridag(inntekt, dagen))
+    }
+
+    internal fun addHelg(inntekt: Double, dagen: LocalDate) {
+        utbetalingsdager.add(Utbetalingsdag.NavHelgDag(0.0, dagen))
+    }
 
     private fun avgrens(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler) : Utbetalingstidslinje {
         visitor = Utbetalingsgrense(alderRegler)
@@ -63,26 +85,6 @@ internal class Utbetalingstidslinje {
     }
 
     private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
-
-    internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
-    }
-
-    internal fun addNAVdag(inntekt: Double, dato: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.NavDag(inntekt, dato))
-    }
-
-    internal fun addArbeidsdag(inntekt: Double, dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.Arbeidsdag(inntekt, dagen))
-    }
-
-    internal fun addFridag(inntekt: Double, dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.Fridag(inntekt, dagen))
-    }
-
-    internal fun addHelg(inntekt: Double, dagen: LocalDate) {
-        utbetalingsdager.add(Utbetalingsdag.NavHelgDag(0.0, dagen))
-    }
 
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}

@@ -11,8 +11,8 @@ internal class AlderReglerTest {
     private val sluttDato = 1.januar.plusYears(1)
 
     companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
-        const val PERSON_67_ÅR_FNR_2018 = "01015112345"
+        internal const val UNG_PERSON_FNR_2018 = "12020052345"
+        internal const val PERSON_67_ÅR_FNR_2018 = "01015112345"
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -12,7 +13,15 @@ data class Utbetalingslinje(
     val fom: LocalDate,
     var tom: LocalDate,
     val dagsats: Int
-)
+) {
+    internal fun toTidslinje() = Utbetalingstidslinje().apply {
+        fom.datesUntil(tom.plusDays(1)).forEach {
+            if (it.erHelg()) this.addHelg(0.0, it) else this.addNAVdag(dagsats.toDouble(), it)
+        }
+    }
+
+    private fun LocalDate?.erHelg() = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(this?.dayOfWeek)
+}
 
 /**
  * Oppdrag expects a continuous payment timeline spanning weekends.
