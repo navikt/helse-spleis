@@ -4,10 +4,9 @@ import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import java.time.LocalDate
 
-private val frøDato = LocalDate.of(2018, 1, 1)
-private var dagensDato = frøDato
+private var dagensDato = LocalDate.of(2018, 1, 1)
 
-internal fun resetSeed() {
+internal fun resetSeed(frøDato: LocalDate = LocalDate.of(2018, 1, 1)) {
     dagensDato = frøDato
 }
 
