@@ -75,23 +75,23 @@ internal class Utbetalingstidslinje internal constructor() {
     operator internal fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
-        return this.pad(tidligsteDato, sisteDato).union(other.pad(tidligsteDato, sisteDato))
+        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
     }
 
-    private fun union(other: Utbetalingstidslinje) = Utbetalingstidslinje(
+    private fun binde(other: Utbetalingstidslinje) = Utbetalingstidslinje(
         this.utbetalingsdager.zip(other.utbetalingsdager)
-            .map { (left: Utbetalingsdag, right: Utbetalingsdag) -> maxOf(left, right) }
+            .map { (venstre: Utbetalingsdag, høyre: Utbetalingsdag) -> maxOf(venstre, høyre) }
     )
 
-    private fun pad(tidligsteDato: LocalDate, sisteDato: LocalDate) =
+    private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
             val original = this@Utbetalingstidslinje
-            tidligsteDato.datesUntil(original.utbetalingsdager.first().dato).forEach { this.pad(it) }
+            tidligsteDato.datesUntil(original.utbetalingsdager.first().dato).forEach { this.addUkjentDag(it) }
             this.utbetalingsdager.addAll(original.utbetalingsdager)
-            original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1)).forEach { this.pad(it) }
+            original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1)).forEach { this.addUkjentDag(it) }
         }
 
-    private fun pad(dato: LocalDate) = if (dato.erHelg()) addFridag(0.0, dato) else addUkjentDag(0.0, dato)
+    private fun addUkjentDag(dato: LocalDate) = if (dato.erHelg()) addFridag(0.0, dato) else addUkjentDag(0.0, dato)
 
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.utbetalingsdager.first().dato, other.utbetalingsdager.first().dato)
