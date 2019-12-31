@@ -33,8 +33,6 @@ internal class UtbetalingBuilder internal constructor(
         return tidslinje
     }
 
-    private fun LocalDate.erHelg() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
-
     override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = fridag(permisjonsdag.dagen)
     override fun visitStudiedag(studiedag: Studiedag) = implisittDag(studiedag.dagen)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = implisittDag(ubestemtdag.dagen)

@@ -136,7 +136,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     companion object {
 
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) Sykedag(
+            if (!gjelder.erHelg()) Sykedag(
                 gjelder,
                 hendelse
             ) else SykHelgedag(
@@ -154,7 +154,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             )
 
         fun ikkeSykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) Arbeidsdag(
+            if (!gjelder.erHelg()) Arbeidsdag(
                 gjelder,
                 hendelse
             ) else ImplisittDag(
@@ -163,7 +163,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             )
 
         fun utenlandsdag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) Utenlandsdag(
+            if (!gjelder.erHelg()) Utenlandsdag(
                 gjelder,
                 hendelse
             ) else ImplisittDag(
@@ -234,7 +234,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         }
 
         fun studiedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) Studiedag(
+            if (!gjelder.erHelg()) Studiedag(
                 gjelder,
                 hendelse
             ) else ImplisittDag(
@@ -253,7 +253,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         }
 
         fun permisjonsdag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) Permisjonsdag(
+            if (!gjelder.erHelg()) Permisjonsdag(
                 gjelder,
                 hendelse
             ) else ImplisittDag(
@@ -262,7 +262,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             )
 
         internal fun implisittDag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
-            if (erArbeidsdag(gjelder)) ImplisittDag(
+            if (!gjelder.erHelg()) ImplisittDag(
                 gjelder,
                 hendelse
             ) else ImplisittDag(
@@ -335,9 +335,5 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                 .groupBy(keySelector = { it.hendelseId() })
                 .mapValues { (_, v) -> v.first() }
         }
-
-
-        private fun erArbeidsdag(dato: LocalDate) =
-            dato.dayOfWeek != DayOfWeek.SATURDAY && dato.dayOfWeek != DayOfWeek.SUNDAY
     }
 }

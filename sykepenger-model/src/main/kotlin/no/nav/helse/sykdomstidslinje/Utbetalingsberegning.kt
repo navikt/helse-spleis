@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -19,8 +20,6 @@ data class Utbetalingslinje(
             if (it.erHelg()) this.addHelg(0.0, it) else this.addNAVdag(dagsats.toDouble(), it)
         }
     }
-
-    private fun LocalDate?.erHelg() = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(this?.dayOfWeek)
 }
 
 /**

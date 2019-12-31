@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -153,7 +154,7 @@ internal class AlderRegler(
     private fun LocalDate.leggTilGjenståendeDager(gjenståendeDagerISisteUke: Int) =
         (0..gjenståendeDagerISisteUke + 2)
             .map { plusDays(it.toLong()) }
-            .filterNot { it.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+            .filterNot { it.erHelg() }
             .get(gjenståendeDagerISisteUke)
 
     private fun LocalDate.trimHelg() = when (dayOfWeek) {
@@ -161,8 +162,6 @@ internal class AlderRegler(
         DayOfWeek.SUNDAY -> minusDays(2)
         else -> this
     }
-
-    private fun LocalDate.erHelg() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
 }
 
 internal typealias BurdeBetale = (Int, Int, LocalDate) -> Boolean
