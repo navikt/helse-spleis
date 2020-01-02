@@ -19,6 +19,7 @@ internal class Utbetalingstidslinje internal constructor() {
     }
 
     internal fun maksdato() = visitor.maksdato()
+
     internal fun antallGjenståendeSykedager() = visitor.antallGjenståendeSykedager()
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
@@ -26,6 +27,8 @@ internal class Utbetalingstidslinje internal constructor() {
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }
+
+    internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
         this

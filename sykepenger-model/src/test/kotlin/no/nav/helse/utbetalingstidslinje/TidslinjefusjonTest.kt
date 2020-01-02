@@ -56,6 +56,22 @@ internal class TidslinjefusjonTest {
         assertEquals(0, inspektør.ukjentDagTeller)
     }
 
+    @Test internal fun `Dagens forrang`() {
+        undersøke(
+            tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+            tidslinjeOf(1.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+            tidslinjeOf(2.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+            tidslinjeOf(3.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
+            tidslinjeOf(4.UTELATE, 1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV)
+        )
+        assertEquals(9, inspektør.size)
+        assertEquals(5, inspektør.navDagTeller)
+        assertEquals(1, inspektør.navHelgDagTeller)
+        assertEquals(1, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(1, inspektør.fridagTeller)
+    }
+
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje).result()
     }
