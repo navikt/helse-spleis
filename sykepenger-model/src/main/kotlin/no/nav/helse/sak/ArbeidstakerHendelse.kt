@@ -14,6 +14,7 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     enum class Hendelsetype {
         Ytelser,
+        Vilkårsgrunnlag,
         ManuellSaksbehandling,
         Utbetaling,
         Inntektsmelding,

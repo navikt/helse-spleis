@@ -1,5 +1,6 @@
 package no.nav.helse.sak
 
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
@@ -22,7 +23,6 @@ import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-
 private inline fun <reified T> Set<*>.førsteAvType(): T {
     return first { it is T } as T
 }
@@ -137,10 +137,23 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
+    private fun trengerVilkårsgrunnlag() {
+        val behov = Vilkårsgrunnlag.lagBehov(
+            vedtaksperiodeId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer
+        )
+
+        observers.forEach { observer ->
+            observer.vedtaksperiodeTrengerLøsning(behov)
+        }
+    }
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand {
-
         val type: TilstandType
+
         val timeout: Duration
 
         // Default implementasjoner av transisjonene
@@ -154,6 +167,9 @@ internal class Vedtaksperiode internal constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
         }
 
         fun håndter(sak: Sak, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
@@ -186,9 +202,9 @@ internal class Vedtaksperiode internal constructor(
                 vedtaksperiode.sykdomstidslinje = tidslinje
             }
         }
-
         override val type = START
         override val timeout: Duration = Duration.ofDays(30)
+
     }
 
     private object MottattNySøknad : Vedtaksperiodetilstand {
@@ -200,8 +216,8 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
         }
-
         override val type = MOTTATT_NY_SØKNAD
+
         override val timeout: Duration = Duration.ofDays(30)
 
     }
@@ -211,8 +227,8 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, BeregnUtbetaling)
         }
-
         override val type = MOTTATT_SENDT_SØKNAD
+
         override val timeout: Duration = Duration.ofDays(30)
 
     }
@@ -222,9 +238,29 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, BeregnUtbetaling)
         }
-
         override val type = MOTTATT_INNTEKTSMELDING
+
         override val timeout: Duration = Duration.ofDays(30)
+
+    }
+
+    private object Vilkårsprøving : Vedtaksperiodetilstand {
+        override val type = VILKÅRSPRØVING
+
+        override val timeout = Duration.ofHours(1)
+
+        override fun entering(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.trengerVilkårsgrunnlag()
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag()
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            if (vilkårsgrunnlag.erEgenAnsatt()) return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
+        }
 
     }
 
@@ -391,6 +427,7 @@ internal class Vedtaksperiode internal constructor(
             MOTTATT_NY_SØKNAD -> MottattNySøknad
             MOTTATT_SENDT_SØKNAD -> MottattSendtSøknad
             MOTTATT_INNTEKTSMELDING -> MottattInntektsmelding
+            VILKÅRSPRØVING -> Vilkårsprøving
             BEREGN_UTBETALING -> BeregnUtbetaling
             TIL_GODKJENNING -> TilGodkjenning
             TIL_UTBETALING -> TilUtbetaling
