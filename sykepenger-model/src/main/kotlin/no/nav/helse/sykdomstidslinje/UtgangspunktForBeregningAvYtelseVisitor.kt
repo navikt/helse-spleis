@@ -104,10 +104,6 @@ internal class UtgangspunktForBeregningAvYtelseVisitor : SykdomstidslinjeVisitor
         override fun implisittdag(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
             utgangspunktForBeregningAvYtelseVisitor.state(MuligOpphold(førsteFraværsdag))
         }
-
-        override fun leaving(utgangspunktForBeregningAvYtelseVisitor: UtgangspunktForBeregningAvYtelseVisitor) {
-            utgangspunktForBeregningAvYtelseVisitor.førsteFraværsdag = null
-        }
     }
 
     private class MuligOpphold(private val kanskjeFørsteFraværsdag: LocalDate): FørsteFraværsdagTilstand {
