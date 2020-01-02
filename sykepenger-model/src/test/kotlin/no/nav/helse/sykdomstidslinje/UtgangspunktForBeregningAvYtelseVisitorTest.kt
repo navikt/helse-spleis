@@ -23,13 +23,6 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
         assertUgyldigTilstand(1.permisjonsdager)
         assertUgyldigTilstand(1.implisittDager)
         assertUgyldigTilstand(1.arbeidsdager)
-        assertUgyldigTilstand(1.sykedager + 1.utenlandsdager)
-        assertUgyldigTilstand(1.sykedager + 1.utenlandsdager + 1.sykedager)
-        assertUgyldigTilstand(1.sykedager + 1.studieDager)
-        assertUgyldigTilstand(1.sykedager + 1.studieDager + 1.sykedager)
-        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.arbeidsdager)
-        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.studieDager)
-        assertUgyldigTilstand(1.sykedager + 1.implisittDager + 1.utenlandsdager)
     }
 
     @Test
@@ -79,9 +72,24 @@ internal class UtgangspunktForBeregningAvYtelseVisitorTest {
     }
 
     @Test
-    internal fun `tidslinjer som slutter med dager som ikke er sykedager, egenmeldingsdager eller sykHelgedag`() {
-        assertUgyldigTilstand(1.sykedager + 1.arbeidsdager)
-        assertUgyldigTilstand(1.sykedager + 1.implisittDager)
+    internal fun `sykedager etterfulgt av arbeidsdager`() {
+        perioder(2.sykedager, 2.arbeidsdager) { sykedager, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
+        }
+    }
+
+    @Test
+    internal fun `sykedager etterfulgt av implisittdager`() {
+        perioder(2.sykedager, 2.implisittDager) { sykedager, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
+        }
+    }
+
+    @Test
+    internal fun `søknad med arbeidgjenopptatt gir ikke feil`() {
+        perioder(2.sykedager, 2.implisittDager) { sykedager, _ ->
+            assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
+        }
     }
 
     companion object {
