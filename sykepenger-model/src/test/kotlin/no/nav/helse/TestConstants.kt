@@ -371,7 +371,7 @@ internal object TestConstants {
     ) ?: fail { "påminnelse er null" }
 }
 
-private fun Behov.løsBehov(løsning: Any): Behov {
+internal fun Behov.løsBehov(løsning: Any): Behov {
     val pakke = Pakke.fromJson(this.toJson())
     pakke["@besvart"] = LocalDateTime.now().toString()
     pakke["@løsning"] = løsning

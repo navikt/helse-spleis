@@ -30,6 +30,10 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(manuellSaksbehandling)
     }
 
+    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        lagreHendelse(vilkårsgrunnlag)
+    }
+
     private fun lagreHendelse(hendelse: ArbeidstakerHendelse) {
         if (!hendelse.kanBehandles()) return
 

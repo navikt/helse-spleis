@@ -101,6 +101,10 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder.forEach { it.håndter(manuellSaksbehandling) }
     }
 
+    internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        perioder.forEach { it.håndter(vilkårsgrunnlag) }
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         return perioder.any { it.håndter(påminnelse) }
     }

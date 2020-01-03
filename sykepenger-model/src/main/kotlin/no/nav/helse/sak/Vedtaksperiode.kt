@@ -85,6 +85,13 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
+    internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(
+            this,
+            vilkårsgrunnlag
+        )
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId()) return false
         tilstand.håndter(this, påminnelse)
@@ -225,7 +232,7 @@ internal class Vedtaksperiode internal constructor(
     private object MottattSendtSøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding, BeregnUtbetaling)
+            vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
         override val type = MOTTATT_SENDT_SØKNAD
 
@@ -233,10 +240,9 @@ internal class Vedtaksperiode internal constructor(
 
     }
 
-    private object MottattInntektsmelding : Vedtaksperiodetilstand {
-
+    internal object MottattInntektsmelding : Vedtaksperiodetilstand {
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
-            vedtaksperiode.håndter(sendtSøknad, BeregnUtbetaling)
+            vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
         }
         override val type = MOTTATT_INNTEKTSMELDING
 
@@ -244,7 +250,7 @@ internal class Vedtaksperiode internal constructor(
 
     }
 
-    private object Vilkårsprøving : Vedtaksperiodetilstand {
+    internal object Vilkårsprøving : Vedtaksperiodetilstand {
         override val type = VILKÅRSPRØVING
 
         override val timeout = Duration.ofHours(1)

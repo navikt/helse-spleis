@@ -13,6 +13,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
+import no.nav.helse.løsBehov
 import no.nav.helse.sak.TilstandType.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
@@ -182,7 +183,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(inntektsmeldingHendelse())
 
-        assertTilstandsendring(BEREGN_UTBETALING)
+        assertTilstandsendring(VILKÅRSPRØVING)
         assertPåminnelse(Duration.ofHours(1))
     }
 
@@ -230,7 +231,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         vedtaksperiode.håndter(sendtSøknadHendelse())
 
-        assertTilstandsendring(BEREGN_UTBETALING)
+        assertTilstandsendring(VILKÅRSPRØVING)
     }
 
     @Test
@@ -281,29 +282,48 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `når tilstand er BeregnUtbetaling, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
+    fun `ber om vilkårsprøving etter at vi har mottatt søknad og inntektsmelding`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val nySøknadHendelse = nySøknadHendelse(
-            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
-            egenmeldinger = emptyList(),
-            fravær = emptyList()
-        )
         val sendtSøknadHendelse = sendtSøknadHendelse(
             søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
             egenmeldinger = emptyList(),
             fravær = emptyList()
         )
+
         val inntektsmeldingHendelse =
             inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
 
         val vedtaksperiode = beInMottattInntektsmelding(
-            nySøknad = nySøknadHendelse,
-            inntektsmelding = inntektsmeldingHendelse
+            tidslinje = tidslinje(
+                fom = periodeFom,
+                tom = periodeTom,
+                sendtSøknadTidslinje = null,
+                inntektsmeldingTidslinje = inntektsmeldingHendelse.sykdomstidslinje()
+            )
         )
 
         vedtaksperiode.håndter(sendtSøknadHendelse)
+
+        assertTilstandsendring(VILKÅRSPRØVING)
+        assertBehov(Behovtype.EgenAnsatt)
+    }
+
+    @Test
+    fun `når vi går inn i BeregnUtbetaling, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val vedtaksperiode = beInVilkårsprøving(
+            tidslinje = tidslinje(
+                fom = periodeFom,
+                tom = periodeTom
+            )
+        )
+
+        vedtaksperiode.håndter(Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
+            .løsBehov(mapOf("EgenAnsatt" to false))))
 
         assertTilstandsendring(BEREGN_UTBETALING)
 
@@ -312,6 +332,24 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         finnBehov(Behovtype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
             assertEquals(periodeFom.minusDays(1), it)
         }
+    }
+
+    @Test
+    fun `Skal ikke behandle egen ansatt`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val vedtaksperiode = beInVilkårsprøving(
+            tidslinje = tidslinje(
+                fom = periodeFom,
+                tom = periodeTom
+            )
+        )
+
+        vedtaksperiode.håndter(Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
+            .løsBehov(mapOf("EgenAnsatt" to true))))
+
+        assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
@@ -596,6 +634,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     private fun tidslinje(
         fom: LocalDate,
         tom: LocalDate,
+        sendtSøknadTidslinje: ConcreteSykdomstidslinje? = sendtSøknadHendelse(
+            søknadsperioder = listOf(SoknadsperiodeDTO(fom, tom)),
+            egenmeldinger = emptyList(),
+            fravær = emptyList()
+        ).sykdomstidslinje(),
         inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmeldingHendelse(
             arbeidsgiverperioder = listOf(Periode(fom, tom.plusDays(16))),
             endringerIRefusjoner = emptyList()
@@ -605,12 +648,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             søknadsperioder = listOf(SoknadsperiodeDTO(fom, tom)),
             egenmeldinger = emptyList(),
             fravær = emptyList()
-        ).sykdomstidslinje() + sendtSøknadHendelse(
-            søknadsperioder = listOf(SoknadsperiodeDTO(fom, tom)),
-            egenmeldinger = emptyList(),
-            fravær = emptyList()
-        ).sykdomstidslinje() +
+        ).sykdomstidslinje().plus(sendtSøknadTidslinje) +
             inntektsmeldingTidslinje
+    }
+
+    private fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje {
+        if (other == null) return this
+        return this + other
     }
 
     @Test
@@ -683,7 +727,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             endringerIRefusjoner = listOf(
                 EndringIRefusjon(endringsdato = null)
 
-        ))
+            )
+        )
 
         val vedtaksperiode = beInBeregnUtbetaling(
             tidslinje(
@@ -858,12 +903,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInMottattInntektsmelding(
-        inntektsmelding: Inntektsmelding = inntektsmeldingHendelse(),
-        nySøknad: NySøknad = nySøknadHendelse()
+        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()
     ) =
-        beInNySøknad(nySøknad).apply {
-            håndter(inntektsmelding)
-        }
+        beIn(Vedtaksperiode.MottattInntektsmelding, tidslinje)
+
+    private fun beInVilkårsprøving(tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()) =
+        beIn(Vedtaksperiode.Vilkårsprøving, tidslinje)
 
     private fun beInBeregnUtbetaling(
         tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()

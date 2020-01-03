@@ -10,6 +10,8 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.løsBehov
 import no.nav.helse.runMigration
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.spleis.HendelseRecorder
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.util.*
 import javax.sql.DataSource
 
 class HendelsePersisteringPostgresTest {
@@ -63,6 +66,13 @@ class HendelsePersisteringPostgresTest {
 
         inntektsmeldingHendelse().also {
             dao.onInntektsmelding(it)
+            assertHendelse(dataSource, it)
+        }
+
+        Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(UUID.randomUUID(), "aktørid", "fnr", "orgnr").løsBehov(mapOf(
+            "EgenAnsatt" to false
+        ))).also {
+            dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }
     }

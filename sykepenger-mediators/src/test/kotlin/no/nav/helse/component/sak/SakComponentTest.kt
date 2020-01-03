@@ -62,7 +62,6 @@ import java.sql.Connection
 import java.time.Duration
 import java.time.Duration.ofMillis
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
@@ -190,7 +189,7 @@ internal class SakComponentTest {
     }
 
     @Test
-    fun `gitt en komplett tidslinje, når vi mottar sykepengehistorikk mer enn 6 måneder tilbake i tid, så skal saken til Speil for godkjenning`() {
+    fun `happy path av hele modellen`() {
         val aktørID = "87654321962"
         val fødselsnummer = "01017000000"
         val virksomhetsnummer = "123456789"
@@ -219,6 +218,17 @@ internal class SakComponentTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.MOTTATT_SENDT_SØKNAD,
+            currentState = TilstandType.VILKÅRSPRØVING,
+            timeout = Duration.ofHours(1)
+        )
+
+        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
+
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.VILKÅRSPRØVING,
             currentState = TilstandType.BEREGN_UTBETALING,
             timeout = Duration.ofHours(1)
         )
@@ -263,6 +273,8 @@ internal class SakComponentTest {
         val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
+
+        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
 
         val sykehistorikk = listOf(
             SpolePeriode(
@@ -318,7 +330,7 @@ internal class SakComponentTest {
         val påminnelse: Påminnelse = sendNyPåminnelse(enAktørId, fødselsnummer, organisasjonsnummer)
 
         await("Venter på beskjed om at vedtaksperiode ikke finnes")
-            .atMost(30L, TimeUnit.SECONDS)
+            .atMost(30L, SECONDS)
             .untilAsserted {
                 assertNotNull(
                     TestConsumer.records(vedtaksperiodeSlettetEventTopic)
@@ -375,6 +387,14 @@ internal class SakComponentTest {
 
         sendBehov(behov.løsBehov(mapOf(
             "Sykepengehistorikk" to perioder
+        )))
+    }
+
+    private fun sendVilkårsgrunnlagsløsning(aktørId: String, fødselsnummer: String, egenAnsatt: Boolean = false) {
+        val behov = ventPåBehov(aktørId, fødselsnummer, EgenAnsatt)
+
+        sendBehov(behov.løsBehov(mapOf(
+            "EgenAnsatt" to egenAnsatt
         )))
     }
 

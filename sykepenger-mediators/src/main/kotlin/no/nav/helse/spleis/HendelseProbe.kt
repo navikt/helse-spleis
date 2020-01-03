@@ -32,6 +32,10 @@ class HendelseProbe: HendelseListener {
         manuellSaksbehandling.tell()
     }
 
+    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        vilkårsgrunnlag.tell()
+    }
+
     override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         inntektsmelding.tell()
     }

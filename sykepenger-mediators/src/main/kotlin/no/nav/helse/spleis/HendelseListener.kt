@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 interface HendelseListener {
     fun onPåminnelse(påminnelse: Påminnelse) {}
     fun onYtelser(ytelser: Ytelser) {}
+    fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {}
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {}
     fun onInntektsmelding(inntektsmelding: Inntektsmelding) {}
     fun onNySøknad(søknad: NySøknad) {}

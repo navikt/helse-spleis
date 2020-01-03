@@ -69,18 +69,20 @@ internal class HendelseBuilder() {
 
         if (!behov.erLøst()) return
 
-        when (behov.hendelsetype()) {
-            ArbeidstakerHendelse.Hendelsetype.Ytelser -> {
-                json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Ytelser.name)
-                Ytelser(behov).also {
-                    notifyListeners(HendelseListener::onYtelser, it)
-                }
+        if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.Ytelser) {
+            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Ytelser.name)
+            Ytelser(behov).also {
+                notifyListeners(HendelseListener::onYtelser, it)
             }
-            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling -> {
-                json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling.name)
-                ManuellSaksbehandling(behov).also {
-                    notifyListeners(HendelseListener::onManuellSaksbehandling, it)
-                }
+        } else if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling) {
+            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling.name)
+            ManuellSaksbehandling(behov).also {
+                notifyListeners(HendelseListener::onManuellSaksbehandling, it)
+            }
+        } else if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.Vilkårsgrunnlag) {
+            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Vilkårsgrunnlag.name)
+            Vilkårsgrunnlag(behov).also {
+                notifyListeners(HendelseListener::onVilkårsgrunnlag, it)
             }
         }
     }

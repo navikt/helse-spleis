@@ -31,6 +31,10 @@ internal class SakMediator(
         finnSak(manuellSaksbehandling) { sak -> sak.håndter(manuellSaksbehandling) }
     }
 
+    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        finnSak(vilkårsgrunnlag) { sak -> sak.håndter(vilkårsgrunnlag) }
+    }
+
     override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         finnSak(inntektsmelding) { sak -> sak.håndter(inntektsmelding) }
     }

@@ -62,6 +62,10 @@ class Sak(private val aktørId: String, private val fødselsnummer: String) : Ve
         finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
     }
 
+    fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
+    }
+
     fun håndter(påminnelse: Påminnelse) {
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
         sakObservers.forEach {
