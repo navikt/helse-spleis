@@ -264,7 +264,7 @@ internal class Vedtaksperiode internal constructor(
 
     }
 
-    private object BeregnUtbetaling : Vedtaksperiodetilstand {
+    internal object BeregnUtbetaling : Vedtaksperiodetilstand {
 
         override val type = BEREGN_UTBETALING
         override val timeout: Duration = Duration.ofHours(1)

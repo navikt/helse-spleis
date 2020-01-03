@@ -1,7 +1,6 @@
 package no.nav.helse.sak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
@@ -10,13 +9,18 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
+import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.juli
 import no.nav.helse.sak.TilstandType.*
+import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -478,192 +482,6 @@ internal class SakTest {
     }
 
     @Test
-    fun `komplett genererer sykepengehistorikk-needs`() {
-        testSak.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = organisasjonsnummer,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
-                )
-            )
-        }
-
-        assertVedtaksperiodeEndret()
-        assertSakEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, BEREGN_UTBETALING)
-        assertBehov(Behovtype.Sykepengehistorikk)
-    }
-
-    @Test
-    fun `sykepengehistorikk eldre enn seks måneder fører saken videre`() {
-        testSak.also {
-            it.håndter(
-                nySøknadHendelse(
-                    fødselsnummer = fødselsnummer,
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 30.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                sendtSøknadHendelse(
-                    fødselsnummer = fødselsnummer,
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 30.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                inntektsmeldingHendelse(
-                    fødselsnummer = fødselsnummer,
-                    virksomhetsnummer = organisasjonsnummer,
-                    arbeidsgiverperioder = listOf(Periode(30.juni, 5.juli))
-                )
-            )
-
-            assertEquals(1, this.testSakObserver.sakstilstander.size)
-            val saksid = vedtaksperiodeIdForSak()
-
-            it.håndter(
-                ytelser(
-                    sykepengehistorikk = listOf(
-                        SpolePeriode(
-                            fom = 1.juli.minusMonths(7).minusMonths(1),
-                            tom = 1.juli.minusMonths(7),
-                            grad = "100"
-                        )),
-                    organisasjonsnummer = organisasjonsnummer,
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = saksid
-                )
-            )
-        }
-
-        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_GODKJENNING)
-        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
-    }
-
-    @Test
-    fun `sykepengehistorikk med feil vedtaksperiodeid skal ikke føre noen saker videre`() {
-        testSak.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = organisasjonsnummer,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
-                )
-            )
-
-            it.håndter(
-                ytelser(
-                    sykepengehistorikk = sykepengehistorikk(
-                        perioder = listOf(
-                            SpolePeriode(
-                                fom = 1.juli.minusMonths(7).minusMonths(1),
-                                tom = 1.juli.minusMonths(7),
-                                grad = "100"
-                            )
-                        )
-                    ),
-                    organisasjonsnummer = organisasjonsnummer,
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = UUID.randomUUID()
-                )
-            )
-        }
-
-        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, BEREGN_UTBETALING)
-    }
-
-    @Test
-    fun `sykepengehistorikk yngre enn seks måneder fører til at saken må behandles i infotrygd`() {
-        testSak.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = organisasjonsnummer,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 9.juli))
-                )
-            )
-
-            assertEquals(1, this.testSakObserver.sakstilstander.size)
-            val saksid = vedtaksperiodeIdForSak()
-
-            it.håndter(
-                ytelser(
-                    sykepengehistorikk = sykepengehistorikk(
-                        perioder = listOf(
-                            SpolePeriode(
-                                fom = 1.juli.minusMonths(5).minusMonths(1),
-                                tom = 1.juli.minusMonths(5),
-                                grad = "100"
-                            )
-                        )
-                    ),
-                    organisasjonsnummer = organisasjonsnummer,
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = saksid
-                )
-            )
-        }
-        assertVedtaksperiodeEndret()
-        assertSakEndret()
-        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `motta en inntektsmelding som ikke kan behandles etter ny søknad`() {
         testSak.also {
             it.håndter(
@@ -688,80 +506,6 @@ internal class SakTest {
             assertSakEndret()
             assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD)
         }
-    }
-
-    @Test
-    fun `vedtaksperiode uten utbetalingsdager skal ikke sendes til godkjenning`() {
-        testSak.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        navn = "S.Vindel og Sønn",
-                        orgnummer = organisasjonsnummer
-                    ),
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 30.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
-
-            it.håndter(
-                inntektsmeldingHendelse(
-                    førsteFraværsdag = 1.juli,
-                    arbeidsgiverperioder = listOf(),
-                    virksomhetsnummer = organisasjonsnummer
-                )
-            )
-
-            it.håndter(
-                sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        navn = "S.Vindel og Sønn",
-                        orgnummer = organisasjonsnummer
-                    ),
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 30.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ),
-                    egenmeldinger = emptyList(),
-                    fravær = listOf(
-                        FravarDTO(
-                            fom = 2.juli,
-                            tom = 30.juli,
-                            type = FravarstypeDTO.FERIE
-                        )
-                    )
-                )
-            )
-
-            val saksid = vedtaksperiodeIdForSak()
-
-            it.håndter(
-                ytelser(
-                    sykepengehistorikk = sykepengehistorikk(
-                        perioder = listOf(
-                            SpolePeriode(
-                                fom = 1.juli.minusMonths(7).minusMonths(1),
-                                tom = 1.juli.minusMonths(7),
-                                grad = "100"
-                            )
-                        )
-                    ),
-                    organisasjonsnummer = organisasjonsnummer,
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = saksid
-                )
-            )
-        }
-        assertVedtaksperiodetilstand(BEREGN_UTBETALING, TIL_INFOTRYGD)
     }
 
     private fun vedtaksperiodeIdForSak() =
