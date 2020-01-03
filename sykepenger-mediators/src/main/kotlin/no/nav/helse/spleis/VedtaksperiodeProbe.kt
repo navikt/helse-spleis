@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
+import io.prometheus.client.Gauge
 import io.prometheus.client.Summary
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Påminnelse
@@ -31,6 +32,13 @@ object VedtaksperiodeProbe : SakObserver {
         .labelNames("forrigeTilstand", "tilstand", "hendelse")
         .register()
 
+    private val tilstandGauge = Gauge.build(
+        "gjeldende_vedtaksperiode_tilstander",
+        "Gjeldende tilstander"
+    )
+        .labelNames("tilstand")
+        .register()
+
     private val utenforOmfangCounter = Counter.build("utenfor_omfang_totals", "Antall ganger en sak er utenfor omfang")
         .labelNames("dokumentType")
         .register()
@@ -40,9 +48,10 @@ object VedtaksperiodeProbe : SakObserver {
             .labelNames("tilstand")
             .register()
 
-    private val sakskjemaForGammeltCounter = Counter.build("sakskjema_for_gammelt_totals", "fordeling av versjonsnummer på sakskjema")
-        .labelNames("skjemaVersjon")
-        .register()
+    private val sakskjemaForGammeltCounter =
+        Counter.build("sakskjema_for_gammelt_totals", "fordeling av versjonsnummer på sakskjema")
+            .labelNames("skjemaVersjon")
+            .register()
 
     private val sakMementoStørrelse =
         Summary.build("sak_memento_size", "størrelse på sak document i databasen").register()
@@ -62,6 +71,9 @@ object VedtaksperiodeProbe : SakObserver {
     }
 
     override fun vedtaksperiodeEndret(event: StateChangeEvent) {
+        tilstandGauge.labels(event.forrigeTilstand.name).dec()
+        tilstandGauge.labels(event.gjeldendeTilstand.name).inc()
+
         tilstandCounter.labels(
             event.forrigeTilstand.name,
             event.gjeldendeTilstand.name,
