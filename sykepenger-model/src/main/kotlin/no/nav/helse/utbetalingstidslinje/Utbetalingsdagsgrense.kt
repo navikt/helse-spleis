@@ -12,10 +12,9 @@ internal class Utbetalingsdagsgrense private constructor(private var fom: LocalD
                                                          private var gammelpersonDager: Int) {
 
 
-    internal constructor(fom: LocalDate,
-                        alder: Alder,
+    internal constructor(alder: Alder,
                         arbeidsgiverRegler: ArbeidsgiverRegler) :
-        this(fom, alder, arbeidsgiverRegler, 0, 0)
+        this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0)
 
     internal fun inkrementer(dato: LocalDate) {
         betalteDager += 1

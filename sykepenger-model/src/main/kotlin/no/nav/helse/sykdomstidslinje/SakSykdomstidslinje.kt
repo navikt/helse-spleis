@@ -1,12 +1,15 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.AlderRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.LocalDate
 
 internal class SakSykdomstidslinje(
     private val sykdomstidslinjer: List<ArbeidsgiverSykdomstidslinje>,
-    private val alderRegler: AlderRegler,
+    private val alder: Alder,
+    private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val arbeidsgiverSykdomstidslinje: ArbeidsgiverSykdomstidslinje,
     private val førsteDag: LocalDate,
     private val sisteDag: LocalDate
@@ -14,10 +17,8 @@ internal class SakSykdomstidslinje(
 ) : SykdomstidslinjeElement {
 
     private var maksdato: LocalDate? = null
-    private var antallGjenståendeSykedager: Int = 0
 
     internal fun maksdato() = maksdato
-    internal fun antallGjenståendeSykedager() = antallGjenståendeSykedager
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSak(this)
@@ -28,9 +29,9 @@ internal class SakSykdomstidslinje(
     internal fun utbetalingslinjer(): List<Utbetalingslinje> {
         val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje,sisteDag).result()
         val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it,sisteDag).result() }
-        return tidslinje.utbetalingslinjer(tidslinjer, alderRegler, førsteDag, sisteDag)
+        return tidslinje.utbetalingslinjer(tidslinjer, alder, arbeidsgiverRegler, førsteDag, sisteDag)
             .also {
                 maksdato = tidslinje.maksdato()
-                antallGjenståendeSykedager = tidslinje.antallGjenståendeSykedager()}
+            }
     }
 }

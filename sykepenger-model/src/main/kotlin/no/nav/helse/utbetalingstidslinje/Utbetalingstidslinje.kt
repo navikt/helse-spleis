@@ -20,8 +20,6 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun maksdato() = visitor.maksdato()
 
-    internal fun antallGjenståendeSykedager() = visitor.antallGjenståendeSykedager()
-
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
@@ -30,10 +28,10 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
-    internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
+    internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
         this
-            .avgrens(others, alderRegler)
-            .filterByMinimumInntekt(others, alderRegler)
+            .avgrens(others, alder, arbeidsgiverRegler)
+            .filterByMinimumInntekt(others, alder)
             .reduserAvSykdomsgrad(others)
             .subset(førsteDag, sisteDag)
             .utbetalingslinjer()
@@ -62,8 +60,8 @@ internal class Utbetalingstidslinje internal constructor() {
         utbetalingsdager.add(Utbetalingsdag.UkjentDag(0.0, dagen))
     }
 
-    private fun avgrens(others: List<Utbetalingstidslinje>, alderRegler: AlderRegler) : Utbetalingstidslinje {
-        visitor = Utbetalingsgrense(alderRegler)
+    private fun avgrens(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) : Utbetalingstidslinje {
+        visitor = Utbetalingsgrense(alder, arbeidsgiverRegler)
         this.merge(others).accept(visitor)
 
         return Utbetalingstidslinje(this.utbetalingsdager
@@ -104,7 +102,7 @@ internal class Utbetalingstidslinje internal constructor() {
 
     private fun filterByMinimumInntekt(
         others: List<Utbetalingstidslinje>,
-        alderRegler: AlderRegler
+        alder: Alder
     ) = this
 
     private fun reduserAvSykdomsgrad(others: List<Utbetalingstidslinje>) = this

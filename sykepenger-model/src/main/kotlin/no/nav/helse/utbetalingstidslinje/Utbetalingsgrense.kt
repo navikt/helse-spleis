@@ -2,12 +2,11 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 
-internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
+internal class Utbetalingsgrense(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
     private var sisteBetalteDag: LocalDate? = null
     private var state: State = State.Initiell
-    private var betalteDager = 0
-    private var gammelpersonDager = 0
+    private val teller = Utbetalingsdagsgrense(alder, arbeidsgiverRegler)
     private var opphold = 0
     private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
 
@@ -15,8 +14,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7
     }
 
-    internal fun maksdato() = alderRegler.maksdato(betalteDager, gammelpersonDager, sisteBetalteDag)
-    internal fun antallGjenståendeSykedager() = alderRegler.gjenståendeDager(betalteDager, gammelpersonDager, sisteBetalteDag)
+    internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
 
     internal fun ubetalteDager(): List<Utbetalingstidslinje.Utbetalingsdag.AvvistDag> {
         return ubetalteDager
@@ -54,8 +52,11 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
     }
 
     private fun nextState(dagen: LocalDate) : State? {
-        if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return State.Initiell
-        return if (alderRegler.burdeBetale(betalteDager+1, gammelpersonDager+1, dagen.plusDays(1))) null else State.Karantene
+        if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
+            teller.resett(dagen.plusDays(1))
+            return State.Initiell
+        }
+        return if (teller.påGrensen(dagen)) State.Karantene else null
     }
 
     private sealed class State {
@@ -66,13 +67,10 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
 
         internal object Initiell: State() {
             override fun entering(avgrenser: Utbetalingsgrense) {
-                avgrenser.gammelpersonDager = 0
-                avgrenser.betalteDager = 0
                 avgrenser.opphold = 0
             }
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.betalteDager = 1
-                if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager = 1
+                avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.state(Syk)
             }
@@ -84,8 +82,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
             }
 
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.betalteDager += 1
-                if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager += 1
+                avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
@@ -98,8 +95,7 @@ internal class Utbetalingsgrense(private val alderRegler: AlderRegler):
         internal object Opphold: State() {
 
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
-                avgrenser.betalteDager += 1
-                if (avgrenser.alderRegler.harFylt67(dagen) )  avgrenser.gammelpersonDager += 1
+                avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }

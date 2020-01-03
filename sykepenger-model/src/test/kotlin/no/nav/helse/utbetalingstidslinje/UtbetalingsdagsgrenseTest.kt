@@ -84,7 +84,8 @@ internal class UtbetalingsdagsgrenseTest {
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
-        grense = Utbetalingsdagsgrense(dato, alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
+        grense = Utbetalingsdagsgrense(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
+            this.resett(dato)
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }
     }
