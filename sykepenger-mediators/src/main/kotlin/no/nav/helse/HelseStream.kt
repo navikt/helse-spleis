@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import com.auth0.jwk.JwkProviderBuilder
-import com.zaxxer.hikari.HikariConfig
 import io.ktor.application.*
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
@@ -16,8 +15,11 @@ import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
-import no.nav.helse.spleis.*
+import no.nav.helse.spleis.HelseBuilder
+import no.nav.helse.spleis.PersonMediator
 import no.nav.helse.spleis.http.getJson
+import no.nav.helse.spleis.person
+import no.nav.helse.spleis.utbetaling
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
@@ -25,31 +27,14 @@ import org.slf4j.LoggerFactory
 import java.net.URL
 import kotlin.system.exitProcess
 
-fun createHikariConfig(jdbcUrl: String, username: String? = null, password: String? = null) =
-    HikariConfig().apply {
-        this.jdbcUrl = jdbcUrl
-        maximumPoolSize = 3
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-        username?.let { this.username = it }
-        password?.let { this.password = it }
-    }
-
 @KtorExperimentalAPI
-fun Application.createHikariConfigFromEnvironment() =
-    createHikariConfig(
-        jdbcUrl = environment.config.property("database.jdbc-url").getString(),
-        username = environment.config.propertyOrNull("database.username")?.getString(),
-        password = environment.config.propertyOrNull("database.password")?.getString()
-    )
+fun Application.helseStream(env: Map<String, String>) {
+    val kafkaConfigBuilder = KafkaConfigBuilder(env)
+    val dataSourceBuilder = DataSourceBuilder(env)
 
-@KtorExperimentalAPI
-fun Application.helseStream() {
     val helseBuilder = HelseBuilder(
-        dataSource = getDataSource(createHikariConfigFromEnvironment()),
-        hendelseProducer = KafkaProducer<String, String>(environment.config.producerConfig(), StringSerializer(), StringSerializer())
+        dataSource = dataSourceBuilder.getDataSource(),
+        hendelseProducer = KafkaProducer<String, String>(kafkaConfigBuilder.producerConfig(), StringSerializer(), StringSerializer())
     )
 
     helseBuilder.addStateListener(KafkaStreams.StateListener { newState, oldState ->
@@ -62,8 +47,8 @@ fun Application.helseStream() {
     })
 
     environment.monitor.subscribe(ApplicationStarted) {
-        migrate(createHikariConfigFromEnvironment())
-        helseBuilder.start(environment.config.streamsConfig())
+        dataSourceBuilder.migrate()
+        helseBuilder.start(kafkaConfigBuilder.streamsConfig())
     }
 
     environment.monitor.subscribe(ApplicationStopping) {

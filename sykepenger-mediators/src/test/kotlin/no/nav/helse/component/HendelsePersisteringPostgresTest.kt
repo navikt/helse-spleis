@@ -9,12 +9,11 @@ import kotliquery.using
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.createHikariConfig
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.runMigration
 import no.nav.helse.spleis.HendelseRecorder
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -37,8 +36,11 @@ class HendelsePersisteringPostgresTest {
             embeddedPostgres = EmbeddedPostgres.builder().start()
             postgresConnection = embeddedPostgres.postgresDatabase.connection
             hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
-            runMigration(HikariDataSource(hikariConfig))
 
+            Flyway.configure()
+                .dataSource(HikariDataSource(hikariConfig))
+                .load()
+                .migrate()
         }
 
         @AfterAll
@@ -47,6 +49,16 @@ class HendelsePersisteringPostgresTest {
             postgresConnection.close()
             embeddedPostgres.close()
         }
+
+        private fun createHikariConfig(jdbcUrl: String) =
+            HikariConfig().apply {
+                this.jdbcUrl = jdbcUrl
+                maximumPoolSize = 3
+                minimumIdle = 1
+                idleTimeout = 10001
+                connectionTimeout = 1000
+                maxLifetime = 30001
+            }
     }
 
     @Test

@@ -3,8 +3,7 @@ package no.nav.helse.component
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.helse.createHikariConfig
-import no.nav.helse.runMigration
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,6 +30,22 @@ class MigrationsPostgresTest {
         hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
     }
 
+    private fun runMigration() =
+        Flyway.configure()
+            .dataSource(HikariDataSource(hikariConfig))
+            .load()
+            .migrate()
+
+    private fun createHikariConfig(jdbcUrl: String) =
+        HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            maximumPoolSize = 3
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+        }
+
     @AfterEach
     fun `stop postgres`() {
         postgresConnection.close()
@@ -39,15 +54,15 @@ class MigrationsPostgresTest {
 
     @Test
     fun `migreringer skal kjøre på en tom database`() {
-        val migrations = runMigration(HikariDataSource(hikariConfig))
+        val migrations = runMigration()
         assertTrue(migrations > 0, "Ingen migreringer ble kjørt")
     }
 
     @Test
     fun `migreringer skal ikke kjøres flere ganger`() {
-        runMigration(HikariDataSource(hikariConfig))
+        runMigration()
 
-        val migrations = runMigration(HikariDataSource(hikariConfig))
+        val migrations = runMigration()
         assertEquals(0, migrations)
     }
 }

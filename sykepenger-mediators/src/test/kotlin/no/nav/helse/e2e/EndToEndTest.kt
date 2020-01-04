@@ -7,8 +7,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -95,8 +93,6 @@ internal class EndToEndTest {
         private lateinit var embeddedPostgres: EmbeddedPostgres
         private lateinit var postgresConnection: Connection
 
-        private lateinit var hikariConfig: HikariConfig
-
         private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
         private lateinit var jwtStub: JwtStub
 
@@ -146,9 +142,6 @@ internal class EndToEndTest {
         internal fun `start embedded environment`() {
             embeddedPostgres = EmbeddedPostgres.builder().start()
             postgresConnection = embeddedPostgres.postgresDatabase.connection
-            hikariConfig = createHikariConfig(
-                embeddedPostgres.getJdbcUrl("postgres", "postgres"))
-            runMigration(HikariDataSource(hikariConfig))
 
             embeddedKafkaEnvironment.start()
             adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
