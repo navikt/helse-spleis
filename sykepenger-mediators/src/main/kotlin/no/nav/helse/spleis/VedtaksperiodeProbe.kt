@@ -73,20 +73,20 @@ object VedtaksperiodeProbe : PersonObserver {
         log.info(
             "vedtaksperiode endret", keyValue("vedtaksperiodeId", "${event.id}"),
             keyValue("hendelse", event.sykdomshendelse.hendelsetype().name),
-            keyValue("tilstand", "${event.gjeldendeTilstand}"),
-            keyValue("forrigeTilstand", "${event.forrigeTilstand}")
+            keyValue("tilstand", event.gjeldendeTilstand.name),
+            keyValue("forrigeTilstand", event.forrigeTilstand.name)
         )
     }
 
     override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         log.info(
             "mottok påminnelse for vedtaksperiode: ${påminnelse.vedtaksperiodeId()}",
-            keyValue("påminnelsenr", påminnelse.antallGangerPåminnet),
-            keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt),
+            keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet}"),
+            keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt.toString()),
             keyValue("vedtaksperiodeId", påminnelse.vedtaksperiodeId()),
-            keyValue("tilstand", påminnelse.tilstand),
-            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt),
-            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt)
+            keyValue("tilstand", påminnelse.tilstand.name),
+            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt.toString()),
+            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt.toString())
         )
 
         vedtaksperiodePåminnetCounter
