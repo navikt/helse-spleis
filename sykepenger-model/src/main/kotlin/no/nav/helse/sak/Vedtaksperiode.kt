@@ -131,29 +131,60 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun trengerYtelser() {
-        val behov = Ytelser.lagBehov(
+        emitTrengerLøsning(Ytelser.lagBehov(
             vedtaksperiodeId = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
-        )
+        ))
+    }
 
+    private fun trengerVilkårsgrunnlag() {
+        emitTrengerLøsning(Vilkårsgrunnlag.lagBehov(
+            vedtaksperiodeId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer
+        ))
+    }
+
+    private fun emitTrengerLøsning(behov: Behov) {
         observers.forEach { observer ->
             observer.vedtaksperiodeTrengerLøsning(behov)
         }
     }
 
-    private fun trengerVilkårsgrunnlag() {
-        val behov = Vilkårsgrunnlag.lagBehov(
-            vedtaksperiodeId = id,
+    // Gang of four Observer pattern
+    internal fun addVedtaksperiodeObserver(observer: VedtaksperiodeObserver) {
+        observers.add(observer)
+    }
+
+    private fun emitVedtaksperiodeEndret(
+        currentState: TilstandType,
+        tidslinjeEvent: ArbeidstakerHendelse,
+        previousState: TilstandType,
+        varighet: Duration
+    ) {
+        val event = StateChangeEvent(
+            id = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer
+            organisasjonsnummer = organisasjonsnummer,
+            gjeldendeTilstand = currentState,
+            forrigeTilstand = previousState,
+            sykdomshendelse = tidslinjeEvent,
+            timeout = varighet
         )
 
         observers.forEach { observer ->
-            observer.vedtaksperiodeTrengerLøsning(behov)
+            observer.vedtaksperiodeEndret(event)
+        }
+    }
+
+    private fun emitVedtaksperiodePåminnet(påminnelse: Påminnelse) {
+        observers.forEach { observer ->
+            observer.vedtaksperiodePåminnet(påminnelse)
         }
     }
 
@@ -325,10 +356,9 @@ internal class Vedtaksperiode internal constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(
-                ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling,
-                listOf(Behovtype.GodkjenningFraSaksbehandler)
-            )
+            vedtaksperiode.emitTrengerLøsning(ManuellSaksbehandling.lagBehov(
+                vedtaksperiode.id, vedtaksperiode.aktørId, vedtaksperiode.fødselsnummer, vedtaksperiode.organisasjonsnummer
+            ))
         }
 
         override fun håndter(
@@ -355,14 +385,21 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            vedtaksperiode.emitTrengerLøsning(
-                ArbeidstakerHendelse.Hendelsetype.Utbetaling, listOf(Behovtype.Utbetaling), mapOf(
+
+            vedtaksperiode.emitTrengerLøsning(Behov.nyttBehov(
+                hendelsetype = ArbeidstakerHendelse.Hendelsetype.Utbetaling,
+                behov = listOf(Behovtype.Utbetaling),
+                aktørId = vedtaksperiode.aktørId,
+                fødselsnummer = vedtaksperiode.fødselsnummer,
+                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiode.id,
+                additionalParams = mapOf(
                     "utbetalingsreferanse" to utbetalingsreferanse,
                     "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
                     "maksdato" to (vedtaksperiode.maksdato ?: ""),
                     "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
                 )
-            )
+            ))
 
             val event = VedtaksperiodeObserver.UtbetalingEvent(
                 vedtaksperiodeId = vedtaksperiode.id,
@@ -469,59 +506,6 @@ internal class Vedtaksperiode internal constructor(
             godkjentAv = godkjentAv,
             utbetalingsreferanse = utbetalingsreferanse
         )
-    }
-
-    // Gang of four Observer pattern
-    internal fun addVedtaksperiodeObserver(observer: VedtaksperiodeObserver) {
-        observers.add(observer)
-    }
-
-    private fun emitVedtaksperiodeEndret(
-        currentState: TilstandType,
-        tidslinjeEvent: ArbeidstakerHendelse,
-        previousState: TilstandType,
-        varighet: Duration
-    ) {
-        val event = StateChangeEvent(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            gjeldendeTilstand = currentState,
-            forrigeTilstand = previousState,
-            sykdomshendelse = tidslinjeEvent,
-            timeout = varighet
-        )
-
-        observers.forEach { observer ->
-            observer.vedtaksperiodeEndret(event)
-        }
-    }
-
-    private fun emitVedtaksperiodePåminnet(påminnelse: Påminnelse) {
-        observers.forEach { observer ->
-            observer.vedtaksperiodePåminnet(påminnelse)
-        }
-    }
-
-    private fun emitTrengerLøsning(
-        hendelsetype: ArbeidstakerHendelse.Hendelsetype,
-        behovsliste: List<Behovtype>,
-        additionalParams: Map<String, Any> = emptyMap()
-    ) {
-        val behov = Behov.nyttBehov(
-            hendelsetype = hendelsetype,
-            behov = behovsliste,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = id,
-            additionalParams = additionalParams
-        )
-
-        observers.forEach { observer ->
-            observer.vedtaksperiodeTrengerLøsning(behov)
-        }
     }
 
     internal class Memento internal constructor(

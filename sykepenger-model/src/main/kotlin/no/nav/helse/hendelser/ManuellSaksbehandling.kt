@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.Behovtype
 import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.sak.VedtaksperiodeHendelse
 import java.util.*
@@ -21,6 +22,23 @@ class ManuellSaksbehandling private constructor(hendelseId: UUID, private val be
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun lagBehov(
+            vedtaksperiodeId: UUID,
+            aktørId: String,
+            fødselsnummer: String,
+            organisasjonsnummer: String
+        ): Behov {
+            return Behov.nyttBehov(
+                hendelsetype = Hendelsetype.ManuellSaksbehandling,
+                behov = listOf(Behovtype.GodkjenningFraSaksbehandler),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                additionalParams = emptyMap()
+            )
+        }
 
         fun fromJson(json: String): ManuellSaksbehandling {
             return objectMapper.readTree(json).let {
