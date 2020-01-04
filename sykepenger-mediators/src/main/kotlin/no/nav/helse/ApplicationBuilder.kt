@@ -1,12 +1,15 @@
 package no.nav.helse
 
-import io.ktor.config.MapApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.helse.spleis.HelseBuilder
 import no.nav.helse.spleis.nais.nais
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.common.serialization.StringSerializer
+import org.apache.kafka.streams.KafkaStreams
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -19,32 +22,55 @@ class ApplicationBuilder(env: Map<String, String>) {
 
     private val applicationLog = LoggerFactory.getLogger(ApplicationBuilder::class.java)
 
-    private val ktorConfig = createConfigFromEnvironment(env)
-    private val app = embeddedServer(Netty, applicationEngineEnvironment {
-        config = ktorConfig
+    private val kafkaConfigBuilder = KafkaConfigBuilder(env)
+    private val dataSourceBuilder = DataSourceBuilder(env)
 
+    private val helseBuilder = HelseBuilder(
+        dataSource = dataSourceBuilder.getDataSource(),
+        hendelseProducer = KafkaProducer<String, String>(kafkaConfigBuilder.producerConfig(), StringSerializer(), StringSerializer())
+    )
+
+    private val app = embeddedServer(Netty, applicationEngineEnvironment {
         log = applicationLog
 
         connector {
-            port = ktorConfig.getInt("server.port")
+            port = env["HTTP_PORT"]?.toInt() ?: 8080
         }
 
         module {
             nais(::isApplicationAlive, ::isApplicationReady)
-            helseStream(env)
+
+            val clientId = "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID")
+            // val clientSecret = "/var/run/secrets/nais.io/azure/client_secret".readFile() ?: env.getValue("AZURE_CLIENT_SECRET")
+
+            restInterface(
+                personMediator = helseBuilder.personMediator,
+                configurationUrl = requireNotNull(env["AZURE_CONFIG_URL"]),
+                clientId = clientId,
+                requiredGroup = requireNotNull(env["AZURE_REQUIRED_GROUP"])
+            )
         }
     })
 
     init {
         setUncaughtExceptionHandler(applicationLog)
         stopApplicationOnShutdown()
+
+        helseBuilder.addStateListener(KafkaStreams.StateListener { newState, _ ->
+            if (newState == KafkaStreams.State.ERROR || newState == KafkaStreams.State.NOT_RUNNING) {
+                stop()
+            }
+        })
     }
 
     fun start() {
         app.start(wait = false)
+        dataSourceBuilder.migrate()
+        helseBuilder.start(kafkaConfigBuilder.streamsConfig())
     }
 
     fun stop() {
+        helseBuilder.stop()
         app.stop(1, 5, TimeUnit.SECONDS)
     }
 
@@ -57,17 +83,7 @@ class ApplicationBuilder(env: Map<String, String>) {
         })
     }
 
-    companion object {
-        fun createConfigFromEnvironment(env: Map<String, String>) =
-            MapApplicationConfig().apply {
-                put("server.port", env.getOrDefault("HTTP_PORT", "8080"))
-
-                put("azure.client_id", "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID"))
-                put("azure.client_secret", "/var/run/secrets/nais.io/azure/client_secret".readFile() ?: env.getValue("AZURE_CLIENT_SECRET"))
-                env["AZURE_CONFIG_URL"]?.let { put("azure.configuration_url", it) }
-                env["AZURE_REQUIRED_GROUP"]?.let { put("azure.required_group", it) }
-            }
-
+    private companion object {
         private fun setUncaughtExceptionHandler(logger: Logger) {
             Thread.currentThread().setUncaughtExceptionHandler { thread, err ->
                 logger.error("uncaught exception in thread ${thread.name}: ${err.message}", err)
@@ -75,14 +91,6 @@ class ApplicationBuilder(env: Map<String, String>) {
         }
     }
 }
-
-@KtorExperimentalAPI
-private fun MapApplicationConfig.getString(property: String) =
-    this.property(property).getString()
-
-@KtorExperimentalAPI
-private fun MapApplicationConfig.getInt(property: String) =
-    this.getString(property).toInt()
 
 private fun String.readFile() =
     try {
