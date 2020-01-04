@@ -1,4 +1,4 @@
-package no.nav.helse.component.sak
+package no.nav.helse.e2e
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -28,7 +28,6 @@ import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.behov.Behovtype.*
-import no.nav.helse.component.JwtStub
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.sak.Sak
 import no.nav.helse.sak.TilstandType
@@ -65,7 +64,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
-internal class SakComponentTest {
+internal class EndToEndTest {
 
     private companion object {
 
@@ -148,22 +147,33 @@ internal class SakComponentTest {
         internal fun `start embedded environment`() {
             embeddedPostgres = EmbeddedPostgres.builder().start()
             postgresConnection = embeddedPostgres.postgresDatabase.connection
-            hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
+            hikariConfig = createHikariConfig(
+                embeddedPostgres.getJdbcUrl("postgres", "postgres"))
             runMigration(HikariDataSource(hikariConfig))
 
             embeddedKafkaEnvironment.start()
             adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
-            kafkaProducer = KafkaProducer(producerProperties(), StringSerializer(), StringSerializer())
+            kafkaProducer = KafkaProducer(
+                producerProperties(), StringSerializer(), StringSerializer())
 
             //Stub ID provider (for authentication of REST endpoints)
             wireMockServer.start()
-            jwtStub = JwtStub("Microsoft Azure AD", wireMockServer)
+            jwtStub =
+                JwtStub(
+                    "Microsoft Azure AD",
+                    wireMockServer
+                )
             stubFor(jwtStub.stubbedJwkProvider())
             stubFor(jwtStub.stubbedConfigProvider())
 
             val port = randomPort()
             appBaseUrl = "http://localhost:$port"
-            app = ApplicationBuilder(applicationConfig(wireMockServer.baseUrl(), port)).apply {
+            app = ApplicationBuilder(
+                applicationConfig(
+                    wireMockServer.baseUrl(),
+                    port
+                )
+            ).apply {
                 start()
             }
         }
@@ -333,7 +343,9 @@ internal class SakComponentTest {
             .atMost(30L, SECONDS)
             .untilAsserted {
                 assertNotNull(
-                    TestConsumer.records(vedtaksperiodeSlettetEventTopic)
+                    TestConsumer.records(
+                        vedtaksperiodeSlettetEventTopic
+                    )
                         .map { objectMapper.readTree(it.value()) }
                         .filter { enAktørId == it["aktørId"].textValue() }
                         .filter { fødselsnummer == it["fødselsnummer"].textValue() }
@@ -491,7 +503,9 @@ internal class SakComponentTest {
         await()
             .atMost(5, SECONDS)
             .untilAsserted {
-                val meldingerPåTopic = TestConsumer.records(vedtaksperiodeEventTopic)
+                val meldingerPåTopic = TestConsumer.records(
+                    vedtaksperiodeEventTopic
+                )
                 val vedtaksperiodeEndretHendelser = meldingerPåTopic
                     .map { objectMapper.readTree(it.value()) }
                     .filter { aktørId == it["aktørId"].textValue() }
@@ -511,7 +525,8 @@ internal class SakComponentTest {
         await()
             .atMost(5, SECONDS)
             .untilAsserted {
-                val meldingerPåTopic = TestConsumer.records(behovTopic)
+                val meldingerPåTopic =
+                    TestConsumer.records(behovTopic)
                 val behov = meldingerPåTopic
                     .map { Behov.fromJson(it.value()) }
                     .filter { aktørId == it["aktørId"] }
@@ -545,7 +560,9 @@ internal class SakComponentTest {
             .atMost(5, SECONDS)
             .untilAsserted {
                 val offsetAndMetadataMap =
-                    adminClient.listConsumerGroupOffsets(kafkaApplicationId).partitionsToOffsetAndMetadata().get()
+                    adminClient.listConsumerGroupOffsets(
+                        kafkaApplicationId
+                    ).partitionsToOffsetAndMetadata().get()
                 val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
                 val currentPositionOfSentMessage = recordMetadata.offset()
                 val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
@@ -569,7 +586,8 @@ internal class SakComponentTest {
         fun records(topic: String) = records().filter { it.topic() == topic }
 
         fun records() =
-            records.also { it.addAll(kafkaConsumer.poll(ofMillis(0))) }
+            records.also { it.addAll(
+                kafkaConsumer.poll(ofMillis(0))) }
 
         fun close() {
             kafkaConsumer.unsubscribe()

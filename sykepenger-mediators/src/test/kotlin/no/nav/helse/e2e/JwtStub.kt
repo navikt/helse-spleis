@@ -1,4 +1,4 @@
-package no.nav.helse.component
+package no.nav.helse.e2e
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
