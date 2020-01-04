@@ -1,4 +1,4 @@
-package no.nav.helse.unit.hendelser.søknad
+package no.nav.helse.hendelser
 
 import no.nav.helse.TestConstants.egenmeldingFom
 import no.nav.helse.TestConstants.egenmeldingTom

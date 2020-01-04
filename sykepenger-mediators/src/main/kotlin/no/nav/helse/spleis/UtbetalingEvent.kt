@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
-import no.nav.helse.sak.VedtaksperiodeObserver
+import no.nav.helse.person.VedtaksperiodeObserver
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import org.apache.kafka.clients.producer.ProducerRecord
 

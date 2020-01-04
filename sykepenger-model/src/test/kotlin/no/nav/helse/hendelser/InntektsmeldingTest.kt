@@ -5,7 +5,7 @@ import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.Uke
 import no.nav.helse.get
-import no.nav.helse.sak.UtenforOmfangException
+import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag

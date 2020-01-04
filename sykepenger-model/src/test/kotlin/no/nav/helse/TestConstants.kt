@@ -10,8 +10,8 @@ import no.nav.helse.behov.Behovtype
 import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.TilstandType
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*

@@ -29,9 +29,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.behov.Behovtype.*
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.sak.Sak
-import no.nav.helse.sak.TilstandType
-import no.nav.helse.spleis.path
+import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -137,7 +136,7 @@ internal class EndToEndTest {
                 put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
                 put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
                 put(SASL_MECHANISM, "PLAIN")
-                put(GROUP_ID_CONFIG, "sakComponentTest")
+                put(GROUP_ID_CONFIG, "end-to-end-test")
                 put(AUTO_OFFSET_RESET_CONFIG, "earliest")
             }
         }
@@ -267,7 +266,7 @@ internal class EndToEndTest {
             typer = listOf(GodkjenningFraSaksbehandler.name)
         )
 
-        aktørID.hentSak {
+        aktørID.hentPerson {
             assertTrue(this.contains("maksdato"))
             assertTrue(this.contains("utbetalingslinjer"))
             assertTrue(this.contains("dagsats"))
@@ -275,7 +274,7 @@ internal class EndToEndTest {
     }
 
     @Test
-    fun `gitt en sak for utbetaling, skal vi kunne hente opp saken via utbetalingsreferanse`() {
+    fun `gitt en periode til utbetaling, skal vi kunne hente opp personen via utbetalingsreferanse`() {
         val aktørID = "87659123421962"
         val fødselsnummer = "01018000000"
         val virksomhetsnummer = "123456789"
@@ -312,19 +311,25 @@ internal class EndToEndTest {
             assertTrue(this.contains(aktørID))
 
             assertDoesNotThrow {
-                Sak.restore(Sak.Memento.fromString(this))
+                Person.restore(Person.Memento.fromString(this))
             }
         }
     }
 
     @Test
-    fun `gitt en ny sak, så skal den kunne hentes ut på saken`() {
+    fun `gitt en ny søknad, så skal den kunne hentes ut på personen`() {
         val enAktørId = "1211109876543"
         val fødselsnummer = "01019000000"
         val virksomhetsnummer = "123456789"
 
         val nySøknad = sendNySøknad(enAktørId, fødselsnummer, virksomhetsnummer)
 
+        enAktørId.hentPerson {
+            val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
+            assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
+        }
+
+        // TODO: fjern route når speil er oppdatert med ny url
         enAktørId.hentSak {
             val lagretNySøknad = objectMapper.readTree(this).findValue("søknad")
             assertEquals(nySøknad.toJsonNode(), lagretNySøknad)
@@ -385,11 +390,15 @@ internal class EndToEndTest {
     }
 
     private fun String.hentSak(testBlock: String.() -> Unit) {
-        (path + this).httpGet(testBlock)
+        ("/api/sak/$this").httpGet(testBlock)
+    }
+
+    private fun String.hentPerson(testBlock: String.() -> Unit) {
+        ("/api/person/$this").httpGet(testBlock)
     }
 
     private fun String.hentUtbetaling(testBlock: String.() -> Unit) {
-        ("/api/utbetaling/" + this).httpGet(testBlock)
+        ("/api/utbetaling/$this").httpGet(testBlock)
     }
 
     private fun sendSykepengehistorikkløsning(aktørId: String, fødselsnummer: String, perioder: List<SpolePeriode>) {

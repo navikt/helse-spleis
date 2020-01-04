@@ -1,6 +1,6 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.sak.SakObserver
+import no.nav.helse.person.PersonObserver
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.streams.KafkaStreams
 import java.util.*
@@ -12,16 +12,16 @@ internal class HelseBuilder(dataSource: DataSource, hendelseProducer: KafkaProdu
     private val hendelseProbe: HendelseListener = HendelseProbe()
     private val hendelseRecorder: HendelseListener = HendelseRecorder(dataSource)
 
-    internal val sakMediator: SakMediator
-    private val sakRepository: SakRepository = SakPostgresRepository(dataSource)
-    private val lagreSakDao: SakObserver = LagreSakDao(dataSource)
+    internal val personMediator: PersonMediator
+    private val personRepository: PersonRepository = PersonPostgresRepository(dataSource)
+    private val lagrePersonDao: PersonObserver = LagrePersonDao(dataSource)
     private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource)
-    private val lagreUtbetalingDao: SakObserver = LagreUtbetalingDao(dataSource)
+    private val lagreUtbetalingDao: PersonObserver = LagreUtbetalingDao(dataSource)
 
     init {
-        sakMediator = SakMediator(
-            sakRepository = sakRepository,
-            lagreSakDao = lagreSakDao,
+        personMediator = PersonMediator(
+            personRepository = personRepository,
+            lagrePersonDao = lagrePersonDao,
             utbetalingsreferanseRepository = utbetalingsreferanseRepository,
             lagreUtbetalingDao = lagreUtbetalingDao,
             producer = hendelseProducer
@@ -30,7 +30,7 @@ internal class HelseBuilder(dataSource: DataSource, hendelseProducer: KafkaProdu
         hendelseBuilder = HendelseBuilder().apply {
             addListener(hendelseProbe)
             addListener(hendelseRecorder)
-            addListener(sakMediator)
+            addListener(personMediator)
         }
     }
 

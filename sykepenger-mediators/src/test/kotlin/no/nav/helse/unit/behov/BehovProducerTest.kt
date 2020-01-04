@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition

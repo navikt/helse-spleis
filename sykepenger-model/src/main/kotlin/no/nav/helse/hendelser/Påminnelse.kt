@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.TilstandType
-import no.nav.helse.sak.VedtaksperiodeHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.VedtaksperiodeHendelse
 import java.io.IOException
 import java.time.LocalDateTime
 import java.util.*

@@ -4,7 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.hendelser.*
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import javax.sql.DataSource
 
 class HendelseRecorder(private val dataSource: DataSource,

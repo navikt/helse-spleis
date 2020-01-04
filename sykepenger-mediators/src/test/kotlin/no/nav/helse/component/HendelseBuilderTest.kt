@@ -7,8 +7,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.TilstandType
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseBuilder
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.toJsonNode

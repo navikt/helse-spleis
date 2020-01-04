@@ -12,8 +12,8 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.createHikariConfig
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.runMigration
-import no.nav.helse.sak.ArbeidstakerHendelse
 import no.nav.helse.spleis.HendelseRecorder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals

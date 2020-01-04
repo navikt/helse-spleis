@@ -1,6 +1,6 @@
 package no.nav.helse.behov
 
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 import java.util.*
 

@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
 

@@ -6,9 +6,9 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 
-internal fun Route.utbetaling(sakMediator: SakMediator) {
+internal fun Route.utbetaling(personMediator: PersonMediator) {
     get("/api/utbetaling/{utbetalingsreferanse}") {
-        sakMediator.hentSakForUtbetaling(call.parameters["utbetalingsreferanse"]!!)?.let { call.respond(it.memento().state()) }
+        personMediator.hentSakForUtbetaling(call.parameters["utbetalingsreferanse"]!!)?.let { call.respond(it.memento().state()) }
                 ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
     }
 }

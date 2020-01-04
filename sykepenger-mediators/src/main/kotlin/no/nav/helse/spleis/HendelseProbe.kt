@@ -2,7 +2,7 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.*
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 
 class HendelseProbe: HendelseListener {
     private companion object {

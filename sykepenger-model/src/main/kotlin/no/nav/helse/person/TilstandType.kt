@@ -1,0 +1,13 @@
+package no.nav.helse.person
+
+enum class TilstandType {
+    START,
+    MOTTATT_NY_SØKNAD,
+    MOTTATT_SENDT_SØKNAD,
+    MOTTATT_INNTEKTSMELDING,
+    VILKÅRSPRØVING,
+    BEREGN_UTBETALING,
+    TIL_GODKJENNING,
+    TIL_UTBETALING,
+    TIL_INFOTRYGD
+}

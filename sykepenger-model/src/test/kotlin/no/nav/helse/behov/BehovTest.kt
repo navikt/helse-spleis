@@ -1,10 +1,8 @@
-package no.nav.helse.unit.behov
+package no.nav.helse.behov
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
-import no.nav.helse.sak.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

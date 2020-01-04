@@ -9,8 +9,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
-import no.nav.helse.sak.ArbeidstakerHendelse
-import no.nav.helse.sak.VedtaksperiodeHendelse
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.*
 

@@ -31,7 +31,7 @@ class ApplicationBuilder(env: Map<String, String>) {
 
         module {
             nais(::isApplicationAlive, ::isApplicationReady)
-            vedtaksperiodeApplication()
+            helseStream()
         }
     })
 
