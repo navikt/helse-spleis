@@ -12,7 +12,6 @@ import io.ktor.request.httpMethod
 import io.ktor.request.uri
 import io.ktor.response.ApplicationSendPipeline
 import io.ktor.routing.routing
-import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import no.nav.helse.spleis.PersonMediator
@@ -32,7 +31,6 @@ private val httpRequestDuration =
     Histogram.build("http_request_duration_seconds", "Distribution of http request duration")
         .register()
 
-@KtorExperimentalAPI
 internal fun Application.restInterface(
     personMediator: PersonMediator,
     configurationUrl: String,
