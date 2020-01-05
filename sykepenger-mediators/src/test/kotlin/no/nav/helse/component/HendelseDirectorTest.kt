@@ -9,8 +9,9 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.HendelseBuilder
+import no.nav.helse.spleis.HendelseDirector
 import no.nav.helse.spleis.HendelseListener
+import no.nav.helse.spleis.HendelseStream
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -35,7 +36,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class HendelseBuilderTest : HendelseListener {
+internal class HendelseDirectorTest : HendelseListener {
 
     @Test
     internal fun `leser søknader`() {
@@ -98,7 +99,14 @@ internal class HendelseBuilderTest : HendelseListener {
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
 
-        private val hendelseBuilder = HendelseBuilder().also {
+        private val topics = listOf(
+            Topics.søknadTopic,
+            Topics.inntektsmeldingTopic,
+            Topics.behovTopic,
+            Topics.påminnelseTopic
+        )
+        private val hendelseStream = HendelseStream(topics)
+        private val hendelseBuilder = HendelseDirector(hendelseStream).also {
             it.addListener(object : HendelseListener {
                 override fun onPåminnelse(påminnelse: Påminnelse) {
                     lestPåminnelse.set(true)
@@ -129,13 +137,6 @@ internal class HendelseBuilderTest : HendelseListener {
                 }
             })
         }
-
-        private val topics = listOf(
-            Topics.søknadTopic,
-            Topics.inntektsmeldingTopic,
-            Topics.behovTopic,
-            Topics.påminnelseTopic
-        )
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
@@ -153,7 +154,7 @@ internal class HendelseBuilderTest : HendelseListener {
         @JvmStatic
         internal fun `start embedded environment`() {
             embeddedKafkaEnvironment.start()
-            hendelseBuilder.start(streamsConfig())
+            hendelseStream.start(streamsConfig())
 
             producer = KafkaProducer(producerConfig(), StringSerializer(), StringSerializer())
         }
