@@ -322,8 +322,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
-            .løsBehov(mapOf("EgenAnsatt" to false))))
+        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
+            .løsBehov(mapOf("EgenAnsatt" to false)).toJson())!!)
 
         assertTilstandsendring(BEREGN_UTBETALING)
 
@@ -346,8 +346,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
-            .løsBehov(mapOf("EgenAnsatt" to true))))
+        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
+            .løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }

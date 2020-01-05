@@ -15,9 +15,24 @@ import java.time.LocalDate
 import java.util.*
 
 class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser), VedtaksperiodeHendelse {
+    ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser),
+    VedtaksperiodeHendelse {
 
-    constructor(behov: Behov) : this(UUID.randomUUID(), behov)
+    private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
+
+    class Builder : ArbeidstakerHendelseBuilder {
+        override fun build(json: String): Ytelser? {
+            return try {
+                val behov = Behov.fromJson(json)
+                require(behov.erLøst())
+                require(Hendelsetype.Ytelser == behov.hendelsetype())
+
+                Ytelser(behov)
+            } catch (err: Exception) {
+                null
+            }
+        }
+    }
 
     companion object {
 

@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.apache.kafka.common.serialization.Serdes
@@ -53,56 +52,51 @@ internal class HendelseBuilder() {
 
     private fun onPåminnelse(json: String) {
         json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Påminnelse.name)
-        Påminnelse.fraJson(json)?.also {
+        Påminnelse.Builder().build(json)?.also {
             notifyListeners(HendelseListener::onPåminnelse, it)
-        }
+        } ?: notifyListeners(HendelseListener::onUnprocessedMessage, json)
     }
 
     private fun onBehov(json: String) {
         json.loggHendelse("Behov")
 
-        val behov = try {
-            Behov.fromJson(json)
-        } catch (err: Exception) {
-            return log.info("kan ikke lese behov som json: ${err.message}", err)
-        }
-
-        if (!behov.erLøst()) return
-
-        if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.Ytelser) {
+        Ytelser.Builder().build(json)?.also {
             json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Ytelser.name)
-            Ytelser(behov).also {
-                notifyListeners(HendelseListener::onYtelser, it)
-            }
-        } else if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling) {
-            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling.name)
-            ManuellSaksbehandling(behov).also {
-                notifyListeners(HendelseListener::onManuellSaksbehandling, it)
-            }
-        } else if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsetype.Vilkårsgrunnlag) {
-            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Vilkårsgrunnlag.name)
-            Vilkårsgrunnlag(behov).also {
-                notifyListeners(HendelseListener::onVilkårsgrunnlag, it)
-            }
+            return notifyListeners(HendelseListener::onYtelser, it)
         }
+
+        ManuellSaksbehandling.Builder().build(json)?.also {
+            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling.name)
+            return notifyListeners(HendelseListener::onManuellSaksbehandling, it)
+        }
+
+        Vilkårsgrunnlag.Builder().build(json)?.also {
+            json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Vilkårsgrunnlag.name)
+            return notifyListeners(HendelseListener::onVilkårsgrunnlag, it)
+        }
+
+        notifyListeners(HendelseListener::onUnprocessedMessage, json)
     }
 
     private fun onInntektsmelding(json: String) {
         json.loggHendelse(ArbeidstakerHendelse.Hendelsetype.Inntektsmelding.name)
-        Inntektsmelding.fromInntektsmelding(json)?.let {
+        Inntektsmelding.Builder().build(json)?.let {
             notifyListeners(HendelseListener::onInntektsmelding, it)
-        }
+        } ?: notifyListeners(HendelseListener::onUnprocessedMessage, json)
     }
 
     private fun onSøknad(json: String) {
         json.loggHendelse("Søknad")
 
-        SøknadHendelse.fromSøknad(json)?.also {
-            when (it) {
-                is NySøknad -> notifyListeners(HendelseListener::onNySøknad, it)
-                is SendtSøknad -> notifyListeners(HendelseListener::onSendtSøknad, it)
-            }
+        NySøknad.Builder().build(json)?.also {
+            return notifyListeners(HendelseListener::onNySøknad, it)
         }
+
+        SendtSøknad.Builder().build(json)?.also {
+            return notifyListeners(HendelseListener::onSendtSøknad, it)
+        }
+
+        notifyListeners(HendelseListener::onUnprocessedMessage, json)
     }
 
     private fun String.loggHendelse(hendelsetype: String) {

@@ -32,7 +32,7 @@ internal class InntektsmeldingHendelseBuilder {
         inntektsmelding = InntektsmeldingkontraktBuilder.build(block)
     }
 
-    private fun build() = Inntektsmelding(inntektsmelding.toJsonNode())
+    private fun build() = Inntektsmelding.Builder().build(inntektsmelding.toJsonNode().toString())!!
 
     internal companion object Type :
         Buildertype<Inntektsmelding, InntektsmeldingHendelseBuilder> {

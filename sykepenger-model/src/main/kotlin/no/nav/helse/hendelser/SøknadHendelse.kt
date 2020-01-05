@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.time.LocalDate
 import java.util.*
 
@@ -16,29 +14,10 @@ abstract class SøknadHendelse protected constructor(
     protected val søknad: JsonNode
 ) : SykdomstidslinjeHendelse(hendelseId, hendelsetype) {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(SøknadHendelse::class.java)
-
+    private companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromSøknad(json: String): SøknadHendelse? {
-            return try {
-                objectMapper.readTree(json).let { jsonNode ->
-                    when (val type = jsonNode["status"].textValue()) {
-                        in listOf("NY", "FREMTIDIG") -> NySøknad(jsonNode)
-                        "SENDT" -> SendtSøknad(jsonNode)
-                        else -> null.also {
-                            log.info("kunne ikke lese sykepengesøknad, ukjent type: $type")
-                        }
-                    }
-                }
-            } catch (err: IOException) {
-                log.info("kunne ikke lese sykepengesøknad som json: ${err.message}", err)
-                null
-            }
-        }
     }
 
     private val aktørId = søknad["aktorId"].asText()!!

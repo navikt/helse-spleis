@@ -10,8 +10,6 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
-import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,23 +18,22 @@ import java.util.*
 class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
     SykdomstidslinjeHendelse(hendelseId, Hendelsetype.Inntektsmelding) {
 
-    constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID(), inntektsmelding)
+    private constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID(), inntektsmelding)
 
-    companion object {
-        private val log = LoggerFactory.getLogger(Inntektsmelding::class.java)
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromInntektsmelding(json: String): Inntektsmelding? {
+    class Builder : ArbeidstakerHendelseBuilder {
+        override fun build(json: String): Inntektsmelding? {
             return try {
                 Inntektsmelding(objectMapper.readTree(json))
-            } catch (err: IOException) {
-                log.info("kunne ikke lese inntektsmelding som json: ${err.message}", err)
+            } catch (err: Exception) {
                 null
             }
         }
+    }
 
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         fun fromJson(json: String): Inntektsmelding {
             return objectMapper.readTree(json).let {
                 Inntektsmelding(
@@ -69,6 +66,7 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
             ?.takeUnless { it.isNull }
             ?.textValue()?.toBigDecimal()
     private val refusjon get() = Refusjon(inntektsmelding["refusjon"])
+
     private val endringIRefusjoner
         get() = inntektsmelding["endringIRefusjoner"]
             .mapNotNull { it["endringsdato"].safelyUnwrapDate() }
@@ -150,15 +148,15 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
             .divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP)
             .toInt()
     }
-
     private class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
-    }
 
+    }
     private class Refusjon(val jsonNode: JsonNode) {
         val opphoersdato get() = jsonNode["opphoersdato"].safelyUnwrapDate()
         val beloepPrMnd get() = jsonNode["beloepPrMnd"]?.textValue()?.toBigDecimal()
+
     }
 }
 

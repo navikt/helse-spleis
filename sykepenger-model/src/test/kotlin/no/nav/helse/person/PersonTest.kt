@@ -496,7 +496,7 @@ internal class PersonTest {
             val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
                 (it as ObjectNode).remove("virksomhetsnummer")
             }
-            val inntektsmeldingHendelse = Inntektsmelding(inntektsmeldingJson)
+            val inntektsmeldingHendelse = requireNotNull(Inntektsmelding.Builder().build(inntektsmeldingJson.toString()))
 
             assertThrows<UtenforOmfangException> {
                 it.håndter(inntektsmeldingHendelse)
@@ -515,7 +515,7 @@ internal class PersonTest {
         it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer))
     }
 
-    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknad(
+    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknad.Builder().build(
         søknadDTO(
             id = UUID.randomUUID().toString(),
             status = SoknadsstatusDTO.NY,
@@ -526,8 +526,7 @@ internal class PersonTest {
                 navn = "en_arbeidsgiver"
             ),
             sendtNav = LocalDateTime.now()
-        ).toJsonNode()
-    )
+        ).toJsonNode().toString())!!
 
     private fun assertAntallPersonerEndret(antall: Int) {
         assertEquals(antall, this.testObserver.tilstandsendringer.size)

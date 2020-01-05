@@ -44,7 +44,7 @@ internal class NySøknadHendelseBuilder {
         sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = NySøknad(sykepengesøknad.toJsonNode())
+    private fun build() = NySøknad.Builder().build(sykepengesøknad.toJsonNode().toString())!!
 
     internal companion object Type :
         Buildertype<NySøknad, NySøknadHendelseBuilder> {
@@ -60,7 +60,7 @@ internal class SendtSøknadHendelseBuilder {
         sykepengesøknad = SykepengesoknadDTOBuilder.build(block)
     }
 
-    private fun build() = SendtSøknad(sykepengesøknad.toJsonNode())
+    private fun build() = SendtSøknad.Builder().build(sykepengesøknad.toJsonNode().toString())!!
 
     internal companion object Type :
         Buildertype<SendtSøknad, SendtSøknadHendelseBuilder> {

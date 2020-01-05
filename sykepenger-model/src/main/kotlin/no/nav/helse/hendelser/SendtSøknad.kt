@@ -13,7 +13,22 @@ import java.util.*
 
 class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsetype.SendtSøknad, søknad) {
 
-    constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
+    private constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
+
+    class Builder : ArbeidstakerHendelseBuilder {
+        override fun build(json: String): SendtSøknad? {
+            return try {
+                objectMapper.readTree(json).let { jsonNode ->
+                    val type = jsonNode["status"].textValue()
+                    require(type == "SENDT")
+
+                    SendtSøknad(jsonNode)
+                }
+            } catch (err: Exception) {
+                null
+            }
+        }
+    }
 
     companion object {
         private val objectMapper = jacksonObjectMapper()

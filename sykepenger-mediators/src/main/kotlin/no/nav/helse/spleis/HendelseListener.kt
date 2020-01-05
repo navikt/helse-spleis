@@ -10,4 +10,5 @@ interface HendelseListener {
     fun onInntektsmelding(inntektsmelding: Inntektsmelding) {}
     fun onNySøknad(søknad: NySøknad) {}
     fun onSendtSøknad(søknad: SendtSøknad) {}
+    fun onUnprocessedMessage(message: String) {}
 }

@@ -130,7 +130,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknad(
+    ) = SendtSøknad.Builder().build(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -143,8 +143,7 @@ internal object TestConstants {
             status = SoknadsstatusDTO.SENDT,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode()
-    )
+        ).toJsonNode().toString())!!
 
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
@@ -181,7 +180,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknad(
+    ) = NySøknad.Builder().build(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -194,8 +193,7 @@ internal object TestConstants {
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode()
-    )
+        ).toJsonNode().toString())!!
 
     fun søknadsperiode(fom: LocalDate, tom: LocalDate, sykemeldingsgrad: Int = 100, faktiskGrad: Int? = null) =
         SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = sykemeldingsgrad, faktiskGrad = faktiskGrad)
@@ -217,7 +215,7 @@ internal object TestConstants {
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
     ) =
-        Inntektsmelding(
+        Inntektsmelding.Builder().build(
             inntektsmeldingDTO(
                 aktørId,
                 fødselsnummer,
@@ -228,8 +226,7 @@ internal object TestConstants {
                 refusjon,
                 endringerIRefusjoner,
                 beregnetInntekt
-            ).toJsonNode()
-        )
+            ).toJsonNode().toString())!!
 
     fun inntektsmeldingDTO(
         aktørId: String = "",
@@ -290,7 +287,7 @@ internal object TestConstants {
         utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
         sykepengehistorikk: List<SpolePeriode>
 
-    ) = Ytelser(
+    ) = Ytelser.Builder().build(
         Ytelser.lagBehov(
             vedtaksperiodeId,
             aktørId,
@@ -301,8 +298,7 @@ internal object TestConstants {
             mapOf(
                 "Sykepengehistorikk" to sykepengehistorikk
             )
-        )
-    )
+        ).toJson())!!
 
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
@@ -337,7 +333,7 @@ internal object TestConstants {
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ): ManuellSaksbehandling {
-        return ManuellSaksbehandling(
+        return ManuellSaksbehandling.Builder().build(
             manuellSaksbehandlingLøsning(
                 organisasjonsnummer = organisasjonsnummer,
                 aktørId = aktørId,
@@ -345,8 +341,7 @@ internal object TestConstants {
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingGodkjent = utbetalingGodkjent,
                 saksbehandler = saksbehandler
-            )
-        )
+            ).toJson())!!
     }
 
     fun påminnelseHendelse(
@@ -354,7 +349,7 @@ internal object TestConstants {
         tilstand: TilstandType,
         aktørId: String = "1",
         organisasjonsnummer: String = "123456789"
-    ) = Påminnelse.fraJson(
+    ) = Påminnelse.Builder().build(
         objectMapper.writeValueAsString(
             mapOf(
                 "aktørId" to aktørId,
@@ -396,11 +391,10 @@ internal class Uke(ukenr: Long) {
     val søndag get() = mandag.plusDays(6)
 }
 
-internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad(
+internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad.Builder().build(
     this.copy(
         status = SoknadsstatusDTO.SENDT
-    ).toJsonNode()
-)
+    ).toJsonNode().toString())!!
 
 internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 

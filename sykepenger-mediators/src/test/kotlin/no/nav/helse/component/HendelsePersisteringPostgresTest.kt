@@ -81,9 +81,9 @@ class HendelsePersisteringPostgresTest {
             assertHendelse(dataSource, it)
         }
 
-        Vilkårsgrunnlag(Vilkårsgrunnlag.lagBehov(UUID.randomUUID(), "aktørid", "fnr", "orgnr").løsBehov(mapOf(
+        Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(UUID.randomUUID(), "aktørid", "fnr", "orgnr").løsBehov(mapOf(
             "EgenAnsatt" to false
-        ))).also {
+        )).toJson())!!.also {
             dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }

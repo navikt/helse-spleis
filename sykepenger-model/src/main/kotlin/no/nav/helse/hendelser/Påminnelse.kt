@@ -11,7 +11,8 @@ import java.io.IOException
 import java.time.LocalDateTime
 import java.util.*
 
-class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNode) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Påminnelse), VedtaksperiodeHendelse {
+class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNode) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Påminnelse),
+    VedtaksperiodeHendelse {
 
     private constructor(json: JsonNode) : this(UUID.randomUUID(), json)
 
@@ -44,12 +45,8 @@ class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNo
         return json.toString()
     }
 
-    companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fraJson(json: String): Påminnelse? {
+    class Builder : ArbeidstakerHendelseBuilder {
+        override fun build(json: String): Påminnelse? {
             val jsonNode = try {
                 objectMapper.readTree(json)
             } catch (err: IOException) {
@@ -67,4 +64,9 @@ class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNo
         }
     }
 
+    private companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
 }

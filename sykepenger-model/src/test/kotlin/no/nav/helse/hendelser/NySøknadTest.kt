@@ -79,7 +79,7 @@ internal class NySøknadTest {
             json.set<ObjectNode>("status", JsonNodeFactory.instance.textNode("NY"))
             json.set<ObjectNode>("soknadsperioder", (objectMapper.readTree(overlappendePerioder)))
 
-            NySøknad(json).sykdomstidslinje()
+            requireNotNull(NySøknad.Builder().build(json.toString())).sykdomstidslinje()
         }
     }
 }

@@ -13,9 +13,24 @@ import no.nav.helse.person.VedtaksperiodeHendelse
 import java.util.*
 
 class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsetype.Vilkårsgrunnlag), VedtaksperiodeHendelse {
+    ArbeidstakerHendelse(hendelseId, Hendelsetype.Vilkårsgrunnlag),
+    VedtaksperiodeHendelse {
 
-    constructor(behov: Behov) : this(UUID.randomUUID(), behov)
+    private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
+
+    class Builder : ArbeidstakerHendelseBuilder {
+        override fun build(json: String): Vilkårsgrunnlag? {
+            return try {
+                val behov = Behov.fromJson(json)
+                require(behov.erLøst())
+                require(Hendelsetype.Vilkårsgrunnlag == behov.hendelsetype())
+
+                Vilkårsgrunnlag(behov)
+            } catch (err: Exception) {
+                null
+            }
+        }
+    }
 
     companion object {
 

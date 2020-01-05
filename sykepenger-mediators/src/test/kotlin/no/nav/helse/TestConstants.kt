@@ -125,7 +125,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknad(
+    ) = SendtSøknad.Builder().build(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -138,8 +138,7 @@ internal object TestConstants {
             status = SoknadsstatusDTO.SENDT,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode()
-    )
+        ).toJsonNode().toString())!!
 
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
@@ -176,7 +175,7 @@ internal object TestConstants {
             orgnummer = "123456789"
         ),
         sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknad(
+    ) = NySøknad.Builder().build(
         søknadDTO(
             id = id,
             aktørId = aktørId,
@@ -189,8 +188,7 @@ internal object TestConstants {
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode()
-    )
+        ).toJsonNode().toString())!!
 
     fun inntektsmeldingHendelse(
         aktørId: String = "",
@@ -208,7 +206,7 @@ internal object TestConstants {
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
     ) =
-        Inntektsmelding(
+        Inntektsmelding.Builder().build(
             inntektsmeldingDTO(
                 aktørId,
                 fødselsnummer,
@@ -219,8 +217,7 @@ internal object TestConstants {
                 refusjon,
                 endringerIRefusjoner,
                 beregnetInntekt
-            ).toJsonNode()
-        )
+            ).toJsonNode().toString())!!
 
     fun inntektsmeldingDTO(
         aktørId: String = "",
@@ -266,7 +263,7 @@ internal object TestConstants {
         aktørId: String = "1",
         organisasjonsnummer: String = "123456789",
         fødselsnummer: String
-    ) = Påminnelse.fraJson(
+    ) = Påminnelse.Builder().build(
         objectMapper.writeValueAsString(
             mapOf(
                 "aktørId" to aktørId,
