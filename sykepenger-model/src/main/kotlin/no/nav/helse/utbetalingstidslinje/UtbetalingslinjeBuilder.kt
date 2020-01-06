@@ -33,7 +33,7 @@ internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslin
     }
 
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
-        helseState.betalingsdag(dag)
+//        helseState.betalingsdag(dag)
     }
 
     private interface HelseState {
