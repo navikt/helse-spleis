@@ -5,7 +5,6 @@ import no.nav.helse.fixtures.UtbetalingstidslinjeInspektør
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 
 internal class ArvTidslinjeTest {
 
