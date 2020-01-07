@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 /**
@@ -22,7 +21,7 @@ internal class UtbetalingBuilder internal constructor(
 
     private val arbeidsgiverRegler = sykdomstidslinje.arbeidsgiverRegler
 
-    private val inntektHistorie = sykdomstidslinje.inntektHistorie
+    private val inntektsberegner = sykdomstidslinje.inntektsberegner
 
     private var nåværendeInntekt = 0.00
 
@@ -74,7 +73,7 @@ internal class UtbetalingBuilder internal constructor(
     }
 
     private fun setNåværendeInntekt(dagen: LocalDate) {
-        nåværendeInntekt = inntektHistorie.inntekt(dagen) * arbeidsgiverRegler.prosentLønn()
+        nåværendeInntekt = inntektsberegner.inntekt(dagen) * arbeidsgiverRegler.prosentLønn()
     }
 
     private fun addArbeidsgiverdag(dagen: LocalDate) {

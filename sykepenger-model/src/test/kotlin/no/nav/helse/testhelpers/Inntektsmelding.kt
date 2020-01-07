@@ -48,13 +48,16 @@ internal class InntektsmeldingkontraktBuilder {
         arbeidsgiverperioder.add(ArbeidsgiverperiodeBuilder().apply(block).build())
     }
 
+    internal var beregnetInntekt: Double = 120.0
+    internal lateinit var førsteFraværsdag: LocalDate
+
     fun build() = Inntektsmeldingkontrakt(
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidstakerAktorId = "aktørId",
         arbeidstakerFnr = "fødselsnummer",
         virksomhetsnummer = "123456789",
-        beregnetInntekt = 666.toBigDecimal(),
-        foersteFravaersdag = arbeidsgiverperioder.map { it.fom }.min(),
+        beregnetInntekt = beregnetInntekt.toBigDecimal(),
+        foersteFravaersdag = førsteFraværsdag,
         ferieperioder = emptyList(),
         refusjon = Refusjon(
             beloepPrMnd = 666.toBigDecimal(),

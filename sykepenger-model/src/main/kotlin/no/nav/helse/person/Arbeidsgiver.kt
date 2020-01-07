@@ -9,13 +9,16 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
 
-internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID) {
-    internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID())
+internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID, private val inntektHistorie: InntektHistorie) {
+    internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(),
+        InntektHistorie()
+    )
 
     internal class Memento internal constructor(
         internal val id: UUID,
         internal val organisasjonsnummer: String,
-        internal val perioder: List<Vedtaksperiode.Memento>
+        internal val perioder: List<Vedtaksperiode.Memento>,
+        internal val inntektHistorie: InntektHistorie.Memento
     ) {
         internal companion object {
 
@@ -28,8 +31,9 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
                     id = UUID.fromString(json["id"].textValue()),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     perioder = json["saker"].map {
-                        Vedtaksperiode.Memento.fromString(it.toString())
-                    }
+                        Vedtaksperiode.Memento.fromJsonNode(it)
+                    },
+                    inntektHistorie = InntektHistorie.Memento.fromJsonNode(json["inntektHistorie"])
                 )
             }
 
@@ -45,6 +49,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
                 this.perioder.fold(it.putArray("saker")) { result, current ->
                     result.addRawValue(RawValue(current.state()))
                 }
+                it.set<ObjectNode>("inntektHistorie", this.inntektHistorie.state())
             }.toString()
     }
 
@@ -52,7 +57,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         fun restore(memento: Memento): Arbeidsgiver {
             return Arbeidsgiver(
                 id = memento.id,
-                organisasjonsnummer = memento.organisasjonsnummer
+                organisasjonsnummer = memento.organisasjonsnummer,
+                inntektHistorie = InntektHistorie.restore(memento.inntektHistorie)
             ).apply {
                 this.perioder.addAll(memento.perioder.map {
                     Vedtaksperiode.restore(it)
@@ -70,7 +76,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
     internal fun memento() = Memento(
         id = this.id,
         organisasjonsnummer = this.organisasjonsnummer,
-        perioder = this.perioder.map { it.memento() }
+        perioder = this.perioder.map { it.memento() },
+        inntektHistorie = this.inntektHistorie.memento()
     )
 
     internal fun håndter(nySøknad: NySøknad) {
@@ -88,6 +95,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
+        inntektHistorie.add(inntektsmelding)
         if (perioder.none { it.håndter(inntektsmelding) }) {
             nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding)
         }

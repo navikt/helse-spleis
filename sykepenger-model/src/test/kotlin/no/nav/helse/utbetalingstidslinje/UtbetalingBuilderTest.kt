@@ -15,13 +15,13 @@ import java.time.LocalDate
 
 internal class UtbetalingBuilderTest {
 
-    private val inntektHistorie = InntektHistorie()
+    private val inntektsberegner = Inntektsberegner()
     private var betalingslinjer = emptyList<Utbetalingslinje>()
     private var maksdato: LocalDate? = null
 
     init {
-        inntektHistorie.add(1.januar.minusDays(5), 1200.00)
-        inntektHistorie.add(23.januar, 1000.00)
+        inntektsberegner.add(1.januar.minusDays(5), 1200)
+        inntektsberegner.add(23.januar, 1000)
     }
 
     @BeforeEach
@@ -458,7 +458,7 @@ internal class UtbetalingBuilderTest {
         arbeidsgiverperiodeSeed: Int = 0
     ) {
         val arbeidsgiverSykdomstidslinje =
-            ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektHistorie, arbeidsgiverperiodeSeed)
+            ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektsberegner, arbeidsgiverperiodeSeed)
         SakSykdomstidslinje(
             listOf(arbeidsgiverSykdomstidslinje),
             Alder(fødselsnummer),

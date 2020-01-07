@@ -2,11 +2,14 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 
-internal class InntektHistorie {
-    private val inntekter = mutableMapOf<LocalDate, Double>()
+internal class Inntektsberegner {
 
-    fun add(dagen: LocalDate, inntekt: Double) {
-        inntekter[dagen] = inntekt
+    private val inntekter = mutableMapOf<LocalDate, Int>()
+
+    fun add(dagen: LocalDate, dagsats: Int) {
+        inntekter[dagen] = dagsats
     }
+
     fun inntekt(dagen: LocalDate) = inntekter.entries.sortedBy { it.key }.last { dagen.isAfter(it.key) }.value
+
 }
