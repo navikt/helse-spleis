@@ -20,8 +20,8 @@ internal class UtbetalingBuilderTest {
     private var maksdato: LocalDate? = null
 
     init {
-        inntektHistorie.add(1.januar.minusDays(5), "Kilde1", 1200)
-        inntektHistorie.add(23.januar, "Kilde1", 1000)
+        inntektHistorie.add(1.januar.minusDays(5), 1200.00)
+        inntektHistorie.add(23.januar, 1000.00)
     }
 
     @BeforeEach

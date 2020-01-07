@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.DecimalNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
 import no.nav.helse.hendelser.*
@@ -37,6 +36,8 @@ internal class Vedtaksperiode internal constructor(
     private var tilstand: Vedtaksperiodetilstand = StartTilstand
 ) {
 
+    private val `6G` = (6 * 99858)
+
     private var maksdato: LocalDate? = null
 
     private var utbetalingslinjer: List<Utbetalingslinje>? = null
@@ -50,7 +51,7 @@ internal class Vedtaksperiode internal constructor(
     private fun inntektsmeldingHendelse() =
         this.sykdomstidslinje.hendelser().førsteAvType<Inntektsmelding>()
 
-    internal fun dagsats() = inntektsmeldingHendelse().dagsats(LocalDate.MAX, `6G`)
+    internal fun dagsats() = inntektsmeldingHendelse().dagsats(`6G`)
 
     internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
@@ -525,7 +526,9 @@ internal class Vedtaksperiode internal constructor(
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-            fun fromJsonNode(json: JsonNode): Memento {
+            fun fromString(state: String): Memento {
+                val json = objectMapper.readTree(state)
+
                 return Memento(
                     id = UUID.fromString(json["id"].textValue()),
                     aktørId = json["aktørId"].textValue(),

@@ -24,7 +24,6 @@ internal class KombineringAvHendelserTest {
                 fom = Uke(1).torsdag
                 tom = Uke(3).fredag
             }
-            førsteFraværsdag = Uke(1).torsdag
         }
 
         val resultat = søknadHendelse.sykdomstidslinje() + inntektsmeldingHendelse.sykdomstidslinje()
