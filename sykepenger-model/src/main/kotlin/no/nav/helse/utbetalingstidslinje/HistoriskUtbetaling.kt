@@ -6,11 +6,8 @@ import java.time.LocalDate
 internal class HistoriskUtbetaling(
     private val orgnummer: Int,
     private val fom: LocalDate,
-    private val tom: LocalDate,
-    maksdato: LocalDate
+    private val tom: LocalDate
 ) {
-
-    private val harNåddMaksdato = maksdato <= tom
 
     internal fun toTidslinje(rangeFom: LocalDate, rangeTom: LocalDate): Utbetalingstidslinje? {
         if (fom > rangeTom || tom < rangeFom) return null
@@ -21,5 +18,4 @@ internal class HistoriskUtbetaling(
         }
     }
 
-    internal fun maksdato() = if (harNåddMaksdato) tom else null
 }

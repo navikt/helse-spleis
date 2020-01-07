@@ -8,8 +8,4 @@ internal class UtbetalingstidslinjerBuilder(private val fom: LocalDate, private 
         return historiskUtbetalinger.mapNotNull { it.toTidslinje(fom, tom) }
     }
 
-    internal fun maksdatoer() : List<LocalDate> {
-        return historiskUtbetalinger.mapNotNull { it.maksdato() }
-    }
-
 }

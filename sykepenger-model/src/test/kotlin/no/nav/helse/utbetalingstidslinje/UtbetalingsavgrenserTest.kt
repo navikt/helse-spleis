@@ -109,6 +109,25 @@ internal class UtbetalingsavgrenserTest {
         assertEquals(listOf(16.oktober), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
+    @Test
+    fun `26 uker tilbakestilles ikke for 70 år gammel`() {
+        val tidslinje = tidslinjeOf(9.NAV, (26*7).ARB, 2.NAV)
+        assertEquals(listOf(11.juli, 12.juli), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_FNR_2018))
+    }
+
+    @Test
+    fun `ingen utbetaling når 70 år gammel`() {
+        val tidslinje = tidslinjeOf(15.UTELATE, 1.NAV, (26*7).ARB, 1.NAV)
+        assertEquals(listOf(16.januar, 18.juli), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_FNR_2018))
+    }
+
+    @Test
+    fun `ukjente dager generert når du legger til to utbetalingstidslinjer teller som ikke-utbetalingsdager`() {
+        val tidslinje1 = tidslinjeOf(50.NAV)
+        val tidslinje2 = tidslinjeOf(50.UTELATE, (26*7).UTELATE, 248.NAV)
+        assertEquals(emptyList<LocalDate>(), (tidslinje1 + tidslinje2).utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
         Utbetalingsgrense(Alder(fnr), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
             .also { this.accept(it) }

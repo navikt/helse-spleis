@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 
-internal class Utbetalingsgrense(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
+internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
     private var sisteBetalteDag: LocalDate? = null
     private var state: State = State.Initiell
@@ -27,6 +27,7 @@ internal class Utbetalingsgrense(alder: Alder, arbeidsgiverRegler: ArbeidsgiverR
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+        if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene)
         state.betalbarDag(this, dag.dato)
     }
 
@@ -43,6 +44,10 @@ internal class Utbetalingsgrense(alder: Alder, arbeidsgiverRegler: ArbeidsgiverR
     }
 
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+        oppholdsdag(dag.dato)
+    }
+
+    override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
         oppholdsdag(dag.dato)
     }
 

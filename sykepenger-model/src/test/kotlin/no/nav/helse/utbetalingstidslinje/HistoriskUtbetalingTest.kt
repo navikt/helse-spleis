@@ -14,7 +14,6 @@ internal class HistoriskUtbetalingTest {
         undersøke(1.januar, 31.desember, 1.mandag.to(1.fredag))
         assertEquals(5, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
-        assertEquals(emptyList<LocalDate>(), builder.maksdatoer())
     }
 
     @Test internal fun `utbetalingslinje spenner helgen`() {
@@ -44,32 +43,22 @@ internal class HistoriskUtbetalingTest {
         assertEquals(44, inspektør.size)
         assertEquals(18, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
-        assertEquals(emptyList<LocalDate>(), builder.maksdatoer())
     }
 
-    @Test internal fun `b`() {
+    @Test internal fun `avvis utbetalingslinjer etter periode`() {
         undersøke(4.januar, 31.januar, 1.januar.to(12.januar), 23.januar.to(1.februar), 14.februar.to(22.februar) )
         assertEquals(2, builder.results().size)
         assertEquals(28, inspektør.size)
         assertEquals(14, inspektør.navDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
-        assertEquals(emptyList<LocalDate>(), builder.maksdatoer())
     }
 
-    @Test internal fun `c`() {
+    @Test internal fun `avvis utbetalingslinjer før periode`() {
         undersøke(20.januar, 16.februar, 1.januar.to(12.januar), 23.januar.to(1.februar), 14.februar.to(22.februar) )
         assertEquals(2, builder.results().size)
         assertEquals(25, inspektør.size)
         assertEquals(11, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
-        assertEquals(emptyList<LocalDate>(), builder.maksdatoer())
-    }
-
-    @Test internal fun `a`(){
-        undersøke(1.januar, 31.desember, 5.januar, 1.januar.to(5.januar))
-        assertEquals(5, inspektør.size)
-        assertEquals(5, inspektør.navDagTeller)
-        assertEquals(listOf(5.januar), builder.maksdatoer())
     }
 
     private fun undersøke(rangeFom: LocalDate, rangeTom: LocalDate, vararg perioder: Pair<LocalDate, LocalDate>) {
@@ -84,8 +73,7 @@ internal class HistoriskUtbetalingTest {
         builder = UtbetalingstidslinjerBuilder(rangeFom, rangeTom, perioder.map { (fom, tom) -> HistoriskUtbetaling(
             987654321,
             fom,
-            tom,
-            maksdato
+            tom
         ) })
         inspektør = UtbetalingstidslinjeInspektør(builder.results().reduce(Utbetalingstidslinje::plus)).result()
     }
