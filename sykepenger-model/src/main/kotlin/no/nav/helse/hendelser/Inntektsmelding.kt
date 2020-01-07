@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -44,7 +45,7 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
         }
     }
 
-    private val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
+    internal val førsteFraværsdag: LocalDate get() = LocalDate.parse(inntektsmelding["foersteFravaersdag"].textValue())
     private val mottattDato: LocalDateTime get() = LocalDateTime.parse(inntektsmelding["mottattDato"].textValue())
     private val ferie
         get() = inntektsmelding["ferieperioder"]?.map {
@@ -139,15 +140,16 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
         return endringIRefusjoner.any { it <= sisteUtbetalingsdag }
     }
 
-    fun dagsats(`6G`: Int): Int {
+    internal fun dagsats(dato: LocalDate, grunnbeløp: Grunnbeløp): Int {
         val beregnetInntekt =
             checkNotNull(beregnetInntekt) { "kan ikke regne ut dagsats fra inntektsmeldinger uten beregnet inntekt" }
         return beregnetInntekt
             .times(12.toBigDecimal())
-            .min(`6G`.toBigDecimal())
+            .min(grunnbeløp(dato).toBigDecimal())
             .divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP)
             .toInt()
     }
+
     private class Periode(val jsonNode: JsonNode) {
         val fom get() = LocalDate.parse(jsonNode["fom"].textValue()) as LocalDate
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
