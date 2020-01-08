@@ -33,7 +33,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
                     perioder = json["saker"].map {
                         Vedtaksperiode.Memento.fromJsonNode(it)
                     },
-                    inntektHistorie = InntektHistorie.Memento.fromJsonNode(json["inntektHistorie"])
+                    inntektHistorie = json["inntektHistorie"]?.takeUnless { it.isNull }?.let { InntektHistorie.Memento.fromJsonNode(it) }?: InntektHistorie.Memento()
                 )
             }
 

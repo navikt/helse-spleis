@@ -1,5 +1,8 @@
 package no.nav.helse.arbeidsgiver
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants
 import no.nav.helse.fixtures.januar
 import no.nav.helse.person.Arbeidsgiver
@@ -7,12 +10,13 @@ import no.nav.helse.testhelpers.InntektsmeldingHendelseWrapper
 import no.nav.helse.testhelpers.inntektsmelding
 import no.nav.helse.person.InntektHistorie
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.util.*
 
 internal class ArbeidsgiverTest {
-        private val uuid = UUID.randomUUID()
+    private val uuid = UUID.randomUUID()
 
     @Test
     fun `restoring av arbeidsgiver gir samme objekt`() {
@@ -29,8 +33,17 @@ internal class ArbeidsgiverTest {
 
     @Test
     fun `restoring av arbeidsgiver med inntektHistorie gir samme objekt`() {
-        val arbeidsgiverMemento = Arbeidsgiver.Memento(uuid, "2", emptyList(), InntektHistorie.Memento(listOf(
-            InntektHistorie.Memento.Inntekt(1.januar, TestConstants.inntektsmeldingHendelse(), 100.00.toBigDecimal()))))
+        val arbeidsgiverMemento = Arbeidsgiver.Memento(
+            uuid, "2", emptyList(), InntektHistorie.Memento(
+                listOf(
+                    InntektHistorie.Memento.Inntekt(
+                        1.januar,
+                        TestConstants.inntektsmeldingHendelse(),
+                        100.00.toBigDecimal()
+                    )
+                )
+            )
+        )
         val arbeidsgiverString = arbeidsgiverMemento.state()
         val arbeidsgiverMementoFromString = Arbeidsgiver.Memento.fromString(arbeidsgiverString)
         val restoredArbeidsgiver = Arbeidsgiver.restore(arbeidsgiverMementoFromString)
@@ -54,5 +67,30 @@ internal class ArbeidsgiverTest {
         assertEquals(1.januar, arbeidsgiver.memento().inntektHistorie.inntekter.first().fom)
     }
 
+    @Test
+    fun `restoring av arbeidsgiver uten inntekstHistorie legger på tom inntekstHistorie`() {
+
+        val arbeidsgiverMemento = Arbeidsgiver.Memento(
+            uuid, "2", emptyList(), InntektHistorie.Memento(
+                listOf(
+                    InntektHistorie.Memento.Inntekt(
+                        1.januar,
+                        TestConstants.inntektsmeldingHendelse(),
+                        100.00.toBigDecimal()
+                    )
+                )
+            )
+        )
+        val arbeidsgiverString = arbeidsgiverMemento.state()
+
+        val json = jacksonObjectMapper().readTree(arbeidsgiverString) as ObjectNode
+
+        json.remove("inntektHistorie")
+
+        val arbeidsgiverMementoFromString = Arbeidsgiver.Memento.fromString(json.toString())
+
+        assertTrue(arbeidsgiverMementoFromString.inntektHistorie.inntekter.isEmpty())
+
+    }
 
 }

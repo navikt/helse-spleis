@@ -34,7 +34,7 @@ internal class InntektHistorie {
     }
 
     internal class Memento internal constructor(
-        internal val inntekter: List<Inntekt>
+        internal val inntekter: List<Inntekt> = emptyList()
     ) {
 
         fun state(): JsonNode {
