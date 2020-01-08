@@ -1,15 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.math.max
 
-internal class Utbetalingsdagsgrense private constructor(private var fom: LocalDate,
-                                                         private val alder: Alder,
-                                                         private val arbeidsgiverRegler: ArbeidsgiverRegler,
-                                                         private var betalteDager: Int,
-                                                         private var gammelpersonDager: Int) {
+internal class UtbetalingTeller private constructor(private var fom: LocalDate,
+                                                    private val alder: Alder,
+                                                    private val arbeidsgiverRegler: ArbeidsgiverRegler,
+                                                    private var betalteDager: Int,
+                                                    private var gammelpersonDager: Int) {
 
 
     internal constructor(alder: Alder,
@@ -38,7 +37,7 @@ internal class Utbetalingsdagsgrense private constructor(private var fom: LocalD
     }
 
     internal fun maksdato(sisteUtbetalingsdag: LocalDate): LocalDate {
-        val clone = Utbetalingsdagsgrense(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager)
+        val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager)
         var result = sisteUtbetalingsdag
         while (!clone.påGrensen(result)) {
             result = result.plusDays(if (result.dayOfWeek == DayOfWeek.FRIDAY) 3 else 1)

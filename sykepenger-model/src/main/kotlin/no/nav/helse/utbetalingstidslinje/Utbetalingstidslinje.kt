@@ -18,13 +18,13 @@ internal class Utbetalingstidslinje internal constructor() {
         this.utbetalingsdager.addAll(utbetalingsdager)
     }
 
-    internal fun maksdato() = visitor.maksdato()
-
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }
+
+    internal fun maksdato() = visitor.maksdato()
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
@@ -112,7 +112,6 @@ internal class Utbetalingstidslinje internal constructor() {
     }
 
     private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
-
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}

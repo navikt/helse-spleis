@@ -1,18 +1,23 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
 internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
-    private var sisteBetalteDag: LocalDate? = null
-    private var state: State = State.Initiell
-    private val teller = Utbetalingsdagsgrense(alder, arbeidsgiverRegler)
-    private var opphold = 0
-    private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
 
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7
+        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
+    private var sisteBetalteDag: LocalDate? = null
+    private var state: State = State.Initiell
+    private val teller = UtbetalingTeller(alder, arbeidsgiverRegler)
+    private var opphold = 0
+    private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
+    private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
+    private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
+    private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
 
     internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
 
@@ -27,7 +32,7 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-        if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene)
+        if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dag.dato] = dag
         state.betalbarDag(this, dag.dato)
     }
 
@@ -44,6 +49,10 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
     }
 
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+        oppholdsdag(dag.dato)
+    }
+
+    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
         oppholdsdag(dag.dato)
     }
 
@@ -64,6 +73,16 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
         return if (teller.påGrensen(dagen)) State.Karantene else null
     }
 
+    private fun dekrementer(tom: LocalDate) {
+        val dekrementertom = tom.minusYears(HISTORISK_PERIODE_I_ÅR)
+        if (dekrementertom >= sakensStartdato) {
+            dekrementerfom.datesUntil(dekrementertom).forEach { dato ->
+                betalbarDager[dato]?.also { teller.dekrementer(dato) }
+            }
+        }
+        dekrementerfom = dekrementertom
+    }
+
     private sealed class State {
         open fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
         open fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
@@ -75,6 +94,8 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
                 avgrenser.opphold = 0
             }
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+                avgrenser.sakensStartdato = dagen
+                avgrenser.dekrementerfom = dagen.minusYears(HISTORISK_PERIODE_I_ÅR)
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.state(Syk)
@@ -102,6 +123,7 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
+                avgrenser.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 
@@ -113,7 +135,7 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
         internal object Karantene: State() {
             override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.ubetalteDager.add(Utbetalingstidslinje.Utbetalingsdag.AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
+                avgrenser.ubetalteDager.add(AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 

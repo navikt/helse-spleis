@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingsdagsgrenseTest {
+internal class UtbetalingTellerTest {
     internal val UNG_PERSON_FNR_2018 = Alder("15010052345")
     internal val PERSON_67_ÅR_FNR_2018 = Alder("15015112345")
     internal val PERSON_70_ÅR_FNR_2018 = Alder("15014812345")
-    private lateinit var grense: Utbetalingsdagsgrense
+    private lateinit var grense: UtbetalingTeller
 
     @Test
     internal fun `Person under 67 år får utbetalt 248 dager`() {
@@ -84,7 +84,7 @@ internal class UtbetalingsdagsgrenseTest {
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
-        grense = Utbetalingsdagsgrense(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
+        grense = UtbetalingTeller(alder, ArbeidsgiverRegler.Companion.NormalArbeidstaker).apply {
             this.resett(dato)
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }
