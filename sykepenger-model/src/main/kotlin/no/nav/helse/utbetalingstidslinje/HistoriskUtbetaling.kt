@@ -9,6 +9,16 @@ internal class HistoriskUtbetaling(
     private val tom: LocalDate
 ) {
 
+    companion object {
+        internal fun finnSisteNavDagFor(list: List<HistoriskUtbetaling>, orgnummer: Int, before: LocalDate) : LocalDate? {
+            return list
+                .filter { it.orgnummer == orgnummer }
+                .map { it.tom }
+                .filter { it < before }
+                .max()
+        }
+    }
+
     internal fun toTidslinje(rangeFom: LocalDate, rangeTom: LocalDate): Utbetalingstidslinje? {
         if (fom > rangeTom || tom < rangeFom) return null
         return Utbetalingstidslinje().apply {
@@ -19,3 +29,6 @@ internal class HistoriskUtbetaling(
     }
 
 }
+
+internal fun List<HistoriskUtbetaling>.finnSisteNavDagFor(orgnummer: Int, before: LocalDate) =
+    HistoriskUtbetaling.finnSisteNavDagFor(this, orgnummer, before)
