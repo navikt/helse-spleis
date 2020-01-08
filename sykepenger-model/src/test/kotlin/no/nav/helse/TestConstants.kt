@@ -1,5 +1,8 @@
 package no.nav.helse
 
+import com.fasterxml.jackson.annotation.JsonGetter
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -279,13 +282,40 @@ internal object TestConstants {
         )
     } ?: perioder
 
+    data class Ytelse(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
+    data class ForeldrepengeLøsning(
+        @JvmField val Foreldrepengeytelse: Ytelse?,
+        @JvmField val Svangerskapsytelse: Ytelse?
+    )
+
+    fun foreldrepenger(
+        foreldrepengeytelse: Ytelse?,
+        svangerskapsytelse: Ytelse?
+    ) = ForeldrepengeLøsning(
+        Foreldrepengeytelse = foreldrepengeytelse,
+        Svangerskapsytelse = svangerskapsytelse
+    )
+
+    fun foreldrepengeytelse(
+        fom: LocalDate,
+        tom: LocalDate
+    ) = Ytelse(
+        fom = fom,
+        tom = tom
+    )
+
     fun ytelser(
         aktørId: String = "1",
         fødselsnummer: String = fakeFNR,
         organisasjonsnummer: String = "123546564",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
-        sykepengehistorikk: List<SpolePeriode>
+        sykepengehistorikk: List<SpolePeriode> = listOf(),
+        foreldrepenger: ForeldrepengeLøsning? = null
 
     ) = Ytelser.Builder().build(
         Ytelser.lagBehov(
@@ -296,7 +326,8 @@ internal object TestConstants {
             utgangspunktForBeregningAvYtelse
         ).løsBehov(
             mapOf(
-                "Sykepengehistorikk" to sykepengehistorikk
+                "Sykepengehistorikk" to sykepengehistorikk,
+                "Foreldrepenger" to foreldrepenger
             )
         ).toJson())!!
 

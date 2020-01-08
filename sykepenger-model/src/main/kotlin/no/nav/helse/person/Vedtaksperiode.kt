@@ -318,6 +318,10 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+            if (ytelser.foreldrepenger().overlapperMedSyketilfelle(vedtaksperiode.sykdomstidslinje.førsteDag(), vedtaksperiode.sykdomstidslinje.sisteDag())) {
+                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
+            }
+
             if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }

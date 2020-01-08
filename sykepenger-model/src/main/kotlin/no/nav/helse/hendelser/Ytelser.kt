@@ -70,11 +70,9 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
     }
 
     internal fun foreldrepenger(): Foreldrepenger {
-        TODO()
-    }
-
-    internal fun svangerskapspenger(): Svangerskapspenger {
-        TODO()
+        val løsning = behov.løsning() as Map<*, *>
+        val foreldrepengerJsonNode = objectMapper.convertValue(løsning["Foreldrepenger"], JsonNode::class.java)
+        return Foreldrepenger(foreldrepengerJsonNode)
     }
 
     internal fun sykepengehistorikk(): Sykepengehistorikk {
@@ -109,9 +107,31 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
             .toString()
     }
 
-    internal class Foreldrepenger {}
+    internal class Foreldrepenger(jsonNode: JsonNode) {
+        fun overlapperMedSyketilfelle(syketilfelleFom: LocalDate, syketilfelleTom: LocalDate): Boolean {
+            val syketilfelleRange = syketilfelleFom.rangeTo(syketilfelleTom)
+            if (Foreldrepengeytelse == null && Svangerskapsytelse == null) {
+                return false
+            }
 
-    internal class Svangerskapspenger {}
+
+
+            return listOfNotNull(Foreldrepengeytelse, Svangerskapsytelse).any { ytelse ->
+                ytelse.overlapperMed(syketilfelleRange)
+            }
+        }
+
+        private val Foreldrepengeytelse: Ytelse? = objectMapper.convertValue(jsonNode["Foreldrepengeytelse"], Ytelse::class.java)
+        private val Svangerskapsytelse: Ytelse? = objectMapper.convertValue(jsonNode["Svangerskapsytelse"], Ytelse::class.java)
+
+        private class Ytelse(
+            internal val fom: LocalDate,
+            internal val tom: LocalDate
+        ) {
+            fun overlapperMed(range: ClosedRange<LocalDate>) =
+                range.contains(fom) || range.contains(tom) || (tom > range.start && fom < range.endInclusive)
+        }
+    }
 
     // Embedded document - json er output fra Spole
     internal data class Sykepengehistorikk(private val jsonNode: JsonNode) {

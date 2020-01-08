@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.SpolePeriode
+import no.nav.helse.TestConstants.foreldrepenger
+import no.nav.helse.TestConstants.foreldrepengeytelse
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
@@ -11,6 +13,7 @@ import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovtype
+import no.nav.helse.fixtures.mai
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.løsBehov
@@ -452,6 +455,58 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
+    fun `dersom en person har foreldrepenger i perioden behandles saken i infotrygd`() {
+        vedtaksperiodeMedForeldrepenger( foreldrepengerFom = 30.mai, foreldrepengerTom = 14.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_INFOTRYGD)
+        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 2.juli, foreldrepengerTom = 21.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_INFOTRYGD)
+        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 30.mai, foreldrepengerTom = 21.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_INFOTRYGD)
+        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 2.juli, foreldrepengerTom = 14.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_INFOTRYGD)
+    }
+
+
+    @Test
+    fun `dersom en person ikke har foreldrepenger i perioden kan saken behandles`() {
+        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 1.mai, foreldrepengerTom = 30.mai, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_GODKJENNING)
+        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 21.juli, foreldrepengerTom = 30.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        assertTilstandsendring(TIL_GODKJENNING)
+    }
+
+    private fun vedtaksperiodeMedForeldrepenger(
+        foreldrepengerFom: LocalDate,
+        foreldrepengerTom: LocalDate,
+        sykeperiodeFom: LocalDate,
+        sykeperiodeTom: LocalDate
+    ) {
+        val vedtaksperiode = beInBeregnUtbetaling(
+            tidslinje(sykeperiodeFom, sykeperiodeTom)
+        )
+
+        vedtaksperiode.håndter(
+            Person(aktørId, fødselsnummer),
+            Arbeidsgiver(organisasjonsnummer),
+            ytelser(
+                sykepengehistorikk = sykepengehistorikk(
+                    perioder = listOf()
+                ),
+                foreldrepenger = foreldrepenger(
+                    foreldrepengeytelse = foreldrepengeytelse(
+                        fom = foreldrepengerFom,
+                        tom = foreldrepengerTom
+                    ),
+                    svangerskapsytelse = null
+                ),
+
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
+    }
+
+
+    @Test
     fun `gitt tilstand BeregnUtbetaling, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
         val vedtaksperiode = beInBeregnUtbetaling()
 
@@ -640,7 +695,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             fravær = emptyList()
         ).sykdomstidslinje(),
         inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(fom, tom.plusDays(16))),
+            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16))),
             endringerIRefusjoner = emptyList()
         ).sykdomstidslinje()
     ): ConcreteSykdomstidslinje {
