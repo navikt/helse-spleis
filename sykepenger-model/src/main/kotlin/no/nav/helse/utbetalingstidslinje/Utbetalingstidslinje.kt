@@ -30,9 +30,9 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
         this
-            .avgrens(others, alder, arbeidsgiverRegler)
-            .filterByMinimumInntekt(others, alder)
             .reduserAvSykdomsgrad(others)
+            .filterByMinimumInntekt(others, alder)
+            .avgrens(others, alder, arbeidsgiverRegler)
             .subset(førsteDag, sisteDag)
             .utbetalingslinjer()
 

@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.fixtures.*
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SakSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.PersonSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -457,9 +457,8 @@ internal class UtbetalingBuilderTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         arbeidsgiverperiodeSeed: Int = 0
     ) {
-        val arbeidsgiverSykdomstidslinje =
-            ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektsberegner, arbeidsgiverperiodeSeed)
-        SakSykdomstidslinje(
+        val arbeidsgiverSykdomstidslinje = ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektsberegner, arbeidsgiverperiodeSeed)
+        PersonSykdomstidslinje(
             listOf(arbeidsgiverSykdomstidslinje),
             Alder(fødselsnummer),
             NormalArbeidstaker,

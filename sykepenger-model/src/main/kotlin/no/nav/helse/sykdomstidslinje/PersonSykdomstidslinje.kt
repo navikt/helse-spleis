@@ -6,7 +6,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.LocalDate
 
-internal class SakSykdomstidslinje(
+internal class PersonSykdomstidslinje(
     private val sykdomstidslinjer: List<ArbeidsgiverSykdomstidslinje>,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
