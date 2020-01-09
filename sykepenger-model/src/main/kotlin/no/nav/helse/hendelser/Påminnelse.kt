@@ -9,9 +9,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.io.IOException
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
-class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNode) : ArbeidstakerHendelse(hendelseId, Hendelsetype.Påminnelse),
+class Påminnelse private constructor(hendelseId: UUID, private val json: JsonNode) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse),
     VedtaksperiodeHendelse {
 
     private constructor(json: JsonNode) : this(UUID.randomUUID(), json)

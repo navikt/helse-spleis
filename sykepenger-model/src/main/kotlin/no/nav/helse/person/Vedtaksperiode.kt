@@ -9,9 +9,24 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.behov.Behovstype
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
+import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
+import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_GODKJENNING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.valueOf
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -23,9 +38,11 @@ import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
-import java.util.*
-private inline fun <reified T> Set<*>.førsteAvType(): T {
-    return first { it is T } as T
+import java.time.YearMonth
+import java.util.UUID
+
+private inline fun <reified T> Set<*>.førsteAvType(): T? {
+    return firstOrNull { it is T } as T?
 }
 
 internal class Vedtaksperiode internal constructor(
@@ -50,7 +67,9 @@ internal class Vedtaksperiode internal constructor(
     private fun inntektsmeldingHendelse() =
         this.sykdomstidslinje.hendelser().førsteAvType<Inntektsmelding>()
 
-    internal fun dagsats() = inntektsmeldingHendelse().dagsats(LocalDate.MAX, `6G`)
+    internal fun førsteFraværsdag(): LocalDate? = inntektsmeldingHendelse()?.førsteFraværsdag
+
+    internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)
 
     internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
@@ -130,22 +149,32 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun trengerYtelser() {
-        emitTrengerLøsning(Ytelser.lagBehov(
-            vedtaksperiodeId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
-        ))
+        emitTrengerLøsning(
+            Ytelser.lagBehov(
+                vedtaksperiodeId = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
+            )
+        )
     }
 
-    private fun trengerVilkårsgrunnlag() {
-        emitTrengerLøsning(Vilkårsgrunnlag.lagBehov(
-            vedtaksperiodeId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer
-        ))
+    internal fun trengerVilkårsgrunnlag(beregningStart: YearMonth, beregningSlutt: YearMonth) {
+        emitTrengerLøsning(
+            Behov.nyttBehov(
+                hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
+                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id,
+                additionalParams = mapOf(
+                    "beregningStart" to beregningStart,
+                    "beregningSlutt" to beregningSlutt
+                )
+            )
+        )
     }
 
     private fun emitTrengerLøsning(behov: Behov) {
@@ -239,6 +268,7 @@ internal class Vedtaksperiode internal constructor(
                 vedtaksperiode.sykdomstidslinje = tidslinje
             }
         }
+
         override val type = START
         override val timeout: Duration = Duration.ofDays(30)
 
@@ -253,6 +283,7 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
         }
+
         override val type = MOTTATT_NY_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)
@@ -264,6 +295,7 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
+
         override val type = MOTTATT_SENDT_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)
@@ -274,6 +306,7 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
         }
+
         override val type = MOTTATT_INNTEKTSMELDING
 
         override val timeout: Duration = Duration.ofDays(30)
@@ -286,11 +319,17 @@ internal class Vedtaksperiode internal constructor(
         override val timeout = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.trengerVilkårsgrunnlag()
+            emitTrengerVilkårsgrunnlag(vedtaksperiode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag()
+            emitTrengerVilkårsgrunnlag(vedtaksperiode)
+        }
+
+        private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
+            val inntektsberegningSlutt = YearMonth.from(vedtaksperiode.førsteFraværsdag())
+            val inntektsberegningStart = inntektsberegningSlutt.minusMonths(12)
+            vedtaksperiode.trengerVilkårsgrunnlag(inntektsberegningSlutt, inntektsberegningStart)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -317,8 +356,17 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.trengerYtelser()
         }
 
-        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
-            if (ytelser.foreldrepenger().overlapperMedSyketilfelle(vedtaksperiode.sykdomstidslinje.førsteDag(), vedtaksperiode.sykdomstidslinje.sisteDag())) {
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: Ytelser
+        ) {
+            if (ytelser.foreldrepenger().overlapperMedSyketilfelle(
+                    vedtaksperiode.sykdomstidslinje.førsteDag(),
+                    vedtaksperiode.sykdomstidslinje.sisteDag()
+                )
+            ) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
@@ -326,14 +374,22 @@ internal class Vedtaksperiode internal constructor(
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
+            val dagsats = requireNotNull(vedtaksperiode.dagsats()) {
+                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
+            }
+
             val utbetalingsberegning = try {
-                vedtaksperiode.sykdomstidslinje.utbetalingsberegning(vedtaksperiode.dagsats(), vedtaksperiode.fødselsnummer)
+                vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
-            if (sisteUtbetalingsdag == null || vedtaksperiode.inntektsmeldingHendelse().harEndringIRefusjon(sisteUtbetalingsdag))  {
+            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
+                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
+            }
+
+            if (sisteUtbetalingsdag == null || inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
                 return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
             }
 
@@ -359,9 +415,14 @@ internal class Vedtaksperiode internal constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.emitTrengerLøsning(ManuellSaksbehandling.lagBehov(
-                vedtaksperiode.id, vedtaksperiode.aktørId, vedtaksperiode.fødselsnummer, vedtaksperiode.organisasjonsnummer
-            ))
+            vedtaksperiode.emitTrengerLøsning(
+                ManuellSaksbehandling.lagBehov(
+                    vedtaksperiode.id,
+                    vedtaksperiode.aktørId,
+                    vedtaksperiode.fødselsnummer,
+                    vedtaksperiode.organisasjonsnummer
+                )
+            )
         }
 
         override fun håndter(
@@ -388,21 +449,22 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-
-            vedtaksperiode.emitTrengerLøsning(Behov.nyttBehov(
-                hendelsetype = ArbeidstakerHendelse.Hendelsetype.Utbetaling,
-                behov = listOf(Behovtype.Utbetaling),
-                aktørId = vedtaksperiode.aktørId,
-                fødselsnummer = vedtaksperiode.fødselsnummer,
-                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiode.id,
-                additionalParams = mapOf(
-                    "utbetalingsreferanse" to utbetalingsreferanse,
-                    "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
-                    "maksdato" to (vedtaksperiode.maksdato ?: ""),
-                    "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
+            vedtaksperiode.emitTrengerLøsning(
+                Behov.nyttBehov(
+                    hendelsestype = ArbeidstakerHendelse.Hendelsestype.Utbetaling,
+                    behov = listOf(Behovstype.Utbetaling),
+                    aktørId = vedtaksperiode.aktørId,
+                    fødselsnummer = vedtaksperiode.fødselsnummer,
+                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiode.id,
+                    additionalParams = mapOf(
+                        "utbetalingsreferanse" to utbetalingsreferanse,
+                        "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
+                        "maksdato" to (vedtaksperiode.maksdato ?: ""),
+                        "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
+                    )
                 )
-            ))
+            )
 
             val event = VedtaksperiodeObserver.UtbetalingEvent(
                 vedtaksperiodeId = vedtaksperiode.id,
@@ -450,10 +512,10 @@ internal class Vedtaksperiode internal constructor(
                 fødselsnummer = memento.fødselsnummer,
                 organisasjonsnummer = memento.organisasjonsnummer,
                 sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString())
-            ).also {
-                it.tilstand = tilstandFraEnum(memento.tilstandType)
-                it.maksdato = memento.maksdato
-                it.utbetalingslinjer = memento.utbetalingslinjer?.map {
+            ).also { vedtaksperiode ->
+                vedtaksperiode.tilstand = tilstandFraEnum(memento.tilstandType)
+                vedtaksperiode.maksdato = memento.maksdato
+                vedtaksperiode.utbetalingslinjer = memento.utbetalingslinjer?.map {
                     Utbetalingslinje(
                         fom = LocalDate.parse(it["fom"].textValue()),
                         tom = LocalDate.parse(it["tom"].textValue()),
@@ -463,8 +525,8 @@ internal class Vedtaksperiode internal constructor(
                         }
                     )
                 }
-                it.godkjentAv = memento.godkjentAv
-                it.utbetalingsreferanse = memento.utbetalingsreferanse
+                vedtaksperiode.godkjentAv = memento.godkjentAv
+                vedtaksperiode.utbetalingsreferanse = memento.utbetalingsreferanse
             }
         }
 

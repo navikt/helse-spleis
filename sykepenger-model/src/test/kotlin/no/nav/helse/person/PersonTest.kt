@@ -11,21 +11,27 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.juli
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
+import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.collections.set
 
 internal class PersonTest {
@@ -564,8 +570,8 @@ internal class PersonTest {
         assertFalse(this.testObserver.personEndret)
     }
 
-    private fun assertBehov(vararg behovtype: Behovtype) {
-        assertTrue(behovtype.all { behov -> testObserver.behovsliste.any { it.behovType().contains(behov.name) } })
+    private fun assertBehov(vararg behovstype: Behovstype) {
+        assertTrue(behovstype.all { behov -> testObserver.behovsliste.any { it.behovType().contains(behov.name) } })
     }
 
     private class TestPersonObserver : PersonObserver {

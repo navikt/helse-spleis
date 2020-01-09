@@ -12,24 +12,42 @@ import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.fixtures.mai
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.juli
 import no.nav.helse.løsBehov
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
+import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
+import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_GODKJENNING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.VILKÅRSPRØVING
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 
 internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
@@ -310,7 +328,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(sendtSøknadHendelse)
 
         assertTilstandsendring(VILKÅRSPRØVING)
-        assertBehov(Behovtype.EgenAnsatt)
+        assertBehov(Behovstype.EgenAnsatt)
     }
 
     @Test
@@ -325,14 +343,14 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
-            .løsBehov(mapOf("EgenAnsatt" to false)).toJson())!!)
+        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder()
+            .build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to false)).toJson())!!)
 
         assertTilstandsendring(BEREGN_UTBETALING)
 
-        assertBehov(Behovtype.Sykepengehistorikk)
+        assertBehov(Behovstype.Sykepengehistorikk)
 
-        finnBehov(Behovtype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
+        finnBehov(Behovstype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
             assertEquals(periodeFom.minusDays(1), it)
         }
     }
@@ -349,8 +367,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(vedtaksperiodeId, aktørId, fødselsnummer, organisasjonsnummer)
-            .løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
+        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder()
+            .build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -375,7 +393,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertTilstandsendring(TIL_GODKJENNING)
         assertPåminnelse(Duration.ofDays(7))
-        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
+        assertBehov(Behovstype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -399,7 +417,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         assertTilstandsendring(TIL_GODKJENNING)
-        assertBehov(Behovtype.GodkjenningFraSaksbehandler)
+        assertBehov(Behovstype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -422,7 +440,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         assertTilstandsendring(TIL_INFOTRYGD)
-        assertIkkeBehov(Behovtype.GodkjenningFraSaksbehandler)
+        assertIkkeBehov(Behovstype.GodkjenningFraSaksbehandler)
     }
 
     @Test
@@ -534,7 +552,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         }
 
-        assertBehov(Behovtype.Sykepengehistorikk)
+        assertBehov(Behovstype.Sykepengehistorikk)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -822,9 +840,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertTilstandsendring(TIL_UTBETALING, ManuellSaksbehandling::class)
         assertPåminnelse(Duration.ZERO)
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
-        assertBehov(Behovtype.Utbetaling)
+        assertBehov(Behovstype.Utbetaling)
 
-        finnBehov(Behovtype.Utbetaling).also {
+        finnBehov(Behovstype.Utbetaling).also {
             assertNotNull(it["utbetalingsreferanse"])
         }
     }
@@ -918,6 +936,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
         assertNull(forrigePåminnelse)
     }
+
+    private fun generiskBehov() = Behov.nyttBehov(
+        hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
+        behov = listOf(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        additionalParams = mapOf()
+    )
 
     private fun beInStartTilstand(
         nySøknad: NySøknad = nySøknadHendelse(
@@ -1055,10 +1083,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         behovsliste.add(event)
     }
 
-    private fun finnBehov(behovstype: Behovtype) =
+    private fun finnBehov(behovstype: Behovstype) =
         behovsliste.first { it.behovType().contains(behovstype.name) }
 
-    private fun harBehov(behovstype: Behovtype) =
+    private fun harBehov(behovstype: Behovstype) =
         behovsliste.any { it.behovType().contains(behovstype.name) }
 
     private fun assertTilstandsendring(
@@ -1100,11 +1128,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertEquals(antallBehov, behovsliste.size)
     }
 
-    private fun assertBehov(behovstype: Behovtype) {
+    private fun assertBehov(behovstype: Behovstype) {
         assertTrue(harBehov(behovstype))
     }
 
-    private fun assertIkkeBehov(behovstype: Behovtype) {
+    private fun assertIkkeBehov(behovstype: Behovstype) {
         assertFalse(harBehov(behovstype))
     }
 

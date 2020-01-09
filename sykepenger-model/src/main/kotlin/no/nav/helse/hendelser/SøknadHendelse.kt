@@ -6,13 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 abstract class SøknadHendelse protected constructor(
     hendelseId: UUID,
-    hendelsetype: Hendelsetype,
+    hendelsestype: Hendelsestype,
     protected val søknad: JsonNode
-) : SykdomstidslinjeHendelse(hendelseId, hendelsetype) {
+) : SykdomstidslinjeHendelse(hendelseId, hendelsestype) {
 
     private companion object {
         private val objectMapper = jacksonObjectMapper()
@@ -60,7 +60,7 @@ abstract class SøknadHendelse protected constructor(
         val orgnummer: String get() = jsonNode["orgnummer"].textValue()
     }
 
-    protected class Sykeperiode(val jsonNode: JsonNode) {
+    protected class Sykeperiode(jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
         val sykmeldingsgrad: Int = jsonNode["sykmeldingsgrad"].intValue()

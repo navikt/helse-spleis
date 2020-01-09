@@ -14,10 +14,10 @@ import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
-    SykdomstidslinjeHendelse(hendelseId, Hendelsetype.Inntektsmelding) {
+    SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding) {
 
     private constructor(inntektsmelding: JsonNode) : this(UUID.randomUUID(), inntektsmelding)
 

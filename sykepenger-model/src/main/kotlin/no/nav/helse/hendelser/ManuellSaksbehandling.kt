@@ -8,13 +8,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
-import java.util.*
+import java.util.UUID
 
 class ManuellSaksbehandling private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsetype.ManuellSaksbehandling),
+    ArbeidstakerHendelse(hendelseId, Hendelsestype.ManuellSaksbehandling),
     VedtaksperiodeHendelse {
 
     private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
@@ -24,7 +24,7 @@ class ManuellSaksbehandling private constructor(hendelseId: UUID, private val be
             return try {
                 val behov = Behov.fromJson(json)
                 require(behov.erLøst())
-                require(Hendelsetype.ManuellSaksbehandling == behov.hendelsetype())
+                require(Hendelsestype.ManuellSaksbehandling == behov.hendelsetype())
 
                 ManuellSaksbehandling(behov)
             } catch (err: Exception) {
@@ -46,8 +46,8 @@ class ManuellSaksbehandling private constructor(hendelseId: UUID, private val be
             organisasjonsnummer: String
         ): Behov {
             return Behov.nyttBehov(
-                hendelsetype = Hendelsetype.ManuellSaksbehandling,
-                behov = listOf(Behovtype.GodkjenningFraSaksbehandler),
+                hendelsestype = Hendelsestype.ManuellSaksbehandling,
+                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,

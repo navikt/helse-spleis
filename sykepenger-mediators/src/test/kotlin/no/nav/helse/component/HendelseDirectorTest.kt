@@ -4,10 +4,15 @@ import no.nav.common.KafkaEnvironment
 import no.nav.helse.TestConstants
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
-import no.nav.helse.hendelser.*
+import no.nav.helse.behov.Behovstype
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.løsBehov
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseDirector
 import no.nav.helse.spleis.HendelseListener
@@ -32,7 +37,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -150,6 +156,21 @@ internal class HendelseDirectorTest : HendelseListener {
 
         private lateinit var producer: KafkaProducer<String, String>
 
+        private fun generiskBehov(
+            hendelsetype: Hendelsestype,
+            aktørId: String,
+            fødselsnummer: String,
+            organisasjonsnummer: String
+        ) = Behov.nyttBehov(
+            hendelsestype = hendelsetype,
+            behov = listOf(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = UUID.randomUUID(),
+            additionalParams = mapOf()
+        )
+
         @BeforeAll
         @JvmStatic
         internal fun `start embedded environment`() {
@@ -166,11 +187,16 @@ internal class HendelseDirectorTest : HendelseListener {
         private fun producerConfig() = kafkaBaseConfig().apply {
             put(LINGER_MS_CONFIG, "0")
         }
+
         private fun kafkaBaseConfig() = Properties().apply {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
         }
 
-        private fun sendNyPåminnelse(aktørId: String = defaultAktørId, fødselsnummer: String = defaultFødselsnummer, organisasjonsnummer: String = defaultOrganisasjonsnummer): Påminnelse {
+        private fun sendNyPåminnelse(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer
+        ): Påminnelse {
             return TestConstants.påminnelseHendelse(
                 vedtaksperiodeId = UUID.randomUUID(),
                 tilstand = TilstandType.START,
@@ -182,37 +208,76 @@ internal class HendelseDirectorTest : HendelseListener {
             }
         }
 
-        private fun sendManuellSaksbehandling(aktørId: String = defaultAktørId, fødselsnummer: String = defaultFødselsnummer, organisasjonsnummer: String = defaultOrganisasjonsnummer) {
+        private fun sendManuellSaksbehandling(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer
+        ) {
             val behov = Behov.nyttBehov(
-                hendelsetype = ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling,
-                behov = listOf(Behovtype.GodkjenningFraSaksbehandler),
+                hendelsestype = Hendelsestype.ManuellSaksbehandling,
+                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
                 additionalParams = emptyMap()
             )
-            sendBehov(behov.løsBehov(mapOf(
-                "GodkjenningFraSaksbehandler" to true
-            )))
+            sendBehov(
+                behov.løsBehov(
+                    mapOf(
+                        "GodkjenningFraSaksbehandler" to true
+                    )
+                )
+            )
         }
 
-        private fun sendYtelser(aktørId: String = defaultAktørId, fødselsnummer: String = defaultFødselsnummer, organisasjonsnummer: String = defaultOrganisasjonsnummer) {
-            val behov = Ytelser.lagBehov(UUID.randomUUID(), aktørId, fødselsnummer, organisasjonsnummer, LocalDate.now())
-            sendBehov(behov.løsBehov(mapOf(
-                "Sykepengehistorikk" to emptyList<Any>()
-            )))
+        private fun sendYtelser(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer
+        ) {
+            val behov = generiskBehov(
+                hendelsetype = Hendelsestype.Ytelser,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer
+            )
+            sendBehov(
+                behov.løsBehov(
+                    mapOf(
+                        "Sykepengehistorikk" to emptyList<Any>()
+                    )
+                )
+            )
         }
 
-        private fun sendVilkårsgrunnlag(aktørId: String = defaultAktørId, fødselsnummer: String = defaultFødselsnummer, organisasjonsnummer: String = defaultOrganisasjonsnummer, egenAnsatt: Boolean = false) {
-            val behov = Vilkårsgrunnlag.lagBehov(UUID.randomUUID(), aktørId, fødselsnummer, organisasjonsnummer)
+        private fun sendVilkårsgrunnlag(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer,
+            egenAnsatt: Boolean = false
+        ) {
+            val behov = generiskBehov(
+                hendelsetype = Hendelsestype.Vilkårsgrunnlag,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer
+            )
 
-            sendBehov(behov.løsBehov(mapOf(
-                "EgenAnsatt" to egenAnsatt
-            )))
+            sendBehov(
+                behov.løsBehov(
+                    mapOf(
+                        "EgenAnsatt" to egenAnsatt
+                    )
+                )
+            )
         }
 
-        private fun sendInnteksmelding(aktørId: String = defaultAktørId, fødselsnummer: String = defaultFødselsnummer, organisasjonsnummer: String = defaultOrganisasjonsnummer): Inntektsmelding {
+        private fun sendInnteksmelding(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer
+        ): Inntektsmelding {
             val inntektsmelding = Inntektsmelding(
                 inntektsmeldingId = UUID.randomUUID().toString(),
                 arbeidstakerFnr = fødselsnummer,

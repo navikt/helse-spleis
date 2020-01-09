@@ -8,18 +8,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.fixtures.S
+import no.nav.helse.fixtures.april
 import no.nav.helse.juli
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class VedtaksperiodeTest {
     private companion object {
@@ -195,5 +200,31 @@ internal class VedtaksperiodeTest {
 
         assertFalse(vedtaksperiode.håndter(påminnelseHendelse(UUID.randomUUID(), TilstandType.START)))
         assertTrue(vedtaksperiode.håndter(påminnelseHendelse(id, TilstandType.START)))
+    }
+
+    @Test
+    fun `første fraversdag skal retur🅱️ere første fraversdag fra inntektsmelding`() {
+        val førsteFraværsdag = 20.april
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(inntektsmeldingHendelse(
+            førsteFraværsdag = førsteFraværsdag
+        ))
+
+        assertEquals(førsteFraværsdag, vedtaksperiode.førsteFraværsdag())
+    }
+
+    @Test
+    fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+            nySøknadHendelse(
+                søknadsperioder = listOf(
+                    SoknadsperiodeDTO(
+                        fom = 1.juli,
+                        tom = 20.juli
+                    )
+                ), egenmeldinger = emptyList(), fravær = emptyList()
+            )
+        )
+
+        assertEquals(null, vedtaksperiode.førsteFraværsdag())
     }
 }

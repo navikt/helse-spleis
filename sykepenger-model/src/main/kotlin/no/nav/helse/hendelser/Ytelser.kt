@@ -9,15 +9,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.util.UUID
 
-class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser),
-    VedtaksperiodeHendelse {
+class Ytelser private constructor(
+    hendelseId: UUID,
+    private val behov: Behov
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser), VedtaksperiodeHendelse {
 
     private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
 
@@ -25,8 +26,8 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
         override fun build(json: String): Ytelser? {
             return try {
                 val behov = Behov.fromJson(json)
-                require(behov.erLøst())
-                require(Hendelsetype.Ytelser == behov.hendelsetype())
+                if (!behov.erLøst() || behov.hendelsetype() != Hendelsestype.Ytelser)
+                    return null
 
                 Ytelser(behov)
             } catch (err: Exception) {
@@ -54,8 +55,8 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
             )
 
             return Behov.nyttBehov(
-                hendelsetype = Hendelsetype.Ytelser,
-                behov = listOf(Behovtype.Sykepengehistorikk, Behovtype.Foreldrepenger),
+                hendelsestype = Hendelsestype.Ytelser,
+                behov = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -82,7 +83,7 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
         val sykepengehistorikkløsninger = løsning["Sykepengehistorikk"] as List<*>
 
         return Sykepengehistorikk(
-            objectMapper.convertValue<JsonNode>(
+            objectMapper.convertValue(
                 sykepengehistorikkløsninger
             )
         )
@@ -98,16 +99,14 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
 
     override fun rapportertdato() = requireNotNull(behov.besvart())
 
-    override fun toJson(): String {
-        return objectMapper.convertValue<ObjectNode>(
-            mapOf(
-                "hendelseId" to hendelseId(),
-                "type" to hendelsetype()
-            )
+    override fun toJson() = objectMapper.convertValue<ObjectNode>(
+        mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to hendelsetype()
         )
-            .putRawValue("ytelser", RawValue(behov.toJson()))
-            .toString()
-    }
+    )
+        .putRawValue("ytelser", RawValue(behov.toJson()))
+        .toString()
 
     internal class Foreldrepenger(jsonNode: JsonNode) {
         fun overlapperMedSyketilfelle(syketilfelleFom: LocalDate, syketilfelleTom: LocalDate): Boolean {
@@ -121,8 +120,10 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
             }
         }
 
-        private val Foreldrepengeytelse: Ytelse? = objectMapper.convertValue(jsonNode["Foreldrepengeytelse"], Ytelse::class.java)
-        private val Svangerskapsytelse: Ytelse? = objectMapper.convertValue(jsonNode["Svangerskapsytelse"], Ytelse::class.java)
+        private val Foreldrepengeytelse: Ytelse? =
+            objectMapper.convertValue(jsonNode["Foreldrepengeytelse"], Ytelse::class.java)
+        private val Svangerskapsytelse: Ytelse? =
+            objectMapper.convertValue(jsonNode["Svangerskapsytelse"], Ytelse::class.java)
 
         private class Ytelse(
             internal val fom: LocalDate,

@@ -7,13 +7,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
-import java.util.*
+import java.util.UUID
 
 class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsetype.Vilkårsgrunnlag),
+    ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag),
     VedtaksperiodeHendelse {
 
     private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
@@ -22,9 +21,8 @@ class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: 
         override fun build(json: String): Vilkårsgrunnlag? {
             return try {
                 val behov = Behov.fromJson(json)
-                require(behov.erLøst())
-                require(Hendelsetype.Vilkårsgrunnlag == behov.hendelsetype())
-
+                if (!behov.erLøst() || Hendelsestype.Vilkårsgrunnlag != behov.hendelsetype())
+                    return null
                 Vilkårsgrunnlag(behov)
             } catch (err: Exception) {
                 null
@@ -37,23 +35,6 @@ class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: 
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun lagBehov(
-            vedtaksperiodeId: UUID,
-            aktørId: String,
-            fødselsnummer: String,
-            organisasjonsnummer: String
-        ): Behov {
-            return Behov.nyttBehov(
-                hendelsetype = Hendelsetype.Vilkårsgrunnlag,
-                behov = listOf(Behovtype.EgenAnsatt),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                additionalParams = emptyMap()
-            )
-        }
 
         fun fromJson(json: String): Vilkårsgrunnlag {
             return objectMapper.readTree(json).let {

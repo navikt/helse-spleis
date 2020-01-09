@@ -3,16 +3,20 @@ package no.nav.helse.person
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Ytelser
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 abstract class ArbeidstakerHendelse protected constructor(
     private val hendelseId: UUID,
-    private val hendelsetype: Hendelsetype
+    private val hendelsestype: Hendelsestype
 ) : Comparable<ArbeidstakerHendelse> {
 
-    enum class Hendelsetype {
+    enum class Hendelsestype {
         Ytelser,
         Vilkårsgrunnlag,
         ManuellSaksbehandling,
@@ -24,7 +28,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     }
 
     fun hendelseId() = hendelseId
-    fun hendelsetype() = hendelsetype
+    fun hendelsetype() = hendelsestype
 
     open fun kanBehandles() = true
 
@@ -49,12 +53,12 @@ abstract class ArbeidstakerHendelse protected constructor(
 
         fun fromJson(json: String): ArbeidstakerHendelse {
             return objectMapper.readTree(json).let {
-                when (val hendelsetype = Hendelsetype.valueOf(it["type"].textValue())) {
-                    Hendelsetype.Inntektsmelding -> Inntektsmelding.fromJson(json)
-                    Hendelsetype.NySøknad -> NySøknad.fromJson(json)
-                    Hendelsetype.SendtSøknad -> SendtSøknad.fromJson(json)
-                    Hendelsetype.Ytelser -> Ytelser.fromJson(json)
-                    Hendelsetype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)
+                when (val hendelsetype = Hendelsestype.valueOf(it["type"].textValue())) {
+                    Hendelsestype.Inntektsmelding -> Inntektsmelding.fromJson(json)
+                    Hendelsestype.NySøknad -> NySøknad.fromJson(json)
+                    Hendelsestype.SendtSøknad -> SendtSøknad.fromJson(json)
+                    Hendelsestype.Ytelser -> Ytelser.fromJson(json)
+                    Hendelsestype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)
                     else -> throw RuntimeException("kjenner ikke hendelsetypen $hendelsetype")
                 }
             }

@@ -2,7 +2,7 @@ package no.nav.helse.behov
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class Behov internal constructor(private val pakke: Pakke) {
 
@@ -21,8 +21,8 @@ class Behov internal constructor(private val pakke: Pakke) {
         private const val VedtaksperiodeIdKey = "vedtaksperiodeId"
 
         fun nyttBehov(
-            hendelsetype: ArbeidstakerHendelse.Hendelsetype,
-            behov: List<Behovtype>,
+            hendelsestype: ArbeidstakerHendelse.Hendelsestype,
+            behov: List<Behovstype>,
             aktørId: String,
             fødselsnummer: String,
             organisasjonsnummer: String,
@@ -34,7 +34,7 @@ class Behov internal constructor(private val pakke: Pakke) {
                     BehovKey to behov.map { it.name },
                     IdKey to UUID.randomUUID().toString(),
                     OpprettetKey to LocalDateTime.now().toString(),
-                    HendelsetypeKey to hendelsetype.name,
+                    HendelsetypeKey to hendelsestype.name,
                     AktørIdKey to aktørId,
                     FødselsnummerKey to fødselsnummer,
                     OrganisasjonsnummerKey to organisasjonsnummer,
@@ -67,8 +67,8 @@ class Behov internal constructor(private val pakke: Pakke) {
         return pakke[BesvartKey]?.let { LocalDateTime.parse(it as String) }
     }
 
-    fun hendelsetype(): ArbeidstakerHendelse.Hendelsetype {
-        return ArbeidstakerHendelse.Hendelsetype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
+    fun hendelsetype(): ArbeidstakerHendelse.Hendelsestype {
+        return ArbeidstakerHendelse.Hendelsestype.valueOf(requireNotNull(get<String>(HendelsetypeKey)))
     }
 
     fun aktørId(): String {

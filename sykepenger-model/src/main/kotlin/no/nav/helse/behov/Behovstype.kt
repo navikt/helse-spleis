@@ -1,9 +1,10 @@
 package no.nav.helse.behov
 
-enum class Behovtype {
+enum class Behovstype {
     Sykepengehistorikk,
     Foreldrepenger,
     EgenAnsatt,
     GodkjenningFraSaksbehandler,
-    Utbetaling
+    Utbetaling,
+    Inntektsberegning
 }

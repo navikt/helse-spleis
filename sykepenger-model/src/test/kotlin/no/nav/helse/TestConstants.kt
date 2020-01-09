@@ -6,21 +6,38 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
-import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
+import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverForskuttererDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidssituasjonDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.*
+import java.util.UUID
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal object TestConstants {
@@ -143,7 +160,8 @@ internal object TestConstants {
             status = SoknadsstatusDTO.SENDT,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode().toString())!!
+        ).toJsonNode().toString()
+    )!!
 
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
@@ -193,7 +211,8 @@ internal object TestConstants {
             status = SoknadsstatusDTO.NY,
             arbeidsgiver = arbeidsgiver,
             sendtNav = sendtNav
-        ).toJsonNode().toString())!!
+        ).toJsonNode().toString()
+    )!!
 
     fun søknadsperiode(fom: LocalDate, tom: LocalDate, sykemeldingsgrad: Int = 100, faktiskGrad: Int? = null) =
         SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = sykemeldingsgrad, faktiskGrad = faktiskGrad)
@@ -226,7 +245,8 @@ internal object TestConstants {
                 refusjon,
                 endringerIRefusjoner,
                 beregnetInntekt
-            ).toJsonNode().toString())!!
+            ).toJsonNode().toString()
+        )!!
 
     fun inntektsmeldingDTO(
         aktørId: String = "",
@@ -297,13 +317,7 @@ internal object TestConstants {
         Svangerskapsytelse = svangerskapsytelse
     )
 
-    fun foreldrepengeytelse(
-        fom: LocalDate,
-        tom: LocalDate
-    ) = Ytelse(
-        fom = fom,
-        tom = tom
-    )
+    fun foreldrepengeytelse(fom: LocalDate, tom: LocalDate) = Ytelse(fom = fom, tom = tom)
 
     fun ytelser(
         aktørId: String = "1",
@@ -326,7 +340,8 @@ internal object TestConstants {
                 "Sykepengehistorikk" to sykepengehistorikk,
                 "Foreldrepenger" to foreldrepenger
             )
-        ).toJson())!!
+        ).toJson()
+    )!!
 
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",
@@ -335,23 +350,21 @@ internal object TestConstants {
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
-    ): Behov {
-        return Behov.nyttBehov(
-            ArbeidstakerHendelse.Hendelsetype.ManuellSaksbehandling,
-            listOf(Behovtype.GodkjenningFraSaksbehandler),
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            UUID.fromString(vedtaksperiodeId),
-            mapOf(
-                "saksbehandlerIdent" to saksbehandler
-            )
-        ).løsBehov(
-            mapOf(
-                Behovtype.GodkjenningFraSaksbehandler.toString() to mapOf("godkjent" to utbetalingGodkjent)
-            )
+    ) = Behov.nyttBehov(
+        ArbeidstakerHendelse.Hendelsestype.ManuellSaksbehandling,
+        listOf(Behovstype.GodkjenningFraSaksbehandler),
+        aktørId,
+        fødselsnummer,
+        organisasjonsnummer,
+        UUID.fromString(vedtaksperiodeId),
+        mapOf(
+            "saksbehandlerIdent" to saksbehandler
         )
-    }
+    ).løsBehov(
+        mapOf(
+            Behovstype.GodkjenningFraSaksbehandler.toString() to mapOf("godkjent" to utbetalingGodkjent)
+        )
+    )
 
     fun manuellSaksbehandlingHendelse(
         organisasjonsnummer: String = "123546564",
@@ -360,17 +373,16 @@ internal object TestConstants {
         vedtaksperiodeId: String = UUID.randomUUID().toString(),
         utbetalingGodkjent: Boolean,
         saksbehandler: String
-    ): ManuellSaksbehandling {
-        return ManuellSaksbehandling.Builder().build(
-            manuellSaksbehandlingLøsning(
-                organisasjonsnummer = organisasjonsnummer,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingGodkjent = utbetalingGodkjent,
-                saksbehandler = saksbehandler
-            ).toJson())!!
-    }
+    ) = ManuellSaksbehandling.Builder().build(
+        manuellSaksbehandlingLøsning(
+            organisasjonsnummer = organisasjonsnummer,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingGodkjent = utbetalingGodkjent,
+            saksbehandler = saksbehandler
+        ).toJson()
+    )!!
 
     fun påminnelseHendelse(
         vedtaksperiodeId: UUID,
@@ -422,7 +434,8 @@ internal class Uke(ukenr: Long) {
 internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad.Builder().build(
     this.copy(
         status = SoknadsstatusDTO.SENDT
-    ).toJsonNode().toString())!!
+    ).toJsonNode().toString()
+)!!
 
 internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 

@@ -9,6 +9,7 @@ import kotliquery.using
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 class HendelsePersisteringPostgresTest {
@@ -81,13 +82,23 @@ class HendelsePersisteringPostgresTest {
             assertHendelse(dataSource, it)
         }
 
-        Vilkårsgrunnlag.Builder().build(Vilkårsgrunnlag.lagBehov(UUID.randomUUID(), "aktørid", "fnr", "orgnr").løsBehov(mapOf(
+        Vilkårsgrunnlag.Builder().build(generiskBehov().løsBehov(mapOf(
             "EgenAnsatt" to false
         )).toJson())!!.also {
             dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }
     }
+
+    private fun generiskBehov() = Behov.nyttBehov(
+        hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
+        behov = listOf(),
+        aktørId = "aktørId",
+        fødselsnummer = "fødselsnummer",
+        organisasjonsnummer = "organisasjonsnummer",
+        vedtaksperiodeId = UUID.randomUUID(),
+        additionalParams = mapOf()
+    )
 
     private fun assertHendelse(dataSource: DataSource, hendelse: ArbeidstakerHendelse) {
         val alleHendelser = using(sessionOf(dataSource)) { session ->

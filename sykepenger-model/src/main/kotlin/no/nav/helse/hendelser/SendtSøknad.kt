@@ -9,9 +9,9 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
-class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsetype.SendtSøknad, søknad) {
+class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsestype.SendtSøknad, søknad) {
 
     private constructor(søknad: JsonNode) : this(UUID.randomUUID(), søknad)
 
@@ -113,18 +113,18 @@ class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendel
                         resultatTidslinje + delTidslinje
                     }
 
-    private class Periode(val jsonNode: JsonNode) {
+    private class Periode(jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
     }
 
-    private class FraværsPeriode(val jsonNode: JsonNode) {
+    private class FraværsPeriode(jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
         val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
     }
 
-    private class Utdanningsfraværsperiode(val jsonNode: JsonNode) {
+    private class Utdanningsfraværsperiode(jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val type: Fraværstype = enumValueOf(jsonNode["type"].textValue())
     }

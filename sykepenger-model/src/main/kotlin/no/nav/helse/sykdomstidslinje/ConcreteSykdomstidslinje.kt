@@ -5,13 +5,26 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
+import no.nav.helse.sykdomstidslinje.dag.JsonDag
+import no.nav.helse.sykdomstidslinje.dag.JsonDagType
+import no.nav.helse.sykdomstidslinje.dag.JsonTidslinje
+import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.dag.Studiedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
+import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.AlderRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -36,11 +49,11 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     abstract fun førsteDag(): LocalDate
     abstract fun sisteDag(): LocalDate
     abstract fun hendelser(): Set<SykdomstidslinjeHendelse>
-
     internal abstract fun flatten(): List<Dag>
-    internal abstract fun length(): Int
 
+    internal abstract fun length(): Int
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
+
     internal abstract fun dag(dato: LocalDate): Dag?
 
     fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
@@ -68,7 +81,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
         if (kuttDag.isBefore(førsteDag())) return null
-        if ( !(kuttDag.isBefore(sisteDag()) )) return this
+        if (!kuttDag.isBefore(sisteDag())) return this
         return CompositeSykdomstidslinje(this.flatten().filterNot { it.dagen.isAfter(kuttDag) })
     }
 
@@ -80,7 +93,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     fun erUtenforOmfang(): Boolean {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
-
     }
 
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {

@@ -5,13 +5,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovProducer
-import no.nav.helse.behov.Behovtype
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -29,8 +29,8 @@ internal class BehovProducerTest {
         BehovProducer(topic, producer)
             .sendNyttBehov(
                 Behov.nyttBehov(
-                    ArbeidstakerHendelse.Hendelsetype.Ytelser,
-                    listOf(Behovtype.Sykepengehistorikk),
+                    ArbeidstakerHendelse.Hendelsestype.Ytelser,
+                    listOf(Behovstype.Sykepengehistorikk),
                     "aktørId",
                     "fnr",
                     "orgnr",
@@ -41,7 +41,7 @@ internal class BehovProducerTest {
 
         verify(exactly = 1) {
             producer.send(match { record ->
-                record.value().contains(Behovtype.Sykepengehistorikk.name)
+                record.value().contains(Behovstype.Sykepengehistorikk.name)
             })
         }
     }

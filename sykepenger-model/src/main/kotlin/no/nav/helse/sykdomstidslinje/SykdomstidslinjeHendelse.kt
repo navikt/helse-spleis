@@ -2,10 +2,10 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
-import java.util.*
+import java.util.UUID
 
-abstract class SykdomstidslinjeHendelse(hendelseId: UUID, hendelsetype: Hendelsetype) :
-    ArbeidstakerHendelse(hendelseId, hendelsetype) {
+abstract class SykdomstidslinjeHendelse(hendelseId: UUID, hendelsestype: Hendelsestype) :
+    ArbeidstakerHendelse(hendelseId, hendelsestype) {
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
