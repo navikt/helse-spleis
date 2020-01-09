@@ -1,4 +1,4 @@
-#Creating Utbetalingstidslinjer (Payment time lines) and Utbetalingslinjer (Payment lines)
+# Creating Utbetalingstidslinjer (Payment time lines) and Utbetalingslinjer (Payment lines)
 
 The creation of an array of **Utbetalingslinjer** (payment lines) is a multistep
 process involving both validation and morphing of information. The challenge is even
@@ -18,13 +18,16 @@ Vedtaksperiode. This means that we can constrain our calculations to dates befor
 the end date of the Vedtaksperiode, even if we must consider other Vedtaksperioder
 and other Arbeidsgivere.
 
-##Steps
+## Steps
 
-###0. All Information Collected
+### 0. All Information Collected
 
 This process starts when we have received prior utbetalinger from the legacy
 system. These are all the HistorikUtbetalinger associated with the *Person*, not
-just those associated with a given Arbeidsgiver.
+just those associated with a given Arbeidsgiver. We pull four years of data,
+thus guaranteeing we have at least three years of data prior to the last day
+worked. This data will be trimmed to three years dynamically during the
+Utbetalingstidslinje generation process.
 
 At this point, we have also built a Sykdomstidslinje for the Vedtaksperiode,
 and may or may not have other Vedtaksperioder in various states of progress.
@@ -32,7 +35,7 @@ and may or may not have other Vedtaksperioder in various states of progress.
 Additionally, we may or may not have other Arbeidsgiverer with their own
 Vedtaksperioder, with each of these in various states.
 
-###1. Creation of Utbetalingstidslinje for Each Arbeidsgiver
+### 1. Creation of Utbetalingstidslinje for Each Arbeidsgiver
 
 Using the various HistorikUtbetalinger, we need to calculate a Utbetalingstidslinje
 for each Arbeidsgivere:
@@ -54,7 +57,7 @@ Utbetalingstidslinje for all the other Arbeidsgivere for the subsequent steps.
 After we have manipulated all these Utbetalingstidslinjer, we will push each
 one onto a stack of Utbetalingstidslinjer kept for each Arbeidsgiver.
 
-###2. Application of Sickness Grade
+### 2. Application of Sickness Grade
 
 NAV payment will not be made if the overall *Sickness Grade* is less than 20%.
 The overall sickness grade is calculated as the weighted average (by inntekt) of
@@ -68,7 +71,7 @@ of the Arbeidsgiver is replaced with a AvvistDag to mark non-payment.
 
 We are now ready for the next filtering.
 
-###3. Filtering on Income Level
+### 3. Filtering on Income Level
 
 The next filtering is for insufficient income level. Across all sources of income,
 no sickness payments are made unless total income is 1/2G (or 2G for persons 67
@@ -80,13 +83,13 @@ unemployment, parental leave, etc.), converted to an annual inntekt, and then
 checked against this minimum limit. For any days below minimum income, a NavDag
 for that day in any Utbetalingstidslinje is changed to a AvvistDag.
 
-###4. Validating Sickness Day Limits
+### 4. Validating Sickness Day Limits
 
 Depending on the Arbeidsgiver and the age of the applicant, there are limits to
 the number of sickness days we will pay.
 
 By law, sickness benefits run out after certain limits or events. These limits are
-captured in the UtbetalingTeller class which also uses the age of the claimant (
+managed by the UtbetalingTeller class which also uses the age of the claimant (
 Alder class). The following summarizes the rules:
 
 * Benefits are not paid on the 70th birthday or later
@@ -97,6 +100,12 @@ insurance has been purchased. This is captured in ArbeidsgiverRegler (EmployerRu
   implemented
   * When conflicts exist with which ArbeidsgiverRegler to use (amongst different
   inntekt sources), a primary ArbeidsgiverRegler is selected for limit analysis.
+* Benefits reset after a 26-week period of no NAV payments.
+
+These limits apply to a rolling, three-year window. Hence, each time we transition
+from a Arbeidsdag to a NavDag, the three-year window needs to be adjusted. If a
+single 248-day (or other limit) period spans the entire three years, we need to
+adjust the limit count for NavDager that just moved out of the three-year window.
 
 With the Utbetalingstidslinje already calculated for each Arbeidsgiver, we must merge
 these Utbetalingstidslinje for limit analysis. *(This is not implemented yet, and is
@@ -123,7 +132,7 @@ marked for payment by NAV, but because of the limits, should not be paid.
 The identified AvvistDager are then merged back into each Utbetalingstidslinje for
 each Arbeidsgiver. Now we are ready to allocate payments.
 
-###5. Allocation of Payments
+### 5. Allocation of Payments
 
 With the revised Utbetalingstidslinje for the Arbeidsgiver from the previous step,
 we need to check for the 6G (maximum allowed daily payment) limit. Several factors
@@ -149,7 +158,7 @@ revised Utbetalingstidslinje are pushed onto the stack of prior Utbetalingstidsl
 for the Arbeidsgiver. A future Epic addresses the behavior when revised payments are
 indicated for prior Vedtaksperioder.
 
-###6. Generation of Utbetalingslinjer (Payment Lines)
+### 6. Generation of Utbetalingslinjer (Payment Lines)
 
 Using just the subset of the last Utbetalingstidslinje for the Arbeidsgiver of the
 relevant Vedtaksperiode, another visitor (GoF Visitor Pattern) is spawned and walks
@@ -163,6 +172,44 @@ One further future refinement will be necessary at some point: *Identification o
 which part of the payment should go to the arbeidsgiver, and which part to the
 claimant. Probably two sets of Utbetalingslinjer will need to be generated.*
 
+## Scaling Back for Epic 3 - Single Arbeidsgiver
+
+While Epic 7 includes support for muliple Arbeidsgivere (and subsequent Epics for
+self-employment and unemployment), Epic 3 supports a single Arbeidsgiver and only
+100% sickness. So the following optimizations are possible:
+
+### 0. All Information Collected
+
+We only need to examine the Vedtaksperioder for the single Arbeidsgiver. We should
+still collect HistorikUtbetaling for all Arbeidsgivere for the Person since the
+Person may have changed jobs in the last 4 years.
+
+### 1. Creation of Utbetalingstidslinje for Each Arbeidsgiver
+
+There is only a single Arbeidsgiver to process.
+
+### 2. Application of Sickness Grade
+
+Since only 100% sickness is handled, we need not be concerned about the 20% limit.
+
+### 3. Filtering on Income Level
+
+The income from the sole Arbeidsgiver is the only income we need to be concerned about.
+Benefits from other soureces (paternity, unemployment) need not be considered.
+
+### 4. Validating Sickness Day Limits
+
+There is a limited need to merge Utbetalingstidslinjer across Arbeidsgivere since we
+only have a single Arbeidsgivere, with one notable exception: If the Person has
+changed companies in the last four years, we may have HistoricUtbetaling for other
+Arbeidsgivere. We thus need to add those other Utbetalingstidslinje generated from
+the HistoricUtbetaling for limit analysis.
+
+### 5. Allocation of Payments
+
+Without competing Arbeidsgivere and with 100% sickness, this step is trivial: It
+is simply the daily max for payments. Note that we are not supporting direct
+payments to the employee yet.
 
 
 
