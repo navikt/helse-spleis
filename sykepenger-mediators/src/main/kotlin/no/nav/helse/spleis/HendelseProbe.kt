@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 class HendelseProbe: HendelseListener {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
+        private val log = LoggerFactory.getLogger(HendelseProbe::class.java)
 
         private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
             .labelNames("type")
@@ -31,6 +32,7 @@ class HendelseProbe: HendelseListener {
     }
 
     override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+        log.info("Mottatt svar på manuell saksbehandling. Godkjent:${manuellSaksbehandling.utbetalingGodkjent()} for vedtaksperiode:${manuellSaksbehandling.vedtaksperiodeId()}")
         manuellSaksbehandling.tell()
     }
 
