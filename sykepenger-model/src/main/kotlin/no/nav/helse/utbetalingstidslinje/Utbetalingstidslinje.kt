@@ -33,7 +33,7 @@ internal class Utbetalingstidslinje internal constructor() {
             .reduserAvSykdomsgrad(others)
             .filterByMinimumInntekt(others, alder)
             .avgrens(others, alder, arbeidsgiverRegler)
-            .subset(førsteDag, sisteDag)
+            .subset(førsteDag, sisteDag, others)
             .utbetalingslinjer()
 
     internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
@@ -107,7 +107,7 @@ internal class Utbetalingstidslinje internal constructor() {
 
     private fun reduserAvSykdomsgrad(others: List<Utbetalingstidslinje>) = this
 
-    private fun subset(fom: LocalDate, tom: LocalDate) : Utbetalingstidslinje {
+    private fun subset(fom: LocalDate, tom: LocalDate, others: List<Utbetalingstidslinje> = emptyList()) : Utbetalingstidslinje {
         return Utbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
     }
 
