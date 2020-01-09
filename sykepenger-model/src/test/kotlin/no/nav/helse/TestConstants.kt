@@ -1,8 +1,5 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.annotation.JsonGetter
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -351,7 +348,7 @@ internal object TestConstants {
             )
         ).løsBehov(
             mapOf(
-                "godkjent" to utbetalingGodkjent
+                Behovtype.GodkjenningFraSaksbehandler.toString() to mapOf("godkjent" to utbetalingGodkjent)
             )
         )
     }

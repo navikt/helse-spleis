@@ -418,13 +418,12 @@ internal class EndToEndTest {
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ) {
-        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler).løsBehov(
-            mapOf(
-                "godkjent" to utbetalingGodkjent
-            )
-        )
-        behov["saksbehandlerIdent"] = saksbehandler
-        sendBehov(behov)
+        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
+
+        val løstBehov = behov
+            .apply { set("saksbehandlerIdent", saksbehandler)}
+            .løsBehov(mapOf(GodkjenningFraSaksbehandler.name to mapOf("godkjent" to utbetalingGodkjent)))
+        sendBehov(løstBehov)
     }
 
     private fun sendInnteksmelding(

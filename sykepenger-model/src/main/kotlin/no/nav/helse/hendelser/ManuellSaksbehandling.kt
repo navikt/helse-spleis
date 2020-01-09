@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.util.RawValue
@@ -64,8 +65,12 @@ class ManuellSaksbehandling private constructor(hendelseId: UUID, private val be
 
     fun saksbehandler(): String = requireNotNull(behov["saksbehandlerIdent"])
 
-    fun utbetalingGodkjent(): Boolean =
-        (behov.løsning() as Map<*, *>?)?.get("godkjent") == true
+    fun utbetalingGodkjent(): Boolean {
+        val løsninger = behov.løsning() as Map<*, *>
+        val løsning =
+            objectMapper.convertValue(løsninger["GodkjenningFraSaksbehandler"], JsonNode::class.java)
+        return løsning.get("godkjent").asBoolean()
+    }
 
     override fun vedtaksperiodeId(): String = behov.vedtaksperiodeId()
 

@@ -115,8 +115,6 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
                 return false
             }
 
-
-
             return listOfNotNull(Foreldrepengeytelse, Svangerskapsytelse).any { ytelse ->
                 ytelse.overlapperMed(syketilfelleRange)
             }
