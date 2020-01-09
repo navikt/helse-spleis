@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.AlderRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
 import java.time.LocalDate
@@ -26,9 +25,9 @@ internal class PersonSykdomstidslinje(
         visitor.postVisitSak(this)
     }
 
-    internal fun utbetalingslinjer(): List<Utbetalingslinje> {
-        val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje,sisteDag).result()
-        val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it,sisteDag).result() }
+    internal fun utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden: LocalDate?): List<Utbetalingslinje> {
+        val tidslinje = UtbetalingBuilder(arbeidsgiverSykdomstidslinje,sisteDag, sisteNavDagForArbeidsgiverFørPerioden).result()
+        val tidslinjer = (sykdomstidslinjer - arbeidsgiverSykdomstidslinje).map { UtbetalingBuilder(it,sisteDag, null).result() }
         return tidslinje.utbetalingslinjer(tidslinjer, alder, arbeidsgiverRegler, førsteDag, sisteDag)
             .also {
                 maksdato = tidslinje.maksdato()

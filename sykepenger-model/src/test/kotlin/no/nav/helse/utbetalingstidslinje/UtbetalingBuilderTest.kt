@@ -412,20 +412,6 @@ internal class UtbetalingBuilderTest {
     }
 
     @Test
-    fun `intitialiserer arbeidsgiverperioden med 5 dager`() {
-        (15.S).utbetalingslinjer(arbeidsgiverperiodeSeed = 5)
-        assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 12.januar, 15.januar, 1200)
-    }
-
-    @Test
-    fun `intitialiserer arbeidsgiverperioden med 16 dager`() {
-        (15.S).utbetalingslinjer(arbeidsgiverperiodeSeed = 16)
-        assertEquals(1, betalingslinjer.size)
-        assert(betalingslinjer.first(), 1.januar, 15.januar, 1200)
-    }
-
-    @Test
     fun `oppdeltArbeidsgiverutbetalingstidslinje har ingen sykedager betalt av nav`() {
         (50.S).utbetalingslinjer(1.januar, 10.januar)
         assertEquals(0, betalingslinjer.size)
@@ -451,13 +437,27 @@ internal class UtbetalingBuilderTest {
         assertEquals(0, betalingslinjer.size)
     }
 
+    @Test
+    fun `NAV betaler første dag når 15-dagers opphold`() {
+        (1.S).utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden = 1.januar.minusDays(16))
+        assertEquals(1, betalingslinjer.size)
+        assert(betalingslinjer.first(), 1.januar, 1.januar, 1200)
+    }
+
+    @Test
+    fun `NAV betaler IKKE første dag når 16-dagers opphold`() {
+        (1.S).utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden = 1.januar.minusDays(17))
+        assertEquals(0, betalingslinjer.size)
+    }
+
+
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         førsteDag: LocalDate = this.førsteDag(),
         sisteDag: LocalDate = this.sisteDag(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
-        arbeidsgiverperiodeSeed: Int = 0
+        sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null
     ) {
-        val arbeidsgiverSykdomstidslinje = ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektsberegner, arbeidsgiverperiodeSeed)
+        val arbeidsgiverSykdomstidslinje = ArbeidsgiverSykdomstidslinje(listOf(this), NormalArbeidstaker, inntektsberegner)
         PersonSykdomstidslinje(
             listOf(arbeidsgiverSykdomstidslinje),
             Alder(fødselsnummer),
@@ -466,7 +466,7 @@ internal class UtbetalingBuilderTest {
             førsteDag,
             sisteDag
         ).also {
-            betalingslinjer = it.utbetalingslinjer()
+            betalingslinjer = it.utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden)
             maksdato = it.maksdato()
         }
 

@@ -4,6 +4,7 @@ import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 /**
  *  Forstår opprettelsen av en ArbeidsgiverUtbetalingstidslinje
@@ -11,11 +12,13 @@ import java.time.LocalDate
 
 internal class UtbetalingBuilder internal constructor(
     private val sykdomstidslinje: ArbeidsgiverSykdomstidslinje,
-    private val sisteDag: LocalDate
+    private val sisteDag: LocalDate,
+    private val sisteNavDagForArbeidsgiverFørPerioden: LocalDate?
 ) : SykdomstidslinjeVisitor {
-    private var state: UtbetalingState = Initiell
+    private var state: UtbetalingState = if (sisteNavDagForArbeidsgiverFørPerioden != null)
+        InitiellMedNavdagFørPerioden else Initiell
 
-    private var sykedager = sykdomstidslinje.arbeidsgiverperiodeSeed
+    private var sykedagerIArbeidsgiverperiode = 0
     private var ikkeSykedager = 0
     private var fridager = 0
 
@@ -52,9 +55,8 @@ internal class UtbetalingBuilder internal constructor(
 
     private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
 
-    //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
     private fun sykedag(dagen: LocalDate) =
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedager)) state.sykedagerEtterArbeidsgiverperioden(
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) state.sykedagerEtterArbeidsgiverperioden(
             this,
             dagen
         )
@@ -62,7 +64,6 @@ internal class UtbetalingBuilder internal constructor(
 
     private fun sykHelgedag(dagen: LocalDate) = state.sykHelgedag(this, dagen)
 
-    //Siden telleren alltid er en dag bak dagen vi ser på, sjekker vi for < 16 i stedet for <= 16
     private fun arbeidsdag(dagen: LocalDate) =
         if (arbeidsgiverRegler.burdeStarteNyArbeidsgiverperiode(ikkeSykedager))
             state.arbeidsdagerEtterOppholdsdager(this, dagen)
@@ -81,7 +82,7 @@ internal class UtbetalingBuilder internal constructor(
     }
 
     private fun håndterArbeidsgiverdag(dagen: LocalDate) {
-        sykedager += 1
+        sykedagerIArbeidsgiverperiode += 1
         addArbeidsgiverdag(dagen)
     }
 
@@ -115,7 +116,7 @@ internal class UtbetalingBuilder internal constructor(
         this.state.entering(this)
     }
 
-    abstract class UtbetalingState {
+    private abstract class UtbetalingState {
         open fun sykedagerIArbeidsgiverperioden(splitter: UtbetalingBuilder, dagen: LocalDate) {}
         open fun sykedagerEtterArbeidsgiverperioden(splitter: UtbetalingBuilder, dagen: LocalDate) {}
 
@@ -129,10 +130,23 @@ internal class UtbetalingBuilder internal constructor(
 
     }
 
+    private object InitiellMedNavdagFørPerioden : UtbetalingState() {
+        override fun sykedagerIArbeidsgiverperioden(splitter: UtbetalingBuilder, dagen: LocalDate) {
+            splitter.setNåværendeInntekt(dagen.minusDays(1))
+            if (ChronoUnit.DAYS.between(splitter.sisteNavDagForArbeidsgiverFørPerioden!!, dagen) <= 16) {
+                splitter.håndterNAVdag(dagen)
+                splitter.state(UtbetalingSykedager)
+                return
+            }
+            splitter.håndterArbeidsgiverdag(dagen)
+            splitter.state(ArbeidsgiverperiodeSykedager)
+        }
+    }
+
     private object Initiell : UtbetalingState() {
 
         override fun entering(splitter: UtbetalingBuilder) {
-            splitter.sykedager = 0
+            splitter.sykedagerIArbeidsgiverperiode = 0
             splitter.ikkeSykedager = 0
             splitter.fridager = 0
         }
@@ -196,8 +210,8 @@ internal class UtbetalingBuilder internal constructor(
         }
 
         override fun sykedagerIArbeidsgiverperioden(splitter: UtbetalingBuilder, dagen: LocalDate) {
-            splitter.sykedager += splitter.fridager
-            if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedager)) splitter.state(UtbetalingSykedager)
+            splitter.sykedagerIArbeidsgiverperiode += splitter.fridager
+            if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedagerIArbeidsgiverperiode)) splitter.state(UtbetalingSykedager)
                 .also { splitter.håndterNAVdag(dagen) }
             else splitter.state(ArbeidsgiverperiodeSykedager)
                 .also { splitter.håndterArbeidsgiverdag(dagen) }
@@ -205,7 +219,7 @@ internal class UtbetalingBuilder internal constructor(
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingBuilder, dagen: LocalDate) {
             splitter.håndterArbeidsdag(dagen)
-            splitter.ikkeSykedager = if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedager)) {
+            splitter.ikkeSykedager = if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedagerIArbeidsgiverperiode)) {
                 1
             } else {
                 splitter.fridager + 1
