@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -12,7 +13,7 @@ import no.nav.helse.behov.Behovtype
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
     ArbeidstakerHendelse(hendelseId, Hendelsetype.Ytelser),
