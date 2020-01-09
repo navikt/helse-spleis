@@ -39,6 +39,7 @@ class Ytelser private constructor(hendelseId: UUID, private val behov: Behov) :
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
         fun lagBehov(
             vedtaksperiodeId: UUID,
