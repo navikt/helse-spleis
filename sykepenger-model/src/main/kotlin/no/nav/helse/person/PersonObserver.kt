@@ -3,9 +3,12 @@ package no.nav.helse.person
 import java.util.*
 
 interface PersonObserver : VedtaksperiodeObserver {
-    data class PersonEndretEvent(val aktørId: String,
-                                 val sykdomshendelse: ArbeidstakerHendelse,
-                                 val memento: Person.Memento)
+    data class PersonEndretEvent(
+        val aktørId: String,
+        val sykdomshendelse: ArbeidstakerHendelse,
+        val memento: Person.Memento,
+        val fødselsnummer: String
+    )
 
     data class VedtaksperiodeIkkeFunnetEvent(val vedtaksperiodeId: UUID,
                                              val aktørId: String,

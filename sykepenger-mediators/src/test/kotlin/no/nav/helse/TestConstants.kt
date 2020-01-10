@@ -35,7 +35,7 @@ internal object TestConstants {
         id: String = UUID.randomUUID().toString(),
         status: SoknadsstatusDTO,
         aktørId: String = UUID.randomUUID().toString().substring(0, 13),
-        fødselsnummer: String = UUID.randomUUID().toString(),
+        fødselsnummer: String = UUID.randomUUID().toString().substring(0, 11),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -92,8 +92,8 @@ internal object TestConstants {
 
     fun sendtSøknadHendelse(
         id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString(),
-        fødselsnummer: String = UUID.randomUUID().toString(),
+        aktørId: String = UUID.randomUUID().toString().substring(0, 13),
+        fødselsnummer: String = UUID.randomUUID().toString().substring(0, 11),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(
@@ -142,8 +142,8 @@ internal object TestConstants {
 
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString(),
-        fødselsnummer: String = UUID.randomUUID().toString(),
+        aktørId: String = UUID.randomUUID().toString().substring(0, 13),
+        fødselsnummer: String = UUID.randomUUID().toString().substring(0, 11),
         arbeidGjenopptatt: LocalDate? = null,
         korrigerer: String? = null,
         egenmeldinger: List<PeriodeDTO> = listOf(

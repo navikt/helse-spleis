@@ -11,12 +11,13 @@ class LagrePersonDao(private val dataSource: DataSource,
                      private val probe: PostgresProbe = PostgresProbe): PersonObserver {
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        lagrePerson(personEndretEvent.aktørId, personEndretEvent.memento)
+        lagrePerson(personEndretEvent.aktørId, personEndretEvent.fødselsnummer, personEndretEvent.memento)
     }
 
-    private fun lagrePerson(aktørId: String, memento: Person.Memento) {
+    private fun lagrePerson(aktørId: String, fødselsnummer: String, memento: Person.Memento) {
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("INSERT INTO person (aktor_id, data) VALUES (?, (to_json(?::json)))", aktørId, memento.state()).asExecute)
+            session.run(queryOf("INSERT INTO person (aktor_id, fnr, data) VALUES (?, ?, (to_json(?::json)))",
+                aktørId, fødselsnummer, memento.state()).asExecute)
         }.also {
             probe.personSkrevetTilDb()
         }

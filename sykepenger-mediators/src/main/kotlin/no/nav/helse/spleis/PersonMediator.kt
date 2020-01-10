@@ -68,7 +68,9 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
-        producer.send(event.producerRecord())
+        producer.send(event.producerRecord()).also {
+            log.info("legger vedtatt vedtak:${event.vedtaksperiodeId} på topic")
+        }
     }
 
     override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
