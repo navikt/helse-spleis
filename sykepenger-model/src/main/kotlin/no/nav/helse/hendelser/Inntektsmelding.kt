@@ -145,7 +145,7 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
             checkNotNull(beregnetInntekt) { "kan ikke regne ut dagsats fra inntektsmeldinger uten beregnet inntekt" }
         return beregnetInntekt
             .times(12.toBigDecimal())
-            .min(grunnbeløp(dato).toBigDecimal())
+            .min(grunnbeløp.beløp(dato).toBigDecimal())
             .divide(260.toBigDecimal(), 0, RoundingMode.HALF_UP)
             .toInt()
     }
