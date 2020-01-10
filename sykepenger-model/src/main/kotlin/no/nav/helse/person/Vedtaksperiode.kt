@@ -329,7 +329,10 @@ internal class Vedtaksperiode internal constructor(
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
             val inntektsberegningSlutt = YearMonth.from(vedtaksperiode.førsteFraværsdag())
             val inntektsberegningStart = inntektsberegningSlutt.minusMonths(12)
-            vedtaksperiode.trengerVilkårsgrunnlag(inntektsberegningSlutt, inntektsberegningStart)
+            vedtaksperiode.trengerVilkårsgrunnlag(
+                beregningStart = inntektsberegningStart,
+                beregningSlutt = inntektsberegningSlutt
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
