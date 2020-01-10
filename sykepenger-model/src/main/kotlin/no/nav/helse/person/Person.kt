@@ -84,7 +84,8 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
                 PersonObserver.PersonEndretEvent(
                     aktørId = aktørId,
                     sykdomshendelse = event.sykdomshendelse,
-                    memento = memento()
+                    memento = memento(),
+                    fødselsnummer = fødselsnummer
                 )
             )
         }

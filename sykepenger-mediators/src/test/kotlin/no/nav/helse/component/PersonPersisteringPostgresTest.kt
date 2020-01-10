@@ -1,5 +1,6 @@
 package no.nav.helse.component
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -25,6 +26,7 @@ class PersonPersisteringPostgresTest {
         private lateinit var postgresConnection: Connection
 
         private lateinit var hikariConfig: HikariConfig
+        private val objectMapper = jacksonObjectMapper()
 
         @BeforeAll
         @JvmStatic
@@ -73,7 +75,10 @@ class PersonPersisteringPostgresTest {
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknadHendelse())
 
-        assertNotNull(repo.hentPerson("2"))
+        val hentetPerson = repo.hentPerson("2")
+        assertNotNull(hentetPerson)
+        val parsedHentetPerson = objectMapper.readTree(hentetPerson!!.memento().state())
+        assertEquals("fnr", parsedHentetPerson["fødselsnummer"].textValue())
     }
 
     @Test
