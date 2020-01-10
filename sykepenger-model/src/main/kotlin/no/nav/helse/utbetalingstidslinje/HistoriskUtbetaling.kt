@@ -10,16 +10,19 @@ internal class HistoriskUtbetaling(
 ) {
 
     companion object {
-        internal fun finnSisteNavDagFor(list: List<HistoriskUtbetaling>, orgnummer: Int, before: LocalDate) : LocalDate? {
-            return list
+        internal fun finnSisteNavDagFor(betalinger: List<HistoriskUtbetaling>, orgnummer: Int, before: LocalDate) : LocalDate? {
+            return betalinger
                 .filter { it.orgnummer == orgnummer }
                 .map { it.tom }
                 .filter { it < before }
                 .max()
         }
+
+        internal fun utbetalingstidslinje(betalinger: List<HistoriskUtbetaling>) =
+            betalinger.mapNotNull { it.toTidslinje() }.reduce(Utbetalingstidslinje::plus)
     }
 
-    internal fun toTidslinje(rangeFom: LocalDate, rangeTom: LocalDate): Utbetalingstidslinje? {
+    internal fun toTidslinje(rangeFom: LocalDate = fom, rangeTom: LocalDate = tom): Utbetalingstidslinje? {
         if (fom > rangeTom || tom < rangeFom) return null
         return Utbetalingstidslinje().apply {
             maxOf(rangeFom, fom).datesUntil(minOf(rangeTom, tom).plusDays(1)).forEach {

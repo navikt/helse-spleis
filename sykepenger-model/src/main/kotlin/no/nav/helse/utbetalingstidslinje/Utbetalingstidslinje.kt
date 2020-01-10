@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 /**
@@ -18,6 +19,8 @@ internal class Utbetalingstidslinje internal constructor() {
         this.utbetalingsdager.addAll(utbetalingsdager)
     }
 
+    private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
+
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
@@ -27,6 +30,12 @@ internal class Utbetalingstidslinje internal constructor() {
     internal fun maksdato() = visitor.maksdato()
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
+
+
+    internal operator fun set(dato: LocalDate, nyDag: Utbetalingsdag.AvvistDag) {
+        val antallDager = utbetalingsdager.first().dato.until(dato, ChronoUnit.DAYS).toInt()
+        utbetalingsdager.set(antallDager, nyDag)
+    }
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
         this
@@ -111,7 +120,7 @@ internal class Utbetalingstidslinje internal constructor() {
         return Utbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
     }
 
-    private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
+
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
@@ -149,6 +158,7 @@ internal class Utbetalingstidslinje internal constructor() {
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
             internal fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt.roundToInt())
             internal fun oppdater(last: Utbetalingslinje) { last.tom = dato }
+            internal fun avvistDag(begrunnelse: Begrunnelse) = AvvistDag(dato, begrunnelse)
         }
 
         internal class NavHelgDag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(0.0, dato) {
@@ -182,5 +192,6 @@ internal class Utbetalingstidslinje internal constructor() {
 }
 
 enum class Begrunnelse {
-    SykepengedagerOppbrukt
+    SykepengedagerOppbrukt,
+    MinimumInntekt
 }

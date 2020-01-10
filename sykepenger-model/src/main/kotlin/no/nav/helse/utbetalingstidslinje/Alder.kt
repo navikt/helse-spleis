@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.Grunnbeløp
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -31,4 +32,8 @@ internal class Alder(fødselsnummer: String) {
             else -> 0
         }
     )
+
+    internal fun minimumInntekt(dato: LocalDate): Double {
+        return (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato)
+    }
 }
