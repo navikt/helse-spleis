@@ -137,5 +137,5 @@ internal class UtbetalingsavgrenserTest {
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
         Utbetalingsgrense(Alder(fnr), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
             .also { this.accept(it) }
-            .ubetalteDager().map { it.dag }
+            .ubetalteDager().map { it.dato }
 }
