@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.spleis.hendelser.MessageDirector
 import no.nav.helse.spleis.hendelser.MessageProblems
 import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
 import no.nav.inntektsmeldingkontrakt.*
@@ -52,43 +51,33 @@ internal class InntektsmeldingMessageTest {
     }.toJson()
 
     @Test
-    internal fun `fails to recognize`() {
-        failsToRecognize(InvalidJson)
-        failsToRecognize(UnknownJson)
+    internal fun `invalid messages`() {
+        assertInvalidMessage(InvalidJson)
+        assertInvalidMessage(UnknownJson)
     }
 
     @Test
-    internal fun `recognizes valid inntektsmelding`() {
-        recognizes(ValidInntektsmeldingWithUnknownFieldsJson)
-        recognizes(ValidInntektsmeldingJson)
+    internal fun `valid inntektsmelding`() {
+        assertValidInntektsmeldingMessage(ValidInntektsmeldingWithUnknownFieldsJson)
+        assertValidInntektsmeldingMessage(ValidInntektsmeldingJson)
     }
 
-    private fun recognizes(message: String) {
+    private fun assertValidInntektsmeldingMessage(message: String) {
         val problems = MessageProblems(message)
-        assertTrue(recognize(message, problems))
+        InntektsmeldingMessage(message, problems)
         assertFalse(problems.hasErrors())
     }
 
-    private fun failsToRecognize(message: String) {
+    private fun assertInvalidMessage(message: String) {
         val problems = MessageProblems(message)
-        assertFalse(recognize(message, problems))
+        InntektsmeldingMessage(message, problems)
         assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
-    }
-
-    private fun recognize(message: String, problems: MessageProblems): Boolean {
-        return InntektsmeldingMessage.Recognizer(director)
-            .recognize(message, problems)
     }
 
     private var recognizedInntektsmelding = false
     @BeforeEach
     fun reset() {
         recognizedInntektsmelding = false
-    }
-    private val director = object : MessageDirector<InntektsmeldingMessage> {
-        override fun onMessage(message: InntektsmeldingMessage, warnings: MessageProblems) {
-            recognizedInntektsmelding = true
-        }
     }
 }
 

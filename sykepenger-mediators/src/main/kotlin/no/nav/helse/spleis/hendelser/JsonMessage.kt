@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 // Understands a specific JSON-formatted message
+// Implements GoF visitor pattern to enable working on the specific types
 internal open class JsonMessage(private val originalMessage: String, private val problems: MessageProblems) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
@@ -25,6 +26,8 @@ internal open class JsonMessage(private val originalMessage: String, private val
             objectMapper.nullNode()
         }
     }
+
+    open fun accept(processor: MessageProcessor) {}
 
     fun requiredKey(vararg keys: String) {
         keys.forEach { requiredKey(it) }

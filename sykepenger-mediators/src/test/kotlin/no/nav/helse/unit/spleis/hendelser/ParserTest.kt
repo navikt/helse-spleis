@@ -1,8 +1,10 @@
 package no.nav.helse.unit.spleis.hendelser
 
-import no.nav.helse.spleis.hendelser.*
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.spleis.hendelser.MessageFactory
+import no.nav.helse.spleis.hendelser.MessageProblems
+import no.nav.helse.spleis.hendelser.Parser
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -18,8 +20,8 @@ internal class ParserTest : Parser.ParserDirector {
 
     @Test
     internal fun `when message is not recognized, errors are accumulated`() {
-        recognizer(listOf("key1_not_set"))
-        recognizer(listOf("key2_not_set"))
+        messageFactory("key1_not_set")
+        messageFactory("key2_not_set")
         parser.onMessage("{\"key\": \"value\"}")
 
         assertTrue(unrecognizedMessage)
@@ -30,27 +32,31 @@ internal class ParserTest : Parser.ParserDirector {
 
     @Test
     internal fun `when message is recognized, errors are not accumulated`() {
-        val recognizer1 = recognizer(listOf("key1_not_set"))
-        val recognizer2 = recognizer(listOf("key"))
+        messageFactory("key1_not_set")
+        var message2: JsonMessage? = null
+        messageFactory {
+            requiredKey("key")
+            message2 = this
+        }
         parser.onMessage("{\"key\": \"value\"}")
 
-        assertFalse(unrecognizedMessage)
-        assertFalse(recognizer1.recognizedMessage)
-        assertTrue(recognizer2.recognizedMessage)
-
-        assertFalse(recognizer2.messageWarnings.hasErrors())
-        assertNotContains("key1_not_set", recognizer2.messageWarnings)
+        assertEquals(message2, recognizedMessage)
+        assertFalse(messageProblems.hasErrors())
+        assertNotContains("key1_not_set", messageProblems)
     }
 
     @Test
     internal fun `stops at first recognizer without error`() {
-        val recognizer1 = recognizer(listOf("key"))
-        val recognizer2 = recognizer(listOf("key"))
+        var message1: JsonMessage? = null
+        messageFactory {
+            requiredKey("key")
+            message1 = this
+        }
+        messageFactory("key")
 
         parser.onMessage("{\"key\": \"value\"}")
 
-        assertTrue(recognizer1.recognizedMessage)
-        assertFalse(recognizer2.recognizedMessage)
+        assertEquals(message1, recognizedMessage)
     }
 
     private fun assertContains(message: String, problems: MessageProblems) {
@@ -63,12 +69,19 @@ internal class ParserTest : Parser.ParserDirector {
 
     private lateinit var parser: Parser
     private var unrecognizedMessage = false
+    private var recognizedMessage: JsonMessage? = null
     private lateinit var messageProblems: MessageProblems
 
     @BeforeEach
     internal fun setup() {
         parser = Parser(this)
+        recognizedMessage = null
         unrecognizedMessage = false
+    }
+
+    override fun onRecognizedMessage(message: JsonMessage, warnings: MessageProblems) {
+        recognizedMessage = message
+        messageProblems = warnings
     }
 
     override fun onUnrecognizedMessage(problems: MessageProblems) {
@@ -76,31 +89,19 @@ internal class ParserTest : Parser.ParserDirector {
         messageProblems = problems
     }
 
-    private fun recognizer(requiredKeys: List<String>): TestRecognizer.Director {
-        val director = TestRecognizer.Director()
-        TestRecognizer(director, requiredKeys).apply {
-            parser.register(this)
+    private fun messageFactory(requiredKey: String) {
+        messageFactory {
+            requiredKey(requiredKey)
         }
-        return director
     }
 
-
-    private class TestRecognizer(director: MessageDirector<JsonMessage>, private val keys: List<String>) : MessageRecognizer<JsonMessage>(director) {
-
-        override fun createMessage(message: String, problems: MessageProblems): JsonMessage {
-            return JsonMessage(message, problems).apply {
-                keys.forEach { requiredKey(it) }
+    private fun messageFactory(block: JsonMessage.() -> Unit) {
+        parser.register(object : MessageFactory<JsonMessage> {
+            override fun createMessage(message: String, problems: MessageProblems): JsonMessage {
+                return JsonMessage(message, problems).apply {
+                    block(this)
+                }
             }
-        }
-
-        class Director : MessageDirector<JsonMessage> {
-            var recognizedMessage = false
-            lateinit var messageWarnings: MessageProblems
-
-            override fun onMessage(message: JsonMessage, warnings: MessageProblems) {
-                recognizedMessage = true
-                messageWarnings = warnings
-            }
-        }
+        })
     }
 }

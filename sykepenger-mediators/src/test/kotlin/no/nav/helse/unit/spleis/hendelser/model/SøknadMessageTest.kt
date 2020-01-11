@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.spleis.hendelser.MessageDirector
 import no.nav.helse.spleis.hendelser.MessageProblems
 import no.nav.helse.spleis.hendelser.model.SøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -63,35 +62,31 @@ internal class SøknadMessageTest {
     }.toJson()
 
     @Test
-    internal fun `fails to recognize`() {
-        failsToRecognize(InvalidJson)
-        failsToRecognize(UnknownJson)
+    internal fun `invalid messages`() {
+        assertInvalidMessage(InvalidJson)
+        assertInvalidMessage(UnknownJson)
     }
 
     @Test
-    internal fun `recognizes valid søknader`() {
-        recognizes(ValidSendtSøknadWithUnknownFieldsJson)
-        recognizes(ValidNySøknad)
-        recognizes(ValidFremtidigSøknad)
-        recognizes(ValidSendtSøknad)
-        recognizes(ValidAvbruttSøknad)
+    internal fun `valid søknader`() {
+        assertValidSøknadMessage(ValidSendtSøknadWithUnknownFieldsJson)
+        assertValidSøknadMessage(ValidNySøknad)
+        assertValidSøknadMessage(ValidFremtidigSøknad)
+        assertValidSøknadMessage(ValidSendtSøknad)
+        assertValidSøknadMessage(ValidAvbruttSøknad)
 
     }
 
-    private fun recognizes(message: String) {
+    private fun assertValidSøknadMessage(message: String) {
         val problems = MessageProblems(message)
-        assertTrue(recognize(message, problems)) { "$problems" }
+        SøknadMessage(message, problems)
         assertFalse(problems.hasErrors())
     }
 
-    private fun failsToRecognize(message: String) {
+    private fun assertInvalidMessage(message: String) {
         val problems = MessageProblems(message)
-        assertFalse(recognize(message, problems))
+        SøknadMessage(message, problems)
         assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
-    }
-
-    private fun recognize(message: String, problems: MessageProblems): Boolean {
-        return SøknadMessage.Recognizer(director).recognize(message, problems)
     }
 
     private var recognizedSøknad = false
@@ -99,20 +94,12 @@ internal class SøknadMessageTest {
     fun reset() {
         recognizedSøknad = false
     }
-
-    private val director = object :
-        MessageDirector<SøknadMessage> {
-        override fun onMessage(message: SøknadMessage, warnings: MessageProblems) {
-            recognizedSøknad = true
-        }
-    }
-
 }
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-internal fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree(this)
-internal fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
+private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree(this)
+private fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

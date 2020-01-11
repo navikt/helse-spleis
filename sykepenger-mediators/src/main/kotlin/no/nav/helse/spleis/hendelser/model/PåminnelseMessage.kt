@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.spleis.hendelser.JsonMessage
-import no.nav.helse.spleis.hendelser.MessageDirector
+import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProblems
-import no.nav.helse.spleis.hendelser.MessageRecognizer
+import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing a Påminnelse
-internal class PåminnelseMessage(originalMessage: String, problems: MessageProblems) :
+internal class PåminnelseMessage(originalMessage: String, private val problems: MessageProblems) :
     JsonMessage(originalMessage, problems) {
     init {
         requiredKey(
@@ -17,8 +17,11 @@ internal class PåminnelseMessage(originalMessage: String, problems: MessageProb
         )
     }
 
-    class Recognizer(director: MessageDirector<PåminnelseMessage>) :
-        MessageRecognizer<PåminnelseMessage>(director) {
+    override fun accept(processor: MessageProcessor) {
+        processor.process(this, problems)
+    }
+
+    object Factory : MessageFactory<PåminnelseMessage> {
 
         override fun createMessage(message: String, problems: MessageProblems) =
             PåminnelseMessage(message, problems)
