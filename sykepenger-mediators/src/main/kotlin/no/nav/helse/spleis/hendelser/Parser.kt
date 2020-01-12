@@ -18,7 +18,7 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
             val problems = MessageProblems(message)
             val newMessage = factory.createMessage(message, problems)
             if (!problems.hasErrors()) return director.onRecognizedMessage(newMessage, problems)
-            accumulatedProblems.addAll(problems, "label")
+            accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
         }
         director.onUnrecognizedMessage(accumulatedProblems)
     }
