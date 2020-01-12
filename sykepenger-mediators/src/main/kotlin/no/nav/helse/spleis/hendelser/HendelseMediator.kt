@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
-
-    private var log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
-
     private val messageProcessor = Processor()
     private val parser = Parser(this)
     private val listeners = mutableListOf<HendelseListener>()
@@ -51,12 +48,14 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
             val status = message["status"].asText()
 
             if (status in listOf("NY", "FREMTIDIG")) {
+                // TODO: map til ordentlig domenehendelse uten kobling til json
                 NySøknad.Builder().build(message.toJson())?.apply {
                     return listeners.forEach { it.onNySøknad(this) }
                 }
             }
 
             if (status == "SENDT") {
+                // TODO: map til ordentlig domenehendelse uten kobling til json
                 SendtSøknad.Builder().build(message.toJson())?.apply {
                     return listeners.forEach { it.onSendtSøknad(this) }
                 }
@@ -66,6 +65,7 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         }
 
         override fun process(message: InntektsmeldingMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
             Inntektsmelding.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onInntektsmelding(this) }
             } ?: problems.error("klarer ikke å mappe inntektsmelding til domenetype")
@@ -78,6 +78,7 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
                 ManuellSaksbehandling.Builder()
             )
 
+            // TODO: map til ordentlig domenehendelse uten kobling til json
             builders.mapNotNull {
                 it.build(message.toJson())
             }.firstOrNull().apply {
@@ -90,6 +91,7 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         }
 
         override fun process(message: PåminnelseMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
             Påminnelse.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onPåminnelse(this) }
             } ?: problems.error("klarer ikke å mappe påminnelse til domenetype")
