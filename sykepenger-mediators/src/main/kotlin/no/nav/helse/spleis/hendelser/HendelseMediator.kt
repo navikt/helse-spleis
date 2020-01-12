@@ -36,6 +36,10 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
 
     override fun onRecognizedMessage(message: JsonMessage, warnings: MessageProblems) {
         message.accept(messageProcessor)
+
+        if (warnings.hasMessages()) {
+            sikkerLogg.info("meldinger om melding: $warnings")
+        }
     }
 
     override fun onUnrecognizedMessage(problems: MessageProblems) {
@@ -44,27 +48,27 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
 
     private inner class Processor : MessageProcessor {
         override fun process(message: SøknadMessage, problems: MessageProblems) {
-            message.toJson().also { json ->
-                NySøknad.Builder().build(json)?.apply {
-                    listeners.forEach { it.onNySøknad(this) }
-                } ?: SendtSøknad.Builder().build(json)?.apply {
-                    listeners.forEach { it.onSendtSøknad(this) }
-                } ?: problems.error("klarer ikke å mappe søknaden til domenetype")
+            val status = message["status"].asText()
+
+            if (status in listOf("NY", "FREMTIDIG")) {
+                NySøknad.Builder().build(message.toJson())?.apply {
+                    return listeners.forEach { it.onNySøknad(this) }
+                }
             }
 
-            if (problems.hasMessages()) {
-                log.info("meldinger om søknad: $problems")
+            if (status == "SENDT") {
+                SendtSøknad.Builder().build(message.toJson())?.apply {
+                    return listeners.forEach { it.onSendtSøknad(this) }
+                }
             }
+
+            problems.error("klarer ikke å mappe søknaden til domenetype")
         }
 
         override fun process(message: InntektsmeldingMessage, problems: MessageProblems) {
             Inntektsmelding.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onInntektsmelding(this) }
             } ?: problems.error("klarer ikke å mappe inntektsmelding til domenetype")
-
-            if (problems.hasMessages()) {
-                log.info("meldinger om inntektsmelding: $problems")
-            }
         }
 
         override fun process(message: BehovMessage, problems: MessageProblems) {
@@ -83,20 +87,12 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
                     is ManuellSaksbehandling -> listeners.forEach { it.onManuellSaksbehandling(this) }
                 }
             } ?: problems.error("klarer ikke å mappe behov til domenetype")
-
-            if (problems.hasMessages()) {
-                log.info("meldinger om behov: $problems")
-            }
         }
 
         override fun process(message: PåminnelseMessage, problems: MessageProblems) {
             Påminnelse.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onPåminnelse(this) }
             } ?: problems.error("klarer ikke å mappe påminnelse til domenetype")
-
-            if (problems.hasMessages()) {
-                log.info("meldinger om påminnelse: $problems")
-            }
         }
     }
 }
