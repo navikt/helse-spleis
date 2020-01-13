@@ -9,13 +9,13 @@ internal class MinimumInntektsfilter (
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     private var inntekter = mutableMapOf<LocalDate, Double>()
+
     internal fun filter() {
         tidslinjer.forEach { it.accept(this) }
         inntekter = inntekter
             .filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMutableMap()
 
-        tidslinjer.forEach { it.accept(NavDagErstatter()) }
-
+        tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
     }
 
     override fun visitNavDag(dag: NavDag) {
@@ -36,16 +36,6 @@ internal class MinimumInntektsfilter (
 
     private fun addInntekt(dag: Utbetalingstidslinje.Utbetalingsdag) {
         inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.inntekt) ?: dag.inntekt
-    }
-
-    private inner class NavDagErstatter: Utbetalingstidslinje.UtbetalingsdagVisitor {
-        private lateinit var tidslinje: Utbetalingstidslinje
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-            this.tidslinje = tidslinje
-        }
-        override fun visitNavDag(dag: NavDag) {
-            if (dag.dato in inntekter) tidslinje[dag.dato] = dag.avvistDag(Begrunnelse.MinimumInntekt)
-        }
     }
 
 }

@@ -4,7 +4,6 @@ import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 /**
@@ -35,10 +34,11 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
-
-    internal operator fun set(dato: LocalDate, nyDag: AvvistDag) {
-        val antallDager = utbetalingsdager.first().dato.until(dato, ChronoUnit.DAYS).toInt()
-        utbetalingsdager.set(antallDager, nyDag)
+    internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse) {
+        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+            if (utbetalingsdag is Utbetalingsdag.NavDag && utbetalingsdag.dato in avvisteDatoer)
+                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
+        }
     }
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
@@ -76,9 +76,8 @@ internal class Utbetalingstidslinje internal constructor() {
     private fun avgrens(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) : Utbetalingstidslinje {
         visitor = Utbetalingsgrense(alder, arbeidsgiverRegler)
         this.merge(others).accept(visitor)
-
-        return Utbetalingstidslinje(this.utbetalingsdager
-            .map { utbetalingdag -> visitor.ubetalteDager().firstOrNull(){ it.dato.isEqual(utbetalingdag.dato) } ?: utbetalingdag })
+        avvis(visitor.avvisteDatoer(), Begrunnelse.SykepengedagerOppbrukt)
+        return Utbetalingstidslinje(utbetalingsdager)
     }
 
     private fun merge(others: List<Utbetalingstidslinje>): Utbetalingstidslinje {
@@ -125,7 +124,6 @@ internal class Utbetalingstidslinje internal constructor() {
     }
 
 
-
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: Utbetalingsdag.ArbeidsgiverperiodeDag) {}
@@ -160,6 +158,7 @@ internal class Utbetalingstidslinje internal constructor() {
 
         internal class NavDag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(inntekt, dato) {
             override val prioritet = 50
+            internal var utbetaling = 0
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
             internal fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt.roundToInt())
             internal fun oppdater(last: Utbetalingslinje) { last.tom = dato }

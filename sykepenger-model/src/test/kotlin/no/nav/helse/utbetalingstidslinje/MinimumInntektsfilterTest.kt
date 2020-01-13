@@ -27,7 +27,7 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test internal fun `dager under minstelønnskravet blir avvist`() {
-        val tidslinje = tidslinjeOf(5.NAV, 10.NAV(12.0))
+        val tidslinje = tidslinjeOf(5.NAV(1200.0), 10.NAV(12.0))
         MinimumInntektsfilter(Alder(UNG_PERSON_FNR_2018), listOf(tidslinje)).filter()
         undersøke(tidslinje)
         assertEquals(15, inspektør.size)
