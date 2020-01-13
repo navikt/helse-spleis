@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.spleis.hendelser.MessageProblems
-import no.nav.helse.spleis.hendelser.model.SøknadMessage
+import no.nav.helse.spleis.hendelser.model.NySøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SøknadMessageTest {
+internal class NySøknadMessageTest {
 
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
@@ -36,7 +36,7 @@ internal class SøknadMessageTest {
         arbeidGjenopptatt = LocalDate.now(),
         korrigerer = "korrigerer",
         opprettet = LocalDateTime.now(),
-        sendtNav = LocalDateTime.now(),
+        sendtNav = null,
         sendtArbeidsgiver = LocalDateTime.now(),
         egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
         soknadsperioder = listOf(SoknadsperiodeDTO(
@@ -52,11 +52,8 @@ internal class SøknadMessageTest {
     )
 
     private val ValidNySøknad = ValidSøknad.copy(status = SoknadsstatusDTO.NY).toJson()
-    private val ValidFremtidigSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.FREMTIDIG).toJson()
     private val ValidAvbruttSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.AVBRUTT).toJson()
-    private val ValidSendtSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.SENDT).toJson()
-
-    private val ValidSendtSøknadWithUnknownFieldsJson = ValidSøknad.asJsonNode().let {
+    private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asJsonNode().let {
         it as ObjectNode
         it.put(UUID.randomUUID().toString(), "foobar")
     }.toJson()
@@ -65,28 +62,26 @@ internal class SøknadMessageTest {
     internal fun `invalid messages`() {
         assertInvalidMessage(InvalidJson)
         assertInvalidMessage(UnknownJson)
+        assertInvalidMessage(ValidAvbruttSøknad)
     }
 
     @Test
     internal fun `valid søknader`() {
-        assertValidSøknadMessage(ValidSendtSøknadWithUnknownFieldsJson)
+        assertValidSøknadMessage(ValidNySøknadWithUnknownFieldsJson)
         assertValidSøknadMessage(ValidNySøknad)
-        assertValidSøknadMessage(ValidFremtidigSøknad)
-        assertValidSøknadMessage(ValidSendtSøknad)
-        assertValidSøknadMessage(ValidAvbruttSøknad)
-
     }
 
     private fun assertValidSøknadMessage(message: String) {
         val problems = MessageProblems(message)
-        SøknadMessage(message, problems)
-        assertFalse(problems.hasErrors())
+        NySøknadMessage(message, problems)
+        assertFalse(problems.hasErrors()) { "was supposed to recognize $message: $problems" }
     }
 
     private fun assertInvalidMessage(message: String) {
-        val problems = MessageProblems(message)
-        SøknadMessage(message, problems)
-        assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
+        MessageProblems(message).also {
+            NySøknadMessage(message, it)
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
+        }
     }
 
     private var recognizedSøknad = false

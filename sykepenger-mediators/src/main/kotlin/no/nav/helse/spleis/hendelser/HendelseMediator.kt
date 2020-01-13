@@ -3,10 +3,7 @@ package no.nav.helse.spleis.hendelser
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
-import no.nav.helse.spleis.hendelser.model.BehovMessage
-import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
-import no.nav.helse.spleis.hendelser.model.PåminnelseMessage
-import no.nav.helse.spleis.hendelser.model.SøknadMessage
+import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -21,7 +18,9 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
     init {
         rapid.addListener(parser)
 
-        parser.register(SøknadMessage.Factory)
+        parser.register(NySøknadMessage.Factory)
+        parser.register(FremtidigSøknadMessage.Factory)
+        parser.register(SendtSøknadMessage.Factory)
         parser.register(InntektsmeldingMessage.Factory)
         parser.register(BehovMessage.Factory)
         parser.register(PåminnelseMessage.Factory)
@@ -44,24 +43,25 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
     }
 
     private inner class Processor : MessageProcessor {
-        override fun process(message: SøknadMessage, problems: MessageProblems) {
-            val status = message["status"].asText()
+        override fun process(message: NySøknadMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
+            NySøknad.Builder().build(message.toJson())?.apply {
+                return listeners.forEach { it.onNySøknad(this) }
+            } ?: problems.error("klarer ikke å mappe søknaden til domenetype")
+        }
 
-            if (status in listOf("NY", "FREMTIDIG")) {
-                // TODO: map til ordentlig domenehendelse uten kobling til json
-                NySøknad.Builder().build(message.toJson())?.apply {
-                    return listeners.forEach { it.onNySøknad(this) }
-                }
-            }
+        override fun process(message: FremtidigSøknadMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
+            NySøknad.Builder().build(message.toJson())?.apply {
+                return listeners.forEach { it.onNySøknad(this) }
+            } ?: problems.error("klarer ikke å mappe søknaden til domenetype")
+        }
 
-            if (status == "SENDT") {
-                // TODO: map til ordentlig domenehendelse uten kobling til json
-                SendtSøknad.Builder().build(message.toJson())?.apply {
-                    return listeners.forEach { it.onSendtSøknad(this) }
-                }
-            }
-
-            problems.error("klarer ikke å mappe søknaden til domenetype")
+        override fun process(message: SendtSøknadMessage, problems: MessageProblems) {
+           // TODO: map til ordentlig domenehendelse uten kobling til json
+            SendtSøknad.Builder().build(message.toJson())?.apply {
+                return listeners.forEach { it.onSendtSøknad(this) }
+            } ?: problems.error("klarer ikke å mappe søknaden til domenetype")
         }
 
         override fun process(message: InntektsmeldingMessage, problems: MessageProblems) {
