@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
 
 internal class Utbetalingstidslinje internal constructor() {
 
-    private lateinit var visitor: MaksimumSykepengedager
+    private lateinit var visitor: MaksimumSykepengedagerfilter
     private val utbetalingsdager = mutableListOf<Utbetalingsdag>()
 
     private constructor(utbetalingsdager: List<Utbetalingsdag>): this() {
@@ -20,7 +20,7 @@ internal class Utbetalingstidslinje internal constructor() {
     }
 
     private fun utbetalingslinjer(): List<Utbetalingslinje> {
-        MaksimumUtbetaling(emptyMap(), listOf(this)).beregn()
+        MaksimumUtbetaling(Sykdomsgrader(listOf(this)), listOf(this)).beregn()
         return UtbetalingslinjeBuilder(this).result()
     }
 
@@ -77,7 +77,7 @@ internal class Utbetalingstidslinje internal constructor() {
     }
 
     private fun avgrens(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) : Utbetalingstidslinje {
-        visitor = MaksimumSykepengedager(alder, arbeidsgiverRegler)
+        visitor = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler)
         this.merge(others).accept(visitor)
         avvis(visitor.avvisteDatoer(), Begrunnelse.SykepengedagerOppbrukt)
         return Utbetalingstidslinje(utbetalingsdager)

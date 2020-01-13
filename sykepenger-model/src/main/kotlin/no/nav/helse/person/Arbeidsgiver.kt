@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
 internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID, private val inntektHistorie: InntektHistorie) {
@@ -68,6 +69,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
 
     }
 
+    private val tidslinjer = mutableListOf<Utbetalingstidslinje>()
     private val perioder = mutableListOf<Vedtaksperiode>()
     private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
@@ -79,6 +81,10 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         perioder = this.perioder.map { it.memento() },
         inntektHistorie = this.inntektHistorie.memento()
     )
+
+    internal fun peekTidslinje() = tidslinjer.last()
+
+    internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
     internal fun håndter(nySøknad: NySøknad) {
         if (!perioder.fold(false) { håndtert, periode ->

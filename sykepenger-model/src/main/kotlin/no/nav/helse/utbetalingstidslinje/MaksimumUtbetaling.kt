@@ -2,11 +2,10 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import java.time.LocalDate
 import kotlin.math.roundToInt
 
 internal class MaksimumUtbetaling(
-    private val sykdomsgrader: Map<LocalDate, Double>,
+    private val sykdomsgrader: Sykdomsgrader,
     private val tidslinjer: List<Utbetalingstidslinje>
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {
 

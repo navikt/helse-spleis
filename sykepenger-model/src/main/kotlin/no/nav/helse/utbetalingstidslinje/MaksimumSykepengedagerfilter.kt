@@ -1,9 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import java.time.LocalDate
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
-internal class MaksimumSykepengedager(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
+internal class MaksimumSykepengedagerfilter(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     companion object {
@@ -23,6 +24,13 @@ internal class MaksimumSykepengedager(private val alder: Alder, arbeidsgiverRegl
 
     internal fun avvisteDatoer(): List<LocalDate> {
         return avvisteDatoer
+    }
+
+    internal fun filter(tidslinjer: List<Utbetalingstidslinje>) {
+        require(tidslinjer.size == 1) {"Flere arbeidsgivere er ikke støttet enda"}
+        val tidslinje = tidslinjer.reduce(Utbetalingstidslinje::plus)
+        tidslinje.accept(this)
+        tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
     }
 
     private fun state(nyState: State) {
@@ -84,16 +92,16 @@ internal class MaksimumSykepengedager(private val alder: Alder, arbeidsgiverRegl
     }
 
     private sealed class State {
-        open fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {}
-        open fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {}
-        open fun entering(avgrenser: MaksimumSykepengedager) {}
-        open fun leaving(avgrenser: MaksimumSykepengedager) {}
+        open fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        open fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        open fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
+        open fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
         internal object Initiell: State() {
-            override fun entering(avgrenser: MaksimumSykepengedager) {
+            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
-            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.sakensStartdato = dagen
                 avgrenser.dekrementerfom = dagen.minusYears(HISTORISK_PERIODE_I_ÅR)
                 avgrenser.teller.inkrementer(dagen)
@@ -103,43 +111,43 @@ internal class MaksimumSykepengedager(private val alder: Alder, arbeidsgiverRegl
         }
 
         internal object Syk: State() {
-            override fun entering(avgrenser: MaksimumSykepengedager) {
+            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.opphold = 0
             }
 
-            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.state(Opphold)
             }
         }
 
         internal object Opphold: State() {
 
-            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
 
         internal object Karantene: State() {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dato: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dato: LocalDate) {
                 avgrenser.opphold += 1
                 avgrenser.avvisteDatoer.add(dato)
                 avgrenser.nextState(dato)?.run { avgrenser.state(this) }
             }
 
-            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
