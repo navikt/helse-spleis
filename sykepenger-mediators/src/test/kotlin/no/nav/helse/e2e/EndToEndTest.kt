@@ -12,8 +12,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.ApplicationBuilder
-import no.nav.helse.SpolePeriode
+import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.søknadDTO
@@ -26,18 +25,10 @@ import no.nav.helse.Topics.vedtaksperiodeEventTopic
 import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.behov.Behovstype.EgenAnsatt
-import no.nav.helse.behov.Behovstype.GodkjenningFraSaksbehandler
-import no.nav.helse.behov.Behovstype.Sykepengehistorikk
-import no.nav.helse.behov.Behovstype.Utbetaling
-import no.nav.helse.handleRequest
+import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.løsBehov
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.randomPort
-import no.nav.helse.responseBody
-import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -50,10 +41,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION
-import org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.*
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -62,20 +50,14 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration
 import java.time.Duration.ofMillis
-import java.util.HashMap
-import java.util.Properties
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
@@ -484,7 +466,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = virksomhetsnummer),
             status = SoknadsstatusDTO.NY
-        )
+        ).copy(sendtNav = null)
     ): SykepengesoknadDTO {
         synchronousSendKafkaMessage(søknadTopic, nySøknad.id!!, nySøknad.toJsonNode().toString())
         return nySøknad
