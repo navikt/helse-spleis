@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingsavgrenserTest {
+internal class MaksimumSykepengedagerTest {
 
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -135,7 +135,7 @@ internal class UtbetalingsavgrenserTest {
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
-        Utbetalingsgrense(Alder(fnr), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        MaksimumSykepengedager(Alder(fnr), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
             .also { this.accept(it) }
             .avvisteDatoer()
 }

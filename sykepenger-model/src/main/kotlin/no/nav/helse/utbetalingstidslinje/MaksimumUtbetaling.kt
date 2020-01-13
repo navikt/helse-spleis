@@ -5,7 +5,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
-internal class MaksimumDagsats(
+internal class MaksimumUtbetaling(
     private val sykdomsgrader: Map<LocalDate, Double>,
     private val tidslinjer: List<Utbetalingstidslinje>
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {

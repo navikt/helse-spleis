@@ -47,7 +47,7 @@ internal class UtbetalingslinjeBuilderTest {
 
     private fun opprettUtbetalingslinjer(vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
-        MaksimumDagsats(emptyMap(), listOf(tidslinje)).beregn()
+        MaksimumUtbetaling(emptyMap(), listOf(tidslinje)).beregn()
         linjer = UtbetalingslinjeBuilder(tidslinje).result()
     }
 

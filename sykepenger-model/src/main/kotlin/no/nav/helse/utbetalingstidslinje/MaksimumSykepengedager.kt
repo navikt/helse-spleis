@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
-internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
+internal class MaksimumSykepengedager(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     companion object {
@@ -84,16 +84,16 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
     }
 
     private sealed class State {
-        open fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
-        open fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {}
-        open fun entering(avgrenser: Utbetalingsgrense) {}
-        open fun leaving(avgrenser: Utbetalingsgrense) {}
+        open fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {}
+        open fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {}
+        open fun entering(avgrenser: MaksimumSykepengedager) {}
+        open fun leaving(avgrenser: MaksimumSykepengedager) {}
 
         internal object Initiell: State() {
-            override fun entering(avgrenser: Utbetalingsgrense) {
+            override fun entering(avgrenser: MaksimumSykepengedager) {
                 avgrenser.opphold = 0
             }
-            override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.sakensStartdato = dagen
                 avgrenser.dekrementerfom = dagen.minusYears(HISTORISK_PERIODE_I_ÅR)
                 avgrenser.teller.inkrementer(dagen)
@@ -103,43 +103,43 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
         }
 
         internal object Syk: State() {
-            override fun entering(avgrenser: Utbetalingsgrense) {
+            override fun entering(avgrenser: MaksimumSykepengedager) {
                 avgrenser.opphold = 0
             }
 
-            override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
-            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.state(Opphold)
             }
         }
 
         internal object Opphold: State() {
 
-            override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
                 avgrenser.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }
 
-            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
 
         internal object Karantene: State() {
-            override fun betalbarDag(avgrenser: Utbetalingsgrense, dato: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedager, dato: LocalDate) {
                 avgrenser.opphold += 1
                 avgrenser.avvisteDatoer.add(dato)
                 avgrenser.nextState(dato)?.run { avgrenser.state(this) }
             }
 
-            override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedager, dagen: LocalDate) {
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
         }
