@@ -34,7 +34,7 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
-    internal fun avvis(avvisteDatoer: MutableSet<LocalDate>, begrunnelse: Begrunnelse) {
+    internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse) {
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
             if (utbetalingsdag is Utbetalingsdag.NavDag && utbetalingsdag.dato in avvisteDatoer)
                 utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
@@ -76,9 +76,8 @@ internal class Utbetalingstidslinje internal constructor() {
     private fun avgrens(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) : Utbetalingstidslinje {
         visitor = Utbetalingsgrense(alder, arbeidsgiverRegler)
         this.merge(others).accept(visitor)
-
-        return Utbetalingstidslinje(this.utbetalingsdager
-            .map { utbetalingdag -> visitor.ubetalteDager().firstOrNull(){ it.dato.isEqual(utbetalingdag.dato) } ?: utbetalingdag })
+        avvis(visitor.avvisteDatoer(), Begrunnelse.SykepengedagerOppbrukt)
+        return Utbetalingstidslinje(utbetalingsdager)
     }
 
     private fun merge(others: List<Utbetalingstidslinje>): Utbetalingstidslinje {

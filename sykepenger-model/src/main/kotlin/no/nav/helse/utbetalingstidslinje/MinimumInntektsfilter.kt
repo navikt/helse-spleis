@@ -15,7 +15,7 @@ internal class MinimumInntektsfilter (
         inntekter = inntekter
             .filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMutableMap()
 
-        tidslinjer.forEach { it.avvis(inntekter.keys, Begrunnelse.MinimumInntekt) }
+        tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
     }
 
     override fun visitNavDag(dag: NavDag) {

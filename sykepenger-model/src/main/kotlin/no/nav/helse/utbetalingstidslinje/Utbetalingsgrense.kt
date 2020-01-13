@@ -16,13 +16,13 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
     private var opphold = 0
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
-    private val ubetalteDager = mutableListOf<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>()
+    private val avvisteDatoer = mutableListOf<LocalDate>()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
 
     internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
 
-    internal fun ubetalteDager(): List<Utbetalingstidslinje.Utbetalingsdag.AvvistDag> {
-        return ubetalteDager
+    internal fun avvisteDatoer(): List<LocalDate> {
+        return avvisteDatoer
     }
 
     private fun state(nyState: State) {
@@ -133,10 +133,10 @@ internal class Utbetalingsgrense(private val alder: Alder, arbeidsgiverRegler: A
         }
 
         internal object Karantene: State() {
-            override fun betalbarDag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
+            override fun betalbarDag(avgrenser: Utbetalingsgrense, dato: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.ubetalteDager.add(AvvistDag(dagen, Begrunnelse.SykepengedagerOppbrukt))
-                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+                avgrenser.avvisteDatoer.add(dato)
+                avgrenser.nextState(dato)?.run { avgrenser.state(this) }
             }
 
             override fun oppholdsdag(avgrenser: Utbetalingsgrense, dagen: LocalDate) {
