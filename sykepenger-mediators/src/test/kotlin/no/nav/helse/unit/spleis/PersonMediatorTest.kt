@@ -9,9 +9,12 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.VedtaksperiodeObserver
 import no.nav.helse.spleis.*
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.Future
 
 internal class PersonMediatorTest {
 
@@ -20,7 +23,11 @@ internal class PersonMediatorTest {
     private val repo = mockk<PersonRepository>()
     private val utbetalingsRepo = mockk<UtbetalingsreferanseRepository>(relaxed = true)
     private val lagreUtbetalingDao = mockk<LagreUtbetalingDao>(relaxed = true)
-    private val producer = mockk<KafkaProducer<String, String>>(relaxed = true)
+    private val producer = mockk<KafkaProducer<String, String>>(relaxed = true) {
+        every { send(any()) } returns mockk<Future<RecordMetadata>> {
+            every { get() } returns RecordMetadata(TopicPartition("topic", 1), 0, 1, 100L, 100L, 0, 0)
+        }
+    }
 
     private val personMediator = PersonMediator(
         vedtaksperiodeProbe = probe,

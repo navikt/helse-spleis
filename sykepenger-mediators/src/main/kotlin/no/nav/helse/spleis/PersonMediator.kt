@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
@@ -58,18 +59,28 @@ internal class PersonMediator(
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
     override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        producer.send(event.producerRecord()).also {
-            log.info("produserte behov=$event, recordMetadata=$it")
+        producer.send(event.producerRecord()).get().also {
+            log.info(
+                "produserte behov=$event, {}, {}, {}",
+                keyValue("vedtaksperiodeId", event.vedtaksperiodeId()),
+                keyValue("partisjon", it.partition()),
+                keyValue("offset", it.offset())
+            )
         }
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-        producer.send(event.producerRecord())
+        producer.send(event.producerRecord()).get()
     }
 
     override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
-        producer.send(event.producerRecord()).also {
-            log.info("legger vedtatt vedtak:${event.vedtaksperiodeId} på topic")
+        producer.send(event.producerRecord()).get().also {
+            log.info(
+                "legger vedtatt vedtak: {} på topic med {} og {}",
+                keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
+                keyValue("partisjon", it.partition()),
+                keyValue("offset", it.offset())
+            )
         }
     }
 

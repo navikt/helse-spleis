@@ -71,7 +71,8 @@ object VedtaksperiodeProbe : PersonObserver {
         ).inc()
 
         log.info(
-            "vedtaksperiode endret", keyValue("vedtaksperiodeId", "${event.id}"),
+            "vedtaksperiode endret {}, {}, {}, {}",
+            keyValue("vedtaksperiodeId", "${event.id}"),
             keyValue("hendelse", event.sykdomshendelse.hendelsetype().name),
             keyValue("tilstand", event.gjeldendeTilstand.name),
             keyValue("forrigeTilstand", event.forrigeTilstand.name)
