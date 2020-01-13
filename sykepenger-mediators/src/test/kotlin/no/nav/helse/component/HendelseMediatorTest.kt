@@ -5,18 +5,13 @@ import no.nav.helse.TestConstants
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.ManuellSaksbehandling
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.HendelseDirector
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
+import no.nav.helse.spleis.hendelser.HendelseMediator
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -24,6 +19,7 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -35,14 +31,14 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Properties
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class HendelseDirectorTest : HendelseListener {
+internal class HendelseMediatorTest : HendelseListener {
 
     @Test
     internal fun `leser søknader`() {
@@ -112,7 +108,7 @@ internal class HendelseDirectorTest : HendelseListener {
             Topics.påminnelseTopic
         )
         private val hendelseStream = HendelseStream(topics)
-        private val hendelseBuilder = HendelseDirector(hendelseStream).also {
+        private val hendelseMediator = HendelseMediator(hendelseStream).also {
             it.addListener(object : HendelseListener {
                 override fun onPåminnelse(påminnelse: Påminnelse) {
                     lestPåminnelse.set(true)
@@ -287,7 +283,7 @@ internal class HendelseDirectorTest : HendelseListener {
                 arbeidsgiverAktorId = null,
                 arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
                 arbeidsforholdId = null,
-                beregnetInntekt = null,
+                beregnetInntekt = BigDecimal.ONE,
                 refusjon = Refusjon(null, null),
                 endringIRefusjoner = emptyList(),
                 opphoerAvNaturalytelser = emptyList(),
@@ -318,7 +314,16 @@ internal class HendelseDirectorTest : HendelseListener {
                 id = id.toString(),
                 aktorId = aktørId,
                 fnr = fødselsnummer,
-                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = LocalDateTime.now(),
+                egenmeldinger = emptyList(),
+                fravar = emptyList(),
+                soknadsperioder = emptyList(),
+                opprettet = LocalDateTime.now()
             )
             sendKafkaMessage(Topics.søknadTopic, id.toString(), sendtSøknad.toJsonNode().toString())
         }
@@ -334,7 +339,16 @@ internal class HendelseDirectorTest : HendelseListener {
                 id = id.toString(),
                 aktorId = aktørId,
                 fnr = fødselsnummer,
-                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = LocalDateTime.now(),
+                egenmeldinger = emptyList(),
+                fravar = emptyList(),
+                soknadsperioder = emptyList(),
+                opprettet = LocalDateTime.now()
             )
             sendKafkaMessage(Topics.søknadTopic, id.toString(), nySøknad.toJsonNode().toString())
             return nySøknad

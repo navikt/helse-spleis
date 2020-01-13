@@ -1,13 +1,14 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.spleis.hendelser.HendelseMediator
 import org.apache.kafka.clients.producer.KafkaProducer
 import javax.sql.DataSource
 
 // Understands how to create the mediators and create the objects they need
 internal class HelseBuilder(dataSource: DataSource, hendelseStream: HendelseStream, hendelseProducer: KafkaProducer<String, String>) {
 
-    private val hendelseDirector: HendelseDirector
+    private val hendelseDirector: HendelseMediator
     private val hendelseProbe: HendelseListener = HendelseProbe()
     private val hendelseRecorder: HendelseListener = HendelseRecorder(dataSource)
 
@@ -26,7 +27,7 @@ internal class HelseBuilder(dataSource: DataSource, hendelseStream: HendelseStre
             producer = hendelseProducer
         )
 
-        hendelseDirector = HendelseDirector(hendelseStream).apply {
+        hendelseDirector = HendelseMediator(rapid = hendelseStream).apply {
             addListener(hendelseProbe)
             addListener(hendelseRecorder)
             addListener(personMediator)
