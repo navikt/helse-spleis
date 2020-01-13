@@ -19,7 +19,10 @@ internal class Utbetalingstidslinje internal constructor() {
         this.utbetalingsdager.addAll(utbetalingsdager)
     }
 
-    private fun utbetalingslinjer() = UtbetalingslinjeBuilder(this).result()
+    private fun utbetalingslinjer(): List<Utbetalingslinje> {
+        MaksimumDagsats(emptyMap(), listOf(this)).beregn()
+        return UtbetalingslinjeBuilder(this).result()
+    }
 
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag) it.navDag() else it })

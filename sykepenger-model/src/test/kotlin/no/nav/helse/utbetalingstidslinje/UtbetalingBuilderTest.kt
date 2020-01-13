@@ -316,20 +316,6 @@ internal class UtbetalingBuilderTest {
         assertEquals(1, betalingslinjer.size)
         assert(betalingslinjer.first(), 22.januar, 23.januar, 1200)
     }
-//
-//    @Test
-//    fun `når rest av ukedager gjør at maksdato går over helg, så skal helgen ikke telle med som sykedag`() {
-//        startDato = LocalDate.of(2019,10,11)
-//        val (4.E + 4.S + 2.E + 5.S + 1.E + S + 14.S) = sykdomstidslinje.tidslinje(
-//        val utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
-//        assertEquals(2, utbetalingslinjer.size)
-//        assertEquals(LocalDate.of(2020,10,7), utbetalingsberegning.maksdato)
-//
-//        assertEquals(LocalDate.of(2019,10,28), utbetalingslinjer[0].fom)
-//        assertEquals(LocalDate.of(2019,11,1), utbetalingslinjer[0].tom)
-//        assertEquals(LocalDate.of(2019,11,4), utbetalingslinjer[1].fom)
-//        assertEquals(LocalDate.of(2019,11,8), utbetalingslinjer[1].tom)
-//    }
 
     @Test
     fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
