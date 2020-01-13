@@ -104,10 +104,7 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(
-            this,
-            vilkårsgrunnlag
-        )
+        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -326,6 +323,23 @@ internal class Vedtaksperiode internal constructor(
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            if (vilkårsgrunnlag.erEgenAnsatt())
+                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
+                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
+            }
+
+//            TODO: Skru på når vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test
+//            TODO: Skru på relevant disabled test: Disabled til vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test
+//            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
+//                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+//            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
+//                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+
+            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
+        }
+
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
             val inntektsberegningSlutt = YearMonth.from(vedtaksperiode.førsteFraværsdag())
             val inntektsberegningStart = inntektsberegningSlutt.minusMonths(12)
@@ -333,11 +347,6 @@ internal class Vedtaksperiode internal constructor(
                 beregningStart = inntektsberegningStart,
                 beregningSlutt = inntektsberegningSlutt
             )
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            if (vilkårsgrunnlag.erEgenAnsatt()) return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
     }

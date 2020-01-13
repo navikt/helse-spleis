@@ -20,6 +20,9 @@ import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Builder
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Inntekt
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Inntektstype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.juli
 import no.nav.helse.løsBehov
@@ -44,9 +47,11 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -343,8 +348,27 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder()
-            .build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to false)).toJson())!!)
+        vedtaksperiode.håndter(
+            Builder().build(
+                generiskBehov().løsBehov(
+                    mapOf(
+                        "EgenAnsatt" to false,
+                        "Inntektsberegning" to (1.rangeTo(12)).map {
+                            Vilkårsgrunnlag.Måned(
+                                årMåned = YearMonth.of(2018, it),
+                                inntektsliste = listOf(
+                                    Inntekt(
+                                        beløp = 666.0,
+                                        inntektstype = Inntektstype.LOENNSINNTEKT,
+                                        orgnummer = "123456789"
+                                    )
+                                )
+                            )
+                        }
+                    )
+                ).toJson()
+            )!!
+        )
 
         assertTilstandsendring(BEREGN_UTBETALING)
 
@@ -367,8 +391,45 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Vilkårsgrunnlag.Builder()
-            .build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
+        vedtaksperiode.håndter(Builder().build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
+
+        assertTilstandsendring(TIL_INFOTRYGD)
+    }
+
+    @Disabled("Disabled til vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test")
+    @Test
+    fun `skal gå til infotrygd hvis det er avvik mellom inntektsmelding og inntekt fra inntektskomponenten`() {
+        val periodeFom = 1.juli
+        val periodeTom = 20.juli
+
+        val vedtaksperiode = beInVilkårsprøving(
+            tidslinje = tidslinje(
+                fom = periodeFom,
+                tom = periodeTom
+            )
+        )
+
+        vedtaksperiode.håndter(
+            Builder().build(
+                generiskBehov().løsBehov(
+                    mapOf(
+                        "EgenAnsatt" to false,
+                        "Inntektsberegning" to (1.rangeTo(12)).map {
+                            Vilkårsgrunnlag.Måned(
+                                årMåned = YearMonth.of(2018, it),
+                                inntektsliste = listOf(
+                                    Inntekt(
+                                        beløp = 532.7,
+                                        inntektstype = Inntektstype.LOENNSINNTEKT,
+                                        orgnummer = "123456789"
+                                    )
+                                )
+                            )
+                        }
+                    )
+                ).toJson()
+            )!!
+        )
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -474,22 +535,52 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     @Test
     fun `dersom en person har foreldrepenger i perioden behandles saken i infotrygd`() {
-        vedtaksperiodeMedForeldrepenger( foreldrepengerFom = 30.mai, foreldrepengerTom = 14.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 30.mai,
+            foreldrepengerTom = 14.juli,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 2.juli, foreldrepengerTom = 21.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 2.juli,
+            foreldrepengerTom = 21.juli,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 30.mai, foreldrepengerTom = 21.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 30.mai,
+            foreldrepengerTom = 21.juli,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 2.juli, foreldrepengerTom = 14.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 2.juli,
+            foreldrepengerTom = 14.juli,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
 
     @Test
     fun `dersom en person ikke har foreldrepenger i perioden kan saken behandles`() {
-        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 1.mai, foreldrepengerTom = 30.mai, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 1.mai,
+            foreldrepengerTom = 30.mai,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_GODKJENNING)
-        vedtaksperiodeMedForeldrepenger(foreldrepengerFom = 21.juli, foreldrepengerTom = 30.juli, sykeperiodeFom = 1.juli, sykeperiodeTom = 20.juli)
+        vedtaksperiodeMedForeldrepenger(
+            foreldrepengerFom = 21.juli,
+            foreldrepengerTom = 30.juli,
+            sykeperiodeFom = 1.juli,
+            sykeperiodeTom = 20.juli
+        )
         assertTilstandsendring(TIL_GODKJENNING)
     }
 

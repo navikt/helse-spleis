@@ -9,11 +9,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
+import java.time.YearMonth
 import java.util.UUID
+import kotlin.math.absoluteValue
 
-class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: Behov) :
-    ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag),
-    VedtaksperiodeHendelse {
+class Vilkårsgrunnlag private constructor(
+    hendelseId: UUID,
+    private val behov: Behov
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag), VedtaksperiodeHendelse {
 
     private constructor(behov: Behov) : this(UUID.randomUUID(), behov)
 
@@ -38,7 +41,10 @@ class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: 
 
         fun fromJson(json: String): Vilkårsgrunnlag {
             return objectMapper.readTree(json).let {
-                Vilkårsgrunnlag(UUID.fromString(it["hendelseId"].textValue()), Behov.fromJson(it["vilkårsgrunnlag"].toString()))
+                Vilkårsgrunnlag(
+                    UUID.fromString(it["hendelseId"].textValue()),
+                    Behov.fromJson(it["vilkårsgrunnlag"].toString())
+                )
             }
         }
     }
@@ -67,5 +73,37 @@ class Vilkårsgrunnlag private constructor(hendelseId: UUID, private val behov: 
         )
             .putRawValue("vilkårsgrunnlag", RawValue(behov.toJson()))
             .toString()
+    }
+
+    private fun beregnetÅrsInntekt(): Double {
+        val løsning = behov.løsning() as Map<*, *>
+        val inntektsmåneder = objectMapper.convertValue<List<Måned>>(løsning["Inntektsberegning"]!!)
+        return inntektsmåneder
+            .flatMap { it.inntektsliste }
+            .sumByDouble { it.beløp }
+    }
+
+    private fun differanseInntekt(månedsinntektFraInntektsmelding: Double) =
+        ((månedsinntektFraInntektsmelding * 12) - beregnetÅrsInntekt()).absoluteValue / beregnetÅrsInntekt()
+
+    internal fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
+        differanseInntekt(månedsinntektFraInntektsmelding) > 0.25
+
+    data class Måned(
+        val årMåned: YearMonth,
+        val inntektsliste: List<Inntekt>
+    )
+
+    data class Inntekt(
+        val beløp: Double,
+        val inntektstype: Inntektstype,
+        val orgnummer: String?
+    )
+
+    enum class Inntektstype {
+        LOENNSINNTEKT,
+        NAERINGSINNTEKT,
+        PENSJON_ELLER_TRYGD,
+        YTELSE_FRA_OFFENTLIGE
     }
 }
