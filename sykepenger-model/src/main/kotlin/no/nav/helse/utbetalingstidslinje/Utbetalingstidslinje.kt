@@ -4,7 +4,6 @@ import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 /**
@@ -35,10 +34,11 @@ internal class Utbetalingstidslinje internal constructor() {
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
-
-    internal operator fun set(dato: LocalDate, nyDag: AvvistDag) {
-        val antallDager = utbetalingsdager.first().dato.until(dato, ChronoUnit.DAYS).toInt()
-        utbetalingsdager.set(antallDager, nyDag)
+    internal fun avvis(avvisteDatoer: MutableSet<LocalDate>, begrunnelse: Begrunnelse) {
+        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+            if (utbetalingsdag is Utbetalingsdag.NavDag && utbetalingsdag.dato in avvisteDatoer)
+                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
+        }
     }
 
     internal fun utbetalingslinjer(others: List<Utbetalingstidslinje>, alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, førsteDag: LocalDate, sisteDag: LocalDate) =
@@ -123,7 +123,6 @@ internal class Utbetalingstidslinje internal constructor() {
     private fun subset(fom: LocalDate, tom: LocalDate, others: List<Utbetalingstidslinje> = emptyList()) : Utbetalingstidslinje {
         return Utbetalingstidslinje(utbetalingsdager.filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) })
     }
-
 
 
     internal interface UtbetalingsdagVisitor {
