@@ -95,6 +95,14 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
+    internal fun håndter(nySøknad: ModelNySøknad) {
+        if (!perioder.fold(false) { håndtert, periode ->
+                håndtert || periode.håndter(nySøknad)
+            }) {
+            nyVedtaksperiode(nySøknad).håndter(nySøknad)
+        }
+    }
+
     internal fun håndter(sendtSøknad: SendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
             nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)

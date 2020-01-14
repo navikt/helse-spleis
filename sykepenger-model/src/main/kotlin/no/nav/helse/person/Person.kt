@@ -31,6 +31,10 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
+    fun håndter(nySøknad: ModelNySøknad) {
+        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
+    }
+
     fun håndter(sendtSøknad: SendtSøknad) {
         if (!sendtSøknad.kanBehandles()) {
             throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknad)

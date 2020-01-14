@@ -10,13 +10,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellSaksbehandling
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
 import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
@@ -72,6 +66,10 @@ internal class Vedtaksperiode internal constructor(
     internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)
 
     internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
+        if (it) tilstand.håndter(this, nySøknad)
+    }
+
+    internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
     }
 
@@ -224,6 +222,10 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+            vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
+        }
+
         fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
             vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
         }
@@ -252,7 +254,6 @@ internal class Vedtaksperiode internal constructor(
 
         fun entering(vedtaksperiode: Vedtaksperiode) {
         }
-
     }
 
     private object StartTilstand : Vedtaksperiodetilstand {
@@ -266,9 +267,17 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+            val tidslinje = nySøknad.sykdomstidslinje()
+            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
+
+            vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
+                vedtaksperiode.sykdomstidslinje = tidslinje
+            }
+        }
+
         override val type = START
         override val timeout: Duration = Duration.ofDays(30)
-
     }
 
     private object MottattNySøknad : Vedtaksperiodetilstand {
