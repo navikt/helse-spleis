@@ -23,7 +23,7 @@ abstract class SøknadHendelse protected constructor(
     private val aktørId = søknad["aktorId"].asText()!!
     private val fnr = søknad["fnr"].asText()!!
 
-    protected val sykeperioder
+    internal val sykeperioder
         get() = søknad["soknadsperioder"]?.map {
             Sykeperiode(
                 it
@@ -56,11 +56,11 @@ abstract class SøknadHendelse protected constructor(
         )
     )
 
-    protected class Arbeidsgiver(val jsonNode: JsonNode) {
+    internal class Arbeidsgiver(val jsonNode: JsonNode) {
         val orgnummer: String get() = jsonNode["orgnummer"].textValue()
     }
 
-    protected class Sykeperiode(jsonNode: JsonNode) {
+    internal class Sykeperiode(jsonNode: JsonNode) {
         val fom: LocalDate = LocalDate.parse(jsonNode["fom"].textValue())
         val tom: LocalDate = LocalDate.parse(jsonNode["tom"].textValue())
         val sykmeldingsgrad: Int = jsonNode["sykmeldingsgrad"].intValue()

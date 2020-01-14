@@ -85,6 +85,23 @@ internal class TidslinjefusjonTest {
         assertEquals(6, inspektør.navHelgDagTeller)
     }
 
+    @Test internal fun `legger til tom utbetalingstidslinje`() {
+        undersøke(tidslinjeOf(10.NAV) + tidslinjeOf())
+        assertEquals(10, inspektør.size)
+        assertEquals(10, inspektør.navDagTeller)
+    }
+
+    @Test internal fun `legger utbetalingstidslinje til en tom tidslinje`() {
+        undersøke(tidslinjeOf() + tidslinjeOf(10.NAV))
+        assertEquals(10, inspektør.size)
+        assertEquals(10, inspektør.navDagTeller)
+    }
+
+    @Test internal fun `adderer to tomme utbetalingstidslinjer`() {
+        undersøke(tidslinjeOf() + tidslinjeOf())
+        assertEquals(0, inspektør.size)
+    }
+
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje).result()
     }

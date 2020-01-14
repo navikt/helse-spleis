@@ -90,6 +90,7 @@ internal class Utbetalingstidslinje internal constructor() {
 
     operator internal fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.utbetalingsdager.isEmpty()) return this
+        if (this.utbetalingsdager.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))

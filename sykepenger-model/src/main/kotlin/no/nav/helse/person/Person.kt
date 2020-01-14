@@ -22,6 +22,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
             throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknad)
         }
 
+        // TODO: Remove this to support multiple Vedtaksperiode
         if (arbeidsgivere.isNotEmpty()) {
             invaliderAllePerioder(nySøknad)
             throw UtenforOmfangException("støtter ikke forlengelse eller flere arbeidsgivere", nySøknad)
@@ -69,12 +70,14 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     fun håndter(påminnelse: Påminnelse) {
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
         observers.forEach {
-            it.vedtaksperiodeIkkeFunnet(PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId()),
-                aktørId = påminnelse.aktørId(),
-                fødselsnummer = påminnelse.fødselsnummer(),
-                organisasjonsnummer = påminnelse.organisasjonsnummer()
-            ))
+            it.vedtaksperiodeIkkeFunnet(
+                PersonObserver.VedtaksperiodeIkkeFunnetEvent(
+                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId()),
+                    aktørId = påminnelse.aktørId(),
+                    fødselsnummer = påminnelse.fødselsnummer(),
+                    organisasjonsnummer = påminnelse.organisasjonsnummer()
+                )
+            )
         }
     }
 
@@ -115,6 +118,11 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
+            }.also {
+                if (arbeidsgivere.size > 1) {
+                    invaliderAllePerioder(hendelse)
+                    throw UtenforOmfangException("støtter ikke flere arbeidsgivere", hendelse)
+                }
             }
         }
 
@@ -153,7 +161,10 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
                 val skjemaVersjon = jsonNode["skjemaVersjon"].intValue()
 
-                if (skjemaVersjon < CURRENT_SKJEMA_VERSJON) throw PersonskjemaForGammelt(skjemaVersjon, CURRENT_SKJEMA_VERSJON)
+                if (skjemaVersjon < CURRENT_SKJEMA_VERSJON) throw PersonskjemaForGammelt(
+                    skjemaVersjon,
+                    CURRENT_SKJEMA_VERSJON
+                )
 
                 return Memento(
                     aktørId = jsonNode["aktørId"].textValue(),
@@ -167,11 +178,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         }
 
         fun state(): String =
-            objectMapper.convertValue<ObjectNode>(mapOf(
-                "aktørId" to this.aktørId,
-                "fødselsnummer" to this.fødselsnummer,
-                "skjemaVersjon" to this.skjemaVersjon
-            )).also {
+            objectMapper.convertValue<ObjectNode>(
+                mapOf(
+                    "aktørId" to this.aktørId,
+                    "fødselsnummer" to this.fødselsnummer,
+                    "skjemaVersjon" to this.skjemaVersjon
+                )
+            ).also {
                 this.arbeidsgivere.fold(it.putArray("arbeidsgivere")) { result, current ->
                     result.addRawValue(RawValue(current.state()))
                 }

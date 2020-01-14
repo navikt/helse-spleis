@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
 internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID, private val inntektHistorie: InntektHistorie) {
+
     internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(),
         InntektHistorie()
     )
