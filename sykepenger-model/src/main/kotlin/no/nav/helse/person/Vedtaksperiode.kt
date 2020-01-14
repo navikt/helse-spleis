@@ -61,6 +61,12 @@ internal class Vedtaksperiode internal constructor(
     private fun inntektsmeldingHendelse() =
         this.sykdomstidslinje.hendelser().førsteAvType<Inntektsmelding>()
 
+    internal fun accept(visitor: VedtaksperiodeVisitor) {
+        visitor.preVisitVedtaksperiode(this)
+        sykdomstidslinje.accept(visitor)
+        visitor.postVisitVedtaksperiode(this)
+    }
+
     internal fun førsteFraværsdag(): LocalDate? = inntektsmeldingHendelse()?.førsteFraværsdag
 
     internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)

@@ -20,7 +20,7 @@ internal class PersonSykdomstidslinje(
     internal fun maksdato() = maksdato
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitSak(this)
+        visitor.preVisitPerson(this)
         sykdomstidslinjer.forEach { it.accept(visitor) }
         visitor.postVisitSak(this)
     }

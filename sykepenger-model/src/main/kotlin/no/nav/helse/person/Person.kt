@@ -103,6 +103,12 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         arbeidsgivere.values.forEach { it.addObserver(observer) }
     }
 
+    internal fun accept(visitor: PersonVisitor) {
+        visitor.preVisitPerson(this)
+        arbeidsgivere.values.forEach { it.accept(visitor) }
+        visitor.postVisitPerson(this)
+    }
+
     private fun harAndreArbeidsgivere(hendelse: ArbeidstakerHendelse): Boolean {
         if (arbeidsgivere.isEmpty()) return false
         if (arbeidsgivere.size > 1) return true

@@ -31,14 +31,14 @@ internal class ModelHendelseTest {
     @Test internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(inspektør.utløst)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstandType)
+        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.gjeldendeTilstand)
     }
 
     @Test internal fun `En ny NySøknad er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(inspektør.utløst)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstandType)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.gjeldendeTilstand)
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
@@ -52,13 +52,15 @@ internal class ModelHendelseTest {
 
     private class TestPersonObserver : PersonObserver {
         internal var utløst = false
-        internal lateinit var tilstandType: TilstandType
+        internal lateinit var gjeldendeTilstand: TilstandType
+        internal lateinit var forrigeTilstand: TilstandType
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
             utløst = true
         }
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            tilstandType = event.gjeldendeTilstand
+            gjeldendeTilstand = event.gjeldendeTilstand
+            forrigeTilstand = event.forrigeTilstand
         }
     }
 }

@@ -74,6 +74,13 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
     private val perioder = mutableListOf<Vedtaksperiode>()
     private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
 
+    internal fun accept(visitor: ArbeidsgiverVisitor) {
+        visitor.preVisitArbeidsgiver(this)
+        tidslinjer.forEach { it.accept(visitor) }
+        perioder.forEach { it.accept(visitor) }
+        visitor.postVisitArbeidsgiver(this)
+    }
+
     internal fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun memento() = Memento(
