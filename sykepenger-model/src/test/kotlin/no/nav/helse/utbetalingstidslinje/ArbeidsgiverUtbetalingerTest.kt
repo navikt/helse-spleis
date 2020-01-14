@@ -108,17 +108,33 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(6.april, maksdato)
     }
 
+    @Test
+    internal fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
+        undersøke(
+            PERSON_67_ÅR_FNR_2018,
+            tidslinjeOf(35.UTELATE, 50.NAV),
+            tidslinjeOf(7.UTELATE, 20.NAV)
+            )
+
+        assertEquals(50, inspektør.size)
+        assertEquals(40, inspektør.navDagTeller)
+        assertEquals(10, inspektør.avvistDagTeller)
+        assertEquals(40 * 1200, inspektør.totalUtbetaling())
+        assertEquals(16.mars, maksdato)
+    }
+
     private fun undersøke(fnr: String, vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
+        undersøke(fnr, tidslinje, tidslinjeOf())
+    }
+
+    private fun undersøke(fnr: String, arbeidsgiverTidslinje: Utbetalingstidslinje, historiskTidslinje: Utbetalingstidslinje) {
         val arbeidsgiver = Arbeidsgiver("88888888")
-        val historiskTidslinje = tidslinjeOf()
-        ArbeidsgiverUtbetalinger(mapOf(arbeidsgiver to tidslinje), historiskTidslinje, Alder(fnr)).also {
+        ArbeidsgiverUtbetalinger(mapOf(arbeidsgiver to arbeidsgiverTidslinje), historiskTidslinje, Alder(fnr)).also {
             it.beregn()
             maksdato = it.maksdato()
         }
-
         inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.peekTidslinje()).result()
-
     }
 
 }
