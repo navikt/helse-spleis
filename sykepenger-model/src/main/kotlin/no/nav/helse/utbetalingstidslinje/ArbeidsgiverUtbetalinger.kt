@@ -26,7 +26,7 @@ internal class ArbeidsgiverUtbetalinger(
             maksdato = it.maksdato()
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer).beregn()
-        this.tidslinjer.entries.first().apply { key.push(value) }
+        this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) -> arbeidsgiver.push(utbetalingstidslinje) }
     }
 
     internal fun maksdato() = maksdato
