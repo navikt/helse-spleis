@@ -80,6 +80,16 @@ internal class JsonMessageTest {
     }
 
     @Test
+    internal fun requiredValues() {
+        assertThrows("{}", "foo", listOf("bar"))
+        assertThrows("{\"foo\": null}", "foo", listOf("bar"))
+        assertThrows("{\"foo\": [\"bar\"]}", "foo", listOf("bar","foo"))
+
+        assertEquals("{\"foo\": [\"bar\", \"foo\"]}", "foo", listOf("bar","foo"))
+        assertEquals("{\"foo\": [\"bar\", \"foo\", \"bla\"]}", "foo", listOf("bar","foo"))
+    }
+
+    @Test
     internal fun `requiredKey can not return null`() {
         val message = message("{\"foo\": null}").apply {
             requiredKey("foo")
@@ -113,6 +123,22 @@ internal class JsonMessageTest {
             it.requiredValue(key, expectedValue)
             assertFalse(problems.hasErrors())
             assertEquals(expectedValue, it[key].booleanValue())
+        }
+    }
+
+    private fun assertEquals(msg: String, key: String, expectedValues: List<String>) {
+        val problems = MessageProblems(msg)
+        JsonMessage(msg, problems).also {
+            it.requiredValues(key, expectedValues)
+            assertFalse(problems.hasErrors())
+        }
+    }
+
+    private fun assertThrows(msg: String, key: String, expectedValues: List<String>) {
+        val problems = MessageProblems(msg)
+        JsonMessage(msg, problems).also {
+            it.requiredValues(key, expectedValues)
+            assertTrue(problems.hasErrors())
         }
     }
 

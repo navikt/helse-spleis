@@ -156,10 +156,11 @@ internal class HendelseMediatorTest : HendelseListener {
             hendelsetype: Hendelsestype,
             aktørId: String,
             fødselsnummer: String,
-            organisasjonsnummer: String
+            organisasjonsnummer: String,
+            behov: List<Behovstype> = listOf()
         ) = Behov.nyttBehov(
             hendelsestype = hendelsetype,
-            behov = listOf(),
+            behov = behov,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -236,7 +237,8 @@ internal class HendelseMediatorTest : HendelseListener {
                 hendelsetype = Hendelsestype.Ytelser,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer
+                organisasjonsnummer = organisasjonsnummer,
+                behov = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
             )
             sendBehov(
                 behov.løsBehov(
@@ -257,7 +259,8 @@ internal class HendelseMediatorTest : HendelseListener {
                 hendelsetype = Hendelsestype.Vilkårsgrunnlag,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer
+                organisasjonsnummer = organisasjonsnummer,
+                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
             )
 
             sendBehov(

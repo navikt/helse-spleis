@@ -22,7 +22,9 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         parser.register(FremtidigSøknadMessage.Factory)
         parser.register(SendtSøknadMessage.Factory)
         parser.register(InntektsmeldingMessage.Factory)
-        parser.register(BehovMessage.Factory)
+        parser.register(YtelserMessage.Factory)
+        parser.register(VilkårsgrunnlagMessage.Factory)
+        parser.register(ManuellSaksbehandlingMessage.Factory)
         parser.register(PåminnelseMessage.Factory)
     }
 
@@ -71,23 +73,25 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
             } ?: problems.error("klarer ikke å mappe inntektsmelding til domenetype")
         }
 
-        override fun process(message: BehovMessage, problems: MessageProblems) {
-            val builders = listOf(
-                Ytelser.Builder(),
-                Vilkårsgrunnlag.Builder(),
-                ManuellSaksbehandling.Builder()
-            )
-
+        override fun process(message: YtelserMessage, problems: MessageProblems) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
-            builders.mapNotNull {
-                it.build(message.toJson())
-            }.firstOrNull().apply {
-                when (this) {
-                    is Ytelser -> listeners.forEach { it.onYtelser(this) }
-                    is Vilkårsgrunnlag -> listeners.forEach { it.onVilkårsgrunnlag(this) }
-                    is ManuellSaksbehandling -> listeners.forEach { it.onManuellSaksbehandling(this) }
-                }
-            } ?: problems.error("klarer ikke å mappe behov til domenetype")
+            Ytelser.Builder().build(message.toJson())?.apply {
+                listeners.forEach { it.onYtelser(this) }
+            } ?: problems.error("klarer ikke å mappe ytelser til domenetype")
+        }
+
+        override fun process(message: VilkårsgrunnlagMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
+            Vilkårsgrunnlag.Builder().build(message.toJson())?.apply {
+                listeners.forEach { it.onVilkårsgrunnlag(this) }
+            } ?: problems.error("klarer ikke å mappe vilkårsgrunnlag til domenetype")
+        }
+
+        override fun process(message: ManuellSaksbehandlingMessage, problems: MessageProblems) {
+            // TODO: map til ordentlig domenehendelse uten kobling til json
+            ManuellSaksbehandling.Builder().build(message.toJson())?.apply {
+                listeners.forEach { it.onManuellSaksbehandling(this) }
+            } ?: problems.error("klarer ikke å mappe manuellsaksbehandling til domenetype")
         }
 
         override fun process(message: PåminnelseMessage, problems: MessageProblems) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
@@ -51,6 +52,17 @@ internal open class JsonMessage(private val originalMessage: String, private val
             return problems.error("Required $key is not string $value")
         }
         accessor(key)
+    }
+
+    fun requiredValues(key: String, values: List<String>) {
+        if (isKeyMissing(key) || !json.path(key).isArray || !values.all { it in (json.path(key) as ArrayNode).map { node -> node.textValue()} }) {
+            return problems.error("Required $key does not contains $values")
+        }
+        accessor(key)
+    }
+
+    fun requiredValues(key: String, vararg values: Enum<*>) {
+        requiredValues(key, values.map { it.name })
     }
 
     fun interestedIn(key: String) {
