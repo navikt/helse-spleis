@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
@@ -396,7 +395,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
-    @Disabled("Disabled til vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test")
     @Test
     fun `skal gå til infotrygd hvis det er avvik mellom inntektsmelding og inntekt fra inntektskomponenten`() {
         val periodeFom = 1.juli

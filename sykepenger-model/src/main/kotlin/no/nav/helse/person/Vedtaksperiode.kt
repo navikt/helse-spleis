@@ -330,19 +330,17 @@ internal class Vedtaksperiode internal constructor(
                 "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
             }
 
-//            TODO: Skru på når vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test
-//            TODO: Skru på relevant disabled test: Disabled til vi har mulighet til å sjekke inntekt før oppretting av inntektsmelding i test
-//            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
-//                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-//            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
-//                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
+                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
+                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
 
             vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
             val inntektsberegningSlutt = YearMonth.from(vedtaksperiode.førsteFraværsdag())
-            val inntektsberegningStart = inntektsberegningSlutt.minusMonths(12)
+            val inntektsberegningStart = inntektsberegningSlutt.minusMonths(11)
             vedtaksperiode.trengerVilkårsgrunnlag(
                 beregningStart = inntektsberegningStart,
                 beregningSlutt = inntektsberegningSlutt
