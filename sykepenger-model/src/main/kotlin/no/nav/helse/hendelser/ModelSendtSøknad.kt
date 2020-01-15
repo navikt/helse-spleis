@@ -76,7 +76,7 @@ class ModelSendtSøknad(
             }
         }
 
-        class Utdanning(fom: LocalDate, private val _tom: LocalDate?): Periode(fom, LocalDate.MAX) {
+        class Utdanning(fom: LocalDate, private val _tom: LocalDate? = null): Periode(fom, LocalDate.MAX) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.utenlandsdager(fom, _tom ?: sendtSøknad.tom, sendtSøknad)
 
@@ -99,7 +99,7 @@ class ModelSendtSøknad(
             override fun valider(sendtSøknad: ModelSendtSøknad, problemer: Problemer) {}
         }
 
-        inner class Arbeid(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+        class Arbeid(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, sendtSøknad)
 
