@@ -4,7 +4,7 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Ferie
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
-import no.nav.helse.person.Problems
+import no.nav.helse.person.Problemer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,11 +18,11 @@ internal class ModelSendtSøknadTest {
     }
 
     private lateinit var sendtSøknad: ModelSendtSøknad
-    private lateinit var problems: Problems
+    private lateinit var problems: Problemer
 
     @BeforeEach
     internal fun setup() {
-        problems = Problems()
+        problems = Problemer()
     }
 
     @Test
