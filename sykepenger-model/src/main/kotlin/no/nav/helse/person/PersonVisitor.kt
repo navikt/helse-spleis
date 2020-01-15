@@ -18,8 +18,8 @@ internal interface ArbeidsgiverVisitor: UtbetalingsdagVisitor, VedtaksperiodeVis
 
 internal interface VedtaksperiodeVisitor: SykdomstidslinjeVisitor {
     fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {}
-    fun visitUtbetalingslinje(linje: Utbetalingslinje)
-    fun visitTilstand(tilstand: Vedtaksperiodetilstand)
+    fun visitUtbetalingslinje(linje: Utbetalingslinje) {}
+    fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {}
 }
 

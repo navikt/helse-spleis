@@ -35,7 +35,7 @@ internal class ModelNySøknadTest {
 
     @Test internal fun `overlappende sykeperioder`() {
         assertThrows<IllegalArgumentException> {
-            nySøknad(Triple(10.januar, 16.januar, 100), Triple(1.januar, 12.januar, 100))
+            nySøknad(Triple(10.januar, 12.januar, 100), Triple(1.januar, 12.januar, 100))
         }
     }
 
