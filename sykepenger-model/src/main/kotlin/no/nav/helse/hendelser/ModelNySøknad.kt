@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.ModelNySøknad.Sykeperiode
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -22,7 +21,7 @@ class ModelNySøknad(
     init {
         require(sykeperioder.isNotEmpty()) { "Ingen sykeperioder" }
         this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
-        require(erUnder100()) { "Bare sykdomsgrad lik 100% støttes" }
+        require(hundreProsentSykmeldt()) { "Bare sykdomsgrad lik 100% støttes" }
         require(ingenOverlappende()) { "Sykeperioder overlapper" }
     }
 
@@ -41,9 +40,9 @@ class ModelNySøknad(
         }
     }
 
-    override fun kanBehandles() = erUnder100() && ingenOverlappende()
+    override fun kanBehandles() = hundreProsentSykmeldt() && ingenOverlappende()
 
-    private fun erUnder100() = sykeperioder.all { it.kanBehandles() }
+    private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 
     private fun ingenOverlappende(): Boolean {
         return sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }

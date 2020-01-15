@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -70,23 +71,28 @@ internal class NySøknadHendelseTest {
     }
 
     private inner class TestPersonInspektør(person: Person): PersonVisitor {
-        private var arbeidsgiverindeks: Int = -1
-        private val tilstande = mutableMapOf<Int, TilstandType>()
+        private var vedtaksperiodeindeks: Int = -1
+        private val tilstander = mutableMapOf<Int, TilstandType>()
+        private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
         init {
             person.accept(this)
         }
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
-            arbeidsgiverindeks += 1
-            tilstande[arbeidsgiverindeks] = TilstandType.START
+            vedtaksperiodeindeks += 1
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstande[arbeidsgiverindeks] = tilstand.type
+            tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        internal val vedtaksperiodeTeller get() = tilstande.size
+        override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
+            sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
+        }
 
-        internal fun tilstand(indeks: Int) = tilstande[indeks]
+        internal val vedtaksperiodeTeller get() = tilstander.size
+
+        internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 }
