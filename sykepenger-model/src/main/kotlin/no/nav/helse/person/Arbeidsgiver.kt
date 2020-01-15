@@ -139,8 +139,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         return perioder.any { it.håndter(påminnelse) }
     }
 
-    internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse, problems: Problems) {
-        perioder.forEach { it.invaliderPeriode(hendelse, problems) }
+    internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse, problemer: Problemer) {
+        perioder.forEach { it.invaliderPeriode(hendelse, problemer) }
     }
 
     fun addObserver(observer: VedtaksperiodeObserver) {

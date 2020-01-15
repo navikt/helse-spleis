@@ -20,34 +20,34 @@ internal class NySøknadHendelseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var problems: Problems
+    private lateinit var problemer: Problemer
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        problems = Problems()
+        problemer = Problemer()
     }
 
     @Test
     internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `En ny NySøknad er ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), problems)
-        assertThrows<Problems> {
-            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), problems)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), problemer)
+        assertThrows<Problemer> {
+            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), problemer)
         }
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -56,8 +56,8 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problems)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problemer)
 
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
@@ -66,8 +66,8 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
-        assertThrows<Problems> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), problems) }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
+        assertThrows<Problemer> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), problemer) }
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -81,7 +81,7 @@ internal class NySøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problems
+            problemer
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

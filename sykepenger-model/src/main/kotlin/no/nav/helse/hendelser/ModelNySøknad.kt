@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Problems
+import no.nav.helse.person.Problemer
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -15,7 +15,7 @@ class ModelNySøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    private val problemer: Problems
+    private val problemer: Problemer
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad) {
 
     private val sykeperioder: List<Sykeperiode>
@@ -42,7 +42,7 @@ class ModelNySøknad(
 
     override fun kanBehandles() = !valider().hasErrors()
 
-    fun valider(): Problems {
+    fun valider(): Problemer {
         if (!hundreProsentSykmeldt()) problemer.error("Støtter bare 100%% sykmeldt")
         return problemer
     }

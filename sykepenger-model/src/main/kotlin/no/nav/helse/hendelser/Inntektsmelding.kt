@@ -35,6 +35,7 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
         fun fromJson(json: String): Inntektsmelding {
             return objectMapper.readTree(json).let {
                 Inntektsmelding(
@@ -155,6 +156,7 @@ class Inntektsmelding(hendelseId: UUID, private val inntektsmelding: JsonNode) :
         val tom get() = LocalDate.parse(jsonNode["tom"].textValue()) as LocalDate
 
     }
+
     private class Refusjon(val jsonNode: JsonNode) {
         val opphoersdato get() = jsonNode["opphoersdato"].safelyUnwrapDate()
         val beloepPrMnd get() = jsonNode["beloepPrMnd"]?.textValue()?.toBigDecimal()

@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-class Problems : RuntimeException() {
+class Problemer : RuntimeException() {
     private val info = mutableListOf<String>()
     private val warn = mutableListOf<String>()
     private val error = mutableListOf<String>()

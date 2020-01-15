@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.fixtures.januar
-import no.nav.helse.person.Problems
+import no.nav.helse.person.Problemer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,11 +17,11 @@ internal class ModelNySøknadTest {
     }
 
     private lateinit var nySøknad: ModelNySøknad
-    private lateinit var problems: Problems
+    private lateinit var problemer: Problemer
 
     @BeforeEach
     internal fun setup() {
-        problems = Problems()
+        problemer = Problemer()
     }
 
     @Test
@@ -39,12 +39,12 @@ internal class ModelNySøknadTest {
 
     @Test
     internal fun `sykeperioder mangler`() {
-        assertThrows<Problems> { nySøknad() }
+        assertThrows<Problemer> { nySøknad() }
     }
 
     @Test
     internal fun `overlappende sykeperioder`() {
-        assertThrows<Problems> {
+        assertThrows<Problemer> {
             nySøknad(Triple(10.januar, 12.januar, 100), Triple(1.januar, 12.januar, 100))
         }
     }
@@ -57,7 +57,7 @@ internal class ModelNySøknadTest {
             "987654321",
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problems
+            problemer
         )
     }
 

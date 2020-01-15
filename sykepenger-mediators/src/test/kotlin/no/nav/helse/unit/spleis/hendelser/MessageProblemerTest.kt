@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class MessageProblemsTest {
+internal class MessageProblemerTest {
 
     private lateinit var problems: MessageProblems
 

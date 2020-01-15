@@ -31,11 +31,11 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(nySøknad: ModelNySøknad, problems: Problems) {
+    fun håndter(nySøknad: ModelNySøknad, problemer: Problemer) {
         nySøknad.valider()
-        if (problems.hasErrors()) {
-            invaliderAllePerioder(nySøknad, problems)
-            throw problems
+        if (problemer.hasErrors()) {
+            invaliderAllePerioder(nySøknad, problemer)
+            throw problemer
         }
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
@@ -120,31 +120,31 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
     }
 
-    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, problems: Problems) {
+    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, problemer: Problemer) {
         arbeidsgivere.forEach { (_, arbeidsgiver) ->
-            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, problems)
+            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, problemer)
         }
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        invaliderAllePerioder(arbeidstakerHendelse, Problems())
+        invaliderAllePerioder(arbeidstakerHendelse, Problemer())
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        finnEllerOpprettArbeidsgiver(hendelse, Problems())
+        finnEllerOpprettArbeidsgiver(hendelse, Problemer())
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, problems: Problems) =
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, problemer: Problemer) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {
-                    problems.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
-                    invaliderAllePerioder(hendelse, problems)
-                    throw problems
+                    problemer.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
+                    invaliderAllePerioder(hendelse, problemer)
+                    throw problemer
                 }
             }
         }
