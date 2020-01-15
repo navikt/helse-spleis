@@ -2,12 +2,12 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Ferie
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
 import no.nav.helse.person.Problemer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
@@ -36,7 +36,7 @@ internal class ModelSendtSøknadTest {
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertEquals(16, sendtSøknad.sykdomstidslinje().length())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
@@ -44,6 +44,30 @@ internal class ModelSendtSøknadTest {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(sendtSøknad.valider().hasErrors())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
+    }
+
+    @Test
+    internal fun `ferie ligger utenfor sykdomsvindu`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
+    internal fun `utdanning ligger utenfor sykdomsvindu`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 16.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
+    internal fun `må ha perioder`() {
+        assertThrows<Problemer>{sendtSøknad()}
+    }
+
+    @Test
+    internal fun `må ha sykdomsperioder`() {
+        assertThrows<Problemer>{sendtSøknad(Ferie(2.januar, 16.januar))}
     }
 
 
