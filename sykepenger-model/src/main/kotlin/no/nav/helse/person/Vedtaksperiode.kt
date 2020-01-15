@@ -11,16 +11,7 @@ import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
-import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
-import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_GODKJENNING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.valueOf
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -33,7 +24,7 @@ import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private inline fun <reified T> Set<*>.førsteAvType(): T? {
     return firstOrNull { it is T } as T?
@@ -119,7 +110,8 @@ internal class Vedtaksperiode internal constructor(
         return true
     }
 
-    internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
+    internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse, problems: Problems) {
+        problems.warn("Invaliderer vedtaksperiode: %s", this.id.toString())
         setTilstand(hendelse, TilInfotrygd)
     }
 

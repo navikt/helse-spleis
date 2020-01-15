@@ -31,7 +31,12 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(nySøknad: ModelNySøknad) {
+    fun håndter(nySøknad: ModelNySøknad, problems: Problems) {
+        nySøknad.valider()
+        if (problems.hasErrors()) {
+            invaliderAllePerioder(nySøknad, problems)
+            throw problems
+        }
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
@@ -115,23 +120,31 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
     }
 
-    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
+    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, problems: Problems) {
         arbeidsgivere.forEach { (_, arbeidsgiver) ->
-            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
+            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, problems)
         }
+    }
+
+    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
+        invaliderAllePerioder(arbeidstakerHendelse, Problems())
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
+        finnEllerOpprettArbeidsgiver(hendelse, Problems())
+
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, problems: Problems) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {
-                    invaliderAllePerioder(hendelse)
-                    throw UtenforOmfangException("støtter ikke flere arbeidsgivere", hendelse)
+                    problems.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
+                    invaliderAllePerioder(hendelse, problems)
+                    throw problems
                 }
             }
         }

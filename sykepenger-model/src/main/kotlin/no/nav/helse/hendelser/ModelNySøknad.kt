@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Problems
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -13,16 +14,16 @@ class ModelNySøknad(
     private val aktørId: String,
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
-    sykeperioder: List<Triple<LocalDate, LocalDate, Int>>
+    sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
+    private val problemer: Problems
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad) {
 
     private val sykeperioder: List<Sykeperiode>
 
     init {
-        require(sykeperioder.isNotEmpty()) { "Ingen sykeperioder" }
+        if (sykeperioder.isEmpty()) problemer.severe("Ingen sykeperioder")
         this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
-        require(hundreProsentSykmeldt()) { "Bare sykdomsgrad lik 100% støttes" }
-        require(ingenOverlappende()) { "Sykeperioder overlapper" }
+        if (!ingenOverlappende()) problemer.severe("Sykeperioder overlapper")
     }
 
     private inner class Sykeperiode(
@@ -35,18 +36,20 @@ class ModelNySøknad(
         internal fun sykdomstidslinje() =
             ConcreteSykdomstidslinje.sykedager(fom, tom, this@ModelNySøknad)
 
-        internal fun ingenOverlappende(other: Sykeperiode): Boolean {
-            return maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
-        }
+        internal fun ingenOverlappende(other: Sykeperiode) =
+            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
     }
 
-    override fun kanBehandles() = hundreProsentSykmeldt() && ingenOverlappende()
+    override fun kanBehandles() = !valider().hasErrors()
+
+    fun valider(): Problems {
+        if (!hundreProsentSykmeldt()) problemer.error("Støtter bare 100%% sykmeldt")
+        return problemer
+    }
 
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 
-    private fun ingenOverlappende(): Boolean {
-        return sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
-    }
+    private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
         sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce(ConcreteSykdomstidslinje::plus)

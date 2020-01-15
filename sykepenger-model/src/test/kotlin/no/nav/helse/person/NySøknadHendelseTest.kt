@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -16,64 +16,79 @@ internal class NySøknadHendelseTest {
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
-        internal const val PERSON_67_ÅR_FNR_2018 = "05015112345"
     }
 
     private lateinit var person: Person
-    private lateinit var observatør: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
+    private lateinit var problems: Problems
 
-    @BeforeEach internal fun opprettPerson() {
+    @BeforeEach
+    internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        observatør = TestPersonObserver().also {
-            person.addObserver(it)
-        }
+        problems = Problems()
     }
 
-    @Test internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(observatør.utløst)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, observatør.gjeldendeTilstand)
+    @Test
+    internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
 
-    @Test internal fun `En ny NySøknad er ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(observatør.utløst)
-        assertEquals(TilstandType.TIL_INFOTRYGD, observatør.gjeldendeTilstand)
+    @Test
+    internal fun `En ny NySøknad er ugyldig`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") = ModelNySøknad(
-        UUID.randomUUID(),
-        ModelNySøknadTest.UNG_PERSON_FNR_2018,
-        "12345",
-        orgnummer,
-        LocalDateTime.now(),
-        listOf(*sykeperioder)
-    )
-
-    private class TestPersonObserver: PersonObserver {
-        internal var utløst = false
-        internal lateinit var gjeldendeTilstand: TilstandType
-        internal lateinit var forrigeTilstand: TilstandType
-        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-            utløst = true
+    @Test
+    internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), problems)
+        assertThrows<Problems> {
+            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), problems)
         }
 
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            gjeldendeTilstand = event.gjeldendeTilstand
-            forrigeTilstand = event.forrigeTilstand
-        }
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
-    private inner class TestPersonInspektør(person: Person): PersonVisitor {
+    @Test
+    internal fun `To søknader uten overlapp`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problems)
+
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
+    }
+
+    @Test
+    internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problems)
+        assertThrows<Problems> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), problems) }
+
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
+        ModelNySøknad(
+            UUID.randomUUID(),
+            ModelNySøknadTest.UNG_PERSON_FNR_2018,
+            "12345",
+            orgnummer,
+            LocalDateTime.now(),
+            listOf(*sykeperioder),
+            problems
+        )
+
+    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+
         init {
             person.accept(this)
         }

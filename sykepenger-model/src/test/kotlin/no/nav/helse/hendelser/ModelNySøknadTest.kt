@@ -1,10 +1,11 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.fixtures.januar
+import no.nav.helse.person.Problems
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -16,25 +17,34 @@ internal class ModelNySøknadTest {
     }
 
     private lateinit var nySøknad: ModelNySøknad
+    private lateinit var problems: Problems
 
-    @Test internal fun `sykdomsgrad som er 100% støttes`() {
+    @BeforeEach
+    internal fun setup() {
+        problems = Problems()
+    }
+
+    @Test
+    internal fun `sykdomsgrad som er 100% støttes`() {
         nySøknad(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
-        assertTrue(nySøknad.kanBehandles())
+        assertFalse(nySøknad.valider().hasErrors())
         assertEquals(16, nySøknad.sykdomstidslinje().length())
     }
 
-    @Test internal fun `sykdomsgrad under 100% støttes ikke`() {
-        assertThrows<IllegalArgumentException> {
-            nySøknad(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
-        }
+    @Test
+    internal fun `sykdomsgrad under 100% støttes ikke`() {
+        nySøknad(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
+        assertTrue(nySøknad.valider().hasErrors())
     }
 
-    @Test internal fun `sykeperioder mangler`() {
-        assertThrows<IllegalArgumentException> { nySøknad() }
+    @Test
+    internal fun `sykeperioder mangler`() {
+        assertThrows<Problems> { nySøknad() }
     }
 
-    @Test internal fun `overlappende sykeperioder`() {
-        assertThrows<IllegalArgumentException> {
+    @Test
+    internal fun `overlappende sykeperioder`() {
+        assertThrows<Problems> {
             nySøknad(Triple(10.januar, 12.januar, 100), Triple(1.januar, 12.januar, 100))
         }
     }
@@ -46,7 +56,8 @@ internal class ModelNySøknadTest {
             "12345",
             "987654321",
             LocalDateTime.now(),
-            listOf(*sykeperioder)
+            listOf(*sykeperioder),
+            problems
         )
     }
 
