@@ -9,7 +9,7 @@ class Problems : RuntimeException() {
     fun info(melding: String, vararg params: Any) = info.add(String.format(melding, *params))
     fun warn(melding: String, vararg params: Any) = warn.add(String.format(melding, *params))
     fun error(melding: String, vararg params: Any) = error.add(String.format(melding, *params))
-    fun severe(melding: String, vararg params: Any) = severe.add(String.format(melding, *params)).also { throw this }
+    fun severe(melding: String, vararg params: Any): Nothing = severe.add(String.format(melding, *params)).let { throw this }
 
     fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
     fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
