@@ -3,13 +3,9 @@ package no.nav.helse.person
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellSaksbehandling
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.*
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 abstract class ArbeidstakerHendelse protected constructor(
     private val hendelseId: UUID,
@@ -55,7 +51,7 @@ abstract class ArbeidstakerHendelse protected constructor(
             return objectMapper.readTree(json).let {
                 when (val hendelsetype = Hendelsestype.valueOf(it["type"].textValue())) {
                     Hendelsestype.Inntektsmelding -> Inntektsmelding.fromJson(json)
-                    Hendelsestype.NySøknad -> NySøknad.fromJson(json)
+                    Hendelsestype.NySøknad -> ModelNySøknad.fromJson(json)
                     Hendelsestype.SendtSøknad -> SendtSøknad.fromJson(json)
                     Hendelsestype.Ytelser -> Ytelser.fromJson(json)
                     Hendelsestype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)

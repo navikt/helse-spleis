@@ -57,7 +57,8 @@ internal class ModelNySøknadTest {
             "987654321",
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer
+            problemer,
+            "{}"
         )
     }
 

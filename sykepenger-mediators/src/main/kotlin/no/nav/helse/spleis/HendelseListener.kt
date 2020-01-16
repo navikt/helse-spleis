@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Problemer
 
 interface HendelseListener {
     fun onPåminnelse(påminnelse: Påminnelse) {}
@@ -11,4 +12,5 @@ interface HendelseListener {
     fun onNySøknad(søknad: NySøknad) {}
     fun onSendtSøknad(søknad: SendtSøknad) {}
     fun onUnprocessedMessage(message: String) {}
+    fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {}
 }

@@ -3,9 +3,10 @@ package no.nav.helse.unit.spleis
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.Topics
+import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Problemer
 import no.nav.helse.person.VedtaksperiodeObserver
 import no.nav.helse.spleis.*
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -13,6 +14,7 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Future
 
@@ -38,13 +40,23 @@ internal class PersonMediatorTest {
         producer = producer
     )
 
-    private val nySøknad = nySøknadHendelse()
+    private val problemer = Problemer()
+    private val nySøknad = ModelNySøknad(
+        hendelseId = UUID.randomUUID(),
+        fnr = "fnr",
+        aktørId = "aktørid",
+        orgnummer = "orgnr",
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(Triple(LocalDate.now(), LocalDate.now(), 100)),
+        problemer = problemer,
+        originalJson = "{}"
+    )
 
     @Test
     fun `sørger for at observers blir varslet om endring`() {
         every { repo.hentPerson(any()) } returns null
 
-        personMediator.onNySøknad(nySøknad)
+        personMediator.onNySøknad(nySøknad, problemer)
 
         verify(exactly = 1) {
             repo.hentPerson(any())

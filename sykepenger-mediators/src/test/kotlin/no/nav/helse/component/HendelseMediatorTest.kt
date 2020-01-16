@@ -8,6 +8,7 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
+import no.nav.helse.person.Problemer
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
@@ -17,10 +18,7 @@ import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG
@@ -130,7 +128,7 @@ internal class HendelseMediatorTest : HendelseListener {
                     lestInntektsmelding.set(true)
                 }
 
-                override fun onNySøknad(søknad: NySøknad) {
+                override fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {
                     lestNySøknad.set(true)
                 }
 
@@ -350,7 +348,13 @@ internal class HendelseMediatorTest : HendelseListener {
                 sendtNav = LocalDateTime.now(),
                 egenmeldinger = emptyList(),
                 fravar = emptyList(),
-                soknadsperioder = emptyList(),
+                soknadsperioder = listOf(
+                    SoknadsperiodeDTO(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        sykmeldingsgrad = 100
+                    )
+                ),
                 opprettet = LocalDateTime.now()
             )
             sendKafkaMessage(Topics.søknadTopic, id.toString(), nySøknad.toJsonNode().toString())

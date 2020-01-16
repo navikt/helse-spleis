@@ -295,6 +295,7 @@ internal data class SpolePeriode(
 )
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
 internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
 internal val Int.juni

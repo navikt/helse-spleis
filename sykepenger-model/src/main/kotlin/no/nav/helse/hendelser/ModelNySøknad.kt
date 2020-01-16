@@ -1,5 +1,9 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Problemer
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -15,10 +19,42 @@ class ModelNySøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    private val problemer: Problemer
+    private val problemer: Problemer,
+    private val originalJson: String
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad) {
 
     private val sykeperioder: List<Sykeperiode>
+
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun fromJson(json: String): ModelNySøknad {
+            return objectMapper.readTree(json).let {
+                ModelNySøknad(
+                    hendelseId = UUID.fromString(it["hendelseId"].textValue()),
+                    fnr = it.path("søknad").path("fnr").asText(),
+                    aktørId = it.path("søknad").path("aktorId").asText(),
+                    orgnummer = it.path("søknad").path("arbeidsgiver").path("orgnummer").asText(),
+                    rapportertdato = it.path("søknad").path("opprettet").asText().let { LocalDateTime.parse(it) },
+                    sykeperioder = it.path("søknad").path("soknadsperioder").map { periode: JsonNode ->
+                        Triple(
+                            first = periode.path("fom").asLocalDate(),
+                            second = periode.path("tom").asLocalDate(),
+                            third = periode.path("sykmeldingsgrad").asInt()
+                        )
+                    },
+                    problemer = Problemer(),
+                    originalJson = objectMapper.writeValueAsString(it.path("søknad"))
+                )
+            }
+        }
+
+        private fun JsonNode.asLocalDate() =
+            asText().let { LocalDate.parse(it) }
+
+    }
 
     init {
         if (sykeperioder.isEmpty()) problemer.severe("Ingen sykeperioder")
@@ -64,5 +100,12 @@ class ModelNySøknad(
 
     override fun aktørId() = aktørId
 
-    override fun toJson() = "" // Should not be part of Model events
+    // TODO: Should not be part of Model events
+    override fun toJson(): String = objectMapper.writeValueAsString(
+        mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to hendelsetype(),
+            "søknad" to objectMapper.readTree(originalJson)
+        )
+    )
 }

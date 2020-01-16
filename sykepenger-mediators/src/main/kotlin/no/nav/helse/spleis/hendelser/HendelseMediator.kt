@@ -1,10 +1,15 @@
 package no.nav.helse.spleis.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Problemer
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
 import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -46,11 +51,38 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
 
     private inner class Processor : MessageProcessor {
         override fun process(message: NySøknadMessage, problems: MessageProblems) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            NySøknad.Builder().build(message.toJson())?.apply {
-                return listeners.forEach { it.onNySøknad(this) }
-            } ?: problems.error("klarer ikke å mappe søknaden til domenetype")
+            val problemer = Problemer()
+            try {
+                val modelNySøknad = ModelNySøknad(
+                    hendelseId = UUID.randomUUID(),
+                    fnr = message["fnr"].asText(),
+                    aktørId = message["aktorId"].asText(),
+                    orgnummer = message["arbeidsgiver"].path("orgnummer").asText(),
+                    rapportertdato = message["opprettet"].asText().let { LocalDateTime.parse(it) },
+                    sykeperioder = message["soknadsperioder"].map {
+                        Triple(
+                            first = it.path("fom").asLocalDate(),
+                            second = it.path("tom").asLocalDate(),
+                            third = it.path("sykmeldingsgrad").asInt()
+                        )
+                    },
+                    problemer = problemer,
+                    originalJson = message.toJson()
+                )
+
+                listeners.forEach { it.onNySøknad(modelNySøknad, problemer) }
+
+                if (problemer.hasMessages()) {
+                    sikkerLogg.info("meldinger om ny søknad: $problemer")
+                }
+            } catch (err: Problemer) {
+                sikkerLogg.info("feil om ny søknad: ${err.message}", err)
+            }
         }
+
+        private fun JsonNode.asLocalDate() =
+            asText().let { LocalDate.parse(it) }
+
 
         override fun process(message: FremtidigSøknadMessage, problems: MessageProblems) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
@@ -60,7 +92,7 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         }
 
         override fun process(message: SendtSøknadMessage, problems: MessageProblems) {
-           // TODO: map til ordentlig domenehendelse uten kobling til json
+            // TODO: map til ordentlig domenehendelse uten kobling til json
             SendtSøknad.Builder().build(message.toJson())?.apply {
                 return listeners.forEach { it.onSendtSøknad(this) }
             } ?: problems.error("klarer ikke å mappe søknaden til domenetype")

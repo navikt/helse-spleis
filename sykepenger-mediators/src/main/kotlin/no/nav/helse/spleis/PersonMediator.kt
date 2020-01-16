@@ -40,8 +40,8 @@ internal class PersonMediator(
         person(inntektsmelding) { person -> person.håndter(inntektsmelding) }
     }
 
-    override fun onNySøknad(søknad: NySøknad) {
-        person(søknad) { person -> person.håndter(søknad) }
+    override fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {
+        person(søknad) { person -> person.håndter(søknad, problemer) }
     }
 
     override fun onSendtSøknad(søknad: SendtSøknad) {

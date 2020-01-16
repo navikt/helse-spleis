@@ -8,36 +8,19 @@ import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellSaksbehandling
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
-import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverForskuttererDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidssituasjonDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.FravarstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
+import no.nav.inntektsmeldingkontrakt.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.UUID
+import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal object TestConstants {
@@ -440,6 +423,7 @@ internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad.Builder(
 internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
 internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
 internal val Int.juni

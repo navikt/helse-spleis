@@ -84,7 +84,8 @@ internal class NySøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer
+            problemer,
+            "{}"
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
