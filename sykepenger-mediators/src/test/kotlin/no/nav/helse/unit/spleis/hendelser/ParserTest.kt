@@ -1,8 +1,8 @@
 package no.nav.helse.unit.spleis.hendelser
 
+import no.nav.helse.person.Problemer
 import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
-import no.nav.helse.spleis.hendelser.MessageProblems
 import no.nav.helse.spleis.hendelser.Parser
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -11,23 +11,15 @@ import org.junit.jupiter.api.Test
 internal class ParserTest : Parser.ParserDirector {
 
     @Test
-    internal fun `message is kept in the problems object`() {
-        val message = "{\"key\": \"value\"}"
-        parser.onMessage(message)
-        assertTrue(unrecognizedMessage)
-        assertContains(message, messageProblems)
-    }
-
-    @Test
     internal fun `when message is not recognized, errors are accumulated`() {
         messageFactory("key1_not_set")
         messageFactory("key2_not_set")
         parser.onMessage("{\"key\": \"value\"}")
 
         assertTrue(unrecognizedMessage)
-        assertTrue(messageProblems.hasErrors())
-        assertContains("key1_not_set", messageProblems)
-        assertContains("key2_not_set", messageProblems)
+        assertTrue(Problemer.hasErrors())
+        assertContains("key1_not_set", Problemer)
+        assertContains("key2_not_set", Problemer)
     }
 
     @Test
@@ -41,8 +33,8 @@ internal class ParserTest : Parser.ParserDirector {
         parser.onMessage("{\"key\": \"value\"}")
 
         assertEquals(message2, recognizedMessage)
-        assertFalse(messageProblems.hasErrors())
-        assertNotContains("key1_not_set", messageProblems)
+        assertFalse(Problemer.hasErrors())
+        assertNotContains("key1_not_set", Problemer)
     }
 
     @Test
@@ -59,18 +51,18 @@ internal class ParserTest : Parser.ParserDirector {
         assertEquals(message1, recognizedMessage)
     }
 
-    private fun assertContains(message: String, problems: MessageProblems) {
+    private fun assertContains(message: String, problems: Problemer) {
         assertTrue(problems.toString().contains(message))
     }
 
-    private fun assertNotContains(message: String, problems: MessageProblems) {
+    private fun assertNotContains(message: String, problems: Problemer) {
         assertFalse(problems.toString().contains(message))
     }
 
     private lateinit var parser: Parser
     private var unrecognizedMessage = false
     private var recognizedMessage: JsonMessage? = null
-    private lateinit var messageProblems: MessageProblems
+    private lateinit var Problemer: Problemer
 
     @BeforeEach
     internal fun setup() {
@@ -79,14 +71,14 @@ internal class ParserTest : Parser.ParserDirector {
         unrecognizedMessage = false
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, warnings: MessageProblems) {
+    override fun onRecognizedMessage(message: JsonMessage, warnings: Problemer) {
         recognizedMessage = message
-        messageProblems = warnings
+        Problemer = warnings
     }
 
-    override fun onUnrecognizedMessage(problems: MessageProblems) {
+    override fun onUnrecognizedMessage(problemer: Problemer) {
         unrecognizedMessage = true
-        messageProblems = problems
+        Problemer = problemer
     }
 
     private fun messageFactory(requiredKey: String) {
@@ -97,7 +89,7 @@ internal class ParserTest : Parser.ParserDirector {
 
     private fun messageFactory(block: JsonMessage.() -> Unit) {
         parser.register(object : MessageFactory<JsonMessage> {
-            override fun createMessage(message: String, problems: MessageProblems): JsonMessage {
+            override fun createMessage(message: String, problems: Problemer): JsonMessage {
                 return JsonMessage(message, problems).apply {
                     block(this)
                 }

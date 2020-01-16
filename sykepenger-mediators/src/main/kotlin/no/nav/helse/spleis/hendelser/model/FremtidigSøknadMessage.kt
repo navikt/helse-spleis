@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.hendelser.model
 
+import no.nav.helse.person.Problemer
 import no.nav.helse.spleis.hendelser.MessageFactory
-import no.nav.helse.spleis.hendelser.MessageProblems
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing a Søknad
-internal class FremtidigSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
+internal class FremtidigSøknadMessage(originalMessage: String, private val problems: Problemer) :
     SøknadMessage(originalMessage, problems) {
     init {
         requiredValue("status", "FREMTIDIG")
@@ -17,7 +17,7 @@ internal class FremtidigSøknadMessage(originalMessage: String, private val prob
 
     object Factory : MessageFactory<FremtidigSøknadMessage> {
 
-        override fun createMessage(message: String, problems: MessageProblems) =
+        override fun createMessage(message: String, problems: Problemer) =
             FremtidigSøknadMessage(message, problems)
     }
 }

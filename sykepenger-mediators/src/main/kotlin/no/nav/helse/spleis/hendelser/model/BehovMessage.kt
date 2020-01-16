@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.behov.Behovstype
+import no.nav.helse.person.Problemer
 import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
-import no.nav.helse.spleis.hendelser.MessageProblems
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing a Behov
-internal abstract class BehovMessage(originalMessage: String, private val problems: MessageProblems) :
+internal abstract class BehovMessage(originalMessage: String, private val problems: Problemer) :
     JsonMessage(originalMessage, problems) {
     init {
         requiredKey(
@@ -20,7 +20,7 @@ internal abstract class BehovMessage(originalMessage: String, private val proble
     }
 }
 
-internal class YtelserMessage(originalMessage: String, private val problems: MessageProblems) :
+internal class YtelserMessage(originalMessage: String, private val problems: Problemer) :
     BehovMessage(originalMessage, problems) {
     init {
         requiredValues("@behov", Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
@@ -32,13 +32,13 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
 
     object Factory : MessageFactory<YtelserMessage> {
 
-        override fun createMessage(message: String, problems: MessageProblems): YtelserMessage {
+        override fun createMessage(message: String, problems: Problemer): YtelserMessage {
             return YtelserMessage(message, problems)
         }
     }
 }
 
-internal class VilkårsgrunnlagMessage(originalMessage: String, private val problems: MessageProblems) :
+internal class VilkårsgrunnlagMessage(originalMessage: String, private val problems: Problemer) :
     BehovMessage(originalMessage, problems) {
     init {
         requiredValues("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
@@ -50,13 +50,13 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val prob
 
     object Factory : MessageFactory<VilkårsgrunnlagMessage> {
 
-        override fun createMessage(message: String, problems: MessageProblems): VilkårsgrunnlagMessage {
+        override fun createMessage(message: String, problems: Problemer): VilkårsgrunnlagMessage {
             return VilkårsgrunnlagMessage(message, problems)
         }
     }
 }
 
-internal class ManuellSaksbehandlingMessage(originalMessage: String, private val problems: MessageProblems) :
+internal class ManuellSaksbehandlingMessage(originalMessage: String, private val problems: Problemer) :
     BehovMessage(originalMessage, problems) {
     init {
         requiredValues("@behov", Behovstype.GodkjenningFraSaksbehandler)
@@ -68,7 +68,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
 
     object Factory : MessageFactory<ManuellSaksbehandlingMessage> {
 
-        override fun createMessage(message: String, problems: MessageProblems): ManuellSaksbehandlingMessage {
+        override fun createMessage(message: String, problems: Problemer): ManuellSaksbehandlingMessage {
             return ManuellSaksbehandlingMessage(message, problems)
         }
     }

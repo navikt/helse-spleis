@@ -7,10 +7,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.person.Problemer
 
 // Understands a specific JSON-formatted message
 // Implements GoF visitor pattern to enable working on the specific types
-internal open class JsonMessage(private val originalMessage: String, private val problems: MessageProblems) {
+internal open class JsonMessage(private val originalMessage: String, private val problems: Problemer) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -23,7 +24,7 @@ internal open class JsonMessage(private val originalMessage: String, private val
         json = try {
             objectMapper.readTree(originalMessage)
         } catch (err: JsonParseException) {
-            problems.fatalError("Invalid JSON per Jackson library: ${err.message}")
+            problems.severe("Invalid JSON per Jackson library: ${err.message}")
             objectMapper.nullNode()
         }
     }

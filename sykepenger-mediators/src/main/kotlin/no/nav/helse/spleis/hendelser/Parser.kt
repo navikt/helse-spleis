@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser
 
+import no.nav.helse.person.Problemer
 import no.nav.helse.spleis.HendelseStream
 
 // Understands a stream of valid JSON packets meeting certain criteria
@@ -13,9 +14,9 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
     }
 
     override fun onMessage(message: String) {
-        val accumulatedProblems = MessageProblems(message)
+        val accumulatedProblems = Problemer(message)
         for (factory in factories) {
-            val problems = MessageProblems(message)
+            val problems = Problemer(message)
             val newMessage = factory.createMessage(message, problems)
             if (!problems.hasErrors()) return director.onRecognizedMessage(newMessage, problems)
             accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
@@ -25,7 +26,7 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
 
     // GoF Mediator
     internal interface ParserDirector {
-        fun onRecognizedMessage(message: JsonMessage, warnings: MessageProblems)
-        fun onUnrecognizedMessage(problems: MessageProblems)
+        fun onRecognizedMessage(message: JsonMessage, warnings: Problemer)
+        fun onUnrecognizedMessage(problemer: Problemer)
     }
 }
