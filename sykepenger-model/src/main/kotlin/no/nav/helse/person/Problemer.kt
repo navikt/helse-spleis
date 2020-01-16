@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
-class Problemer : RuntimeException() {
+// Understands issues that arose when analyzing a JSON message
+// Implements Collecting Parameter in Refactoring by Martin Fowler
+class Problemer(private val originalMessage: String? = null) : RuntimeException() {
     private val info = mutableListOf<String>()
     private val warn = mutableListOf<String>()
     private val error = mutableListOf<String>()
@@ -19,7 +21,7 @@ class Problemer : RuntimeException() {
     override fun toString(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
-        results.append("Meldinger eller problemer finnes. \n\t")
+        results.append("Meldinger eller problemer finnes. ${ originalMessage?.let { "Original melding: $it" } } \n\t")
         append("Severe errors", severe, results)
         append("Errors", error, results)
         append("Warnings", warn, results)
