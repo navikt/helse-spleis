@@ -68,6 +68,27 @@ internal class ModelSendtSøknadTest {
     }
 
     @Test
+    internal fun `permisjon ligger utenfor sykdomsvindu`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
+    internal fun `arbeidag ligger utenfor sykdomsvindu`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Arbeid(2.januar, 16.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
+    internal fun `egenmelding ligger utenfor sykdomsvindu`() {
+        sendtSøknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
+        assertFalse(sendtSøknad.valider().hasErrors())
+        assertEquals(11, sendtSøknad.sykdomstidslinje().length())
+    }
+
+    @Test
     internal fun `må ha perioder`() {
         assertThrows<Problemer>{sendtSøknad()}
     }
@@ -76,8 +97,6 @@ internal class ModelSendtSøknadTest {
     internal fun `må ha sykdomsperioder`() {
         assertThrows<Problemer>{sendtSøknad(Ferie(2.januar, 16.januar))}
     }
-
-
 
     private fun sendtSøknad(vararg perioder: Periode) {
         sendtSøknad = ModelSendtSøknad(
