@@ -87,6 +87,7 @@ internal class HendelseMediatorTest : HendelseListener {
     }
 
     private companion object : HendelseListener {
+        private const val dummyTopic = "unused"
         private val defaultAktørId = UUID.randomUUID().toString()
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
@@ -99,53 +100,49 @@ internal class HendelseMediatorTest : HendelseListener {
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
 
-        private val topics = listOf(
-            Topics.søknadTopic,
-            Topics.inntektsmeldingTopic,
-            Topics.behovTopic,
-            Topics.påminnelseTopic
-        )
-        private val hendelseStream = HendelseStream(topics)
-        private val hendelseMediator = HendelseMediator(hendelseStream).also {
-            it.addListener(object : HendelseListener {
-                override fun onPåminnelse(påminnelse: Påminnelse) {
-                    lestPåminnelse.set(true)
-                }
+        private val hendelseStream = HendelseStream(listOf(dummyTopic))
 
-                override fun onYtelser(ytelser: Ytelser) {
-                    lestYtelser.set(true)
-                }
+        init {
+            HendelseMediator(hendelseStream).also {
+                it.addListener(object : HendelseListener {
+                    override fun onPåminnelse(påminnelse: Påminnelse) {
+                        lestPåminnelse.set(true)
+                    }
 
-                override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
-                    lestVilkårsgrunnlag.set(true)
-                }
+                    override fun onYtelser(ytelser: Ytelser) {
+                        lestYtelser.set(true)
+                    }
 
-                override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
-                    lestManuellSaksbehandling.set(true)
-                }
+                    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+                        lestVilkårsgrunnlag.set(true)
+                    }
 
-                override fun onInntektsmelding(inntektsmelding: no.nav.helse.hendelser.Inntektsmelding) {
-                    lestInntektsmelding.set(true)
-                }
+                    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+                        lestManuellSaksbehandling.set(true)
+                    }
+
+                    override fun onInntektsmelding(inntektsmelding: no.nav.helse.hendelser.Inntektsmelding) {
+                        lestInntektsmelding.set(true)
+                    }
 
                 override fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {
                     lestNySøknad.set(true)
                 }
 
-                override fun onSendtSøknad(søknad: SendtSøknad) {
-                    lestSendtSøknad.set(true)
-                }
-            })
+                    override fun onSendtSøknad(søknad: SendtSøknad) {
+                        lestSendtSøknad.set(true)
+                    }
+                })
+            }
         }
-        private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
+        private val topicInfos = listOf(dummyTopic, Topics.helseRapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
             autoStart = false,
             noOfBrokers = 1,
             topicInfos = topicInfos,
             withSchemaRegistry = false,
-            withSecurity = false,
-            topicNames = topics
+            withSecurity = false
         )
 
         private lateinit var producer: KafkaProducer<String, String>
@@ -199,7 +196,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 organisasjonsnummer = organisasjonsnummer,
                 fødselsnummer = fødselsnummer
             ).also {
-                sendKafkaMessage(Topics.påminnelseTopic, aktørId, it.toJson())
+                sendKafkaMessage(aktørId, it.toJson())
             }
         }
 
@@ -297,7 +294,6 @@ internal class HendelseMediatorTest : HendelseListener {
                 mottattDato = LocalDateTime.now()
             )
             sendKafkaMessage(
-                Topics.inntektsmeldingTopic,
                 inntektsmelding.inntektsmeldingId,
                 inntektsmelding.toJsonNode().toString()
             )
@@ -326,7 +322,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 soknadsperioder = emptyList(),
                 opprettet = LocalDateTime.now()
             )
-            sendKafkaMessage(Topics.søknadTopic, id.toString(), sendtSøknad.toJsonNode().toString())
+            sendKafkaMessage(id.toString(), sendtSøknad.toJsonNode().toString())
         }
 
         private fun sendNySøknad(
@@ -357,15 +353,15 @@ internal class HendelseMediatorTest : HendelseListener {
                 ),
                 opprettet = LocalDateTime.now()
             )
-            sendKafkaMessage(Topics.søknadTopic, id.toString(), nySøknad.toJsonNode().toString())
+            sendKafkaMessage(id.toString(), nySøknad.toJsonNode().toString())
             return nySøknad
         }
 
         private fun sendBehov(behov: Behov) {
-            sendKafkaMessage(Topics.behovTopic, behov.id().toString(), behov.toJson())
+            sendKafkaMessage(behov.id().toString(), behov.toJson())
         }
 
-        private fun sendKafkaMessage(topic: String, key: String, message: String) =
-            producer.send(ProducerRecord(topic, key, message))
+        private fun sendKafkaMessage(key: String, message: String) =
+            producer.send(ProducerRecord(Topics.helseRapidTopic, key, message))
     }
 }

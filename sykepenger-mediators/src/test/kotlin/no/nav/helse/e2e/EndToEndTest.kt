@@ -17,7 +17,9 @@ import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.søknadDTO
+import no.nav.helse.Topics
 import no.nav.helse.Topics.behovTopic
+import no.nav.helse.Topics.helseRapidTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.opprettGosysOppgaveTopic
 import no.nav.helse.Topics.påminnelseTopic
@@ -26,10 +28,7 @@ import no.nav.helse.Topics.vedtaksperiodeEventTopic
 import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.behov.Behovstype.EgenAnsatt
-import no.nav.helse.behov.Behovstype.GodkjenningFraSaksbehandler
-import no.nav.helse.behov.Behovstype.Sykepengehistorikk
-import no.nav.helse.behov.Behovstype.Utbetaling
+import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.handleRequest
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -51,10 +50,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG
-import org.apache.kafka.clients.producer.ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION
-import org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.*
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -63,11 +59,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -93,16 +85,12 @@ internal class EndToEndTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics =
-            listOf(
-                søknadTopic,
-                inntektsmeldingTopic,
-                behovTopic,
-                opprettGosysOppgaveTopic,
-                vedtaksperiodeEventTopic,
-                påminnelseTopic,
-                vedtaksperiodeSlettetEventTopic
-            )
+        private val topics = Topics.hendelseKildeTopics + listOf(
+            opprettGosysOppgaveTopic,
+            vedtaksperiodeEventTopic,
+            vedtaksperiodeSlettetEventTopic,
+            helseRapidTopic
+        )
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -111,8 +99,7 @@ internal class EndToEndTest {
             noOfBrokers = 1,
             topicInfos = topicInfos,
             withSchemaRegistry = false,
-            withSecurity = false,
-            topicNames = topics
+            withSecurity = false
         )
 
         private lateinit var adminClient: AdminClient

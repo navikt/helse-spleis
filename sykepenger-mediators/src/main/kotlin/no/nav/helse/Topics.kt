@@ -9,4 +9,12 @@ internal object Topics {
     const val vedtaksperiodeSlettetEventTopic = "privat-helse-sykepenger-vedtaksperiode-slettet"
     const val utbetalingEventTopic = "privat-helse-sykepenger-utbetaling"
     const val påminnelseTopic = "privat-helse-sykepenger-paminnelser"
+    const val helseRapidTopic = "privat-helse-sykepenger-rapid-v1"
+
+    val hendelseKildeTopics = listOf(
+        behovTopic,
+        påminnelseTopic,
+        inntektsmeldingTopic,
+        søknadTopic
+    )
 }

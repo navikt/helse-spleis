@@ -1,0 +1,31 @@
+{
+    "topics": [
+        {
+            "configEntries": {},
+            "members": [
+                {
+                    "member": "srvspsak",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspsak",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspleistestdata",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "S151890",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "S149030",
+                    "role": "PRODUCER"
+                }
+            ],
+            "numPartitions": 6,
+            "topicName": "privat-helse-sykepenger-rapid-v1"
+        }
+    ]
+}

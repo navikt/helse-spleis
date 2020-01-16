@@ -26,12 +26,7 @@ class ApplicationBuilder(env: Map<String, String>) {
     private val kafkaConfigBuilder = KafkaConfigBuilder(env)
     private val dataSourceBuilder = DataSourceBuilder(env)
 
-    private val hendelseStream = HendelseStream(listOf(
-        Topics.behovTopic,
-        Topics.påminnelseTopic,
-        Topics.inntektsmeldingTopic,
-        Topics.søknadTopic
-    ))
+    private val hendelseStream = HendelseStream(Topics.hendelseKildeTopics)
 
     private val helseBuilder = HelseBuilder(
         dataSource = dataSourceBuilder.getDataSource(),

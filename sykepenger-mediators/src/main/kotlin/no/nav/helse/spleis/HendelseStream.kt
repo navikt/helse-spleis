@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.Topics
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
@@ -70,6 +71,7 @@ internal class HendelseStream(private val topics: List<String>) {
     private fun build() =
         StreamsBuilder().apply {
             stream<String, String>(topics, consumeStrings)
+                .through(Topics.helseRapidTopic)
                 .foreach(::notifyListeners)
         }.build()
 
