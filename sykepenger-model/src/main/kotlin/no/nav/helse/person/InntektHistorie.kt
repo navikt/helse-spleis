@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ModelInntektsmelding
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -31,6 +32,16 @@ internal class InntektHistorie {
                 )
             )
         }
+    }
+
+    fun add(inntektsmelding: ModelInntektsmelding) {
+        inntekter.add(
+            Inntekt(
+                inntektsmelding.førsteFraværsdag,
+                inntektsmelding,
+                inntektsmelding.beregnetInntekt.toBigDecimal()
+            )
+        )
     }
 
     internal class Memento internal constructor(

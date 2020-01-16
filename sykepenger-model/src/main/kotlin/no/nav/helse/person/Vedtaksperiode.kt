@@ -88,6 +88,14 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
+    internal fun håndter(inntektsmelding: ModelInntektsmelding, problemer: Problemer): Boolean {
+        return overlapperMed(inntektsmelding).also {
+            if (it) {
+                tilstand.håndter(this, inntektsmelding, problemer)
+            }
+        }
+    }
+
     internal fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, ytelser: Ytelser) {
         if (id.toString() == ytelser.vedtaksperiodeId()) tilstand.håndter(
             person,
@@ -267,6 +275,11 @@ internal class Vedtaksperiode internal constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding, problemer: Problemer) {
+            problemer.error("uventet Inntektsmelding")
             vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
         }
 

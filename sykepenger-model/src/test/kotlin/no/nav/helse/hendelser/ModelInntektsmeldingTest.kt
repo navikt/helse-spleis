@@ -15,11 +15,6 @@ import java.util.*
 
 internal class ModelInntektsmeldingTest {
 
-    companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
-        internal const val ORGNR = "88888888"
-    }
-
     private lateinit var inntektsmelding: ModelInntektsmelding
     private lateinit var problemer: Problemer
 
@@ -119,8 +114,8 @@ internal class ModelInntektsmeldingTest {
         inntektsmelding = ModelInntektsmelding(
             UUID.randomUUID(),
             ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            ORGNR,
-            UNG_PERSON_FNR_2018,
+            "88888888",
+            "12020052345",
             "100010101010",
             1.februar.atStartOfDay(),
             førsteFraværsdag,

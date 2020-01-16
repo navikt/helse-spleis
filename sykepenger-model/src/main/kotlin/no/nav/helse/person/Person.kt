@@ -72,6 +72,15 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
 
+    fun håndter(inntektsmelding: ModelInntektsmelding, problemer: Problemer) {
+        inntektsmelding.valider()
+        if (problemer.hasErrors()) {
+            invaliderAllePerioder(inntektsmelding, problemer)
+            throw problemer
+        }
+        finnEllerOpprettArbeidsgiver(inntektsmelding, problemer).håndter(inntektsmelding, problemer)
+    }
+
     fun håndter(ytelser: Ytelser) {
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
     }

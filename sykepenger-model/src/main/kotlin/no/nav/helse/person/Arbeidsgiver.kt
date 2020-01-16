@@ -127,6 +127,13 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
+    internal fun håndter(inntektsmelding: ModelInntektsmelding, problemer: Problemer) {
+        inntektHistorie.add(inntektsmelding)
+        if (perioder.none { it.håndter(inntektsmelding, problemer) }) {
+            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding, problemer)
+        }
+    }
+
     internal fun håndter(person: Person, ytelser: Ytelser) {
         perioder.forEach { it.håndter(person, this, ytelser) }
     }

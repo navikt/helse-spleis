@@ -337,7 +337,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldngen`() {
+    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldingen`() {
         testPerson.also {
             it.håndter(
                 nySøknadHendelse(
