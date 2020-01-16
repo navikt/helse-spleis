@@ -54,6 +54,20 @@ internal class ModelSendtSøknadTest {
     }
 
     @Test
+    internal fun `sykdomsgrad ikke 100`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 50), Utdanning(2.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
+    internal fun `sykdom faktiskgrad ikke 100`() {
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100, 50.0), Utdanning(2.januar))
+        assertTrue(sendtSøknad.valider().hasErrors())
+        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+    }
+
+    @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())

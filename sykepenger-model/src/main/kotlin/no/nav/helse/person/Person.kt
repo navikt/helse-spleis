@@ -37,7 +37,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
             invaliderAllePerioder(nySøknad, problemer)
             throw problemer
         }
-        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
+        finnEllerOpprettArbeidsgiver(nySøknad, problemer).håndter(nySøknad, problemer)
     }
 
     fun håndter(sendtSøknad: SendtSøknad) {
@@ -52,8 +52,16 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
                 sendtSøknad
             )
         }
-
         finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
+    }
+
+    fun håndter(sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
+        sendtSøknad.valider()
+        if (problemer.hasErrors()) {
+            invaliderAllePerioder(sendtSøknad, problemer)
+            throw problemer
+        }
+        finnEllerOpprettArbeidsgiver(sendtSøknad, problemer).håndter(sendtSøknad, problemer)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding) {

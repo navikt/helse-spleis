@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -49,7 +50,7 @@ internal class NySøknadHendelseTest {
         assertThrows<Problemer> {
             person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), problemer)
         }
-
+        assertTrue(problemer.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }

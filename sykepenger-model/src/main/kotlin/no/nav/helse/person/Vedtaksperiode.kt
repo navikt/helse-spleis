@@ -68,12 +68,16 @@ internal class Vedtaksperiode internal constructor(
         if (it) tilstand.håndter(this, nySøknad)
     }
 
-    internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
-        if (it) tilstand.håndter(this, nySøknad)
+    internal fun håndter(nySøknad: ModelNySøknad, problemer: Problemer) = overlapperMed(nySøknad).also {
+        if (it) tilstand.håndter(this, nySøknad, problemer)
     }
 
     internal fun håndter(sendtSøknad: SendtSøknad) = overlapperMed(sendtSøknad).also {
         if (it) tilstand.håndter(this, sendtSøknad)
+    }
+
+    internal fun håndter(sendtSøknad: ModelSendtSøknad, problemer: Problemer) = overlapperMed(sendtSøknad).also {
+        if (it) tilstand.håndter(this, sendtSøknad, problemer)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
@@ -222,11 +226,17 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad, problemer: Problemer) {
+            problemer.error("uventet NySøknad")
             vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
+            problemer.error("uventet SendtSøknad")
             vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
         }
 
@@ -267,13 +277,18 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad, problemer: Problemer) {
             val tidslinje = nySøknad.sykdomstidslinje()
             if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
 
             vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomstidslinje = tidslinje
             }
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
+            problemer.error("mangler NySøknad")
+            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
         }
 
         override val type = START
@@ -283,6 +298,10 @@ internal class Vedtaksperiode internal constructor(
     private object MottattNySøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
             vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
         }
 
@@ -310,6 +329,10 @@ internal class Vedtaksperiode internal constructor(
 
     internal object MottattInntektsmelding : Vedtaksperiodetilstand {
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
+            vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
             vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
         }
 

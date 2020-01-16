@@ -102,17 +102,21 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(nySøknad: ModelNySøknad) {
-        if (!perioder.fold(false) { håndtert, periode ->
-                håndtert || periode.håndter(nySøknad)
-            }) {
-            nyVedtaksperiode(nySøknad).håndter(nySøknad)
+    internal fun håndter(nySøknad: ModelNySøknad, problemer: Problemer) {
+        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad, problemer) }) {
+            nyVedtaksperiode(nySøknad).håndter(nySøknad, problemer)
         }
     }
 
     internal fun håndter(sendtSøknad: SendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
             nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)
+        }
+    }
+
+    internal fun håndter(sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
+        if (perioder.none { it.håndter(sendtSøknad, problemer) }) {
+            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad, problemer)
         }
     }
 
