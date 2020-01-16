@@ -1,44 +1,62 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Arbeidsgiverperiode
+import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Ferieperiode
 import no.nav.helse.person.Problemer
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.lang.Double.min
-import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 class ModelInntektsmelding(
     hendelseId: UUID,
+    private val refusjon: Refusjon,
+    private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
     private val mottattDato: LocalDateTime,
-    private val førsteFraværsdag: LocalDate,
-    orgnummer: String?,
-    private val beregnetInntekt: Double,
-    refusjon: Refusjon?,
+    internal val førsteFraværsdag: LocalDate,
+    internal val beregnetInntekt: Double,
     private val problemer: Problemer,
-    private val arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-    private val ferier: List<ClosedRange<LocalDate>>
+    arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
+    ferieperioder: List<ClosedRange<LocalDate>>
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding) {
 
-    data class Refusjon(val opphørsdato: LocalDate, val beløpPrMåned: Double)
+    data class Refusjon(val opphørsdato: LocalDate, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate>?)
 
-    private val orgnummer: String
-    private val refusjon: Refusjon
+    private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
+    private val ferieperioder: List<Ferieperiode>
 
     init {
-        if (orgnummer == null) problemer.error("Inntektsmelding uten orgnummer")
-        if (!ingenOverlappende()) problemer.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
-        if (refusjon?.beløpPrMåned != beregnetInntekt) problemer.error("Beregnet inntekt matcher ikke refusjon pr måned")
-
+        if (refusjon.beløpPrMåned != beregnetInntekt) problemer.error("Beregnet inntekt matcher ikke refusjon pr måned")
         if (problemer.hasErrors()) throw problemer
 
-        this.orgnummer = orgnummer!!
-        this.refusjon = refusjon!!
+        this.arbeidsgiverperioder = arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
+        this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
+    }
+
+    sealed class Periode(
+        internal val fom: LocalDate,
+        internal val tom: LocalDate
+    ) {
+        internal abstract fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding): ConcreteSykdomstidslinje
+
+        internal fun ingenOverlappende(other: Periode) =
+            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+
+        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+            override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
+                    ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, inntektsmelding)
+        }
+
+        class Ferieperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+            override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
+                ConcreteSykdomstidslinje.ferie(fom, tom, inntektsmelding)
+        }
     }
 
     internal fun dagsats(dato: LocalDate, grunnbeløp: Grunnbeløp): Int {
@@ -46,28 +64,29 @@ class ModelInntektsmelding(
         return (årssats / 260).toInt()
     }
 
-    private fun ingenOverlappende() = arbeidsgiverperioder
-        .sortedBy { it.start }
-        .zipWithNext(ClosedRange<LocalDate>::ingenOverlappende)
+    private fun ingenOverlappende() = if (arbeidsgiverperioder.isEmpty()) true else arbeidsgiverperioder
+        .sortedBy { it.fom }
+        .zipWithNext(Periode::ingenOverlappende)
         .all { it }
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
-        val arbeidsgivertidslinje = konstruerArbeidsgivertidslinje()
-        val ferietidslinje = konstruerFerietidslinje()
-            ?: return arbeidsgivertidslinje
-        return arbeidsgivertidslinje + ferietidslinje
+        val arbeidsgivertidslinje = this.arbeidsgiverperioder.takeUnless { it.isEmpty() }?.map { it.sykdomstidslinje(this) }?.reduce { acc, sykdomstidslinje ->
+            acc.plus(sykdomstidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
+        }
+        val ferietidslinje = this.ferieperioder.takeUnless { it.isEmpty() }?.map { it.sykdomstidslinje(this) }?.reduce(ConcreteSykdomstidslinje::plus)
+
+        return arbeidsgivertidslinje.plus(ferietidslinje) ?: ConcreteSykdomstidslinje.egenmeldingsdag(
+            førsteFraværsdag,
+            this
+        )
     }
 
-    private fun konstruerArbeidsgivertidslinje() = arbeidsgiverperioder
-        .map { ConcreteSykdomstidslinje.egenmeldingsdager(it.start, it.endInclusive, this) }
-        .takeUnless { it.isEmpty() }
-        ?.reduce { acc, sykdomstidslinje -> acc + sykdomstidslinje }
-        ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, this)
+    internal fun valider(): Problemer {
+        if (!ingenOverlappende()) problemer.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
+        return problemer
+    }
 
-    private fun konstruerFerietidslinje() = ferier
-        .map { ConcreteSykdomstidslinje.ferie(it.start, it.endInclusive, this) }
-        .takeUnless { it.isEmpty() }
-        ?.reduce { acc, sykdomstidslinje -> acc + sykdomstidslinje }
+    override fun kanBehandles() = !valider().hasErrors()
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
@@ -80,7 +99,14 @@ class ModelInntektsmelding(
     override fun organisasjonsnummer() = orgnummer
 
     override fun toJson() = "no u" // Should not be part of Model events
+
+    fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
+        if (refusjon.opphørsdato <= sisteUtbetalingsdag) return true
+        return refusjon.endringerIRefusjon?.any { it <= sisteUtbetalingsdag } ?: false
+    }
 }
 
-private fun ClosedRange<LocalDate>.ingenOverlappende(other: ClosedRange<LocalDate>) =
-    maxOf(this.start, other.start) > minOf(this.endInclusive, other.endInclusive)
+private fun ConcreteSykdomstidslinje?.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje? {
+    if (other == null) return this
+    return this?.plus(other) ?: other
+}
