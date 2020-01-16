@@ -4,8 +4,7 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,6 +31,7 @@ internal class NySøknadHendelseTest {
     @Test
     internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
+        assertFalse(problemer.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
@@ -39,7 +39,8 @@ internal class NySøknadHendelseTest {
     @Test
     internal fun `En ny NySøknad er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
+        assertThrows<Problemer> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer) }
+        assertTrue(problemer.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -59,7 +60,7 @@ internal class NySøknadHendelseTest {
     internal fun `To søknader uten overlapp`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
         person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problemer)
-
+        assertFalse(problemer.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
@@ -70,6 +71,7 @@ internal class NySøknadHendelseTest {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
         assertThrows<Problemer> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), problemer) }
 
+        assertTrue(problemer.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
