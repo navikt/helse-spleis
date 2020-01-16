@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
-import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -137,7 +136,8 @@ internal class SendtSøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer
+            problemer,
+            "{}"
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
