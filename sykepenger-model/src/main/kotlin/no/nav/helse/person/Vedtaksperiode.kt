@@ -365,6 +365,10 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
+            vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving, aktivitetslogger)
+        }
+
         override val type = MOTTATT_SENDT_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)

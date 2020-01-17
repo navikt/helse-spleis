@@ -4,6 +4,7 @@ import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -35,14 +36,24 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt søknad`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_INNTEKTSMELDING, inspektør.tilstand(0))
     }
 
     @Test
+    internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt ny søknad og sendt søknad`() {
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
+        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar,20.januar, 100)), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.VILKÅRSPRØVING, inspektør.tilstand(0))
+    }
+
+    @Test
     internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
-        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -51,8 +62,8 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(nyInntektsmelding(), aktivitetslogger)
-        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -61,13 +72,13 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding med tilhørende søknad men med forskjellige arbeidsgivere støttes ikke`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"), aktivitetslogger)
-        assertThrows<Aktivitetslogger> { person.håndter(nyInntektsmelding(virksomhetsnummer = "456"), aktivitetslogger) }
+        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(virksomhetsnummer = "456"), aktivitetslogger) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
-    private fun nyInntektsmelding(
+    private fun inntektsmelding(
         refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,
@@ -99,6 +110,17 @@ internal class InntektsmeldingHendelseTest {
             listOf(*sykeperioder),
             aktivitetslogger,
             "{}"
+        )
+
+    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode, orgnummer: String = ORGNR) =
+        ModelSendtSøknad(
+            UUID.randomUUID(),
+            SendtSøknadHendelseTest.UNG_PERSON_FNR_2018,
+            "12345",
+            orgnummer,
+            LocalDateTime.now(),
+            listOf(*perioder),
+            aktivitetslogger
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
