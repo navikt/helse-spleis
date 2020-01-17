@@ -47,6 +47,8 @@ internal class Vedtaksperiode internal constructor(
 
     private var utbetalingsreferanse: String? = null
 
+    private var førsteFraværsdag: LocalDate? = null
+
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
@@ -60,7 +62,7 @@ internal class Vedtaksperiode internal constructor(
         visitor.postVisitVedtaksperiode(this)
     }
 
-    internal fun førsteFraværsdag(): LocalDate? = inntektsmeldingHendelse()?.førsteFraværsdag
+    internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
 
     internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)
 
@@ -329,10 +331,12 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding, aktivitetslogger)
         }
 
@@ -345,10 +349,12 @@ internal class Vedtaksperiode internal constructor(
     private object MottattSendtSøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving, aktivitetslogger)
         }
 
@@ -603,6 +609,7 @@ internal class Vedtaksperiode internal constructor(
                 }
                 vedtaksperiode.godkjentAv = memento.godkjentAv
                 vedtaksperiode.utbetalingsreferanse = memento.utbetalingsreferanse
+                vedtaksperiode.førsteFraværsdag = memento.førsteFraværsdag
             }
         }
 
@@ -645,7 +652,8 @@ internal class Vedtaksperiode internal constructor(
             utbetalingslinjer = utbetalingslinjer
                 ?.let { objectMapper.convertValue<JsonNode>(it) },
             godkjentAv = godkjentAv,
-            utbetalingsreferanse = utbetalingsreferanse
+            utbetalingsreferanse = utbetalingsreferanse,
+            førsteFraværsdag = førsteFraværsdag
         )
     }
 
@@ -659,7 +667,8 @@ internal class Vedtaksperiode internal constructor(
         internal val maksdato: LocalDate?,
         internal val utbetalingslinjer: JsonNode?,
         internal val godkjentAv: String?,
-        internal val utbetalingsreferanse: String?
+        internal val utbetalingsreferanse: String?,
+        internal val førsteFraværsdag: LocalDate?
     ) {
 
         internal companion object {
@@ -678,7 +687,8 @@ internal class Vedtaksperiode internal constructor(
                     maksdato = json["maksdato"].safelyUnwrapDate(),
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),
-                    utbetalingsreferanse = json["utbetalingsreferanse"]?.textValue()
+                    utbetalingsreferanse = json["utbetalingsreferanse"]?.textValue(),
+                    førsteFraværsdag = json["førsteFraværsdag"].safelyUnwrapDate()
                 )
             }
         }
@@ -695,7 +705,8 @@ internal class Vedtaksperiode internal constructor(
                     "maksdato" to this.maksdato,
                     "utbetalingslinjer" to this.utbetalingslinjer,
                     "godkjentAv" to this.godkjentAv,
-                    "utbetalingsreferanse" to this.utbetalingsreferanse
+                    "utbetalingsreferanse" to this.utbetalingsreferanse,
+                    "førsteFraværsdag" to this.førsteFraværsdag
                 )
             )
     }

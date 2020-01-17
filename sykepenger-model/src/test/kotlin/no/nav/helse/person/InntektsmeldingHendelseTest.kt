@@ -42,6 +42,14 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
+    internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
+        person.håndter(inntektsmelding(), aktivitetslogger)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(1.januar, inspektør.førsteFraværsdag(0))
+    }
+
+    @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt ny søknad og sendt søknad`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
         person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar,20.januar, 100)), aktivitetslogger)
@@ -53,7 +61,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
-        person.håndter(inntektsmelding(), aktivitetslogger)
+        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(), aktivitetslogger) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -127,6 +135,7 @@ internal class InntektsmeldingHendelseTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
 
         init {
             person.accept(this)
@@ -135,6 +144,7 @@ internal class InntektsmeldingHendelseTest {
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
+            førsteFraværsdager[vedtaksperiodeindeks] = vedtaksperiode.førsteFraværsdag()
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -148,6 +158,7 @@ internal class InntektsmeldingHendelseTest {
         internal val vedtaksperiodeTeller get() = tilstander.size
 
         internal fun tilstand(indeks: Int) = tilstander[indeks]
+        internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks]
     }
 
 }
