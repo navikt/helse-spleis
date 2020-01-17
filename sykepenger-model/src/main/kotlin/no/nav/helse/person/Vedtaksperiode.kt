@@ -389,6 +389,8 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!påminnelse.gjelderTilstand(type)) return
+            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
         }
 
