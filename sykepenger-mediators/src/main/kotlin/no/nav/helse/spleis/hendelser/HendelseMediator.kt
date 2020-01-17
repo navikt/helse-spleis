@@ -56,6 +56,10 @@ internal class HendelseMediator(
             }
         } catch (err: Aktivitetslogger) {
             sikkerLogg.info("feil på melding: $err")
+        } catch (err: UtenforOmfangException) {
+            sikkerLogg.info("melding er utenfor omfang: ${err.message}", err)
+        } catch (err: PersonskjemaForGammelt) {
+            sikkerLogg.info("person har gammelt skjema: ${err.message}", err)
         }
     }
 
@@ -65,33 +69,29 @@ internal class HendelseMediator(
 
     private inner class Processor : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            try {
-                val modelNySøknad = ModelNySøknad(
-                    hendelseId = UUID.randomUUID(),
-                    fnr = message["fnr"].asText(),
-                    aktørId = message["aktorId"].asText(),
-                    orgnummer = message["arbeidsgiver"].path("orgnummer").asText(),
-                    rapportertdato = message["opprettet"].asText().let { LocalDateTime.parse(it) },
-                    sykeperioder = message["soknadsperioder"].map {
-                        Triple(
-                            first = it.path("fom").asLocalDate(),
-                            second = it.path("tom").asLocalDate(),
-                            third = it.path("sykmeldingsgrad").asInt()
-                        )
-                    },
-                    aktivitetslogger = aktivitetslogger,
-                    originalJson = message.toJson()
-                )
+            val modelNySøknad = ModelNySøknad(
+                hendelseId = UUID.randomUUID(),
+                fnr = message["fnr"].asText(),
+                aktørId = message["aktorId"].asText(),
+                orgnummer = message["arbeidsgiver"].path("orgnummer").asText(),
+                rapportertdato = message["opprettet"].asText().let { LocalDateTime.parse(it) },
+                sykeperioder = message["soknadsperioder"].map {
+                    Triple(
+                        first = it.path("fom").asLocalDate(),
+                        second = it.path("tom").asLocalDate(),
+                        third = it.path("sykmeldingsgrad").asInt()
+                    )
+                },
+                aktivitetslogger = aktivitetslogger,
+                originalJson = message.toJson()
+            )
 
-                hendelseProbe.onNySøknad(modelNySøknad, aktivitetslogger)
-                hendelseRecorder.onNySøknad(modelNySøknad, aktivitetslogger)
-                person(modelNySøknad).håndter(modelNySøknad, aktivitetslogger)
+            hendelseProbe.onNySøknad(modelNySøknad, aktivitetslogger)
+            hendelseRecorder.onNySøknad(modelNySøknad, aktivitetslogger)
+            person(modelNySøknad).håndter(modelNySøknad, aktivitetslogger)
 
-                if (aktivitetslogger.hasMessages()) {
-                    sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
-                }
-            } catch (err: Aktivitetslogger) {
-                sikkerLogg.info("feil om ny søknad: ${err.message}", err)
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
             }
         }
 
@@ -127,45 +127,37 @@ internal class HendelseMediator(
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
-            try {
-                val foreldrepenger = message["@løsning"].path("Foreldrepenger").let {
-                    ModelForeldrepenger(
-                        foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                        svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                        aktivitetslogger = aktivitetslogger
-                    )
-                }
-
-                val sykepengehistorikk = ModelSykepengehistorikk(
-                    perioder = message["@løsning"].path("Sykepengehistorikk").map(::asPeriode),
+            val foreldrepenger = message["@løsning"].path("Foreldrepenger").let {
+                ModelForeldrepenger(
+                    foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
+                    svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
                     aktivitetslogger = aktivitetslogger
                 )
+            }
 
-                val ytelser = ModelYtelser(
-                    hendelseId = UUID.randomUUID(),
-                    aktørId = message["aktørId"].asText(),
-                    fødselsnummer = message["fødselsnummer"].asText(),
-                    organisasjonsnummer = message["organisasjonsnummer"].asText(),
-                    vedtaksperiodeId = message["vedtaksperiodeId"].asText(),
-                    sykepengehistorikk = sykepengehistorikk,
-                    foreldrepenger = foreldrepenger,
-                    rapportertdato = message["@besvart"].asLocalDateTime(),
-                    originalJson = message.toJson()
-                )
+            val sykepengehistorikk = ModelSykepengehistorikk(
+                perioder = message["@løsning"].path("Sykepengehistorikk").map(::asPeriode),
+                aktivitetslogger = aktivitetslogger
+            )
 
-                hendelseProbe.onYtelser(ytelser)
-                hendelseRecorder.onYtelser(ytelser)
-                person(ytelser).håndter(ytelser)
+            val ytelser = ModelYtelser(
+                hendelseId = UUID.randomUUID(),
+                aktørId = message["aktørId"].asText(),
+                fødselsnummer = message["fødselsnummer"].asText(),
+                organisasjonsnummer = message["organisasjonsnummer"].asText(),
+                vedtaksperiodeId = message["vedtaksperiodeId"].asText(),
+                sykepengehistorikk = sykepengehistorikk,
+                foreldrepenger = foreldrepenger,
+                rapportertdato = message["@besvart"].asLocalDateTime(),
+                originalJson = message.toJson()
+            )
 
-                if (aktivitetslogger.hasMessages()) {
-                    sikkerLogg.info("meldinger om ytelser: $aktivitetslogger")
-                }
-            } catch (err: Aktivitetslogger) {
-                sikkerLogg.info("feil om ytelser: ${err.message}", err)
-            } catch (err: UtenforOmfangException) {
-                sikkerLogg.info("feil om ytelser: ${err.message}", err)
-            } catch (err: PersonskjemaForGammelt) {
-                sikkerLogg.info("feil om ytelser: ${err.message}", err)
+            hendelseProbe.onYtelser(ytelser)
+            hendelseRecorder.onYtelser(ytelser)
+            person(ytelser).håndter(ytelser)
+
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om ytelser: $aktivitetslogger")
             }
         }
 
