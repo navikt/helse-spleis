@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -32,8 +33,35 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
+    internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt søknad`() {
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
         person.håndter(nyInntektsmelding(), aktivitetslogger)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.MOTTATT_INNTEKTSMELDING, inspektør.tilstand(0))
+    }
+
+    @Test
+    internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
+        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        assertTrue(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+    @Test
+    internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
+        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        assertTrue(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+    @Test
+    internal fun `inntektsmelding med tilhørende søknad men med forskjellige arbeidsgivere støttes ikke`() {
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"), aktivitetslogger)
+        assertThrows<Aktivitetslogger> { person.håndter(nyInntektsmelding(virksomhetsnummer = "456"), aktivitetslogger) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -44,12 +72,13 @@ internal class InntektsmeldingHendelseTest {
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 1.januar,
-        endringerIRefusjon: List<LocalDate> = emptyList()
+        endringerIRefusjon: List<LocalDate> = emptyList(),
+        virksomhetsnummer: String = ORGNR
     ) =
         ModelInntektsmelding(
             UUID.randomUUID(),
             ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            ORGNR,
+            virksomhetsnummer,
             UNG_PERSON_FNR_2018,
             AKTØRID,
             1.februar.atStartOfDay(),
@@ -60,12 +89,12 @@ internal class InntektsmeldingHendelseTest {
             emptyList()
         )
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>)
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR)
         = ModelNySøknad(
             UUID.randomUUID(),
             UNG_PERSON_FNR_2018,
             AKTØRID,
-            ORGNR,
+            orgnr,
             LocalDateTime.now(),
             listOf(*sykeperioder),
             aktivitetslogger,
