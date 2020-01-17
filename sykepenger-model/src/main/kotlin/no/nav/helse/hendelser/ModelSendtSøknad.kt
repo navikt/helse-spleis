@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -16,7 +17,7 @@ class ModelSendtSøknad(
     private val rapportertdato: LocalDateTime,
     private val perioder: List<Periode>,
     private val aktivitetslogger: Aktivitetslogger
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad) {
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad), IAktivitetslogger by aktivitetslogger {
 
     private val fom: LocalDate
     private val tom: LocalDate

@@ -123,7 +123,7 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.warn("Invaliderer vedtaksperiode: %s", this.id.toString())
+        hendelse.warn("Invaliderer vedtaksperiode: %s", this.id.toString())
         setTilstand(hendelse, TilInfotrygd)
     }
 

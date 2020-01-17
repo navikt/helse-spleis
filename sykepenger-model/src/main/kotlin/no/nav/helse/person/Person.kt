@@ -33,9 +33,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     fun håndter(nySøknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
         nySøknad.valider()
-        if (aktivitetslogger.hasErrors()) {
+        if (nySøknad.hasErrors()) {
             invaliderAllePerioder(nySøknad, aktivitetslogger)
-            throw aktivitetslogger
+            nySøknad.expectNoErrors()
         }
         finnEllerOpprettArbeidsgiver(nySøknad, aktivitetslogger).håndter(nySøknad, aktivitetslogger)
     }
@@ -57,9 +57,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     fun håndter(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
         sendtSøknad.valider()
-        if (aktivitetslogger.hasErrors()) {
+        if (sendtSøknad.hasErrors()) {
             invaliderAllePerioder(sendtSøknad, aktivitetslogger)
-            throw aktivitetslogger
+            sendtSøknad.expectNoErrors()
         }
         finnEllerOpprettArbeidsgiver(sendtSøknad, aktivitetslogger).håndter(sendtSøknad, aktivitetslogger)
     }
@@ -74,9 +74,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     fun håndter(inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
         inntektsmelding.valider()
-        if (aktivitetslogger.hasErrors()) {
+        if (inntektsmelding.hasErrors()) {
             invaliderAllePerioder(inntektsmelding, aktivitetslogger)
-            throw aktivitetslogger
+            inntektsmelding.expectNoErrors()
         }
         finnEllerOpprettArbeidsgiver(inntektsmelding, aktivitetslogger).håndter(inntektsmelding, aktivitetslogger)
     }

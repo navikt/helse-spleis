@@ -37,6 +37,11 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
 
     override val message get() = toString()
 
+    override fun expectNoErrors(): Boolean {
+        if (hasErrors()) throw this
+        return true
+    }
+
     override fun toString(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
@@ -83,4 +88,6 @@ interface IAktivitetslogger {
     fun hasErrors(): Boolean
 
     fun addAll(other: Aktivitetslogger, label: String)
+
+    fun expectNoErrors(): Boolean
 }
