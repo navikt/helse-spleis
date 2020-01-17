@@ -1,6 +1,6 @@
 package no.nav.helse.unit.spleis.hendelser
 
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.JsonMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -13,8 +13,8 @@ internal class JsonMessageTest {
 
     @Test
     internal fun `invalid json`() {
-        Problemer(InvalidJson).also {
-            assertThrows<Problemer> {
+        Aktivitetslogger(InvalidJson).also {
+            assertThrows<Aktivitetslogger> {
                 JsonMessage(InvalidJson, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }
@@ -23,7 +23,7 @@ internal class JsonMessageTest {
 
     @Test
     internal fun `valid json`() {
-        val problems = Problemer(ValidJson)
+        val problems = Aktivitetslogger(ValidJson)
         JsonMessage(ValidJson, problems)
         assertFalse(problems.hasErrors())
     }
@@ -31,8 +31,8 @@ internal class JsonMessageTest {
     @Test
     internal fun `extended message`() {
         "not_valid_json".also { json ->
-            Problemer(json).also {
-                assertThrows<Problemer> {
+            Aktivitetslogger(json).also {
+                assertThrows<Aktivitetslogger> {
                     ExtendedMessage(json, it)
                 }
                 assertTrue(it.hasErrors()) { "was not supposed to recognize $json" }
@@ -40,13 +40,13 @@ internal class JsonMessageTest {
         }
 
         "{}".also { json ->
-            val problems = Problemer(json)
+            val problems = Aktivitetslogger(json)
             ExtendedMessage(json, problems)
             assertTrue(problems.hasErrors())
         }
 
         "{\"required_key\": \"foo\"}".also { json ->
-            val problems = Problemer(json)
+            val problems = Aktivitetslogger(json)
             ExtendedMessage(json, problems)
             assertFalse(problems.hasErrors())
         }
@@ -115,7 +115,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertEquals(msg: String, key: String, expectedValue: String) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValue(key, expectedValue)
             assertFalse(problems.hasErrors())
@@ -124,7 +124,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertEquals(msg: String, key: String, expectedValue: Boolean) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValue(key, expectedValue)
             assertFalse(problems.hasErrors())
@@ -133,7 +133,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertEquals(msg: String, key: String, expectedValues: List<String>) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValues(key, expectedValues)
             assertFalse(problems.hasErrors())
@@ -141,7 +141,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertThrows(msg: String, key: String, expectedValues: List<String>) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValues(key, expectedValues)
             assertTrue(problems.hasErrors())
@@ -149,7 +149,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertThrows(msg: String, key: String, expectedValue: Boolean) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValue(key, expectedValue)
             assertTrue(problems.hasErrors())
@@ -158,7 +158,7 @@ internal class JsonMessageTest {
     }
 
     private fun assertThrows(msg: String, key: String, expectedValue: String) {
-        val problems = Problemer(msg)
+        val problems = Aktivitetslogger(msg)
         JsonMessage(msg, problems).also {
             it.requiredValue(key, expectedValue)
             assertTrue(problems.hasErrors())
@@ -172,9 +172,9 @@ internal class JsonMessageTest {
         }
     }
 
-    private fun message(json: String) = JsonMessage(json, Problemer(json))
+    private fun message(json: String) = JsonMessage(json, Aktivitetslogger(json))
 
-    private class ExtendedMessage(originalMessage: String, problems: Problemer) : JsonMessage(originalMessage, problems) {
+    private class ExtendedMessage(originalMessage: String, problems: Aktivitetslogger) : JsonMessage(originalMessage, problems) {
         init {
             requiredKey("required_key")
         }

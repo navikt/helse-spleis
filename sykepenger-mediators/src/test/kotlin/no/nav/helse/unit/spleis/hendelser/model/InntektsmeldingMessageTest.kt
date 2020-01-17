@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
 import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -64,20 +64,20 @@ internal class InntektsmeldingMessageTest {
     }
 
     private fun assertValidInntektsmeldingMessage(message: String) {
-        val problems = Problemer(message)
+        val problems = Aktivitetslogger(message)
         InntektsmeldingMessage(message, problems)
         assertFalse(problems.hasErrors())
     }
 
     private fun assertInvalidMessage(message: String) {
-        val problems = Problemer(message)
+        val problems = Aktivitetslogger(message)
         InntektsmeldingMessage(message, problems)
         assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
     }
 
     private fun assertThrows(message: String) {
-        Problemer(message).also {
-            assertThrows<Problemer> {
+        Aktivitetslogger(message).also {
+            assertThrows<Aktivitetslogger> {
                 InntektsmeldingMessage(message, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }

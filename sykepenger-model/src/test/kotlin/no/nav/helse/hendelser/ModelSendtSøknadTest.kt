@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,11 +18,11 @@ internal class ModelSendtSøknadTest {
     }
 
     private lateinit var sendtSøknad: ModelSendtSøknad
-    private lateinit var problems: Problemer
+    private lateinit var problems: Aktivitetslogger
 
     @BeforeEach
     internal fun setup() {
-        problems = Problemer()
+        problems = Aktivitetslogger()
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class ModelSendtSøknadTest {
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
@@ -57,42 +57,42 @@ internal class ModelSendtSøknadTest {
     internal fun `sykdomsgrad ikke 100`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 50), Utdanning(2.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `sykdom faktiskgrad ikke 100`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100, 50.0), Utdanning(2.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `arbeidag ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Arbeid(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Problemer>{sendtSøknad.sykdomstidslinje()}
+        assertThrows<Aktivitetslogger>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
@@ -104,12 +104,12 @@ internal class ModelSendtSøknadTest {
 
     @Test
     internal fun `må ha perioder`() {
-        assertThrows<Problemer>{sendtSøknad()}
+        assertThrows<Aktivitetslogger>{sendtSøknad()}
     }
 
     @Test
     internal fun `må ha sykdomsperioder`() {
-        assertThrows<Problemer>{sendtSøknad(Ferie(2.januar, 16.januar))}
+        assertThrows<Aktivitetslogger>{sendtSøknad(Ferie(2.januar, 16.januar))}
     }
 
     private fun sendtSøknad(vararg perioder: Periode) {

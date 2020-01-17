@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.FremtidigSøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -76,21 +76,21 @@ internal class FremtidigSøknadMessageTest {
     }
 
     private fun assertValidSøknadMessage(message: String) {
-        val problems = Problemer(message)
+        val problems = Aktivitetslogger(message)
         FremtidigSøknadMessage(message, problems)
         assertFalse(problems.hasErrors()) { "was supposed to recognize $message: $problems" }
     }
 
     private fun assertInvalidMessage(message: String) {
-        Problemer(message).also {
+        Aktivitetslogger(message).also {
             FremtidigSøknadMessage(message, it)
             assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
         }
     }
 
     private fun assertThrows(message: String) {
-        Problemer(message).also {
-            assertThrows<Problemer> {
+        Aktivitetslogger(message).also {
+            assertThrows<Aktivitetslogger> {
                 FremtidigSøknadMessage(message, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }

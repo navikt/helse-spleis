@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Ferieperiode
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -21,7 +21,7 @@ class ModelInntektsmelding(
     private val mottattDato: LocalDateTime,
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
-    private val problemer: Problemer,
+    private val aktivitetslogger: Aktivitetslogger,
     arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
     ferieperioder: List<ClosedRange<LocalDate>>
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding) {
@@ -32,8 +32,8 @@ class ModelInntektsmelding(
     private val ferieperioder: List<Ferieperiode>
 
     init {
-        if (refusjon.beløpPrMåned != beregnetInntekt) problemer.error("Beregnet inntekt matcher ikke refusjon pr måned")
-        if (problemer.hasErrors()) throw problemer
+        if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.error("Beregnet inntekt matcher ikke refusjon pr måned")
+        if (aktivitetslogger.hasErrors()) throw aktivitetslogger
 
         this.arbeidsgiverperioder = arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
@@ -81,9 +81,9 @@ class ModelInntektsmelding(
         )
     }
 
-    internal fun valider(): Problemer {
-        if (!ingenOverlappende()) problemer.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
-        return problemer
+    internal fun valider(): Aktivitetslogger {
+        if (!ingenOverlappende()) aktivitetslogger.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
+        return aktivitetslogger
     }
 
     override fun kanBehandles() = !valider().hasErrors()

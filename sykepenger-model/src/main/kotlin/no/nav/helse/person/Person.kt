@@ -31,13 +31,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(nySøknad: ModelNySøknad, problemer: Problemer) {
+    fun håndter(nySøknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
         nySøknad.valider()
-        if (problemer.hasErrors()) {
-            invaliderAllePerioder(nySøknad, problemer)
-            throw problemer
+        if (aktivitetslogger.hasErrors()) {
+            invaliderAllePerioder(nySøknad, aktivitetslogger)
+            throw aktivitetslogger
         }
-        finnEllerOpprettArbeidsgiver(nySøknad, problemer).håndter(nySøknad, problemer)
+        finnEllerOpprettArbeidsgiver(nySøknad, aktivitetslogger).håndter(nySøknad, aktivitetslogger)
     }
 
     fun håndter(sendtSøknad: SendtSøknad) {
@@ -55,13 +55,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
-    fun håndter(sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
+    fun håndter(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
         sendtSøknad.valider()
-        if (problemer.hasErrors()) {
-            invaliderAllePerioder(sendtSøknad, problemer)
-            throw problemer
+        if (aktivitetslogger.hasErrors()) {
+            invaliderAllePerioder(sendtSøknad, aktivitetslogger)
+            throw aktivitetslogger
         }
-        finnEllerOpprettArbeidsgiver(sendtSøknad, problemer).håndter(sendtSøknad, problemer)
+        finnEllerOpprettArbeidsgiver(sendtSøknad, aktivitetslogger).håndter(sendtSøknad, aktivitetslogger)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding) {
@@ -72,13 +72,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
 
-    fun håndter(inntektsmelding: ModelInntektsmelding, problemer: Problemer) {
+    fun håndter(inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
         inntektsmelding.valider()
-        if (problemer.hasErrors()) {
-            invaliderAllePerioder(inntektsmelding, problemer)
-            throw problemer
+        if (aktivitetslogger.hasErrors()) {
+            invaliderAllePerioder(inntektsmelding, aktivitetslogger)
+            throw aktivitetslogger
         }
-        finnEllerOpprettArbeidsgiver(inntektsmelding, problemer).håndter(inntektsmelding, problemer)
+        finnEllerOpprettArbeidsgiver(inntektsmelding, aktivitetslogger).håndter(inntektsmelding, aktivitetslogger)
     }
 
     fun håndter(ytelser: Ytelser) {
@@ -137,31 +137,31 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
     }
 
-    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, problemer: Problemer) {
+    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) {
         arbeidsgivere.forEach { (_, arbeidsgiver) ->
-            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, problemer)
+            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, aktivitetslogger)
         }
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        invaliderAllePerioder(arbeidstakerHendelse, Problemer())
+        invaliderAllePerioder(arbeidstakerHendelse, Aktivitetslogger())
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        finnEllerOpprettArbeidsgiver(hendelse, Problemer())
+        finnEllerOpprettArbeidsgiver(hendelse, Aktivitetslogger())
 
-    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, problemer: Problemer) =
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {
-                    problemer.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
-                    invaliderAllePerioder(hendelse, problemer)
-                    throw problemer
+                    aktivitetslogger.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
+                    invaliderAllePerioder(hendelse, aktivitetslogger)
+                    throw aktivitetslogger
                 }
             }
         }

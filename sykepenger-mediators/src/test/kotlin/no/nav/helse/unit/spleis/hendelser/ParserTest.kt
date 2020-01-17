@@ -1,6 +1,6 @@
 package no.nav.helse.unit.spleis.hendelser
 
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.Parser
@@ -17,9 +17,9 @@ internal class ParserTest : Parser.ParserDirector {
         parser.onMessage("{\"key\": \"value\"}")
 
         assertTrue(unrecognizedMessage)
-        assertTrue(Problemer.hasErrors())
-        assertContains("key1_not_set", Problemer)
-        assertContains("key2_not_set", Problemer)
+        assertTrue(Aktivitetslogger.hasErrors())
+        assertContains("key1_not_set", Aktivitetslogger)
+        assertContains("key2_not_set", Aktivitetslogger)
     }
 
     @Test
@@ -33,8 +33,8 @@ internal class ParserTest : Parser.ParserDirector {
         parser.onMessage("{\"key\": \"value\"}")
 
         assertEquals(message2, recognizedMessage)
-        assertFalse(Problemer.hasErrors())
-        assertNotContains("key1_not_set", Problemer)
+        assertFalse(Aktivitetslogger.hasErrors())
+        assertNotContains("key1_not_set", Aktivitetslogger)
     }
 
     @Test
@@ -51,18 +51,18 @@ internal class ParserTest : Parser.ParserDirector {
         assertEquals(message1, recognizedMessage)
     }
 
-    private fun assertContains(message: String, problems: Problemer) {
+    private fun assertContains(message: String, problems: Aktivitetslogger) {
         assertTrue(problems.toString().contains(message))
     }
 
-    private fun assertNotContains(message: String, problems: Problemer) {
+    private fun assertNotContains(message: String, problems: Aktivitetslogger) {
         assertFalse(problems.toString().contains(message))
     }
 
     private lateinit var parser: Parser
     private var unrecognizedMessage = false
     private var recognizedMessage: JsonMessage? = null
-    private lateinit var Problemer: Problemer
+    private lateinit var Aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun setup() {
@@ -71,14 +71,14 @@ internal class ParserTest : Parser.ParserDirector {
         unrecognizedMessage = false
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, warnings: Problemer) {
+    override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
         recognizedMessage = message
-        Problemer = warnings
+        Aktivitetslogger = warnings
     }
 
-    override fun onUnrecognizedMessage(problemer: Problemer) {
+    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
         unrecognizedMessage = true
-        Problemer = problemer
+        Aktivitetslogger = aktivitetslogger
     }
 
     private fun messageFactory(requiredKey: String) {
@@ -89,7 +89,7 @@ internal class ParserTest : Parser.ParserDirector {
 
     private fun messageFactory(block: JsonMessage.() -> Unit) {
         parser.register(object : MessageFactory<JsonMessage> {
-            override fun createMessage(message: String, problems: Problemer): JsonMessage {
+            override fun createMessage(message: String, problems: Aktivitetslogger): JsonMessage {
                 return JsonMessage(message, problems).apply {
                     block(this)
                 }

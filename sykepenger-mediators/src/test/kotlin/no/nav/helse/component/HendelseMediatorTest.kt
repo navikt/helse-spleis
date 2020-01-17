@@ -8,7 +8,7 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
@@ -125,7 +125,7 @@ internal class HendelseMediatorTest : HendelseListener {
                         lestInntektsmelding.set(true)
                     }
 
-                override fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {
+                override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
                     lestNySøknad.set(true)
                 }
 

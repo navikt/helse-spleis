@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.Topics
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.VedtaksperiodeObserver
 import no.nav.helse.spleis.*
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -40,7 +40,7 @@ internal class PersonMediatorTest {
         producer = producer
     )
 
-    private val problemer = Problemer()
+    private val aktivitetslogger = Aktivitetslogger()
     private val nySøknad = ModelNySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",
@@ -48,7 +48,7 @@ internal class PersonMediatorTest {
         orgnummer = "orgnr",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(LocalDate.now(), LocalDate.now(), 100)),
-        problemer = problemer,
+        aktivitetslogger = aktivitetslogger,
         originalJson = "{}"
     )
 
@@ -56,7 +56,7 @@ internal class PersonMediatorTest {
     fun `sørger for at observers blir varslet om endring`() {
         every { repo.hentPerson(any()) } returns null
 
-        personMediator.onNySøknad(nySøknad, problemer)
+        personMediator.onNySøknad(nySøknad, aktivitetslogger)
 
         verify(exactly = 1) {
             repo.hentPerson(any())

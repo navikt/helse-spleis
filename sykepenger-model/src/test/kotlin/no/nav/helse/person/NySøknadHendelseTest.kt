@@ -20,47 +20,47 @@ internal class NySøknadHendelseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var problemer: Problemer
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        problemer = Problemer()
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
     internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `En ny NySøknad er ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertThrows<Problemer> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer) }
-        assertTrue(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger) }
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), problemer)
-        assertThrows<Problemer> {
-            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), problemer)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), aktivitetslogger)
+        assertThrows<Aktivitetslogger> {
+            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), aktivitetslogger)
         }
-        assertTrue(problemer.hasErrors())
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
@@ -68,10 +68,10 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertThrows<Problemer> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), problemer) }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), aktivitetslogger) }
 
-        assertTrue(problemer.hasErrors())
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -84,7 +84,7 @@ internal class NySøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer,
+            aktivitetslogger,
             "{}"
         )
 

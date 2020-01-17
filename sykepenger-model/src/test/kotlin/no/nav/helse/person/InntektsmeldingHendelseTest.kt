@@ -21,20 +21,20 @@ internal class InntektsmeldingHendelseTest {
     }
 
     private lateinit var person: Person
-    private lateinit var problemer: Problemer
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     private val inspektør get() = TestPersonInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person(AKTØRID, UNG_PERSON_FNR_2018)
-        problemer = Problemer()
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
     internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        person.håndter(nyInntektsmelding(), problemer)
-        assertTrue(problemer.hasErrors())
+        person.håndter(nyInntektsmelding(), aktivitetslogger)
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -55,7 +55,7 @@ internal class InntektsmeldingHendelseTest {
             1.februar.atStartOfDay(),
             førsteFraværsdag,
             beregnetInntekt,
-            problemer,
+            aktivitetslogger,
             listOf(1.januar .. 16.januar),
             emptyList()
         )
@@ -68,7 +68,7 @@ internal class InntektsmeldingHendelseTest {
             ORGNR,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer,
+            aktivitetslogger,
             "{}"
         )
 

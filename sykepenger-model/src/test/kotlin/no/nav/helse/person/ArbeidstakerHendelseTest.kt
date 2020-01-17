@@ -25,7 +25,7 @@ internal class ArbeidstakerHendelseTest {
         sykeperioder = listOf(
             Triple(LocalDate.now(), LocalDate.now(), 100)
         ),
-        problemer = Problemer(),
+        aktivitetslogger = Aktivitetslogger(),
         originalJson = TestConstants.søknadDTO(
             aktørId = "aktørId",
             status = SoknadsstatusDTO.NY

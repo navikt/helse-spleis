@@ -40,8 +40,8 @@ internal class PersonMediator(
         person(inntektsmelding) { person -> person.håndter(inntektsmelding) }
     }
 
-    override fun onNySøknad(søknad: ModelNySøknad, problemer: Problemer) {
-        person(søknad) { person -> person.håndter(søknad, problemer) }
+    override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
+        person(søknad) { person -> person.håndter(søknad, aktivitetslogger) }
     }
 
     override fun onSendtSøknad(søknad: SendtSøknad) {
@@ -110,7 +110,7 @@ internal class PersonMediator(
             block(person(hendelse))
         } catch (err: UtenforOmfangException) {
             vedtaksperiodeProbe.utenforOmfang(hendelse)
-        } catch (err: Problemer) {
+        } catch (err: Aktivitetslogger) {
             vedtaksperiodeProbe.utenforOmfang(hendelse)
             log.warn(err.message, err)
         } catch (err: PersonskjemaForGammelt) {

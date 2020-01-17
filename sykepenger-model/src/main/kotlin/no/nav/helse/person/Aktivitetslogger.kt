@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
-class Problemer(private val originalMessage: String? = null) : RuntimeException() {
+class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeException() {
     private val info = mutableListOf<Aktivitet>()
     private val warn = mutableListOf<Aktivitet>()
     private val error = mutableListOf<Aktivitet>()
@@ -29,7 +29,7 @@ class Problemer(private val originalMessage: String? = null) : RuntimeException(
 
     fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
 
-    fun addAll(other: Problemer, label: String) {
+    fun addAll(other: Aktivitetslogger, label: String) {
         other.severe.forEach { this.severe("$it ($label)") }
         other.error.forEach { this.error("$it ($label)") }
         other.warn.forEach { this.warn("$it ($label)") }

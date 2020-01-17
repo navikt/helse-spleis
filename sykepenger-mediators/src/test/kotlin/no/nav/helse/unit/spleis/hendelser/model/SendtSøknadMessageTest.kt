@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.SendtSøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -61,8 +61,8 @@ internal class SendtSøknadMessageTest {
 
     @Test
     internal fun `invalid messages`() {
-        Problemer(InvalidJson).also {
-            assertThrows<Problemer> {
+        Aktivitetslogger(InvalidJson).also {
+            assertThrows<Aktivitetslogger> {
                 SendtSøknadMessage(InvalidJson, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }
@@ -78,13 +78,13 @@ internal class SendtSøknadMessageTest {
     }
 
     private fun assertValidSøknadMessage(message: String) {
-        val problems = Problemer(message)
+        val problems = Aktivitetslogger(message)
         SendtSøknadMessage(message, problems)
         assertFalse(problems.hasErrors()) { "was supposed to recognize $message: $problems" }
     }
 
     private fun assertInvalidMessage(message: String) {
-        Problemer(message).also {
+        Aktivitetslogger(message).also {
             SendtSøknadMessage(message, it)
             assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
         }

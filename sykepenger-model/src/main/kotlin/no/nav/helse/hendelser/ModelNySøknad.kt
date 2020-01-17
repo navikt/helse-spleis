@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -19,7 +19,7 @@ class ModelNySøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    private val problemer: Problemer,
+    private val aktivitetslogger: Aktivitetslogger,
     private val originalJson: String
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad) {
 
@@ -45,7 +45,7 @@ class ModelNySøknad(
                             third = periode.path("sykmeldingsgrad").asInt()
                         )
                     },
-                    problemer = Problemer(),
+                    aktivitetslogger = Aktivitetslogger(),
                     originalJson = objectMapper.writeValueAsString(it.path("søknad"))
                 )
             }
@@ -57,9 +57,9 @@ class ModelNySøknad(
     }
 
     init {
-        if (sykeperioder.isEmpty()) problemer.severe("Ingen sykeperioder")
+        if (sykeperioder.isEmpty()) aktivitetslogger.severe("Ingen sykeperioder")
         this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
-        if (!ingenOverlappende()) problemer.severe("Sykeperioder overlapper")
+        if (!ingenOverlappende()) aktivitetslogger.severe("Sykeperioder overlapper")
     }
 
     private inner class Sykeperiode(
@@ -78,9 +78,9 @@ class ModelNySøknad(
 
     override fun kanBehandles() = !valider().hasErrors()
 
-    fun valider(): Problemer {
-        if (!hundreProsentSykmeldt()) problemer.error("Støtter bare 100%% sykmeldt")
-        return problemer
+    fun valider(): Aktivitetslogger {
+        if (!hundreProsentSykmeldt()) aktivitetslogger.error("Støtter bare 100%% sykmeldt")
+        return aktivitetslogger
     }
 
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }

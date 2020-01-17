@@ -4,7 +4,7 @@ import io.mockk.mockk
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.PersonMediator
 import no.nav.helse.toJson
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
@@ -18,7 +18,7 @@ import java.util.*
 internal class PersonRepositoryTest {
 
     private val aktørId = "1234"
-    private val problemer = Problemer()
+    private val aktivitetslogger = Aktivitetslogger()
     private val nySøknad = ModelNySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",
@@ -28,7 +28,7 @@ internal class PersonRepositoryTest {
         sykeperioder = listOf(
             Triple(LocalDate.now(), LocalDate.now(), 100)
         ),
-        problemer = problemer,
+        aktivitetslogger = aktivitetslogger,
         originalJson = søknadDTO(
             aktørId = aktørId,
             status = SoknadsstatusDTO.NY
@@ -49,7 +49,7 @@ internal class PersonRepositoryTest {
             producer = mockk(relaxed = true)
         )
 
-        mediator.onNySøknad(nySøknad, problemer)
+        mediator.onNySøknad(nySøknad, aktivitetslogger)
 
         assertNotNull(repo.hentPerson(aktørId))
         assertEquals(1, repo.hentHistorikk(aktørId).size)
@@ -65,7 +65,7 @@ internal class PersonRepositoryTest {
             lagreUtbetalingDao = mockk(relaxed = true),
             producer = mockk(relaxed = true)
         )
-        mediator.onNySøknad(nySøknad, problemer)
+        mediator.onNySøknad(nySøknad, aktivitetslogger)
 
 
         val personEtterNySøknad = repo.hentPerson(aktørId)

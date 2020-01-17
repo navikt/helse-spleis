@@ -102,9 +102,9 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(nySøknad: ModelNySøknad, problemer: Problemer) {
-        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad, problemer) }) {
-            nyVedtaksperiode(nySøknad).håndter(nySøknad, problemer)
+    internal fun håndter(nySøknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
+        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad, aktivitetslogger) }) {
+            nyVedtaksperiode(nySøknad).håndter(nySøknad, aktivitetslogger)
         }
     }
 
@@ -114,9 +114,9 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(sendtSøknad: ModelSendtSøknad, problemer: Problemer) {
-        if (perioder.none { it.håndter(sendtSøknad, problemer) }) {
-            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad, problemer)
+    internal fun håndter(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
+        if (perioder.none { it.håndter(sendtSøknad, aktivitetslogger) }) {
+            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad, aktivitetslogger)
         }
     }
 
@@ -127,10 +127,10 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding, problemer: Problemer) {
+    internal fun håndter(inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
         inntektHistorie.add(inntektsmelding)
-        if (perioder.none { it.håndter(inntektsmelding, problemer) }) {
-            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding, problemer)
+        if (perioder.none { it.håndter(inntektsmelding, aktivitetslogger) }) {
+            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding, aktivitetslogger)
         }
     }
 
@@ -150,8 +150,8 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         return perioder.any { it.håndter(påminnelse) }
     }
 
-    internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse, problemer: Problemer) {
-        perioder.forEach { it.invaliderPeriode(hendelse, problemer) }
+    internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) {
+        perioder.forEach { it.invaliderPeriode(hendelse, aktivitetslogger) }
     }
 
     fun addObserver(observer: VedtaksperiodeObserver) {

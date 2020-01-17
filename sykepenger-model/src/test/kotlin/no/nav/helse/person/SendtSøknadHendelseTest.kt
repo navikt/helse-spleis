@@ -22,22 +22,22 @@ internal class SendtSøknadHendelseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var problemer: Problemer
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        problemer = Problemer()
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
     internal fun `sendtsøknad matcher nysøknad`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
@@ -45,27 +45,27 @@ internal class SendtSøknadHendelseTest {
 
     @Test
     internal fun `sykdomsgrad ikke 100`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertThrows<Problemer> {
-            person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 50)), problemer) }
-        assertTrue(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertThrows<Aktivitetslogger> {
+            person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 50)), aktivitetslogger) }
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `mangler NySøknad`() {
-        assertThrows<Problemer> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), problemer) }
-        assertTrue(problemer.hasErrors())
+        assertThrows<Aktivitetslogger> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), aktivitetslogger) }
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `sendtSøknad kan utvide sykdomstidslinje`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
         assertEquals(10, inspektør.sykdomstidslinje(0).length())
@@ -73,30 +73,30 @@ internal class SendtSøknadHendelseTest {
 
     @Test
     internal fun `sendtSøknad med utdanning avvist`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        assertThrows<Problemer> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)), problemer) }
-        assertTrue(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertThrows<Aktivitetslogger> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)), aktivitetslogger) }
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `andre sendSøknad ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
-        assertThrows<Problemer> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), problemer) }
-        assertTrue(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
+        assertThrows<Aktivitetslogger> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), aktivitetslogger) }
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), problemer)
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), problemer)
-        person.håndter(sendtSøknad(Sykdom(6.januar, 10.januar, 100)), problemer)
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), problemer)
-        assertFalse(problemer.hasErrors())
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), aktivitetslogger)
+        person.håndter(sendtSøknad(Sykdom(6.januar, 10.januar, 100)), aktivitetslogger)
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)), aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
@@ -106,13 +106,13 @@ internal class SendtSøknadHendelseTest {
 
     @Test
     internal fun `to forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), problemer)
-        assertThrows<Problemer> {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), aktivitetslogger)
+        assertThrows<Aktivitetslogger> {
             person.håndter(
                 sendtSøknad(Sykdom(1.januar, 5.januar, 100), orgnummer = "orgnummer2"),
-                problemer)
+                aktivitetslogger)
         }
-        assertTrue(problemer.hasErrors())
+        assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -125,7 +125,7 @@ internal class SendtSøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*perioder),
-            problemer
+            aktivitetslogger
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
@@ -136,7 +136,7 @@ internal class SendtSøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*sykeperioder),
-            problemer,
+            aktivitetslogger,
             "{}"
         )
 

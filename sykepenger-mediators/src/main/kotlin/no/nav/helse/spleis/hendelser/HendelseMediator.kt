@@ -2,7 +2,7 @@ package no.nav.helse.spleis.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
 import no.nav.helse.spleis.hendelser.model.*
@@ -37,7 +37,7 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         listeners.add(listener)
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, warnings: Problemer) {
+    override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
         message.accept(messageProcessor)
 
         if (warnings.hasMessages()) {
@@ -45,12 +45,12 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         }
     }
 
-    override fun onUnrecognizedMessage(problemer: Problemer) {
-        sikkerLogg.info("ukjent melding: $problemer")
+    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
+        sikkerLogg.info("ukjent melding: $aktivitetslogger")
     }
 
     private inner class Processor : MessageProcessor {
-        override fun process(message: NySøknadMessage, problemer: Problemer) {
+        override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
             try {
                 val modelNySøknad = ModelNySøknad(
                     hendelseId = UUID.randomUUID(),
@@ -65,16 +65,16 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
                             third = it.path("sykmeldingsgrad").asInt()
                         )
                     },
-                    problemer = problemer,
+                    aktivitetslogger = aktivitetslogger,
                     originalJson = message.toJson()
                 )
 
-                listeners.forEach { it.onNySøknad(modelNySøknad, problemer) }
+                listeners.forEach { it.onNySøknad(modelNySøknad, aktivitetslogger) }
 
-                if (problemer.hasMessages()) {
-                    sikkerLogg.info("meldinger om ny søknad: $problemer")
+                if (aktivitetslogger.hasMessages()) {
+                    sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
                 }
-            } catch (err: Problemer) {
+            } catch (err: Aktivitetslogger) {
                 sikkerLogg.info("feil om ny søknad: ${err.message}", err)
             }
         }
@@ -83,53 +83,53 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
             asText().let { LocalDate.parse(it) }
 
 
-        override fun process(message: FremtidigSøknadMessage, problemer: Problemer) {
+        override fun process(message: FremtidigSøknadMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             NySøknad.Builder().build(message.toJson())?.apply {
                 return listeners.forEach { it.onNySøknad(this) }
-            } ?: problemer.error("klarer ikke å mappe søknaden til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe søknaden til domenetype")
         }
 
-        override fun process(message: SendtSøknadMessage, problemer: Problemer) {
+        override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             SendtSøknad.Builder().build(message.toJson())?.apply {
                 return listeners.forEach { it.onSendtSøknad(this) }
-            } ?: problemer.error("klarer ikke å mappe søknaden til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe søknaden til domenetype")
         }
 
-        override fun process(message: InntektsmeldingMessage, problemer: Problemer) {
+        override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             Inntektsmelding.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onInntektsmelding(this) }
-            } ?: problemer.error("klarer ikke å mappe inntektsmelding til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe inntektsmelding til domenetype")
         }
 
-        override fun process(message: YtelserMessage, problemer: Problemer) {
+        override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             Ytelser.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onYtelser(this) }
-            } ?: problemer.error("klarer ikke å mappe ytelser til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe ytelser til domenetype")
         }
 
-        override fun process(message: VilkårsgrunnlagMessage, problemer: Problemer) {
+        override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             Vilkårsgrunnlag.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onVilkårsgrunnlag(this) }
-            } ?: problemer.error("klarer ikke å mappe vilkårsgrunnlag til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe vilkårsgrunnlag til domenetype")
         }
 
-        override fun process(message: ManuellSaksbehandlingMessage, problemer: Problemer) {
+        override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             ManuellSaksbehandling.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onManuellSaksbehandling(this) }
-            } ?: problemer.error("klarer ikke å mappe manuellsaksbehandling til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe manuellsaksbehandling til domenetype")
         }
 
-        override fun process(message: PåminnelseMessage, problemer: Problemer) {
+        override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
             Påminnelse.Builder().build(message.toJson())?.apply {
                 listeners.forEach { it.onPåminnelse(this) }
-            } ?: problemer.error("klarer ikke å mappe påminnelse til domenetype")
+            } ?: aktivitetslogger.error("klarer ikke å mappe påminnelse til domenetype")
         }
     }
 }

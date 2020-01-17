@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
-import no.nav.helse.person.Problemer
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import org.junit.jupiter.api.Assertions.*
@@ -16,11 +16,11 @@ import java.util.*
 internal class ModelInntektsmeldingTest {
 
     private lateinit var inntektsmelding: ModelInntektsmelding
-    private lateinit var problemer: Problemer
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun setup() {
-        problemer = Problemer()
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
@@ -55,7 +55,7 @@ internal class ModelInntektsmeldingTest {
     internal fun `arbeidgiverperioden kan ikke ha overlappende perioder`() {
         nyInntektsmelding(listOf(1.januar..2.januar, 4.januar..5.januar, 3.januar..4.januar), emptyList())
         inntektsmelding.valider()
-        assertTrue(problemer.hasErrors())
+        assertTrue(aktivitetslogger.hasErrors())
     }
 
     @Test
@@ -78,7 +78,7 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
-        assertThrows<Problemer> {
+        assertThrows<Aktivitetslogger> {
             nyInntektsmelding(
                 emptyList(),
                 emptyList(),
@@ -120,7 +120,7 @@ internal class ModelInntektsmeldingTest {
             1.februar.atStartOfDay(),
             førsteFraværsdag,
             beregnetInntekt,
-            problemer,
+            aktivitetslogger,
             arbeidsgiverperioder,
             ferieperioder
         )
