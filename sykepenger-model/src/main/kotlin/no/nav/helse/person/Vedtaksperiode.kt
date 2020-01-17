@@ -326,11 +326,6 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.error("mangler NySøknad")
-            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd, aktivitetslogger)
-        }
-
         override val type = START
         override val timeout: Duration = Duration.ofDays(30)
     }
