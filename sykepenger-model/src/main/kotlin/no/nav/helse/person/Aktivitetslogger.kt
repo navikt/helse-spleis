@@ -5,31 +5,31 @@ import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
-class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeException() {
+class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeException(), IAktivitetslogger {
     private val info = mutableListOf<Aktivitet>()
     private val warn = mutableListOf<Aktivitet>()
     private val error = mutableListOf<Aktivitet>()
     private val severe = mutableListOf<Aktivitet>()
 
-    fun info(melding: String, vararg params: Any) {
+    override fun info(melding: String, vararg params: Any) {
         info.add(Aktivitet(String.format(melding, *params)))
     }
-    fun warn(melding: String, vararg params: Any) {
+    override fun warn(melding: String, vararg params: Any) {
         warn.add(Aktivitet(String.format(melding, *params)))
     }
-    fun error(melding: String, vararg params: Any) {
+    override fun error(melding: String, vararg params: Any) {
         error.add(Aktivitet(String.format(melding, *params)))
     }
-    fun severe(melding: String, vararg params: Any): Nothing {
+    override fun severe(melding: String, vararg params: Any): Nothing {
         severe.add(Aktivitet(String.format(melding, *params)))
         throw this
     }
 
-    fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
+    override fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
 
-    fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
+    override fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
 
-    fun addAll(other: Aktivitetslogger, label: String) {
+    override fun addAll(other: Aktivitetslogger, label: String) {
         other.severe.forEach { this.severe("$it ($label)") }
         other.error.forEach { this.error("$it ($label)") }
         other.warn.forEach { this.warn("$it ($label)") }
@@ -70,4 +70,17 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
             return tidsstempel + "\t" + melding
         }
     }
+}
+
+interface IAktivitetslogger {
+    fun info(melding: String, vararg params: Any)
+    fun warn(melding: String, vararg params: Any)
+    fun error(melding: String, vararg params: Any)
+    fun severe(melding: String, vararg params: Any): Nothing
+
+    fun hasMessages(): Boolean
+
+    fun hasErrors(): Boolean
+
+    fun addAll(other: Aktivitetslogger, label: String)
 }

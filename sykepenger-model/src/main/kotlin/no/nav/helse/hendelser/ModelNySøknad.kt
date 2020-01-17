@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -21,7 +22,7 @@ class ModelNySøknad(
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
     private val aktivitetslogger: Aktivitetslogger,
     private val originalJson: String
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad) {
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad), IAktivitetslogger by aktivitetslogger {
 
     private val sykeperioder: List<Sykeperiode>
 
