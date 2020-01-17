@@ -14,7 +14,7 @@ import io.ktor.response.ApplicationSendPipeline
 import io.ktor.routing.routing
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
-import no.nav.helse.spleis.PersonMediator
+import no.nav.helse.spleis.PersonRestInterface
 import no.nav.helse.spleis.http.getJson
 import no.nav.helse.spleis.person
 import no.nav.helse.spleis.utbetaling
@@ -32,7 +32,7 @@ private val httpRequestDuration =
         .register()
 
 internal fun Application.restInterface(
-    personMediator: PersonMediator,
+    personRestInterface: PersonRestInterface,
     configurationUrl: String,
     clientId: String,
     requiredGroup: String
@@ -88,8 +88,8 @@ internal fun Application.restInterface(
 
     routing {
         authenticate {
-            utbetaling(personMediator)
-            person(personMediator)
+            utbetaling(personRestInterface)
+            person(personRestInterface)
         }
     }
 

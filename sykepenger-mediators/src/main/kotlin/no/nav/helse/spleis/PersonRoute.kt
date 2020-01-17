@@ -8,18 +8,18 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.util.pipeline.PipelineContext
 
-internal fun Route.person(personMediator: PersonMediator) {
+internal fun Route.person(personRestInterface: PersonRestInterface) {
     get("/api/person/{aktørId}") {
-        finnPerson(personMediator)
+        finnPerson(personRestInterface)
     }
     // TODO: fjern route når speil er oppdatert med ny url
     get("/api/sak/{aktørId}") {
-        finnPerson(personMediator)
+        finnPerson(personRestInterface)
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.finnPerson(personMediator: PersonMediator) {
-    personMediator.hentSak(call.parameters["aktørId"]!!)?.let {
+private suspend fun PipelineContext<Unit, ApplicationCall>.finnPerson(personRestInterface: PersonRestInterface) {
+    personRestInterface.hentSak(call.parameters["aktørId"]!!)?.let {
         call.respond(it.memento().state())
     } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
 }

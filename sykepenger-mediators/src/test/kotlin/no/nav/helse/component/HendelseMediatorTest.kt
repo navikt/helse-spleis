@@ -1,5 +1,7 @@
 package no.nav.helse.component
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.TestConstants
 import no.nav.helse.Topics
@@ -8,14 +10,14 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
+import no.nav.helse.spleis.PersonRepository
 import no.nav.helse.spleis.hendelser.HendelseMediator
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -35,6 +37,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class HendelseMediatorTest : HendelseListener {
 
@@ -86,7 +89,7 @@ internal class HendelseMediatorTest : HendelseListener {
         lestManuellSaksbehandling.set(false)
     }
 
-    private companion object : HendelseListener {
+    private companion object : PersonRepository {
         private const val dummyTopic = "unused"
         private val defaultAktørId = UUID.randomUUID().toString()
         private val defaultFødselsnummer = UUID.randomUUID().toString()
@@ -102,38 +105,69 @@ internal class HendelseMediatorTest : HendelseListener {
 
         private val hendelseStream = HendelseStream(listOf(dummyTopic))
 
-        init {
-            HendelseMediator(hendelseStream).also {
-                it.addListener(object : HendelseListener {
-                    override fun onPåminnelse(påminnelse: Påminnelse) {
-                        lestPåminnelse.set(true)
-                    }
-
-                    override fun onYtelser(ytelser: ModelYtelser) {
-                        lestYtelser.set(true)
-                    }
-
-                    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
-                        lestVilkårsgrunnlag.set(true)
-                    }
-
-                    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
-                        lestManuellSaksbehandling.set(true)
-                    }
-
-                    override fun onInntektsmelding(inntektsmelding: no.nav.helse.hendelser.Inntektsmelding) {
-                        lestInntektsmelding.set(true)
-                    }
-
-                override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
+        override fun hentPerson(aktørId: String): Person? {
+            return mockk<Person>(relaxed = true) {
+                every {
+                    håndter(any<NySøknad>())
+                } answers {
                     lestNySøknad.set(true)
                 }
 
-                    override fun onSendtSøknad(søknad: SendtSøknad) {
-                        lestSendtSøknad.set(true)
-                    }
-                })
+                every {
+                    håndter(any<ModelNySøknad>(), any())
+                } answers {
+                    lestNySøknad.set(true)
+                }
+
+                every {
+                    håndter(any<SendtSøknad>())
+                } answers {
+                    lestSendtSøknad.set(true)
+                }
+
+                every {
+                    håndter(any<Inntektsmelding>())
+                } answers {
+                    lestInntektsmelding.set(true)
+                }
+
+                every {
+                    håndter(any<ModelYtelser>())
+                } answers {
+                    lestYtelser.set(true)
+                }
+
+                every {
+                    håndter(any<Påminnelse>())
+                } answers {
+                    lestPåminnelse.set(true)
+                }
+
+                every {
+                    håndter(any<Vilkårsgrunnlag>())
+                } answers {
+                    lestVilkårsgrunnlag.set(true)
+                }
+
+                every {
+                    håndter(any<ManuellSaksbehandling>())
+                } answers {
+                    lestManuellSaksbehandling.set(true)
+                }
             }
+        }
+
+        init {
+            HendelseMediator(
+                rapid = hendelseStream,
+                personRepository = this,
+                lagrePersonDao = mockk(relaxed = true),
+                lagreUtbetalingDao = mockk(relaxed = true),
+                vedtaksperiodeProbe = mockk(relaxed = true),
+                producer = mockk(relaxed = true),
+                hendelseProbe = mockk(relaxed = true),
+                hendelseRecorder = mockk(relaxed = true)
+            )
         }
         private val topicInfos = listOf(dummyTopic, Topics.helseRapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -271,8 +305,8 @@ internal class HendelseMediatorTest : HendelseListener {
             aktørId: String = defaultAktørId,
             fødselsnummer: String = defaultFødselsnummer,
             organisasjonsnummer: String = defaultOrganisasjonsnummer
-        ): Inntektsmelding {
-            val inntektsmelding = Inntektsmelding(
+        ): Inntektsmeldingkontrakt {
+            val inntektsmelding = Inntektsmeldingkontrakt(
                 inntektsmeldingId = UUID.randomUUID().toString(),
                 arbeidstakerFnr = fødselsnummer,
                 arbeidstakerAktorId = aktørId,

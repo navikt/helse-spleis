@@ -48,7 +48,7 @@ class ApplicationBuilder(env: Map<String, String>) {
             // val clientSecret = "/var/run/secrets/nais.io/azure/client_secret".readFile() ?: env.getValue("AZURE_CLIENT_SECRET")
 
             restInterface(
-                personMediator = helseBuilder.personMediator,
+                personRestInterface = helseBuilder.personRestInterface,
                 configurationUrl = requireNotNull(env["AZURE_CONFIG_URL"]),
                 clientId = clientId,
                 requiredGroup = requireNotNull(env["AZURE_REQUIRED_GROUP"])

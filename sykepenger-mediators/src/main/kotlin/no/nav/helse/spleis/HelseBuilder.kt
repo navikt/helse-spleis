@@ -12,25 +12,26 @@ internal class HelseBuilder(dataSource: DataSource, hendelseStream: HendelseStre
     private val hendelseProbe: HendelseListener = HendelseProbe()
     private val hendelseRecorder: HendelseListener = HendelseRecorder(dataSource)
 
-    internal val personMediator: PersonMediator
+    internal val personRestInterface: PersonRestInterface
     private val personRepository: PersonRepository = PersonPostgresRepository(dataSource)
     private val lagrePersonDao: PersonObserver = LagrePersonDao(dataSource)
     private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository = UtbetalingsreferansePostgresRepository(dataSource)
     private val lagreUtbetalingDao: PersonObserver = LagreUtbetalingDao(dataSource)
 
     init {
-        personMediator = PersonMediator(
+        personRestInterface = PersonRestInterface(
             personRepository = personRepository,
-            lagrePersonDao = lagrePersonDao,
-            utbetalingsreferanseRepository = utbetalingsreferanseRepository,
-            lagreUtbetalingDao = lagreUtbetalingDao,
-            producer = hendelseProducer
+            utbetalingsreferanseRepository = utbetalingsreferanseRepository
         )
 
-        hendelseDirector = HendelseMediator(rapid = hendelseStream).apply {
-            addListener(hendelseProbe)
-            addListener(hendelseRecorder)
-            addListener(personMediator)
-        }
+        hendelseDirector = HendelseMediator(
+            rapid = hendelseStream,
+            personRepository = personRepository,
+            lagrePersonDao = lagrePersonDao,
+            lagreUtbetalingDao = lagreUtbetalingDao,
+            producer = hendelseProducer,
+            hendelseProbe = hendelseProbe,
+            hendelseRecorder = hendelseRecorder
+        )
     }
 }
