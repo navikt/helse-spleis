@@ -1,28 +1,32 @@
 package no.nav.helse.person
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 class Problemer(private val originalMessage: String? = null) : RuntimeException() {
-    private val info = mutableListOf<String>()
-    private val warn = mutableListOf<String>()
-    private val error = mutableListOf<String>()
-    private val severe = mutableListOf<String>()
+    private val info = mutableListOf<Aktivitet>()
+    private val warn = mutableListOf<Aktivitet>()
+    private val error = mutableListOf<Aktivitet>()
+    private val severe = mutableListOf<Aktivitet>()
 
     fun info(melding: String, vararg params: Any) {
-        info.add(String.format(melding, *params))
+        info.add(Aktivitet(String.format(melding, *params)))
     }
     fun warn(melding: String, vararg params: Any) {
-        warn.add(String.format(melding, *params))
+        warn.add(Aktivitet(String.format(melding, *params)))
     }
     fun error(melding: String, vararg params: Any) {
-        error.add(String.format(melding, *params))
+        error.add(Aktivitet(String.format(melding, *params)))
     }
     fun severe(melding: String, vararg params: Any): Nothing {
-        severe.add(String.format(melding, *params))
+        severe.add(Aktivitet(String.format(melding, *params)))
         throw this
     }
 
     fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
+
     fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
 
     fun addAll(other: Problemer, label: String) {
@@ -45,7 +49,7 @@ class Problemer(private val originalMessage: String? = null) : RuntimeException(
         return results.toString()
     }
 
-    private fun append(label: String, messages: List<String>, results: StringBuffer ) {
+    private fun append(label: String, messages: List<Aktivitet>, results: StringBuffer ) {
         if (messages.isEmpty()) return
         results.append("\n")
         results.append(label)
@@ -54,6 +58,16 @@ class Problemer(private val originalMessage: String? = null) : RuntimeException(
         for (message in messages) {
             results.append("\n\t")
             results.append(message)
+        }
+    }
+
+    private class Aktivitet(private val melding: String) {
+        companion object {
+            private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+        }
+        private val tidsstempel = LocalDateTime.now().format(tidsstempelformat)
+        override fun toString(): String {
+            return tidsstempel + "\t" + melding
         }
     }
 }
