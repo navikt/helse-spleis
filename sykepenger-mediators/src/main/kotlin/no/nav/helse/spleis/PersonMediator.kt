@@ -110,9 +110,6 @@ internal class PersonMediator(
             block(person(hendelse))
         } catch (err: UtenforOmfangException) {
             vedtaksperiodeProbe.utenforOmfang(hendelse)
-        } catch (err: Aktivitetslogger) {
-            vedtaksperiodeProbe.utenforOmfang(hendelse)
-            log.warn(err.message, err)
         } catch (err: PersonskjemaForGammelt) {
             vedtaksperiodeProbe.forGammelSkjemaversjon(err)
         }

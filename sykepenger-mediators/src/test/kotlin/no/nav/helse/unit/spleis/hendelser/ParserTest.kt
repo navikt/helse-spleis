@@ -11,6 +11,34 @@ import org.junit.jupiter.api.Test
 internal class ParserTest : Parser.ParserDirector {
 
     @Test
+    internal fun `invalid json`() {
+        parser.register(object : MessageFactory<JsonMessage> {
+            override fun createMessage(message: String, problems: Aktivitetslogger) =
+                JsonMessage(message, problems)
+        })
+        parser.onMessage("foo")
+
+        assertTrue(unrecognizedMessage)
+        assertTrue(Aktivitetslogger.hasErrors())
+        assertContains("Invalid JSON per Jackson library", Aktivitetslogger)
+    }
+
+    @Test
+    internal fun `severe errors are caught`() {
+        parser.register(object : MessageFactory<JsonMessage> {
+            override fun createMessage(message: String, problems: Aktivitetslogger) =
+                JsonMessage(message, problems).apply {
+                    problems.severe("Severe error!")
+                }
+        })
+        parser.onMessage("{}")
+
+        assertTrue(unrecognizedMessage)
+        assertTrue(Aktivitetslogger.hasErrors())
+        assertContains("Severe error!", Aktivitetslogger)
+    }
+
+    @Test
     internal fun `when message is not recognized, errors are accumulated`() {
         messageFactory("key1_not_set")
         messageFactory("key2_not_set")
@@ -52,7 +80,7 @@ internal class ParserTest : Parser.ParserDirector {
     }
 
     private fun assertContains(message: String, problems: Aktivitetslogger) {
-        assertTrue(problems.toString().contains(message))
+        assertTrue(problems.toString().contains(message)) { "Expected <$problems> to contain <$message>"}
     }
 
     private fun assertNotContains(message: String, problems: Aktivitetslogger) {

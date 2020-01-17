@@ -38,15 +38,19 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
     }
 
     override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
-        message.accept(messageProcessor)
+        try {
+            message.accept(messageProcessor)
 
-        if (warnings.hasMessages()) {
-            sikkerLogg.info("meldinger om melding: $warnings")
+            if (warnings.hasMessages()) {
+                sikkerLogg.info("meldinger om melding: $warnings")
+            }
+        } catch (err: Aktivitetslogger) {
+            sikkerLogg.info("feil på melding: $err")
         }
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
-        sikkerLogg.info("ukjent melding: $aktivitetslogger")
+        sikkerLogg.info("feil på melding: $aktivitetslogger")
     }
 
     private inner class Processor : MessageProcessor {

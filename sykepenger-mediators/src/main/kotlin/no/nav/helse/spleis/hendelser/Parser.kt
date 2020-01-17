@@ -15,13 +15,19 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
 
     override fun onMessage(message: String) {
         val accumulatedProblems = Aktivitetslogger(message)
-        for (factory in factories) {
-            val problems = Aktivitetslogger(message)
-            val newMessage = factory.createMessage(message, problems)
-            if (!problems.hasErrors()) return director.onRecognizedMessage(newMessage, problems)
-            accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
+
+        try {
+            for (factory in factories) {
+                val problems = Aktivitetslogger(message)
+                val newMessage = factory.createMessage(message, problems)
+                if (!problems.hasErrors()) return director.onRecognizedMessage(newMessage, problems)
+                accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
+            }
+
+            director.onUnrecognizedMessage(accumulatedProblems)
+        } catch (err: Aktivitetslogger) {
+            director.onUnrecognizedMessage(err)
         }
-        director.onUnrecognizedMessage(accumulatedProblems)
     }
 
     // GoF Mediator
