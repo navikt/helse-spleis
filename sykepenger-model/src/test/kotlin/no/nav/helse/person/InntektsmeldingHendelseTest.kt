@@ -63,7 +63,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
         person.håndter(inntektsmelding(), aktivitetslogger)
-        person.håndter(inntektsmelding(), aktivitetslogger)
+        assertThrows<Aktivitetslogger>{ person.håndter(inntektsmelding(), aktivitetslogger) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
