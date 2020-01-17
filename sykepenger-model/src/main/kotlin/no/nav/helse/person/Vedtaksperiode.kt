@@ -96,7 +96,7 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    internal fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, ytelser: Ytelser) {
+    internal fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, ytelser: ModelYtelser) {
         if (id.toString() == ytelser.vedtaksperiodeId()) tilstand.håndter(
             person,
             arbeidsgiver,
@@ -183,7 +183,7 @@ internal class Vedtaksperiode internal constructor(
 
     private fun trengerYtelser() {
         emitTrengerLøsning(
-            Ytelser.lagBehov(
+            ModelYtelser.lagBehov(
                 vedtaksperiodeId = id,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -286,7 +286,7 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
         }
 
-        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: ModelYtelser) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ManuellSaksbehandling) {
@@ -445,7 +445,7 @@ internal class Vedtaksperiode internal constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            ytelser: Ytelser
+            ytelser: ModelYtelser
         ) {
             if (ytelser.foreldrepenger().overlapperMedSyketilfelle(
                     vedtaksperiode.sykdomstidslinje.førsteDag(),
@@ -485,7 +485,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         private fun harFraværsdagInnen6Mnd(
-            ytelser: Ytelser,
+            ytelser: ModelYtelser,
             tidslinje: ConcreteSykdomstidslinje
         ): Boolean {
             val sisteFraværsdag = ytelser.sykepengehistorikk().sisteFraværsdag() ?: return false

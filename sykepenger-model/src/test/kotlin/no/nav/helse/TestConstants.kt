@@ -10,6 +10,7 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -307,24 +308,29 @@ internal object TestConstants {
         fødselsnummer: String = fakeFNR,
         organisasjonsnummer: String = "123546564",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        utgangspunktForBeregningAvYtelse: LocalDate = LocalDate.now(),
         sykepengehistorikk: List<SpolePeriode> = listOf(),
         foreldrepenger: ForeldrepengeLøsning? = null
 
-    ) = Ytelser.Builder().build(
-        Ytelser.lagBehov(
-            vedtaksperiodeId,
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            utgangspunktForBeregningAvYtelse
-        ).løsBehov(
-            mapOf(
-                "Sykepengehistorikk" to sykepengehistorikk,
-                "Foreldrepenger" to foreldrepenger
+    ) = ModelYtelser(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        sykepengehistorikk = ModelSykepengehistorikk(
+            perioder = sykepengehistorikk.map { it.fom to it.tom },
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        foreldrepenger = foreldrepenger.let {
+            ModelForeldrepenger(
+                foreldrepengeytelse = it?.Foreldrepengeytelse?.let { it.fom to it.tom },
+                svangerskapsytelse = it?.Svangerskapsytelse?.let { it.fom to it.tom },
+                aktivitetslogger = Aktivitetslogger()
             )
-        ).toJson()
-    )!!
+        },
+        rapportertdato = LocalDateTime.now(),
+        originalJson = "{}"
+    )
 
     fun manuellSaksbehandlingLøsning(
         organisasjonsnummer: String = "123546564",

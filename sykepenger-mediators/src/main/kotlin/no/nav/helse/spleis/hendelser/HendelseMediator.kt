@@ -105,11 +105,49 @@ internal class HendelseMediator(rapid: HendelseStream) : Parser.ParserDirector {
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            Ytelser.Builder().build(message.toJson())?.apply {
-                listeners.forEach { it.onYtelser(this) }
-            } ?: aktivitetslogger.error("klarer ikke å mappe ytelser til domenetype")
+            try {
+                val foreldrepenger = message["@løsning"].path("Foreldrepenger").let {
+                    ModelForeldrepenger(
+                        foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
+                        svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
+                        aktivitetslogger = aktivitetslogger
+                    )
+                }
+
+                val sykepengehistorikk = ModelSykepengehistorikk(
+                    perioder = message["@løsning"].path("Sykepengehistorikk").map(::asPeriode),
+                    aktivitetslogger = aktivitetslogger
+                )
+
+                val ytelser = ModelYtelser(
+                    hendelseId = UUID.randomUUID(),
+                    aktørId = message["aktørId"].asText(),
+                    fødselsnummer = message["fødselsnummer"].asText(),
+                    organisasjonsnummer = message["organisasjonsnummer"].asText(),
+                    vedtaksperiodeId = message["vedtaksperiodeId"].asText(),
+                    sykepengehistorikk = sykepengehistorikk,
+                    foreldrepenger = foreldrepenger,
+                    rapportertdato = message["@besvart"].asLocalDateTime(),
+                    originalJson = message.toJson()
+                )
+
+                listeners.forEach { it.onYtelser(ytelser) }
+
+                if (aktivitetslogger.hasMessages()) {
+                    sikkerLogg.info("meldinger om ytelser: $aktivitetslogger")
+                }
+            } catch (err: Aktivitetslogger) {
+                sikkerLogg.info("feil om ytelser: ${err.message}", err)
+            }
+
+
         }
+
+        private fun JsonNode.asLocalDateTime() =
+            asText().let { LocalDateTime.parse(it) }
+
+        private fun asPeriode(jsonNode: JsonNode) =
+            jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json

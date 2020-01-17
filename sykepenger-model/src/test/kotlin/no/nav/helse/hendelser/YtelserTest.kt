@@ -15,9 +15,9 @@ internal class YtelserTest {
     @Test
     fun `siste fraværsdato fra tom sykepengehistorikk`() {
         val ytelser = ytelser(
-            organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             sykepengehistorikk = sykepengehistorikk()
         )
@@ -28,9 +28,9 @@ internal class YtelserTest {
     @Test
     fun `startdato fra sykepengehistorikk med én periode`() {
         val ytelser = ytelser(
-            organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             sykepengehistorikk = sykepengehistorikk(
                 perioder = listOf(
@@ -45,9 +45,9 @@ internal class YtelserTest {
     @Test
     fun `siste fraværsdag fra sykepengehistorikk med flere periode`() {
         val sykepengehistorikkHendelse = ytelser(
-            organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             sykepengehistorikk = sykepengehistorikk(
                 perioder = listOf(
@@ -63,9 +63,9 @@ internal class YtelserTest {
     @Test
     fun `tidslinje fra sykepengehistorikk med overlappende perioder`() {
         val sykepengehistorikkHendelse = ytelser(
-            organisasjonsnummer = organisasjonsnummer,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             sykepengehistorikk = sykepengehistorikk(
                 perioder = listOf(

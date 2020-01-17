@@ -27,7 +27,7 @@ class HendelseProbe: HendelseListener {
         påminnelse.tell()
     }
 
-    override fun onYtelser(ytelser: Ytelser) {
+    override fun onYtelser(ytelser: ModelYtelser) {
         ytelser.tell()
     }
 

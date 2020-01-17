@@ -109,7 +109,7 @@ internal class HendelseMediatorTest : HendelseListener {
                         lestPåminnelse.set(true)
                     }
 
-                    override fun onYtelser(ytelser: Ytelser) {
+                    override fun onYtelser(ytelser: ModelYtelser) {
                         lestYtelser.set(true)
                     }
 

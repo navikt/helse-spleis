@@ -81,7 +81,8 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(inntektsmelding, aktivitetslogger).håndter(inntektsmelding, aktivitetslogger)
     }
 
-    fun håndter(ytelser: Ytelser) {
+
+    fun håndter(ytelser: ModelYtelser) {
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
     }
 

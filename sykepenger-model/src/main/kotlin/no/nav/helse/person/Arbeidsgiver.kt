@@ -134,7 +134,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
         }
     }
 
-    internal fun håndter(person: Person, ytelser: Ytelser) {
+    internal fun håndter(person: Person, ytelser: ModelYtelser) {
         perioder.forEach { it.håndter(person, this, ytelser) }
     }
 

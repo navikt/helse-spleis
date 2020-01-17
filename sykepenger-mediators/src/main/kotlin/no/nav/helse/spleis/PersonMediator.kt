@@ -24,7 +24,7 @@ internal class PersonMediator(
         person(påminnelse) { person -> person.håndter(påminnelse) }
     }
 
-    override fun onYtelser(ytelser: Ytelser) {
+    override fun onYtelser(ytelser: ModelYtelser) {
         person(ytelser) { person -> person.håndter(ytelser) }
     }
 

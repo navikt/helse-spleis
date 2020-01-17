@@ -22,7 +22,7 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(søknad)
     }
 
-    override fun onYtelser(ytelser: Ytelser) {
+    override fun onYtelser(ytelser: ModelYtelser) {
         lagreHendelse(ytelser)
     }
 
