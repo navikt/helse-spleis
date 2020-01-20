@@ -94,6 +94,10 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
     }
 
+    fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
+    }
+
     fun håndter(påminnelse: Påminnelse) {
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
         observers.forEach {

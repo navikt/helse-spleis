@@ -118,6 +118,10 @@ internal class Vedtaksperiode internal constructor(
         if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
     }
 
+    internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId) tilstand.håndter(this, vilkårsgrunnlag)
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId()) return false
         tilstand.håndter(this, påminnelse)
@@ -267,6 +271,9 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        }
+
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: ModelYtelser) {
         }
 
@@ -384,6 +391,21 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             if (vilkårsgrunnlag.erEgenAnsatt())
+                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
+                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
+            }
+
+            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
+                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
+                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+
+            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+            if (vilkårsgrunnlag.erEgenAnsatt)
                 return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
             val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
                 "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
