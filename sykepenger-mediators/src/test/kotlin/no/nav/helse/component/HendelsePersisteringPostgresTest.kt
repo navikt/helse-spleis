@@ -6,12 +6,13 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.behov.Behov
+import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.spleis.HendelseRecorder
 import org.flywaydb.core.Flyway
@@ -20,7 +21,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.util.UUID
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 import javax.sql.DataSource
 
 class HendelsePersisteringPostgresTest {
@@ -77,14 +80,31 @@ class HendelsePersisteringPostgresTest {
             assertHendelse(dataSource, it)
         }
 
-        inntektsmeldingHendelse().also {
+        ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 1000.00, emptyList()),
+            orgnummer = "123456789",
+            fødselsnummer = "01018712345",
+            aktørId = "aktør",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = LocalDate.now(),
+            beregnetInntekt = 1000.00,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = listOf(LocalDate.now().minusDays(1)..LocalDate.now()),
+            ferieperioder = emptyList()
+        ).also {
             dao.onInntektsmelding(it)
             assertHendelse(dataSource, it)
         }
 
-        Vilkårsgrunnlag.Builder().build(generiskBehov().løsBehov(mapOf(
-            "EgenAnsatt" to false
-        )).toJson())!!.also {
+        Vilkårsgrunnlag.Builder().build(
+            generiskBehov().løsBehov(
+                mapOf(
+                    "EgenAnsatt" to false
+                )
+            ).toJson()
+        )!!.also {
             dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }
@@ -102,9 +122,15 @@ class HendelsePersisteringPostgresTest {
 
     private fun assertHendelse(dataSource: DataSource, hendelse: ArbeidstakerHendelse) {
         val alleHendelser = using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT data FROM hendelse WHERE aktor_id = ? AND type = ? ORDER BY id", hendelse.aktørId(), hendelse.hendelsetype().name).map {
-                it.string("data")
-            }.asList)
+            session.run(
+                queryOf(
+                    "SELECT data FROM hendelse WHERE aktor_id = ? AND type = ? ORDER BY id",
+                    hendelse.aktørId(),
+                    hendelse.hendelsetype().name
+                ).map {
+                    it.string("data")
+                }.asList
+            )
         }
         assertEquals(1, alleHendelser.size, "Antall hendelser skal være 1, men var ${alleHendelser.size}")
     }

@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.SpolePeriode
 import no.nav.helse.TestConstants.foreldrepenger
 import no.nav.helse.TestConstants.foreldrepengeytelse
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.objectMapper
@@ -19,17 +18,17 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.*
 import no.nav.helse.juli
 import no.nav.helse.løsBehov
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
-import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.KClass
@@ -65,9 +64,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
 
-        vedtaksperiode.håndter(inntektsmeldingHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(inntektsmelding())
+        }
 
-        assertTilstandsendring(TIL_INFOTRYGD, Inntektsmelding::class)
+        assertTilstandsendring(TIL_INFOTRYGD, ModelInntektsmelding::class)
     }
 
     @Test
@@ -129,7 +130,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
 
-        vedtaksperiode.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmelding())
 
         assertTilstandsendring(MOTTATT_INNTEKTSMELDING)
         assertPåminnelse(Duration.ofDays(30))
@@ -186,7 +187,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding etter sendt søknad`() {
         val vedtaksperiode = beInSendtSøknad()
 
-        vedtaksperiode.håndter(inntektsmeldingHendelse())
+        vedtaksperiode.håndter(inntektsmelding())
 
         assertTilstandsendring(VILKÅRSPRØVING)
         assertPåminnelse(Duration.ofHours(1))
@@ -252,8 +253,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
-        vedtaksperiode.håndter(inntektsmeldingHendelse())
-
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(inntektsmelding())
+        }
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
@@ -297,8 +299,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             fravær = emptyList()
         )
 
-        val inntektsmeldingHendelse =
-            inntektsmeldingHendelse(arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))))
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16))
+        )
 
         val vedtaksperiode = beInMottattInntektsmelding(
             tidslinje = tidslinje(
@@ -328,25 +331,26 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
         vedtaksperiode.håndter(
-            Builder().build(
-                generiskBehov().løsBehov(
-                    mapOf(
-                        "EgenAnsatt" to false,
-                        "Inntektsberegning" to (1.rangeTo(12)).map {
-                            Vilkårsgrunnlag.Måned(
-                                årMåned = YearMonth.of(2018, it),
-                                inntektsliste = listOf(
-                                    Inntekt(
-                                        beløp = 666.0,
-                                        inntektstype = Inntektstype.LOENNSINNTEKT,
-                                        orgnummer = "123456789"
-                                    )
-                                )
+            ModelVilkårsgrunnlag(
+                hendelseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                orgnummer = organisasjonsnummer,
+                rapportertDato = LocalDateTime.now(),
+                inntektsmåneder = (1.rangeTo(12)).map {
+                    ModelVilkårsgrunnlag.Måned(
+                        årMåned = YearMonth.of(2018, it),
+                        inntektsliste = listOf(
+                            ModelVilkårsgrunnlag.Inntekt(
+                                beløp = 1000.0
                             )
-                        }
+                        )
                     )
-                ).toJson()
-            )!!
+                },
+                erEgenAnsatt = false,
+                aktivitetslogger = Aktivitetslogger()
+            )
         )
 
         assertTilstandsendring(BEREGN_UTBETALING)
@@ -370,7 +374,17 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(Builder().build(generiskBehov().løsBehov(mapOf("EgenAnsatt" to true)).toJson())!!)
+        vedtaksperiode.håndter(ModelVilkårsgrunnlag(
+            hendelseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiode.toString(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            orgnummer = organisasjonsnummer,
+            rapportertDato = LocalDateTime.now(),
+            inntektsmåneder = emptyList(),
+            erEgenAnsatt = true,
+            aktivitetslogger = Aktivitetslogger()
+        ))
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -393,7 +407,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     mapOf(
                         "EgenAnsatt" to false,
                         "Inntektsberegning" to (1.rangeTo(12)).map {
-                            Vilkårsgrunnlag.Måned(
+                            Måned(
                                 årMåned = YearMonth.of(2018, it),
                                 inntektsliste = listOf(
                                     Inntekt(
@@ -646,9 +660,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeTom = 20.juli
         val sisteHistoriskeSykedag = periodeFom.minusMonths(7)
 
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            refusjon = Refusjon(opphoersdato = periodeTom.plusDays(1))
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = periodeTom.plusDays(1),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = null
+            )
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
@@ -680,9 +698,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         val sisteHistoriskeSykedag = periodeFom.minusMonths(7)
 
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            refusjon = Refusjon(opphoersdato = periodeTom)
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = periodeTom,
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = null
+            )
         )
 
         val vedtaksperiode = beInBeregnUtbetaling(
@@ -708,46 +730,18 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `arbeidsgiver har ikke oppgitt opphørsdato for refusjon`() {
-        val periodeFom = 1.juli
-        val periodeTom = 20.juli
-
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            refusjon = Refusjon(opphoersdato = null)
-        )
-
-        val vedtaksperiode = beInBeregnUtbetaling(
-            tidslinje(
-                fom = periodeFom,
-                tom = periodeTom,
-                inntektsmeldingTidslinje = inntektsmeldingHendelse.sykdomstidslinje()
-            )
-        )
-
-        vedtaksperiode.håndter(
-            Person(aktørId, fødselsnummer),
-            Arbeidsgiver(organisasjonsnummer),
-            ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
-                )
-            )
-        )
-
-        assertTilstandsendring(TIL_GODKJENNING)
-    }
-
-    @Test
     fun `arbeidsgiver endrer refusjonen etter utbetalingsperioden`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            endringerIRefusjoner = listOf(
-                EndringIRefusjon(endringsdato = periodeTom.plusDays(1))
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = listOf(
+                    periodeTom.plusDays(1)
+                )
             )
         )
 
@@ -781,9 +775,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             egenmeldinger = emptyList(),
             fravær = emptyList()
         ).sykdomstidslinje(),
-        inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16))),
-            endringerIRefusjoner = emptyList()
+        inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmelding(
+            arbeidsgiverperioder = listOf(fom..fom.plusDays(16))
         ).sykdomstidslinje()
     ): ConcreteSykdomstidslinje {
         return nySøknadHendelse(
@@ -830,10 +823,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 19.juli
 
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            endringerIRefusjoner = listOf(
-                EndringIRefusjon(endringsdato = periodeTom)
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = listOf(periodeTom)
             )
         )
 
@@ -864,11 +859,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val inntektsmeldingHendelse = inntektsmeldingHendelse(
-            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
-            endringerIRefusjoner = listOf(
-                EndringIRefusjon(endringsdato = null)
-
+        val inntektsmeldingHendelse = inntektsmelding(
+            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = null
             )
         )
 
@@ -1016,6 +1012,29 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         additionalParams = mapOf()
     )
 
+    private fun inntektsmelding(
+        arbeidsgiverperioder: List<ClosedRange<LocalDate>> = listOf(10.september..10.september.plusDays(16)),
+        refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
+            opphørsdato = LocalDate.now(),
+            beløpPrMåned = 1000.0,
+            endringerIRefusjon = emptyList()
+        )
+    ) =
+        ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = refusjon,
+            orgnummer = "orgnr",
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = LocalDate.now(),
+            beregnetInntekt = 1000.0,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            ferieperioder = emptyList()
+        )
+
     private fun beInStartTilstand(
         nySøknad: NySøknad = nySøknadHendelse(
             aktørId = aktørId,
@@ -1055,15 +1074,15 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInMottattInntektsmelding(
-        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()
+        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
     ) =
         beIn(Vedtaksperiode.MottattInntektsmelding, tidslinje)
 
-    private fun beInVilkårsprøving(tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()) =
+    private fun beInVilkårsprøving(tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()) =
         beIn(Vedtaksperiode.Vilkårsprøving, tidslinje)
 
     private fun beInBeregnUtbetaling(
-        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknadHendelse().sykdomstidslinje() + inntektsmeldingHendelse().sykdomstidslinje()
+        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
     ) =
         beIn(Vedtaksperiode.BeregnUtbetaling, tidslinje)
 
@@ -1097,7 +1116,26 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         ),
         sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
-        inntektsmelding: Inntektsmelding = inntektsmeldingHendelse(),
+        inntektsmelding: ModelInntektsmelding = ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = emptyList()
+            ),
+            orgnummer = "orgnr",
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = LocalDate.now(),
+            beregnetInntekt = 1000.0,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = listOf(
+                10.september..10.september.plusDays(16)
+            ),
+            ferieperioder = emptyList()
+        ),
         nySøknad: NySøknad = nySøknadHendelse()
     ) =
         beInBeregnUtbetaling(sendtSøknad.sykdomstidslinje() + inntektsmelding.sykdomstidslinje() + nySøknad.sykdomstidslinje()).apply {

@@ -40,7 +40,7 @@ class HendelseProbe: HendelseListener {
         vilkårsgrunnlag.tell()
     }
 
-    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
+    override fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {
         inntektsmelding.tell()
     }
 

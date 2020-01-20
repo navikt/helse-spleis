@@ -214,7 +214,7 @@ internal object TestConstants {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Refusjon = Refusjon(
             beloepPrMnd = 666.toBigDecimal(),
-            opphoersdato = null
+            opphoersdato = LocalDate.now()
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
     ) =

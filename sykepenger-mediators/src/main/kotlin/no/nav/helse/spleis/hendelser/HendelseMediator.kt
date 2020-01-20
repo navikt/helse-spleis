@@ -95,12 +95,10 @@ internal class HendelseMediator(
         }
 
         override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            Inntektsmelding.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onInntektsmelding(this)
-                hendelseRecorder.onInntektsmelding(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe inntektsmelding til domenetype")
+            val inntektsmelding = message.asModelInntektsmelding()
+                hendelseProbe.onInntektsmelding(inntektsmelding)
+                hendelseRecorder.onInntektsmelding(inntektsmelding)
+                person(inntektsmelding).håndter(inntektsmelding)
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {

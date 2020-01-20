@@ -126,7 +126,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<Inntektsmelding>())
+                    håndter(any<ModelInntektsmelding>())
                 } answers {
                     lestInntektsmelding.set(true)
                 }

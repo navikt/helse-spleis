@@ -104,6 +104,7 @@ internal class InntektsmeldingHendelseTest {
             førsteFraværsdag,
             beregnetInntekt,
             aktivitetslogger,
+            "{}",
             listOf(1.januar .. 16.januar),
             emptyList()
         )

@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.TestConstants
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.toJson
@@ -45,6 +45,6 @@ internal class ArbeidstakerHendelseTest {
 
     @Test
     internal fun `deserialize Inntektsmelding`() {
-        assertTrue(ArbeidstakerHendelse.fromJson(inntektsmelding) is Inntektsmelding)
+        assertTrue(ArbeidstakerHendelse.fromJson(inntektsmelding) is ModelInntektsmelding)
     }
 }

@@ -1,15 +1,13 @@
 package no.nav.helse.person
 
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.Grunnbeløp.Companion.`6G`
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
@@ -17,9 +15,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.*
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.math.RoundingMode
 import java.nio.ByteBuffer
@@ -58,7 +53,7 @@ internal class Vedtaksperiode internal constructor(
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
-        this.sykdomstidslinje.hendelser().førsteAvType<Inntektsmelding>()
+        this.sykdomstidslinje.hendelser().førsteAvType<ModelInntektsmelding>()
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this)
@@ -73,7 +68,7 @@ internal class Vedtaksperiode internal constructor(
     internal fun dataForVilkårsvurdering() = dataForVilkårsvurdering
     internal fun inntektFraInntektsmelding() = inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt?.toDouble()
 
-    internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)
+    private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
 
     internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
@@ -89,14 +84,6 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad) = overlapperMed(sendtSøknad).also {
         if (it) tilstand.håndter(this, sendtSøknad)
-    }
-
-    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
-        return overlapperMed(inntektsmelding).also {
-            if (it) {
-                tilstand.håndter(this, inntektsmelding)
-            }
-        }
     }
 
     internal fun håndter(inntektsmelding: ModelInntektsmelding): Boolean {
@@ -157,9 +144,11 @@ internal class Vedtaksperiode internal constructor(
         tilstand = nyTilstand
         block()
 
-        tilstand.entering(this, event)
-
-        emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, tilstand.timeout)
+        try {
+            tilstand.entering(this, event)
+        } finally {
+            emitVedtaksperiodeEndret(tilstand.type, event, previousStateName, tilstand.timeout)
+        }
     }
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
@@ -268,10 +257,6 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             inntektsmelding.error("uventet Inntektsmelding")
             vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
@@ -334,11 +319,6 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
@@ -351,12 +331,6 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal object MottattSendtSøknad : Vedtaksperiodetilstand {
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt?.toDouble()
-            vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
@@ -700,7 +674,6 @@ internal class Vedtaksperiode internal constructor(
         internal companion object {
             private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
-                .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
             fun fromJsonNode(json: JsonNode): Memento {
@@ -721,7 +694,23 @@ internal class Vedtaksperiode internal constructor(
             }
         }
 
-        fun state(): String = objectMapper.writeValueAsString(this)
+        fun state(): String =
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "id" to this.id,
+                    "aktørId" to this.aktørId,
+                    "fødselsnummer" to this.fødselsnummer,
+                    "organisasjonsnummer" to this.organisasjonsnummer,
+                    "tilstandType" to this.tilstandType,
+                    "sykdomstidslinje" to this.sykdomstidslinje,
+                    "maksdato" to this.maksdato,
+                    "utbetalingslinjer" to this.utbetalingslinjer,
+                    "godkjentAv" to this.godkjentAv,
+                    "utbetalingsreferanse" to this.utbetalingsreferanse,
+                    "førsteFraværsdag" to this.førsteFraværsdag,
+                    "dataForVilkårsvurdering" to this.dataForVilkårsvurdering
+                )
+            )
     }
 }
 

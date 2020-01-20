@@ -64,14 +64,6 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
-    fun håndter(inntektsmelding: Inntektsmelding) {
-        if (!inntektsmelding.kanBehandles()) {
-            invaliderAllePerioder(inntektsmelding)
-            throw UtenforOmfangException("kan ikke behandle inntektsmelding", inntektsmelding)
-        }
-        finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
-    }
-
     fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntektsmelding.valider()
         if (inntektsmelding.hasErrors()) {

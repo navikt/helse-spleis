@@ -8,7 +8,7 @@ interface HendelseListener {
     fun onYtelser(ytelser: ModelYtelser) {}
     fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {}
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {}
-    fun onInntektsmelding(inntektsmelding: Inntektsmelding) {}
+    fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {}
     fun onNySøknad(søknad: NySøknad) {}
     fun onSendtSøknad(søknad: SendtSøknad) {}
     fun onUnprocessedMessage(message: String) {}

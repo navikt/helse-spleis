@@ -14,7 +14,7 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(søknad)
     }
 
-    override fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
+    override fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {
         lagreHendelse(inntektsmelding)
     }
 

@@ -1,32 +1,31 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.TestConstants
+import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class ModelVilkårsgrunnlagTest {
     private val aktivitetslogger = Aktivitetslogger()
-    val vedtaksperiodeId = UUID.randomUUID()
-    val aktørId = "123"
-    val fødselsnummer = "234"
-    val orgnummer = "345"
-    private val gammelInntektsmelding = TestConstants.inntektsmeldingHendelse(
-        beregnetInntekt = 1000.toBigDecimal(),
-        førsteFraværsdag = 10.januar,
-        arbeidsgiverperioder = listOf(Periode(fom = 8.januar, tom = 10.januar))
-    )
+    private val vedtaksperiodeId = UUID.randomUUID()
+    private val aktørId = "123"
+    private val fødselsnummer = "234"
+    private val orgnummer = "345"
     private val gammelSendtSøknad = TestConstants.sendtSøknadHendelse(
         søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.januar, tom = 12.januar))
     )
@@ -63,7 +62,7 @@ internal class ModelVilkårsgrunnlagTest {
             .map { Måned(YearMonth.of(2018, it), listOf(Inntekt(1000.0))) })
 
         val vedtaksperiode = vedtaksperiode()
-        vedtaksperiode.håndter(gammelInntektsmelding)
+        vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
         val beforeRestore = vedtaksperiode.dataForVilkårsvurdering()
@@ -121,7 +120,15 @@ internal class ModelVilkårsgrunnlagTest {
             førsteFraværsdag = 10.januar,
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,
-            arbeidsgiverperioder = listOf(),
-            ferieperioder = listOf()
+            arbeidsgiverperioder = listOf(8.januar..10.januar),
+            ferieperioder = listOf(),
+            originalJson = inntektsmeldingDTO(
+                beregnetInntekt = BigDecimal.valueOf(1000.0),
+                arbeidsgiverperioder = listOf(Periode(fom = 8.januar, tom = 10.januar)),
+                refusjon = Refusjon(
+                    beloepPrMnd = BigDecimal.valueOf(1000.0),
+                    opphoersdato = LocalDate.now()
+                )
+            ).toJsonNode().toString()
         )
 }

@@ -1,18 +1,20 @@
 package no.nav.helse.arbeidsgiver
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants
 import no.nav.helse.fixtures.januar
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.testhelpers.InntektsmeldingHendelseWrapper
-import no.nav.helse.testhelpers.inntektsmelding
 import no.nav.helse.person.InntektHistorie
+import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
+import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverTest {
@@ -55,15 +57,33 @@ internal class ArbeidsgiverTest {
 
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
-        val inntektsmelding = inntektsmelding(InntektsmeldingHendelseWrapper) {
-            this.beregnetInntekt = 120.0
-            this.førsteFraværsdag = 1.januar
-        }
+        val inntektsmelding = ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 120.0,
+                endringerIRefusjon = null
+            ),
+            orgnummer = "orgnr",
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 120.0,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = listOf(10.september..10.september.plusDays(16)),
+            ferieperioder = emptyList()
+        )
+
         val arbeidsgiver = Arbeidsgiver("12345678")
-        arbeidsgiver.håndter(inntektsmelding)
+
+        assertThrows<Aktivitetslogger> {
+            arbeidsgiver.håndter(inntektsmelding)
+        }
 
         assertEquals(1, arbeidsgiver.memento().inntektHistorie.inntekter.size)
-        assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntektHistorie.inntekter.first().beløp)
+        assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntektHistorie.inntekter.first().beløp.setScale(2))
         assertEquals(1.januar, arbeidsgiver.memento().inntektHistorie.inntekter.first().fom)
     }
 

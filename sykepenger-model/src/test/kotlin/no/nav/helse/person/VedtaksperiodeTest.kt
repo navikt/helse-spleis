@@ -8,23 +8,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.fixtures.S
 import no.nav.helse.fixtures.april
+import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.juli
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
+import java.time.LocalDateTime
+import java.util.*
 
 internal class VedtaksperiodeTest {
     private companion object {
@@ -207,9 +206,9 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `første fraversdag skal retur🅱️ere første fraversdag fra inntektsmelding`() {
+    fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
         val førsteFraværsdag = 20.april
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(inntektsmeldingHendelse(
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(inntektsmelding(
             førsteFraværsdag = førsteFraværsdag
         ))
 
@@ -231,4 +230,24 @@ internal class VedtaksperiodeTest {
 
         assertEquals(null, vedtaksperiode.førsteFraværsdag())
     }
+
+    private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =
+        ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = null
+            ),
+            orgnummer = "orgnr",
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = 1000.0,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = listOf(10.september..10.september.plusDays(16)),
+            ferieperioder = emptyList()
+        )
 }

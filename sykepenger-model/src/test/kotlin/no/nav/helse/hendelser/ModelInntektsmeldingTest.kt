@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.*
 
@@ -121,6 +120,7 @@ internal class ModelInntektsmeldingTest {
             førsteFraværsdag,
             beregnetInntekt,
             aktivitetslogger,
+            "{}",
             arbeidsgiverperioder,
             ferieperioder
         )

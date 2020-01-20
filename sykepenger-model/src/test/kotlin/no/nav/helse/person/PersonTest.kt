@@ -1,8 +1,5 @@
 package no.nav.helse.person
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.TestConstants.inntektsmeldingDTO
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
@@ -11,27 +8,21 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.juli
-import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
-import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.*
+import no.nav.helse.september
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.collections.set
 
 internal class PersonTest {
@@ -55,7 +46,6 @@ internal class PersonTest {
     fun `uten arbeidsgiver`() {
         assertThrows<UtenforOmfangException> { testPerson.håndter(nySøknadHendelse(arbeidsgiver = null)) }
         assertThrows<UtenforOmfangException> { testPerson.håndter(sendtSøknadHendelse(arbeidsgiver = null)) }
-        assertThrows<UtenforOmfangException> { testPerson.håndter(inntektsmeldingHendelse(virksomhetsnummer = null)) }
     }
 
     @Test
@@ -136,12 +126,10 @@ internal class PersonTest {
 
     @Test
     internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        testPerson.also {
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = "123456789"
-                )
-            )
+        assertThrows<Aktivitetslogger> {
+            testPerson.also {
+                it.håndter(inntektsmelding())
+            }
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -159,11 +147,7 @@ internal class PersonTest {
                 )
             )
 
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = organisasjonsnummer
-                )
-            )
+            it.håndter(inntektsmelding())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -347,20 +331,19 @@ internal class PersonTest {
                     fravær = emptyList()
                 )
             )
-            it.håndter(
-                inntektsmeldingHendelse(
+            it.håndter(inntektsmelding(
+                virksomhetsnummer = "12",
+                førsteFraværsdag = 1.juli,
+                arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+            ))
+
+            assertThrows<Aktivitetslogger> {
+                it.håndter(inntektsmelding(
                     virksomhetsnummer = "12",
                     førsteFraværsdag = 1.juli,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
-                )
-            )
-            it.håndter(
-                inntektsmeldingHendelse(
-                    virksomhetsnummer = "12",
-                    førsteFraværsdag = 1.juli,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
-                )
-            )
+                    arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+                ))
+            }
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -487,33 +470,6 @@ internal class PersonTest {
         assertVedtaksperiodeIkkeEndret()
     }
 
-    @Test
-    fun `motta en inntektsmelding som ikke kan behandles etter ny søknad`() {
-        testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
-
-            val inntektsmeldingJson = inntektsmeldingDTO().toJsonNode().also {
-                (it as ObjectNode).remove("virksomhetsnummer")
-            }
-            val inntektsmeldingHendelse = requireNotNull(Inntektsmelding.Builder().build(inntektsmeldingJson.toString()))
-
-            assertThrows<UtenforOmfangException> {
-                it.håndter(inntektsmeldingHendelse)
-            }
-
-            assertVedtaksperiodeEndret()
-            assertPersonEndret()
-            assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD)
-        }
-    }
-
     private fun vedtaksperiodeIdForPerson() =
         testObserver.tilstandsendringer.keys.first()
 
@@ -570,9 +526,29 @@ internal class PersonTest {
         assertFalse(this.testObserver.personEndret)
     }
 
-    private fun assertBehov(vararg behovstype: Behovstype) {
-        assertTrue(behovstype.all { behov -> testObserver.behovsliste.any { it.behovType().contains(behov.name) } })
-    }
+    private fun inntektsmelding(
+        virksomhetsnummer: String = organisasjonsnummer,
+        arbeidsgiverperioder: List<ClosedRange<LocalDate>> = listOf(10.september..10.september.plusDays(16)),
+        førsteFraværsdag: LocalDate = LocalDate.now()
+    ) =
+        ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(
+                opphørsdato = LocalDate.now(),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = null
+            ),
+            orgnummer = virksomhetsnummer,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = 1000.0,
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}",
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            ferieperioder = emptyList()
+        )
 
     private class TestPersonObserver : PersonObserver {
         internal val tilstandsendringer: MutableMap<UUID, VedtaksperiodeObserver.StateChangeEvent> = mutableMapOf()

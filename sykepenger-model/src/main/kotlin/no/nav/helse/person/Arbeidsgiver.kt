@@ -124,13 +124,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding) {
-        inntektHistorie.add(inntektsmelding)
-        if (perioder.none { it.håndter(inntektsmelding) }) {
-            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding)
-        }
-    }
-
     internal fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntektHistorie.add(inntektsmelding)
         if (perioder.none { it.håndter(inntektsmelding) }) {

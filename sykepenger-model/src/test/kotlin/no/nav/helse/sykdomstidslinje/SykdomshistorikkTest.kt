@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -24,7 +24,8 @@ internal class SykdomshistorikkTest {
     private lateinit var inspektør: HistorikkInspektør
 
     private lateinit var historikk: Sykdomshistorikk
-    @BeforeEach internal fun initialiser() {
+    @BeforeEach
+    internal fun initialiser() {
         historikk = Sykdomshistorikk()
     }
 
@@ -38,10 +39,12 @@ internal class SykdomshistorikkTest {
     @Test
     internal fun `SendtSøknad mottatt`() {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
-        historikk.håndter(sendtSøknad(
-            ModelSendtSøknad.Periode.Sykdom(8.januar,10.januar, 100),
-            ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
-        ))
+        historikk.håndter(
+            sendtSøknad(
+                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            )
+        )
         val inspektør = HistorikkInspektør(historikk)
         assertEquals(2, historikk.size)
         assertEquals(11, historikk.sykdomstidslinje().length())
@@ -54,15 +57,21 @@ internal class SykdomshistorikkTest {
 
     }
 
-    @Test internal fun `Inntektsmelding mottatt`() {
+    @Test
+    internal fun `Inntektsmelding mottatt`() {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
-        historikk.håndter(sendtSøknad(
-            ModelSendtSøknad.Periode.Sykdom(8.januar,10.januar, 100),
-            ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
-        ))
-        historikk.håndter(inntektsmelding(
-            listOf(1.januar..3.januar, 9.januar..12.januar),
-            listOf(4.januar..8.januar)))
+        historikk.håndter(
+            sendtSøknad(
+                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            )
+        )
+        historikk.håndter(
+            inntektsmelding(
+                listOf(1.januar..3.januar, 9.januar..12.januar),
+                listOf(4.januar..8.januar)
+            )
+        )
         val inspektør = HistorikkInspektør(historikk)
         assertEquals(3, historikk.size)
         assertEquals(12, historikk.sykdomstidslinje().length())
@@ -78,28 +87,26 @@ internal class SykdomshistorikkTest {
 
     }
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>)
-         = ModelNySøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            "12345",
-            "987654321",
-            LocalDateTime.now(),
-            listOf(*sykeperioder),
-            Aktivitetslogger(),
-            "{}"
-        )
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
+        UUID.randomUUID(),
+        UNG_PERSON_FNR_2018,
+        "12345",
+        "987654321",
+        LocalDateTime.now(),
+        listOf(*sykeperioder),
+        Aktivitetslogger(),
+        "{}"
+    )
 
-    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode)
-         = ModelSendtSøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            "12345",
-            "987654321",
-            LocalDateTime.now(),
-            listOf(*perioder),
-            Aktivitetslogger()
-        )
+    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode) = ModelSendtSøknad(
+        UUID.randomUUID(),
+        UNG_PERSON_FNR_2018,
+        "12345",
+        "987654321",
+        LocalDateTime.now(),
+        listOf(*perioder),
+        Aktivitetslogger()
+    )
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
@@ -110,20 +117,21 @@ internal class SykdomshistorikkTest {
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) = ModelInntektsmelding(
-            UUID.randomUUID(),
-            ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            "88888888",
-            "12020052345",
-            "100010101010",
-            1.februar.atStartOfDay(),
-            førsteFraværsdag,
-            beregnetInntekt,
-            Aktivitetslogger(),
-            arbeidsgiverperioder,
-            ferieperioder
-        )
+        UUID.randomUUID(),
+        ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+        "88888888",
+        "12020052345",
+        "100010101010",
+        1.februar.atStartOfDay(),
+        førsteFraværsdag,
+        beregnetInntekt,
+        Aktivitetslogger(),
+        "{}",
+        arbeidsgiverperioder,
+        ferieperioder
+    )
 
-    private class HistorikkInspektør(sykdomshistorikk: Sykdomshistorikk): SykdomshistorikkVisitor {
+    private class HistorikkInspektør(sykdomshistorikk: Sykdomshistorikk) : SykdomshistorikkVisitor {
         internal val hendelseSykdomstidslinje = mutableListOf<ConcreteSykdomstidslinje>()
         internal val beregnetSykdomstidslinjer = mutableListOf<ConcreteSykdomstidslinje>()
         internal val hendelser = mutableListOf<SykdomstidslinjeHendelse>()

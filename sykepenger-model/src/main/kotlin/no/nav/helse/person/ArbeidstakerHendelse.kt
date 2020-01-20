@@ -66,7 +66,7 @@ abstract class ArbeidstakerHendelse protected constructor(
         fun fromJson(json: String): ArbeidstakerHendelse {
             return objectMapper.readTree(json).let {
                 when (val hendelsetype = Hendelsestype.valueOf(it["type"].textValue())) {
-                    Hendelsestype.Inntektsmelding -> Inntektsmelding.fromJson(json)
+                    Hendelsestype.Inntektsmelding -> ModelInntektsmelding.fromJson(json)
                     Hendelsestype.NySøknad -> ModelNySøknad.fromJson(json)
                     Hendelsestype.SendtSøknad -> SendtSøknad.fromJson(json)
                     Hendelsestype.Ytelser -> ModelYtelser.fromJson(json)

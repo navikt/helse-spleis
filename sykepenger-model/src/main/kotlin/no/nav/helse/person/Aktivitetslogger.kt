@@ -48,7 +48,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
     override fun toString(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
-        results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }} \n\t")
+        results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }?: ""} \n\t")
         append("Severe errors", severe, results)
         append("Errors", error, results)
         append("Warnings", warn, results)
