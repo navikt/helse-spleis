@@ -31,13 +31,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(nySøknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
+    fun håndter(nySøknad: ModelNySøknad) {
         nySøknad.valider()
         if (nySøknad.hasErrors()) {
-            invaliderAllePerioder(nySøknad, aktivitetslogger)
+            invaliderAllePerioder(nySøknad)
             nySøknad.expectNoErrors()
         }
-        finnEllerOpprettArbeidsgiver(nySøknad, aktivitetslogger).håndter(nySøknad, aktivitetslogger)
+        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
     fun håndter(sendtSøknad: SendtSøknad) {
@@ -55,13 +55,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
-    fun håndter(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
+    fun håndter(sendtSøknad: ModelSendtSøknad) {
         sendtSøknad.valider()
         if (sendtSøknad.hasErrors()) {
-            invaliderAllePerioder(sendtSøknad, aktivitetslogger)
+            invaliderAllePerioder(sendtSøknad)
             sendtSøknad.expectNoErrors()
         }
-        finnEllerOpprettArbeidsgiver(sendtSøknad, aktivitetslogger).håndter(sendtSøknad, aktivitetslogger)
+        finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
     fun håndter(inntektsmelding: Inntektsmelding) {
@@ -72,13 +72,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
 
-    fun håndter(inntektsmelding: ModelInntektsmelding, aktivitetslogger: Aktivitetslogger) {
+    fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntektsmelding.valider()
         if (inntektsmelding.hasErrors()) {
-            invaliderAllePerioder(inntektsmelding, aktivitetslogger)
+            invaliderAllePerioder(inntektsmelding)
             inntektsmelding.expectNoErrors()
         }
-        finnEllerOpprettArbeidsgiver(inntektsmelding, aktivitetslogger).håndter(inntektsmelding, aktivitetslogger)
+        finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
 
 
@@ -138,31 +138,23 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
     }
 
-    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) {
-        arbeidsgivere.forEach { (_, arbeidsgiver) ->
-            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse, aktivitetslogger)
-        }
-    }
-
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        invaliderAllePerioder(arbeidstakerHendelse, Aktivitetslogger())
+        arbeidsgivere.forEach { (_, arbeidsgiver) ->
+            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
+        }
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        finnEllerOpprettArbeidsgiver(hendelse, Aktivitetslogger())
-
-    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse, aktivitetslogger: Aktivitetslogger) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {
-                    aktivitetslogger.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
-                    invaliderAllePerioder(hendelse, aktivitetslogger)
-                    throw aktivitetslogger
+                    invaliderAllePerioder(hendelse)
+                    hendelse.severe("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
                 }
             }
         }
@@ -236,11 +228,11 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         fun restore(memento: Memento): Person {
             return Person(memento.aktørId, memento.fødselsnummer)
                 .apply {
-                    this.arbeidsgivere.putAll(memento.arbeidsgivere.map {
-                        Arbeidsgiver.restore(it).also {
-                            it.addObserver(this)
-                        }.let {
-                            it.organisasjonsnummer() to it
+                    this.arbeidsgivere.putAll(memento.arbeidsgivere.map { arbeidsgiverMemento ->
+                        Arbeidsgiver.restore(arbeidsgiverMemento).also { arbeidsgiver ->
+                            arbeidsgiver.addObserver(this)
+                        }.let { arbeidsgiver ->
+                            arbeidsgiver.organisasjonsnummer() to arbeidsgiver
                         }
                     })
                 }

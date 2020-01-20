@@ -30,7 +30,7 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
@@ -38,8 +38,8 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `En ny NySøknad er ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
-        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger) }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100))) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -47,9 +47,9 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"), aktivitetslogger)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         assertThrows<Aktivitetslogger> {
-            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"), aktivitetslogger)
+            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
         }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -58,8 +58,8 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)), aktivitetslogger)
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
@@ -68,8 +68,8 @@ internal class NySøknadHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)), aktivitetslogger)
-        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)), aktivitetslogger) }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        assertThrows<Aktivitetslogger> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50))) }
 
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)

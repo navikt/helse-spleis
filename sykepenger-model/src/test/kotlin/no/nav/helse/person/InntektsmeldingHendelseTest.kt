@@ -35,25 +35,25 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(inntektsmelding(), aktivitetslogger)
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_INNTEKTSMELDING, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(inntektsmelding(), aktivitetslogger)
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.førsteFraværsdag(0))
     }
 
     @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt ny søknad og sendt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(inntektsmelding(), aktivitetslogger)
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar,20.januar, 100)))
+        person.håndter(inntektsmelding())
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.VILKÅRSPRØVING, inspektør.tilstand(0))
@@ -61,7 +61,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
-        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(), aktivitetslogger) }
+        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding()) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -69,9 +69,9 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)), aktivitetslogger)
-        person.håndter(inntektsmelding(), aktivitetslogger)
-        assertThrows<Aktivitetslogger>{ person.håndter(inntektsmelding(), aktivitetslogger) }
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(inntektsmelding())
+        assertThrows<Aktivitetslogger>{ person.håndter(inntektsmelding()) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -79,8 +79,8 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `inntektsmelding med tilhørende søknad men med forskjellige arbeidsgivere støttes ikke`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"), aktivitetslogger)
-        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(virksomhetsnummer = "456"), aktivitetslogger) }
+        person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"))
+        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(virksomhetsnummer = "456")) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

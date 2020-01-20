@@ -88,7 +88,7 @@ internal class HendelseMediator(
 
             hendelseProbe.onNySøknad(modelNySøknad, aktivitetslogger)
             hendelseRecorder.onNySøknad(modelNySøknad, aktivitetslogger)
-            person(modelNySøknad).håndter(modelNySøknad, aktivitetslogger)
+            person(modelNySøknad).håndter(modelNySøknad)
 
             if (aktivitetslogger.hasMessages()) {
                 sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")

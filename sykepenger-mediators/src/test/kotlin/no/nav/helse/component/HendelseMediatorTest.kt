@@ -114,7 +114,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<ModelNySøknad>(), any())
+                    håndter(any<ModelNySøknad>())
                 } answers {
                     lestNySøknad.set(true)
                 }
