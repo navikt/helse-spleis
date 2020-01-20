@@ -12,12 +12,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.ApplicationBuilder
-import no.nav.helse.SpolePeriode
+import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Topics
 import no.nav.helse.Topics.behovTopic
 import no.nav.helse.Topics.helseRapidTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
@@ -29,16 +27,12 @@ import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
-import no.nav.helse.handleRequest
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.løsBehov
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.randomPort
-import no.nav.helse.responseBody
-import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
@@ -66,10 +60,9 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.Duration
 import java.time.Duration.ofMillis
+import java.time.LocalDate
 import java.time.YearMonth
-import java.util.HashMap
-import java.util.Properties
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
 @KtorExperimentalAPI
@@ -469,7 +462,11 @@ internal class EndToEndTest {
         inntektsMelding: Inntektsmelding = inntektsmeldingDTO(
             aktørId = aktorID,
             fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer
+            virksomhetsnummer = virksomhetsnummer,
+            refusjon = Refusjon(
+                beloepPrMnd = 666.toBigDecimal(),
+                opphoersdato = LocalDate.now()
+            )
         )
     ) {
         synchronousSendKafkaMessage(

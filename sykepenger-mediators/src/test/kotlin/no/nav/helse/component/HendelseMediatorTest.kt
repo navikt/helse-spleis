@@ -316,7 +316,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
                 arbeidsforholdId = null,
                 beregnetInntekt = BigDecimal.ONE,
-                refusjon = Refusjon(null, null),
+                refusjon = Refusjon(BigDecimal.ONE, LocalDate.now()),
                 endringIRefusjoner = emptyList(),
                 opphoerAvNaturalytelser = emptyList(),
                 gjenopptakelseNaturalytelser = emptyList(),
