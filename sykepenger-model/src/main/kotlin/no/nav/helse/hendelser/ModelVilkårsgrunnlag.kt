@@ -32,11 +32,21 @@ class ModelVilkårsgrunnlag(
             .sumByDouble { it.beløp }
     }
 
-    private fun differanseInntekt(månedsinntektFraInntektsmelding: Double) =
+    private fun avviksprosentInntekt(månedsinntektFraInntektsmelding: Double) =
         ((månedsinntektFraInntektsmelding * 12) - beregnetÅrsInntekt()).absoluteValue / beregnetÅrsInntekt()
 
     internal fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
-        differanseInntekt(månedsinntektFraInntektsmelding) > 0.25
+        avviksprosentInntekt(månedsinntektFraInntektsmelding) > 0.25
+
+    internal fun måHåndteresManuelt(månedsinntektFraInntektsmelding: Double): Resultat {
+        val grunnlag = Grunnlagsdata(
+            erEgenAnsatt,
+            beregnetÅrsInntekt(),
+            avviksprosentInntekt(månedsinntektFraInntektsmelding)
+        )
+
+        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding), grunnlag)
+    }
 
     data class Måned(
         val årMåned: YearMonth,
@@ -45,6 +55,17 @@ class ModelVilkårsgrunnlag(
 
     data class Inntekt(
         val beløp: Double
+    )
+
+    data class Resultat(
+        val resultat: Boolean,
+        val grunnlagsdata: Grunnlagsdata
+    )
+
+    data class Grunnlagsdata(
+        val erEgenAnsatt: Boolean,
+        val beregnetÅrsinntektFraInntektskomponenten: Double,
+        val avviksprosent: Double
     )
 }
 

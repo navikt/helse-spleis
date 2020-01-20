@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
@@ -48,6 +50,8 @@ internal class Vedtaksperiode internal constructor(
     private var utbetalingsreferanse: String? = null
 
     private var førsteFraværsdag: LocalDate? = null
+    private var inntektFraInntektsmelding: Double? = null
+    private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata? = null
 
     private val sykdomshistorikk = Sykdomshistorikk()
 
@@ -66,6 +70,8 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
+    internal fun dataForVilkårsvurdering() = dataForVilkårsvurdering
+    internal fun inntektFraInntektsmelding() = inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt?.toDouble()
 
     internal fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, `6G`)
 
@@ -344,15 +350,17 @@ internal class Vedtaksperiode internal constructor(
 
     }
 
-    private object MottattSendtSøknad : Vedtaksperiodetilstand {
+    internal object MottattSendtSøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
+            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt?.toDouble()
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
+            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
         }
 
@@ -393,30 +401,28 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            if (vilkårsgrunnlag.erEgenAnsatt())
-                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
+            val inntektFraInntektsmelding = requireNotNull(vedtaksperiode.inntektFraInntektsmelding()) {
                 "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
             }
 
-            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
-                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
+            val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
+            vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
+
+            if (behandlesManuelt)
                 return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
 
             vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-            if (vilkårsgrunnlag.erEgenAnsatt)
-                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
+            val inntektFraInntektsmelding = requireNotNull(vedtaksperiode.inntektFraInntektsmelding()) {
                 "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
             }
 
-            val inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
-                ?: return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-            if (vilkårsgrunnlag.harAvvikIOppgittInntekt(inntektFraInntektsmelding.toDouble()))
+            val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
+            vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
+
+            if (behandlesManuelt)
                 return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
 
             vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
@@ -625,6 +631,9 @@ internal class Vedtaksperiode internal constructor(
                 vedtaksperiode.godkjentAv = memento.godkjentAv
                 vedtaksperiode.utbetalingsreferanse = memento.utbetalingsreferanse
                 vedtaksperiode.førsteFraværsdag = memento.førsteFraværsdag
+                vedtaksperiode.dataForVilkårsvurdering = memento.dataForVilkårsvurdering?.let {
+                    objectMapper.convertValue(it)
+                }
             }
         }
 
@@ -668,7 +677,8 @@ internal class Vedtaksperiode internal constructor(
                 ?.let { objectMapper.convertValue<JsonNode>(it) },
             godkjentAv = godkjentAv,
             utbetalingsreferanse = utbetalingsreferanse,
-            førsteFraværsdag = førsteFraværsdag
+            førsteFraværsdag = førsteFraværsdag,
+            dataForVilkårsvurdering = dataForVilkårsvurdering?.let { objectMapper.convertValue<JsonNode>(it) }
         )
     }
 
@@ -683,12 +693,14 @@ internal class Vedtaksperiode internal constructor(
         internal val utbetalingslinjer: JsonNode?,
         internal val godkjentAv: String?,
         internal val utbetalingsreferanse: String?,
-        internal val førsteFraværsdag: LocalDate?
+        internal val førsteFraværsdag: LocalDate?,
+        internal val dataForVilkårsvurdering: JsonNode?
     ) {
 
         internal companion object {
             private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
+                .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
             fun fromJsonNode(json: JsonNode): Memento {
@@ -703,27 +715,13 @@ internal class Vedtaksperiode internal constructor(
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),
                     utbetalingsreferanse = json["utbetalingsreferanse"]?.textValue(),
-                    førsteFraværsdag = json["førsteFraværsdag"].safelyUnwrapDate()
+                    førsteFraværsdag = json["førsteFraværsdag"].safelyUnwrapDate(),
+                    dataForVilkårsvurdering = json["dataForVilkårsvurdering"]
                 )
             }
         }
 
-        fun state(): String =
-            objectMapper.writeValueAsString(
-                mapOf(
-                    "id" to this.id,
-                    "aktørId" to this.aktørId,
-                    "fødselsnummer" to this.fødselsnummer,
-                    "organisasjonsnummer" to this.organisasjonsnummer,
-                    "tilstandType" to this.tilstandType,
-                    "sykdomstidslinje" to this.sykdomstidslinje,
-                    "maksdato" to this.maksdato,
-                    "utbetalingslinjer" to this.utbetalingslinjer,
-                    "godkjentAv" to this.godkjentAv,
-                    "utbetalingsreferanse" to this.utbetalingsreferanse,
-                    "førsteFraværsdag" to this.førsteFraværsdag
-                )
-            )
+        fun state(): String = objectMapper.writeValueAsString(this)
     }
 }
 

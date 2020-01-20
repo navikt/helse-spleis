@@ -83,11 +83,24 @@ class Vilkårsgrunnlag private constructor(
             .sumByDouble { it.beløp }
     }
 
-    private fun differanseInntekt(månedsinntektFraInntektsmelding: Double) =
+    private fun avviksprosentInntekt(månedsinntektFraInntektsmelding: Double) =
         ((månedsinntektFraInntektsmelding * 12) - beregnetÅrsInntekt()).absoluteValue / beregnetÅrsInntekt()
 
-    internal fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
-        differanseInntekt(månedsinntektFraInntektsmelding) > 0.25
+    private fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
+        avviksprosentInntekt(månedsinntektFraInntektsmelding) > 0.25
+
+    internal fun måHåndteresManuelt(månedsinntektFraInntektsmelding: Double): ModelVilkårsgrunnlag.Resultat {
+        val grunnlag = ModelVilkårsgrunnlag.Grunnlagsdata(
+            erEgenAnsatt(),
+            beregnetÅrsInntekt(),
+            avviksprosentInntekt(månedsinntektFraInntektsmelding)
+        )
+
+        return ModelVilkårsgrunnlag.Resultat(
+            erEgenAnsatt() || harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding),
+            grunnlag
+        )
+    }
 
     data class Måned(
         val årMåned: YearMonth,

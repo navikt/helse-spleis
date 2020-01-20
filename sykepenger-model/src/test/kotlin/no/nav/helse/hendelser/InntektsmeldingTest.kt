@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class InntektsmeldingTest {
+internal class zInntektsmeldingTest {
 
     @Test
     internal fun `mellomrom mellom arbeidsgiverperioder skal være arbeidsdager`() {

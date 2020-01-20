@@ -112,7 +112,8 @@ internal class VedtaksperiodeTest {
             sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
-            førsteFraværsdag = null
+            førsteFraværsdag = null,
+            dataForVilkårsvurdering = null
         )
 
         val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(memento)
@@ -156,7 +157,8 @@ internal class VedtaksperiodeTest {
             sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
-            førsteFraværsdag = null
+            førsteFraværsdag = null,
+            dataForVilkårsvurdering = null
         )
 
         val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(jsonRepresentation)
