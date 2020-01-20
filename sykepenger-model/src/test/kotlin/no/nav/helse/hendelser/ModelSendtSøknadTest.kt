@@ -18,11 +18,11 @@ internal class ModelSendtSøknadTest {
     }
 
     private lateinit var sendtSøknad: ModelSendtSøknad
-    private lateinit var problems: Aktivitetslogger
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun setup() {
-        problems = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
@@ -120,7 +120,7 @@ internal class ModelSendtSøknadTest {
             "987654321",
             LocalDateTime.now(),
             listOf(*perioder),
-            problems
+            aktivitetslogger
         )
     }
 }

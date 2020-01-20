@@ -14,9 +14,9 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
+import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.math.RoundingMode
@@ -49,6 +49,8 @@ internal class Vedtaksperiode internal constructor(
 
     private var førsteFraværsdag: LocalDate? = null
 
+    private val sykdomshistorikk = Sykdomshistorikk()
+
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
@@ -56,6 +58,7 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this)
+        sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
         sykdomstidslinje.accept(visitor)
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
