@@ -18,6 +18,10 @@ internal class InntektHistorie {
 
     private val inntekter = mutableListOf<Inntekt>()
 
+    internal fun accept(visitor: ArbeidsgiverVisitor) {
+        visitor.visitIntektHistorie(this)
+    }
+
     fun add(dagen: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
         inntekter.add(Inntekt(dagen, hendelse, beløp))
     }

@@ -10,7 +10,10 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
-internal class Arbeidsgiver private constructor(private val organisasjonsnummer: String, private val id: UUID, private val inntektHistorie: InntektHistorie) {
+internal class Arbeidsgiver private constructor(
+    private val organisasjonsnummer: String,
+    private val id: UUID,
+    private val inntektHistorie: InntektHistorie) {
 
     internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(),
         InntektHistorie()
@@ -76,6 +79,7 @@ internal class Arbeidsgiver private constructor(private val organisasjonsnummer:
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this)
+        inntektHistorie.accept(visitor)
         tidslinjer.forEach { it.accept(visitor) }
         perioder.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgiver(this)

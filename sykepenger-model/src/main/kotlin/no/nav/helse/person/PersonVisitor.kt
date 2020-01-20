@@ -13,6 +13,7 @@ internal interface PersonVisitor: ArbeidsgiverVisitor {
 
 internal interface ArbeidsgiverVisitor: UtbetalingsdagVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
+    fun visitIntektHistorie(inntektHistorie: InntektHistorie) {}
     fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
 }
 
