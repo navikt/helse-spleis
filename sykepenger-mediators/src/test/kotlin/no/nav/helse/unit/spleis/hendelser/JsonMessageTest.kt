@@ -69,6 +69,22 @@ internal class JsonMessageTest {
     }
 
     @Test
+    internal fun `nested keys`() {
+        "{\"foo\": { \"bar\": \"baz\" }}".also { json ->
+            message(json).also {
+                assertThrows<IllegalArgumentException> { it["foo.bar"] }
+                it.requiredKey("foo.bar")
+                assertEquals("baz", it["foo.bar"].textValue())
+            }
+            message(json).also {
+                assertThrows<IllegalArgumentException> { it["foo.bar"] }
+                it.interestedIn("foo.bar")
+                assertEquals("baz", it["foo.bar"].textValue())
+            }
+        }
+    }
+
+    @Test
     internal fun requiredValue() {
         "{}".also {
             assertThrows(it, "foo", "bar")

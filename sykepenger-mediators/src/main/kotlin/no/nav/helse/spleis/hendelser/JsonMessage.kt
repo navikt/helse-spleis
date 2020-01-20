@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser
 
+
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
@@ -10,7 +11,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
 import java.time.LocalDateTime
-
 // Understands a specific JSON-formatted message
 // Implements GoF visitor pattern to enable working on the specific types
 internal open class JsonMessage(private val originalMessage: String, private val problems: Aktivitetslogger) {
@@ -21,6 +21,8 @@ internal open class JsonMessage(private val originalMessage: String, private val
 
     private val json: JsonNode
     private val recognizedKeys = mutableMapOf<String, JsonNode>()
+
+    private val nestedKeySeparator = '.'
 
     init {
         json = try {
@@ -39,26 +41,26 @@ internal open class JsonMessage(private val originalMessage: String, private val
 
     fun requiredKey(key: String) {
         if (isKeyMissing(key)) return problems.error("Missing required key $key")
-        if (json.path(key).isNull) return problems.error("Missing required key $key; value is null")
+        if (node(key).isNull) return problems.error("Missing required key $key; value is null")
         accessor(key)
     }
 
     fun requiredValue(key: String, value: Boolean) {
-        if (isKeyMissing(key) || !json.path(key).isBoolean || json.path(key).booleanValue() != value) {
+        if (isKeyMissing(key) || !node(key).isBoolean || node(key).booleanValue() != value) {
             return problems.error("Required $key is not boolean $value")
         }
         accessor(key)
     }
 
     fun requiredValue(key: String, value: String) {
-        if (isKeyMissing(key) || !json.path(key).isTextual || json.path(key).asText() != value) {
+        if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() != value) {
             return problems.error("Required $key is not string $value")
         }
         accessor(key)
     }
 
     fun requiredValues(key: String, values: List<String>) {
-        if (isKeyMissing(key) || !json.path(key).isArray || !values.all { it in (json.path(key) as ArrayNode).map { node -> node.textValue()} }) {
+        if (isKeyMissing(key) || !node(key).isArray || !values.all { it in (node(key) as ArrayNode).map { node -> node.textValue() } }) {
             return problems.error("Required $key does not contains $values")
         }
         accessor(key)
@@ -73,10 +75,17 @@ internal open class JsonMessage(private val originalMessage: String, private val
     }
 
     private fun accessor(key: String) {
-        recognizedKeys.computeIfAbsent(key) { json.path(key) }
+        recognizedKeys.computeIfAbsent(key) { node(key) }
     }
 
-    private fun isKeyMissing(key: String) = json.path(key).isMissingNode
+    private fun isKeyMissing(key: String) = node(key).isMissingNode
+
+    private fun node(path: String): JsonNode {
+        if (!path.contains(nestedKeySeparator)) return json.path(path)
+        return path.split(nestedKeySeparator).fold(json) { result, key ->
+            result.path(key)
+        }
+    }
 
     operator fun get(key: String): JsonNode =
         requireNotNull(recognizedKeys[key]) { "$key is unknown; keys must be declared as required, forbidden, or interesting" }
