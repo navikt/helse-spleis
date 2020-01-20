@@ -5,7 +5,7 @@ import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
 import java.util.*
 
-internal open class CompositeSykdomstidslinje internal constructor(
+internal class CompositeSykdomstidslinje internal constructor(
     tidslinjer: List<ConcreteSykdomstidslinje>
 ) : ConcreteSykdomstidslinje() {
 

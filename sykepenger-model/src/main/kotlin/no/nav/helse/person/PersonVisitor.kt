@@ -16,12 +16,16 @@ internal interface PersonVisitor: ArbeidsgiverVisitor {
 
 internal interface ArbeidsgiverVisitor: UtbetalingsdagVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
-    fun visitIntektHistorie(inntektHistorie: InntektHistorie) {}
+    fun preVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
+    fun postVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
     fun preVisitTidslinjer() {}
     fun postVisitTidslinjer() {}
     fun preVisitPerioder() {}
     fun postVisitPerioder() {}
     fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
+    fun preVisitInntekter() {}
+    fun postVisitInntekter() {}
+    fun visitInntekt(inntekt: InntektHistorie.Inntekt) {}
 }
 
 internal interface VedtaksperiodeVisitor: SykdomstidslinjeVisitor, SykdomshistorikkVisitor {

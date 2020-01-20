@@ -14,12 +14,22 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class InntektHistorie {
-    private class Inntekt(val fom: LocalDate, val hendelse: ArbeidstakerHendelse, val beløp: BigDecimal)
+    internal class Inntekt(val fom: LocalDate, val hendelse: ArbeidstakerHendelse, val beløp: BigDecimal){
+        fun accept(visitor: ArbeidsgiverVisitor) {
+            visitor.visitInntekt(this)
+        }
+    }
 
     private val inntekter = mutableListOf<Inntekt>()
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.visitIntektHistorie(this)
+        visitor.preVisitInntektHistorie(this)
+
+        visitor.preVisitInntekter()
+        inntekter.forEach{ it.accept(visitor) }
+        visitor.postVisitInntekter()
+
+        visitor.postVisitInntektHistorie(this)
     }
 
     fun add(dagen: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
