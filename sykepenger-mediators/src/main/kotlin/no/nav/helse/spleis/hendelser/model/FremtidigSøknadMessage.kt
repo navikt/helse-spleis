@@ -15,7 +15,7 @@ internal class FremtidigSøknadMessage(originalMessage: String, private val prob
         processor.process(this, problems)
     }
 
-    object Factory : MessageFactory<FremtidigSøknadMessage> {
+    object Factory : MessageFactory {
 
         override fun createMessage(message: String, problems: Aktivitetslogger) =
             FremtidigSøknadMessage(message, problems)

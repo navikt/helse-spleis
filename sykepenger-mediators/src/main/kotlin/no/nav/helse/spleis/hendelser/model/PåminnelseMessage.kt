@@ -21,7 +21,7 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
         processor.process(this, problems)
     }
 
-    object Factory : MessageFactory<PåminnelseMessage> {
+    object Factory : MessageFactory {
 
         override fun createMessage(message: String, problems: Aktivitetslogger) =
             PåminnelseMessage(message, problems)

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
@@ -11,9 +10,6 @@ import no.nav.helse.spleis.hendelser.model.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -69,22 +65,7 @@ internal class HendelseMediator(
 
     private inner class Processor : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            val modelNySøknad = ModelNySøknad(
-                hendelseId = UUID.randomUUID(),
-                fnr = message["fnr"].asText(),
-                aktørId = message["aktorId"].asText(),
-                orgnummer = message["arbeidsgiver"].path("orgnummer").asText(),
-                rapportertdato = message["opprettet"].asText().let { LocalDateTime.parse(it) },
-                sykeperioder = message["soknadsperioder"].map {
-                    Triple(
-                        first = it.path("fom").asLocalDate(),
-                        second = it.path("tom").asLocalDate(),
-                        third = it.path("sykmeldingsgrad").asInt()
-                    )
-                },
-                aktivitetslogger = aktivitetslogger,
-                originalJson = message.toJson()
-            )
+            val modelNySøknad = message.asModelNySøknad()
 
             hendelseProbe.onNySøknad(modelNySøknad, aktivitetslogger)
             hendelseRecorder.onNySøknad(modelNySøknad, aktivitetslogger)
@@ -94,10 +75,6 @@ internal class HendelseMediator(
                 sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
             }
         }
-
-        private fun JsonNode.asLocalDate() =
-            asText().let { LocalDate.parse(it) }
-
 
         override fun process(message: FremtidigSøknadMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json
@@ -127,30 +104,7 @@ internal class HendelseMediator(
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
-            val foreldrepenger = message["@løsning"].path("Foreldrepenger").let {
-                ModelForeldrepenger(
-                    foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                    svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                    aktivitetslogger = aktivitetslogger
-                )
-            }
-
-            val sykepengehistorikk = ModelSykepengehistorikk(
-                perioder = message["@løsning"].path("Sykepengehistorikk").map(::asPeriode),
-                aktivitetslogger = aktivitetslogger
-            )
-
-            val ytelser = ModelYtelser(
-                hendelseId = UUID.randomUUID(),
-                aktørId = message["aktørId"].asText(),
-                fødselsnummer = message["fødselsnummer"].asText(),
-                organisasjonsnummer = message["organisasjonsnummer"].asText(),
-                vedtaksperiodeId = message["vedtaksperiodeId"].asText(),
-                sykepengehistorikk = sykepengehistorikk,
-                foreldrepenger = foreldrepenger,
-                rapportertdato = message["@besvart"].asLocalDateTime(),
-                originalJson = message.toJson()
-            )
+            val ytelser = message.asModelYtelser()
 
             hendelseProbe.onYtelser(ytelser)
             hendelseRecorder.onYtelser(ytelser)
@@ -171,12 +125,6 @@ internal class HendelseMediator(
                 it.addObserver(lagreUtbetalingDao)
                 it.addObserver(vedtaksperiodeProbe)
             }
-
-        private fun JsonNode.asLocalDateTime() =
-            asText().let { LocalDateTime.parse(it) }
-
-        private fun asPeriode(jsonNode: JsonNode) =
-            jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
             // TODO: map til ordentlig domenehendelse uten kobling til json

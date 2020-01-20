@@ -7,9 +7,9 @@ import no.nav.helse.spleis.HendelseStream
 // Implements GoF Mediator pattern to notify unrecognized messages
 // Implements GoF Command pattern for parsing
 internal class Parser(private val director: ParserDirector) : HendelseStream.MessageListener {
-    private val factories = mutableListOf<MessageFactory<*>>()
+    private val factories = mutableListOf<MessageFactory>()
 
-    fun register(factory: MessageFactory<*>) {
+    fun register(factory: MessageFactory) {
         factories.add(factory)
     }
 

@@ -23,7 +23,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val probl
         processor.process(this, problems)
     }
 
-    object Factory : MessageFactory<InntektsmeldingMessage> {
+    object Factory : MessageFactory {
 
         override fun createMessage(message: String, problems: Aktivitetslogger) =
             InntektsmeldingMessage(message, problems)

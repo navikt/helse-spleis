@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 // Understands a specific JSON-formatted message
 // Implements GoF visitor pattern to enable working on the specific types
@@ -81,3 +83,12 @@ internal open class JsonMessage(private val originalMessage: String, private val
 
     fun toJson() = originalMessage
 }
+
+internal fun JsonNode.asLocalDate() =
+    asText().let { LocalDate.parse(it) }
+
+internal fun JsonNode.asLocalDateTime() =
+    asText().let { LocalDateTime.parse(it) }
+
+internal fun asPeriode(jsonNode: JsonNode) =
+    jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()

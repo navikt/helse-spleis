@@ -16,7 +16,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
         processor.process(this, problems)
     }
 
-    object Factory : MessageFactory<SendtSøknadMessage> {
+    object Factory : MessageFactory {
 
         override fun createMessage(message: String, problems: Aktivitetslogger) =
             SendtSøknadMessage(message, problems)

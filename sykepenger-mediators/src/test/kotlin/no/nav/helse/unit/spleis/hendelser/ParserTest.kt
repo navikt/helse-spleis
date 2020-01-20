@@ -12,7 +12,7 @@ internal class ParserTest : Parser.ParserDirector {
 
     @Test
     internal fun `invalid json`() {
-        parser.register(object : MessageFactory<JsonMessage> {
+        parser.register(object : MessageFactory {
             override fun createMessage(message: String, problems: Aktivitetslogger) =
                 JsonMessage(message, problems)
         })
@@ -25,7 +25,7 @@ internal class ParserTest : Parser.ParserDirector {
 
     @Test
     internal fun `severe errors are caught`() {
-        parser.register(object : MessageFactory<JsonMessage> {
+        parser.register(object : MessageFactory {
             override fun createMessage(message: String, problems: Aktivitetslogger) =
                 JsonMessage(message, problems).apply {
                     problems.severe("Severe error!")
@@ -116,7 +116,7 @@ internal class ParserTest : Parser.ParserDirector {
     }
 
     private fun messageFactory(block: JsonMessage.() -> Unit) {
-        parser.register(object : MessageFactory<JsonMessage> {
+        parser.register(object : MessageFactory {
             override fun createMessage(message: String, problems: Aktivitetslogger): JsonMessage {
                 return JsonMessage(message, problems).apply {
                     block(this)
