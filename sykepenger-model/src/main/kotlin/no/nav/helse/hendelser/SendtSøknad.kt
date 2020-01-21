@@ -9,7 +9,7 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendelseId, Hendelsestype.SendtSøknad, søknad) {
 
@@ -34,12 +34,6 @@ class SendtSøknad(hendelseId: UUID, søknad: JsonNode) : SøknadHendelse(hendel
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromJson(json: String): SendtSøknad {
-            return objectMapper.readTree(json).let {
-                SendtSøknad(UUID.fromString(it["hendelseId"].textValue()), it["søknad"])
-            }
-        }
     }
 
     private val fom get() = søknad["fom"].asText().let { LocalDate.parse(it) }

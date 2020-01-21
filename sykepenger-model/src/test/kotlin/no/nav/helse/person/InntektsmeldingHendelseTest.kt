@@ -129,7 +129,8 @@ internal class InntektsmeldingHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*perioder),
-            aktivitetslogger
+            aktivitetslogger,
+            "{}"
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

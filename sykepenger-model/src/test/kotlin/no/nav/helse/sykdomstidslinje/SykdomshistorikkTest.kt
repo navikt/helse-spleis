@@ -138,7 +138,8 @@ internal class SykdomshistorikkTest {
         "987654321",
         LocalDateTime.now(),
         listOf(*perioder),
-        Aktivitetslogger()
+        Aktivitetslogger(),
+        "{}"
     )
 
     private fun inntektsmelding(

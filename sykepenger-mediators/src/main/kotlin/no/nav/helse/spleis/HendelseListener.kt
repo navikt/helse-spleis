@@ -10,7 +10,7 @@ interface HendelseListener {
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {}
     fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {}
     fun onNySøknad(søknad: NySøknad) {}
-    fun onSendtSøknad(søknad: SendtSøknad) {}
+    fun onSendtSøknad(søknad: ModelSendtSøknad) {}
     fun onUnprocessedMessage(message: String) {}
     fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {}
 }

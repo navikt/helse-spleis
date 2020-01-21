@@ -48,7 +48,7 @@ class HendelseProbe: HendelseListener {
         søknad.tell()
     }
 
-    override fun onSendtSøknad(søknad: SendtSøknad) {
+    override fun onSendtSøknad(søknad: ModelSendtSøknad) {
         søknad.tell()
     }
 

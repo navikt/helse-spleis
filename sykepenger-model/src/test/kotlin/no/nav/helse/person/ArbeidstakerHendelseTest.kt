@@ -5,7 +5,7 @@ import no.nav.helse.TestConstants.inntektsmeldingHendelse
 import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.toJson
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -40,7 +40,7 @@ internal class ArbeidstakerHendelseTest {
 
     @Test
     internal fun `deserialize SendtSøknad`() {
-        assertTrue(ArbeidstakerHendelse.fromJson(sendtSøknad) is SendtSøknad)
+        assertTrue(ArbeidstakerHendelse.fromJson(sendtSøknad) is ModelSendtSøknad)
     }
 
     @Test

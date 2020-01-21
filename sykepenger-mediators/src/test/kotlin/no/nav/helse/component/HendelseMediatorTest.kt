@@ -120,7 +120,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<SendtSøknad>())
+                    håndter(any<ModelSendtSøknad>())
                 } answers {
                     lestSendtSøknad.set(true)
                 }
@@ -353,7 +353,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 sendtNav = LocalDateTime.now(),
                 egenmeldinger = emptyList(),
                 fravar = emptyList(),
-                soknadsperioder = emptyList(),
+                soknadsperioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100)),
                 opprettet = LocalDateTime.now()
             )
             sendKafkaMessage(id.toString(), sendtSøknad.toJsonNode().toString())

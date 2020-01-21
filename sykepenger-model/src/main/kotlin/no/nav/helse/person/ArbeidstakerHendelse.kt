@@ -68,7 +68,7 @@ abstract class ArbeidstakerHendelse protected constructor(
                 when (val hendelsetype = Hendelsestype.valueOf(it["type"].textValue())) {
                     Hendelsestype.Inntektsmelding -> ModelInntektsmelding.fromJson(json)
                     Hendelsestype.NySøknad -> ModelNySøknad.fromJson(json)
-                    Hendelsestype.SendtSøknad -> SendtSøknad.fromJson(json)
+                    Hendelsestype.SendtSøknad -> ModelSendtSøknad.fromJson(json)
                     Hendelsestype.Ytelser -> ModelYtelser.fromJson(json)
                     Hendelsestype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)
                     else -> throw RuntimeException("kjenner ikke hendelsetypen $hendelsetype")

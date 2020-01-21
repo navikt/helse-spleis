@@ -125,7 +125,8 @@ internal class SendtSøknadHendelseTest {
             orgnummer,
             LocalDateTime.now(),
             listOf(*perioder),
-            aktivitetslogger
+            aktivitetslogger,
+            "{}"
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =

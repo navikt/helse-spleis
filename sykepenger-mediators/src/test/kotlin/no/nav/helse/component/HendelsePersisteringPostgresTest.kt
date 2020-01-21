@@ -7,9 +7,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.TestConstants.nySøknadHendelse
-import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
 import no.nav.helse.person.Aktivitetslogger
@@ -75,7 +76,16 @@ class HendelsePersisteringPostgresTest {
             assertHendelse(dataSource, it)
         }
 
-        sendtSøknadHendelse().also {
+        ModelSendtSøknad(
+            hendelseId = UUID.randomUUID(),
+            fnr = "1234",
+            aktørId = "56789",
+            orgnummer = "orgnummer",
+            rapportertdato = LocalDateTime.now(),
+            perioder = listOf(Periode.Sykdom(LocalDate.now(), LocalDate.now(), 100)),
+            aktivitetslogger = Aktivitetslogger(),
+            originalJson = "{}"
+        ).also {
             dao.onSendtSøknad(it)
             assertHendelse(dataSource, it)
         }

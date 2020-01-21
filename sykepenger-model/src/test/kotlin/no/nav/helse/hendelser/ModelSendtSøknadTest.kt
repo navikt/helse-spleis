@@ -120,7 +120,8 @@ internal class ModelSendtSøknadTest {
             "987654321",
             LocalDateTime.now(),
             listOf(*perioder),
-            aktivitetslogger
+            aktivitetslogger,
+            "{}"
         )
     }
 }

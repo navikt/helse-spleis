@@ -1,5 +1,9 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -7,7 +11,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class ModelSendtSøknad(
     hendelseId: UUID,
@@ -16,11 +20,44 @@ class ModelSendtSøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     private val perioder: List<Periode>,
-    private val aktivitetslogger: Aktivitetslogger
+    private val aktivitetslogger: Aktivitetslogger,
+    private val originalJson: String
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad), IAktivitetslogger by aktivitetslogger {
 
     private val fom: LocalDate
     private val tom: LocalDate
+
+    companion object {
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        fun fromJson(json: String): ModelSendtSøknad {
+            return objectMapper.readTree(json).let {
+                ModelSendtSøknad(
+                    hendelseId = UUID.fromString(it["hendelseId"].textValue()),
+                    fnr = it.path("søknad").path("fnr").asText(),
+                    aktørId = it.path("søknad").path("aktorId").asText(),
+                    orgnummer = it.path("søknad").path("arbeidsgiver").path("orgnummer").asText(),
+                    rapportertdato = it.path("søknad").path("opprettet").asText().let { LocalDateTime.parse(it) },
+                    perioder = it.path("søknad").path("soknadsperioder").map { periode: JsonNode ->
+                        Periode.Sykdom(
+                            fom = periode["fom"].asLocalDate(),
+                            tom = periode["tom"].asLocalDate(),
+                            grad = periode["sykmeldingsgrad"].asInt(),
+                            faktiskGrad = periode["faktiskGrad"]?.asDouble() ?: periode["sykmeldingsgrad"].asDouble()
+                        )
+                    },
+                    aktivitetslogger = Aktivitetslogger(),
+                    originalJson = objectMapper.writeValueAsString(it.path("søknad"))
+                )
+            }
+        }
+
+        private fun JsonNode.asLocalDate() =
+            asText().let { LocalDate.parse(it) }
+
+    }
 
     init {
         if (perioder.isEmpty()) aktivitetslogger.severe("Søknad må inneholde perioder")
@@ -44,7 +81,14 @@ class ModelSendtSøknad(
 
     override fun aktørId() = aktørId
 
-    override fun toJson() = "" // Should not be part of Model events
+    // TODO: Should not be part of Model events
+    override fun toJson(): String = objectMapper.writeValueAsString(
+        mapOf(
+            "hendelseId" to hendelseId(),
+            "type" to hendelsetype(),
+            "søknad" to objectMapper.readTree(originalJson)
+        )
+    )
 
     override fun kanBehandles() = !valider().hasErrors()
 

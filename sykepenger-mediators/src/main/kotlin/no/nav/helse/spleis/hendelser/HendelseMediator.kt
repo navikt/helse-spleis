@@ -3,7 +3,10 @@ package no.nav.helse.spleis.hendelser
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.hendelser.model.*
@@ -86,19 +89,21 @@ internal class HendelseMediator(
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            SendtSøknad.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onSendtSøknad(this)
-                hendelseRecorder.onSendtSøknad(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe søknaden til domenetype")
+            val modelSendtSøknad = message.asModelSendtSøknad()
+            hendelseProbe.onSendtSøknad(modelSendtSøknad)
+            hendelseRecorder.onSendtSøknad(modelSendtSøknad)
+            person(modelSendtSøknad).håndter(modelSendtSøknad)
+
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om sendt søknad: $aktivitetslogger")
+            }
         }
 
         override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
             val inntektsmelding = message.asModelInntektsmelding()
-                hendelseProbe.onInntektsmelding(inntektsmelding)
-                hendelseRecorder.onInntektsmelding(inntektsmelding)
-                person(inntektsmelding).håndter(inntektsmelding)
+            hendelseProbe.onInntektsmelding(inntektsmelding)
+            hendelseRecorder.onInntektsmelding(inntektsmelding)
+            person(inntektsmelding).håndter(inntektsmelding)
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
