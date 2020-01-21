@@ -18,6 +18,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
             "status", "arkivreferanse", "ferieperioder",
             "foersteFravaersdag", "mottattDato"
         )
+        interestedIn("refusjon.opphoersdato")
     }
 
     override fun accept(processor: MessageProcessor) {
