@@ -1,22 +1,17 @@
 package no.nav.helse.person
 
+import no.nav.helse.*
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
-import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
-import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.TestConstants.ytelser
-import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.juli
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.september
-import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -41,12 +36,6 @@ internal class PersonTest {
             testObserver = TestPersonObserver()
             it.addObserver(this.testObserver)
         }
-
-    @Test
-    fun `uten arbeidsgiver`() {
-        assertThrows<UtenforOmfangException> { testPerson.håndter(nySøknadHendelse(arbeidsgiver = null)) }
-        assertThrows<UtenforOmfangException> { testPerson.håndter(sendtSøknadHendelse(arbeidsgiver = null)) }
-    }
 
     @Test
     fun `flere arbeidsgivere`() {
@@ -108,16 +97,24 @@ internal class PersonTest {
         assertPersonIkkeEndret()
         assertVedtaksperiodeIkkeEndret()
         assertTrue(testObserver.vedtaksperiodeIkkeFunnet)
-        assertEquals(påminnelse.vedtaksperiodeId(), testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.vedtaksperiodeId.toString())
+        assertEquals(
+            påminnelse.vedtaksperiodeId(),
+            testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.vedtaksperiodeId.toString()
+        )
         assertEquals(påminnelse.aktørId(), testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.aktørId)
-        assertEquals(påminnelse.organisasjonsnummer(), testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.organisasjonsnummer)
+        assertEquals(
+            påminnelse.organisasjonsnummer(),
+            testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.organisasjonsnummer
+        )
         assertEquals(påminnelse.fødselsnummer(), testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.fødselsnummer)
     }
 
     @Test
     internal fun `sendt søknad uten eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        testPerson.also {
-            it.håndter(sendtSøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            testPerson.also {
+                it.håndter(sendtSøknad())
+            }
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -222,6 +219,9 @@ internal class PersonTest {
         testPerson.also {
             it.håndter(
                 nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        orgnummer = organisasjonsnummer
+                    ),
                     søknadsperioder = listOf(
                         SoknadsperiodeDTO(
                             fom = 1.juli,
@@ -232,27 +232,29 @@ internal class PersonTest {
                 )
             )
             it.håndter(
-                sendtSøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
+                sendtSøknad(
+                    perioder = listOf(
+                        Periode.Sykdom(
                             fom = 1.juli,
                             tom = 20.juli,
-                            sykmeldingsgrad = 100
+                            grad = 100
                         )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
             )
-            it.håndter(
-                sendtSøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 10.juli,
-                            tom = 30.juli,
-                            sykmeldingsgrad = 100
+            assertThrows<Aktivitetslogger> {
+                it.håndter(
+                    sendtSøknad(
+                        perioder = listOf(
+                            Periode.Sykdom(
+                                fom = 10.juli,
+                                tom = 30.juli,
+                                grad = 100
+                            )
                         )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
-            )
+            }
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -294,6 +296,9 @@ internal class PersonTest {
         testPerson.also {
             it.håndter(
                 nySøknadHendelse(
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        orgnummer = organisasjonsnummer
+                    ),
                     søknadsperioder = listOf(
                         SoknadsperiodeDTO(
                             fom = 1.juli,
@@ -303,17 +308,19 @@ internal class PersonTest {
                     ), egenmeldinger = emptyList(), fravær = emptyList()
                 )
             )
-            it.håndter(
-                sendtSøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 10.juli,
-                            tom = 30.juli,
-                            sykmeldingsgrad = 100
+            assertThrows<Aktivitetslogger> {
+                it.håndter(
+                    sendtSøknad(
+                        perioder = listOf(
+                            Periode.Sykdom(
+                                fom = 10.juli,
+                                tom = 30.juli,
+                                grad = 100
+                            )
                         )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
-            )
+            }
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -331,18 +338,22 @@ internal class PersonTest {
                     fravær = emptyList()
                 )
             )
-            it.håndter(inntektsmelding(
-                virksomhetsnummer = "12",
-                førsteFraværsdag = 1.juli,
-                arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
-            ))
-
-            assertThrows<Aktivitetslogger> {
-                it.håndter(inntektsmelding(
+            it.håndter(
+                inntektsmelding(
                     virksomhetsnummer = "12",
                     førsteFraværsdag = 1.juli,
                     arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
-                ))
+                )
+            )
+
+            assertThrows<Aktivitetslogger> {
+                it.håndter(
+                    inntektsmelding(
+                        virksomhetsnummer = "12",
+                        førsteFraværsdag = 1.juli,
+                        arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+                    )
+                )
             }
         }
         assertPersonEndret()
@@ -370,13 +381,13 @@ internal class PersonTest {
     @Test
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         testPerson.also {
-            assertThrows<UtenforOmfangException> {
+            assertThrows<Aktivitetslogger> {
                 it.håndter(
-                    sendtSøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100)
+                    sendtSøknad(
+                        perioder = listOf(
+                            Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
                         ),
-                        sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
+                        rapportertDato = Uke(1).mandag.plusMonths(4).atStartOfDay()
                     )
                 )
             }
@@ -386,16 +397,16 @@ internal class PersonTest {
     @Test
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
         testPerson.also {
-            assertThrows<UtenforOmfangException> {
+            assertThrows<Aktivitetslogger> {
                 it.håndter(
-                    sendtSøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 100),
-                            SoknadsperiodeDTO(
+                    sendtSøknad(
+                        perioder = listOf(
+                            Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
+                            Periode.Sykdom(
                                 fom = Uke(1).fredag,
                                 tom = Uke(1).fredag,
-                                sykmeldingsgrad = 100,
-                                faktiskGrad = 90
+                                grad = 100,
+                                faktiskGrad = 90.0
                             )
                         )
                     )
@@ -421,22 +432,6 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sendt søknad uten organisasjonsnummer kaster exception`() {
-        testPerson.also {
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    sendtSøknadHendelse(
-                        arbeidsgiver = ArbeidsgiverDTO(
-                            navn = "En arbeidsgiver",
-                            orgnummer = null
-                        )
-                    )
-                )
-            }
-        }
-    }
-
-    @Test
     internal fun `sendt søknad trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
             it.håndter(
@@ -446,14 +441,7 @@ internal class PersonTest {
                     )
                 )
             )
-
-            it.håndter(
-                sendtSøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        orgnummer = organisasjonsnummer
-                    )
-                )
-            )
+            it.håndter(sendtSøknad())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -478,17 +466,28 @@ internal class PersonTest {
     }
 
     private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknad.Builder().build(
-        søknadDTO(
+        SykepengesoknadDTO(
             id = UUID.randomUUID().toString(),
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.NY,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            aktorId = aktørId,
+            fnr = fødselsnummer,
+            sykmeldingId = UUID.randomUUID().toString(),
             arbeidsgiver = ArbeidsgiverDTO(
-                orgnummer = virksomhetsnummer,
-                navn = "en_arbeidsgiver"
+                "en_arbeidsgiver",
+                virksomhetsnummer
             ),
-            sendtNav = LocalDateTime.now()
-        ).toJsonNode().toString())!!
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(16.september, 5.oktober,100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString()
+    )!!
 
     private fun assertAntallPersonerEndret(antall: Int) {
         assertEquals(antall, this.testObserver.tilstandsendringer.size)
@@ -548,6 +547,18 @@ internal class PersonTest {
             originalJson = "{}",
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
+        )
+
+    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+        ModelSendtSøknad(
+            UUID.randomUUID(),
+            fødselsnummer,
+            aktørId,
+            organisasjonsnummer,
+            rapportertDato,
+            perioder,
+            Aktivitetslogger(),
+            "{}"
         )
 
     private class TestPersonObserver : PersonObserver {

@@ -40,21 +40,6 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
-    fun håndter(sendtSøknad: SendtSøknad) {
-        if (!sendtSøknad.kanBehandles()) {
-            throw UtenforOmfangException("kan ikke behandle sendt søknad", sendtSøknad)
-        }
-
-        if (harAndreArbeidsgivere(sendtSøknad)) {
-            invaliderAllePerioder(sendtSøknad)
-            throw UtenforOmfangException(
-                "forventer at vi har mottatt ny søknad for arbeidsgiver i sendt søknad, og bare én arbeidsgiver",
-                sendtSøknad
-            )
-        }
-        finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
-    }
-
     fun håndter(sendtSøknad: ModelSendtSøknad) {
         sendtSøknad.valider()
         if (sendtSøknad.hasErrors()) {

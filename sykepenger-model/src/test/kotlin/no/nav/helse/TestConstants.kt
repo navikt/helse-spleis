@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
@@ -24,20 +23,21 @@ import java.time.Month
 import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
+private val objectMapper = jacksonObjectMapper()
+    .registerModule(JavaTimeModule())
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
 internal object TestConstants {
-    internal val objectMapper = jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    val sykeperiodeFOM = 16.september
-    val sykeperiodeTOM = 5.oktober
-    val egenmeldingFom = 12.september
-    val egenmeldingTom = 15.september
-    val ferieFom = 1.oktober
-    val ferieTom = 4.oktober
-    val fakeFNR = "01019510000"
+    private val sykeperiodeFOM = 16.september
+    private val sykeperiodeTOM = 5.oktober
+    private val egenmeldingFom = 12.september
+    private val egenmeldingTom = 15.september
+    private val ferieFom = 1.oktober
+    private val ferieTom = 4.oktober
+    private val fakeFNR = "01019510000"
 
-    fun søknadDTO(
+    private fun søknadDTO(
         id: String = UUID.randomUUID().toString(),
         status: SoknadsstatusDTO,
         aktørId: String = UUID.randomUUID().toString().substring(0, 13),
@@ -95,57 +95,6 @@ internal object TestConstants {
         soknadsperioder = søknadsperioder,
         fravar = fravær
     )
-
-    fun sendtSøknadHendelse(
-        id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString(),
-        fødselsnummer: String = UUID.randomUUID().toString(),
-        arbeidGjenopptatt: LocalDate? = null,
-        korrigerer: String? = null,
-        egenmeldinger: List<PeriodeDTO> = listOf(
-            PeriodeDTO(
-                fom = egenmeldingFom,
-                tom = egenmeldingTom
-            )
-        ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = 30.september,
-                sykmeldingsgrad = 100
-            ), SoknadsperiodeDTO(
-                fom = 5.oktober,
-                tom = sykeperiodeTOM,
-                sykmeldingsgrad = 100
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
-        arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
-            navn = "enArbeidsgiver",
-            orgnummer = "123456789"
-        ),
-        sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknad.Builder().build(
-        søknadDTO(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            egenmeldinger = egenmeldinger,
-            søknadsperioder = søknadsperioder,
-            fravær = fravær,
-            status = SoknadsstatusDTO.SENDT,
-            arbeidsgiver = arbeidsgiver,
-            sendtNav = sendtNav
-        ).toJsonNode().toString()
-    )!!
 
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
@@ -431,6 +380,7 @@ internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten()
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 internal fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
 internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
+internal fun Inntektsmeldingkontrakt.toJson(): String = objectMapper.writeValueAsString(this)
 
 internal val Int.juni
     get() = LocalDate.of(2019, Month.JUNE, this)

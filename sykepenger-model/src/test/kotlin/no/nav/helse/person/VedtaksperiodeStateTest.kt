@@ -1,24 +1,23 @@
 package no.nav.helse.person
 
-import no.nav.helse.SpolePeriode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.*
 import no.nav.helse.TestConstants.foreldrepenger
 import no.nav.helse.TestConstants.foreldrepengeytelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.nySøknadHendelse
-import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.TestConstants.påminnelseHendelse
-import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.fixtures.mai
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag.*
-import no.nav.helse.juli
-import no.nav.helse.løsBehov
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
 import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
@@ -55,9 +54,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta sendt søknad på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
 
-        vedtaksperiode.håndter(sendtSøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(sendtSøknad())
+        }
 
-        assertTilstandsendring(TIL_INFOTRYGD, SendtSøknad::class)
+        assertTilstandsendring(TIL_INFOTRYGD, ModelSendtSøknad::class)
     }
 
     @Test
@@ -120,7 +121,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta sendt søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
 
-        vedtaksperiode.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknad())
 
         assertTilstandsendring(MOTTATT_SENDT_SØKNAD)
         assertPåminnelse(Duration.ofDays(30))
@@ -235,7 +236,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta sendt søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
-        vedtaksperiode.håndter(sendtSøknadHendelse())
+        vedtaksperiode.håndter(sendtSøknad())
 
         assertTilstandsendring(VILKÅRSPRØVING)
     }
@@ -293,10 +294,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
 
-        val sendtSøknadHendelse = sendtSøknadHendelse(
-            søknadsperioder = listOf(SoknadsperiodeDTO(fom = periodeFom, tom = periodeTom)),
-            egenmeldinger = emptyList(),
-            fravær = emptyList()
+        val sendtSøknadHendelse = sendtSøknad(
+            perioder = listOf(Periode.Sykdom(fom = periodeFom, tom = periodeTom, grad = 100))
         )
 
         val inntektsmeldingHendelse = inntektsmelding(
@@ -374,17 +373,19 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
 
-        vedtaksperiode.håndter(ModelVilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiode.toString(),
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            orgnummer = organisasjonsnummer,
-            rapportertDato = LocalDateTime.now(),
-            inntektsmåneder = emptyList(),
-            erEgenAnsatt = true,
-            aktivitetslogger = Aktivitetslogger()
-        ))
+        vedtaksperiode.håndter(
+            ModelVilkårsgrunnlag(
+                hendelseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiode.toString(),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                orgnummer = organisasjonsnummer,
+                rapportertDato = LocalDateTime.now(),
+                inntektsmåneder = emptyList(),
+                erEgenAnsatt = true,
+                aktivitetslogger = Aktivitetslogger()
+            )
+        )
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -770,10 +771,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     private fun tidslinje(
         fom: LocalDate,
         tom: LocalDate,
-        sendtSøknadTidslinje: ConcreteSykdomstidslinje? = sendtSøknadHendelse(
-            søknadsperioder = listOf(SoknadsperiodeDTO(fom, tom)),
-            egenmeldinger = emptyList(),
-            fravær = emptyList()
+        sendtSøknadTidslinje: ConcreteSykdomstidslinje? = sendtSøknad(
+            perioder = listOf(Periode.Sykdom(fom, tom, 100))
         ).sykdomstidslinje(),
         inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmelding(
             arbeidsgiverperioder = listOf(fom..fom.plusDays(16))
@@ -1012,6 +1011,26 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         additionalParams = mapOf()
     )
 
+    private fun sendtSøknad(
+        perioder: List<Periode> = listOf(
+            Periode.Sykdom(
+                16.september,
+                5.oktober,
+                100
+            )
+        ), rapportertDato: LocalDateTime = LocalDateTime.now()
+    ) =
+        ModelSendtSøknad(
+            UUID.randomUUID(),
+            fødselsnummer,
+            aktørId,
+            organisasjonsnummer,
+            rapportertDato,
+            perioder,
+            Aktivitetslogger(),
+            "{}"
+        )
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<ClosedRange<LocalDate>> = listOf(10.september..10.september.plusDays(16)),
         refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
@@ -1049,15 +1068,17 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
     }
 
-    private fun beInStartTilstand(sendtSøknad: SendtSøknad): Vedtaksperiode {
+    private fun beInStartTilstand(sendtSøknad: ModelSendtSøknad): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(sendtSøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
     }
 
-    private fun beInTilInfotrygd(sendtSøknad: SendtSøknad = sendtSøknadHendelse()) =
+    private fun beInTilInfotrygd(sendtSøknad: ModelSendtSøknad = sendtSøknad()) =
         beInStartTilstand(sendtSøknad).apply {
-            håndter(sendtSøknad)
+            assertThrows<Aktivitetslogger> {
+                håndter(sendtSøknad)
+            }
         }
 
     private fun beInNySøknad(nySøknad: NySøknad = nySøknadHendelse()) =
@@ -1066,7 +1087,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInSendtSøknad(
-        sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
+        sendtSøknad: ModelSendtSøknad = sendtSøknad(),
         nySøknad: NySøknad = nySøknadHendelse()
     ) =
         beInNySøknad(nySøknad).apply {
@@ -1082,7 +1103,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         beIn(Vedtaksperiode.Vilkårsprøving, tidslinje)
 
     private fun beInBeregnUtbetaling(
-        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
+        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknad().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
     ) =
         beIn(Vedtaksperiode.BeregnUtbetaling, tidslinje)
 
@@ -1115,7 +1136,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             )
         ),
-        sendtSøknad: SendtSøknad = sendtSøknadHendelse(),
+        sendtSøknad: ModelSendtSøknad = sendtSøknad(),
         inntektsmelding: ModelInntektsmelding = ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
             refusjon = ModelInntektsmelding.Refusjon(
@@ -1242,6 +1263,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     private fun assertIkkeBehov(behovstype: Behovstype) {
         assertFalse(harBehov(behovstype))
     }
+
+    private val objectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     private fun assertMementoHarFelt(vedtaksperiode: Vedtaksperiode, feltnavn: String) {
         val jsonNode = objectMapper.readTree(vedtaksperiode.memento().state())

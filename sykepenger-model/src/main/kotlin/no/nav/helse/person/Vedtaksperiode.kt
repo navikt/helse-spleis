@@ -80,10 +80,6 @@ internal class Vedtaksperiode internal constructor(
         if (it) tilstand.håndter(this, nySøknad)
     }
 
-    internal fun håndter(sendtSøknad: SendtSøknad) = overlapperMed(sendtSøknad).also {
-        if (it) tilstand.håndter(this, sendtSøknad)
-    }
-
     internal fun håndter(sendtSøknad: ModelSendtSøknad) = overlapperMed(sendtSøknad).also {
         if (it) tilstand.håndter(this, sendtSøknad)
     }
@@ -253,10 +249,6 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
-            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             sendtSøknad.error("uventet SendtSøknad")
             vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
@@ -313,10 +305,6 @@ internal class Vedtaksperiode internal constructor(
 
     private object MottattNySøknad : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
-            vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
         }
@@ -347,9 +335,6 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal object MottattInntektsmelding : Vedtaksperiodetilstand {
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: SendtSøknad) {
-            vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)

@@ -108,7 +108,6 @@ internal class SykdomshistorikkTest {
                 ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
-        println(historikk.sykdomstidslinje().toJson())
         val inspektør = HistorikkInspektør(historikk)
         assertEquals(2, historikk.size)
         assertEquals(11, historikk.sykdomstidslinje().length())

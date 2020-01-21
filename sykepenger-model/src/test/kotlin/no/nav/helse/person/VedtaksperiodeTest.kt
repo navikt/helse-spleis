@@ -10,11 +10,13 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
-import no.nav.helse.TestConstants.sendtSøknadHendelse
 import no.nav.helse.fixtures.S
 import no.nav.helse.fixtures.april
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
+import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
@@ -183,13 +185,14 @@ internal class VedtaksperiodeTest {
 
         assertFalse(
             vedtaksperiode.håndter(
-                sendtSøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
+                sendtSøknad(
+                    perioder = listOf(
+                        Periode.Sykdom(
                             fom = 21.juli,
-                            tom = 25.juli
+                            tom = 25.juli,
+                            grad = 100
                         )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
+                    )
                 )
             )
         )
@@ -249,5 +252,17 @@ internal class VedtaksperiodeTest {
             originalJson = "{}",
             arbeidsgiverperioder = listOf(10.september..10.september.plusDays(16)),
             ferieperioder = emptyList()
+        )
+
+    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+        ModelSendtSøknad(
+            UUID.randomUUID(),
+            "fnr",
+            "aktørId",
+            "orgnr",
+            rapportertDato,
+            perioder,
+            Aktivitetslogger(),
+            "{}"
         )
 }

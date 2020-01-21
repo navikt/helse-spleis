@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.TestConstants
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
@@ -11,7 +10,7 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -26,8 +25,35 @@ internal class ModelVilkårsgrunnlagTest {
     private val aktørId = "123"
     private val fødselsnummer = "234"
     private val orgnummer = "345"
-    private val gammelSendtSøknad = TestConstants.sendtSøknadHendelse(
-        søknadsperioder = listOf(SoknadsperiodeDTO(fom = 10.januar, tom = 12.januar))
+    private val sendtSøknad = ModelSendtSøknad(
+        UUID.randomUUID(),
+        fødselsnummer,
+        aktørId,
+        orgnummer,
+        LocalDateTime.now(),
+        listOf(ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)),
+        aktivitetslogger,
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.SENDT,
+            aktorId = aktørId,
+            fnr = fødselsnummer,
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                orgnummer
+            ),
+            fom = 10.januar,
+            tom = 12.januar,
+            opprettet = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(10.januar, 12.januar,100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString()
     )
 
     @Test
@@ -105,7 +131,7 @@ internal class ModelVilkårsgrunnlagTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
-            sykdomstidslinje = ConcreteSykdomstidslinje.sykedager(10.januar, 12.januar, gammelSendtSøknad),
+            sykdomstidslinje = ConcreteSykdomstidslinje.sykedager(10.januar, 12.januar, sendtSøknad),
             tilstand = Vedtaksperiode.MottattSendtSøknad
         )
 

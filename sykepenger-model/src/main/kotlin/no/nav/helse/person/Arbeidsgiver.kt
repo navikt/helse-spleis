@@ -116,12 +116,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun håndter(sendtSøknad: SendtSøknad) {
-        if (perioder.none { it.håndter(sendtSøknad) }) {
-            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)
-        }
-    }
-
     internal fun håndter(sendtSøknad: ModelSendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
             nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)

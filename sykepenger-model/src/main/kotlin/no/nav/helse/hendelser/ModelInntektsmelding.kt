@@ -44,8 +44,8 @@ class ModelInntektsmelding(
             return objectMapper.readTree(json).let {
                 ModelInntektsmelding(
                     UUID.fromString(it["hendelseId"].textValue()),
-                    refusjon = ModelInntektsmelding.Refusjon(
-                        it["inntektsmelding"]["refusjon"]["opphoersdato"]?.asLocalDate(),
+                    refusjon = Refusjon(
+                        it["inntektsmelding"]["refusjon"]["opphoersdato"]?.takeIf(JsonNode::isTextual)?.asLocalDate(),
                         it["inntektsmelding"]["refusjon"]["beloepPrMnd"].asDouble(),
                         it["inntektsmelding"]["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }),
                     orgnummer = it["inntektsmelding"]["virksomhetsnummer"].asText(),

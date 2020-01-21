@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.inntektsmeldingHendelse
-import no.nav.helse.TestConstants.sendtSøknadHendelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.ferie
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.ikkeSykedag
@@ -14,10 +17,13 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.sykedag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.utenlandsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
+import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomstidslinjeJsonTest {
@@ -28,7 +34,7 @@ internal class SykdomstidslinjeJsonTest {
     }
 
     private val inntektsmelding = inntektsmeldingHendelse()
-    private val sendtSøknad = sendtSøknadHendelse()
+    private val sendtSøknad = sendtSøknad()
 
 
     @Test
@@ -62,7 +68,7 @@ internal class SykdomstidslinjeJsonTest {
 
         val combined = tidslinjeB + tidslinjeC
 
-        val tidslinjeJson = objectMapper.readTree(combined.toJson()).also { println(it) }
+        val tidslinjeJson = objectMapper.readTree(combined.toJson())
 
 
         val hendelser = tidslinjeJson["hendelser"]
@@ -186,4 +192,37 @@ internal class SykdomstidslinjeJsonTest {
             assertDagEquals(dag, actualDager[key])
         }
     }
+
+    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
+                            rapportertDato: LocalDateTime = LocalDateTime.now()) =
+        ModelSendtSøknad(
+            UUID.randomUUID(),
+            "fnr",
+            "aktørId",
+            "123456789",
+            LocalDateTime.now(),
+            listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
+            Aktivitetslogger(),
+            SykepengesoknadDTO(
+                id = "123",
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.SENDT,
+                aktorId = "aktørId",
+                fnr = "fnr",
+                sykmeldingId = UUID.randomUUID().toString(),
+                arbeidsgiver = ArbeidsgiverDTO(
+                    "Hello world",
+                    "123456789"
+                ),
+                fom = 16.september,
+                tom = 5.oktober,
+                opprettet = LocalDateTime.now(),
+                sendtNav = LocalDateTime.now(),
+                egenmeldinger = emptyList(),
+                soknadsperioder = listOf(
+                    SoknadsperiodeDTO(16.september, 5.oktober,100)
+                ),
+                fravar = emptyList()
+            ).toJsonNode().toString()
+        )
 }
