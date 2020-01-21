@@ -152,7 +152,10 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
-        val tidslinje = this.sykdomstidslinje.plus(hendelse.sykdomstidslinje())
+//        sykdomshistorikk.håndter(hendelse).also {
+//            setTilstand(hendelse, if(hendelse.hasErrors()) TilInfotrygd else nesteTilstand)
+//        }
+        val tidslinje = this.sykdomstidslinje + hendelse.sykdomstidslinje()
 
         if (tidslinje.erUtenforOmfang()) {
             hendelse.error("Ikke støttet dag")
@@ -297,11 +300,8 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
-            val tidslinje = nySøknad.sykdomstidslinje()
-            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
-
             vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
-                vedtaksperiode.sykdomstidslinje = tidslinje
+                vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
         }
 

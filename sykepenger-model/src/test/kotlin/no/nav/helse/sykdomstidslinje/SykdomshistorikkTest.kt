@@ -54,7 +54,20 @@ internal class SykdomshistorikkTest {
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
         assertTrue(inspektør.hendelser[0] is ModelSendtSøknad)
         assertTrue(inspektør.hendelser[1] is ModelNySøknad)
+    }
 
+    @Test
+    internal fun `Håndterer Ubestemt dag`() {
+        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        sendtSøknad(
+            ModelSendtSøknad.Periode.Utdanning(8.januar, 9.januar),
+            ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
+        ).also {
+            historikk.håndter(it)
+            assertTrue(it.hasErrors())
+        }
+        assertEquals(2, historikk.size)
+        assertEquals(5, historikk.sykdomstidslinje().length())
     }
 
     @Test
@@ -84,7 +97,27 @@ internal class SykdomshistorikkTest {
         assertTrue(inspektør.hendelser[0] is ModelInntektsmelding)
         assertTrue(inspektør.hendelser[1] is ModelSendtSøknad)
         assertTrue(inspektør.hendelser[2] is ModelNySøknad)
+    }
 
+    @Test
+    internal fun `JSON`() {
+        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        historikk.håndter(
+            sendtSøknad(
+                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            )
+        )
+        println(historikk.sykdomstidslinje().toJson())
+        val inspektør = HistorikkInspektør(historikk)
+        assertEquals(2, historikk.size)
+        assertEquals(11, historikk.sykdomstidslinje().length())
+        assertEquals(5, inspektør.hendelseSykdomstidslinje[1].length())
+        assertEquals(5, inspektør.beregnetSykdomstidslinjer[1].length())
+        assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
+        assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
+        assertTrue(inspektør.hendelser[0] is ModelSendtSøknad)
+        assertTrue(inspektør.hendelser[1] is ModelNySøknad)
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(

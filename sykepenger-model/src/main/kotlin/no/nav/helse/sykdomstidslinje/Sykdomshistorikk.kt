@@ -24,7 +24,11 @@ internal class Sykdomshistorikk {
         internal val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
         internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje =
             if (elementer.isEmpty()) hendelseSykdomstidslinje
-            else (sykdomstidslinje() + hendelseSykdomstidslinje)
+            else {
+                (sykdomstidslinje() + hendelseSykdomstidslinje).also {
+                    if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
+                }
+            }
 
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this)

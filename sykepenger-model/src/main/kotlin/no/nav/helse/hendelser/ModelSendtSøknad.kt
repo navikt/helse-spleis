@@ -54,8 +54,11 @@ class ModelSendtSøknad(
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
+
         internal abstract fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad): ConcreteSykdomstidslinje
+
         internal open fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {}
+
         internal fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String){
             if(fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.error(beskjed)
         }
@@ -91,7 +94,7 @@ class ModelSendtSøknad(
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                valider(sendtSøknad, aktivitetslogger, "Permisjon ligger utenfor sykdomsvindu")
+                aktivitetslogger.error("Permisjon foreløpig ikke understøttet")
         }
         class Egenmelding(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =

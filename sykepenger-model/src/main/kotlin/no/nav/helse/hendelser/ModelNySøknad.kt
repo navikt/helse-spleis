@@ -63,20 +63,6 @@ class ModelNySøknad(
         if (!ingenOverlappende()) aktivitetslogger.severe("Sykeperioder overlapper")
     }
 
-    private inner class Sykeperiode(
-        private val fom: LocalDate,
-        private val tom: LocalDate,
-        private val sykdomsgrad: Int
-    ) {
-        internal fun kanBehandles() = sykdomsgrad == 100
-
-        internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, this@ModelNySøknad)
-
-        internal fun ingenOverlappende(other: Sykeperiode) =
-            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
-    }
-
     override fun kanBehandles() = !valider().hasErrors()
 
     fun valider(): Aktivitetslogger {
@@ -109,4 +95,18 @@ class ModelNySøknad(
             "søknad" to objectMapper.readTree(originalJson)
         )
     )
+
+    private inner class Sykeperiode(
+        private val fom: LocalDate,
+        private val tom: LocalDate,
+        private val sykdomsgrad: Int
+    ) {
+        internal fun kanBehandles() = sykdomsgrad == 100
+
+        internal fun sykdomstidslinje() =
+            ConcreteSykdomstidslinje.sykedager(fom, tom, this@ModelNySøknad)
+
+        internal fun ingenOverlappende(other: Sykeperiode) =
+            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+    }
 }
