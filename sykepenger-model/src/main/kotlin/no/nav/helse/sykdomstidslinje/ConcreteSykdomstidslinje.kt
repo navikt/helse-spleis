@@ -95,6 +95,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
     }
 
+    @Deprecated("EPIC 1")
     fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
         val beregner = Utbetalingsberegner(
             dagsats,

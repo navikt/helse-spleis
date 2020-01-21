@@ -1,9 +1,11 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.AlderRegler
 import java.time.LocalDate
 
+@Deprecated("EPIC 1")
 internal class Utbetalingsberegner(private val dagsats: Int, private val alderRegler: AlderRegler) : SykdomstidslinjeVisitor {
 
     private var state: UtbetalingState = Initiell
@@ -40,8 +42,8 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
     override fun visitImplisittDag(implisittDag: ImplisittDag) = if (implisittDag.erHelg()) fridag(implisittDag.dagen) else arbeidsdag(implisittDag.dagen)
     override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = if(egenmeldingsdag.erHelg()) fridag(egenmeldingsdag.dagen) else sykedag(egenmeldingsdag.dagen)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = fridag(sykHelgedag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = if(egenmeldingsdag.erHelg()) sykHelg(egenmeldingsdag) else sykedag(egenmeldingsdag.dagen)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykHelg(sykHelgedag)
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
         if(utbetalingslinjer.isNotEmpty()) {
             maksdato = alderRegler.maksdato(betalteSykedager, betalteSykepengerEtter67, utbetalingslinjer.last().tom)
@@ -60,6 +62,10 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
 
     private fun fridag(dagen: LocalDate){
         state.fridag(this, dagen)
+    }
+
+    private fun sykHelg(dagen: Dag){
+        state.sykHelg(this, dagen)
     }
 
     private fun opprettBetalingslinje(dagen: LocalDate) {
@@ -91,6 +97,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
         open fun færreEllerLik16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {}
         open fun merEnn16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {}
         open fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {}
+        open fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {}
         open fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {}
         open fun merEnn16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {}
 
@@ -120,6 +127,10 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
             splitter.håndter180dagerOpphold()
         }
 
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
+            throw UtenforOmfangException("Støtter ikke at første sykedag er på helg", dagen.hendelse)
+        }
+
         override fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.håndter180dagerOpphold()
         }
@@ -143,6 +154,11 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
             splitter.state(Fri)
         }
 
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
+            splitter.fridager = 1
+            splitter.state(Fri)
+        }
+
         override fun færreEllerLik16arbeidsdager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.ikkeSykedager = 1
             splitter.state(ArbeidsgiverperiodeOpphold)
@@ -155,6 +171,11 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
 
     private object ArbeidsgiverperiodeOpphold : UtbetalingState() {
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+            if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
+        }
+
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
             splitter.ikkeSykedager += 1
             if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
         }
@@ -180,6 +201,10 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
 
     private object Fri : UtbetalingState() {
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.fridager += 1
+        }
+
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
             splitter.fridager += 1
         }
 
@@ -236,6 +261,10 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.state(UtbetalingFri)
         }
+
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
+            splitter.state(UtbetalingFri)
+        }
     }
 
     private object UtbetalingFri: UtbetalingState() {
@@ -253,6 +282,10 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
         }
 
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.fridager += 1
+        }
+
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
             splitter.fridager += 1
         }
 
@@ -287,6 +320,11 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
         }
 
         override fun fridag(splitter: Utbetalingsberegner, dagen: LocalDate) {
+            splitter.ikkeSykedager += 1
+            if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
+        }
+
+        override fun sykHelg(splitter: Utbetalingsberegner, dagen: Dag) {
             splitter.ikkeSykedager += 1
             if (splitter.ikkeSykedager == 16) splitter.state(Initiell)
         }
