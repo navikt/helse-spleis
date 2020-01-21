@@ -60,7 +60,9 @@ internal class Vedtaksperiode internal constructor(
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
         sykdomstidslinje.accept(visitor)
+        visitor.preVisitUtbetalingslinjer()
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
+        visitor.postVisitUtbetalingslinjer()
         visitor.postVisitVedtaksperiode(this)
     }
 

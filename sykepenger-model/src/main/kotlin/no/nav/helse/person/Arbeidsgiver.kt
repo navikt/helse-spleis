@@ -80,8 +80,12 @@ internal class Arbeidsgiver private constructor(
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this)
         inntektHistorie.accept(visitor)
+        visitor.preVisitTidslinjer()
         tidslinjer.forEach { it.accept(visitor) }
+        visitor.postVisitTidslinjer()
+        visitor.preVisitPerioder()
         perioder.forEach { it.accept(visitor) }
+        visitor.postVisitPerioder()
         visitor.postVisitArbeidsgiver(this)
     }
 
