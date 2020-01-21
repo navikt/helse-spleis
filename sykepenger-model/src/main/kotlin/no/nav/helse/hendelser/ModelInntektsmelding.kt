@@ -45,7 +45,7 @@ class ModelInntektsmelding(
                 ModelInntektsmelding(
                     UUID.fromString(it["hendelseId"].textValue()),
                     refusjon = ModelInntektsmelding.Refusjon(
-                        it["inntektsmelding"]["refusjon"]["opphoersdato"].asLocalDate(),
+                        it["inntektsmelding"]["refusjon"]["opphoersdato"]?.asLocalDate(),
                         it["inntektsmelding"]["refusjon"]["beloepPrMnd"].asDouble(),
                         it["inntektsmelding"]["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }),
                     orgnummer = it["inntektsmelding"]["virksomhetsnummer"].asText(),
