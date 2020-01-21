@@ -73,7 +73,7 @@ class ModelInntektsmelding(
 
     }
 
-     class Refusjon(val opphørsdato: LocalDate, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate>?)
+    class Refusjon(val opphørsdato: LocalDate?, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate>?)
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
@@ -81,7 +81,8 @@ class ModelInntektsmelding(
     init {
         if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.severe("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
 
-        this.arbeidsgiverperioder = arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
+        this.arbeidsgiverperioder =
+            arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
     }
 
@@ -96,7 +97,7 @@ class ModelInntektsmelding(
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
-                    ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, inntektsmelding)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, inntektsmelding)
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -120,8 +121,8 @@ class ModelInntektsmelding(
             .takeUnless { it.isEmpty() }
             ?.map { it.sykdomstidslinje(this) }
             ?.reduce { acc, sykdomstidslinje ->
-            acc.plus(sykdomstidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
-        }
+                acc.plus(sykdomstidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
+            }
         val ferietidslinje = this.ferieperioder
             .takeUnless { it.isEmpty() }
             ?.map { it.sykdomstidslinje(this) }
@@ -161,7 +162,11 @@ class ModelInntektsmelding(
 
 
     fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
-        if (refusjon.opphørsdato <= sisteUtbetalingsdag) return true
+        refusjon.opphørsdato?.also {
+            if (it <= sisteUtbetalingsdag) {
+                return true
+            }
+        }
         return refusjon.endringerIRefusjon?.any { it <= sisteUtbetalingsdag } ?: false
     }
 }

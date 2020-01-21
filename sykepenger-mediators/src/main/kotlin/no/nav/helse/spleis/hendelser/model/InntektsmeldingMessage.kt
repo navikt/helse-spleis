@@ -12,7 +12,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
         requiredKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
-            "arbeidsgivertype", "beregnetInntekt", "refusjon.opphoersdato",
+            "arbeidsgivertype", "beregnetInntekt",
             "refusjon.beloepPrMnd",
             "endringIRefusjoner", "arbeidsgiverperioder",
             "status", "arkivreferanse", "ferieperioder",
@@ -27,7 +27,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
     internal fun asModelInntektsmelding() = ModelInntektsmelding(
         hendelseId = UUID.randomUUID(),
         refusjon = ModelInntektsmelding.Refusjon(
-            this["refusjon.opphoersdato"].asLocalDate(),
+            this["refusjon.opphoersdato"].asOptionalLocalDate(),
             this["refusjon.beloepPrMnd"].asDouble(),
             this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }),
         orgnummer = this["virksomhetsnummer"].asText(),
