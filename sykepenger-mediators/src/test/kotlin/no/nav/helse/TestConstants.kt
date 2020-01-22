@@ -90,56 +90,6 @@ internal object TestConstants {
         fravar = fravær
     )
 
-    fun sendtSøknadHendelse(
-        id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString().substring(0, 13),
-        fødselsnummer: String = UUID.randomUUID().toString().substring(0, 11),
-        arbeidGjenopptatt: LocalDate? = null,
-        korrigerer: String? = null,
-        egenmeldinger: List<PeriodeDTO> = listOf(
-            PeriodeDTO(
-                fom = egenmeldingFom,
-                tom = egenmeldingTom
-            )
-        ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = 30.september,
-                sykmeldingsgrad = 100
-            ), SoknadsperiodeDTO(
-                fom = 5.oktober,
-                tom = sykeperiodeTOM,
-                sykmeldingsgrad = 100
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
-        arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
-            navn = "enArbeidsgiver",
-            orgnummer = "123456789"
-        ),
-        sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SendtSøknad.Builder().build(
-        søknadDTO(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            egenmeldinger = egenmeldinger,
-            søknadsperioder = søknadsperioder,
-            fravær = fravær,
-            status = SoknadsstatusDTO.SENDT,
-            arbeidsgiver = arbeidsgiver,
-            sendtNav = sendtNav
-        ).toJsonNode().toString())!!
-
     fun nySøknadHendelse(
         id: String = UUID.randomUUID().toString(),
         aktørId: String = UUID.randomUUID().toString().substring(0, 13),

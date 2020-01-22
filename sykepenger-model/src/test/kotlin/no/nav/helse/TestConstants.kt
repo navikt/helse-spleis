@@ -369,12 +369,6 @@ internal class Uke(ukenr: Long) {
     val søndag get() = mandag.plusDays(6)
 }
 
-internal fun SykepengesoknadDTO.toSendtSøknadHendelse() = SendtSøknad.Builder().build(
-    this.copy(
-        status = SoknadsstatusDTO.SENDT
-    ).toJsonNode().toString()
-)!!
-
 internal operator fun ConcreteSykdomstidslinje.get(index: LocalDate) = flatten().firstOrNull { it.førsteDag() == index }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
