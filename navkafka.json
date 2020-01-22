@@ -36,6 +36,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkel-sykepen",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkel-sykepen",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvsparkelinntekt",
                     "role": "PRODUCER"
                 },
