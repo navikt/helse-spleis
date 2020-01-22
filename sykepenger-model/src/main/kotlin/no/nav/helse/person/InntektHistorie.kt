@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ModelInntektsmelding
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -34,18 +33,6 @@ internal class InntektHistorie {
 
     fun add(dagen: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
         inntekter.add(Inntekt(dagen, hendelse, beløp))
-    }
-
-    fun add(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.beregnetInntekt ?.run {
-            inntekter.add(
-                Inntekt(
-                    inntektsmelding.førsteFraværsdag,
-                    inntektsmelding,
-                    this
-                )
-            )
-        }
     }
 
     fun add(inntektsmelding: ModelInntektsmelding) {
