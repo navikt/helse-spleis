@@ -12,11 +12,87 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspenn",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspenn",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsputnik",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsputnik",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkel-persono",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkel-persono",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelinntekt",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelinntekt",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelvilkar",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelvilkar",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspock",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspock",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvbehovsakkumulat",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvbehovsakkumulat",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspade",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspade",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvvedtaksfeed",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvvedtaksfeed",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvspleistestdata",
                     "role": "PRODUCER"
                 },
                 {
                     "member": "S151890",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "S150563",
                     "role": "MANAGER"
                 },
                 {
