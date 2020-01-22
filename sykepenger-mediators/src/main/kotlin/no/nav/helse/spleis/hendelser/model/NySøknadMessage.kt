@@ -23,7 +23,7 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
         hendelseId = UUID.randomUUID(),
         fnr = this["fnr"].asText(),
         aktørId = this["aktorId"].asText(),
-        orgnummer = this["arbeidsgiver"].path("orgnummer").asText(),
+        orgnummer = this["arbeidsgiver.orgnummer"].asText(),
         rapportertdato = this["opprettet"].asText().let { LocalDateTime.parse(it) },
         sykeperioder = this["soknadsperioder"].map {
             Triple(

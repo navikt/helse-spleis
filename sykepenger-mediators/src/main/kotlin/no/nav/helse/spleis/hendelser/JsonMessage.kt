@@ -98,7 +98,7 @@ internal fun JsonNode.asLocalDate() =
     asText().let { LocalDate.parse(it) }
 
 internal fun JsonNode.asOptionalLocalDate() =
-    asText().takeIf(String::isNotEmpty)?.let { LocalDate.parse(it) }
+    takeIf(JsonNode::isTextual)?.asText()?.takeIf(String::isNotEmpty)?.let { LocalDate.parse(it) }
 
 internal fun JsonNode.asLocalDateTime() =
     asText().let { LocalDateTime.parse(it) }

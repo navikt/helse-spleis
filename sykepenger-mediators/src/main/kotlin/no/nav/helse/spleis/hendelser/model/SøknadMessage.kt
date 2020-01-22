@@ -7,9 +7,6 @@ import no.nav.helse.spleis.hendelser.JsonMessage
 internal abstract class SøknadMessage(originalMessage: String, problems: Aktivitetslogger) :
     JsonMessage(originalMessage, problems) {
     init {
-        requiredKey("id", "type", "status",
-            "fnr", "aktorId", "arbeidsgiver", "fom", "tom", "startSyketilfelle",
-            "opprettet", "egenmeldinger",
-            "fravar", "soknadsperioder")
+        requiredKey("fnr", "aktorId", "arbeidsgiver.orgnummer", "opprettet", "soknadsperioder")
     }
 }
