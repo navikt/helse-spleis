@@ -220,7 +220,7 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
 
         override fun færreEllerLik16Sykedager(splitter: Utbetalingsberegner, dagen: LocalDate) {
             splitter.sykedager += splitter.fridager + 1
-            if (splitter.sykedager >= 16) splitter.state =
+            if (splitter.sykedager > 16) splitter.state =
                 UtbetalingSykedager.also { splitter.opprettBetalingslinje(dagen) }
             else splitter.state(ArbeidsgiverperiodeSykedager)
         }

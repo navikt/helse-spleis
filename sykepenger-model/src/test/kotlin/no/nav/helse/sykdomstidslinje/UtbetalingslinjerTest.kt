@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.fixtures.november
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -368,6 +369,28 @@ internal class UtbetalingslinjerTest {
         assertThrows<UtenforOmfangException>{
             sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer
         }
+
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på mandag`() {
+        val sykdomstidslinje = 1.S + 3.A + 4.S + 3.A + 11.S + 4.S
+        val utbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.first().fom
+        assertEquals(LocalDate.of(2018, 1, 23), utbetaling)
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på søndag`() {
+        val sykdomstidslinje = 1.S + 3.A + 4.S + 2.A + 12.S + 4.S
+        val utbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.first().fom
+        assertEquals(LocalDate.of(2018, 1, 22), utbetaling)
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på lørdag`() {
+        val sykdomstidslinje = 1.S + 3.A + 4.S + 1.A + 13.S + 4.S
+        val utbetaling = sykdomstidslinje.utbetalingsberegning(dagsats, fødselsnummer).utbetalingslinjer.first().fom
+        assertEquals(LocalDate.of(2018, 1, 22), utbetaling)
     }
 
     private val S

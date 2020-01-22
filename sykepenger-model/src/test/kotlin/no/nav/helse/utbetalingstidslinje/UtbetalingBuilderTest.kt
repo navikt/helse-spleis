@@ -436,6 +436,23 @@ internal class UtbetalingBuilderTest {
         assertEquals(0, betalingslinjer.size)
     }
 
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på mandag`() {
+        (1.S + 3.A + 4.S + 3.A + 11.S + 4.S).utbetalingslinjer()
+        assertEquals(LocalDate.of(2018, 1, 23), betalingslinjer.first().fom)
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på søndag`() {
+        (1.S + 3.A + 4.S + 2.A + 12.S + 4.S).utbetalingslinjer()
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden faller på lørdag`() {
+        (1.S + 3.A + 4.S + 1.A + 13.S + 4.S).utbetalingslinjer()
+        assertEquals(LocalDate.of(2018, 1, 22), betalingslinjer.first().fom)
+    }
 
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         førsteDag: LocalDate = this.førsteDag(),
