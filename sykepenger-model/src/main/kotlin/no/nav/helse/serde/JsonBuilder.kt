@@ -1,9 +1,16 @@
 package no.nav.helse.serde
 
+import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntektHistorie
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.reflection.ArbeidsdagReflect
+import no.nav.helse.serde.reflection.ArbeidsgiverReflect
+import no.nav.helse.serde.reflection.InntektReflect
+import no.nav.helse.serde.reflection.VedtaksperiodeReflect
+import no.nav.helse.serde.reflection.PersonReflect
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
 internal class JsonBuilder : PersonVisitor {
@@ -50,6 +57,12 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitInntekter() = currentState.preVisitInntekter(this)
     override fun visitInntekt(inntekt: InntektHistorie.Inntekt) = currentState.visitInntekt(this, inntekt)
+    override fun preVisitTidslinjer() = currentState.preVisitTidslinjer(this)
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) = currentState.preVisitUtbetalingstidslinje(this, tidslinje)
+    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) = currentState.visitArbeidsdag(this, dag)
+    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) = currentState.postVisitUtbetalingstidslinje(this, tidslinje)
+    override fun preVisitPerioder() = currentState.preVisitPerioder(this)
+    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) = currentState.preVisitVedtaksperiode(this, vedtaksperiode)
 
     private interface JsonState {
         fun entering(jsonBuilder: JsonBuilder) {}
@@ -65,6 +78,12 @@ internal class JsonBuilder : PersonVisitor {
         fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: InntektHistorie.Inntekt) {}
         fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {}
         fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {}
+        fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {}
+        fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {}
+        fun visitArbeidsdag(jsonBuilder: JsonBuilder, arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
+        fun postVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
+        fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {}
+        fun preVisitPerioder(jsonBuilder: JsonBuilder) {}
     }
 
     private class Root : JsonState {
@@ -79,7 +98,7 @@ internal class JsonBuilder : PersonVisitor {
 
     private class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
         init {
-            //TODO: Hente felter fra Person med reflection og legg i personMap
+            personMap.putAll(PersonReflect(person).toMap())
         }
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
@@ -102,13 +121,38 @@ internal class JsonBuilder : PersonVisitor {
     private class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
         JsonState {
         init {
-            //TODO: Hente felter fra Arbeidsgiver med reflection og legg i arbeidsgiverMap
+            arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
         override fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {
             val inntekter = mutableListOf<MutableMap<String, Any?>>()
             arbeidsgiverMap["inntekter"] = inntekter
             jsonBuilder.pushState(InntektHistorieState(inntekter))
+        }
+
+        private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
+
+        override fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {
+            arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
+        }
+
+        override fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {
+            val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
+            utbetalingstidslinjer.add(utbetalingstidslinjeMap)
+            jsonBuilder.pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
+        }
+
+        private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
+
+        override fun preVisitPerioder(jsonBuilder: JsonBuilder) {
+            arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
+        }
+
+        override fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode){
+            val vedtaksperiodeMap = mutableMapOf<String, Any?>()
+            vedtaksperioder.add(vedtaksperiodeMap)
+            jsonBuilder.pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiverMap))
+
         }
 
         override fun postVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {
@@ -120,11 +164,40 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: InntektHistorie.Inntekt) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
-            //TODO: Hente felter fra Inntekt med reflection og legg i inntektMap
+
+            inntektMap.putAll(InntektReflect(inntekt).toMap())
         }
 
         override fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {
             jsonBuilder.popState()
         }
     }
+
+    private class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
+        JsonState {
+
+        private val dager = mutableListOf<MutableMap<String, Any?>>()
+
+        init {
+            utbetalingstidslinjeMap["dager"] = dager
+        }
+
+        override fun visitArbeidsdag(jsonBuilder: JsonBuilder, arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+            val arbeidsdagMap = mutableMapOf<String, Any?>()
+            dager.add(arbeidsdagMap)
+
+            arbeidsdagMap.putAll(ArbeidsdagReflect(arbeidsdag).toMap())
+        }
+
+        override fun postVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, utbetalingstidslinje: Utbetalingstidslinje) {
+            jsonBuilder.popState()
+        }
+    }
+
+    private class VedtaksperiodeState(vedtaksperiode: Vedtaksperiode, private val vedtaksperiodeMap: MutableMap<String, Any?>): JsonState {
+        init {
+            vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
+        }
+    }
+
 }
