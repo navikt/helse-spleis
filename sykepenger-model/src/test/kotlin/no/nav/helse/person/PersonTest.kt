@@ -1,16 +1,18 @@
 package no.nav.helse.person
 
-import no.nav.helse.*
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
+import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.juli
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -388,23 +390,7 @@ internal class PersonTest {
         LocalDateTime.now(),
         perioder,
         Aktivitetslogger(),
-        SykepengesoknadDTO(
-            id = "123",
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            aktorId = aktørId,
-            fnr = fødselsnummer,
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "Hello world",
-                orgnummer
-            ),
-            fom = 16.september,
-            tom = 5.oktober,
-            opprettet = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
-        ).toJsonNode().toString()
+        "{}"
     )
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
