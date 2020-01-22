@@ -109,6 +109,12 @@ internal class JsonMessageTest {
     }
 
     @Test
+    internal fun requiredNestedValue() {
+        assertEquals("{\"foo\": { \"bar\": \"baz\" } }", "foo.bar", "baz")
+        assertEquals("{\"foo\": { \"bar\": true } }", "foo.bar", true)
+    }
+
+    @Test
     internal fun requiredValues() {
         assertThrows("{}", "foo", listOf("bar"))
         assertThrows("{\"foo\": null}", "foo", listOf("bar"))
@@ -116,6 +122,11 @@ internal class JsonMessageTest {
 
         assertEquals("{\"foo\": [\"bar\", \"foo\"]}", "foo", listOf("bar","foo"))
         assertEquals("{\"foo\": [\"bar\", \"foo\", \"bla\"]}", "foo", listOf("bar","foo"))
+    }
+
+    @Test
+    internal fun requiredNestedValues() {
+        assertEquals("{\"foo\": { \"bar\": [ \"baz\", \"foobar\" ] }}", "foo.bar", listOf("baz","foobar"))
     }
 
     @Test
