@@ -10,7 +10,7 @@ import no.nav.helse.spleis.hendelser.*
 import java.util.*
 
 // Understands a JSON message representing a Need with solution
-internal abstract class BehovMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
+internal abstract class BehovMessage(originalMessage: String, aktivitetslogger: Aktivitetslogger) :
     JsonMessage(originalMessage, aktivitetslogger) {
     init {
         requiredKey(
@@ -28,6 +28,10 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
     BehovMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValues("@behov", Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+        requiredKey("@løsning.${Behovstype.Foreldrepenger.name}")
+        requiredKey("@løsning.${Behovstype.Sykepengehistorikk.name}")
+        interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Foreldrepengeytelse")
+        interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Svangerskapsytelse")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -35,16 +39,14 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
     }
 
     internal fun asModelYtelser(): ModelYtelser {
-        val foreldrepenger = this["@løsning"].path("Foreldrepenger").let {
-            ModelForeldrepenger(
-                foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                aktivitetslogger = aktivitetslogger
-            )
-        }
+        val foreldrepenger = ModelForeldrepenger(
+            foreldrepengeytelse = this["@løsning.Foreldrepenger.Foreldrepengeytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
+            svangerskapsytelse = this["@løsning.Foreldrepenger.Svangerskapsytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
+            aktivitetslogger = aktivitetslogger
+        )
 
         val sykepengehistorikk = ModelSykepengehistorikk(
-            perioder = this["@løsning"].path("Sykepengehistorikk").map(::asPeriode),
+            perioder = this["@løsning.Sykepengehistorikk"].map(::asPeriode),
             aktivitetslogger = aktivitetslogger
         )
 
@@ -74,6 +76,8 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
     BehovMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValues("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
+        requiredKey("@løsning.${Behovstype.Inntektsberegning.name}")
+        requiredKey("@løsning.${Behovstype.EgenAnsatt.name}")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -93,6 +97,8 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
     BehovMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValues("@behov", Behovstype.GodkjenningFraSaksbehandler)
+        requiredKey("@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}")
+
     }
 
     override fun accept(processor: MessageProcessor) {

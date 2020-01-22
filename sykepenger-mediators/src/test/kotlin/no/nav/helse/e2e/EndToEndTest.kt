@@ -402,7 +402,8 @@ internal class EndToEndTest {
         sendBehov(
             behov.løsBehov(
                 mapOf(
-                    "Sykepengehistorikk" to perioder
+                    "Sykepengehistorikk" to perioder,
+                    "Foreldrepenger" to emptyMap<String, String>()
                 )
             )
         )

@@ -267,7 +267,8 @@ internal class HendelseMediatorTest : HendelseListener {
             sendBehov(
                 behov.løsBehov(
                     mapOf(
-                        "Sykepengehistorikk" to emptyList<Any>()
+                        "Sykepengehistorikk" to emptyList<Any>(),
+                        "Foreldrepenger" to emptyMap<String, String>()
                     )
                 )
             )
@@ -290,7 +291,8 @@ internal class HendelseMediatorTest : HendelseListener {
             sendBehov(
                 behov.løsBehov(
                     mapOf(
-                        "EgenAnsatt" to egenAnsatt
+                        "EgenAnsatt" to egenAnsatt,
+                        "Inntektsberegning" to emptyMap<String, String>()
                     )
                 )
             )
