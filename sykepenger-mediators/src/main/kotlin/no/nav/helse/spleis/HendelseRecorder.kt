@@ -4,13 +4,14 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import javax.sql.DataSource
 
 class HendelseRecorder(private val dataSource: DataSource,
                        private val probe: PostgresProbe = PostgresProbe) : HendelseListener {
 
-    override fun onNySøknad(søknad: NySøknad) {
+    override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
         lagreHendelse(søknad)
     }
 

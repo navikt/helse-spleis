@@ -102,14 +102,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: NySøknad) {
-        if (!perioder.fold(false) { håndtert, periode ->
-                håndtert || periode.håndter(nySøknad)
-            }) {
-            nyVedtaksperiode(nySøknad).håndter(nySøknad)
-        }
-    }
-
     internal fun håndter(nySøknad: ModelNySøknad) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
             nyVedtaksperiode(nySøknad).håndter(nySøknad)

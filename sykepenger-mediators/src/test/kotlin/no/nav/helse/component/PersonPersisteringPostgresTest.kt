@@ -7,7 +7,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.oktober
@@ -81,7 +81,7 @@ class PersonPersisteringPostgresTest {
 
         val person = Person("2", "fnr")
         person.addObserver(LagrePersonDao(dataSource))
-        person.håndter(nySøknadHendelse())
+        person.håndter(nySøknad("2"))
 
         val hentetPerson = repo.hentPerson("2")
         assertNotNull(hentetPerson)
@@ -96,7 +96,7 @@ class PersonPersisteringPostgresTest {
         val aktørId = "3"
         val person = Person(aktørId, "fnr")
         person.addObserver(LagrePersonDao(dataSource))
-        person.håndter(nySøknadHendelse())
+        person.håndter(nySøknad(aktørId))
         person.håndter(ModelSendtSøknad(
             UUID.randomUUID(),
             "fnr",
@@ -135,5 +135,35 @@ class PersonPersisteringPostgresTest {
         }
         assertEquals(2, alleVersjoner.size, "Antall versjoner av personaggregat skal være 2, men var ${alleVersjoner.size}")
     }
+
+    private fun nySøknad(aktørId: String) = ModelNySøknad(
+        UUID.randomUUID(),
+        "fnr",
+        aktørId,
+        "123456789",
+        LocalDateTime.now(),
+        listOf(Triple(16.september, 5.oktober, 100)),
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = aktørId,
+            fnr = "fnr",
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                "123456789"
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(16.september, 5.oktober,100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString()
+    )
 
 }

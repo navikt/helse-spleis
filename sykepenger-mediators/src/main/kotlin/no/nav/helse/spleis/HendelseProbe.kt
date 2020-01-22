@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.slf4j.LoggerFactory
 
@@ -44,7 +45,7 @@ class HendelseProbe: HendelseListener {
         inntektsmelding.tell()
     }
 
-    override fun onNySøknad(søknad: NySøknad) {
+    override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
         søknad.tell()
     }
 

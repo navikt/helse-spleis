@@ -7,7 +7,6 @@ import no.nav.helse.*
 import no.nav.helse.TestConstants.foreldrepenger
 import no.nav.helse.TestConstants.foreldrepengeytelse
 import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
@@ -19,8 +18,7 @@ import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,9 +36,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad`() {
         val vedtaksperiode = beInStartTilstand()
 
-        vedtaksperiode.håndter(nySøknadHendelse())
+        vedtaksperiode.håndter(nySøknad())
 
-        assertTilstandsendring(MOTTATT_NY_SØKNAD, NySøknad::class)
+        assertTilstandsendring(MOTTATT_NY_SØKNAD, ModelNySøknad::class)
         assertPåminnelse(Duration.ofDays(30))
     }
 
@@ -141,7 +139,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
 
-        vedtaksperiode.håndter(nySøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(nySøknad())
+        }
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -179,7 +179,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter sendt søknad`() {
         val vedtaksperiode = beInSendtSøknad()
 
-        vedtaksperiode.håndter(nySøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(nySøknad())
+        }
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -198,7 +200,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter søknad`() {
         val vedtaksperiode = beInSendtSøknad()
 
-        vedtaksperiode.håndter(nySøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(nySøknad())
+        }
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -245,7 +249,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
-        vedtaksperiode.håndter(nySøknadHendelse())
+        assertThrows<Aktivitetslogger> {
+            vedtaksperiode.håndter(nySøknad())
+        }
 
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -778,12 +784,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             arbeidsgiverperioder = listOf(fom..fom.plusDays(16))
         ).sykdomstidslinje()
     ): ConcreteSykdomstidslinje {
-        return nySøknadHendelse(
-            søknadsperioder = listOf(SoknadsperiodeDTO(fom, tom)),
-            egenmeldinger = emptyList(),
-            fravær = emptyList()
-        ).sykdomstidslinje().plus(sendtSøknadTidslinje) +
-            inntektsmeldingTidslinje
+        return nySøknad(perioder = listOf(Triple(fom, tom, 100)))
+            .sykdomstidslinje().plus(sendtSøknadTidslinje) + inntektsmeldingTidslinje
     }
 
     private fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje {
@@ -1011,6 +1013,36 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         additionalParams = mapOf()
     )
 
+    private fun nySøknad(
+        orgnummer: String = organisasjonsnummer,
+        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+    ) = ModelNySøknad(
+        UUID.randomUUID(),
+        fødselsnummer,
+        aktørId,
+        orgnummer,
+        LocalDateTime.now(),
+        perioder,
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = aktørId,
+            fnr = fødselsnummer,
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                orgnummer
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
+        ).toJsonNode().toString()
+    )
+
     private fun sendtSøknad(
         perioder: List<Periode> = listOf(
             Periode.Sykdom(
@@ -1054,15 +1086,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             ferieperioder = emptyList()
         )
 
-    private fun beInStartTilstand(
-        nySøknad: NySøknad = nySøknadHendelse(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidsgiver = ArbeidsgiverDTO(
-                orgnummer = organisasjonsnummer
-            )
-        )
-    ): Vedtaksperiode {
+    private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
@@ -1081,29 +1105,29 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             }
         }
 
-    private fun beInNySøknad(nySøknad: NySøknad = nySøknadHendelse()) =
+    private fun beInNySøknad(nySøknad: ModelNySøknad = nySøknad()) =
         beInStartTilstand(nySøknad).apply {
             håndter(nySøknad)
         }
 
     private fun beInSendtSøknad(
         sendtSøknad: ModelSendtSøknad = sendtSøknad(),
-        nySøknad: NySøknad = nySøknadHendelse()
+        nySøknad: ModelNySøknad = nySøknad()
     ) =
         beInNySøknad(nySøknad).apply {
             håndter(sendtSøknad)
         }
 
     private fun beInMottattInntektsmelding(
-        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
+        tidslinje: ConcreteSykdomstidslinje = nySøknad().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
     ) =
         beIn(Vedtaksperiode.MottattInntektsmelding, tidslinje)
 
-    private fun beInVilkårsprøving(tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()) =
+    private fun beInVilkårsprøving(tidslinje: ConcreteSykdomstidslinje = nySøknad().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()) =
         beIn(Vedtaksperiode.Vilkårsprøving, tidslinje)
 
     private fun beInBeregnUtbetaling(
-        tidslinje: ConcreteSykdomstidslinje = nySøknadHendelse().sykdomstidslinje() + sendtSøknad().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
+        tidslinje: ConcreteSykdomstidslinje = nySøknad().sykdomstidslinje() + sendtSøknad().sykdomstidslinje() + inntektsmelding().sykdomstidslinje()
     ) =
         beIn(Vedtaksperiode.BeregnUtbetaling, tidslinje)
 
@@ -1157,7 +1181,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             ),
             ferieperioder = emptyList()
         ),
-        nySøknad: NySøknad = nySøknadHendelse()
+        nySøknad: ModelNySøknad = nySøknad()
     ) =
         beInBeregnUtbetaling(sendtSøknad.sykdomstidslinje() + inntektsmelding.sykdomstidslinje() + nySøknad.sykdomstidslinje()).apply {
             håndter(

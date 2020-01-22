@@ -107,11 +107,6 @@ internal class HendelseMediatorTest : HendelseListener {
 
         override fun hentPerson(aktørId: String): Person? {
             return mockk<Person>(relaxed = true) {
-                every {
-                    håndter(any<NySøknad>())
-                } answers {
-                    lestNySøknad.set(true)
-                }
 
                 every {
                     håndter(any<ModelNySøknad>())

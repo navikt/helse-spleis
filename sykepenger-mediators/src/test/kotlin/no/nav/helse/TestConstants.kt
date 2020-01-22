@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -24,12 +24,12 @@ internal object TestConstants {
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    val sykeperiodeFOM = 16.september
-    val sykeperiodeTOM = 5.oktober
-    val egenmeldingFom = 12.september
-    val egenmeldingTom = 15.september
-    val ferieFom = 1.oktober
-    val ferieTom = 4.oktober
+    private val sykeperiodeFOM = 16.september
+    private val sykeperiodeTOM = 5.oktober
+    private val egenmeldingFom = 12.september
+    private val egenmeldingTom = 15.september
+    private val ferieFom = 1.oktober
+    private val ferieTom = 4.oktober
 
     fun søknadDTO(
         id: String = UUID.randomUUID().toString(),
@@ -89,85 +89,6 @@ internal object TestConstants {
         soknadsperioder = søknadsperioder,
         fravar = fravær
     )
-
-    fun nySøknadHendelse(
-        id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString().substring(0, 13),
-        fødselsnummer: String = UUID.randomUUID().toString().substring(0, 11),
-        arbeidGjenopptatt: LocalDate? = null,
-        korrigerer: String? = null,
-        egenmeldinger: List<PeriodeDTO> = listOf(
-            PeriodeDTO(
-                fom = egenmeldingFom,
-                tom = egenmeldingTom
-            )
-        ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = 30.september,
-                sykmeldingsgrad = 100
-            ), SoknadsperiodeDTO(
-                fom = 5.oktober,
-                tom = sykeperiodeTOM,
-                sykmeldingsgrad = 100
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
-        arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
-            navn = "enArbeidsgiver",
-            orgnummer = "123456789"
-        ),
-        sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknad.Builder().build(
-        søknadDTO(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            egenmeldinger = egenmeldinger,
-            søknadsperioder = søknadsperioder,
-            fravær = fravær,
-            status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver,
-            sendtNav = sendtNav
-        ).toJsonNode().toString())!!
-
-    fun inntektsmeldingHendelse(
-        aktørId: String = "",
-        fødselsnummer: String = "",
-        virksomhetsnummer: String? = "123456789",
-        beregnetInntekt: BigDecimal? = 666.toBigDecimal(),
-        førsteFraværsdag: LocalDate = 10.september,
-        arbeidsgiverperioder: List<Periode> = listOf(
-            Periode(10.september, 10.september.plusDays(16))
-        ),
-        ferieperioder: List<Periode> = emptyList(),
-        refusjon: Refusjon = Refusjon(
-            beloepPrMnd = 666.toBigDecimal(),
-            opphoersdato = null
-        ),
-        endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
-    ) =
-        Inntektsmelding.Builder().build(
-            inntektsmeldingDTO(
-                aktørId,
-                fødselsnummer,
-                virksomhetsnummer,
-                førsteFraværsdag,
-                arbeidsgiverperioder,
-                ferieperioder,
-                refusjon,
-                endringerIRefusjoner,
-                beregnetInntekt
-            ).toJsonNode().toString())!!
 
     fun inntektsmeldingDTO(
         aktørId: String = "",

@@ -8,19 +8,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.fixtures.S
 import no.nav.helse.fixtures.april
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -28,32 +28,24 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtaksperiodeTest {
+
+    private val aktør = "1234"
+    private val fødselsnummer = "5678"
+    private val organisasjonsnummer = "123456789"
+
     private companion object {
+
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
     }
 
     @Test
     internal fun `gyldig jsonrepresentasjon av tomt vedtaksperiode`() {
-        val aktørId = "1234"
-        val fødselsnummer = "5678"
-        val organisasjonsnummer = "123456789"
-
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(
-            nySøknadHendelse(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                arbeidsgiver = ArbeidsgiverDTO(
-                    orgnummer = organisasjonsnummer
-                )
-            )
-        )
-
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(nySøknad())
         val jsonRepresentation = vedtaksperiode.memento()
 
-        assertEquals(aktørId, jsonRepresentation.aktørId)
+        assertEquals(aktør, jsonRepresentation.aktørId)
         assertEquals(fødselsnummer, jsonRepresentation.fødselsnummer)
         assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
         assertNotNull(jsonRepresentation.sykdomstidslinje)
@@ -61,20 +53,7 @@ internal class VedtaksperiodeTest {
 
     @Test
     internal fun `gyldig vedtaksperiode fra jsonrepresentasjon av tomt vedtaksperiode`() {
-        val aktørId = "1234"
-        val fødselsnummer = "5678"
-        val organisasjonsnummer = "123456789"
-
-        val originalJson = Vedtaksperiode.nyPeriode(
-            nySøknadHendelse(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                arbeidsgiver = ArbeidsgiverDTO(
-                    orgnummer = organisasjonsnummer
-                )
-            )
-        ).memento()
-
+        val originalJson = Vedtaksperiode.nyPeriode(nySøknad()).memento()
         val gjenopprettetJson = Vedtaksperiode.restore(originalJson)
 
         assertEquals(
@@ -110,7 +89,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
+            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
             førsteFraværsdag = null,
@@ -155,7 +134,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknadHendelse().sykdomstidslinje().toJson()),
+            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
             førsteFraværsdag = null,
@@ -173,14 +152,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
         val vedtaksperiode = Vedtaksperiode.nyPeriode(
-            nySøknadHendelse(
-                søknadsperioder = listOf(
-                    SoknadsperiodeDTO(
-                        fom = 1.juli,
-                        tom = 20.juli
-                    )
-                ), egenmeldinger = emptyList(), fravær = emptyList()
-            )
+            nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
         assertFalse(
@@ -221,14 +193,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
         val vedtaksperiode = Vedtaksperiode.nyPeriode(
-            nySøknadHendelse(
-                søknadsperioder = listOf(
-                    SoknadsperiodeDTO(
-                        fom = 1.juli,
-                        tom = 20.juli
-                    )
-                ), egenmeldinger = emptyList(), fravær = emptyList()
-            )
+            nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
         assertEquals(null, vedtaksperiode.førsteFraværsdag())
@@ -242,9 +207,9 @@ internal class VedtaksperiodeTest {
                 beløpPrMåned = 1000.0,
                 endringerIRefusjon = null
             ),
-            orgnummer = "orgnr",
-            fødselsnummer = "fnr",
-            aktørId = "aktørId",
+            orgnummer = organisasjonsnummer,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktør,
             mottattDato = LocalDateTime.now(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
@@ -254,12 +219,44 @@ internal class VedtaksperiodeTest {
             ferieperioder = emptyList()
         )
 
+    private fun nySøknad(
+        fnr: String = fødselsnummer,
+        aktørId: String = aktør,
+        orgnummer: String = organisasjonsnummer,
+        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+    ) = ModelNySøknad(
+        hendelseId = UUID.randomUUID(),
+        fnr = fnr,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = perioder,
+        aktivitetslogger = Aktivitetslogger(),
+        originalJson = SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = aktørId,
+            fnr = fnr,
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                orgnummer
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
+        ).toJsonNode().toString()
+    )
+
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
             UUID.randomUUID(),
-            "fnr",
-            "aktørId",
-            "orgnr",
+            fødselsnummer,
+            aktør,
+            organisasjonsnummer,
             rapportertDato,
             perioder,
             Aktivitetslogger(),

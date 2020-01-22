@@ -14,7 +14,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -29,126 +29,7 @@ private val objectMapper = jacksonObjectMapper()
 
 internal object TestConstants {
 
-    private val sykeperiodeFOM = 16.september
-    private val sykeperiodeTOM = 5.oktober
-    private val egenmeldingFom = 12.september
-    private val egenmeldingTom = 15.september
-    private val ferieFom = 1.oktober
-    private val ferieTom = 4.oktober
     private val fakeFNR = "01019510000"
-
-    private fun søknadDTO(
-        id: String = UUID.randomUUID().toString(),
-        status: SoknadsstatusDTO,
-        aktørId: String = UUID.randomUUID().toString().substring(0, 13),
-        fødselsnummer: String = UUID.randomUUID().toString(),
-        arbeidGjenopptatt: LocalDate? = null,
-        korrigerer: String? = null,
-        egenmeldinger: List<PeriodeDTO> = listOf(
-            PeriodeDTO(
-                fom = egenmeldingFom,
-                tom = egenmeldingTom
-            )
-        ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = 30.september,
-                sykmeldingsgrad = 100
-            ), SoknadsperiodeDTO(
-                fom = 5.oktober,
-                tom = sykeperiodeTOM,
-                sykmeldingsgrad = 100
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
-        arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
-            navn = "enArbeidsgiver",
-            orgnummer = "123456789"
-        ),
-        sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = SykepengesoknadDTO(
-        id = id,
-        type = SoknadstypeDTO.ARBEIDSTAKERE,
-        status = status,
-        aktorId = aktørId,
-        fnr = fødselsnummer,
-        sykmeldingId = UUID.randomUUID().toString(),
-        arbeidsgiver = arbeidsgiver,
-        arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-        arbeidsgiverForskutterer = ArbeidsgiverForskuttererDTO.JA,
-        fom = søknadsperioder.sortedBy { it.fom }.first().fom,
-        tom = søknadsperioder.sortedBy { it.tom }.last().tom,
-        startSyketilfelle = LocalDate.of(2019, Month.SEPTEMBER, 10),
-        arbeidGjenopptatt = arbeidGjenopptatt,
-        korrigerer = korrigerer,
-        opprettet = LocalDateTime.now(),
-        sendtNav = sendtNav,
-        sendtArbeidsgiver = LocalDateTime.of(2019, Month.SEPTEMBER, 30, 0, 0, 0),
-        egenmeldinger = egenmeldinger,
-        soknadsperioder = søknadsperioder,
-        fravar = fravær
-    )
-
-    fun nySøknadHendelse(
-        id: String = UUID.randomUUID().toString(),
-        aktørId: String = UUID.randomUUID().toString(),
-        fødselsnummer: String = fakeFNR,
-        arbeidGjenopptatt: LocalDate? = null,
-        korrigerer: String? = null,
-        egenmeldinger: List<PeriodeDTO> = listOf(
-            PeriodeDTO(
-                fom = egenmeldingFom,
-                tom = egenmeldingTom
-            )
-        ),
-        søknadsperioder: List<SoknadsperiodeDTO> = listOf(
-            SoknadsperiodeDTO(
-                fom = sykeperiodeFOM,
-                tom = 30.september,
-                sykmeldingsgrad = 100
-            ), SoknadsperiodeDTO(
-                fom = 5.oktober,
-                tom = sykeperiodeTOM,
-                sykmeldingsgrad = 100
-            )
-        ),
-        fravær: List<FravarDTO> = listOf(
-            FravarDTO(
-                fom = ferieFom,
-                tom = ferieTom,
-                type = FravarstypeDTO.FERIE
-            )
-        ),
-        arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(
-            navn = "enArbeidsgiver",
-            orgnummer = "123456789"
-        ),
-        sendtNav: LocalDateTime = sykeperiodeTOM.plusDays(10).atStartOfDay()
-    ) = NySøknad.Builder().build(
-        søknadDTO(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            arbeidGjenopptatt = arbeidGjenopptatt,
-            korrigerer = korrigerer,
-            egenmeldinger = egenmeldinger,
-            søknadsperioder = søknadsperioder,
-            fravær = fravær,
-            status = SoknadsstatusDTO.NY,
-            arbeidsgiver = arbeidsgiver,
-            sendtNav = sendtNav
-        ).toJsonNode().toString()
-    )!!
-
-    fun søknadsperiode(fom: LocalDate, tom: LocalDate, sykemeldingsgrad: Int = 100, faktiskGrad: Int? = null) =
-        SoknadsperiodeDTO(fom = fom, tom = tom, sykmeldingsgrad = sykemeldingsgrad, faktiskGrad = faktiskGrad)
 
 
     fun inntektsmeldingHendelse(

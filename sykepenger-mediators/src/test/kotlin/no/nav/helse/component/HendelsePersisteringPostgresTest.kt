@@ -6,16 +6,20 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.løsBehov
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.september
 import no.nav.helse.spleis.HendelseRecorder
+import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,8 +75,8 @@ class HendelsePersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
         val dao = HendelseRecorder(dataSource)
 
-        nySøknadHendelse().also {
-            dao.onNySøknad(it)
+        nySøknad().also {
+            dao.onNySøknad(it, Aktivitetslogger())
             assertHendelse(dataSource, it)
         }
 
@@ -144,4 +148,34 @@ class HendelsePersisteringPostgresTest {
         }
         assertEquals(1, alleHendelser.size, "Antall hendelser skal være 1, men var ${alleHendelser.size}")
     }
+
+    private fun nySøknad(
+        orgnummer: String = "organisasjonsnummer",
+        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+    ) = ModelNySøknad(
+        UUID.randomUUID(),
+        "fødselsnummer",
+        "aktørId",
+        orgnummer,
+        LocalDateTime.now(),
+        perioder,
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = "aktørId",
+            fnr = "fødselsnummer",
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                orgnummer
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
+        ).toJsonNode().toString()
+    )
 }

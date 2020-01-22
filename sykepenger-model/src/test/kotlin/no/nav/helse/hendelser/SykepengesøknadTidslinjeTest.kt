@@ -1,13 +1,10 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.TestConstants.nySøknadHendelse
-import no.nav.helse.Uke
-import no.nav.helse.get
+import no.nav.helse.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -26,7 +23,7 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`() {
-        val tidslinje = (sendtSøknad().sykdomstidslinje() + nySøknadHendelse().sykdomstidslinje())
+        val tidslinje = (sendtSøknad().sykdomstidslinje() + nySøknad().sykdomstidslinje())
 
         assertType(Sykedag::class, tidslinje[sykeperiodeFOM])
         assertType(SykHelgedag::class, tidslinje[sykeperiodeTOM])
@@ -39,7 +36,7 @@ internal class SykepengesøknadTidslinjeTest {
         val tidslinje = (sendtSøknad( perioder = listOf(
             Periode.Egenmelding(egenmeldingFom, egenmeldingTom),
             Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100))
-        ).sykdomstidslinje() + nySøknadHendelse().sykdomstidslinje())
+        ).sykdomstidslinje() + nySøknad().sykdomstidslinje())
 
         assertEquals(egenmeldingFom, tidslinje.førsteDag())
         assertType(Egenmeldingsdag::class, tidslinje[egenmeldingFom])
@@ -53,7 +50,7 @@ internal class SykepengesøknadTidslinjeTest {
                 Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100),
                 Periode.Ferie(ferieFom, ferieTom)
             )
-        ).sykdomstidslinje() + nySøknadHendelse().sykdomstidslinje())
+        ).sykdomstidslinje() + nySøknad().sykdomstidslinje())
 
         assertType(Feriedag::class, tidslinje[ferieFom])
         assertType(Feriedag::class, tidslinje[ferieTom])
@@ -107,5 +104,36 @@ internal class SykepengesøknadTidslinjeTest {
             Aktivitetslogger(),
             "{}"
         )
+
+    private fun nySøknad() = ModelNySøknad(
+        UUID.randomUUID(),
+        "fnr",
+        "aktørId",
+        "123456789",
+        LocalDateTime.now(),
+        listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = "aktørId",
+            fnr = "fnr",
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                "123456789"
+            ),
+            fom = sykeperiodeFOM,
+            tom = sykeperiodeTOM,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(sykeperiodeFOM, sykeperiodeTOM,100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString()
+    )
+
 }
 

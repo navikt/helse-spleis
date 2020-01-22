@@ -17,20 +17,6 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(nySøknad: NySøknad) {
-        if (!nySøknad.kanBehandles()) {
-            throw UtenforOmfangException("kan ikke behandle ny søknad", nySøknad)
-        }
-
-        // TODO: Remove this to support multiple Vedtaksperiode
-        if (arbeidsgivere.isNotEmpty()) {
-            invaliderAllePerioder(nySøknad)
-            throw UtenforOmfangException("støtter ikke forlengelse eller flere arbeidsgivere", nySøknad)
-        }
-
-        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
-    }
-
     fun håndter(nySøknad: ModelNySøknad) {
         nySøknad.valider()
         if (nySøknad.hasErrors()) {

@@ -72,10 +72,6 @@ internal class Vedtaksperiode internal constructor(
 
     private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
 
-    internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
-        if (it) tilstand.håndter(this, nySøknad)
-    }
-
     internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
     }
@@ -239,11 +235,6 @@ internal class Vedtaksperiode internal constructor(
 
         val timeout: Duration
 
-        // Default implementasjoner av transisjonene
-        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
-            vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             nySøknad.error("uventet NySøknad")
             vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
@@ -283,15 +274,6 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private object StartTilstand : Vedtaksperiodetilstand {
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
-            val tidslinje = nySøknad.sykdomstidslinje()
-            if (tidslinje.erUtenforOmfang()) return vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
-
-            vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
-                vedtaksperiode.sykdomstidslinje = tidslinje
-            }
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {

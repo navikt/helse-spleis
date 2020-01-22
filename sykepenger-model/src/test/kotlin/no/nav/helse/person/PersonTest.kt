@@ -1,15 +1,14 @@
 package no.nav.helse.person
 
 import no.nav.helse.*
-import no.nav.helse.TestConstants.nySøknadHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.person.TilstandType.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
@@ -39,9 +38,9 @@ internal class PersonTest {
 
     @Test
     fun `flere arbeidsgivere`() {
-        assertThrows<UtenforOmfangException> {
+        assertThrows<Aktivitetslogger> {
             enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
-                it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer_b))
+                it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
             }
         }
 
@@ -52,7 +51,7 @@ internal class PersonTest {
     @Test
     internal fun `ny søknad fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         testPerson.also {
-            it.håndter(nySøknadHendelse())
+            it.håndter(nySøknad())
         }
 
         assertPersonEndret()
@@ -63,11 +62,7 @@ internal class PersonTest {
     @Test
     internal fun `påminnelse blir delegert til perioden`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer)
-                )
-            )
+            it.håndter(nySøknad())
             it.håndter(
                 påminnelseHendelse(
                     aktørId = aktørId,
@@ -136,14 +131,7 @@ internal class PersonTest {
     @Test
     internal fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        orgnummer = organisasjonsnummer
-                    )
-                )
-            )
-
+            it.håndter(nySøknad())
             it.håndter(inntektsmelding())
         }
         assertPersonEndret()
@@ -152,63 +140,12 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ny periode blir opprettet når en ny søknad som ikke overlapper perioden personen har fra før blir sendt inn`() {
-        testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 20.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
-
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    nySøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(
-                                fom = 21.juli,
-                                tom = 28.juli,
-                                sykmeldingsgrad = 100
-                            )
-                        ), egenmeldinger = emptyList(), fravær = emptyList()
-                    )
-                )
-            }
-        }
-    }
-
-    @Test
     internal fun `eksisterende periode må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende perioden`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 20.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
+            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
 
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    nySøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(
-                                fom = 10.juli,
-                                tom = 22.juli,
-                                sykmeldingsgrad = 100
-                            )
-                        ), egenmeldinger = emptyList(), fravær = emptyList()
-                    )
-                )
+            assertThrows<Aktivitetslogger> {
+                it.håndter(nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))))
             }
         }
     }
@@ -217,20 +154,7 @@ internal class PersonTest {
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre sendte søknaden`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        orgnummer = organisasjonsnummer
-                    ),
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 20.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
+            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
             it.håndter(
                 sendtSøknad(
                     perioder = listOf(
@@ -262,52 +186,9 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `kaster ut periode når ny søknad kommer, som ikke overlapper med eksisterende`() {
-        testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 20.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    nySøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(
-                                fom = 21.juli,
-                                tom = 30.juli,
-                                sykmeldingsgrad = 100
-                            )
-                        ), egenmeldinger = emptyList(), fravær = emptyList()
-                    )
-                )
-            }
-        }
-    }
-
-    @Test
     internal fun `ny periode må behandles i infotrygd når vi mottar den sendte søknaden først`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        orgnummer = organisasjonsnummer
-                    ),
-                    søknadsperioder = listOf(
-                        SoknadsperiodeDTO(
-                            fom = 1.juli,
-                            tom = 9.juli,
-                            sykmeldingsgrad = 100
-                        )
-                    ), egenmeldinger = emptyList(), fravær = emptyList()
-                )
-            )
+            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
             assertThrows<Aktivitetslogger> {
                 it.håndter(
                     sendtSøknad(
@@ -330,14 +211,7 @@ internal class PersonTest {
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldingen`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(orgnummer = "12"),
-                    søknadsperioder = listOf(SoknadsperiodeDTO(fom = 1.juli, tom = 9.juli, sykmeldingsgrad = 100)),
-                    egenmeldinger = emptyList(),
-                    fravær = emptyList()
-                )
-            )
+            it.håndter(nySøknad(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
             it.håndter(
                 inntektsmelding(
                     virksomhetsnummer = "12",
@@ -365,12 +239,12 @@ internal class PersonTest {
     @Test
     internal fun `ny søknad med periode som ikke er 100 % kaster exception`() {
         testPerson.also {
-            assertThrows<UtenforOmfangException> {
+            assertThrows<Aktivitetslogger> {
                 it.håndter(
-                    nySøknadHendelse(
-                        søknadsperioder = listOf(
-                            SoknadsperiodeDTO(fom = Uke(1).mandag, tom = Uke(1).torsdag, sykmeldingsgrad = 60),
-                            SoknadsperiodeDTO(fom = Uke(1).fredag, tom = Uke(1).fredag, sykmeldingsgrad = 100)
+                    nySøknad(
+                        perioder = listOf(
+                            Triple(Uke(1).mandag, Uke(1).torsdag, 60),
+                            Triple(Uke(1).fredag, Uke(1).fredag, 100)
                         )
                     )
                 )
@@ -416,31 +290,9 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ny søknad uten organisasjonsnummer kaster exception`() {
-        testPerson.also {
-            assertThrows<UtenforOmfangException> {
-                it.håndter(
-                    nySøknadHendelse(
-                        arbeidsgiver = ArbeidsgiverDTO(
-                            navn = "En arbeidsgiver",
-                            orgnummer = null
-                        )
-                    )
-                )
-            }
-        }
-    }
-
-    @Test
     internal fun `sendt søknad trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
-            it.håndter(
-                nySøknadHendelse(
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        orgnummer = organisasjonsnummer
-                    )
-                )
-            )
+            it.håndter(nySøknad())
             it.håndter(sendtSøknad())
         }
         assertPersonEndret()
@@ -462,32 +314,8 @@ internal class PersonTest {
         testObserver.tilstandsendringer.keys.first()
 
     private fun enPersonMedÉnArbeidsgiver(virksomhetsnummer: String) = testPerson.also {
-        it.håndter(nySøknadHendelse(virksomhetsnummer = virksomhetsnummer))
+        it.håndter(nySøknad(orgnummer = virksomhetsnummer))
     }
-
-    private fun nySøknadHendelse(virksomhetsnummer: String) = NySøknad.Builder().build(
-        SykepengesoknadDTO(
-            id = UUID.randomUUID().toString(),
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            aktorId = aktørId,
-            fnr = fødselsnummer,
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "en_arbeidsgiver",
-                virksomhetsnummer
-            ),
-            fom = 16.september,
-            tom = 5.oktober,
-            opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = listOf(
-                SoknadsperiodeDTO(16.september, 5.oktober,100)
-            ),
-            fravar = emptyList()
-        ).toJsonNode().toString()
-    )!!
 
     private fun assertAntallPersonerEndret(antall: Int) {
         assertEquals(antall, this.testObserver.tilstandsendringer.size)
@@ -548,6 +376,36 @@ internal class PersonTest {
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
         )
+
+    private fun nySøknad(
+        orgnummer: String = organisasjonsnummer,
+        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+    ) = ModelNySøknad(
+        UUID.randomUUID(),
+        fødselsnummer,
+        aktørId,
+        orgnummer,
+        LocalDateTime.now(),
+        perioder,
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = aktørId,
+            fnr = fødselsnummer,
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                orgnummer
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
+        ).toJsonNode().toString()
+    )
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(

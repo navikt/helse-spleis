@@ -1,10 +1,16 @@
 package no.nav.helse.person
 
-import no.nav.helse.TestConstants.nySøknadHendelse
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.oktober
 import no.nav.helse.readResource
+import no.nav.helse.september
+import no.nav.helse.toJsonNode
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.*
 
 internal class PersonSerializationTest {
     @Test
@@ -15,7 +21,7 @@ internal class PersonSerializationTest {
         person.addObserver(testObserver)
 
         // trigger endring på person som gjør at vi kan få ut memento fra observer
-        person.håndter(nySøknadHendelse())
+        person.håndter(nySøknad("id"))
 
         val json = testObserver.lastPersonEndretEvent!!.memento.state()
 
@@ -47,4 +53,35 @@ internal class PersonSerializationTest {
 
         }
     }
+
+    private fun nySøknad(aktørId: String) = ModelNySøknad(
+        UUID.randomUUID(),
+        "fnr",
+        aktørId,
+        "123456789",
+        LocalDateTime.now(),
+        listOf(Triple(16.september, 5.oktober, 100)),
+        Aktivitetslogger(),
+        SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.NY,
+            aktorId = aktørId,
+            fnr = "fnr",
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                "123456789"
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(16.september, 5.oktober,100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString()
+    )
+
 }
