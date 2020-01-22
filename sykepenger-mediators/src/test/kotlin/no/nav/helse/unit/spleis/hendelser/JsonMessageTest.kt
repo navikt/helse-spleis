@@ -1,10 +1,17 @@
 package no.nav.helse.unit.spleis.hendelser
 
+import com.fasterxml.jackson.databind.node.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.spleis.hendelser.asLocalDate
+import no.nav.helse.spleis.hendelser.asLocalDateTime
+import no.nav.helse.spleis.hendelser.asOptionalLocalDate
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeParseException
 
 internal class JsonMessageTest {
 
@@ -128,6 +135,43 @@ internal class JsonMessageTest {
             interestedIn("foo")
         }
         assertNull(message["foo"].textValue())
+    }
+
+    @Test
+    internal fun asLocalDate() {
+        assertThrows<DateTimeParseException> { MissingNode.getInstance().asLocalDate() }
+        assertThrows<DateTimeParseException> { NullNode.instance.asLocalDate() }
+        assertThrows<DateTimeParseException> { BooleanNode.TRUE.asLocalDate() }
+        assertThrows<DateTimeParseException> { IntNode(0).asLocalDate() }
+        assertThrows<DateTimeParseException> { TextNode.valueOf("").asLocalDate() }
+        with ("2020-01-01") {
+            assertEquals(LocalDate.parse(this), TextNode.valueOf(this).asLocalDate())
+        }
+    }
+
+    @Test
+    internal fun asOptionalLocalDate() {
+        assertNull(MissingNode.getInstance().asOptionalLocalDate())
+        assertNull(NullNode.instance.asOptionalLocalDate())
+        assertNull(BooleanNode.TRUE.asOptionalLocalDate())
+        assertNull(IntNode(0).asOptionalLocalDate())
+        assertNull(TextNode.valueOf("").asOptionalLocalDate())
+        with ("2020-01-01") {
+            assertEquals(LocalDate.parse(this), TextNode.valueOf(this).asOptionalLocalDate())
+        }
+    }
+
+
+    @Test
+    internal fun asLocalDateTime() {
+        assertThrows<DateTimeParseException> { MissingNode.getInstance().asLocalDateTime() }
+        assertThrows<DateTimeParseException> { NullNode.instance.asLocalDateTime() }
+        assertThrows<DateTimeParseException> { BooleanNode.TRUE.asLocalDateTime() }
+        assertThrows<DateTimeParseException> { IntNode(0).asLocalDateTime() }
+        assertThrows<DateTimeParseException> { TextNode.valueOf("").asLocalDateTime() }
+        with("2020-01-01T00:00:00.000000") {
+            assertEquals(LocalDateTime.parse(this), TextNode.valueOf(this).asLocalDateTime())
+        }
     }
 
     private fun assertEquals(msg: String, key: String, expectedValue: String) {
