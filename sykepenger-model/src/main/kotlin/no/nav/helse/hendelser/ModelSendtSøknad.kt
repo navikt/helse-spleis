@@ -34,6 +34,8 @@ class ModelSendtSøknad(
 
         fun fromJson(json: String): ModelSendtSøknad {
             return objectMapper.readTree(json).let {
+                val søknadTom = it["søknad"].path("tom").asLocalDate()
+                val aktivitetslogger = Aktivitetslogger(json)
                 ModelSendtSøknad(
                     hendelseId = UUID.fromString(it["hendelseId"].textValue()),
                     fnr = it.path("søknad").path("fnr").asText(),
@@ -47,12 +49,34 @@ class ModelSendtSøknad(
                             grad = periode["sykmeldingsgrad"].asInt(),
                             faktiskGrad = periode["faktiskGrad"]?.asDouble() ?: periode["sykmeldingsgrad"].asDouble()
                         )
-                    },
-                    aktivitetslogger = Aktivitetslogger(),
+                    } + it.path("søknad").path("egenmeldinger").map {
+                        Periode.Egenmelding(
+                            fom = it.path("fom").asLocalDate(),
+                            tom = it.path("tom").asLocalDate()
+                        )
+                    } + it.path("søknad").path("fravar").mapNotNull {
+                        val fraværstype = it["type"].asText()
+                        val fom = it.path("fom").asLocalDate()
+                        when (fraværstype) {
+                            in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
+                            "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
+                            "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
+                            else -> {
+                                aktivitetslogger.warn("Ukjent fraværstype $fraværstype")
+                                null
+                            }
+                        }
+                    } + (it.path("søknad").path("arbeidGjenopptatt").asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
+                        ?: emptyList()),
+                    aktivitetslogger = aktivitetslogger,
                     originalJson = objectMapper.writeValueAsString(it.path("søknad"))
                 )
             }
         }
+
+        private fun JsonNode.asOptionalLocalDate() =
+            takeIf(JsonNode::isTextual)?.asText()?.takeIf(String::isNotEmpty)?.let { LocalDate.parse(it) }
+
 
         private fun JsonNode.asLocalDate() =
             asText().let { LocalDate.parse(it) }
