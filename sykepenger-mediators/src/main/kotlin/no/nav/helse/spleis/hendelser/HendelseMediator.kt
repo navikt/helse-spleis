@@ -182,7 +182,7 @@ internal class HendelseMediator(
         }
 
         private fun Behov.producerRecord() =
-            ProducerRecord<String, String>(Topics.behovTopic, id().toString(), toJson())
+            ProducerRecord<String, String>(Topics.rapidTopic, fødselsnummer(), toJson())
 
     }
 }

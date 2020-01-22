@@ -137,6 +137,7 @@ internal object TestConstants {
     ) = Påminnelse.Builder().build(
         objectMapper.writeValueAsString(
             mapOf(
+                "@event_name" to "påminnelse",
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,

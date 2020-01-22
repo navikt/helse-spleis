@@ -16,14 +16,9 @@ import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Topics.behovTopic
-import no.nav.helse.Topics.helseRapidTopic
 import no.nav.helse.Topics.inntektsmeldingTopic
-import no.nav.helse.Topics.opprettGosysOppgaveTopic
-import no.nav.helse.Topics.påminnelseTopic
+import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.Topics.vedtaksperiodeEventTopic
-import no.nav.helse.Topics.vedtaksperiodeSlettetEventTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
@@ -79,10 +74,7 @@ internal class EndToEndTest {
         private const val kafkaApplicationId = "spleis-v1"
 
         private val topics = Topics.hendelseKildeTopics + listOf(
-            opprettGosysOppgaveTopic,
-            vedtaksperiodeEventTopic,
-            vedtaksperiodeSlettetEventTopic,
-            helseRapidTopic
+            rapidTopic
         )
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
@@ -350,10 +342,9 @@ internal class EndToEndTest {
             .atMost(30L, SECONDS)
             .untilAsserted {
                 assertNotNull(
-                    TestConsumer.records(
-                        vedtaksperiodeSlettetEventTopic
-                    )
+                    TestConsumer.records(rapidTopic)
                         .map { objectMapper.readTree(it.value()) }
+                        .filter { it["@event_name"]?.asText() == "påminnelse" }
                         .filter { enAktørId == it["aktørId"].textValue() }
                         .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                         .filter { organisasjonsnummer == it["organisasjonsnummer"].textValue() }
@@ -370,7 +361,7 @@ internal class EndToEndTest {
             organisasjonsnummer = organisasjonsnummer,
             fødselsnummer = fødselsnummer
         ).also {
-            synchronousSendKafkaMessage(påminnelseTopic, aktørId, it.toJson())
+            sendKafkaMessage(rapidTopic, aktørId, it.toJson())
         }
     }
 
@@ -506,7 +497,7 @@ internal class EndToEndTest {
     }
 
     private fun sendBehov(behov: Behov) {
-        sendKafkaMessage(behovTopic, behov.id().toString(), behov.toJson())
+        sendKafkaMessage(rapidTopic, behov.fødselsnummer(), behov.toJson())
     }
 
     private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovstype): Behov {
@@ -515,8 +506,14 @@ internal class EndToEndTest {
         await()
             .atMost(5, SECONDS)
             .until {
-                behov = TestConsumer.records(behovTopic)
-                    .map { Behov.fromJson(it.value()) }
+                behov = TestConsumer.records(rapidTopic)
+                    .mapNotNull {
+                        try {
+                            Behov.fromJson(it.value())
+                        } catch (e: IllegalArgumentException) {
+                            null
+                        }
+                    }
                     .filter { it.behovType().contains(behovType.name) }
                     .firstOrNull { aktørId == it["aktørId"] && fødselsnummer == it["fødselsnummer"] }
 
@@ -537,11 +534,10 @@ internal class EndToEndTest {
         await()
             .atMost(5, SECONDS)
             .untilAsserted {
-                val meldingerPåTopic = TestConsumer.records(
-                    vedtaksperiodeEventTopic
-                )
+                val meldingerPåTopic = TestConsumer.records(rapidTopic)
                 val vedtaksperiodeEndretHendelser = meldingerPåTopic
                     .map { objectMapper.readTree(it.value()) }
+                    .filter { it["@event_name"]?.asText() == "vedtaksperiode_endret" }
                     .filter { aktørId == it["aktørId"].textValue() }
                     .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                     .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
@@ -560,9 +556,15 @@ internal class EndToEndTest {
             .atMost(5, SECONDS)
             .untilAsserted {
                 val meldingerPåTopic =
-                    TestConsumer.records(behovTopic)
+                    TestConsumer.records(rapidTopic)
                 val behov = meldingerPåTopic
-                    .map { Behov.fromJson(it.value()) }
+                    .mapNotNull {
+                        try {
+                            Behov.fromJson(it.value())
+                        } catch (e: IllegalArgumentException) {
+                            null
+                        }
+                    }
                     .filter { aktørId == it["aktørId"] }
                     .filter { fødselsnummer == it["fødselsnummer"] }
                     .filter { virksomhetsnummer == it["organisasjonsnummer"] }

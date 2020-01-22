@@ -9,7 +9,7 @@ import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import org.apache.kafka.clients.producer.ProducerRecord
 
 internal fun VedtaksperiodeObserver.UtbetalingEvent.producerRecord() = ProducerRecord<String, String>(
-    Topics.utbetalingEventTopic, utbetalingsreferanse, toJson(this)
+    Topics.rapidTopic, this.fødselsnummer, toJson(this)
 )
 
 private val objectMapper = jacksonObjectMapper()
@@ -18,6 +18,7 @@ private val objectMapper = jacksonObjectMapper()
 
 private fun toJson(event: VedtaksperiodeObserver.UtbetalingEvent) = objectMapper.writeValueAsString(
     mapOf(
+        "@event_name" to "utbetaling",
         "aktørId" to event.aktørId,
         "fødselsnummer" to event.fødselsnummer,
         "organisasjonsnummer" to event.organisasjonsnummer,

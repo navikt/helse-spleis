@@ -9,8 +9,8 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 internal fun VedtaksperiodeIkkeFunnetEvent.producerRecord() =
     ProducerRecord<String, String>(
-        Topics.vedtaksperiodeSlettetEventTopic,
-        aktørId,
+        Topics.rapidTopic,
+        fødselsnummer,
         toJson(this)
     )
 
@@ -20,6 +20,7 @@ private val objectMapper = jacksonObjectMapper()
 
 private fun toJson(event: VedtaksperiodeIkkeFunnetEvent) = objectMapper.writeValueAsString(
     mapOf(
+        "@event_name" to "vedtaksperiode_ikke_funnet",
         "aktørId" to event.aktørId,
         "fødselsnummer" to event.fødselsnummer,
         "organisasjonsnummer" to event.organisasjonsnummer,

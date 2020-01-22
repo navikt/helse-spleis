@@ -164,7 +164,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 hendelseRecorder = mockk(relaxed = true)
             )
         }
-        private val topicInfos = listOf(dummyTopic, Topics.helseRapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
+        private val topicInfos = listOf(dummyTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
             autoStart = false,
@@ -391,6 +391,6 @@ internal class HendelseMediatorTest : HendelseListener {
         }
 
         private fun sendKafkaMessage(key: String, message: String) =
-            producer.send(ProducerRecord(Topics.helseRapidTopic, key, message))
+            producer.send(ProducerRecord(Topics.rapidTopic, key, message))
     }
 }
