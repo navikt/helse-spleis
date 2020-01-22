@@ -77,7 +77,7 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             inntektsmelding(
                 emptyList(),
                 emptyList(),

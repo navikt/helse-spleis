@@ -14,7 +14,7 @@ internal class JsonMessageTest {
     @Test
     internal fun `invalid json`() {
         Aktivitetslogger(InvalidJson).also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 JsonMessage(InvalidJson, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }
@@ -32,7 +32,7 @@ internal class JsonMessageTest {
     internal fun `extended message`() {
         "not_valid_json".also { json ->
             Aktivitetslogger(json).also {
-                assertThrows<Aktivitetslogger> {
+                assertThrows<Aktivitetslogger.AktivitetException> {
                     ExtendedMessage(json, it)
                 }
                 assertTrue(it.hasErrors()) { "was not supposed to recognize $json" }

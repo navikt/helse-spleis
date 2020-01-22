@@ -52,7 +52,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta sendt søknad på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(sendtSøknad())
         }
 
@@ -63,7 +63,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(inntektsmelding())
         }
 
@@ -139,7 +139,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(nySøknad())
         }
 
@@ -179,7 +179,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter sendt søknad`() {
         val vedtaksperiode = beInSendtSøknad()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(nySøknad())
         }
 
@@ -200,7 +200,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter søknad`() {
         val vedtaksperiode = beInSendtSøknad()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(nySøknad())
         }
 
@@ -249,7 +249,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta ny søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(nySøknad())
         }
 
@@ -260,7 +260,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta inntektsmelding etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             vedtaksperiode.håndter(inntektsmelding())
         }
         assertTilstandsendring(TIL_INFOTRYGD)
@@ -1100,7 +1100,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     private fun beInTilInfotrygd(sendtSøknad: ModelSendtSøknad = sendtSøknad()) =
         beInStartTilstand(sendtSøknad).apply {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 håndter(sendtSøknad)
             }
         }

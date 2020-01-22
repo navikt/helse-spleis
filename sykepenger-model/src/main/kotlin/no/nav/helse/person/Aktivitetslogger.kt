@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
-class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeException(), IAktivitetslogger {
+class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitetslogger {
     private val info = mutableListOf<Aktivitet>()
     private val warn = mutableListOf<Aktivitet>()
     private val error = mutableListOf<Aktivitet>()
@@ -25,7 +25,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
 
     override fun severe(melding: String, vararg params: Any): Nothing {
         severe.add(Aktivitet(String.format(melding, *params)))
-        throw this
+        throw AktivitetException(this)
     }
 
     override fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
@@ -38,10 +38,8 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
         other.warn.forEach { this.warn("$it ($label)") }
     }
 
-    override val message get() = toString()
-
     override fun expectNoErrors(): Boolean {
-        if (hasErrors()) throw this
+        if (hasErrors()) throw AktivitetException(this)
         return true
     }
 
@@ -68,6 +66,8 @@ class Aktivitetslogger(private val originalMessage: String? = null) : RuntimeExc
             results.append(message)
         }
     }
+
+    class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
 
     private class Aktivitet(private val melding: String) {
         companion object {

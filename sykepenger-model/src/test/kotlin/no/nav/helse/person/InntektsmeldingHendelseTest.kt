@@ -61,7 +61,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
-        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding()) }
+        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(inntektsmelding()) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -71,7 +71,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
         person.håndter(inntektsmelding())
-        assertThrows<Aktivitetslogger>{ person.håndter(inntektsmelding()) }
+        assertThrows<Aktivitetslogger.AktivitetException>{ person.håndter(inntektsmelding()) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -80,7 +80,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding med tilhørende søknad men med forskjellige arbeidsgivere støttes ikke`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"))
-        assertThrows<Aktivitetslogger> { person.håndter(inntektsmelding(virksomhetsnummer = "456")) }
+        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(inntektsmelding(virksomhetsnummer = "456")) }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

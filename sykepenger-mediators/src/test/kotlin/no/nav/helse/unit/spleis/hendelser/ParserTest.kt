@@ -18,9 +18,8 @@ internal class ParserTest : Parser.ParserDirector {
         })
         parser.onMessage("foo")
 
-        assertTrue(unrecognizedMessage)
-        assertTrue(Aktivitetslogger.hasErrors())
-        assertContains("Invalid JSON per Jackson library", Aktivitetslogger)
+        assertTrue(messageWithError)
+        assertContains("Invalid JSON per Jackson library", aktivitetException)
     }
 
     @Test
@@ -33,9 +32,8 @@ internal class ParserTest : Parser.ParserDirector {
         })
         parser.onMessage("{}")
 
-        assertTrue(unrecognizedMessage)
-        assertTrue(Aktivitetslogger.hasErrors())
-        assertContains("Severe error!", Aktivitetslogger)
+        assertTrue(messageWithError)
+        assertContains("Severe error!", aktivitetException)
     }
 
     @Test
@@ -83,14 +81,20 @@ internal class ParserTest : Parser.ParserDirector {
         assertTrue(problems.toString().contains(message)) { "Expected <$problems> to contain <$message>"}
     }
 
+    private fun assertContains(message: String, problems: Aktivitetslogger.AktivitetException) {
+        assertTrue(problems.toString().contains(message)) { "Expected <$problems> to contain <$message>"}
+    }
+
     private fun assertNotContains(message: String, problems: Aktivitetslogger) {
         assertFalse(problems.toString().contains(message))
     }
 
     private lateinit var parser: Parser
+    private var messageWithError = false
     private var unrecognizedMessage = false
     private var recognizedMessage: JsonMessage? = null
     private lateinit var Aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetException: Aktivitetslogger.AktivitetException
 
     @BeforeEach
     internal fun setup() {
@@ -102,6 +106,11 @@ internal class ParserTest : Parser.ParserDirector {
     override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
         recognizedMessage = message
         Aktivitetslogger = warnings
+    }
+
+    override fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException) {
+        messageWithError = true
+        this.aktivitetException = aktivitetException
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {

@@ -40,7 +40,7 @@ internal class PersonTest {
 
     @Test
     fun `flere arbeidsgivere`() {
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
                 it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
             }
@@ -108,7 +108,7 @@ internal class PersonTest {
 
     @Test
     internal fun `sendt søknad uten eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             testPerson.also {
                 it.håndter(sendtSøknad())
             }
@@ -120,7 +120,7 @@ internal class PersonTest {
 
     @Test
     internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             testPerson.also {
                 it.håndter(inntektsmelding())
             }
@@ -146,7 +146,7 @@ internal class PersonTest {
         testPerson.also {
             it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
 
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))))
             }
         }
@@ -168,7 +168,7 @@ internal class PersonTest {
                     )
                 )
             )
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     sendtSøknad(
                         perioder = listOf(
@@ -191,7 +191,7 @@ internal class PersonTest {
     internal fun `ny periode må behandles i infotrygd når vi mottar den sendte søknaden først`() {
         testPerson.also {
             it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     sendtSøknad(
                         perioder = listOf(
@@ -222,7 +222,7 @@ internal class PersonTest {
                 )
             )
 
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     inntektsmelding(
                         virksomhetsnummer = "12",
@@ -241,7 +241,7 @@ internal class PersonTest {
     @Test
     internal fun `ny søknad med periode som ikke er 100 % kaster exception`() {
         testPerson.also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     nySøknad(
                         perioder = listOf(
@@ -257,7 +257,7 @@ internal class PersonTest {
     @Test
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         testPerson.also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     sendtSøknad(
                         perioder = listOf(
@@ -273,7 +273,7 @@ internal class PersonTest {
     @Test
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
         testPerson.also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 it.håndter(
                     sendtSøknad(
                         perioder = listOf(

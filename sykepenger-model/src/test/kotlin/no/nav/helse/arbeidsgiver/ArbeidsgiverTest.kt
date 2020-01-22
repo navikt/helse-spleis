@@ -78,7 +78,7 @@ internal class ArbeidsgiverTest {
 
         val arbeidsgiver = Arbeidsgiver("12345678")
 
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             arbeidsgiver.håndter(inntektsmelding)
         }
 

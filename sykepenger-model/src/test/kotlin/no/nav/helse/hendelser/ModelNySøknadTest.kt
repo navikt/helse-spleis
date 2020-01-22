@@ -39,12 +39,12 @@ internal class ModelNySøknadTest {
 
     @Test
     internal fun `sykeperioder mangler`() {
-        assertThrows<Aktivitetslogger> { nySøknad() }
+        assertThrows<Aktivitetslogger.AktivitetException> { nySøknad() }
     }
 
     @Test
     internal fun `overlappende sykeperioder`() {
-        assertThrows<Aktivitetslogger> {
+        assertThrows<Aktivitetslogger.AktivitetException> {
             nySøknad(Triple(10.januar, 12.januar, 100), Triple(1.januar, 12.januar, 100))
         }
     }

@@ -31,7 +31,7 @@ internal class AktivitetsloggerTest {
 
     @Test
     internal fun `severe oppdaget og kaster exception`() {
-        assertThrows<Aktivitetslogger> { aktivitetslogger.severe("Severe error") }
+        assertThrows<Aktivitetslogger.AktivitetException> { aktivitetslogger.severe("Severe error") }
         assertTrue(aktivitetslogger.hasErrors())
         assertTrue(aktivitetslogger.toString().contains("Severe error"))
     }

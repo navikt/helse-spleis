@@ -77,7 +77,7 @@ internal class InntektsmeldingMessageTest {
 
     private fun assertThrows(message: String) {
         Aktivitetslogger(message).also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 InntektsmeldingMessage(message, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }

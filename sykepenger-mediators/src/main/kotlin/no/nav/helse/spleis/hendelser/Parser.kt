@@ -25,7 +25,7 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
             }
 
             director.onUnrecognizedMessage(accumulatedProblems)
-        } catch (err: Aktivitetslogger) {
+        } catch (err: Aktivitetslogger.AktivitetException) {
             director.onUnrecognizedMessage(err)
         }
     }
@@ -34,5 +34,6 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
     internal interface ParserDirector {
         fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger)
         fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger)
+        fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException)
     }
 }

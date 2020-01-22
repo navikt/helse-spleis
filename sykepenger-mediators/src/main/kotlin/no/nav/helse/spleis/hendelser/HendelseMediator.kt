@@ -51,7 +51,7 @@ internal class HendelseMediator(
             if (warnings.hasMessages()) {
                 sikkerLogg.info("meldinger om melding: $warnings")
             }
-        } catch (err: Aktivitetslogger) {
+        } catch (err: Aktivitetslogger.AktivitetException) {
             sikkerLogg.info("feil på melding: $err")
         } catch (err: UtenforOmfangException) {
             sikkerLogg.info("melding er utenfor omfang: ${err.message}", err)
@@ -60,8 +60,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException) {
+        sikkerLogg.info("feil på melding: $aktivitetException", aktivitetException)
+    }
+
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
-        sikkerLogg.info("feil på melding: $aktivitetslogger")
+        sikkerLogg.info("ukjent melding: $aktivitetslogger")
     }
 
     private inner class Processor : MessageProcessor {

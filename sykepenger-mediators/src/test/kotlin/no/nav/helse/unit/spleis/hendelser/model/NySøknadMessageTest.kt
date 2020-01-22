@@ -62,7 +62,7 @@ internal class NySøknadMessageTest {
     @Test
     internal fun `invalid messages`() {
         Aktivitetslogger(InvalidJson).also {
-            assertThrows<Aktivitetslogger> {
+            assertThrows<Aktivitetslogger.AktivitetException> {
                 NySøknadMessage(InvalidJson, it)
             }
             assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }

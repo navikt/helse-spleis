@@ -93,7 +93,7 @@ class ModelSendtSøknad(
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje(this) }
         .reduce(ConcreteSykdomstidslinje::plus)
-        .also { if(aktivitetslogger.hasErrors()) throw aktivitetslogger }
+        .also { aktivitetslogger.expectNoErrors() }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 
