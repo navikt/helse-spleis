@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ManuellSaksbehandling
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
@@ -37,7 +36,6 @@ internal class HendelseMediator(
         rapid.addListener(parser)
 
         parser.register(NySøknadMessage.Factory)
-        parser.register(FremtidigSøknadMessage.Factory)
         parser.register(SendtSøknadMessage.Factory)
         parser.register(InntektsmeldingMessage.Factory)
         parser.register(YtelserMessage.Factory)
@@ -77,15 +75,6 @@ internal class HendelseMediator(
             if (aktivitetslogger.hasMessages()) {
                 sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
             }
-        }
-
-        override fun process(message: FremtidigSøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            NySøknad.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onNySøknad(this)
-                hendelseRecorder.onNySøknad(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe søknaden til domenetype")
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {

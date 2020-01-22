@@ -6,7 +6,6 @@ import no.nav.helse.spleis.hendelser.model.*
 // Acts as a GoF visitor
 internal interface MessageProcessor {
     fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger)
-    fun process(message: FremtidigSøknadMessage, aktivitetslogger: Aktivitetslogger)
     fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger)
     fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger)
     fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger)
