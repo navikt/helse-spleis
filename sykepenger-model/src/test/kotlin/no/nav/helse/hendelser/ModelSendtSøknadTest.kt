@@ -36,7 +36,6 @@ internal class ModelSendtSøknadTest {
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
@@ -49,50 +48,44 @@ internal class ModelSendtSøknadTest {
     @Test
     internal fun `søknad med utdanning`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar))
-        assertFalse(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrors())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad ikke 100`() {
-        sendtSøknad(Sykdom(1.januar, 10.januar, 50), Utdanning(2.januar))
+        sendtSøknad(Sykdom(1.januar, 10.januar, 50))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `sykdom faktiskgrad ikke 100`() {
-        sendtSøknad(Sykdom(1.januar, 10.januar, 100, 50.0), Utdanning(2.januar))
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100, 50.0))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test
     internal fun `arbeidag ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Arbeid(2.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad.sykdomstidslinje()}
     }
 
     @Test

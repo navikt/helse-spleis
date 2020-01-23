@@ -251,22 +251,19 @@ internal class PersonTest {
 
     @Test
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
-        testPerson.also {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(
-                    sendtSøknad(
-                        perioder = listOf(
-                            Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
-                            Periode.Sykdom(
-                                fom = Uke(1).fredag,
-                                tom = Uke(1).fredag,
-                                grad = 100,
-                                faktiskGrad = 90.0
-                            )
-                        )
-                    )
+        sendtSøknad(
+            perioder = listOf(
+                Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
+                Periode.Sykdom(
+                    fom = Uke(1).fredag,
+                    tom = Uke(1).fredag,
+                    grad = 100,
+                    faktiskGrad = 90.0
                 )
-            }
+            )
+        ).also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
     }
 

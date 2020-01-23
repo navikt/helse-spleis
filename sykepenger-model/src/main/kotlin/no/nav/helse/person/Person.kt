@@ -30,9 +30,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         sendtSøknad.valider()
         if (sendtSøknad.hasErrors()) {
             invaliderAllePerioder(sendtSøknad)
-            sendtSøknad.expectNoErrors()
+        } else {
+            finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
         }
-        finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
     }
 
     fun håndter(inntektsmelding: ModelInntektsmelding) {

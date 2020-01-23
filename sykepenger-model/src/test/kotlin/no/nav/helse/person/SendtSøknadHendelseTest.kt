@@ -46,8 +46,7 @@ internal class SendtSøknadHendelseTest {
     @Test
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 50))) }
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 50)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

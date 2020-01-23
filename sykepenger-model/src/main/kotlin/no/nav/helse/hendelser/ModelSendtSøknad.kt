@@ -93,7 +93,6 @@ class ModelSendtSøknad(
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje(this) }
         .reduce(ConcreteSykdomstidslinje::plus)
-        .also { aktivitetslogger.expectNoErrors() }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 
@@ -152,10 +151,8 @@ class ModelSendtSøknad(
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.utenlandsdager(fom, _tom ?: sendtSøknad.tom, sendtSøknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger){
-                if(fom < sendtSøknad.fom || (_tom ?: sendtSøknad.tom) > sendtSøknad.tom)
-                    aktivitetslogger.error("Utdanning ligger utenfor sykdomsvindu")
-            }
+            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
+                aktivitetslogger.error("Utdanning foreløpig ikke understøttet")
         }
         class Permisjon(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
@@ -167,8 +164,6 @@ class ModelSendtSøknad(
         class Egenmelding(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, sendtSøknad)
-
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {}
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {

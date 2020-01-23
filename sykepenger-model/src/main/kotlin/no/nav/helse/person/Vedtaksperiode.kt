@@ -145,6 +145,7 @@ internal class Vedtaksperiode internal constructor(
 //        sykdomshistorikk.håndter(hendelse).also {
 //            setTilstand(hendelse, if(hendelse.hasErrors()) TilInfotrygd else nesteTilstand)
 //        }
+        sykdomshistorikk.håndter(hendelse)
         val tidslinje = this.sykdomstidslinje + hendelse.sykdomstidslinje()
 
         if (tidslinje.erUtenforOmfang()) {
@@ -270,6 +271,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
+                vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
                 vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
         }
