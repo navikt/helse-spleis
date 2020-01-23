@@ -1,15 +1,7 @@
 package no.nav.helse.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.util.RawValue
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
@@ -27,38 +19,7 @@ class ModelYtelser(
     private val rapportertdato: LocalDateTime,
     private val originalJson: String
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser), VedtaksperiodeHendelse {
-    companion object {
-
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromJson(json: String): ModelYtelser {
-            return objectMapper.readTree(json).let {
-                val aktivitetslogger = Aktivitetslogger()
-                ModelYtelser(
-                    hendelseId = UUID.fromString(it["hendelseId"].textValue()),
-                    aktørId = it.path("ytelser").path("aktørId").asText(),
-                    fødselsnummer = it.path("ytelser").path("fødselsnummer").asText(),
-                    organisasjonsnummer = it.path("ytelser").path("organisasjonsnummer").asText(),
-                    vedtaksperiodeId = it.path("ytelser").path("vedtaksperiodeId").asText(),
-                    sykepengehistorikk = ModelSykepengehistorikk(
-                        perioder = it.path("ytelser").path("@løsning").path("Sykepengehistorikk").map(::asPeriode),
-                        aktivitetslogger = aktivitetslogger
-                    ),
-                    foreldrepenger = it.path("ytelser").path("@løsning").path("Foreldrepenger").let {
-                        ModelForeldrepenger(
-                            foreldrepengeytelse = it.path("Foreldrepengeytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                            svangerskapsytelse = it.path("Svangerskapsytelse").takeIf(JsonNode::isObject)?.let(::asPeriode),
-                            aktivitetslogger = aktivitetslogger
-                        )
-                    },
-                    rapportertdato = it.path("ytelser").path("@besvart").asLocalDateTime(),
-                    originalJson = objectMapper.writeValueAsString(it.path("ytelser"))
-                )
-            }
-        }
-
+    internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,
             aktørId: String,
@@ -81,15 +42,6 @@ class ModelYtelser(
             )
         }
 
-        private fun JsonNode.asLocalDate() =
-            asText().let { LocalDate.parse(it) }
-
-        private fun JsonNode.asLocalDateTime() =
-            asText().let { LocalDateTime.parse(it) }
-
-        private fun asPeriode(jsonNode: JsonNode) =
-            jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
-
     }
 
     internal fun sykepengehistorikk() = sykepengehistorikk
@@ -110,17 +62,6 @@ class ModelYtelser(
 
     override fun organisasjonsnummer(): String {
         return organisasjonsnummer
-    }
-
-    override fun toJson(): String {
-        return objectMapper.writeValueAsString(
-            objectMapper.convertValue<ObjectNode>(
-                mapOf(
-                    "hendelseId" to hendelseId(),
-                    "type" to hendelsetype()
-                )
-            ).putRawValue("ytelser", RawValue(originalJson))
-        )
     }
 
     override fun vedtaksperiodeId(): String {

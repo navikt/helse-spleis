@@ -132,8 +132,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
             utbetalingGodkjent = this["@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent"].asBoolean(),
-            rapportertdato = this["@besvart"].asLocalDateTime(),
-            originalJson = this.toJson()
+            rapportertdato = this["@besvart"].asLocalDateTime()
         )
 
     object Factory : MessageFactory {

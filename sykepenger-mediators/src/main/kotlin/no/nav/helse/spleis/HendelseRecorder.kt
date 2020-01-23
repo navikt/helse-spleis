@@ -6,6 +6,7 @@ import kotliquery.using
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import javax.sql.DataSource
 
 class HendelseRecorder(private val dataSource: DataSource,
@@ -37,6 +38,7 @@ class HendelseRecorder(private val dataSource: DataSource,
 
     private fun lagreHendelse(hendelse: ArbeidstakerHendelse) {
         if (!hendelse.kanBehandles()) return
+        if (hendelse !is SykdomstidslinjeHendelse) return
 
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf("INSERT INTO hendelse (id, aktor_id, fnr, type, rapportertdato, data) VALUES (?, ?, ?, ?, ?, (to_json(?::json)))",

@@ -1,10 +1,11 @@
-package no.nav.helse.person
+package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
 import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
@@ -17,8 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ArbeidstakerHendelseTest {
-
+internal class SykdomstidslinjeHendelseTest {
     private val nySøknad = ModelNySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",
@@ -120,16 +120,16 @@ internal class ArbeidstakerHendelseTest {
 
     @Test
     internal fun `deserialize NySøknad`() {
-        assertTrue(ArbeidstakerHendelse.fromJson(nySøknad) is ModelNySøknad)
+        assertTrue(SykdomstidslinjeHendelse.fromJson(nySøknad) is ModelNySøknad)
     }
 
     @Test
     internal fun `deserialize SendtSøknad`() {
-        assertTrue(ArbeidstakerHendelse.fromJson(sendtSøknad) is ModelSendtSøknad)
+        assertTrue(SykdomstidslinjeHendelse.fromJson(sendtSøknad) is ModelSendtSøknad)
     }
 
     @Test
     internal fun `deserialize Inntektsmelding`() {
-        assertTrue(ArbeidstakerHendelse.fromJson(inntektsmelding) is ModelInntektsmelding)
+        assertTrue(SykdomstidslinjeHendelse.fromJson(inntektsmelding) is ModelInntektsmelding)
     }
 }

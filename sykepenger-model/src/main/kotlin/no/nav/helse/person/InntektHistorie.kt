@@ -13,7 +13,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class InntektHistorie {
-    internal class Inntekt(val fom: LocalDate, val hendelse: ArbeidstakerHendelse, val beløp: BigDecimal){
+    internal class Inntekt(val fom: LocalDate, val hendelse: ModelInntektsmelding, val beløp: BigDecimal){
         fun accept(visitor: ArbeidsgiverVisitor) {
             visitor.visitInntekt(this)
         }
@@ -31,7 +31,7 @@ internal class InntektHistorie {
         visitor.postVisitInntektHistorie(this)
     }
 
-    fun add(dagen: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
+    fun add(dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
         inntekter.add(Inntekt(dagen, hendelse, beløp))
     }
 
@@ -57,12 +57,12 @@ internal class InntektHistorie {
             }
         }
 
-        internal class Inntekt(val fom: LocalDate, val hendelse: ArbeidstakerHendelse, val beløp: BigDecimal) {
+        internal class Inntekt(val fom: LocalDate, val hendelse: ModelInntektsmelding, val beløp: BigDecimal) {
             internal companion object {
                 fun fromJsonNode(json: JsonNode) =
                     Inntekt(
                         fom = LocalDate.parse(json["fom"].textValue()),
-                        hendelse = ArbeidstakerHendelse.fromJson(json["hendelse"].asText()),
+                        hendelse = ModelInntektsmelding.fromJson(json["hendelse"].asText()),
                         beløp = json["beløp"].decimalValue()
                     )
             }

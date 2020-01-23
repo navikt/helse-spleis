@@ -959,8 +959,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             organisasjonsnummer = organisasjonsnummer,
             utbetalingGodkjent = utbetalingGodkjent,
             saksbehandler = "en_saksbehandler_ident",
-            rapportertdato = LocalDateTime.now(),
-            originalJson = "{}"
+            rapportertdato = LocalDateTime.now()
         )
     }
 

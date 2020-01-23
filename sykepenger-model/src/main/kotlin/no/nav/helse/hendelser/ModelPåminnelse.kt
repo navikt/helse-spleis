@@ -19,8 +19,6 @@ class ModelPåminnelse(
     private val nestePåminnelsestidspunkt: LocalDateTime
     ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse), VedtaksperiodeHendelse {
 
-    override fun toJson() = "{}"
-
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
     fun tilstandsendringstidspunkt() = tilstandsendringstidspunkt

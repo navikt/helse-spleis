@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -107,22 +106,6 @@ class HendelsePersisteringPostgresTest {
             ferieperioder = emptyList()
         ).also {
             dao.onInntektsmelding(it)
-            assertHendelse(dataSource, it)
-        }
-
-        ModelVilkårsgrunnlag(
-            UUID.randomUUID(),
-            "",
-            "aktør",
-            "fnr",
-            "orgnummer",
-            LocalDateTime.now(),
-            emptyList(),
-            true,
-            Aktivitetslogger(),
-            "{}"
-        ).also {
-            dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }
     }
