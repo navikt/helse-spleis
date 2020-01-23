@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.hendelser.ModelYtelser
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
@@ -82,6 +83,26 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this, aktivitetslogger)
+    }
+
+    internal fun asModelVilkårsgrunnlag(): ModelVilkårsgrunnlag {
+        return ModelVilkårsgrunnlag(
+            UUID.randomUUID(),
+            this["vedtaksperiodeId"].asText(),
+            this["aktørId"].asText(),
+            this["fødselsnummer"].asText(),
+            this["organisasjonsnummer"].asText(),
+            this["@besvart"].asLocalDateTime(),
+            this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
+                ModelVilkårsgrunnlag.Måned(
+                    it["årMåned"].asYearMonth(),
+                    it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
+                )
+            },
+            this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
+            aktivitetslogger,
+            this.toJson()
+        )
     }
 
     object Factory : MessageFactory {

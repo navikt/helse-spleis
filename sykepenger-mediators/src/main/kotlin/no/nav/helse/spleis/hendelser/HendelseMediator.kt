@@ -5,7 +5,6 @@ import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ManuellSaksbehandling
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.hendelser.model.*
@@ -123,12 +122,14 @@ internal class HendelseMediator(
             }
 
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            Vilkårsgrunnlag.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onVilkårsgrunnlag(this)
-                hendelseRecorder.onVilkårsgrunnlag(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe vilkårsgrunnlag til domenetype")
+            val vilkårsgrunnlag = message.asModelVilkårsgrunnlag()
+            hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
+            hendelseRecorder.onVilkårsgrunnlag(vilkårsgrunnlag)
+            person(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
+
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om vilkårsgrunnlag: $aktivitetslogger")
+            }
         }
 
         override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {

@@ -109,7 +109,7 @@ internal class Vedtaksperiode internal constructor(
     }
 
     internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId) tilstand.håndter(this, vilkårsgrunnlag)
+        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {

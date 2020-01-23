@@ -121,7 +121,8 @@ internal class ModelVilkårsgrunnlagTest {
         rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
         erEgenAnsatt = false,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        originalJson = "{}"
     )
 
     private fun vedtaksperiode() =

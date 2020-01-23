@@ -6,7 +6,7 @@ import no.nav.helse.person.Aktivitetslogger
 interface HendelseListener {
     fun onPåminnelse(påminnelse: Påminnelse) {}
     fun onYtelser(ytelser: ModelYtelser) {}
-    fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {}
+    fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {}
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {}
     fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {}
     fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {}

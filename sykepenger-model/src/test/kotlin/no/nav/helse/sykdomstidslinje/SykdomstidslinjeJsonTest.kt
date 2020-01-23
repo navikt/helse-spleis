@@ -234,8 +234,7 @@ internal class SykdomstidslinjeJsonTest {
         )
     }
 
-    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
-                            rapportertDato: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad() =
         ModelSendtSøknad(
             UUID.randomUUID(),
             "fnr",

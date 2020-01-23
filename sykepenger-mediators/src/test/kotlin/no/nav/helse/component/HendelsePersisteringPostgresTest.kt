@@ -6,13 +6,11 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.løsBehov
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -112,27 +110,22 @@ class HendelsePersisteringPostgresTest {
             assertHendelse(dataSource, it)
         }
 
-        Vilkårsgrunnlag.Builder().build(
-            generiskBehov().løsBehov(
-                mapOf(
-                    "EgenAnsatt" to false
-                )
-            ).toJson()
-        )!!.also {
+        ModelVilkårsgrunnlag(
+            UUID.randomUUID(),
+            "",
+            "aktør",
+            "fnr",
+            "orgnummer",
+            LocalDateTime.now(),
+            emptyList(),
+            true,
+            Aktivitetslogger(),
+            "{}"
+        ).also {
             dao.onVilkårsgrunnlag(it)
             assertHendelse(dataSource, it)
         }
     }
-
-    private fun generiskBehov() = Behov.nyttBehov(
-        hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
-        behov = listOf(),
-        aktørId = "aktørId",
-        fødselsnummer = "fødselsnummer",
-        organisasjonsnummer = "organisasjonsnummer",
-        vedtaksperiodeId = UUID.randomUUID(),
-        additionalParams = mapOf()
-    )
 
     private fun assertHendelse(dataSource: DataSource, hendelse: ArbeidstakerHendelse) {
         val alleHendelser = using(sessionOf(dataSource)) { session ->

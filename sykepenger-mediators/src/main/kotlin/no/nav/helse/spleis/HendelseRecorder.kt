@@ -31,7 +31,7 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(manuellSaksbehandling)
     }
 
-    override fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+    override fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         lagreHendelse(vilkårsgrunnlag)
     }
 

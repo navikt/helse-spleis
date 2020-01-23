@@ -2,15 +2,13 @@ package no.nav.helse.unit.spleis.hendelser
 
 import com.fasterxml.jackson.databind.node.*
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.hendelser.JsonMessage
-import no.nav.helse.spleis.hendelser.asLocalDate
-import no.nav.helse.spleis.hendelser.asLocalDateTime
-import no.nav.helse.spleis.hendelser.asOptionalLocalDate
+import no.nav.helse.spleis.hendelser.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeParseException
 
 internal class JsonMessageTest {
@@ -157,6 +155,18 @@ internal class JsonMessageTest {
         assertThrows<DateTimeParseException> { TextNode.valueOf("").asLocalDate() }
         with ("2020-01-01") {
             assertEquals(LocalDate.parse(this), TextNode.valueOf(this).asLocalDate())
+        }
+    }
+
+    @Test
+    internal fun asYearMonth() {
+        assertThrows<DateTimeParseException> { MissingNode.getInstance().asYearMonth() }
+        assertThrows<DateTimeParseException> { NullNode.instance.asYearMonth() }
+        assertThrows<DateTimeParseException> { BooleanNode.TRUE.asYearMonth() }
+        assertThrows<DateTimeParseException> { IntNode(0).asYearMonth() }
+        assertThrows<DateTimeParseException> { TextNode.valueOf("").asYearMonth() }
+        with ("2020-01") {
+            assertEquals(YearMonth.parse(this), TextNode.valueOf(this).asYearMonth())
         }
     }
 

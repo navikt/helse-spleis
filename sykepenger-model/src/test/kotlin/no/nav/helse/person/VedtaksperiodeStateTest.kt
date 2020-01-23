@@ -22,7 +22,6 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -322,7 +321,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     )
                 },
                 erEgenAnsatt = false,
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                originalJson = "{}"
             )
         )
         assertTilstandsendring(BEREGN_UTBETALING)
@@ -352,7 +352,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = emptyList(),
                 erEgenAnsatt = true,
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                originalJson = "{}"
             )
         )
         assertTilstandsendring(TIL_INFOTRYGD)

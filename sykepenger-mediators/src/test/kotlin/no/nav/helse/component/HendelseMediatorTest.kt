@@ -139,7 +139,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<Vilkårsgrunnlag>())
+                    håndter(any<ModelVilkårsgrunnlag>())
                 } answers {
                     lestVilkårsgrunnlag.set(true)
                 }
