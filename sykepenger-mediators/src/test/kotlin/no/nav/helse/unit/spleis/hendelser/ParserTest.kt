@@ -103,12 +103,12 @@ internal class ParserTest : Parser.ParserDirector {
         unrecognizedMessage = false
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
+    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger) {
         recognizedMessage = message
-        Aktivitetslogger = warnings
+        Aktivitetslogger = aktivitetslogger
     }
 
-    override fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException) {
+    override fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException) {
         messageWithError = true
         this.aktivitetException = aktivitetException
     }

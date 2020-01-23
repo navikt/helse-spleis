@@ -20,8 +20,8 @@ internal class HendelseMediator(
     private val lagreUtbetalingDao: PersonObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
     producer: KafkaProducer<String, String>,
-    private val hendelseProbe: HendelseListener,
-    private val hendelseRecorder: HendelseListener
+    private val hendelseProbe: HendelseProbe,
+    private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
     private val messageProcessor = Processor()
@@ -41,12 +41,13 @@ internal class HendelseMediator(
         parser.register(PåminnelseMessage.Factory)
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger) {
+    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger) {
         try {
+            hendelseRecorder.lagreMelding(message)
             message.accept(messageProcessor)
 
-            if (warnings.hasMessages()) {
-                sikkerLogg.info("meldinger om melding: $warnings")
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om melding: $aktivitetslogger")
             }
         } catch (err: Aktivitetslogger.AktivitetException) {
             sikkerLogg.info("feil på melding: $err")
@@ -57,8 +58,8 @@ internal class HendelseMediator(
         }
     }
 
-    override fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException) {
-        sikkerLogg.info("feil på melding: $aktivitetException", aktivitetException)
+    override fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException) {
+        sikkerLogg.info("feil på melding: ${aktivitetException.message}", aktivitetException)
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
@@ -69,30 +70,19 @@ internal class HendelseMediator(
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
             val modelNySøknad = message.asModelNySøknad()
 
-            hendelseProbe.onNySøknad(modelNySøknad, aktivitetslogger)
-            hendelseRecorder.onNySøknad(modelNySøknad, aktivitetslogger)
+            hendelseProbe.onNySøknad(modelNySøknad)
             person(modelNySøknad).håndter(modelNySøknad)
-
-            if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om ny søknad: $aktivitetslogger")
-            }
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
             val modelSendtSøknad = message.asModelSendtSøknad()
             hendelseProbe.onSendtSøknad(modelSendtSøknad)
-            hendelseRecorder.onSendtSøknad(modelSendtSøknad)
             person(modelSendtSøknad).håndter(modelSendtSøknad)
-
-            if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om sendt søknad: $aktivitetslogger")
-            }
         }
 
         override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
             val inntektsmelding = message.asModelInntektsmelding()
             hendelseProbe.onInntektsmelding(inntektsmelding)
-            hendelseRecorder.onInntektsmelding(inntektsmelding)
             person(inntektsmelding).håndter(inntektsmelding)
         }
 
@@ -100,40 +90,24 @@ internal class HendelseMediator(
             val ytelser = message.asModelYtelser()
 
             hendelseProbe.onYtelser(ytelser)
-            hendelseRecorder.onYtelser(ytelser)
             person(ytelser).håndter(ytelser)
-
-            if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om ytelser: $aktivitetslogger")
-            }
         }
 
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
             val vilkårsgrunnlag = message.asModelVilkårsgrunnlag()
             hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
-            hendelseRecorder.onVilkårsgrunnlag(vilkårsgrunnlag)
             person(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
-
-            if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om vilkårsgrunnlag: $aktivitetslogger")
-            }
         }
 
         override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {
             val manuellSaksbehandling = message.asModelManuellSaksbehandling()
             hendelseProbe.onManuellSaksbehandling(manuellSaksbehandling)
-            hendelseRecorder.onManuellSaksbehandling(manuellSaksbehandling)
             person(manuellSaksbehandling).håndter(manuellSaksbehandling)
-
-            if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om manuell saksbehandling: $aktivitetslogger")
-            }
         }
 
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
             val påminnelse = message.asModelPåminnelse()
                 hendelseProbe.onPåminnelse(påminnelse)
-                hendelseRecorder.onPåminnelse(påminnelse)
                 person(påminnelse).håndter(påminnelse)
         }
 

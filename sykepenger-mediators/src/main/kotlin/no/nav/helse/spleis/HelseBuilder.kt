@@ -9,8 +9,8 @@ import javax.sql.DataSource
 internal class HelseBuilder(dataSource: DataSource, hendelseStream: HendelseStream, hendelseProducer: KafkaProducer<String, String>) {
 
     private val hendelseDirector: HendelseMediator
-    private val hendelseProbe: HendelseListener = HendelseProbe()
-    private val hendelseRecorder: HendelseListener = HendelseRecorder(dataSource)
+    private val hendelseProbe: HendelseProbe = HendelseProbe()
+    private val hendelseRecorder: HendelseRecorder = HendelseRecorder(dataSource)
 
     internal val personRestInterface: PersonRestInterface
     private val personRepository: PersonRepository = PersonPostgresRepository(dataSource)

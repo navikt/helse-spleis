@@ -14,7 +14,6 @@ import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.HendelseListener
 import no.nav.helse.spleis.HendelseStream
 import no.nav.helse.spleis.PersonRepository
 import no.nav.helse.spleis.hendelser.HendelseMediator
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
-internal class HendelseMediatorTest : HendelseListener {
+internal class HendelseMediatorTest {
 
     @Test
     internal fun `leser søknader`() {

@@ -26,14 +26,14 @@ internal class Parser(private val director: ParserDirector) : HendelseStream.Mes
 
             director.onUnrecognizedMessage(accumulatedProblems)
         } catch (err: Aktivitetslogger.AktivitetException) {
-            director.onUnrecognizedMessage(err)
+            director.onMessageError(err)
         }
     }
 
     // GoF Mediator
     internal interface ParserDirector {
-        fun onRecognizedMessage(message: JsonMessage, warnings: Aktivitetslogger)
+        fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger)
         fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger)
-        fun onUnrecognizedMessage(aktivitetException: Aktivitetslogger.AktivitetException)
+        fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException)
     }
 }

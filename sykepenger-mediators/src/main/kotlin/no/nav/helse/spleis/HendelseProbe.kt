@@ -2,11 +2,10 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.slf4j.LoggerFactory
 
-class HendelseProbe: HendelseListener {
+class HendelseProbe {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
         private val log = LoggerFactory.getLogger(HendelseProbe::class.java)
@@ -21,39 +20,35 @@ class HendelseProbe: HendelseListener {
                 .register()
     }
 
-    override fun onPåminnelse(påminnelse: ModelPåminnelse) {
+    fun onPåminnelse(påminnelse: ModelPåminnelse) {
         påminnetCounter
             .labels(påminnelse.tilstand().toString())
             .inc()
         påminnelse.tell()
     }
 
-    override fun onYtelser(ytelser: ModelYtelser) {
+    fun onYtelser(ytelser: ModelYtelser) {
         ytelser.tell()
     }
 
-    override fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {
+    fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {
         manuellSaksbehandling.tell()
     }
 
-    override fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+    fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         vilkårsgrunnlag.tell()
     }
 
-    override fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {
+    fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {
         inntektsmelding.tell()
     }
 
-    override fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {
+    fun onNySøknad(søknad: ModelNySøknad) {
         søknad.tell()
     }
 
-    override fun onSendtSøknad(søknad: ModelSendtSøknad) {
+    fun onSendtSøknad(søknad: ModelSendtSøknad) {
         søknad.tell()
-    }
-
-    override fun onUnprocessedMessage(message: String) {
-        sikkerLogg.info("uhåndtert melding $message")
     }
 
     private fun ArbeidstakerHendelse.tell() {
