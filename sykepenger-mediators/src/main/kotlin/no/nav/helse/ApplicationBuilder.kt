@@ -4,7 +4,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.spleis.HelseBuilder
 import no.nav.helse.spleis.HendelseStream
 import no.nav.helse.spleis.nais.nais
@@ -18,7 +17,6 @@ import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
 // Understands how to build our application server
-@KtorExperimentalAPI
 class ApplicationBuilder(env: Map<String, String>) {
 
     private val applicationLog = LoggerFactory.getLogger(ApplicationBuilder::class.java)

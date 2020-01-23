@@ -10,7 +10,6 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
@@ -60,7 +59,6 @@ import java.time.YearMonth
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
-@KtorExperimentalAPI
 internal class EndToEndTest {
 
     private companion object {

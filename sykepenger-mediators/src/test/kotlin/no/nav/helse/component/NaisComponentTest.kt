@@ -4,7 +4,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.helse.handleRequest
 import no.nav.helse.responseBody
 import no.nav.helse.spleis.nais.nais
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-@KtorExperimentalAPI
 class NaisComponentTest {
 
     private val testEnv = applicationEngineEnvironment {

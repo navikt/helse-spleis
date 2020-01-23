@@ -7,7 +7,6 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.ApplicationEngineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -21,7 +20,6 @@ fun randomPort(): Int = ServerSocket(0).use {
     it.localPort
 }
 
-@KtorExperimentalAPI
 fun testServer(
     shutdownTimeoutMs: Long = 10000,
     environment: ApplicationEngineEnvironment,
