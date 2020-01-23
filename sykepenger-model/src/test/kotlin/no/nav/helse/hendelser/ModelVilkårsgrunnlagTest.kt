@@ -1,15 +1,14 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -50,7 +49,7 @@ internal class ModelVilkårsgrunnlagTest {
             sendtNav = LocalDateTime.now(),
             egenmeldinger = emptyList(),
             soknadsperioder = listOf(
-                SoknadsperiodeDTO(10.januar, 12.januar,100)
+                SoknadsperiodeDTO(10.januar, 12.januar, 100)
             ),
             fravar = emptyList()
         ).toJsonNode().toString()
@@ -148,13 +147,31 @@ internal class ModelVilkårsgrunnlagTest {
             aktivitetslogger = aktivitetslogger,
             arbeidsgiverperioder = listOf(8.januar..10.januar),
             ferieperioder = listOf(),
-            originalJson = inntektsmeldingDTO(
-                beregnetInntekt = BigDecimal.valueOf(1000.0),
+            originalJson = Inntektsmelding(
+                inntektsmeldingId = "",
+                arbeidstakerFnr = "fødselsnummer",
+                arbeidstakerAktorId = "aktørId",
+                virksomhetsnummer = "virksomhetsnummer",
+                arbeidsgiverFnr = null,
+                arbeidsgiverAktorId = null,
+                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+                arbeidsforholdId = null,
+                beregnetInntekt = BigDecimal.valueOf(1000),
+                refusjon = Refusjon(beloepPrMnd = BigDecimal.valueOf(1000), opphoersdato = LocalDate.now()),
+                endringIRefusjoner = listOf(
+                    EndringIRefusjon(
+                        endringsdato = LocalDate.now(),
+                        beloep = BigDecimal.valueOf(1000)
+                    )
+                ),
+                opphoerAvNaturalytelser = emptyList(),
+                gjenopptakelseNaturalytelser = emptyList(),
                 arbeidsgiverperioder = listOf(Periode(fom = 8.januar, tom = 10.januar)),
-                refusjon = Refusjon(
-                    beloepPrMnd = BigDecimal.valueOf(1000.0),
-                    opphoersdato = LocalDate.now()
-                )
-            ).toJsonNode().toString()
+                status = Status.GYLDIG,
+                arkivreferanse = "",
+                ferieperioder = emptyList(),
+                foersteFravaersdag = LocalDate.now(),
+                mottattDato = LocalDateTime.now()
+            ).toJson()
         )
 }

@@ -3,7 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.inntektsmeldingHendelse
+import no.nav.helse.fixtures.januar
+import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
@@ -17,11 +18,14 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.sykedag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.utenlandsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
+import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
+import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -33,7 +37,7 @@ internal class SykdomstidslinjeJsonTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private val inntektsmelding = inntektsmeldingHendelse()
+    private val inntektsmelding = inntektsmelding()
     private val sendtSøknad = sendtSøknad()
 
 
@@ -191,6 +195,43 @@ internal class SykdomstidslinjeJsonTest {
         expected.dagerErstattet().forEachIndexed { key, dag ->
             assertDagEquals(dag, actualDager[key])
         }
+    }
+
+    private fun inntektsmelding(): ModelInntektsmelding {
+        return ModelInntektsmelding(
+            UUID.randomUUID(),
+            ModelInntektsmelding.Refusjon(null, 1.0, null),
+            "orgnummer",
+            "fnr",
+            "aktør",
+            LocalDateTime.now(),
+            LocalDate.now(),
+            1.0,
+            Aktivitetslogger(),
+            Inntektsmelding(
+                inntektsmeldingId = "",
+                arbeidstakerFnr = "fødselsnummer",
+                arbeidstakerAktorId = "aktørId",
+                virksomhetsnummer = "virksomhetsnummer",
+                arbeidsgiverFnr = null,
+                arbeidsgiverAktorId = null,
+                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+                arbeidsforholdId = null,
+                beregnetInntekt = BigDecimal.ONE,
+                refusjon = Refusjon(beloepPrMnd = BigDecimal.ONE, opphoersdato = LocalDate.now()),
+                endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+                opphoerAvNaturalytelser = emptyList(),
+                gjenopptakelseNaturalytelser = emptyList(),
+                arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                status = Status.GYLDIG,
+                arkivreferanse = "",
+                ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                foersteFravaersdag = LocalDate.now(),
+                mottattDato = LocalDateTime.now()
+            ).toJson(),
+            listOf(1.januar..2.januar),
+            emptyList()
+        )
     }
 
     private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),

@@ -2,17 +2,18 @@ package no.nav.helse.arbeidsgiver
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntektHistorie
 import no.nav.helse.september
+import no.nav.helse.toJson
+import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -40,7 +41,7 @@ internal class ArbeidsgiverTest {
                 listOf(
                     InntektHistorie.Memento.Inntekt(
                         1.januar,
-                        TestConstants.inntektsmeldingHendelse(),
+                        inntektsmelding(),
                         100.00.toBigDecimal()
                     )
                 )
@@ -54,6 +55,7 @@ internal class ArbeidsgiverTest {
         assertEquals(1, restoredArbeidsgiver.memento().inntektHistorie.inntekter.size)
         assertEquals(100.0.toBigDecimal(), restoredArbeidsgiver.memento().inntektHistorie.inntekter.first().beløp)
     }
+
 
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
@@ -92,7 +94,7 @@ internal class ArbeidsgiverTest {
                 listOf(
                     InntektHistorie.Memento.Inntekt(
                         1.januar,
-                        TestConstants.inntektsmeldingHendelse(),
+                        inntektsmelding(),
                         100.00.toBigDecimal()
                     )
                 )
@@ -108,6 +110,43 @@ internal class ArbeidsgiverTest {
 
         assertTrue(arbeidsgiverMementoFromString.inntektHistorie.inntekter.isEmpty())
 
+    }
+
+    private fun inntektsmelding(): ModelInntektsmelding {
+        return ModelInntektsmelding(
+            UUID.randomUUID(),
+            ModelInntektsmelding.Refusjon(null, 1.0, null),
+            "orgnummer",
+            "fnr",
+            "aktør",
+            LocalDateTime.now(),
+            LocalDate.now(),
+            1.0,
+            Aktivitetslogger(),
+            Inntektsmelding(
+                inntektsmeldingId = "",
+                arbeidstakerFnr = "fødselsnummer",
+                arbeidstakerAktorId = "aktørId",
+                virksomhetsnummer = "virksomhetsnummer",
+                arbeidsgiverFnr = null,
+                arbeidsgiverAktorId = null,
+                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+                arbeidsforholdId = null,
+                beregnetInntekt = BigDecimal.ONE,
+                refusjon = Refusjon(beloepPrMnd = BigDecimal.ONE, opphoersdato = LocalDate.now()),
+                endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+                opphoerAvNaturalytelser = emptyList(),
+                gjenopptakelseNaturalytelser = emptyList(),
+                arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                status = Status.GYLDIG,
+                arkivreferanse = "",
+                ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                foersteFravaersdag = LocalDate.now(),
+                mottattDato = LocalDateTime.now()
+            ).toJson(),
+            listOf(1.januar..2.januar),
+            emptyList()
+        )
     }
 
 }

@@ -8,15 +8,12 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.junit.jupiter.api.fail
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -30,75 +27,6 @@ private val objectMapper = jacksonObjectMapper()
 internal object TestConstants {
 
     private val fakeFNR = "01019510000"
-
-
-    fun inntektsmeldingHendelse(
-        aktørId: String = "",
-        fødselsnummer: String = fakeFNR,
-        virksomhetsnummer: String? = "123456789",
-        beregnetInntekt: BigDecimal? = 666.toBigDecimal(),
-        førsteFraværsdag: LocalDate = 10.september,
-        arbeidsgiverperioder: List<Periode> = listOf(
-            Periode(10.september, 10.september.plusDays(16))
-        ),
-        ferieperioder: List<Periode> = emptyList(),
-        refusjon: Refusjon = Refusjon(
-            beloepPrMnd = 666.toBigDecimal(),
-            opphoersdato = LocalDate.now()
-        ),
-        endringerIRefusjoner: List<EndringIRefusjon> = emptyList()
-    ) =
-        Inntektsmelding.Builder().build(
-            inntektsmeldingDTO(
-                aktørId,
-                fødselsnummer,
-                virksomhetsnummer,
-                førsteFraværsdag,
-                arbeidsgiverperioder,
-                ferieperioder,
-                refusjon,
-                endringerIRefusjoner,
-                beregnetInntekt
-            ).toJsonNode().toString()
-        )!!
-
-    fun inntektsmeldingDTO(
-        aktørId: String = "",
-        fødselsnummer: String = fakeFNR,
-        virksomhetsnummer: String? = "123456789",
-        førsteFraværsdag: LocalDate = 10.september,
-        arbeidsgiverperioder: List<Periode> = listOf(
-            Periode(10.september, 10.september.plusDays(16))
-        ),
-        feriePerioder: List<Periode> = emptyList(),
-        refusjon: Refusjon = Refusjon(
-            beloepPrMnd = 666.toBigDecimal(),
-            opphoersdato = null
-        ),
-        endringerIRefusjoner: List<EndringIRefusjon> = emptyList(),
-        beregnetInntekt: BigDecimal? = 666.toBigDecimal()
-    ) =
-        Inntektsmeldingkontrakt(
-            inntektsmeldingId = "",
-            arbeidstakerFnr = fødselsnummer,
-            arbeidstakerAktorId = aktørId,
-            virksomhetsnummer = virksomhetsnummer,
-            arbeidsgiverFnr = null,
-            arbeidsgiverAktorId = null,
-            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-            arbeidsforholdId = null,
-            beregnetInntekt = beregnetInntekt,
-            refusjon = refusjon,
-            endringIRefusjoner = endringerIRefusjoner,
-            opphoerAvNaturalytelser = emptyList(),
-            gjenopptakelseNaturalytelser = emptyList(),
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            status = Status.GYLDIG,
-            arkivreferanse = "",
-            ferieperioder = feriePerioder,
-            foersteFravaersdag = førsteFraværsdag,
-            mottattDato = LocalDateTime.now()
-        )
 
     fun sykepengehistorikk(
         perioder: List<SpolePeriode> = emptyList(),
