@@ -6,15 +6,14 @@ import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
-import org.apache.kafka.streams.kstream.KStream
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
 // Understands how to a read stream of messages from Kafka
-internal class HendelseStream(private val topics: List<String>) {
+internal class KafkaRapid(private val topics: List<String>) {
 
-    private val log = LoggerFactory.getLogger(HendelseStream::class.java)
+    private val log = LoggerFactory.getLogger(KafkaRapid::class.java)
 
     private val messageListeners = mutableListOf<MessageListener>()
     private val stateListeners = mutableListOf<KafkaStreams.StateListener>()
@@ -72,7 +71,9 @@ internal class HendelseStream(private val topics: List<String>) {
         StreamsBuilder().apply {
             stream<String, String>(topics, consumeStrings)
                 .through(Topics.rapidTopic)
-                .foreach(::notifyListeners)
+                .foreach { _, message ->
+                    notifyListeners(message)
+                }
         }.build()
 
     private fun notifyListeners(message: String) {
@@ -89,14 +90,3 @@ internal class HendelseStream(private val topics: List<String>) {
                 .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST)
     }
 }
-
-private fun <K, V> KStream<K, V>.foreach(action: (V) -> Unit) = this.foreach { _, value ->
-    action(value)
-}
-
-private fun <K, V> KStream<K, V>.filterValues(filter: (V) -> Boolean): KStream<K, V> = this.filter { _, value ->
-    filter(value)
-}
-
-private inline fun <K, reified V> KStream<K, V?>.filterNotNull(): KStream<K, V> = filterValues { it != null }
-    .mapValues { _, value -> value as V }

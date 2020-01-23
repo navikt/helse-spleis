@@ -1,4 +1,4 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.db
 
 import java.util.*
 

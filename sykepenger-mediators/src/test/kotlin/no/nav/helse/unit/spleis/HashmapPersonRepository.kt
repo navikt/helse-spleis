@@ -2,7 +2,7 @@ package no.nav.helse.unit.spleis
 
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.spleis.PersonRepository
+import no.nav.helse.spleis.db.PersonRepository
 
 internal class HashmapPersonRepository : PersonRepository, PersonObserver {
 

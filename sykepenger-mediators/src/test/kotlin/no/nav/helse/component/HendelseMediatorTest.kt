@@ -14,9 +14,9 @@ import no.nav.helse.løsBehov
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.HendelseStream
-import no.nav.helse.spleis.PersonRepository
-import no.nav.helse.spleis.hendelser.HendelseMediator
+import no.nav.helse.spleis.HendelseMediator
+import no.nav.helse.spleis.KafkaRapid
+import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -104,7 +104,7 @@ internal class HendelseMediatorTest {
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
 
-        private val hendelseStream = HendelseStream(listOf(dummyTopic))
+        private val hendelseStream = KafkaRapid(listOf(dummyTopic))
 
         override fun hentPerson(aktørId: String): Person? {
             return mockk<Person>(relaxed = true) {

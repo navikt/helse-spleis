@@ -1,10 +1,14 @@
-package no.nav.helse.spleis.hendelser
+package no.nav.helse.spleis
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.person.*
-import no.nav.helse.spleis.*
+import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.PersonRepository
+import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -14,7 +18,7 @@ import org.slf4j.LoggerFactory
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
-    rapid: HendelseStream,
+    rapid: KafkaRapid,
     private val personRepository: PersonRepository,
     private val lagrePersonDao: PersonObserver,
     private val lagreUtbetalingDao: PersonObserver,

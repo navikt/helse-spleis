@@ -1,15 +1,17 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.db
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.VedtaksperiodeObserver
+import no.nav.helse.spleis.PostgresProbe
 import java.util.*
 import javax.sql.DataSource
 
 class LagreUtbetalingDao(private val dataSource: DataSource,
-                         private val probe: PostgresProbe = PostgresProbe): PersonObserver {
+                         private val probe: PostgresProbe = PostgresProbe
+): PersonObserver {
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
     }
@@ -23,7 +25,7 @@ class LagreUtbetalingDao(private val dataSource: DataSource,
             session.run(queryOf("INSERT INTO utbetalingsreferanse (id, aktor_id, orgnr, vedtaksperiode_id) VALUES (?, ?, ?, ?)",
                     utbetalingsreferanse, aktørId, organisasjonsnummer, vedtaksperiodeId.toString()).asExecute)
         }.also {
-            probe.utbetalingSkrevetTilDb()
+            PostgresProbe.utbetalingSkrevetTilDb()
         }
     }
 

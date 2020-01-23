@@ -5,7 +5,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import no.nav.helse.spleis.HelseBuilder
-import no.nav.helse.spleis.HendelseStream
+import no.nav.helse.spleis.KafkaRapid
 import no.nav.helse.spleis.nais.nais
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -24,11 +24,11 @@ class ApplicationBuilder(env: Map<String, String>) {
     private val kafkaConfigBuilder = KafkaConfigBuilder(env)
     private val dataSourceBuilder = DataSourceBuilder(env)
 
-    private val hendelseStream = HendelseStream(Topics.hendelseKildeTopics)
+    private val rapid = KafkaRapid(Topics.hendelseKildeTopics)
 
     private val helseBuilder = HelseBuilder(
         dataSource = dataSourceBuilder.getDataSource(),
-        hendelseStream = hendelseStream,
+        kafkaRapid = rapid,
         hendelseProducer = KafkaProducer<String, String>(kafkaConfigBuilder.producerConfig(), StringSerializer(), StringSerializer())
     )
 
@@ -58,7 +58,7 @@ class ApplicationBuilder(env: Map<String, String>) {
         setUncaughtExceptionHandler(applicationLog)
         stopApplicationOnShutdown()
 
-        hendelseStream.addStateListener(KafkaStreams.StateListener { newState, _ ->
+        rapid.addStateListener(KafkaStreams.StateListener { newState, _ ->
             if (newState == KafkaStreams.State.ERROR || newState == KafkaStreams.State.NOT_RUNNING) {
                 stop()
             }
@@ -68,11 +68,11 @@ class ApplicationBuilder(env: Map<String, String>) {
     fun start() {
         app.start(wait = false)
         dataSourceBuilder.migrate()
-        hendelseStream.start(kafkaConfigBuilder.streamsConfig())
+        rapid.start(kafkaConfigBuilder.streamsConfig())
     }
 
     fun stop() {
-        hendelseStream.stop()
+        rapid.stop()
         app.stop(1, 5, TimeUnit.SECONDS)
     }
 

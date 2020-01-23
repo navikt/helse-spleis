@@ -1,6 +1,8 @@
 package no.nav.helse
 
 import com.auth0.jwk.JwkProviderBuilder
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.*
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
@@ -14,11 +16,12 @@ import io.ktor.response.ApplicationSendPipeline
 import io.ktor.routing.routing
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
-import no.nav.helse.spleis.PersonRestInterface
-import no.nav.helse.spleis.http.getJson
-import no.nav.helse.spleis.person
-import no.nav.helse.spleis.utbetaling
+import no.nav.helse.spleis.rest.PersonRestInterface
+import no.nav.helse.spleis.rest.person
+import no.nav.helse.spleis.rest.utbetaling
 import org.slf4j.LoggerFactory
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.net.URL
 
 private val httpTraceLog = LoggerFactory.getLogger("HttpTraceLog")
@@ -93,4 +96,22 @@ internal fun Application.restInterface(
         }
     }
 
+}
+
+private val objectMapper = ObjectMapper()
+
+private fun String.getJson(): JsonNode {
+    val (responseCode, responseBody) = this.fetchUrl()
+
+    if (responseCode >= 300 || responseBody == null) {
+        throw Exception("got status $responseCode from ${this}.")
+    }
+    return objectMapper.readTree(responseBody)
+}
+
+private fun String.fetchUrl() = with(URL(this).openConnection() as HttpURLConnection) {
+    requestMethod = "GET"
+
+    val stream: InputStream? = if (responseCode < 300) this.inputStream else this.errorStream
+    responseCode to stream?.bufferedReader()?.readText()
 }

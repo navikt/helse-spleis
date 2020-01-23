@@ -1,4 +1,4 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.rest
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode

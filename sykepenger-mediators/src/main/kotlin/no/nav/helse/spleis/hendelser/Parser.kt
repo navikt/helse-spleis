@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.HendelseStream
+import no.nav.helse.spleis.KafkaRapid
 
 // Understands a stream of valid JSON packets meeting certain criteria
 // Implements GoF Mediator pattern to notify unrecognized messages
 // Implements GoF Command pattern for parsing
-internal class Parser(private val director: ParserDirector) : HendelseStream.MessageListener {
+internal class Parser(private val director: ParserDirector) : KafkaRapid.MessageListener {
     private val factories = mutableListOf<MessageFactory>()
 
     fun register(factory: MessageFactory) {

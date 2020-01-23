@@ -14,8 +14,8 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import no.nav.helse.september
-import no.nav.helse.spleis.LagrePersonDao
-import no.nav.helse.spleis.PersonPostgresRepository
+import no.nav.helse.spleis.db.LagrePersonDao
+import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.flywaydb.core.Flyway

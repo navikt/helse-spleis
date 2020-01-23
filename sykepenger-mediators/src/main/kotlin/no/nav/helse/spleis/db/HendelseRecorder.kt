@@ -1,8 +1,9 @@
-package no.nav.helse.spleis
+package no.nav.helse.spleis.db
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.hendelser.JsonMessage
 import javax.sql.DataSource
 
@@ -20,7 +21,7 @@ internal class HendelseRecorder(
                 ).asExecute
             )
         }.also {
-            probe.hendelseSkrevetTilDb()
+            PostgresProbe.hendelseSkrevetTilDb()
         }
     }
 }
