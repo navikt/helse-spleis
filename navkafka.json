@@ -1,7 +1,9 @@
 {
     "topics": [
         {
-            "configEntries": {},
+            "configEntries": {
+                "retention.ms": -1
+            },
             "members": [
                 {
                     "member": "srvspsak",
