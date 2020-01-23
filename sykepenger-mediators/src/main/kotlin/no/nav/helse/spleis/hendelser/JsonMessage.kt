@@ -60,6 +60,13 @@ internal open class JsonMessage(private val originalMessage: String, private val
         accessor(key)
     }
 
+    fun requiredValueOneOf(key: String, values: List<String>) {
+        if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() !in values) {
+            return problems.error("Required $key must be one of $values")
+        }
+        accessor(key)
+    }
+
     fun requiredValues(key: String, values: List<String>) {
         if (isKeyMissing(key) || !node(key).isArray || !node(key).map(JsonNode::asText).containsAll(values)) {
             return problems.error("Required $key does not contains $values")

@@ -1,9 +1,11 @@
 package no.nav.helse.component
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.common.KafkaEnvironment
-import no.nav.helse.TestConstants
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
@@ -133,7 +135,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<Påminnelse>())
+                    håndter(any<ModelPåminnelse>())
                 } answers {
                     lestPåminnelse.set(true)
                 }
@@ -213,20 +215,29 @@ internal class HendelseMediatorTest : HendelseListener {
             put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
         }
 
+        private val objectMapper = jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
         private fun sendNyPåminnelse(
             aktørId: String = defaultAktørId,
             fødselsnummer: String = defaultFødselsnummer,
             organisasjonsnummer: String = defaultOrganisasjonsnummer
-        ): Påminnelse {
-            return TestConstants.påminnelseHendelse(
-                vedtaksperiodeId = UUID.randomUUID(),
-                tilstand = TilstandType.START,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                fødselsnummer = fødselsnummer
-            ).also {
-                sendKafkaMessage(aktørId, it.toJson())
-            }
+        ) {
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "@event_name" to "påminnelse",
+                    "aktørId" to aktørId,
+                    "fødselsnummer" to fødselsnummer,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "vedtaksperiodeId" to UUID.randomUUID().toString(),
+                    "tilstand" to TilstandType.START.name,
+                    "antallGangerPåminnet" to 0,
+                    "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
+                    "påminnelsestidspunkt" to LocalDateTime.now().toString(),
+                    "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
+                )
+            ).also { sendKafkaMessage(aktørId, it) }
         }
 
         private fun sendManuellSaksbehandling(

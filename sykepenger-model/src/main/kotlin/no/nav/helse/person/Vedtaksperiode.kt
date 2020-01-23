@@ -108,7 +108,7 @@ internal class Vedtaksperiode internal constructor(
         if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
     }
 
-    internal fun håndter(påminnelse: Påminnelse): Boolean {
+    internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId()) return false
         tilstand.håndter(this, påminnelse)
         return true
@@ -219,7 +219,7 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    private fun emitVedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    private fun emitVedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
         observers.forEach { observer ->
             observer.vedtaksperiodePåminnet(påminnelse)
         }
@@ -255,7 +255,7 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ModelManuellSaksbehandling) {
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.setTilstand(påminnelse, TilInfotrygd)
@@ -330,7 +330,7 @@ internal class Vedtaksperiode internal constructor(
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
@@ -372,7 +372,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.trengerYtelser()
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
@@ -465,7 +465,7 @@ internal class Vedtaksperiode internal constructor(
         override val type = TIL_UTBETALING
         override val timeout: Duration = Duration.ZERO
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
@@ -524,7 +524,7 @@ internal class Vedtaksperiode internal constructor(
             aktivitetslogger.warn("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {}
     }
 
     // Gang of four Memento pattern

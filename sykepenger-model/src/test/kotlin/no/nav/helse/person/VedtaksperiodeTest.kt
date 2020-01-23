@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.fixtures.S
 import no.nav.helse.fixtures.april
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
@@ -176,8 +176,8 @@ internal class VedtaksperiodeTest {
         val id = UUID.randomUUID()
         val vedtaksperiode = Vedtaksperiode(id, "123", "123", "123", 1.S)
 
-        assertFalse(vedtaksperiode.håndter(påminnelseHendelse(UUID.randomUUID(), TilstandType.START)))
-        assertTrue(vedtaksperiode.håndter(påminnelseHendelse(id, TilstandType.START)))
+        assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.START)))
+        assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.START)))
     }
 
     @Test
@@ -262,4 +262,18 @@ internal class VedtaksperiodeTest {
             Aktivitetslogger(),
             "{}"
         )
+
+    private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = ModelPåminnelse(
+        hendelseId = UUID.randomUUID(),
+        aktørId = "",
+        fødselsnummer = "",
+        organisasjonsnummer = "",
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        tilstand = tilstandType,
+        antallGangerPåminnet = 1,
+        tilstandsendringstidspunkt = LocalDateTime.now(),
+        påminnelsestidspunkt = LocalDateTime.now(),
+        nestePåminnelsestidspunkt = LocalDateTime.now()
+    )
+
 }

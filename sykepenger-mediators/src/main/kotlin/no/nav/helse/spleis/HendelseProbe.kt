@@ -21,9 +21,9 @@ class HendelseProbe: HendelseListener {
                 .register()
     }
 
-    override fun onPåminnelse(påminnelse: Påminnelse) {
+    override fun onPåminnelse(påminnelse: ModelPåminnelse) {
         påminnetCounter
-            .labels(påminnelse.tilstand.toString())
+            .labels(påminnelse.tilstand().toString())
             .inc()
         påminnelse.tell()
     }

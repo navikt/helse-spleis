@@ -10,13 +10,10 @@ import no.nav.helse.behov.Pakke
 import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.ModelSykepengehistorikk
 import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
-import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -115,27 +112,6 @@ internal object TestConstants {
             Behovstype.GodkjenningFraSaksbehandler.toString() to mapOf("godkjent" to utbetalingGodkjent)
         )
     )
-
-    fun påminnelseHendelse(
-        vedtaksperiodeId: UUID,
-        tilstand: TilstandType,
-        aktørId: String = "1",
-        organisasjonsnummer: String = "123456789"
-    ) = Påminnelse.Builder().build(
-        objectMapper.writeValueAsString(
-            mapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fakeFNR,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "tilstand" to tilstand.toString(),
-                "antallGangerPåminnet" to 0,
-                "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
-                "påminnelsestidspunkt" to LocalDateTime.now().toString(),
-                "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
-            )
-        )
-    ) ?: fail { "påminnelse er null" }
 }
 
 internal fun Behov.løsBehov(løsning: Any): Behov {

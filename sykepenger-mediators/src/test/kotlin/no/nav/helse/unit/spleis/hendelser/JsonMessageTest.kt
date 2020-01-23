@@ -123,6 +123,22 @@ internal class JsonMessageTest {
     }
 
     @Test
+    internal fun requiredValueOneOf() {
+        "{\"foo\": \"bar\" }".also { json ->
+            message(json).also {
+                it.requiredValueOneOf("foo", listOf("foo"))
+                assertTrue(aktivitetslogger.hasErrors())
+                assertThrows<IllegalArgumentException> { it["foo"] }
+            }
+            message(json).also {
+                it.requiredValueOneOf("foo", listOf("bar", "foobar"))
+                assertFalse(aktivitetslogger.hasErrors()) { "did not expect errors: $aktivitetslogger" }
+                assertDoesNotThrow { it["foo"] }
+            }
+        }
+    }
+
+    @Test
     internal fun requiredNestedValues() {
         assertEquals("{\"foo\": { \"bar\": [ \"baz\", \"foobar\" ] }}", "foo.bar", listOf("baz","foobar"))
     }
@@ -253,7 +269,11 @@ internal class JsonMessageTest {
         }
     }
 
-    private fun message(json: String) = JsonMessage(json, Aktivitetslogger(json))
+    private lateinit var aktivitetslogger: Aktivitetslogger
+    private fun message(json: String): JsonMessage {
+        aktivitetslogger = Aktivitetslogger(json)
+        return JsonMessage(json, aktivitetslogger)
+    }
 
     private class ExtendedMessage(originalMessage: String, problems: Aktivitetslogger) : JsonMessage(originalMessage, problems) {
         init {

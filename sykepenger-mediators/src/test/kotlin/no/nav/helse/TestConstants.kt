@@ -7,11 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
-import org.junit.jupiter.api.fail
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -128,28 +125,6 @@ internal object TestConstants {
             mottattDato = LocalDateTime.now()
         )
 
-    fun påminnelseHendelse(
-        vedtaksperiodeId: UUID,
-        tilstand: TilstandType,
-        aktørId: String = "1",
-        organisasjonsnummer: String = "123456789",
-        fødselsnummer: String
-    ) = Påminnelse.Builder().build(
-        objectMapper.writeValueAsString(
-            mapOf(
-                "@event_name" to "påminnelse",
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "tilstand" to tilstand.toString(),
-                "antallGangerPåminnet" to 0,
-                "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
-                "påminnelsestidspunkt" to LocalDateTime.now().toString(),
-                "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
-            )
-        )
-    ) ?: fail { "påminnelse er null" }
 }
 
 internal fun Behov.løsBehov(løsning: Any): Behov {

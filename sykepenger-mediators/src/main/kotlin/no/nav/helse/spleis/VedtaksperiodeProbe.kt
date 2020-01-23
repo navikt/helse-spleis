@@ -4,7 +4,7 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonskjemaForGammelt
@@ -79,19 +79,19 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
         log.info(
             "mottok påminnelse for vedtaksperiode: ${påminnelse.vedtaksperiodeId()}",
-            keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet}"),
-            keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt.toString()),
+            keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
+            keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
             keyValue("vedtaksperiodeId", påminnelse.vedtaksperiodeId()),
-            keyValue("tilstand", påminnelse.tilstand.name),
-            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt.toString()),
-            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt.toString())
+            keyValue("tilstand", påminnelse.tilstand().name),
+            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
+            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
         )
 
         vedtaksperiodePåminnetCounter
-            .labels(påminnelse.tilstand.toString())
+            .labels(påminnelse.tilstand().toString())
             .inc()
     }
 

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.hendelser
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
 import no.nav.helse.spleis.*
 import no.nav.helse.spleis.hendelser.model.*
@@ -109,17 +108,6 @@ internal class HendelseMediator(
             }
         }
 
-        private fun person(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
-                aktørId = arbeidstakerHendelse.aktørId(),
-                fødselsnummer = arbeidstakerHendelse.fødselsnummer()
-            )).also {
-                it.addObserver(personObserver)
-                it.addObserver(lagrePersonDao)
-                it.addObserver(lagreUtbetalingDao)
-                it.addObserver(vedtaksperiodeProbe)
-            }
-
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
             val vilkårsgrunnlag = message.asModelVilkårsgrunnlag()
             hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
@@ -143,13 +131,22 @@ internal class HendelseMediator(
         }
 
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            Påminnelse.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onPåminnelse(this)
-                hendelseRecorder.onPåminnelse(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe påminnelse til domenetype")
+            val påminnelse = message.asModelPåminnelse()
+                hendelseProbe.onPåminnelse(påminnelse)
+                hendelseRecorder.onPåminnelse(påminnelse)
+                person(påminnelse).håndter(påminnelse)
         }
+
+        private fun person(arbeidstakerHendelse: ArbeidstakerHendelse) =
+            (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
+                aktørId = arbeidstakerHendelse.aktørId(),
+                fødselsnummer = arbeidstakerHendelse.fødselsnummer()
+            )).also {
+                it.addObserver(personObserver)
+                it.addObserver(lagrePersonDao)
+                it.addObserver(lagreUtbetalingDao)
+                it.addObserver(vedtaksperiodeProbe)
+            }
     }
 
     private class PersonMediator(private val producer: KafkaProducer<String, String>) : PersonObserver {

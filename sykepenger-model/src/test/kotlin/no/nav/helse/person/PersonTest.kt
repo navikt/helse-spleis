@@ -1,12 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
@@ -69,14 +69,7 @@ internal class PersonTest {
     internal fun `påminnelse blir delegert til perioden`() {
         testPerson.also {
             it.håndter(nySøknad())
-            it.håndter(
-                påminnelseHendelse(
-                    aktørId = aktørId,
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeIdForPerson(),
-                    tilstand = MOTTATT_NY_SØKNAD
-                )
-            )
+            it.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
         }
 
         assertPersonEndret()
@@ -87,11 +80,9 @@ internal class PersonTest {
 
     @Test
     internal fun `påminnelse for periode som ikke finnes`() {
-        val påminnelse = påminnelseHendelse(
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
+        val påminnelse = påminnelse(
             vedtaksperiodeId = UUID.randomUUID(),
-            tilstand = MOTTATT_NY_SØKNAD
+            tilstandType = MOTTATT_NY_SØKNAD
         )
         testPerson.also { it.håndter(påminnelse) }
 
@@ -392,6 +383,20 @@ internal class PersonTest {
             Aktivitetslogger(),
             "{}"
         )
+
+
+    private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) = ModelPåminnelse(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        tilstand = tilstandType,
+        antallGangerPåminnet = 1,
+        tilstandsendringstidspunkt = LocalDateTime.now(),
+        påminnelsestidspunkt = LocalDateTime.now(),
+        nestePåminnelsestidspunkt = LocalDateTime.now()
+    )
 
     private class TestPersonObserver : PersonObserver {
         internal val tilstandsendringer: MutableMap<UUID, VedtaksperiodeObserver.StateChangeEvent> = mutableMapOf()

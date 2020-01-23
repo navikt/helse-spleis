@@ -14,7 +14,6 @@ import io.ktor.util.KtorExperimentalAPI
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
-import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.rapidTopic
@@ -22,8 +21,8 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
+import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -56,6 +55,7 @@ import java.sql.Connection
 import java.time.Duration
 import java.time.Duration.ofMillis
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
@@ -336,7 +336,7 @@ internal class EndToEndTest {
         val fødselsnummer = "01019000000"
         val organisasjonsnummer = "123456789"
 
-        val påminnelse: Påminnelse = sendNyPåminnelse(enAktørId, fødselsnummer, organisasjonsnummer)
+        val påminnelse = sendNyPåminnelse(enAktørId, fødselsnummer, organisasjonsnummer)
 
         await("Venter på beskjed om at vedtaksperiode ikke finnes")
             .atMost(30L, SECONDS)
@@ -344,7 +344,7 @@ internal class EndToEndTest {
                 assertNotNull(
                     TestConsumer.records(rapidTopic)
                         .map { objectMapper.readTree(it.value()) }
-                        .filter { it["@event_name"]?.asText() == "påminnelse" }
+                        .filter { it["@event_name"]?.asText() == "vedtaksperiode_ikke_funnet" }
                         .filter { enAktørId == it["aktørId"].textValue() }
                         .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                         .filter { organisasjonsnummer == it["organisasjonsnummer"].textValue() }
@@ -353,16 +353,34 @@ internal class EndToEndTest {
             }
     }
 
-    private fun sendNyPåminnelse(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): Påminnelse {
-        return påminnelseHendelse(
-            vedtaksperiodeId = UUID.randomUUID(),
-            tilstand = TilstandType.START,
+    private fun sendNyPåminnelse(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): ModelPåminnelse {
+        val vedtaksperiodeId = UUID.randomUUID().toString()
+        objectMapper.writeValueAsString(
+            mapOf(
+                "@event_name" to "påminnelse",
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "tilstand" to TilstandType.START.name,
+                "antallGangerPåminnet" to 0,
+                "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
+                "påminnelsestidspunkt" to LocalDateTime.now().toString(),
+                "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
+            )
+        ).also { sendKafkaMessage(rapidTopic, fødselsnummer, it) }
+        return ModelPåminnelse(
+            hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            fødselsnummer = fødselsnummer
-        ).also {
-            sendKafkaMessage(rapidTopic, aktørId, it.toJson())
-        }
+            vedtaksperiodeId = vedtaksperiodeId,
+            antallGangerPåminnet = 1,
+            tilstand = TilstandType.START,
+            tilstandsendringstidspunkt = LocalDateTime.now(),
+            påminnelsestidspunkt = LocalDateTime.now(),
+            nestePåminnelsestidspunkt = LocalDateTime.now()
+        )
     }
 
     private fun String.httpGet(testBlock: String.() -> Unit) {

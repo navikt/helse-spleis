@@ -133,7 +133,7 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(vilkårsgrunnlag) }
     }
 
-    internal fun håndter(påminnelse: Påminnelse): Boolean {
+    internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
         return perioder.any { it.håndter(påminnelse) }
     }
 

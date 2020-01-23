@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.*
 import no.nav.helse.TestConstants.foreldrepenger
 import no.nav.helse.TestConstants.foreldrepengeytelse
-import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
@@ -83,25 +82,15 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra starttilstand, gå TilInfotrygd`() {
         val vedtaksperiode = beInStartTilstand()
-        vedtaksperiode.håndter(
-            påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = START
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD, Påminnelse::class)
+        vedtaksperiode.håndter(påminnelse(tilstandType = START))
+        assertTilstandsendring(TIL_INFOTRYGD, ModelPåminnelse::class)
     }
 
     @Test
     fun `ignorer påminnelse for en annen tilstand enn starttilstand`() {
         val vedtaksperiode = beInStartTilstand()
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = MOTTATT_NY_SØKNAD
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
         }
     }
 
@@ -134,13 +123,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra MottattNySøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInNySøknad()
-        vedtaksperiode.håndter(
-            påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = MOTTATT_NY_SØKNAD
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD, Påminnelse::class)
+        vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
+        assertTilstandsendring(TIL_INFOTRYGD, ModelPåminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -148,12 +132,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `ignorer påminnelse for en annen tilstand enn MottattNySøknad`() {
         val vedtaksperiode = beInNySøknad()
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = MOTTATT_INNTEKTSMELDING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_INNTEKTSMELDING))
         }
         assertNull(forrigePåminnelse)
     }
@@ -189,13 +168,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra MottattSendtSøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInSendtSøknad()
-        vedtaksperiode.håndter(
-            påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = MOTTATT_SENDT_SØKNAD
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD, Påminnelse::class)
+        vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_SENDT_SØKNAD))
+        assertTilstandsendring(TIL_INFOTRYGD, ModelPåminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -203,12 +177,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `ignorer påminnelse for en annen tilstand enn SENDT_SØKNAD_MOTTATT`() {
         val vedtaksperiode = beInSendtSøknad()
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = MOTTATT_INNTEKTSMELDING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_INNTEKTSMELDING))
         }
         assertNull(forrigePåminnelse)
     }
@@ -243,13 +212,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra MottattInntektsmelding, gå TilInfotrygd`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-        vedtaksperiode.håndter(
-            påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = MOTTATT_INNTEKTSMELDING
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD, Påminnelse::class)
+        vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_INNTEKTSMELDING))
+        assertTilstandsendring(TIL_INFOTRYGD, ModelPåminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -257,12 +221,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `ignorer påminnelse for en annen tilstand enn MottattInntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = MOTTATT_NY_SØKNAD
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
         }
         assertNull(forrigePåminnelse)
     }
@@ -589,12 +548,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndringITilstand {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = BEREGN_UTBETALING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = BEREGN_UTBETALING))
         }
 
         assertBehov(Behovstype.Sykepengehistorikk)
@@ -606,12 +560,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = MOTTATT_INNTEKTSMELDING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_INNTEKTSMELDING))
         }
         assertNull(forrigePåminnelse)
     }
@@ -891,13 +840,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta påminnelse fra TilGodkjenning, gå TilInfotrygd`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        vedtaksperiode.håndter(
-            påminnelseHendelse(
-                vedtaksperiodeId = vedtaksperiodeId,
-                tilstand = TIL_GODKJENNING
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD, Påminnelse::class)
+        vedtaksperiode.håndter(påminnelse(tilstandType = TIL_GODKJENNING))
+        assertTilstandsendring(TIL_INFOTRYGD, ModelPåminnelse::class)
         assertEquals(vedtaksperiodeId.toString(), forrigePåminnelse?.vedtaksperiodeId())
     }
 
@@ -906,12 +850,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val vedtaksperiode = beInTilGodkjenning()
 
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = BEREGN_UTBETALING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = BEREGN_UTBETALING))
         }
         assertNull(forrigePåminnelse)
     }
@@ -921,12 +860,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val vedtaksperiode = beInTilUtbetaling()
 
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = TIL_UTBETALING
-                )
-            )
+            vedtaksperiode.håndter(påminnelse(tilstandType = TIL_UTBETALING))
         }
         assertNull(forrigePåminnelse)
     }
@@ -937,24 +871,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
         assertIngenEndring {
             vedtaksperiode.håndter(
-                påminnelseHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    tilstand = TIL_GODKJENNING
-                )
+                påminnelse(tilstandType = TIL_GODKJENNING)
             )
         }
         assertNull(forrigePåminnelse)
     }
-
-    private fun generiskBehov() = Behov.nyttBehov(
-        hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
-        behov = listOf(),
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        additionalParams = mapOf()
-    )
 
     private fun nySøknad(
         orgnummer: String = organisasjonsnummer,
@@ -1042,6 +963,20 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             originalJson = "{}"
         )
     }
+
+    private fun påminnelse(tilstandType: TilstandType) = ModelPåminnelse(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        tilstand = tilstandType,
+        antallGangerPåminnet = 1,
+        tilstandsendringstidspunkt = LocalDateTime.now(),
+        påminnelsestidspunkt = LocalDateTime.now(),
+        nestePåminnelsestidspunkt = LocalDateTime.now()
+    )
+
 
     private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
@@ -1166,7 +1101,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         private var vedtaksperiodeEndringer = 0
         private lateinit var lastStateEvent: VedtaksperiodeObserver.StateChangeEvent
         private val behovsliste: MutableList<Behov> = mutableListOf()
-        private var forrigePåminnelse: Påminnelse? = null
+        private var forrigePåminnelse: ModelPåminnelse? = null
     }
 
     @BeforeEach
@@ -1181,7 +1116,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiodeEndringer++
     }
 
-    override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
         forrigePåminnelse = påminnelse
     }
 
