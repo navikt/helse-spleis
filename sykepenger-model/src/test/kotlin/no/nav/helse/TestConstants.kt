@@ -7,7 +7,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Pakke
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelForeldrepenger
+import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
@@ -112,24 +115,6 @@ internal object TestConstants {
             Behovstype.GodkjenningFraSaksbehandler.toString() to mapOf("godkjent" to utbetalingGodkjent)
         )
     )
-
-    fun manuellSaksbehandlingHendelse(
-        organisasjonsnummer: String = "123546564",
-        aktørId: String = "1",
-        fødselsnummer: String = fakeFNR,
-        vedtaksperiodeId: String = UUID.randomUUID().toString(),
-        utbetalingGodkjent: Boolean,
-        saksbehandler: String
-    ) = ManuellSaksbehandling.Builder().build(
-        manuellSaksbehandlingLøsning(
-            organisasjonsnummer = organisasjonsnummer,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingGodkjent = utbetalingGodkjent,
-            saksbehandler = saksbehandler
-        ).toJson()
-    )!!
 
     fun påminnelseHendelse(
         vedtaksperiodeId: UUID,

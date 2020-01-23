@@ -145,7 +145,7 @@ internal class HendelseMediatorTest : HendelseListener {
                 }
 
                 every {
-                    håndter(any<ManuellSaksbehandling>())
+                    håndter(any<ModelManuellSaksbehandling>())
                 } answers {
                     lestManuellSaksbehandling.set(true)
                 }
@@ -241,12 +241,16 @@ internal class HendelseMediatorTest : HendelseListener {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
-                additionalParams = emptyMap()
+                additionalParams = mapOf(
+                    "saksbehandlerIdent" to "en_saksbehandler"
+                )
             )
             sendBehov(
                 behov.løsBehov(
                     mapOf(
-                        "GodkjenningFraSaksbehandler" to true
+                        "GodkjenningFraSaksbehandler" to mapOf(
+                            "godkjent" to true
+                        )
                     )
                 )
             )

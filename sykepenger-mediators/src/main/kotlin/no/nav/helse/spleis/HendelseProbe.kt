@@ -32,8 +32,7 @@ class HendelseProbe: HendelseListener {
         ytelser.tell()
     }
 
-    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
-        log.info("Mottatt svar på manuell saksbehandling. Godkjent:${manuellSaksbehandling.utbetalingGodkjent()} for vedtaksperiode:${manuellSaksbehandling.vedtaksperiodeId()}")
+    override fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {
         manuellSaksbehandling.tell()
     }
 

@@ -7,7 +7,7 @@ interface HendelseListener {
     fun onPåminnelse(påminnelse: Påminnelse) {}
     fun onYtelser(ytelser: ModelYtelser) {}
     fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {}
-    fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {}
+    fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {}
     fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {}
     fun onNySøknad(søknad: ModelNySøknad, aktivitetslogger: Aktivitetslogger) {}
     fun onSendtSøknad(søknad: ModelSendtSøknad) {}

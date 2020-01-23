@@ -27,7 +27,7 @@ class HendelseRecorder(private val dataSource: DataSource,
         lagreHendelse(ytelser)
     }
 
-    override fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+    override fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {
         lagreHendelse(manuellSaksbehandling)
     }
 

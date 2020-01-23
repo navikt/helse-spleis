@@ -49,7 +49,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
     }
 
-    fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+    fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
         finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
     }
 

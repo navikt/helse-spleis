@@ -70,7 +70,7 @@ abstract class ArbeidstakerHendelse protected constructor(
                     Hendelsestype.NySøknad -> ModelNySøknad.fromJson(json)
                     Hendelsestype.SendtSøknad -> ModelSendtSøknad.fromJson(json)
                     Hendelsestype.Ytelser -> ModelYtelser.fromJson(json)
-                    Hendelsestype.ManuellSaksbehandling -> ManuellSaksbehandling.fromJson(json)
+                    Hendelsestype.ManuellSaksbehandling -> ModelManuellSaksbehandling.fromJson(json)
                     else -> throw RuntimeException("kjenner ikke hendelsetypen $hendelsetype")
                 }
             }

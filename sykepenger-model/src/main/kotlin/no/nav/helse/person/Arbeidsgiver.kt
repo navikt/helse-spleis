@@ -125,7 +125,7 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(person, this, ytelser) }
     }
 
-    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+    internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
         perioder.forEach { it.håndter(manuellSaksbehandling) }
     }
 

@@ -2,10 +2,7 @@ package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.ModelForeldrepenger
-import no.nav.helse.hendelser.ModelSykepengehistorikk
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
 import java.util.*
@@ -87,21 +84,21 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
 
     internal fun asModelVilkårsgrunnlag(): ModelVilkårsgrunnlag {
         return ModelVilkårsgrunnlag(
-            UUID.randomUUID(),
-            this["vedtaksperiodeId"].asText(),
-            this["aktørId"].asText(),
-            this["fødselsnummer"].asText(),
-            this["organisasjonsnummer"].asText(),
-            this["@besvart"].asLocalDateTime(),
-            this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
+            hendelseId = UUID.randomUUID(),
+            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            aktørId = this["aktørId"].asText(),
+            fødselsnummer = this["fødselsnummer"].asText(),
+            orgnummer = this["organisasjonsnummer"].asText(),
+            rapportertDato = this["@besvart"].asLocalDateTime(),
+            inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
                 ModelVilkårsgrunnlag.Måned(
-                    it["årMåned"].asYearMonth(),
-                    it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
+                    årMåned = it["årMåned"].asYearMonth(),
+                    inntektsliste = it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
                 )
             },
-            this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
-            aktivitetslogger,
-            this.toJson()
+            erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
+            aktivitetslogger = aktivitetslogger,
+            originalJson = this.toJson()
         )
     }
 
@@ -118,13 +115,26 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
     BehovMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValues("@behov", Behovstype.GodkjenningFraSaksbehandler)
-        requiredKey("@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}")
-
+        requiredKey("@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent")
+        requiredKey("saksbehandlerIdent")
     }
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this, aktivitetslogger)
     }
+
+    internal fun asModelManuellSaksbehandling() =
+        ModelManuellSaksbehandling(
+            hendelseId = UUID.randomUUID(),
+            aktørId = this["aktørId"].asText(),
+            fødselsnummer = this["fødselsnummer"].asText(),
+            organisasjonsnummer = this["organisasjonsnummer"].asText(),
+            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            saksbehandler = this["saksbehandlerIdent"].asText(),
+            utbetalingGodkjent = this["@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent"].asBoolean(),
+            rapportertdato = this["@besvart"].asLocalDateTime(),
+            originalJson = this.toJson()
+        )
 
     object Factory : MessageFactory {
 

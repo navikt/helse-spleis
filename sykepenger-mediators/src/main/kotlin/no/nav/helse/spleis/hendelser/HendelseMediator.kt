@@ -3,7 +3,6 @@ package no.nav.helse.spleis.hendelser
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.ManuellSaksbehandling
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
 import no.nav.helse.spleis.*
@@ -133,12 +132,14 @@ internal class HendelseMediator(
         }
 
         override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {
-            // TODO: map til ordentlig domenehendelse uten kobling til json
-            ManuellSaksbehandling.Builder().build(message.toJson())?.apply {
-                hendelseProbe.onManuellSaksbehandling(this)
-                hendelseRecorder.onManuellSaksbehandling(this)
-                person(this).håndter(this)
-            } ?: aktivitetslogger.error("klarer ikke å mappe manuellsaksbehandling til domenetype")
+            val manuellSaksbehandling = message.asModelManuellSaksbehandling()
+            hendelseProbe.onManuellSaksbehandling(manuellSaksbehandling)
+            hendelseRecorder.onManuellSaksbehandling(manuellSaksbehandling)
+            person(manuellSaksbehandling).håndter(manuellSaksbehandling)
+
+            if (aktivitetslogger.hasMessages()) {
+                sikkerLogg.info("meldinger om manuell saksbehandling: $aktivitetslogger")
+            }
         }
 
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {

@@ -97,7 +97,7 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
-    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+    internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
         if (id.toString() == manuellSaksbehandling.vedtaksperiodeId()) tilstand.håndter(
             this,
             manuellSaksbehandling
@@ -252,7 +252,7 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: ModelYtelser) {
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ManuellSaksbehandling) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ModelManuellSaksbehandling) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -438,7 +438,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             vedtaksperiode.emitTrengerLøsning(
-                ManuellSaksbehandling.lagBehov(
+                ModelManuellSaksbehandling.lagBehov(
                     vedtaksperiode.id,
                     vedtaksperiode.aktørId,
                     vedtaksperiode.fødselsnummer,
@@ -449,7 +449,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandling: ManuellSaksbehandling
+            manuellSaksbehandling: ModelManuellSaksbehandling
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.setTilstand(manuellSaksbehandling, TilUtbetaling) {

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.*
 import no.nav.helse.TestConstants.foreldrepenger
 import no.nav.helse.TestConstants.foreldrepengeytelse
-import no.nav.helse.TestConstants.manuellSaksbehandlingHendelse
 import no.nav.helse.TestConstants.påminnelseHendelse
 import no.nav.helse.TestConstants.sykepengehistorikk
 import no.nav.helse.TestConstants.ytelser
@@ -581,13 +580,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val vedtaksperiode = beInBeregnUtbetaling()
 
         assertIngenEndring {
-            vedtaksperiode.håndter(
-                manuellSaksbehandlingHendelse(
-                    vedtaksperiodeId = vedtaksperiodeId.toString(),
-                    utbetalingGodkjent = true,
-                    saksbehandler = "en_saksbehandler_ident"
-                )
-            )
+            vedtaksperiode.håndter(manuellSaksbehandling())
         }
     }
 
@@ -857,15 +850,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta manuell saksbehandling med utbetaling godkjent etter klar til utbetaling`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        vedtaksperiode.håndter(
-            manuellSaksbehandlingHendelse(
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                utbetalingGodkjent = true,
-                saksbehandler = "en_saksbehandler_ident"
-            )
-        )
+        vedtaksperiode.håndter(manuellSaksbehandling())
 
-        assertTilstandsendring(TIL_UTBETALING, ManuellSaksbehandling::class)
+        assertTilstandsendring(TIL_UTBETALING, ModelManuellSaksbehandling::class)
         assertPåminnelse(Duration.ZERO)
         assertMementoHarFelt(vedtaksperiode, "utbetalingsreferanse")
         assertBehov(Behovstype.Utbetaling)
@@ -879,15 +866,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta manuell saksbehandling med utbetaling ikke godkjent etter klar til utbetaling`() {
         val vedtaksperiode = beInTilGodkjenning()
 
-        vedtaksperiode.håndter(
-            manuellSaksbehandlingHendelse(
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                utbetalingGodkjent = false,
-                saksbehandler = "en_saksbehandler_ident"
-            )
-        )
+        vedtaksperiode.håndter(manuellSaksbehandling(utbetalingGodkjent = false))
 
-        assertTilstandsendring(TIL_INFOTRYGD, ManuellSaksbehandling::class)
+        assertTilstandsendring(TIL_INFOTRYGD, ModelManuellSaksbehandling::class)
     }
 
     @Test
@@ -1048,6 +1029,20 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             ferieperioder = emptyList()
         )
 
+    private fun manuellSaksbehandling(utbetalingGodkjent: Boolean = true): ModelManuellSaksbehandling {
+        return ModelManuellSaksbehandling(
+            hendelseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingGodkjent = utbetalingGodkjent,
+            saksbehandler = "en_saksbehandler_ident",
+            rapportertdato = LocalDateTime.now(),
+            originalJson = "{}"
+        )
+    }
+
     private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
@@ -1155,11 +1150,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         }
 
     private fun beInTilUtbetaling(
-        manuellSaksbehandling: ManuellSaksbehandling = manuellSaksbehandlingHendelse(
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
-            utbetalingGodkjent = true,
-            saksbehandler = "en_saksbehandler_ident"
-        )
+        manuellSaksbehandling: ModelManuellSaksbehandling = manuellSaksbehandling()
     ) =
         beInTilGodkjenning().apply {
             håndter(manuellSaksbehandling)
