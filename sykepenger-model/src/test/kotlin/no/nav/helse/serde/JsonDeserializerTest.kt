@@ -32,11 +32,7 @@ internal class JsonDeserializerTest {
 
     @Test
     fun test1() {
-        val json = enkelPersonJson()
-        val visitableJson = JsonVisitable(json)
-        val modelBuilder = ModelBuilder()
-        visitableJson.accept(modelBuilder)
-        val result = modelBuilder.result
+        val result = ModelBuilder(enkelPersonJson()).result()
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))
@@ -46,15 +42,12 @@ internal class JsonDeserializerTest {
     private fun enkelPersonJson() =
         jacksonObjectMapper().writeValueAsString(
             mapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "arbeidsgivere" to emptyList<Map<String,Any?>>(),
-                "hendelser" to listOf(
-                    mapOf(uuid1 to mapOf<String, Any?>(
-                        "id" to uuid1,
-                        "type" to "henning"
-                    ))
-                )
+                "person" to mapOf(
+                    "aktørId" to aktørId,
+                    "fødselsnummer" to fødselsnummer,
+                    "arbeidsgivere" to emptyList<Map<String, Any?>>()
+                ),
+                "hendelser" to mapOf<String, Any?>()
             )
         )
 }

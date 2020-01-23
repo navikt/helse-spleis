@@ -1,11 +1,8 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-internal class JsonVisitable(jsonString: String) {
-
-    val json:JsonNode = jacksonObjectMapper().readTree(jsonString)
+internal class JsonVisitable(private val json: JsonNode) {
 
     internal fun accept(visitor: StructureVisitor) {
         accept(visitor, json)

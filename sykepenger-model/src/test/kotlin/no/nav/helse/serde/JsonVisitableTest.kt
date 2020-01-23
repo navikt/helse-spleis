@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -24,11 +25,11 @@ internal class JsonVisitableTest {
     }
 
     private fun enkelTidslinjeJson() =
-        jacksonObjectMapper().writeValueAsString(
+        jacksonObjectMapper().convertValue(
             mapOf( "tidslinje" to listOf( mapOf(
                 "type" to "FERIEDAG",
                 "dato" to "2020-01-01"
-            ))))
+            ))), JsonNode::class.java)
 }
 
 private class Gjestebok(private val rec : MutableList<Pair<String, String>>) : StructureVisitor {

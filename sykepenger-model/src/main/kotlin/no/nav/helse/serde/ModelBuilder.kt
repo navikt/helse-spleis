@@ -1,19 +1,29 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import java.util.*
 
-internal class ModelBuilder : StructureVisitor {
-
+internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
     private var personResult:Person? = null
-
-    internal val result:Person get() = personResult!!
+    private val hendelser = mutableMapOf<String,ArbeidstakerHendelse>()
 
     private val stack: Stack<ModelState> = Stack()
 
-    init {
-        stack.push(Root())
+    internal fun result() : Person {
+        if (personResult == null) parse()
+        return personResult ?: throw RuntimeException("Kunne ikke gjenopprette personen")
+    }
+
+    private fun parse() {
+        val json: JsonNode = jacksonObjectMapper().readTree(jsonString)
+        stack.push(HendelserState())
+        JsonVisitable(json["hendelser"]).accept(this)
+        stack.push((PersonState()))
+        JsonVisitable(json["person"]).accept(this)
     }
 
     private val currentState: ModelState
@@ -21,79 +31,43 @@ internal class ModelBuilder : StructureVisitor {
 
     override fun toString() = currentState.toString()
 
-    private fun pushState(state: ModelState) {
-        currentState.leaving(this)
-        stack.push(state)
-        currentState.entering(this)
-    }
+    override fun preVisitArrayField(name: String) { currentState.preVisitArrayField(name) }
+    override fun postVisitArrayField() { currentState.postVisitArrayField() }
+    override fun preVisitObjectField(name: String) { currentState.preVisitObjectField(name) }
+    override fun postVisitObjectField() { currentState.postVisitObjectField() }
+    override fun visitStringField(name: String, value: String) { currentState.visitStringField(name, value) }
+    override fun visitBooleanField(name: String, value: Boolean) { currentState.visitBooleanField(name, value) }
+    override fun visitNumberField(name: String, value: Number) { currentState.visitNumberField(name, value) }
 
-    private fun popState() {
-        currentState.leaving(this)
-        stack.pop()
-        currentState.entering(this)
-    }
+    override fun preVisitArray() { currentState.preVisitArray() }
+    override fun postVisitArray() { currentState.postVisitArray() }
+    override fun preVisitObject() { currentState.preVisitObject() }
+    override fun postVisitObject() { currentState.postVisitObject() }
+    override fun visitString(value: String) { currentState.visitString(value) }
+    override fun visitBoolean(value: Boolean) { currentState.visitBoolean(value) }
+    override fun visitNumber(value: Number) { currentState.visitNumber(value) }
 
-    override fun preVisitArrayField(name: String) { currentState.preVisitArrayField(this, name) }
-    override fun postVisitArrayField() { currentState.postVisitArrayField(this) }
-    override fun preVisitObjectField(name: String) { currentState.preVisitObjectField(this, name) }
-    override fun postVisitObjectField() { currentState.postVisitObjectField(this) }
-    override fun visitStringField(name: String, value: String) { currentState.visitStringField(this, name, value) }
-    override fun visitBooleanField(name: String, value: Boolean) { currentState.visitBooleanField(this, name, value) }
-    override fun visitNumberField(name: String, value: Number) { currentState.visitNumberField(this, name, value) }
+    private interface ModelState : StructureVisitor
 
-    override fun preVisitArray() { currentState.preVisitArray(this) }
-    override fun postVisitArray() { currentState.postVisitArray(this) }
-    override fun preVisitObject() { currentState.preVisitObject(this) }
-    override fun postVisitObject() { currentState.postVisitObject(this) }
-    override fun visitString(value: String) { currentState.visitString(this, value) }
-    override fun visitBoolean(value: Boolean) { currentState.visitBoolean(this, value) }
-    override fun visitNumber(value: Number) { currentState.visitNumber(this, value) }
+    private inner class HendelserState : ModelState
 
-    private interface ModelState {
-        fun entering(builder: ModelBuilder) {}
-        fun leaving(builder: ModelBuilder) {}
-
-        fun preVisitArrayField(builder: ModelBuilder, name: String) {}
-        fun postVisitArrayField(builder: ModelBuilder) {}
-        fun preVisitObjectField(builder: ModelBuilder, name: String) {}
-        fun postVisitObjectField(builder: ModelBuilder) {}
-        fun visitStringField(builder: ModelBuilder, name: String, value: String) {}
-        fun visitBooleanField(builder: ModelBuilder, name: String, value: Boolean) {}
-        fun visitNumberField(builder: ModelBuilder, name: String, value: Number) {}
-        fun preVisitArray(builder: ModelBuilder) {}
-        fun postVisitArray(builder: ModelBuilder) {}
-        fun preVisitObject(builder: ModelBuilder) {}
-        fun postVisitObject(builder: ModelBuilder) {}
-        fun visitString(builder: ModelBuilder, value: String) {}
-        fun visitBoolean(builder: ModelBuilder, value: Boolean) {}
-        fun visitNumber(builder: ModelBuilder, value: Number) {}
-    }
-
-    private class Root : ModelState {
-        override fun preVisitObject(builder: ModelBuilder) {
-            builder.stack.push(PersonState {
-                builder.personResult = it
-            })
-        }
-    }
-
-    private class PersonState(private val personSetter : (Person) -> Unit) : ModelState {
+    private inner class PersonState : ModelState {
         val arbeidsgivere = mutableListOf<Arbeidsgiver>()
         var aktørId: String? = null
         var fødselsnummer: String? = null
 
-        override fun visitStringField(builder: ModelBuilder, name: String, value: String) {
+        override fun visitStringField(name: String, value: String) {
             when (name) {
                 "aktørId" -> aktørId = value
                 "fødselsnummer" -> fødselsnummer = value
             }
         }
 
-        override fun postVisitObject(builder: ModelBuilder) {
-            personSetter(Person(aktørId!!, fødselsnummer!!))
+        override fun postVisitObject() {
+            personResult = Person(aktørId!!, fødselsnummer!!)
         }
 
-        override fun preVisitArrayField(builder: ModelBuilder, name: String) {
+        override fun preVisitArrayField(name: String) {
             //if (name == "arbeidsgivere")
         }
     }
