@@ -14,6 +14,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -31,12 +32,15 @@ internal class PersonTest {
     private val virksomhetsnummer_b = "098765432"
 
     private lateinit var testObserver: TestPersonObserver
+    private lateinit var testPerson: Person
 
-    private val testPerson
-        get() = Person(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
-            testObserver = TestPersonObserver()
+    @BeforeEach
+    internal fun setup() {
+        testObserver = TestPersonObserver()
+        testPerson = Person(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
             it.addObserver(this.testObserver)
         }
+    }
 
     @Test
     fun `flere arbeidsgivere`() {
@@ -108,10 +112,9 @@ internal class PersonTest {
 
     @Test
     internal fun `sendt søknad uten eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            testPerson.also {
-                it.håndter(sendtSøknad())
-            }
+        sendtSøknad().also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -120,10 +123,9 @@ internal class PersonTest {
 
     @Test
     internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            testPerson.also {
-                it.håndter(inntektsmelding())
-            }
+        inntektsmelding().also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -143,15 +145,12 @@ internal class PersonTest {
 
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende perioden`() {
-        testPerson.also {
-            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
-
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))))
-            }
+        testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
+        nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
     }
-
 
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre sendte søknaden`() {
@@ -168,19 +167,18 @@ internal class PersonTest {
                     )
                 )
             )
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(
-                    sendtSøknad(
-                        perioder = listOf(
-                            Periode.Sykdom(
-                                fom = 10.juli,
-                                tom = 30.juli,
-                                grad = 100
-                            )
-                        )
-                    )
+        }
+        sendtSøknad(
+            perioder = listOf(
+                Periode.Sykdom(
+                    fom = 10.juli,
+                    tom = 30.juli,
+                    grad = 100
                 )
-            }
+            )
+        ).also {
+            testPerson.håndter(it)
+            it.hasErrors()
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -189,21 +187,18 @@ internal class PersonTest {
 
     @Test
     internal fun `ny periode må behandles i infotrygd når vi mottar den sendte søknaden først`() {
-        testPerson.also {
-            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(
-                    sendtSøknad(
-                        perioder = listOf(
-                            Periode.Sykdom(
-                                fom = 10.juli,
-                                tom = 30.juli,
-                                grad = 100
-                            )
-                        )
-                    )
+        testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
+        sendtSøknad(
+            perioder = listOf(
+                Periode.Sykdom(
+                    fom = 10.juli,
+                    tom = 30.juli,
+                    grad = 100
                 )
-            }
+            )
+        ).also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -212,25 +207,21 @@ internal class PersonTest {
 
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldingen`() {
-        testPerson.also {
-            it.håndter(nySøknad(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
-            it.håndter(
+        testPerson.håndter(nySøknad(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
+            testPerson.håndter(
                 inntektsmelding(
                     virksomhetsnummer = "12",
                     førsteFraværsdag = 1.juli,
                     arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
                 )
             )
-
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(
-                    inntektsmelding(
-                        virksomhetsnummer = "12",
-                        førsteFraværsdag = 1.juli,
-                        arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
-                    )
-                )
-            }
+        inntektsmelding(
+            virksomhetsnummer = "12",
+            førsteFraværsdag = 1.juli,
+            arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+        ).also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -256,17 +247,14 @@ internal class PersonTest {
 
     @Test
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
-        testPerson.also {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                it.håndter(
-                    sendtSøknad(
-                        perioder = listOf(
-                            Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
-                        ),
-                        rapportertDato = Uke(1).mandag.plusMonths(4).atStartOfDay()
-                    )
-                )
-            }
+        sendtSøknad(
+            perioder = listOf(
+                Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
+            ),
+            rapportertDato = Uke(1).mandag.plusMonths(4).atStartOfDay()
+        ).also {
+            testPerson.håndter(it)
+            assertTrue(it.hasErrors())
         }
     }
 

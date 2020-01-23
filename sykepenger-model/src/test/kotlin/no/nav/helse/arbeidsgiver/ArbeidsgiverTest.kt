@@ -77,11 +77,8 @@ internal class ArbeidsgiverTest {
         )
 
         val arbeidsgiver = Arbeidsgiver("12345678")
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            arbeidsgiver.håndter(inntektsmelding)
-        }
-
+        arbeidsgiver.håndter(inntektsmelding)
+        assertTrue(inntektsmelding.hasErrors())
         assertEquals(1, arbeidsgiver.memento().inntektHistorie.inntekter.size)
         assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntektHistorie.inntekter.first().beløp.setScale(2))
         assertEquals(1.januar, arbeidsgiver.memento().inntektHistorie.inntekter.first().fom)

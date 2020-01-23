@@ -35,9 +35,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta ny søknad`() {
         val vedtaksperiode = beInStartTilstand()
-
         vedtaksperiode.håndter(nySøknad())
-
         assertTilstandsendring(MOTTATT_NY_SØKNAD, ModelNySøknad::class)
         assertPåminnelse(Duration.ofDays(30))
     }
@@ -51,29 +49,26 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta sendt søknad på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(sendtSøknad())
+        sendtSøknad().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD, ModelSendtSøknad::class)
     }
 
     @Test
     fun `motta inntektsmelding på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(inntektsmelding())
+        inntektsmelding().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD, ModelInntektsmelding::class)
     }
 
     @Test
     fun `motta sykdomshistorikk på feil tidspunkt`() {
         val vedtaksperiode = beInStartTilstand()
-
         assertIngenEndring {
             vedtaksperiode.håndter(
                 Person(aktørId, fødselsnummer),
@@ -91,7 +86,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra starttilstand, gå TilInfotrygd`() {
         val vedtaksperiode = beInStartTilstand()
-
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -104,7 +98,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `ignorer påminnelse for en annen tilstand enn starttilstand`() {
         val vedtaksperiode = beInStartTilstand()
-
         assertIngenEndring {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
@@ -118,9 +111,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta sendt søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
-
         vedtaksperiode.håndter(sendtSøknad())
-
         assertTilstandsendring(MOTTATT_SENDT_SØKNAD)
         assertPåminnelse(Duration.ofDays(30))
     }
@@ -128,9 +119,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta inntektsmelding etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
-
         vedtaksperiode.håndter(inntektsmelding())
-
         assertTilstandsendring(MOTTATT_INNTEKTSMELDING)
         assertPåminnelse(Duration.ofDays(30))
     }
@@ -138,18 +127,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta ny søknad etter ny søknad`() {
         val vedtaksperiode = beInNySøknad()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(nySøknad())
+        nySøknad().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
     fun `motta påminnelse fra MottattNySøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInNySøknad()
-
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -163,7 +150,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `ignorer påminnelse for en annen tilstand enn MottattNySøknad`() {
         val vedtaksperiode = beInNySøknad()
-
         assertIngenEndring {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
@@ -178,20 +164,17 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta ny søknad etter sendt søknad`() {
         val vedtaksperiode = beInSendtSøknad()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(nySøknad())
+        nySøknad().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
     fun `motta inntektsmelding etter sendt søknad`() {
         val vedtaksperiode = beInSendtSøknad()
-
         vedtaksperiode.håndter(inntektsmelding())
-
         assertTilstandsendring(VILKÅRSPRØVING)
         assertPåminnelse(Duration.ofHours(1))
     }
@@ -199,18 +182,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta ny søknad etter søknad`() {
         val vedtaksperiode = beInSendtSøknad()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(nySøknad())
+        nySøknad().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
     fun `motta påminnelse fra MottattSendtSøknad, gå TilInfotrygd`() {
         val vedtaksperiode = beInSendtSøknad()
-
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -224,7 +205,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `ignorer påminnelse for en annen tilstand enn SENDT_SØKNAD_MOTTATT`() {
         val vedtaksperiode = beInSendtSøknad()
-
         assertIngenEndring {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
@@ -239,29 +219,26 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta sendt søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-
         vedtaksperiode.håndter(sendtSøknad())
-
         assertTilstandsendring(VILKÅRSPRØVING)
     }
 
     @Test
     fun `motta ny søknad etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(nySøknad())
+        nySøknad().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
-
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
     fun `motta inntektsmelding etter inntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            vedtaksperiode.håndter(inntektsmelding())
+        inntektsmelding().also {
+            vedtaksperiode.håndter(it)
+            assertTrue(it.hasErrors())
         }
         assertTilstandsendring(TIL_INFOTRYGD)
     }
@@ -269,7 +246,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `motta påminnelse fra MottattInntektsmelding, gå TilInfotrygd`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-
         vedtaksperiode.håndter(
             påminnelseHendelse(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -283,7 +259,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     @Test
     fun `ignorer påminnelse for en annen tilstand enn MottattInntektsmelding`() {
         val vedtaksperiode = beInMottattInntektsmelding()
-
         assertIngenEndring {
             vedtaksperiode.håndter(
                 påminnelseHendelse(
@@ -299,15 +274,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `ber om vilkårsprøving etter at vi har mottatt søknad og inntektsmelding`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
-
         val sendtSøknadHendelse = sendtSøknad(
             perioder = listOf(Periode.Sykdom(fom = periodeFom, tom = periodeTom, grad = 100))
         )
-
         val inntektsmeldingHendelse = inntektsmelding(
             arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16))
         )
-
         val vedtaksperiode = beInMottattInntektsmelding(
             tidslinje = tidslinje(
                 fom = periodeFom,
@@ -316,9 +288,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 inntektsmeldingTidslinje = inntektsmeldingHendelse.sykdomstidslinje()
             )
         )
-
         vedtaksperiode.håndter(sendtSøknadHendelse)
-
         assertTilstandsendring(VILKÅRSPRØVING)
         assertBehov(Behovstype.EgenAnsatt)
     }
@@ -327,14 +297,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `når vi går inn i BeregnUtbetaling, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
-
         val vedtaksperiode = beInVilkårsprøving(
             tidslinje = tidslinje(
                 fom = periodeFom,
                 tom = periodeTom
             )
         )
-
         vedtaksperiode.håndter(
             ModelVilkårsgrunnlag(
                 hendelseId = UUID.randomUUID(),
@@ -357,11 +325,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 aktivitetslogger = Aktivitetslogger()
             )
         )
-
         assertTilstandsendring(BEREGN_UTBETALING)
-
         assertBehov(Behovstype.Sykepengehistorikk)
-
         finnBehov(Behovstype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
             assertEquals(periodeFom.minusDays(1), it)
         }
@@ -371,14 +336,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `Skal ikke behandle egen ansatt`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
-
         val vedtaksperiode = beInVilkårsprøving(
             tidslinje = tidslinje(
                 fom = periodeFom,
                 tom = periodeTom
             )
         )
-
         vedtaksperiode.håndter(
             ModelVilkårsgrunnlag(
                 hendelseId = UUID.randomUUID(),
@@ -392,7 +355,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 aktivitetslogger = Aktivitetslogger()
             )
         )
-
         assertTilstandsendring(TIL_INFOTRYGD)
     }
 
@@ -400,14 +362,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `skal gå til infotrygd hvis det er avvik mellom inntektsmelding og inntekt fra inntektskomponenten`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
-
         val vedtaksperiode = beInVilkårsprøving(
             tidslinje = tidslinje(
                 fom = periodeFom,
                 tom = periodeTom
             )
         )
-
         vedtaksperiode.håndter(
             Builder().build(
                 generiskBehov().løsBehov(
@@ -1100,8 +1060,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     private fun beInTilInfotrygd(sendtSøknad: ModelSendtSøknad = sendtSøknad()) =
         beInStartTilstand(sendtSøknad).apply {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                håndter(sendtSøknad)
+            sendtSøknad.also {
+                håndter(it)
+                it.hasErrors()
             }
         }
 

@@ -542,7 +542,7 @@ internal class Vedtaksperiode internal constructor(
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
-            aktivitetslogger.expectNoErrors()
+            aktivitetslogger.warn("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

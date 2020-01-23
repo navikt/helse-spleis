@@ -55,7 +55,7 @@ internal class SendtSøknadHendelseTest {
 
     @Test
     internal fun `mangler NySøknad`() {
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100))) }
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -74,7 +74,7 @@ internal class SendtSøknadHendelseTest {
     @Test
     internal fun `sendtSøknad med utdanning avvist`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar))) }
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -84,7 +84,7 @@ internal class SendtSøknadHendelseTest {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100))) }
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

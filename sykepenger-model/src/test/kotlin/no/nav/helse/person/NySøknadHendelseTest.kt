@@ -39,7 +39,7 @@ internal class NySøknadHendelseTest {
     @Test
     internal fun `En ny NySøknad er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(nySøknad(Triple(1.januar, 5.januar, 100))) }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
