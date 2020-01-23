@@ -1,11 +1,16 @@
 package no.nav.helse.person
 
+import no.nav.helse.TestConstants
+import no.nav.helse.Uke
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
+import no.nav.helse.get
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

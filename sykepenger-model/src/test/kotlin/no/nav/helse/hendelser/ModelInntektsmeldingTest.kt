@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Uke
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
 import no.nav.helse.person.Aktivitetslogger
@@ -23,18 +24,15 @@ internal class ModelInntektsmeldingTest {
     }
 
     @Test
-    internal fun `mellomrom mellom arbeidsgiverperioder skal være arbeidsdager`() {
+    internal fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(1.januar..2.januar, 4.januar..5.januar), emptyList())
-        assertEquals(Arbeidsdag::class, inntektsmelding.sykdomstidslinje().dag(3.januar)!!::class)
-    }
-
-    @Test
-    internal fun `arbeidsgiverperioden skal være egenmeldingsdager`() {
-        inntektsmelding(listOf(1.januar..2.januar, 4.januar..5.januar), emptyList())
-        assertEquals(Egenmeldingsdag::class, inntektsmelding.sykdomstidslinje().dag(1.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, inntektsmelding.sykdomstidslinje().dag(2.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, inntektsmelding.sykdomstidslinje().dag(4.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, inntektsmelding.sykdomstidslinje().dag(5.januar)!!::class)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(Arbeidsdag::class, tidslinje.dag(3.januar)!!::class)
+        assertEquals(Egenmeldingsdag::class, tidslinje.dag(1.januar)!!::class)
+        assertEquals(Egenmeldingsdag::class, tidslinje.dag(2.januar)!!::class)
+        assertEquals(Egenmeldingsdag::class, tidslinje.dag(4.januar)!!::class)
+        assertEquals(Egenmeldingsdag::class, tidslinje.dag(5.januar)!!::class)
+        assertEquals(Uke(1).torsdag, tidslinje.utgangspunktForBeregningAvYtelse())
     }
 
     @Test
