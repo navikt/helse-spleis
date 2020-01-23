@@ -53,10 +53,6 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
     }
 
-    fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
-    }
-
     fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
     }

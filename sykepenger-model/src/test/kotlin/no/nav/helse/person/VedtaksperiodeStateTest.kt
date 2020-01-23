@@ -15,7 +15,6 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.fixtures.mai
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.Vilkårsgrunnlag.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
@@ -370,25 +369,27 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             )
         )
         vedtaksperiode.håndter(
-            Builder().build(
-                generiskBehov().løsBehov(
-                    mapOf(
-                        "EgenAnsatt" to false,
-                        "Inntektsberegning" to (1.rangeTo(12)).map {
-                            Måned(
-                                årMåned = YearMonth.of(2018, it),
-                                inntektsliste = listOf(
-                                    Inntekt(
-                                        beløp = 532.7,
-                                        inntektstype = Inntektstype.LOENNSINNTEKT,
-                                        orgnummer = "123456789"
-                                    )
-                                )
+            ModelVilkårsgrunnlag(
+                UUID.randomUUID(),
+                vedtaksperiodeId.toString(),
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
+                LocalDateTime.now(),
+                (1.rangeTo(12)).map {
+                    ModelVilkårsgrunnlag.Måned(
+                        årMåned = YearMonth.of(2018, it),
+                        inntektsliste = listOf(
+                            ModelVilkårsgrunnlag.Inntekt(
+                                beløp = 532.7
                             )
-                        }
+                        )
                     )
-                ).toJson()
-            )!!
+                },
+                false,
+                Aktivitetslogger(),
+                "{}"
+            )
         )
 
         assertTilstandsendring(TIL_INFOTRYGD)

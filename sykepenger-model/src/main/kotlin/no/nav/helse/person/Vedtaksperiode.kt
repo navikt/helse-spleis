@@ -104,10 +104,6 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
-    internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
-    }
-
     internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
     }
@@ -250,9 +246,6 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        }
-
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         }
 
@@ -341,20 +334,6 @@ internal class Vedtaksperiode internal constructor(
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            val inntektFraInntektsmelding = requireNotNull(vedtaksperiode.inntektFraInntektsmelding()) {
-                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
-            }
-
-            val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
-            vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
-
-            if (behandlesManuelt)
-                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
-
-            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {

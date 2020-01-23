@@ -22,8 +22,8 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -417,13 +417,11 @@ internal class EndToEndTest {
                 mapOf(
                     "EgenAnsatt" to egenAnsatt,
                     "Inntektsberegning" to (1.rangeTo(12)).map {
-                        Vilkårsgrunnlag.Måned(
+                        ModelVilkårsgrunnlag.Måned(
                             årMåned = YearMonth.of(2018, it),
                             inntektsliste = listOf(
-                                Vilkårsgrunnlag.Inntekt(
-                                    beløp = 666.0,
-                                    inntektstype = Vilkårsgrunnlag.Inntektstype.LOENNSINNTEKT,
-                                    orgnummer = "123456789"
+                                ModelVilkårsgrunnlag.Inntekt(
+                                    beløp = 666.0
                                 )
                             )
                         )
