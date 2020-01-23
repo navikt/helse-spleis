@@ -33,8 +33,12 @@ internal class Sykdomshistorikk {
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this)
             visitor.visitHendelse(hendelse)
+            visitor.preVisitHendelseSykdomstidslinje()
             hendelseSykdomstidslinje.accept(visitor)
+            visitor.postVisitHendelseSykdomstidslinje()
+            visitor.preVisitBeregnetSykdomstidslinje()
             beregnetSykdomstidslinje.accept(visitor)
+            visitor.postVisitBeregnetSykdomstidslinje()
             visitor.postVisitSykdomshistorikkElement(this)
         }
 

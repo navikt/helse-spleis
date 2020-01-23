@@ -43,4 +43,8 @@ internal interface SykdomshistorikkVisitor: SykdomstidslinjeVisitor {
     fun visitHendelse(hendelse: SykdomstidslinjeHendelse) {}
     fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {}
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
+    fun preVisitHendelseSykdomstidslinje() {}
+    fun postVisitHendelseSykdomstidslinje() {}
+    fun preVisitBeregnetSykdomstidslinje() {}
+    fun postVisitBeregnetSykdomstidslinje() {}
 }

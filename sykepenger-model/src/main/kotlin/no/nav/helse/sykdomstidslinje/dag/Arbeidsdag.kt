@@ -6,7 +6,8 @@ import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDate
 
-internal class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) : Dag(gjelder, hendelse) {
+internal class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) :
+    Dag(gjelder, hendelse) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitArbeidsdag(this)
     }
@@ -17,8 +18,8 @@ internal class Arbeidsdag internal constructor(gjelder: LocalDate, hendelse: Syk
 
     override fun nøkkel(): Nøkkel =
         when (hendelse.nøkkelHendelseType()) {
-             Søknad -> Nøkkel.WD_A
-             Inntektsmelding -> Nøkkel.WD_IM
+            Søknad -> Nøkkel.WD_A
+            Inntektsmelding -> Nøkkel.WD_IM
             else -> throw RuntimeException("Hendelse ${hendelse.nøkkelHendelseType()} er ikke støttet")
         }
 }
