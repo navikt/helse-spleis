@@ -29,9 +29,9 @@ class ModelSykepengehistorikk(
     }
 
     class Inntektsopplysning(
-        val sykepengerFom: LocalDate,
-        val inntektPerMåned: Int,
-        val orgnummer: String
+        private val sykepengerFom: LocalDate,
+        private val inntektPerMåned: Int,
+        private val orgnummer: String
     ) {
         fun valider(modelSykepengehistorikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
@@ -40,7 +40,7 @@ class ModelSykepengehistorikk(
         }
     }
 
-    sealed class Periode(val fom: LocalDate, val tom: LocalDate, val dagsats: Int) {
+    sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
         open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
             aktivitetslogger.severe("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
         }

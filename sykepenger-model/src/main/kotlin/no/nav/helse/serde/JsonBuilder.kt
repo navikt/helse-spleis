@@ -3,6 +3,7 @@ package no.nav.helse.serde
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -115,6 +116,25 @@ internal class JsonBuilder : PersonVisitor {
         currentState.visitUtbetalingslinje(this, utbetalingslinje)
 
     override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer(this)
+    override fun preVisitHendelser() = currentState.preVisitHendelser(this)
+    override fun postVisitHendelser() = currentState.postVisitHendelser(this)
+    override fun visitInntektsmeldingHendelse(inntektsmelding: ModelInntektsmelding) =
+        currentState.visitInntektsmeldingHendelse(this, inntektsmelding)
+
+    override fun visitManuellSaksbehandlingHendelse(manuellSaksbehandling: ModelManuellSaksbehandling) =
+        currentState.visitManuellSaksbehandlingHendelse(this, manuellSaksbehandling)
+
+    override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) = currentState.visitNySøknadHendelse(this, nySøknad)
+    override fun visitPåminnelseHendelse(påminnelse: ModelPåminnelse) =
+        currentState.visitPåminnelseHendelse(this, påminnelse)
+
+    override fun visitSendtSøknadHendelse(sendtSøknad: ModelSendtSøknad) =
+        currentState.visitSendtSøknadHendelse(this, sendtSøknad)
+
+    override fun visitVilkårsgrunnlagHendelse(vilkårsgrunnlag: ModelVilkårsgrunnlag) =
+        currentState.visitVilkårsgrunnlagHendelse(this, vilkårsgrunnlag)
+
+    override fun visitYtelserHendelse(ytelser: ModelYtelser) = currentState.visitYtelserHendelse(this, ytelser)
 
     private interface JsonState {
         fun entering(jsonBuilder: JsonBuilder) {}
@@ -155,6 +175,20 @@ internal class JsonBuilder : PersonVisitor {
         fun preVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
         fun visitUtbetalingslinje(jsonBuilder: JsonBuilder, utbetalingslinje: Utbetalingslinje) {}
         fun postVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
+        fun preVisitHendelser(jsonBuilder: JsonBuilder) {}
+        fun postVisitHendelser(jsonBuilder: JsonBuilder) {}
+        fun visitInntektsmeldingHendelse(jsonBuilder: JsonBuilder, inntektsmelding: ModelInntektsmelding) {}
+        fun visitManuellSaksbehandlingHendelse(
+            jsonBuilder: JsonBuilder,
+            manuellSaksbehandling: ModelManuellSaksbehandling
+        ) {
+        }
+
+        fun visitNySøknadHendelse(jsonBuilder: JsonBuilder, nySøknad: ModelNySøknad) {}
+        fun visitPåminnelseHendelse(jsonBuilder: JsonBuilder, påminnelse: ModelPåminnelse) {}
+        fun visitSendtSøknadHendelse(jsonBuilder: JsonBuilder, sendtSøknad: ModelSendtSøknad) {}
+        fun visitVilkårsgrunnlagHendelse(jsonBuilder: JsonBuilder, vilkårsgrunnlag: ModelVilkårsgrunnlag) {}
+        fun visitYtelserHendelse(jsonBuilder: JsonBuilder, ytelser: ModelYtelser) {}
     }
 
     private class Root : JsonState {
@@ -178,6 +212,12 @@ internal class JsonBuilder : PersonVisitor {
             personMap.putAll(PersonReflect(person).toMap())
         }
 
+        override fun preVisitHendelser(jsonBuilder: JsonBuilder) {
+            val hendelser = mutableListOf<MutableMap<String, Any?>>()
+            personMap["hendelser"] = hendelser
+            jsonBuilder.pushState(HendelseState(hendelser))
+        }
+
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitArbeidsgivere(jsonBuilder: JsonBuilder) {
@@ -191,6 +231,26 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun postVisitPerson(jsonBuilder: JsonBuilder, person: Person) {
+            jsonBuilder.popState()
+        }
+    }
+
+    private class HendelseState(private val hendelser: MutableList<MutableMap<String, Any?>>) : JsonState {
+        override fun visitInntektsmeldingHendelse(jsonBuilder: JsonBuilder, inntektsmelding: ModelInntektsmelding) {
+            hendelser.add(InntektsmeldingReflect(inntektsmelding).toMap())
+
+            // (private val (.+): .+),
+            // $1 = inntektsmelding.getProp("$2")
+        }
+
+        override fun visitManuellSaksbehandlingHendelse(
+            jsonBuilder: JsonBuilder,
+            manuellSaksbehandling: ModelManuellSaksbehandling
+        ) {
+            hendelser.add(ManuellSaksbehandlingReflect(manuellSaksbehandling).toMap())
+        }
+
+        override fun postVisitHendelser(jsonBuilder: JsonBuilder) {
             jsonBuilder.popState()
         }
     }
