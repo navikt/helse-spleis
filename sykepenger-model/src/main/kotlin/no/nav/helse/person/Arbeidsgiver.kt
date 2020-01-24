@@ -108,31 +108,37 @@ internal class Arbeidsgiver private constructor(
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
         }
+        nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
-            nyVedtaksperiode(sendtSøknad).håndter(sendtSøknad)
+            sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
         }
+        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntektHistorie.add(inntektsmelding)
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            nyVedtaksperiode(inntektsmelding).håndter(inntektsmelding)
+            inntektsmelding.error("Uventet inntektsmelding, mangler ny søknad")
         }
+        inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(person: Person, ytelser: ModelYtelser) {
         perioder.forEach { it.håndter(person, this, ytelser) }
+        ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
         perioder.forEach { it.håndter(manuellSaksbehandling) }
+        manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         perioder.forEach { it.håndter(vilkårsgrunnlag) }
+        vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(påminnelse: ModelPåminnelse): Boolean {

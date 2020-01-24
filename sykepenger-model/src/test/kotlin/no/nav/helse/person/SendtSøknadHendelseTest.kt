@@ -56,8 +56,7 @@ internal class SendtSøknadHendelseTest {
     internal fun `mangler NySøknad`() {
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test

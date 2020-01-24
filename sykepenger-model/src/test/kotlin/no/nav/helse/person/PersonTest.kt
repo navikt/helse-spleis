@@ -97,28 +97,6 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sendt søknad uten eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        sendtSøknad().also {
-            testPerson.håndter(it)
-            assertTrue(it.hasErrors())
-        }
-        assertPersonEndret()
-        assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    internal fun `inntektsmelding uten en eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        inntektsmelding().also {
-            testPerson.håndter(it)
-            assertTrue(it.hasErrors())
-        }
-        assertPersonEndret()
-        assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
-    }
-
-    @Test
     internal fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
             it.håndter(nySøknad())
@@ -190,9 +168,8 @@ internal class PersonTest {
             testPerson.håndter(it)
             assertTrue(it.hasErrors())
         }
-        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.tilstand(0))
-        assertEquals(TIL_INFOTRYGD, inspektør.tilstand(1))
         assertTrue(inspektør.personLogger.hasErrors())
 
         assertPersonEndret()

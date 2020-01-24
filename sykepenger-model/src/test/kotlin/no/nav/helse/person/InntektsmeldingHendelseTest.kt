@@ -64,8 +64,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `vedtaksperioden må behandles i infotrygd om vi mottar en inntektsmelding uten tilhørende søknad`() {
         person.håndter(inntektsmelding())
         assertTrue(aktivitetslogger.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
