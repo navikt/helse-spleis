@@ -48,6 +48,10 @@ class ModelVilkårsgrunnlag(
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding), grunnlag)
     }
 
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Vilkårsgrunnlag")
+    }
+
     data class Måned(
         val årMåned: YearMonth,
         val inntektsliste: List<Inntekt>

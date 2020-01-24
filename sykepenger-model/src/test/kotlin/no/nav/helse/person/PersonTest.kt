@@ -54,7 +54,7 @@ internal class PersonTest {
         testPerson.also {
             it.håndter(nySøknad())
         }
-
+        assertTrue(inspektør.personLogger.toString().contains("Ny arbeidsgiver"))
         assertPersonEndret()
         assertVedtaksperiodeEndret()
         assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD)

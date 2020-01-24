@@ -47,4 +47,7 @@ class ModelManuellSaksbehandling(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Manuell saksbehandling")
+    }
 }

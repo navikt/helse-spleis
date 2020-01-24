@@ -15,11 +15,12 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
     private val aktivitetslogger = Aktivitetslogger()
+    private val hendelser = mutableListOf<ArbeidstakerHendelse>()
 
     private val observers = mutableListOf<PersonObserver>()
 
     fun håndter(nySøknad: ModelNySøknad) {
-        nySøknad.info("Behandler ny søknad")
+        registrer(nySøknad, "Behandler ny søknad")
         var arbeidsgiver: Arbeidsgiver? = null
         continueIfNoErrors(nySøknad,
             { nySøknad.valider() },
@@ -28,16 +29,8 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: () -> Unit) {
-        if (hendelse.hasErrors()) return
-        blocks.forEach {
-            it()
-            if (hendelse.hasErrors()) return invaliderAllePerioder(hendelse)
-        }
-    }
-
     fun håndter(sendtSøknad: ModelSendtSøknad) {
-        sendtSøknad.info("Behandler sendt søknad")
+        registrer(sendtSøknad, "Behandler sendt søknad")
         var arbeidsgiver: Arbeidsgiver? = null
         continueIfNoErrors(sendtSøknad,
             { sendtSøknad.valider() },
@@ -47,7 +40,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     }
 
     fun håndter(inntektsmelding: ModelInntektsmelding) {
-        inntektsmelding.info("Behandler inntektsmelding")
+        registrer(inntektsmelding, "Behandler inntektsmelding")
         var arbeidsgiver: Arbeidsgiver? = null
         continueIfNoErrors(inntektsmelding,
             { inntektsmelding.valider() },
@@ -57,15 +50,21 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     }
 
     fun håndter(ytelser: ModelYtelser) {
+        registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
+        ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
+        registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
         finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
+        manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
         finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
+        vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(påminnelse: ModelPåminnelse) {
@@ -109,10 +108,17 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         visitor.postVisitPerson(this)
     }
 
-    private fun harAndreArbeidsgivere(hendelse: ArbeidstakerHendelse): Boolean {
-        if (arbeidsgivere.isEmpty()) return false
-        if (arbeidsgivere.size > 1) return true
-        return !arbeidsgivere.containsKey(hendelse.organisasjonsnummer())
+    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: () -> Unit) {
+        if (hendelse.hasErrors()) return
+        blocks.forEach {
+            it()
+            if (hendelse.hasErrors()) return invaliderAllePerioder(hendelse)
+        }
+    }
+
+    private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
+        hendelser.add(hendelse)
+        hendelse.info(melding)
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
@@ -122,11 +128,16 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let { arbeidsgivere[it] }
+        hendelse.organisasjonsnummer().let {
+            arbeidsgivere[it].also {
+                if (it == null) hendelse.error("Finner ikke arbeidsgiver")
+            }
+        }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.getOrPut(orgnr) {
+                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {

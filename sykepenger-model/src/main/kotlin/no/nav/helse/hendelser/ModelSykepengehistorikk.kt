@@ -24,6 +24,10 @@ class ModelSykepengehistorikk(
         return aktivitetslogger
     }
 
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Sykepengehistorikk")
+    }
+
     class Inntektsopplysning(
         val sykepengerFom: LocalDate,
         val inntektPerMåned: Int,

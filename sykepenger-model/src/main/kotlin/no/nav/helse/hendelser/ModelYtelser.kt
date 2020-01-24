@@ -69,4 +69,8 @@ class ModelYtelser(
     override fun vedtaksperiodeId(): String {
         return vedtaksperiodeId
     }
+
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        sykepengehistorikk.kopierAktiviteterTil(aktivitetslogger)
+    }
 }
