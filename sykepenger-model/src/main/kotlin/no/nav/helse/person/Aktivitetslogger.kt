@@ -28,7 +28,9 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         throw AktivitetException(this)
     }
 
-    override fun hasMessages() = info.isNotEmpty() || warn.isNotEmpty() || hasErrors()
+    override fun hasMessages() = info.isNotEmpty() || hasWarnings() || hasErrors()
+
+    override fun hasWarnings() = warn.isNotEmpty()
 
     override fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
 
@@ -94,6 +96,7 @@ interface IAktivitetslogger {
     fun severe(melding: String, vararg params: Any): Nothing
 
     fun hasMessages(): Boolean
+    fun hasWarnings(): Boolean
 
     fun hasErrors(): Boolean
 

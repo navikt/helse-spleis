@@ -68,7 +68,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     }
 
     fun håndter(påminnelse: ModelPåminnelse) {
+        påminnelse.info("Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
+        påminnelse.warn("Fant ikke arbeidsgiver eller vedtaksperiode")
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(

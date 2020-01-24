@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
-import no.nav.helse.person.PersonVisitor
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,7 +24,13 @@ class ModelPåminnelse(
     fun påminnelsestidspunkt() = påminnelsestidspunkt
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
-    fun gjelderTilstand(tilstandType: TilstandType) = tilstandType == tilstand
+    fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
+        if (!it) {
+            info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+        } else {
+            warn("Vedtaksperiode blir påminnet")
+        }
+    }
 
     override fun rapportertdato() = påminnelsestidspunkt
     override fun aktørId() = aktørId

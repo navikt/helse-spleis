@@ -273,7 +273,7 @@ internal class Vedtaksperiode internal constructor(
         fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {}
     }
 
-    private object StartTilstand : Vedtaksperiodetilstand {
+    internal object StartTilstand : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
@@ -286,7 +286,7 @@ internal class Vedtaksperiode internal constructor(
         override val timeout: Duration = Duration.ofDays(30)
     }
 
-    private object MottattNySøknad : Vedtaksperiodetilstand {
+    internal object MottattNySøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
