@@ -81,6 +81,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
                 )
             )
         }
+        påminnelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {

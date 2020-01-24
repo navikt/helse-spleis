@@ -142,7 +142,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
-        return perioder.any { it.håndter(påminnelse) }
+        return perioder.any { it.håndter(påminnelse) }.also {
+            påminnelse.kopierAktiviteterTil(aktivitetslogger)
+        }
     }
 
     internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse) {

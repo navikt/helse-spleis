@@ -41,4 +41,8 @@ class ModelPåminnelse(
     override fun accept(visitor: PersonVisitor) {
         visitor.visitPåminnelseHendelse(this)
     }
+
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Påminnelse")
+    }
 }
