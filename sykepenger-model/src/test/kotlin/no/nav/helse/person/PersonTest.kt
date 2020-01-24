@@ -1,13 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.TestConstants.sykepengehistorikk
-import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
 import no.nav.helse.oktober
@@ -287,7 +282,17 @@ internal class PersonTest {
     @Test
     internal fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         testPerson.also {
-            it.håndter(ytelser(sykepengehistorikk = sykepengehistorikk()))
+            it.håndter(ModelYtelser(
+                hendelseId = UUID.randomUUID(),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                sykepengehistorikk = ModelSykepengehistorikk(emptyList(), emptyList(), Aktivitetslogger()),
+                foreldrepenger = ModelForeldrepenger(null, null, Aktivitetslogger()),
+                rapportertdato = LocalDateTime.now(),
+                originalJson = ""
+            ))
         }
 
         assertPersonIkkeEndret()

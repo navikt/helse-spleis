@@ -1,41 +1,28 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.SpolePeriode
-import no.nav.helse.TestConstants.sykepengehistorikk
-import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class YtelserTest {
 
     @Test
     fun `siste fraværsdato fra tom sykepengehistorikk`() {
-        val ytelser = ytelser(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            sykepengehistorikk = sykepengehistorikk()
-        )
-
+        val ytelser = ytelser()
         assertNull(ytelser.sykepengehistorikk().sisteFraværsdag())
     }
 
     @Test
     fun `startdato fra sykepengehistorikk med én periode`() {
         val ytelser = ytelser(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            sykepengehistorikk = sykepengehistorikk(
-                perioder = listOf(
-                    SpolePeriode(1.juni, 2.juni, "100")
-                )
+            utbetalinger = listOf(
+                Triple(1.juni, 2.juni, 1000)
             )
         )
 
@@ -44,39 +31,53 @@ internal class YtelserTest {
 
     @Test
     fun `siste fraværsdag fra sykepengehistorikk med flere periode`() {
-        val sykepengehistorikkHendelse = ytelser(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            sykepengehistorikk = sykepengehistorikk(
-                perioder = listOf(
-                    SpolePeriode(1.juni, 2.juni, "100"),
-                    SpolePeriode(1.juli, 2.juli, "100")
-                )
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                Triple(1.juni, 2.juni, 1000),
+                Triple(1.juni, 2.juli, 1200)
             )
         )
 
-        assertEquals(2.juli, sykepengehistorikkHendelse.sykepengehistorikk().sisteFraværsdag())
+        assertEquals(2.juli, ytelser.sykepengehistorikk().sisteFraværsdag())
     }
 
     @Test
     fun `tidslinje fra sykepengehistorikk med overlappende perioder`() {
         val sykepengehistorikkHendelse = ytelser(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            sykepengehistorikk = sykepengehistorikk(
-                perioder = listOf(
-                    SpolePeriode(1.juni, 2.juni, "100"),
-                    SpolePeriode(1.juni, 3.juni, "100")
-                )
+            utbetalinger = listOf(
+                Triple(1.juni, 2.juni, 1000),
+                Triple(1.juni, 3.juni, 1200)
             )
         )
 
         assertEquals(3.juni, sykepengehistorikkHendelse.sykepengehistorikk().sisteFraværsdag())
     }
+
+    private fun ytelser(
+        utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
+        foreldrepenger: Pair<LocalDate, LocalDate>? = null,
+        svangerskapspenger: Pair<LocalDate, LocalDate>? = null
+    ) = ModelYtelser(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        sykepengehistorikk = ModelSykepengehistorikk(
+            utbetalinger = utbetalinger.map {
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    it.first,
+                    it.second,
+                    it.third
+                )
+            },
+            inntektshistorikk = emptyList(),
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
+        rapportertdato = LocalDateTime.now(),
+        originalJson = "{}"
+    )
 
     private companion object {
         private val organisasjonsnummer = "123456789"

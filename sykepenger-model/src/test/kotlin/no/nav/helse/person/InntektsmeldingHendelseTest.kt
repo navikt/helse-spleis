@@ -1,16 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.TestConstants
-import no.nav.helse.Uke
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
-import no.nav.helse.get
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,6 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.set
 
 internal class InntektsmeldingHendelseTest {
 
@@ -40,7 +36,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_INNTEKTSMELDING, inspektør.tilstand(0))
@@ -48,7 +44,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.førsteFraværsdag(0))
@@ -56,8 +52,8 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `kan behandle inntektsmelding om vi mottar den etter mottatt ny søknad og sendt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
-        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar,20.januar, 100)))
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -74,7 +70,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `vedtaksperiode må behandles i infotrygd om vi får inn en inntektsmelding nummer to`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100)))
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
         assertTrue(aktivitetslogger.hasErrors())
@@ -110,21 +106,20 @@ internal class InntektsmeldingHendelseTest {
             beregnetInntekt,
             aktivitetslogger,
             "{}",
-            listOf(1.januar .. 16.januar),
+            listOf(1.januar..16.januar),
             emptyList()
         )
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR)
-        = ModelNySøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            AKTØRID,
-            orgnr,
-            LocalDateTime.now(),
-            listOf(*sykeperioder),
-            aktivitetslogger,
-            "{}"
-        )
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = ModelNySøknad(
+        UUID.randomUUID(),
+        UNG_PERSON_FNR_2018,
+        AKTØRID,
+        orgnr,
+        LocalDateTime.now(),
+        listOf(*sykeperioder),
+        aktivitetslogger,
+        "{}"
+    )
 
     private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode, orgnummer: String = ORGNR) =
         ModelSendtSøknad(

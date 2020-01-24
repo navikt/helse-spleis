@@ -3,6 +3,8 @@ package no.nav.helse.spleis.hendelser.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelSykepengehistorikk.Inntektsopplysning
+import no.nav.helse.hendelser.ModelSykepengehistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
 import java.util.*
@@ -44,7 +46,37 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
         )
 
         val sykepengehistorikk = ModelSykepengehistorikk(
-            perioder = this["@løsning.Sykepengehistorikk"].map(::asPeriode),
+            utbetalinger = this["@løsning.Sykepengehistorikk"].flatMap {
+                it.path("utbetalteSykeperioder")
+            }.map { utbetaling ->
+                val fom = utbetaling["fom"].asLocalDate()
+                val tom = utbetaling["fom"].asLocalDate()
+                val typekode = utbetaling["typeKode"].asText()
+                val dagsats = utbetaling["dagsats"].asInt()
+                when(typekode) {
+                    "1" -> { ReduksjonMedlem(fom, tom, dagsats) }
+                    in listOf("2", "3") -> { Etterbetaling(fom, tom, dagsats) }
+                    "4" -> { KontertRegnskap(fom, tom, dagsats) }
+                    "5" -> { RefusjonTilArbeidsgiver(fom, tom, dagsats) }
+                    "6" -> { ReduksjonArbRef(fom, tom, dagsats) }
+                    "7" -> { Tilbakeført(fom, tom, dagsats) }
+                    "8" -> { Konvertert(fom, tom, dagsats) }
+                    "9" -> { Ferie(fom, tom, dagsats) }
+                    "O" -> { Opphold(fom, tom, dagsats) }
+                    "S" -> { Sanksjon(fom, tom, dagsats) }
+                    "" -> { Ukjent(fom, tom, dagsats) }
+                    else -> aktivitetslogger.severe("Fikk en ukjent typekode:$typekode")
+                }
+            },
+            inntektshistorikk = this["@løsning.Sykepengehistorikk"].flatMap {
+                it.path("inntektsopplysninger")
+            }.map { opplysning ->
+                Inntektsopplysning(
+                    sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
+                    inntektPerMåned = opplysning["inntekt"].asInt(),
+                    orgnummer = opplysning["orgnummer"].asText()
+                )
+            },
             aktivitetslogger = aktivitetslogger
         )
 

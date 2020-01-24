@@ -3,18 +3,17 @@ package no.nav.helse.person
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.*
-import no.nav.helse.TestConstants.foreldrepenger
-import no.nav.helse.TestConstants.foreldrepengeytelse
-import no.nav.helse.TestConstants.sykepengehistorikk
-import no.nav.helse.TestConstants.ytelser
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.fixtures.mai
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.juli
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -70,9 +69,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 Person(aktørId, fødselsnummer),
                 Arbeidsgiver(organisasjonsnummer),
                 ytelser(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    sykepengehistorikk = sykepengehistorikk(
-                        sisteHistoriskeSykedag = LocalDate.now()
+                    utbetalinger = listOf(
+                        Triple(
+                            LocalDate.now().minusDays(10),
+                            LocalDate.now(),
+                            1000
+                        )
                     )
                 )
             )
@@ -365,10 +367,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         vedtaksperiode.håndter(
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
-            ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk()
-            )
+            ytelser()
         )
 
         assertTilstandsendring(TIL_GODKJENNING)
@@ -389,9 +388,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -404,7 +406,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun `motta sykepengehistorikk med siste sykedag innenfor seks måneder av denne periodens første sykedag`() {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
-        val sisteHistoriskeSykedag = periodeFom.minusMonths(5)
 
         val vedtaksperiode = beInBeregnUtbetaling(
             tidslinje(periodeFom, periodeTom)
@@ -414,8 +415,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(sisteHistoriskeSykedag = sisteHistoriskeSykedag)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(5).minusDays(10),
+                        periodeFom.minusMonths(5),
+                        1000
+                    )
+                )
             )
         )
 
@@ -436,14 +442,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    perioder = listOf(
-                        SpolePeriode(
-                            fom = periodeFom.minusMonths(1),
-                            tom = periodeFom.plusMonths(1),
-                            grad = "100"
-                        )
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(1),
+                        periodeFom.plusMonths(1),
+                        1000
                     )
                 )
             )
@@ -517,19 +520,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    perioder = listOf()
-                ),
-
-                foreldrepenger = foreldrepenger(
-                    foreldrepengeytelse = foreldrepengeytelse(
-                        fom = foreldrepengerFom,
-                        tom = foreldrepengerTom
-                    ),
-                    svangerskapsytelse = null
-                )
+                fordrepengeYtelse = Pair(foreldrepengerFom, foreldrepengerTom)
             )
+
         )
     }
 
@@ -592,9 +585,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = sisteHistoriskeSykedag
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -630,9 +626,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = sisteHistoriskeSykedag
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -668,9 +667,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -713,9 +715,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -749,9 +754,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -785,9 +793,12 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = sykepengehistorikk(
-                    sisteHistoriskeSykedag = periodeFom.minusMonths(7)
+                utbetalinger = listOf(
+                    Triple(
+                        periodeFom.minusMonths(7).minusDays(10),
+                        periodeFom.minusMonths(7),
+                        1000
+                    )
                 )
             )
         )
@@ -828,10 +839,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(
                 Person(aktørId, fødselsnummer),
                 Arbeidsgiver(organisasjonsnummer),
-                ytelser(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    sykepengehistorikk = sykepengehistorikk()
-                )
+                ytelser()
             )
         }
     }
@@ -976,6 +984,36 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         nestePåminnelsestidspunkt = LocalDateTime.now()
     )
 
+    private fun ytelser(
+        utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
+        fordrepengeYtelse: Pair<LocalDate, LocalDate>? = null,
+        svangerskapsytelse: Pair<LocalDate, LocalDate>? = null
+    ) = ModelYtelser(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        sykepengehistorikk = ModelSykepengehistorikk(
+            utbetalinger = utbetalinger.map {
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    it.first,
+                    it.second,
+                    it.third
+                )
+            },
+            inntektshistorikk = emptyList(),
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        foreldrepenger = ModelForeldrepenger(
+            foreldrepengeytelse = fordrepengeYtelse,
+            svangerskapsytelse = svangerskapsytelse,
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        rapportertdato = LocalDateTime.now(),
+        originalJson = "{}"
+    )
+
 
     private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()): Vedtaksperiode {
         return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
@@ -1038,17 +1076,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     private fun beInTilGodkjenning(
         ytelser: ModelYtelser = ytelser(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            sykepengehistorikk = sykepengehistorikk(
-                perioder = listOf(
-                    SpolePeriode(
-                        fom = LocalDate.now().minusMonths(12).minusMonths(1),
-                        tom = LocalDate.now().minusMonths(12),
-                        grad = "100"
-                    )
+            utbetalinger = listOf(
+                Triple(
+                    LocalDate.now().minusMonths(12).minusMonths(1),
+                    LocalDate.now().minusMonths(12),
+                    1000
                 )
             )
         ),
@@ -1184,4 +1216,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val jsonNode = objectMapper.readTree(vedtaksperiode.memento().state())
         assertNotNull(jsonNode[feltnavn].takeUnless { it.isNull })
     }
+
+
 }
+
+private typealias Utbetaling = Triple<LocalDate, LocalDate, Int>
