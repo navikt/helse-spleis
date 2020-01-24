@@ -69,8 +69,7 @@ internal class NySøknadHendelseTest {
     @Test
     internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(nySøknad(Triple(6.januar, 10.januar, 50))) }
-
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

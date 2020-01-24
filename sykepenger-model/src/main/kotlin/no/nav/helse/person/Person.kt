@@ -18,12 +18,13 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     private val observers = mutableListOf<PersonObserver>()
 
     fun håndter(nySøknad: ModelNySøknad) {
+        nySøknad.info("")
         nySøknad.valider()
         if (nySøknad.hasErrors()) {
             invaliderAllePerioder(nySøknad)
-            nySøknad.expectNoErrors()
+        } else {
+            finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
         }
-        finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
     }
 
     fun håndter(sendtSøknad: ModelSendtSøknad) {
@@ -39,11 +40,10 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         inntektsmelding.valider()
         if (inntektsmelding.hasErrors()) {
             invaliderAllePerioder(inntektsmelding)
-            inntektsmelding.expectNoErrors()
+        } else {
+            finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
         }
-        finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
     }
-
 
     fun håndter(ytelser: ModelYtelser) {
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
