@@ -288,7 +288,7 @@ internal class JsonBuilder : PersonVisitor {
         override fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperioder.add(vedtaksperiodeMap)
-            jsonBuilder.pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiverMap))
+            jsonBuilder.pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
 
         }
 
