@@ -106,11 +106,9 @@ internal class SendtSøknadHendelseTest {
     @Test
     internal fun `to forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            person.håndter(
+        person.håndter(
                 sendtSøknad(Sykdom(1.januar, 5.januar, 100), orgnummer = "orgnummer2")
             )
-        }
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

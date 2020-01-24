@@ -70,7 +70,10 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
     class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
 
-    private class Aktivitet(private var melding: String, private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)) {
+    private class Aktivitet(
+        private var melding: String,
+        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+    ) {
         companion object {
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }

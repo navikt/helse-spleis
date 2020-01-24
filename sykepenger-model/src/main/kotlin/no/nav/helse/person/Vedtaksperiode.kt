@@ -130,6 +130,7 @@ internal class Vedtaksperiode internal constructor(
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
     ) {
+        if (tilstand == nyTilstand) return  // Already in this state => ignore
         tilstand.leaving(event)
 
         val previousStateName = tilstand.type

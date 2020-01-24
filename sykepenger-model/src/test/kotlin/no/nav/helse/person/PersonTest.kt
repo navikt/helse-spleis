@@ -13,6 +13,7 @@ import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +34,7 @@ internal class PersonTest {
 
     private lateinit var testObserver: TestPersonObserver
     private lateinit var testPerson: Person
+    private val inspektør get() = TestPersonInspektør(testPerson)
 
     @BeforeEach
     internal fun setup() {
@@ -44,12 +46,10 @@ internal class PersonTest {
 
     @Test
     fun `flere arbeidsgivere`() {
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
-                it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
-            }
+        enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
+            it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
         }
-
+        assertTrue(inspektør.personLogger.hasErrors())
         assertAntallPersonerEndret(1)
         assertAlleVedtaksperiodetilstander(TIL_INFOTRYGD)
     }
@@ -179,6 +179,10 @@ internal class PersonTest {
     @Test
     internal fun `ny periode må behandles i infotrygd når vi mottar den sendte søknaden først`() {
         testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
+        assertTrue(inspektør.personLogger.hasMessages())
+        assertFalse(inspektør.personLogger.hasErrors())
         sendtSøknad(
             perioder = listOf(
                 Periode.Sykdom(
@@ -191,9 +195,14 @@ internal class PersonTest {
             testPerson.håndter(it)
             assertTrue(it.hasErrors())
         }
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.tilstand(1))
+        assertTrue(inspektør.personLogger.hasErrors())
+
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(START, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD) // Invalidation of first period
     }
 
     @Test
@@ -422,5 +431,32 @@ internal class PersonTest {
         override fun vedtaksperiodeTrengerLøsning(event: Behov) {
             behovsliste.add(event)
         }
+    }
+
+    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
+        private var vedtaksperiodeindeks: Int = -1
+        private val tilstander = mutableMapOf<Int, TilstandType>()
+        internal lateinit var personLogger: Aktivitetslogger
+
+        init {
+            person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            personLogger = aktivitetslogger
+        }
+
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiodeindeks += 1
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
+        }
+
+        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+            tilstander[vedtaksperiodeindeks] = tilstand.type
+        }
+
+        internal val vedtaksperiodeTeller get() = tilstander.size
+
+        internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 }

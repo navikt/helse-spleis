@@ -85,7 +85,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding med tilhørende søknad men med forskjellige arbeidsgivere støttes ikke`() {
         person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"))
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(inntektsmelding(virksomhetsnummer = "456")) }
+        person.håndter(inntektsmelding(virksomhetsnummer = "456"))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))

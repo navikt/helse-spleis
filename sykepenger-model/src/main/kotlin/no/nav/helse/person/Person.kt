@@ -20,31 +20,40 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     fun håndter(nySøknad: ModelNySøknad) {
         nySøknad.info("Behandler ny søknad")
-        nySøknad.valider()
-        if (nySøknad.hasErrors()) {
-            invaliderAllePerioder(nySøknad)
-        } else {
-            finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
-        }
+        var arbeidsgiver: Arbeidsgiver? = null
+        continueIfNoErrors(nySøknad,
+            { nySøknad.valider() },
+            { arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad) },
+            { arbeidsgiver?.håndter(nySøknad) })
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun håndter(sendtSøknad: ModelSendtSøknad) {
-        sendtSøknad.valider()
-        if (sendtSøknad.hasErrors()) {
-            invaliderAllePerioder(sendtSøknad)
-        } else {
-            finnEllerOpprettArbeidsgiver(sendtSøknad).håndter(sendtSøknad)
+    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: () -> Unit) {
+        if (hendelse.hasErrors()) return
+        blocks.forEach {
+            it()
+            if (hendelse.hasErrors()) return invaliderAllePerioder(hendelse)
         }
     }
 
+    fun håndter(sendtSøknad: ModelSendtSøknad) {
+        sendtSøknad.info("Behandler sendt søknad")
+        var arbeidsgiver: Arbeidsgiver? = null
+        continueIfNoErrors(sendtSøknad,
+            { sendtSøknad.valider() },
+            { arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad) },
+            { arbeidsgiver?.håndter(sendtSøknad) })
+        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     fun håndter(inntektsmelding: ModelInntektsmelding) {
-        inntektsmelding.valider()
-        if (inntektsmelding.hasErrors()) {
-            invaliderAllePerioder(inntektsmelding)
-        } else {
-            finnEllerOpprettArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
-        }
+        inntektsmelding.info("Behandler inntektsmelding")
+        var arbeidsgiver: Arbeidsgiver? = null
+        continueIfNoErrors(inntektsmelding,
+            { inntektsmelding.valider() },
+            { arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding) },
+            { arbeidsgiver?.håndter(inntektsmelding) })
+        inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(ytelser: ModelYtelser) {
@@ -121,8 +130,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
                 arbeidsgiver(orgnr)
             }.also {
                 if (arbeidsgivere.size > 1) {
-                    invaliderAllePerioder(hendelse)
-                    hendelse.severe("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
+                    hendelse.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
                 }
             }
         }

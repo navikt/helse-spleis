@@ -34,7 +34,6 @@ internal class NySøknadHendelseTest {
         assertFalse(aktivitetslogger.hasErrors())
         assertTrue(inspektør.personLogger.hasMessages())
         assertFalse(inspektør.personLogger.hasErrors())
-        println(inspektør.personLogger)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
@@ -44,6 +43,7 @@ internal class NySøknadHendelseTest {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -51,10 +51,9 @@ internal class NySøknadHendelseTest {
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
-        }
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
         assertTrue(aktivitetslogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -64,6 +63,8 @@ internal class NySøknadHendelseTest {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasMessages())
+        assertFalse(inspektør.personLogger.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))

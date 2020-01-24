@@ -111,6 +111,10 @@ class ModelInntektsmelding(
         return (årssats / 260).toInt()
     }
 
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Inntektsmelding")
+    }
+
     private fun ingenOverlappende() = if (arbeidsgiverperioder.isEmpty()) true else arbeidsgiverperioder
         .sortedBy { it.fom }
         .zipWithNext(Periode::ingenOverlappende)
