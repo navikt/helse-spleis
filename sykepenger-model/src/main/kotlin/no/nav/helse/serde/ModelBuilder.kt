@@ -89,9 +89,9 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
 
         override fun postVisitObject() {
             when (type) {
-                "Inntektsmelding" -> recordingState.accept(InntektsmeldingDataState {
+                "Inntektsmelding" -> recordingState.accept(stack.push(InntektsmeldingDataState {
                     hendelser[it.hendelseId().toString()] = it
-                })
+                }))
             }
             stack.pop()
         }
@@ -123,6 +123,7 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
                     ferieperioder = emptyList()
                 )
             )
+            stack.pop()
         }
     }
 
