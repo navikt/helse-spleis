@@ -41,62 +41,20 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
         get() = stack.peek()
 
     override fun toString() = currentState.toString()
-
-    override fun preVisitArrayField(name: String) {
-        currentState.preVisitArrayField(name)
-    }
-
-    override fun postVisitArrayField() {
-        currentState.postVisitArrayField()
-    }
-
-    override fun preVisitObjectField(name: String) {
-        currentState.preVisitObjectField(name)
-    }
-
-    override fun postVisitObjectField() {
-        currentState.postVisitObjectField()
-    }
-
-    override fun visitStringField(name: String, value: String) {
-        currentState.visitStringField(name, value)
-    }
-
-    override fun visitBooleanField(name: String, value: Boolean) {
-        currentState.visitBooleanField(name, value)
-    }
-
-    override fun visitNumberField(name: String, value: Number) {
-        currentState.visitNumberField(name, value)
-    }
-
-    override fun preVisitArray() {
-        currentState.preVisitArray()
-    }
-
-    override fun postVisitArray() {
-        currentState.postVisitArray()
-    }
-
-    override fun preVisitObject() {
-        currentState.preVisitObject()
-    }
-
-    override fun postVisitObject() {
-        currentState.postVisitObject()
-    }
-
-    override fun visitString(value: String) {
-        currentState.visitString(value)
-    }
-
-    override fun visitBoolean(value: Boolean) {
-        currentState.visitBoolean(value)
-    }
-
-    override fun visitNumber(value: Number) {
-        currentState.visitNumber(value)
-    }
+    override fun preVisitArrayField(name: String) = currentState.preVisitArrayField(name)
+    override fun postVisitArrayField() = currentState.postVisitArrayField()
+    override fun preVisitObjectField(name: String) = currentState.preVisitObjectField(name)
+    override fun postVisitObjectField() = currentState.postVisitObjectField()
+    override fun visitStringField(name: String, value: String) = currentState.visitStringField(name, value)
+    override fun visitBooleanField(name: String, value: Boolean) = currentState.visitBooleanField(name, value)
+    override fun visitNumberField(name: String, value: Number) = currentState.visitNumberField(name, value)
+    override fun preVisitArray() = currentState.preVisitArray()
+    override fun postVisitArray() = currentState.postVisitArray()
+    override fun preVisitObject() = currentState.preVisitObject()
+    override fun postVisitObject() = currentState.postVisitObject()
+    override fun visitString(value: String) = currentState.visitString(value)
+    override fun visitBoolean(value: Boolean) = currentState.visitBoolean(value)
+    override fun visitNumber(value: Number) = currentState.visitNumber(value)
 
     private interface ModelState : StructureVisitor
 
@@ -168,75 +126,6 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
         }
     }
 
-    private inner class VisitorRecordingState : ModelState {
-        private var objectFieldDepth = 0
-
-        private val recordedVisits = mutableListOf<(ModelState) -> Unit>()
-
-        fun accept(modelState: ModelState) {
-            recordedVisits.forEach { it(modelState) }
-        }
-
-        override fun preVisitArrayField(name: String) {
-            recordedVisits.add { it.preVisitArrayField(name) }
-        }
-
-        override fun postVisitArrayField() {
-            recordedVisits.add { it.postVisitArrayField() }
-        }
-
-        override fun preVisitObjectField(name: String) {
-            recordedVisits.add { it.preVisitObjectField(name) }
-            objectFieldDepth++
-        }
-
-        override fun postVisitObjectField() {
-            recordedVisits.add { it.postVisitObjectField() }
-            if (objectFieldDepth == 0) stack.pop()
-            objectFieldDepth--
-        }
-
-        override fun visitStringField(name: String, value: String) {
-            recordedVisits.add { it.visitStringField(name, value) }
-        }
-
-        override fun visitBooleanField(name: String, value: Boolean) {
-            recordedVisits.add { it.visitBooleanField(name, value) }
-        }
-
-        override fun visitNumberField(name: String, value: Number) {
-            recordedVisits.add { it.visitNumberField(name, value) }
-        }
-
-        override fun preVisitArray() {
-            recordedVisits.add { it.preVisitArray() }
-        }
-
-        override fun postVisitArray() {
-            recordedVisits.add { it.postVisitArray() }
-        }
-
-        override fun preVisitObject() {
-            recordedVisits.add { it.preVisitObject() }
-        }
-
-        override fun postVisitObject() {
-            recordedVisits.add { it.postVisitObject() }
-        }
-
-        override fun visitString(value: String) {
-            recordedVisits.add { it.visitString(value) }
-        }
-
-        override fun visitBoolean(value: Boolean) {
-            recordedVisits.add { it.visitBoolean(value) }
-        }
-
-        override fun visitNumber(value: Number) {
-            recordedVisits.add { it.visitNumber(value) }
-        }
-    }
-
     private inner class PersonState : ModelState {
         private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
         private lateinit var aktørId: String
@@ -263,8 +152,9 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
         }
     }
 
-    private inner class ArbeidsgivereArrayState(private val arbeidsgivere: MutableMap<String, Arbeidsgiver>) :
-        ModelState {
+    private inner class ArbeidsgivereArrayState(
+        private val arbeidsgivere: MutableMap<String, Arbeidsgiver>
+    ) : ModelState {
         override fun preVisitObject() {
             stack.push(ArbeidsgiverState { orgnr, arbeidsgiver ->
                 arbeidsgivere[orgnr] = arbeidsgiver
@@ -317,8 +207,9 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
         }
     }
 
-    private inner class InntektState(private val setter: (dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) -> Unit) :
-        ModelState {
+    private inner class InntektState(
+        private val setter: (dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) -> Unit
+    ) : ModelState {
         private lateinit var fom: LocalDate
         private lateinit var hendelse: ModelInntektsmelding
         private lateinit var beløp: BigDecimal
@@ -344,6 +235,47 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
     }
 
     private fun hentHendelseMedId(id: String) = hendelser[id]
+
+    private inner class VisitorRecordingState : ModelState {
+        private var objectFieldDepth = 0
+        private val recordedVisits = mutableListOf<(ModelState) -> Unit>()
+
+        fun accept(modelState: ModelState) = recordedVisits.forEach { it(modelState) }
+
+        override fun preVisitObjectField(name: String) {
+            recordedVisits.record { it.preVisitObjectField(name) }
+            objectFieldDepth++
+        }
+
+        override fun postVisitObjectField() {
+            recordedVisits.record { it.postVisitObjectField() }
+            if (objectFieldDepth == 0) stack.pop()
+            objectFieldDepth--
+        }
+
+        override fun preVisitArrayField(name: String) = recordedVisits.record { it.preVisitArrayField(name) }
+        override fun postVisitArrayField() = recordedVisits.record { it.postVisitArrayField() }
+        override fun visitStringField(name: String, value: String) =
+            recordedVisits.record { it.visitStringField(name, value) }
+
+        override fun visitBooleanField(name: String, value: Boolean) =
+            recordedVisits.record { it.visitBooleanField(name, value) }
+
+        override fun visitNumberField(name: String, value: Number) =
+            recordedVisits.record { it.visitNumberField(name, value) }
+
+        override fun preVisitArray() = recordedVisits.record { it.preVisitArray() }
+        override fun postVisitArray() = recordedVisits.record { it.postVisitArray() }
+        override fun preVisitObject() = recordedVisits.record { it.preVisitObject() }
+        override fun postVisitObject() = recordedVisits.record { it.postVisitObject() }
+        override fun visitString(value: String) = recordedVisits.record { it.visitString(value) }
+        override fun visitBoolean(value: Boolean) = recordedVisits.record { it.visitBoolean(value) }
+        override fun visitNumber(value: Number) = recordedVisits.record { it.visitNumber(value) }
+
+        private fun MutableList<(ModelState) -> Unit>.record(recording: (ModelState) -> Unit) {
+            this.add(recording)
+        }
+    }
 }
 
 internal inline fun <reified T> Any.privatProp(fieldName: String): T =
