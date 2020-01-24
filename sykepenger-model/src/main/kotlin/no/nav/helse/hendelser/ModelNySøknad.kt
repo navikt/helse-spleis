@@ -70,6 +70,10 @@ class ModelNySøknad(
         return aktivitetslogger
     }
 
+    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+        aktivitetslogger.addAll(this.aktivitetslogger, "Ny søknad")
+    }
+
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }

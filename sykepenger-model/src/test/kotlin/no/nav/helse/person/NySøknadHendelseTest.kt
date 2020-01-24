@@ -32,6 +32,9 @@ internal class NySøknadHendelseTest {
     internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasMessages())
+        assertFalse(inspektør.personLogger.hasErrors())
+        println(inspektør.personLogger)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
     }
@@ -91,9 +94,14 @@ internal class NySøknadHendelseTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        internal lateinit var personLogger: Aktivitetslogger
 
         init {
             person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            personLogger = aktivitetslogger
         }
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {

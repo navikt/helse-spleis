@@ -9,6 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisi
 
 internal interface PersonVisitor: ArbeidsgiverVisitor {
     fun preVisitPerson(person: Person) {}
+    fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
     fun postVisitPerson(person: Person) {}
@@ -16,6 +17,7 @@ internal interface PersonVisitor: ArbeidsgiverVisitor {
 
 internal interface ArbeidsgiverVisitor: UtbetalingsdagVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
+    fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun preVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
     fun postVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
     fun preVisitTidslinjer() {}
@@ -30,6 +32,7 @@ internal interface ArbeidsgiverVisitor: UtbetalingsdagVisitor, VedtaksperiodeVis
 
 internal interface VedtaksperiodeVisitor: SykdomstidslinjeVisitor, SykdomshistorikkVisitor {
     fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {}
+    fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun visitUtbetalingslinje(linje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun preVisitUtbetalingslinjer() {}

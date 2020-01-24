@@ -14,17 +14,19 @@ private const val CURRENT_SKJEMA_VERSJON = 3
 class Person(private val aktørId: String, private val fødselsnummer: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
+    private val aktivitetslogger = Aktivitetslogger()
 
     private val observers = mutableListOf<PersonObserver>()
 
     fun håndter(nySøknad: ModelNySøknad) {
-        nySøknad.info("")
+        nySøknad.info("Behandler ny søknad")
         nySøknad.valider()
         if (nySøknad.hasErrors()) {
             invaliderAllePerioder(nySøknad)
         } else {
             finnEllerOpprettArbeidsgiver(nySøknad).håndter(nySøknad)
         }
+        nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(sendtSøknad: ModelSendtSøknad) {
@@ -91,6 +93,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this)
+        visitor.visitPersonAktivitetslogger(aktivitetslogger)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.values.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()

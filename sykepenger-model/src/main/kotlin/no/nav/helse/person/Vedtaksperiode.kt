@@ -50,6 +50,8 @@ internal class Vedtaksperiode internal constructor(
 
     private val sykdomshistorikk = Sykdomshistorikk()
 
+    private val aktivitetslogger = Aktivitetslogger()
+
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
@@ -57,6 +59,7 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this)
+        visitor.visitVedtaksperiodeAktivitetslogger(aktivitetslogger)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
         sykdomstidslinje.accept(visitor)

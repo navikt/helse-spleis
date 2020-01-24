@@ -76,9 +76,11 @@ internal class Arbeidsgiver private constructor(
     private val tidslinjer = mutableListOf<Utbetalingstidslinje>()
     private val perioder = mutableListOf<Vedtaksperiode>()
     private val vedtaksperiodeObservers = mutableListOf<VedtaksperiodeObserver>()
+    private val aktivitetslogger = Aktivitetslogger()
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this)
+        visitor.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
         inntektHistorie.accept(visitor)
         visitor.preVisitTidslinjer()
         tidslinjer.forEach { it.accept(visitor) }

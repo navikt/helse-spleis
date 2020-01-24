@@ -33,9 +33,10 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     override fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
 
     override fun addAll(other: Aktivitetslogger, label: String) {
-        other.severe.forEach { this.severe("$it ($label)") }
-        other.error.forEach { this.error("$it ($label)") }
-        other.warn.forEach { this.warn("$it ($label)") }
+        this.severe.addAll(other.severe.map {it.cloneWith(label) })
+        this.error.addAll(other.error.map {it.cloneWith(label) })
+        this.warn.addAll(other.warn.map {it.cloneWith(label) })
+        this.info.addAll(other.info.map {it.cloneWith(label) })
     }
 
     override fun expectNoErrors(): Boolean {
@@ -69,15 +70,17 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
     class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
 
-    private class Aktivitet(private val melding: String) {
+    private class Aktivitet(private var melding: String, private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)) {
         companion object {
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        private val tidsstempel = LocalDateTime.now().format(tidsstempelformat)
-        override fun toString(): String {
-            return tidsstempel + "\t" + melding
-        }
+        internal fun cloneWith(label: String) = Aktivitet(
+                melding + " ($label)",
+                tidsstempel
+            )
+
+        override fun toString() = tidsstempel + "\t" + melding
     }
 }
 
