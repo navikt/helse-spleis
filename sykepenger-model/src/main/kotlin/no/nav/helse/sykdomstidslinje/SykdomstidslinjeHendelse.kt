@@ -38,6 +38,4 @@ abstract class SykdomstidslinjeHendelse(
             }
         }
     }
-
-    fun visitHendelse(hendelse: SykdomstidslinjeHendelse) {}
 }

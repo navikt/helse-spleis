@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -50,6 +51,10 @@ class ModelVilkårsgrunnlag(
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Vilkårsgrunnlag")
+    }
+
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitVilkårsgrunnlagHendelse(this)
     }
 
     data class Måned(

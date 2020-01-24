@@ -11,6 +11,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -153,6 +154,9 @@ class ModelInntektsmelding(
     override fun fødselsnummer() = fødselsnummer
 
     override fun organisasjonsnummer() = orgnummer
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitInntektsmeldingHendelse(this)
+    }
 
     override fun toJson(): String = objectMapper.writeValueAsString(
         objectMapper.convertValue<ObjectNode>(

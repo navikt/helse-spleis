@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.IAktivitetslogger
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -41,4 +42,7 @@ internal class Testhendelse(
     }
 
     override fun equals(other: Any?): Boolean = this === other
+
+    override fun accept(visitor: PersonVisitor) {
+    }
 }

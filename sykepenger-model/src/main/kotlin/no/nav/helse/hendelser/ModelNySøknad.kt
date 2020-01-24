@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -98,6 +99,10 @@ class ModelNySøknad(
             "søknad" to objectMapper.readTree(originalJson)
         )
     )
+
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitNySøknadHendelse(this)
+    }
 
     private inner class Sykeperiode(
         private val fom: LocalDate,

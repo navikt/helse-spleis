@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -128,6 +129,10 @@ class ModelSendtSøknad(
     internal fun valider(): Aktivitetslogger {
         perioder.forEach { it.valider(this, aktivitetslogger) }
         return aktivitetslogger
+    }
+
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitSendtSøknadHendelse(this)
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {

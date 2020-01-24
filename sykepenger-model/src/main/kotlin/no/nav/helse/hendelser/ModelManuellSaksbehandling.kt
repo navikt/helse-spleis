@@ -4,6 +4,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.util.*
@@ -49,5 +50,9 @@ class ModelManuellSaksbehandling(
     override fun vedtaksperiodeId() = vedtaksperiodeId
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Manuell saksbehandling")
+    }
+
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitManuellSaksbehandlingHendelse(this)
     }
 }

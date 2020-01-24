@@ -101,6 +101,9 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this)
+        visitor.preVisitHendelser()
+        hendelser.forEach { it.accept(visitor) }
+        visitor.postVisitHendelser()
         visitor.visitPersonAktivitetslogger(aktivitetslogger)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.values.forEach { it.accept(visitor) }

@@ -4,6 +4,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,5 +73,9 @@ class ModelYtelser(
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         sykepengehistorikk.kopierAktiviteterTil(aktivitetslogger)
+    }
+
+    override fun accept(visitor: PersonVisitor) {
+        visitor.visitYtelserHendelse(this)
     }
 }
