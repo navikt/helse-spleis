@@ -6,9 +6,7 @@ import no.nav.helse.person.InntektHistorie
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import java.util.*
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
+import java.util.UUID
 
 internal class JsonDeserializerTest {
 
@@ -31,7 +29,7 @@ internal class JsonDeserializerTest {
     private val organisasjonsnummer = "ORGNR"
 
     private val arbeidsgiverId = UUID.randomUUID().toString()
-    private val hendelseId = UUID.randomUUID().toString()
+    private val inntektsmeldingHendelseId = UUID.randomUUID().toString()
 
     @Test
     fun test1() {
@@ -47,7 +45,7 @@ internal class JsonDeserializerTest {
         val inntekter = arbeidsgiver.privatProp<InntektHistorie>("inntektHistorie")
             .privatProp<MutableList<InntektHistorie.Inntekt>>("inntekter")
         assertEquals(1, inntekter.size)
-        //assertEquals(hendelseId, inntekter.first().hendelse.hendelseId())
+        assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
     }
 
     private fun enkelPersonJson() =
@@ -62,26 +60,21 @@ internal class JsonDeserializerTest {
                         "inntekter" to listOf(
                             mapOf(
                                 "fom" to "2020-01-01",
-                                "hendelse" to hendelseId,
+                                "hendelse" to inntektsmeldingHendelseId,
                                 "beløp" to 30000.0
                             )
                         )
                     )
                 ),
-                "hendelser" to mapOf(
-                    hendelseId to mapOf<String, Any?>(
-                        "id" to hendelseId,
-                        "type" to "ArbeidstakerHendelse"
+                "hendelser" to listOf(
+                    mapOf(
+                        "type" to "Inntektsmelding",
+                        "tidspunkt" to "2020-01-01T00:00:00",
+                        "data" to mapOf(
+                            "hendelseId" to inntektsmeldingHendelseId
+                        )
                     )
                 )
             )
         )
 }
-
-private inline fun <reified T> Any.privatProp(fieldName: String): T =
-    this::class.memberProperties.first { it.name == fieldName }.apply {
-        isAccessible = true
-    }.call(this) as T
-
-
-
