@@ -21,7 +21,7 @@ internal class AktivitetsloggerTest {
     internal fun `inneholder original melding`() {
         assertFalse(aktivitetslogger.toString().contains(Message))
         aktivitetslogger.info("info message")
-        assertTrue(aktivitetslogger.toString().contains(Message))
+        assertTrue(aktivitetslogger.toReport().contains(Message))
     }
 
     @Test

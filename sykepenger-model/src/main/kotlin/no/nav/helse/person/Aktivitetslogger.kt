@@ -1,44 +1,40 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.Aktivitetslogger.Alvorlighetsgrad.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitetslogger {
-    private val info = mutableListOf<Aktivitet>()
-    private val warn = mutableListOf<Aktivitet>()
-    private val error = mutableListOf<Aktivitet>()
-    private val severe = mutableListOf<Aktivitet>()
+    private val aktiviteter = mutableListOf<Aktivitet>()
 
     override fun info(melding: String, vararg params: Any) {
-        info.add(Aktivitet(String.format(melding, *params)))
+        aktiviteter.add(Aktivitet(INFO, String.format(melding, *params)))
     }
 
     override fun warn(melding: String, vararg params: Any) {
-        warn.add(Aktivitet(String.format(melding, *params)))
+        aktiviteter.add(Aktivitet(WARN, String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
-        error.add(Aktivitet(String.format(melding, *params)))
+        aktiviteter.add(Aktivitet(ERROR, String.format(melding, *params)))
     }
 
     override fun severe(melding: String, vararg params: Any): Nothing {
-        severe.add(Aktivitet(String.format(melding, *params)))
+        aktiviteter.add(Aktivitet(SEVERE, String.format(melding, *params)))
         throw AktivitetException(this)
     }
 
-    override fun hasMessages() = info.isNotEmpty() || hasWarnings() || hasErrors()
+    override fun hasMessages() = info().isNotEmpty() || hasWarnings() || hasErrors()
 
-    override fun hasWarnings() = warn.isNotEmpty()
+    override fun hasWarnings() = warn().isNotEmpty()
 
-    override fun hasErrors() = error.isNotEmpty() || severe.isNotEmpty()
+    override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
 
     override fun addAll(other: Aktivitetslogger, label: String) {
-        this.severe.addAll(other.severe.map {it.cloneWith(label) })
-        this.error.addAll(other.error.map {it.cloneWith(label) })
-        this.warn.addAll(other.warn.map {it.cloneWith(label) })
-        this.info.addAll(other.info.map {it.cloneWith(label) })
+        this.aktiviteter.addAll(other.aktiviteter.map { it.cloneWith(label) })
+        this.aktiviteter.sort()
     }
 
     override fun expectNoErrors(): Boolean {
@@ -46,14 +42,14 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         return true
     }
 
-    override fun toString(): String {
+    fun toReport(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
         results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }?: ""} \n\t")
-        append("Severe errors", severe, results)
-        append("Errors", error, results)
-        append("Warnings", warn, results)
-        append("Information", info, results)
+        append("Severe errors", severe(), results)
+        append("Errors", error(), results)
+        append("Warnings", warn(), results)
+        append("Information", info(), results)
         results.append("\n")
         return results.toString()
     }
@@ -70,22 +66,53 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         }
     }
 
+    override fun toString() = aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s}
+
+
+    private fun info() = Aktivitet.filter(INFO, aktiviteter)
+    private fun warn() = Aktivitet.filter(WARN, aktiviteter)
+    private fun error() = Aktivitet.filter(ERROR, aktiviteter)
+    private fun severe() = Aktivitet.filter(SEVERE, aktiviteter)
+
     class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
 
     private class Aktivitet(
+        private val alvorlighetsgrad: Alvorlighetsgrad,
         private var melding: String,
         private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-    ) {
+    ): Comparable<Aktivitet> {
         companion object {
+            internal fun filter(
+                alvorlighetsgrad: Alvorlighetsgrad,
+                aktiviteter: MutableList<Aktivitet>
+            ): List<Aktivitet> {
+                return aktiviteter.filter { it.alvorlighetsgrad == alvorlighetsgrad }
+            }
+
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
         internal fun cloneWith(label: String) = Aktivitet(
+                alvorlighetsgrad,
                 melding + " ($label)",
                 tidsstempel
             )
 
+        override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
+            .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
+
         override fun toString() = tidsstempel + "\t" + melding
+        internal fun inOrder() = alvorlighetsgrad
+            .toString() + "\t" + tidsstempel + "\t" + melding
+    }
+
+    private enum class Alvorlighetsgrad(private val label: String): Comparable<Alvorlighetsgrad> {
+        INFO("I"),
+        WARN("W"),
+        ERROR("E"),
+        SEVERE("S");
+
+        override fun toString() = label
     }
 }
 
