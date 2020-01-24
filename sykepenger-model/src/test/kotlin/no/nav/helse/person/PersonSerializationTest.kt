@@ -55,14 +55,13 @@ internal class PersonSerializationTest {
     }
 
     private fun nySøknad(aktørId: String) = ModelNySøknad(
-        UUID.randomUUID(),
-        "fnr",
-        aktørId,
-        "123456789",
-        LocalDateTime.now(),
-        listOf(Triple(16.september, 5.oktober, 100)),
-        Aktivitetslogger(),
-        SykepengesoknadDTO(
+        hendelseId = UUID.randomUUID(),
+        fnr = "fnr",
+        aktørId = aktørId,
+        orgnummer = "123456789",
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
+        originalJson = SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.NY,
@@ -81,7 +80,8 @@ internal class PersonSerializationTest {
                 SoknadsperiodeDTO(16.september, 5.oktober,100)
             ),
             fravar = emptyList()
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
 }

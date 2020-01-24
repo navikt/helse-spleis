@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -20,9 +19,9 @@ class ModelSendtSøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     private val perioder: List<Periode>,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val originalJson: String
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad), IAktivitetslogger by aktivitetslogger {
+    private val originalJson: String,
+    aktivitetslogger: Aktivitetslogger
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger) {
 
     private val fom: LocalDate
     private val tom: LocalDate
@@ -66,7 +65,14 @@ class ModelSendtSøknad(
                                 null
                             }
                         }
-                    } + (it.path("søknad").path("arbeidGjenopptatt").asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
+                    } + (it.path("søknad").path("arbeidGjenopptatt").asOptionalLocalDate()?.let {
+                        listOf(
+                            Periode.Arbeid(
+                                it,
+                                søknadTom
+                            )
+                        )
+                    }
                         ?: emptyList()),
                     aktivitetslogger = aktivitetslogger,
                     originalJson = objectMapper.writeValueAsString(it.path("søknad"))
@@ -130,47 +136,55 @@ class ModelSendtSøknad(
 
         internal open fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {}
 
-        internal fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String){
-            if(fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.error(beskjed)
+        internal fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
+            if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.error(beskjed)
         }
 
-        class Ferie(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+        class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.ferie(fom, tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
         }
-        class Sykdom(fom: LocalDate, tom: LocalDate, private val grad: Int, private val faktiskGrad: Double = grad.toDouble()): Periode(fom, tom) {
+
+        class Sykdom(
+            fom: LocalDate,
+            tom: LocalDate,
+            private val grad: Int,
+            private val faktiskGrad: Double = grad.toDouble()
+        ) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.sykedager(fom, tom, sendtSøknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger){
-                if(grad != 100) aktivitetslogger.error("grad i søknaden er ikke 100%%")
-                if(faktiskGrad != 100.0) aktivitetslogger.error("faktisk grad i søknaden er ikke 100%%")
+            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
+                if (grad != 100) aktivitetslogger.error("grad i søknaden er ikke 100%%")
+                if (faktiskGrad != 100.0) aktivitetslogger.error("faktisk grad i søknaden er ikke 100%%")
             }
         }
 
-        class Utdanning(fom: LocalDate, private val _tom: LocalDate? = null): Periode(fom, LocalDate.MAX) {
+        class Utdanning(fom: LocalDate, private val _tom: LocalDate? = null) : Periode(fom, LocalDate.MAX) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.utenlandsdager(fom, _tom ?: sendtSøknad.tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.error("Utdanning foreløpig ikke understøttet")
         }
-        class Permisjon(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+
+        class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.error("Permisjon foreløpig ikke understøttet")
         }
-        class Egenmelding(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+
+        class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, sendtSøknad)
         }
 
-        class Arbeid(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+        class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, sendtSøknad)
 

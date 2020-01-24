@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
@@ -17,8 +18,9 @@ class ModelYtelser(
     private val sykepengehistorikk: ModelSykepengehistorikk,
     private val foreldrepenger: ModelForeldrepenger,
     private val rapportertdato: LocalDateTime,
-    private val originalJson: String
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser), VedtaksperiodeHendelse {
+    private val originalJson: String,
+    aktivitetslogger: Aktivitetslogger
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger), VedtaksperiodeHendelse {
     internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,

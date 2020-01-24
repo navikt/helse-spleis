@@ -109,18 +109,18 @@ internal class ModelInntektsmeldingTest {
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
         inntektsmelding = ModelInntektsmelding(
-            UUID.randomUUID(),
-            ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            "88888888",
-            "12020052345",
-            "100010101010",
-            1.februar.atStartOfDay(),
-            førsteFraværsdag,
-            beregnetInntekt,
-            aktivitetslogger,
-            "{}",
-            arbeidsgiverperioder,
-            ferieperioder
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            orgnummer = "88888888",
+            fødselsnummer = "12020052345",
+            aktørId = "100010101010",
+            mottattDato = 1.februar.atStartOfDay(),
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = beregnetInntekt,
+            originalJson = "{}",
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            ferieperioder = ferieperioder,
+            aktivitetslogger = aktivitetslogger
         )
     }
 }

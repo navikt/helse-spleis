@@ -10,8 +10,12 @@ class ModelForeldrepenger(
 ) {
 
     init {
-        if (foreldrepengeytelse != null && foreldrepengeytelse.first > foreldrepengeytelse.second) aktivitetslogger.severe("fom er større enn tom for foreldrepengeytelse")
-        if (svangerskapsytelse != null && svangerskapsytelse.first > svangerskapsytelse.second) aktivitetslogger.severe("fom er større enn tom for svangerskapsytelse")
+        if (foreldrepengeytelse != null && foreldrepengeytelse.first > foreldrepengeytelse.second) aktivitetslogger.severe(
+            "fom er større enn tom for foreldrepengeytelse"
+        )
+        if (svangerskapsytelse != null && svangerskapsytelse.first > svangerskapsytelse.second) aktivitetslogger.severe(
+            "fom er større enn tom for svangerskapsytelse"
+        )
     }
 
     fun overlapperMedSyketilfelle(syketilfelleFom: LocalDate, syketilfelleTom: LocalDate): Boolean {

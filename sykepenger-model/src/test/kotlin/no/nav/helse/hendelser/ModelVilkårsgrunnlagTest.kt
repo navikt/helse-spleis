@@ -25,14 +25,13 @@ internal class ModelVilkårsgrunnlagTest {
     private val fødselsnummer = "234"
     private val orgnummer = "345"
     private val sendtSøknad = ModelSendtSøknad(
-        UUID.randomUUID(),
-        fødselsnummer,
-        aktørId,
-        orgnummer,
-        LocalDateTime.now(),
-        listOf(ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)),
-        aktivitetslogger,
-        SykepengesoknadDTO(
+        hendelseId = UUID.randomUUID(),
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        perioder = listOf(ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)),
+        originalJson = SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.SENDT,
@@ -52,7 +51,8 @@ internal class ModelVilkårsgrunnlagTest {
                 SoknadsperiodeDTO(10.januar, 12.januar, 100)
             ),
             fravar = emptyList()
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        aktivitetslogger = aktivitetslogger
     )
 
     @Test

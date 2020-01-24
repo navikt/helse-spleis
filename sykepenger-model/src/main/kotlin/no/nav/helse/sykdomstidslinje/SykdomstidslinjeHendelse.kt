@@ -6,12 +6,16 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
 
-abstract class SykdomstidslinjeHendelse(hendelseId: UUID, hendelsestype: Hendelsestype) :
-    ArbeidstakerHendelse(hendelseId, hendelsestype) {
+abstract class SykdomstidslinjeHendelse(
+    hendelseId: UUID,
+    hendelsestype: Hendelsestype,
+    aktivitetslogger: Aktivitetslogger
+) : ArbeidstakerHendelse(hendelseId, hendelsestype, aktivitetslogger) {
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType

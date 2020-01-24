@@ -89,7 +89,8 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
             sykepengehistorikk = sykepengehistorikk,
             foreldrepenger = foreldrepenger,
             rapportertdato = this["@besvart"].asLocalDateTime(),
-            originalJson = this.toJson()
+            originalJson = this.toJson(),
+            aktivitetslogger = aktivitetslogger
         )
     }
 
@@ -164,7 +165,8 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
             utbetalingGodkjent = this["@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent"].asBoolean(),
-            rapportertdato = this["@besvart"].asLocalDateTime()
+            rapportertdato = this["@besvart"].asLocalDateTime(),
+            aktivitetslogger = aktivitetslogger
         )
 
     object Factory : MessageFactory {

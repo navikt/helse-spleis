@@ -51,14 +51,14 @@ internal class ModelNySøknadTest {
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
         nySøknad = ModelNySøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            "12345",
-            "987654321",
-            LocalDateTime.now(),
-            listOf(*sykeperioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = "987654321",
+            rapportertdato = LocalDateTime.now(),
+            sykeperioder = listOf(*sykeperioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
     }
 

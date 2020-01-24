@@ -291,7 +291,8 @@ internal class PersonTest {
                 sykepengehistorikk = ModelSykepengehistorikk(emptyList(), emptyList(), Aktivitetslogger()),
                 foreldrepenger = ModelForeldrepenger(null, null, Aktivitetslogger()),
                 rapportertdato = LocalDateTime.now(),
-                originalJson = ""
+                originalJson = "",
+                aktivitetslogger = Aktivitetslogger()
             ))
         }
 
@@ -370,26 +371,26 @@ internal class PersonTest {
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
     ) = ModelNySøknad(
-        UUID.randomUUID(),
-        fødselsnummer,
-        aktørId,
-        orgnummer,
-        LocalDateTime.now(),
-        perioder,
-        Aktivitetslogger(),
-        "{}"
+        hendelseId = UUID.randomUUID(),
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = perioder,
+        originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            fødselsnummer,
-            aktørId,
-            organisasjonsnummer,
-            rapportertDato,
-            perioder,
-            Aktivitetslogger(),
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = fødselsnummer,
+            aktørId = aktørId,
+            orgnummer = organisasjonsnummer,
+            rapportertdato = rapportertDato,
+            perioder = perioder,
+            originalJson = "{}",
+            aktivitetslogger = Aktivitetslogger()
         )
 
 
@@ -403,7 +404,8 @@ internal class PersonTest {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private class TestPersonObserver : PersonObserver {

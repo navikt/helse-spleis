@@ -95,25 +95,24 @@ internal class SykepengesøknadTidslinjeTest {
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                             rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            "fnr",
-            "aktørId",
-            "orgnr",
-            rapportertDato,
-            perioder,
-            Aktivitetslogger(),
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = "fnr",
+            aktørId = "aktørId",
+            orgnummer = "orgnr",
+            rapportertdato = rapportertDato,
+            perioder = perioder,
+            originalJson = "{}",
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun nySøknad() = ModelNySøknad(
-        UUID.randomUUID(),
-        "fnr",
-        "aktørId",
-        "123456789",
-        LocalDateTime.now(),
-        listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
-        Aktivitetslogger(),
-        SykepengesoknadDTO(
+        hendelseId = UUID.randomUUID(),
+        fnr = "fnr",
+        aktørId = "aktørId",
+        orgnummer = "123456789",
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
+        originalJson = SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.NY,
@@ -132,7 +131,8 @@ internal class SykepengesøknadTidslinjeTest {
                 SoknadsperiodeDTO(sykeperiodeFOM, sykeperiodeTOM,100)
             ),
             fravar = emptyList()
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
 }

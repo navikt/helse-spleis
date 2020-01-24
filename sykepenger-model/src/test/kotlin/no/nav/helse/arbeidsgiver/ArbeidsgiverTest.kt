@@ -114,16 +114,15 @@ internal class ArbeidsgiverTest {
 
     private fun inntektsmelding(): ModelInntektsmelding {
         return ModelInntektsmelding(
-            UUID.randomUUID(),
-            ModelInntektsmelding.Refusjon(null, 1.0, null),
-            "orgnummer",
-            "fnr",
-            "aktør",
-            LocalDateTime.now(),
-            LocalDate.now(),
-            1.0,
-            Aktivitetslogger(),
-            Inntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(null, 1.0, null),
+            orgnummer = "orgnummer",
+            fødselsnummer = "fnr",
+            aktørId = "aktør",
+            mottattDato = LocalDateTime.now(),
+            førsteFraværsdag = LocalDate.now(),
+            beregnetInntekt = 1.0,
+            originalJson = Inntektsmelding(
                 inntektsmeldingId = "",
                 arbeidstakerFnr = "fødselsnummer",
                 arbeidstakerAktorId = "aktørId",
@@ -144,8 +143,9 @@ internal class ArbeidsgiverTest {
                 foersteFravaersdag = LocalDate.now(),
                 mottattDato = LocalDateTime.now()
             ).toJson(),
-            listOf(1.januar..2.januar),
-            emptyList()
+            arbeidsgiverperioder = listOf(1.januar..2.januar),
+            ferieperioder = emptyList(),
+            aktivitetslogger = Aktivitetslogger()
         )
     }
 

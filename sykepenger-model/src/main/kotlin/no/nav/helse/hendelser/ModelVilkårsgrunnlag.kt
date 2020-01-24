@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -18,9 +17,9 @@ class ModelVilkårsgrunnlag(
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
     private val erEgenAnsatt: Boolean,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val originalJson: String
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag),VedtaksperiodeHendelse, IAktivitetslogger by aktivitetslogger {
+    private val originalJson: String,
+    aktivitetslogger: Aktivitetslogger
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun rapportertdato() = rapportertDato
     override fun aktørId() = aktørId

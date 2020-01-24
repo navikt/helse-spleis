@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
@@ -15,7 +16,9 @@ class ModelManuellSaksbehandling(
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val utbetalingGodkjent: Boolean,
-    private val rapportertdato: LocalDateTime) : ArbeidstakerHendelse(hendelseId, Hendelsestype.ManuellSaksbehandling), VedtaksperiodeHendelse {
+    private val rapportertdato: LocalDateTime,
+    aktivitetslogger: Aktivitetslogger
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.ManuellSaksbehandling, aktivitetslogger), VedtaksperiodeHendelse {
 
     companion object {
         fun lagBehov(

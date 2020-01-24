@@ -8,6 +8,7 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
@@ -87,8 +88,12 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
         currentState.postVisitComposite(this, compositeSykdomstidslinje)
-    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) = currentState.postVisitSykdomshistorikkElement(this, element)
-    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) = currentState.postVisitVedtaksperiode(this, vedtaksperiode)
+
+    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
+        currentState.postVisitSykdomshistorikkElement(this, element)
+
+    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) =
+        currentState.postVisitVedtaksperiode(this, vedtaksperiode)
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = currentState.visitDag(this, arbeidsdag)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = currentState.visitDag(this, egenmeldingsdag)
@@ -100,6 +105,16 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitSykedag(sykedag: Sykedag) = currentState.visitDag(this, sykedag)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitDag(this, ubestemtdag)
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitDag(this, utenlandsdag)
+    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
+        currentState.visitTilstand(this, tilstand)
+
+    override fun preVisitVedtaksperiodeSykdomstidslinje() = currentState.preVisitVedtaksperiodeSykdomstidslinje(this)
+    override fun postVisitVedtaksperiodeSykdomstidslinje() = currentState.postVisitVedtaksperiodeSykdomstidslinje(this)
+    override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer(this)
+    override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
+        currentState.visitUtbetalingslinje(this, utbetalingslinje)
+
+    override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer(this)
 
     private interface JsonState {
         fun entering(jsonBuilder: JsonBuilder) {}
@@ -134,6 +149,12 @@ internal class JsonBuilder : PersonVisitor {
         fun postVisitSykdomshistorikkElement(jsonBuilder: JsonBuilder, element: Sykdomshistorikk.Element) {}
         fun postVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {}
         fun visitDag(jsonBuilder: JsonBuilder, dag: Dag) {}
+        fun visitTilstand(jsonBuilder: JsonBuilder, tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {}
+        fun postVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {}
+        fun preVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {}
+        fun preVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
+        fun visitUtbetalingslinje(jsonBuilder: JsonBuilder, utbetalingslinje: Utbetalingslinje) {}
+        fun postVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
     }
 
     private class Root : JsonState {
@@ -146,7 +167,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun toString() = listOf(hendelseMap, personMap).toString()
 
-        override fun toJson() = jacksonObjectMapper()
+        override fun toJson(): String = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
             .writeValueAsString(personMap)
@@ -277,7 +298,39 @@ internal class JsonBuilder : PersonVisitor {
             jsonBuilder.pushState(SykdomshistorikkElementState(element, elementMap))
         }
 
+        override fun visitTilstand(jsonBuilder: JsonBuilder, tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+            vedtaksperiodeMap["tilstand"] = tilstand.type.name
+        }
+
+        override fun preVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {
+            val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
+            vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinjeListe
+            jsonBuilder.pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+        }
+
+        override fun preVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {
+            val utbetalingstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
+            vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
+            jsonBuilder.pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
+        }
+
         override fun postVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {
+            jsonBuilder.popState()
+        }
+    }
+
+    private class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+        JsonState {
+        override fun visitUtbetalingslinje(jsonBuilder: JsonBuilder, utbetalingslinje: Utbetalingslinje) {
+            val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
+                "fom" to utbetalingslinje.fom,
+                "tom" to utbetalingslinje.tom,
+                "dagsats" to utbetalingslinje.dagsats
+            )
+            utbetalingstidslinjeListe.add(utbetalingstidslinjeMap)
+        }
+
+        override fun postVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {
             jsonBuilder.popState()
         }
     }
@@ -315,7 +368,7 @@ internal class JsonBuilder : PersonVisitor {
         JsonState {
 
         override fun visitDag(jsonBuilder: JsonBuilder, dag: Dag) {
-            fun mapDag(dagen:Dag): MutableMap<String, Any?> = mutableMapOf(
+            fun mapDag(dagen: Dag): MutableMap<String, Any?> = mutableMapOf(
                 "dagen" to dagen.dagen,
                 "hendelseId" to dagen.hendelse.hendelseId(),
                 "type" to dagen.dagType().name,
@@ -330,6 +383,10 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun postVisitBeregnetSykdomstidslinje(jsonBuilder: JsonBuilder) {
+            jsonBuilder.popState()
+        }
+
+        override fun postVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {
             jsonBuilder.popState()
         }
     }

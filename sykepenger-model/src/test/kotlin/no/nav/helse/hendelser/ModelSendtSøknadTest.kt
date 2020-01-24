@@ -107,14 +107,14 @@ internal class ModelSendtSøknadTest {
 
     private fun sendtSøknad(vararg perioder: Periode) {
         sendtSøknad = ModelSendtSøknad(
-            UUID.randomUUID(),
-            ModelNySøknadTest.UNG_PERSON_FNR_2018,
-            "12345",
-            "987654321",
-            LocalDateTime.now(),
-            listOf(*perioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = "987654321",
+            rapportertdato = LocalDateTime.now(),
+            perioder = listOf(*perioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
     }
 }

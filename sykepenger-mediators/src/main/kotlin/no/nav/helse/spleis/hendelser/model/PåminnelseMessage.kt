@@ -46,7 +46,8 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
             this["tilstand"].asText().let { oldTilstander[it] ?: TilstandType.valueOf(it) },
             this["tilstandsendringstidspunkt"].asLocalDateTime(),
             this["påminnelsestidspunkt"].asLocalDateTime(),
-            this["nestePåminnelsestidspunkt"].asLocalDateTime()
+            this["nestePåminnelsestidspunkt"].asLocalDateTime(),
+            problems
         )
     }
 

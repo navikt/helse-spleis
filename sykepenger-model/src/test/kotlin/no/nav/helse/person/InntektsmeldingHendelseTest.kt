@@ -96,41 +96,41 @@ internal class InntektsmeldingHendelseTest {
         virksomhetsnummer: String = ORGNR
     ) =
         ModelInntektsmelding(
-            UUID.randomUUID(),
-            ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            virksomhetsnummer,
-            UNG_PERSON_FNR_2018,
-            AKTØRID,
-            1.februar.atStartOfDay(),
-            førsteFraværsdag,
-            beregnetInntekt,
-            aktivitetslogger,
-            "{}",
-            listOf(1.januar..16.januar),
-            emptyList()
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            orgnummer = virksomhetsnummer,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            mottattDato = 1.februar.atStartOfDay(),
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = beregnetInntekt,
+            originalJson = "{}",
+            arbeidsgiverperioder = listOf(1.januar..16.januar),
+            ferieperioder = emptyList(),
+            aktivitetslogger = aktivitetslogger
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = ModelNySøknad(
-        UUID.randomUUID(),
-        UNG_PERSON_FNR_2018,
-        AKTØRID,
-        orgnr,
-        LocalDateTime.now(),
-        listOf(*sykeperioder),
-        aktivitetslogger,
-        "{}"
+        hendelseId = UUID.randomUUID(),
+        fnr = UNG_PERSON_FNR_2018,
+        aktørId = AKTØRID,
+        orgnummer = orgnr,
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(*sykeperioder),
+        originalJson = "{}",
+        aktivitetslogger = aktivitetslogger
     )
 
     private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode, orgnummer: String = ORGNR) =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            SendtSøknadHendelseTest.UNG_PERSON_FNR_2018,
-            "12345",
-            orgnummer,
-            LocalDateTime.now(),
-            listOf(*perioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = SendtSøknadHendelseTest.UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = orgnummer,
+            rapportertdato = LocalDateTime.now(),
+            perioder = listOf(*perioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

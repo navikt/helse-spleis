@@ -11,7 +11,6 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -29,11 +28,11 @@ class ModelInntektsmelding(
     private val mottattDato: LocalDateTime,
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
-    private val aktivitetslogger: Aktivitetslogger,
     private val originalJson: String,
     arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-    ferieperioder: List<ClosedRange<LocalDate>>
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding), IAktivitetslogger by aktivitetslogger {
+    ferieperioder: List<ClosedRange<LocalDate>>,
+    aktivitetslogger: Aktivitetslogger
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger) {
     companion object {
 
         private val objectMapper = jacksonObjectMapper()

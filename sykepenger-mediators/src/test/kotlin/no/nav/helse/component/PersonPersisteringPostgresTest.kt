@@ -98,14 +98,13 @@ class PersonPersisteringPostgresTest {
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknad(aktørId))
         person.håndter(ModelSendtSøknad(
-            UUID.randomUUID(),
-            "fnr",
-            aktørId,
-            "123456789",
-            LocalDateTime.now(),
-            listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-            Aktivitetslogger(),
-            SykepengesoknadDTO(
+            hendelseId = UUID.randomUUID(),
+            fnr = "fnr",
+            aktørId = aktørId,
+            orgnummer = "123456789",
+            rapportertdato = LocalDateTime.now(),
+            perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
+            originalJson = SykepengesoknadDTO(
                 id = "123",
                 type = SoknadstypeDTO.ARBEIDSTAKERE,
                 status = SoknadsstatusDTO.SENDT,
@@ -125,7 +124,8 @@ class PersonPersisteringPostgresTest {
                     SoknadsperiodeDTO(16.september, 5.oktober,100)
                 ),
                 fravar = emptyList()
-            ).toJsonNode().toString()
+            ).toJsonNode().toString(),
+            aktivitetslogger = Aktivitetslogger()
         ))
 
         val alleVersjoner = using(sessionOf(dataSource)) { session ->
@@ -137,14 +137,13 @@ class PersonPersisteringPostgresTest {
     }
 
     private fun nySøknad(aktørId: String) = ModelNySøknad(
-        UUID.randomUUID(),
-        "fnr",
-        aktørId,
-        "123456789",
-        LocalDateTime.now(),
-        listOf(Triple(16.september, 5.oktober, 100)),
-        Aktivitetslogger(),
-        SykepengesoknadDTO(
+        hendelseId = UUID.randomUUID(),
+        fnr = "fnr",
+        aktørId = aktørId,
+        orgnummer = "123456789",
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
+        originalJson = SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.NY,
@@ -163,7 +162,8 @@ class PersonPersisteringPostgresTest {
                 SoknadsperiodeDTO(16.september, 5.oktober,100)
             ),
             fravar = emptyList()
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
 }

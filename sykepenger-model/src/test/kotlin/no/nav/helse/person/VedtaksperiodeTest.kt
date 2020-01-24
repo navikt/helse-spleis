@@ -253,14 +253,14 @@ internal class VedtaksperiodeTest {
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            fødselsnummer,
-            aktør,
-            organisasjonsnummer,
-            rapportertDato,
-            perioder,
-            Aktivitetslogger(),
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = fødselsnummer,
+            aktørId = aktør,
+            orgnummer = organisasjonsnummer,
+            rapportertdato = rapportertDato,
+            perioder = perioder,
+            originalJson = "{}",
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = ModelPåminnelse(
@@ -273,7 +273,8 @@ internal class VedtaksperiodeTest {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
 }

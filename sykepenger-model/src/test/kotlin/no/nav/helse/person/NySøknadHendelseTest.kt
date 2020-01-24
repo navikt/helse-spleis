@@ -81,14 +81,14 @@ internal class NySøknadHendelseTest {
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         ModelNySøknad(
-            UUID.randomUUID(),
-            ModelNySøknadTest.UNG_PERSON_FNR_2018,
-            "12345",
-            orgnummer,
-            LocalDateTime.now(),
-            listOf(*sykeperioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = orgnummer,
+            rapportertdato = LocalDateTime.now(),
+            sykeperioder = listOf(*sykeperioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

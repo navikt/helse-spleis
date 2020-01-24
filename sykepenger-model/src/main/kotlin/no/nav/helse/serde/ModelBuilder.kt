@@ -170,10 +170,10 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
             LocalDateTime.now(),
             LocalDate.now(),
             30000.0,
-            Aktivitetslogger(),
             "{}",
             emptyList(),
-            emptyList()
+            emptyList(),
+            Aktivitetslogger()
         )
     }
 

@@ -330,13 +330,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
         vedtaksperiode.håndter(
             ModelVilkårsgrunnlag(
-                UUID.randomUUID(),
-                vedtaksperiodeId.toString(),
-                aktørId,
-                fødselsnummer,
-                organisasjonsnummer,
-                LocalDateTime.now(),
-                (1.rangeTo(12)).map {
+                hendelseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                orgnummer = organisasjonsnummer,
+                rapportertDato = LocalDateTime.now(),
+                inntektsmåneder = (1.rangeTo(12)).map {
                     ModelVilkårsgrunnlag.Måned(
                         årMåned = YearMonth.of(2018, it),
                         inntektsliste = listOf(
@@ -346,9 +346,9 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                         )
                     )
                 },
-                false,
-                Aktivitetslogger(),
-                "{}"
+                erEgenAnsatt = false,
+                originalJson = "{}",
+                aktivitetslogger = Aktivitetslogger()
             )
         )
 
@@ -889,14 +889,13 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
     ) = ModelNySøknad(
-        UUID.randomUUID(),
-        fødselsnummer,
-        aktørId,
-        orgnummer,
-        LocalDateTime.now(),
-        perioder,
-        Aktivitetslogger(),
-        SykepengesoknadDTO(
+        hendelseId = UUID.randomUUID(),
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = perioder,
+        originalJson = SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             status = SoknadsstatusDTO.NY,
@@ -912,7 +911,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             opprettet = LocalDateTime.now(),
             egenmeldinger = emptyList(),
             soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun sendtSøknad(
@@ -925,14 +925,14 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         ), rapportertDato: LocalDateTime = LocalDateTime.now()
     ) =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            fødselsnummer,
-            aktørId,
-            organisasjonsnummer,
-            rapportertDato,
-            perioder,
-            Aktivitetslogger(),
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = fødselsnummer,
+            aktørId = aktørId,
+            orgnummer = organisasjonsnummer,
+            rapportertdato = rapportertDato,
+            perioder = perioder,
+            originalJson = "{}",
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun inntektsmelding(
@@ -967,7 +967,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             organisasjonsnummer = organisasjonsnummer,
             utbetalingGodkjent = utbetalingGodkjent,
             saksbehandler = "en_saksbehandler_ident",
-            rapportertdato = LocalDateTime.now()
+            rapportertdato = LocalDateTime.now(),
+            aktivitetslogger = Aktivitetslogger()
         )
     }
 
@@ -981,7 +982,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun ytelser(
@@ -1011,7 +1013,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             aktivitetslogger = Aktivitetslogger()
         ),
         rapportertdato = LocalDateTime.now(),
-        originalJson = "{}"
+        originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
     )
 
 

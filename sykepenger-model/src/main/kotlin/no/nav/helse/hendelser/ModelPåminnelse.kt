@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VedtaksperiodeHendelse
@@ -16,8 +17,9 @@ class ModelPåminnelse(
     private val tilstand: TilstandType,
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
-    private val nestePåminnelsestidspunkt: LocalDateTime
-    ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse), VedtaksperiodeHendelse {
+    private val nestePåminnelsestidspunkt: LocalDateTime,
+    aktivitetslogger: Aktivitetslogger
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse, aktivitetslogger), VedtaksperiodeHendelse {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

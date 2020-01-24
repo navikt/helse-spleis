@@ -58,7 +58,6 @@ internal class SykdomstidslinjeHendelseTest {
         "123456789",
         LocalDateTime.now(),
         listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
-        Aktivitetslogger(),
         SykepengesoknadDTO(
             id = "123",
             type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -79,19 +78,19 @@ internal class SykdomstidslinjeHendelseTest {
                 SoknadsperiodeDTO(16.september, 5.oktober,100)
             ),
             fravar = emptyList()
-        ).toJsonNode().toString()
+        ).toJsonNode().toString(),
+        Aktivitetslogger()
     ).toJson()
     private val inntektsmelding = ModelInntektsmelding(
-        UUID.randomUUID(),
-        ModelInntektsmelding.Refusjon(null, 0.0, null),
-        "orgnr",
-        "fnr",
-        "aktørId",
-        LocalDateTime.now(),
-        LocalDate.now(),
-        0.0,
-        Aktivitetslogger(),
-        Inntektsmelding(
+        hendelseId = UUID.randomUUID(),
+        refusjon = ModelInntektsmelding.Refusjon(null, 0.0, null),
+        orgnummer = "orgnr",
+        fødselsnummer = "fnr",
+        aktørId = "aktørId",
+        mottattDato = LocalDateTime.now(),
+        førsteFraværsdag = LocalDate.now(),
+        beregnetInntekt = 0.0,
+        originalJson = Inntektsmelding(
             inntektsmeldingId = "",
             arbeidstakerFnr = "fnr",
             arbeidstakerAktorId = "aktørId",
@@ -114,8 +113,9 @@ internal class SykdomstidslinjeHendelseTest {
             foersteFravaersdag = LocalDate.now(),
             mottattDato = LocalDateTime.now()
         ).toJson(),
-        listOf(1.januar..2.januar),
-        ferieperioder = emptyList()
+        arbeidsgiverperioder = listOf(1.januar..2.januar),
+        ferieperioder = emptyList(),
+        aktivitetslogger = Aktivitetslogger()
     ).toJson()
 
     @Test

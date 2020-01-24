@@ -1,5 +1,7 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.IAktivitetslogger
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -8,9 +10,10 @@ import java.util.UUID
 
 internal class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
-    private val hendelsetype: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad
+    private val hendelsetype: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad,
+    aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
 ) :
-    SykdomstidslinjeHendelse(UUID.randomUUID(), Hendelsestype.SendtSøknad) {
+    SykdomstidslinjeHendelse(UUID.randomUUID(), Hendelsestype.SendtSøknad, aktivitetslogger) {
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType = hendelsetype
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {

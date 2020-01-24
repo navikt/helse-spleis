@@ -12,13 +12,15 @@ class ModelSykepengehistorikk(
 
     private val sisteFraværsdag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
 
-    internal fun utbetalingslinjer(): List<Utbetalingslinje> = utbetalinger.map { it.utbetalingslinjer(aktivitetslogger) }
+    internal fun utbetalingslinjer(): List<Utbetalingslinje> =
+        utbetalinger.map { it.utbetalingslinjer(aktivitetslogger) }
+
     internal fun sisteFraværsdag() = sisteFraværsdag
     internal fun inntektsopplysninger() = inntektshistorikk
 
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
-        inntektshistorikk.forEach {it.valider(this, aktivitetslogger) }
+        inntektshistorikk.forEach { it.valider(this, aktivitetslogger) }
         return aktivitetslogger
     }
 
@@ -28,7 +30,9 @@ class ModelSykepengehistorikk(
         val orgnummer: String
     ) {
         fun valider(modelSykepengehistorikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
-            if (orgnummer.isBlank()) { aktivitetslogger.error("Orgnummer må være satt: $orgnummer")}
+            if (orgnummer.isBlank()) {
+                aktivitetslogger.error("Orgnummer må være satt: $orgnummer")
+            }
         }
     }
 
@@ -36,6 +40,7 @@ class ModelSykepengehistorikk(
         open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
             aktivitetslogger.severe("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
         }
+
         open fun valider(historikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
             aktivitetslogger.error("Perioden er ikke støttet")
         }

@@ -22,6 +22,7 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -377,7 +378,8 @@ internal class EndToEndTest {
             tilstand = TilstandType.START,
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
-            nestePåminnelsestidspunkt = LocalDateTime.now()
+            nestePåminnelsestidspunkt = LocalDateTime.now(),
+            aktivitetslogger = Aktivitetslogger()
         )
     }
 

@@ -171,7 +171,10 @@ internal class SykdomstidslinjeJsonTest {
     }
 
     private fun assertJsonDagType(expectedType: JsonDagType, dag: Dag) {
-        assertTrue(dag.toJson().contains("\"${expectedType.name}\""), "Tidslinje inneholder ikke dag-type ${expectedType.name}")
+        assertTrue(
+            dag.toJson().contains("\"${expectedType.name}\""),
+            "Tidslinje inneholder ikke dag-type ${expectedType.name}"
+        )
     }
 
     private fun assertSykdomstidslinjerEquals(expected: ConcreteSykdomstidslinje, actual: ConcreteSykdomstidslinje) {
@@ -197,72 +200,69 @@ internal class SykdomstidslinjeJsonTest {
         }
     }
 
-    private fun inntektsmelding(): ModelInntektsmelding {
-        return ModelInntektsmelding(
-            UUID.randomUUID(),
-            ModelInntektsmelding.Refusjon(null, 1.0, null),
-            "orgnummer",
-            "fnr",
-            "aktør",
-            LocalDateTime.now(),
-            LocalDate.now(),
-            1.0,
-            Aktivitetslogger(),
-            Inntektsmelding(
-                inntektsmeldingId = "",
-                arbeidstakerFnr = "fødselsnummer",
-                arbeidstakerAktorId = "aktørId",
-                virksomhetsnummer = "virksomhetsnummer",
-                arbeidsgiverFnr = null,
-                arbeidsgiverAktorId = null,
-                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-                arbeidsforholdId = null,
-                beregnetInntekt = BigDecimal.ONE,
-                refusjon = Refusjon(beloepPrMnd = BigDecimal.ONE, opphoersdato = LocalDate.now()),
-                endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
-                opphoerAvNaturalytelser = emptyList(),
-                gjenopptakelseNaturalytelser = emptyList(),
-                arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
-                status = Status.GYLDIG,
-                arkivreferanse = "",
-                ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
-                foersteFravaersdag = LocalDate.now(),
-                mottattDato = LocalDateTime.now()
-            ).toJson(),
-            listOf(1.januar..2.januar),
-            emptyList()
-        )
-    }
+    private fun inntektsmelding() = ModelInntektsmelding(
+        hendelseId = UUID.randomUUID(),
+        refusjon = ModelInntektsmelding.Refusjon(null, 1.0, null),
+        orgnummer = "orgnummer",
+        fødselsnummer = "fnr",
+        aktørId = "aktør",
+        mottattDato = LocalDateTime.now(),
+        førsteFraværsdag = LocalDate.now(),
+        beregnetInntekt = 1.0,
+        originalJson = Inntektsmelding(
+            inntektsmeldingId = "",
+            arbeidstakerFnr = "fødselsnummer",
+            arbeidstakerAktorId = "aktørId",
+            virksomhetsnummer = "virksomhetsnummer",
+            arbeidsgiverFnr = null,
+            arbeidsgiverAktorId = null,
+            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+            arbeidsforholdId = null,
+            beregnetInntekt = BigDecimal.ONE,
+            refusjon = Refusjon(beloepPrMnd = BigDecimal.ONE, opphoersdato = LocalDate.now()),
+            endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+            opphoerAvNaturalytelser = emptyList(),
+            gjenopptakelseNaturalytelser = emptyList(),
+            arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+            status = Status.GYLDIG,
+            arkivreferanse = "",
+            ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+            foersteFravaersdag = LocalDate.now(),
+            mottattDato = LocalDateTime.now()
+        ).toJson(),
+        arbeidsgiverperioder = listOf(1.januar..2.januar),
+        ferieperioder = emptyList(),
+        aktivitetslogger = Aktivitetslogger()
+    )
 
-    private fun sendtSøknad() =
-        ModelSendtSøknad(
-            UUID.randomUUID(),
-            "fnr",
-            "aktørId",
-            "123456789",
-            LocalDateTime.now(),
-            listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
-            Aktivitetslogger(),
-            SykepengesoknadDTO(
-                id = "123",
-                type = SoknadstypeDTO.ARBEIDSTAKERE,
-                status = SoknadsstatusDTO.SENDT,
-                aktorId = "aktørId",
-                fnr = "fnr",
-                sykmeldingId = UUID.randomUUID().toString(),
-                arbeidsgiver = ArbeidsgiverDTO(
-                    "Hello world",
-                    "123456789"
-                ),
-                fom = 16.september,
-                tom = 5.oktober,
-                opprettet = LocalDateTime.now(),
-                sendtNav = LocalDateTime.now(),
-                egenmeldinger = emptyList(),
-                soknadsperioder = listOf(
-                    SoknadsperiodeDTO(16.september, 5.oktober,100)
-                ),
-                fravar = emptyList()
-            ).toJsonNode().toString()
-        )
+    private fun sendtSøknad() = ModelSendtSøknad(
+        hendelseId = UUID.randomUUID(),
+        fnr = "fnr",
+        aktørId = "aktørId",
+        orgnummer = "123456789",
+        rapportertdato = LocalDateTime.now(),
+        perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)),
+        originalJson = SykepengesoknadDTO(
+            id = "123",
+            type = SoknadstypeDTO.ARBEIDSTAKERE,
+            status = SoknadsstatusDTO.SENDT,
+            aktorId = "aktørId",
+            fnr = "fnr",
+            sykmeldingId = UUID.randomUUID().toString(),
+            arbeidsgiver = ArbeidsgiverDTO(
+                "Hello world",
+                "123456789"
+            ),
+            fom = 16.september,
+            tom = 5.oktober,
+            opprettet = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
+            egenmeldinger = emptyList(),
+            soknadsperioder = listOf(
+                SoknadsperiodeDTO(16.september, 5.oktober, 100)
+            ),
+            fravar = emptyList()
+        ).toJsonNode().toString(),
+        aktivitetslogger = Aktivitetslogger()
+    )
 }

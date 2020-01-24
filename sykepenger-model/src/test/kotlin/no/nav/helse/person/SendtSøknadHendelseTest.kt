@@ -116,26 +116,26 @@ internal class SendtSøknadHendelseTest {
 
     private fun sendtSøknad(vararg perioder: Periode, orgnummer: String = "987654321") =
         ModelSendtSøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            "12345",
-            orgnummer,
-            LocalDateTime.now(),
-            listOf(*perioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = orgnummer,
+            rapportertdato = LocalDateTime.now(),
+            perioder = listOf(*perioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         ModelNySøknad(
-            UUID.randomUUID(),
-            UNG_PERSON_FNR_2018,
-            "12345",
-            orgnummer,
-            LocalDateTime.now(),
-            listOf(*sykeperioder),
-            aktivitetslogger,
-            "{}"
+            hendelseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = "12345",
+            orgnummer = orgnummer,
+            rapportertdato = LocalDateTime.now(),
+            sykeperioder = listOf(*sykeperioder),
+            originalJson = "{}",
+            aktivitetslogger = aktivitetslogger
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

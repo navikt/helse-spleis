@@ -120,25 +120,25 @@ internal class SykdomshistorikkTest {
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
-        UUID.randomUUID(),
-        UNG_PERSON_FNR_2018,
-        "12345",
-        "987654321",
-        LocalDateTime.now(),
-        listOf(*sykeperioder),
-        Aktivitetslogger(),
-        "{}"
+        hendelseId = UUID.randomUUID(),
+        fnr = UNG_PERSON_FNR_2018,
+        aktørId = "12345",
+        orgnummer = "987654321",
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(*sykeperioder),
+        originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode) = ModelSendtSøknad(
-        UUID.randomUUID(),
-        UNG_PERSON_FNR_2018,
-        "12345",
-        "987654321",
-        LocalDateTime.now(),
-        listOf(*perioder),
-        Aktivitetslogger(),
-        "{}"
+        hendelseId = UUID.randomUUID(),
+        fnr = UNG_PERSON_FNR_2018,
+        aktørId = "12345",
+        orgnummer = "987654321",
+        rapportertdato = LocalDateTime.now(),
+        perioder = listOf(*perioder),
+        originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun inntektsmelding(
@@ -150,18 +150,18 @@ internal class SykdomshistorikkTest {
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) = ModelInntektsmelding(
-        UUID.randomUUID(),
-        ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-        "88888888",
-        "12020052345",
-        "100010101010",
-        1.februar.atStartOfDay(),
-        førsteFraværsdag,
-        beregnetInntekt,
-        Aktivitetslogger(),
-        "{}",
-        arbeidsgiverperioder,
-        ferieperioder
+        hendelseId = UUID.randomUUID(),
+        refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+        orgnummer = "88888888",
+        fødselsnummer = "12020052345",
+        aktørId = "100010101010",
+        mottattDato = 1.februar.atStartOfDay(),
+        førsteFraværsdag = førsteFraværsdag,
+        beregnetInntekt = beregnetInntekt,
+        originalJson = "{}",
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        ferieperioder = ferieperioder,
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private class HistorikkInspektør(sykdomshistorikk: Sykdomshistorikk) : SykdomshistorikkVisitor {
