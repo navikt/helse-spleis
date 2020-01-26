@@ -1,6 +1,9 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.Behovstype.*
+import no.nav.helse.fixtures.desember
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.*
@@ -24,6 +27,7 @@ internal class EnSykdomVedtakperiodeTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 1000.00
+        private val rapportertdato = 1.februar.atStartOfDay()
     }
 
     private lateinit var aktivitetslogger: Aktivitetslogger
@@ -38,14 +42,28 @@ internal class EnSykdomVedtakperiodeTest {
         observatør = TestObservatør().also {person.addObserver(it)}
     }
 
-    @Test internal fun `ingen historie`() {
-        håndterNySøknad(Triple(1.januar, 26.januar, 100))
-        håndterSendtSøknad(Sykdom(1.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(1.januar..26.januar))
-        håndterVilkårsgrunnlag()
-        håndterYtelser()
+    @Test internal fun `ingen historie med SendtSøknad først`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(listOf(3.januar..26.januar))
+        håndterVilkårsgrunnlag(INNTEKT)
+        håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling()
-        println(aktivitetslogger)
+        assertFalse(aktivitetslogger.hasErrors())
+        assertFalse(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasMessages())
+    }
+
+    @Test internal fun `ingen historie med Inntektsmelding først`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmelding(listOf(3.januar..26.januar))
+        håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(INNTEKT)
+        håndterYtelser(emptyList())   // No history
+        håndterManuelSaksbehandling()
+        assertFalse(aktivitetslogger.hasErrors())
+        assertFalse(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasMessages())
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -54,24 +72,38 @@ internal class EnSykdomVedtakperiodeTest {
     }
 
     private fun håndterSendtSøknad(vararg perioder: Periode) {
+        assertFalse(observatør.ettersburteBehov(Inntektsberegning))
+        assertFalse(observatør.ettersburteBehov(EgenAnsatt))
         person.håndter(sendtSøknad(*perioder))
         assertEndringTeller()
     }
 
     private fun håndterInntektsmelding(arbeidsgiverperioder: List<ClosedRange<LocalDate>>) {
+        assertFalse(observatør.ettersburteBehov(Inntektsberegning))
+        assertFalse(observatør.ettersburteBehov(EgenAnsatt))
         person.håndter(inntektsmelding(arbeidsgiverperioder))
         assertEndringTeller()
     }
 
-    private fun håndterVilkårsgrunnlag() {
+    private fun håndterVilkårsgrunnlag(inntekt: Double) {
+        assertTrue(observatør.ettersburteBehov(Inntektsberegning))
+        assertTrue(observatør.ettersburteBehov(EgenAnsatt))
+        assertFalse(observatør.ettersburteBehov(Sykepengehistorikk))
+        assertFalse(observatør.ettersburteBehov(Foreldrepenger))
         person.håndter(vilkårsgrunnlag(INNTEKT))
         assertEndringTeller()
     }
 
-    private fun håndterYtelser() {
+    private fun håndterYtelser(utbetalinger: List<Triple<LocalDate, LocalDate, Int>>) {
+        assertTrue(observatør.ettersburteBehov(Sykepengehistorikk))
+        assertTrue(observatør.ettersburteBehov(Foreldrepenger))
+        assertFalse(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
+        person.håndter(ytelser(utbetalinger))
+        assertEndringTeller()
     }
 
     private fun håndterManuelSaksbehandling() {
+        assertTrue(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
     }
 
     private fun assertEndringTeller() {
@@ -84,7 +116,7 @@ internal class EnSykdomVedtakperiodeTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            rapportertdato = LocalDateTime.now(),
+            rapportertdato = rapportertdato,
             sykeperioder = listOf(*sykeperioder),
             originalJson = "{}",
             aktivitetslogger = aktivitetslogger
@@ -95,7 +127,7 @@ internal class EnSykdomVedtakperiodeTest {
             fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            rapportertdato = 31.januar.atStartOfDay(),
+            rapportertdato = rapportertdato,
             perioder = listOf(*perioder),
             originalJson = "{}",
             aktivitetslogger = aktivitetslogger
@@ -107,7 +139,7 @@ internal class EnSykdomVedtakperiodeTest {
         refusjonBeløp: Double = INNTEKT,
         beregnetInntekt: Double = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjonOpphørsdato: LocalDate = 1.januar,
+        refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) = ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
@@ -115,7 +147,7 @@ internal class EnSykdomVedtakperiodeTest {
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
-            mottattDato = 1.februar.atStartOfDay(),
+            mottattDato = rapportertdato,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             originalJson = "{}",
@@ -130,7 +162,7 @@ internal class EnSykdomVedtakperiodeTest {
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = ORGNUMMER,
-        rapportertDato = LocalDateTime.now(),
+        rapportertDato = rapportertdato,
         inntektsmåneder = (1..12).map { ModelVilkårsgrunnlag.Måned(
             YearMonth.of(2017, it),
             listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))) },
@@ -139,14 +171,45 @@ internal class EnSykdomVedtakperiodeTest {
         originalJson = "{}"
     )
 
+    private fun ytelser(
+        utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
+        foreldrepenger: Pair<LocalDate, LocalDate>? = null,
+        svangerskapspenger: Pair<LocalDate, LocalDate>? = null
+    ) = ModelYtelser(
+        hendelseId = UUID.randomUUID(),
+        aktørId = AKTØRID,
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = vedtaksperiodeId,
+        sykepengehistorikk = ModelSykepengehistorikk(
+            utbetalinger = utbetalinger.map {
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    it.first,
+                    it.second,
+                    it.third
+                )
+            },
+            inntektshistorikk = emptyList(),
+            aktivitetslogger = aktivitetslogger
+        ),
+        foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, aktivitetslogger),
+        rapportertdato = rapportertdato,
+        originalJson = "{}",
+        aktivitetslogger = aktivitetslogger
+    )
+
     private inner class TestObservatør: PersonObserver {
         internal var endreTeller = 0
+        private val etterspurteBehov = mutableMapOf<String, Boolean>()
+
+        internal fun ettersburteBehov(key: Behovstype) = etterspurteBehov.getOrDefault(key.name, false)
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
             endreTeller += 1
         }
 
         override fun vedtaksperiodeTrengerLøsning(event: Behov) {
+            event.behovType().forEach { etterspurteBehov[it] = true }
             vedtaksperiodeId = event.vedtaksperiodeId()
         }
 
