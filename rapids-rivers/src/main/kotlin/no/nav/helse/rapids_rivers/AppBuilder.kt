@@ -11,6 +11,11 @@ import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
 class AppBuilder(private val env: Map<String, String>) {
+    init {
+        Thread.currentThread().setUncaughtExceptionHandler(::uncaughtExceptionHandler)
+        Runtime.getRuntime().addShutdownHook(Thread(::stop))
+    }
+
     private val log = LoggerFactory.getLogger(AppBuilder::class.java)
 
     private val kafkaConfig = KafkaConfigBuilder(
@@ -29,11 +34,6 @@ class AppBuilder(private val env: Map<String, String>) {
     )
 
     private val app = createKtorApp(rapid::isRunning, rapid::isRunning)
-
-    init {
-        Thread.currentThread().setUncaughtExceptionHandler(::uncaughtExceptionHandler)
-        Runtime.getRuntime().addShutdownHook(Thread(::stop))
-    }
 
     fun register(river: River) {
         rapid.register(river)
