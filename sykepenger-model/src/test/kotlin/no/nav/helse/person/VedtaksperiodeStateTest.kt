@@ -54,7 +54,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         sendtSøknad().also {
             vedtaksperiode.håndter(it)
             assertTrue(it.hasErrors())
-            println(aktivitetslogger.toString())
         }
         assertTilstandsendring(TIL_INFOTRYGD, ModelSendtSøknad::class)
     }
