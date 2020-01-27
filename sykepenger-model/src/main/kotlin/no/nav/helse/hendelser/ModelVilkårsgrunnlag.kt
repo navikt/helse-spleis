@@ -46,7 +46,9 @@ class ModelVilkårsgrunnlag(
             avviksprosentInntekt(månedsinntektFraInntektsmelding)
         )
 
-        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding), grunnlag)
+        val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
+        aktivitetslogger.info("Er egen ansatt: $erEgenAnsatt, har avvik i oppgitt inntekt: $harAvvikIOppgittInntekt")
+        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt, grunnlag)
     }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {

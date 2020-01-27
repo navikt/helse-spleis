@@ -345,16 +345,16 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-            val inntektFraInntektsmelding = requireNotNull(vedtaksperiode.inntektFraInntektsmelding()) {
-                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
-            }
+            val inntektFraInntektsmelding = if (vedtaksperiode.inntektFraInntektsmelding() == null) {
+                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+            } else vedtaksperiode.inntektFraInntektsmelding()!!
 
             val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
             vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
 
-            if (behandlesManuelt)
-                return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
+            if (behandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
 
+            vedtaksperiode.aktivitetslogger.info("Vilkårsgrunnlag verifisert")
             vedtaksperiode.tilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
@@ -467,8 +467,10 @@ internal class Vedtaksperiode internal constructor(
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
                     vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler()
+                    vedtaksperiode.aktivitetslogger.info("Utbetaling markert som godkjent av saksbehandler")
                 }
             } else {
+                vedtaksperiode.aktivitetslogger.warn("Utbetaling markert som ikke godkjent av saksbehandler")
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
@@ -510,6 +512,9 @@ internal class Vedtaksperiode internal constructor(
                 utbetalingslinjer = vedtaksperiode.utbetalingslinjer ?: emptyList(),
                 opprettet = LocalDate.now()
             )
+
+            vedtaksperiode.aktivitetslogger.info("Satt til utbetaling")
+
             vedtaksperiode.observers.forEach {
                 it.vedtaksperiodeTilUtbetaling(event)
             }
