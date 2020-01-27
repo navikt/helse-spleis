@@ -8,8 +8,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Arbeidsgiverperiode
-import no.nav.helse.hendelser.ModelInntektsmelding.Periode.Ferieperiode
+import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
+import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -30,8 +30,8 @@ class ModelInntektsmelding(
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
     private val originalJson: String,
-    arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-    ferieperioder: List<ClosedRange<LocalDate>>,
+    arbeidsgiverperioder: List<Periode>,
+    ferieperioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger) {
     companion object {
@@ -56,8 +56,8 @@ class ModelInntektsmelding(
                     beregnetInntekt = it["inntektsmelding"]["beregnetInntekt"].asDouble(),
                     aktivitetslogger = Aktivitetslogger(),
                     originalJson = objectMapper.writeValueAsString(it["inntektsmelding"]),
-                    arbeidsgiverperioder = it["inntektsmelding"]["arbeidsgiverperioder"].map(::asPeriode).map { (fom, tom) -> fom..tom },
-                    ferieperioder = it["inntektsmelding"]["ferieperioder"].map(::asPeriode).map { (fom, tom) -> fom..tom }
+                    arbeidsgiverperioder = it["inntektsmelding"]["arbeidsgiverperioder"].map(::asPeriode),
+                    ferieperioder = it["inntektsmelding"]["ferieperioder"].map(::asPeriode)
                 )
             }
         }
@@ -69,7 +69,7 @@ class ModelInntektsmelding(
             asText().let { LocalDateTime.parse(it) }
 
         private fun asPeriode(jsonNode: JsonNode) =
-            jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
+            Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate())
 
     }
 
@@ -86,21 +86,21 @@ class ModelInntektsmelding(
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
     }
 
-    sealed class Periode(
+    sealed class InntektsmeldingPeriode(
         internal val fom: LocalDate,
         internal val tom: LocalDate
     ) {
         internal abstract fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding): ConcreteSykdomstidslinje
 
-        internal fun ingenOverlappende(other: Periode) =
+        internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
 
-        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, inntektsmelding)
         }
 
-        class Ferieperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
                 ConcreteSykdomstidslinje.ferie(fom, tom, inntektsmelding)
         }
@@ -117,7 +117,7 @@ class ModelInntektsmelding(
 
     private fun ingenOverlappende() = if (arbeidsgiverperioder.isEmpty()) true else arbeidsgiverperioder
         .sortedBy { it.fom }
-        .zipWithNext(Periode::ingenOverlappende)
+        .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
         .all { it }
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {

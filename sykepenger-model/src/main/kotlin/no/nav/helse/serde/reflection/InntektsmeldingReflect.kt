@@ -15,9 +15,9 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val førsteFraværsdag: LocalDate = inntektsmelding.getProp("førsteFraværsdag")
     private val beregnetInntekt: Double = inntektsmelding.getProp("beregnetInntekt")
     private val originalJson: String = inntektsmelding.getProp("originalJson")
-    private val arbeidsgiverperioder: List<ModelInntektsmelding.Periode.Arbeidsgiverperiode> =
+    private val arbeidsgiverperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode> =
         inntektsmelding.getProp("arbeidsgiverperioder")
-    private val ferieperioder: List<ModelInntektsmelding.Periode.Ferieperiode> =
+    private val ferieperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode> =
         inntektsmelding.getProp("ferieperioder")
 
     fun toMap() = mutableMapOf<String, Any?>(
@@ -34,8 +34,8 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
         "ferieperioder" to ferieperioder.map(::periodeToMap)
     )
 
-    private fun periodeToMap(it: ModelInntektsmelding.Periode) = mapOf(
-        "fom" to it.fom,
-        "tom" to it.tom
+    private fun periodeToMap(periode: ModelInntektsmelding.InntektsmeldingPeriode) = mapOf(
+        "fom" to periode.fom,
+        "tom" to periode.tom
     )
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
@@ -29,6 +30,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class SykdomstidslinjeJsonTest {
     private companion object {
@@ -223,14 +225,14 @@ internal class SykdomstidslinjeJsonTest {
             endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
             opphoerAvNaturalytelser = emptyList(),
             gjenopptakelseNaturalytelser = emptyList(),
-            arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+            arbeidsgiverperioder = listOf(InntektsmeldingPeriode(fom = LocalDate.now(), tom = LocalDate.now())),
             status = Status.GYLDIG,
             arkivreferanse = "",
-            ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+            ferieperioder = listOf(InntektsmeldingPeriode(fom = LocalDate.now(), tom = LocalDate.now())),
             foersteFravaersdag = LocalDate.now(),
             mottattDato = LocalDateTime.now()
         ).toJson(),
-        arbeidsgiverperioder = listOf(1.januar..2.januar),
+        arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
         ferieperioder = emptyList(),
         aktivitetslogger = Aktivitetslogger()
     )

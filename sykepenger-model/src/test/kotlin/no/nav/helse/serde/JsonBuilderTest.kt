@@ -2,9 +2,7 @@ package no.nav.helse.serde
 
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import org.junit.jupiter.api.Test
@@ -17,7 +15,7 @@ private const val orgnummer = "987654321"
 
 internal class JsonBuilderTest {
     @Test
-    internal fun `maybe what?`(){
+    internal fun `maybe what?`() {
         val person = Person(aktørId, fnr).apply {
             håndter(nySøknad)
             håndter(sendtSøknad)
@@ -62,7 +60,7 @@ private val inntektsmelding = ModelInntektsmelding(
     førsteFraværsdag = 1.januar,
     beregnetInntekt = 1000.00,
     originalJson = "{}",
-    arbeidsgiverperioder = listOf(1.januar..16.januar),
+    arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
     ferieperioder = emptyList(),
     aktivitetslogger = Aktivitetslogger()
 )

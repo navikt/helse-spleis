@@ -5,6 +5,7 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,8 +82,8 @@ internal class SykdomshistorikkTest {
         )
         historikk.håndter(
             inntektsmelding(
-                listOf(1.januar..3.januar, 9.januar..12.januar),
-                listOf(4.januar..8.januar)
+                listOf(Periode(1.januar, 3.januar), Periode(9.januar, 12.januar)),
+                listOf(Periode(4.januar, 8.januar))
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -142,8 +143,8 @@ internal class SykdomshistorikkTest {
     )
 
     private fun inntektsmelding(
-        arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-        ferieperioder: List<ClosedRange<LocalDate>>,
+        arbeidsgiverperioder: List<Periode>,
+        ferieperioder: List<Periode>,
         refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,

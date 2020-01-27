@@ -3,16 +3,13 @@ package no.nav.helse.person
 import no.nav.helse.Uke
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -123,7 +120,7 @@ internal class PersonTest {
             it.håndter(
                 sendtSøknad(
                     perioder = listOf(
-                        Periode.Sykdom(
+                        ModelSendtSøknad.Periode.Sykdom(
                             fom = 1.juli,
                             tom = 20.juli,
                             grad = 100
@@ -134,7 +131,7 @@ internal class PersonTest {
         }
         sendtSøknad(
             perioder = listOf(
-                Periode.Sykdom(
+                ModelSendtSøknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -158,7 +155,7 @@ internal class PersonTest {
         assertFalse(inspektør.personLogger.hasErrors())
         sendtSøknad(
             perioder = listOf(
-                Periode.Sykdom(
+                ModelSendtSøknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -184,13 +181,13 @@ internal class PersonTest {
                 inntektsmelding(
                     virksomhetsnummer = "12",
                     førsteFraværsdag = 1.juli,
-                    arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
                 )
             )
         inntektsmelding(
             virksomhetsnummer = "12",
             førsteFraværsdag = 1.juli,
-            arbeidsgiverperioder = listOf(1.juli..1.juli.plusDays(16))
+            arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
         ).also {
             testPerson.håndter(it)
             assertTrue(it.hasErrors())
@@ -218,7 +215,7 @@ internal class PersonTest {
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         sendtSøknad(
             perioder = listOf(
-                Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
+                ModelSendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
             ),
             rapportertDato = Uke(1).mandag.plusMonths(4).atStartOfDay()
         ).also {
@@ -231,8 +228,8 @@ internal class PersonTest {
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
         sendtSøknad(
             perioder = listOf(
-                Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
-                Periode.Sykdom(
+                ModelSendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
+                ModelSendtSøknad.Periode.Sykdom(
                     fom = Uke(1).fredag,
                     tom = Uke(1).fredag,
                     grad = 100,
@@ -322,7 +319,7 @@ internal class PersonTest {
 
     private fun inntektsmelding(
         virksomhetsnummer: String = organisasjonsnummer,
-        arbeidsgiverperioder: List<ClosedRange<LocalDate>> = listOf(10.september..10.september.plusDays(16)),
+        arbeidsgiverperioder: List<Periode> = listOf(Periode(10.september, 10.september.plusDays(16))),
         førsteFraværsdag: LocalDate = LocalDate.now()
     ) =
         ModelInntektsmelding(
@@ -358,7 +355,7 @@ internal class PersonTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,

@@ -72,7 +72,8 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
     internal fun dataForVilkårsvurdering() = dataForVilkårsvurdering
-    internal fun inntektFraInntektsmelding() = inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
+    internal fun inntektFraInntektsmelding() =
+        inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
 
     private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
 
@@ -403,8 +404,7 @@ internal class Vedtaksperiode internal constructor(
             ytelser: ModelYtelser
         ) {
             if (ytelser.foreldrepenger().overlapperMedSyketilfelle(
-                    vedtaksperiode.sykdomstidslinje.førsteDag(),
-                    vedtaksperiode.sykdomstidslinje.sisteDag()
+                    Periode(vedtaksperiode.sykdomstidslinje.førsteDag(), vedtaksperiode.sykdomstidslinje.sisteDag())
                 )
             ) {
                 ytelser.error("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")

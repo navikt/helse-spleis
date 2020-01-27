@@ -5,11 +5,11 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -104,7 +104,7 @@ internal class InntektsmeldingHendelseTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             originalJson = "{}",
-            arbeidsgiverperioder = listOf(1.januar..16.januar),
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
             aktivitetslogger = aktivitetslogger
         )

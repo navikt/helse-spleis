@@ -1,13 +1,11 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.annotation.JsonTypeId
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -84,10 +82,10 @@ class JsonNodeModelBuilder(json: String) {
                     originalJson = "{}",
                     arbeidsgiverperioder = jsonNode["arbeidsgiverperioder"]
                         .asOptional()
-                        ?.map { it["fom"].asDate().rangeTo(it["tom"].asDate()) } ?: listOf(),
+                        ?.map { Periode(it["fom"].asDate(), it["tom"].asDate()) } ?: listOf(),
                     ferieperioder = jsonNode["ferieperioder"]
                         .asOptional()
-                        ?.map { it["fom"].asDate().rangeTo(it["tom"].asDate()) } ?: listOf()
+                        ?.map { Periode(it["fom"].asDate(), it["tom"].asDate()) } ?: listOf()
                 )
 
                 private class RefusjonParser : Parser<ModelInntektsmelding.Refusjon> {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
@@ -17,6 +18,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class ArbeidsgiverTest {
     private val uuid = UUID.randomUUID()
@@ -74,7 +76,7 @@ internal class ArbeidsgiverTest {
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),
             originalJson = "{}",
-            arbeidsgiverperioder = listOf(10.september..10.september.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
 
@@ -82,7 +84,10 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.håndter(inntektsmelding)
         assertTrue(inntektsmelding.hasErrors())
         assertEquals(1, arbeidsgiver.memento().inntekthistorikk.inntekter.size)
-        assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntekthistorikk.inntekter.first().beløp.setScale(2))
+        assertEquals(
+            120.00.toBigDecimal().setScale(2),
+            arbeidsgiver.memento().inntekthistorikk.inntekter.first().beløp.setScale(2)
+        )
         assertEquals(1.januar, arbeidsgiver.memento().inntekthistorikk.inntekter.first().fom)
     }
 
@@ -136,14 +141,14 @@ internal class ArbeidsgiverTest {
                 endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
                 opphoerAvNaturalytelser = emptyList(),
                 gjenopptakelseNaturalytelser = emptyList(),
-                arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                arbeidsgiverperioder = listOf(InntektsmeldingPeriode(fom = LocalDate.now(), tom = LocalDate.now())),
                 status = Status.GYLDIG,
                 arkivreferanse = "",
-                ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+                ferieperioder = listOf(InntektsmeldingPeriode(fom = LocalDate.now(), tom = LocalDate.now())),
                 foersteFravaersdag = LocalDate.now(),
                 mottattDato = LocalDateTime.now()
             ).toJson(),
-            arbeidsgiverperioder = listOf(1.januar..2.januar),
+            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()
         )

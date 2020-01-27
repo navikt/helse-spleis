@@ -39,8 +39,8 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
         beregnetInntekt = this["beregnetInntekt"].asDouble(),
         aktivitetslogger = aktivitetslogger,
         originalJson = this.toJson(),
-        arbeidsgiverperioder = this["arbeidsgiverperioder"].map(::asPeriode).map { (fom, tom) -> fom..tom },
-        ferieperioder = this["ferieperioder"].map(::asPeriode).map { (fom, tom) -> fom..tom }
+        arbeidsgiverperioder = this["arbeidsgiverperioder"].map(::asPeriode),
+        ferieperioder = this["ferieperioder"].map(::asPeriode)
     )
 
     object Factory : MessageFactory {

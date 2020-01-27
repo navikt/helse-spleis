@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -114,4 +115,4 @@ internal fun JsonNode.asLocalDateTime() =
     asText().let { LocalDateTime.parse(it) }
 
 internal fun asPeriode(jsonNode: JsonNode) =
-    jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
+    Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate())

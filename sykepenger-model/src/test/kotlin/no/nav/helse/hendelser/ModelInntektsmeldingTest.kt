@@ -25,7 +25,7 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `sykdom med en antatt arbeidsdag`() {
-        inntektsmelding(listOf(1.januar..2.januar, 4.januar..5.januar), emptyList())
+        inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsdag::class, tidslinje.dag(3.januar)!!::class)
         assertEquals(Egenmeldingsdag::class, tidslinje.dag(1.januar)!!::class)
@@ -37,7 +37,7 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
-        inntektsmelding(emptyList(), listOf(1.januar..2.januar, 4.januar..5.januar))
+        inntektsmelding(emptyList(), listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
         val sykdomstidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, sykdomstidslinje.førsteDag())
         assertThrows<IllegalStateException> {
@@ -50,7 +50,11 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `arbeidgiverperioden kan ikke ha overlappende perioder`() {
-        inntektsmelding(listOf(1.januar..2.januar, 4.januar..5.januar, 3.januar..4.januar), emptyList())
+        inntektsmelding(
+            listOf(
+                Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
+            ), emptyList()
+        )
         inntektsmelding.valider()
         assertTrue(aktivitetslogger.hasErrors())
     }
@@ -65,7 +69,7 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `ferieperiode og arbeidsgiverperiode blir slått sammen`() {
-        inntektsmelding(listOf(1.januar..16.januar), listOf(17.januar..18.januar))
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), listOf(Periode(17.januar, 18.januar)))
 
         assertEquals(1.januar, inntektsmelding.sykdomstidslinje().førsteDag())
         assertEquals(1.januar, inntektsmelding.sykdomstidslinje().utgangspunktForBeregningAvYtelse())
@@ -87,21 +91,31 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `når refusjonsopphørsdato er før siste utbetalingsdag, gir det endring i refusjon`() {
-        inntektsmelding(listOf(1.januar .. 3.januar), emptyList(), refusjonOpphørsdato = 2.januar, endringerIRefusjon = listOf(2.januar))
+        inntektsmelding(
+            listOf(Periode(1.januar, 3.januar)),
+            emptyList(),
+            refusjonOpphørsdato = 2.januar,
+            endringerIRefusjon = listOf(2.januar)
+        )
         val sisteUtbetalingsdag = 3.januar
         assertTrue(inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag))
     }
 
     @Test
     internal fun `når refusjonsopphørsdato er etter siste utbetalingsdag, gir det ikke endring i refusjon`() {
-        inntektsmelding(listOf(1.januar .. 3.januar), emptyList(), refusjonOpphørsdato = 4.januar, endringerIRefusjon = listOf(4.januar))
+        inntektsmelding(
+            listOf(Periode(1.januar, 3.januar)),
+            emptyList(),
+            refusjonOpphørsdato = 4.januar,
+            endringerIRefusjon = listOf(4.januar)
+        )
         val sisteUtbetalingsdag = 3.januar
         assertFalse(inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag))
     }
 
     private fun inntektsmelding(
-        arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-        ferieperioder: List<ClosedRange<LocalDate>>,
+        arbeidsgiverperioder: List<Periode>,
+        ferieperioder: List<Periode>,
         refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,

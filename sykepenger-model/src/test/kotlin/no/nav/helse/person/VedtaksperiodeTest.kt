@@ -10,11 +10,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.fixtures.S
 import no.nav.helse.fixtures.april
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
@@ -159,7 +155,7 @@ internal class VedtaksperiodeTest {
             vedtaksperiode.håndter(
                 sendtSøknad(
                     perioder = listOf(
-                        Periode.Sykdom(
+                        ModelSendtSøknad.Periode.Sykdom(
                             fom = 21.juli,
                             tom = 25.juli,
                             grad = 100
@@ -215,7 +211,7 @@ internal class VedtaksperiodeTest {
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
             originalJson = "{}",
-            arbeidsgiverperioder = listOf(10.september..10.september.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
 
@@ -251,7 +247,7 @@ internal class VedtaksperiodeTest {
         ).toJsonNode().toString()
     )
 
-    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,

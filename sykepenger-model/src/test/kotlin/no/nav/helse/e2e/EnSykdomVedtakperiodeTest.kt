@@ -8,8 +8,8 @@ import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelNySøknadTest
-import no.nav.helse.hendelser.ModelSendtSøknad.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -49,7 +49,7 @@ internal class EnSykdomVedtakperiodeTest {
     @Test internal fun `ingen historie med SendtSøknad først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(3.januar..26.januar))
+        håndterInntektsmelding(listOf(Periode(3.januar, 26.januar)))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling(true)
@@ -69,7 +69,7 @@ internal class EnSykdomVedtakperiodeTest {
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(3.januar..26.januar))
+        håndterInntektsmelding(listOf(Periode(3.januar, 26.januar)))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
@@ -118,14 +118,14 @@ internal class EnSykdomVedtakperiodeTest {
         assertEndringTeller()
     }
 
-    private fun håndterSendtSøknad(vararg perioder: Periode) {
+    private fun håndterSendtSøknad(vararg perioder: ModelSendtSøknad.Periode) {
         assertFalse(observatør.ettersburteBehov(Inntektsberegning))
         assertFalse(observatør.ettersburteBehov(EgenAnsatt))
         person.håndter(sendtSøknad(*perioder))
         assertEndringTeller()
     }
 
-    private fun håndterInntektsmelding(arbeidsgiverperioder: List<ClosedRange<LocalDate>>) {
+    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>) {
         assertFalse(observatør.ettersburteBehov(Inntektsberegning))
         assertFalse(observatør.ettersburteBehov(EgenAnsatt))
         person.håndter(inntektsmelding(arbeidsgiverperioder))
@@ -166,7 +166,7 @@ internal class EnSykdomVedtakperiodeTest {
             aktivitetslogger = Aktivitetslogger()
         )
 
-    private fun sendtSøknad(vararg perioder: Periode) = ModelSendtSøknad(
+    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode) = ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
@@ -178,8 +178,8 @@ internal class EnSykdomVedtakperiodeTest {
         )
 
     private fun inntektsmelding(
-        arbeidsgiverperioder: List<ClosedRange<LocalDate>>,
-        ferieperioder: List<ClosedRange<LocalDate>> = emptyList(),
+        arbeidsgiverperioder: List<Periode>,
+        ferieperioder: List<Periode> = emptyList(),
         refusjonBeløp: Double = INNTEKT,
         beregnetInntekt: Double = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
@@ -217,8 +217,8 @@ internal class EnSykdomVedtakperiodeTest {
 
     private fun ytelser(
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
-        foreldrepenger: Pair<LocalDate, LocalDate>? = null,
-        svangerskapspenger: Pair<LocalDate, LocalDate>? = null
+        foreldrepenger: Periode? = null,
+        svangerskapspenger: Periode? = null
     ) = ModelYtelser(
         hendelseId = UUID.randomUUID(),
         aktørId = AKTØRID,

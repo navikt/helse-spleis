@@ -7,7 +7,6 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.fixtures.mai
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
@@ -240,10 +239,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 20.juli
         val sendtSøknadHendelse = sendtSøknad(
-            perioder = listOf(Periode.Sykdom(fom = periodeFom, tom = periodeTom, grad = 100))
+            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(fom = periodeFom, tom = periodeTom, grad = 100))
         )
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16))
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16)))
         )
         val vedtaksperiode = beInMottattInntektsmelding(
             tidslinje = tidslinje(
@@ -527,7 +526,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             Person(aktørId, fødselsnummer),
             Arbeidsgiver(organisasjonsnummer),
             ytelser(
-                fordrepengeYtelse = Pair(foreldrepengerFom, foreldrepengerTom)
+                fordrepengeYtelse = Periode(foreldrepengerFom, foreldrepengerTom)
             )
 
         )
@@ -572,7 +571,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val sisteHistoriskeSykedag = periodeFom.minusMonths(7)
 
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = periodeTom.plusDays(1),
                 beløpPrMåned = 1000.0,
@@ -613,7 +612,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val sisteHistoriskeSykedag = periodeFom.minusMonths(7)
 
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = periodeTom,
                 beløpPrMåned = 1000.0,
@@ -652,7 +651,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeTom = 20.juli
 
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0,
@@ -691,10 +690,10 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         fom: LocalDate,
         tom: LocalDate,
         sendtSøknadTidslinje: ConcreteSykdomstidslinje? = sendtSøknad(
-            perioder = listOf(Periode.Sykdom(fom, tom, 100))
+            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(fom, tom, 100))
         ).sykdomstidslinje(),
         inntektsmeldingTidslinje: ConcreteSykdomstidslinje = inntektsmelding(
-            arbeidsgiverperioder = listOf(fom..fom.plusDays(16))
+            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16)))
         ).sykdomstidslinje()
     ): ConcreteSykdomstidslinje {
         return nySøknad(perioder = listOf(Triple(fom, tom, 100)))
@@ -741,7 +740,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeTom = 19.juli
 
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0,
@@ -780,7 +779,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeTom = 20.juli
 
         val inntektsmeldingHendelse = inntektsmelding(
-            arbeidsgiverperioder = listOf(periodeFom..periodeFom.plusDays(16)),
+            arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0,
@@ -923,8 +922,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     )
 
     private fun sendtSøknad(
-        perioder: List<Periode> = listOf(
-            Periode.Sykdom(
+        perioder: List<ModelSendtSøknad.Periode> = listOf(
+            ModelSendtSøknad.Periode.Sykdom(
                 16.september,
                 5.oktober,
                 100
@@ -943,7 +942,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         )
 
     private fun inntektsmelding(
-        arbeidsgiverperioder: List<ClosedRange<LocalDate>> = listOf(10.september..10.september.plusDays(16)),
+        arbeidsgiverperioder: List<Periode> = listOf(Periode(10.september, 10.september.plusDays(16))),
         refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
             opphørsdato = LocalDate.now(),
             beløpPrMåned = 1000.0,
@@ -995,8 +994,8 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
     private fun ytelser(
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
-        fordrepengeYtelse: Pair<LocalDate, LocalDate>? = null,
-        svangerskapsytelse: Pair<LocalDate, LocalDate>? = null
+        fordrepengeYtelse: Periode? = null,
+        svangerskapsytelse: Periode? = null
     ) = ModelYtelser(
         hendelseId = UUID.randomUUID(),
         aktørId = aktørId,
@@ -1109,7 +1108,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             aktivitetslogger = aktivitetslogger,
             originalJson = "{}",
             arbeidsgiverperioder = listOf(
-                10.september..10.september.plusDays(16)
+                Periode(10.september, 10.september.plusDays(16))
             ),
             ferieperioder = emptyList()
         ),

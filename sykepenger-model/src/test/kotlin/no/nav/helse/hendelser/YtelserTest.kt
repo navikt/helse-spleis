@@ -55,8 +55,8 @@ internal class YtelserTest {
 
     private fun ytelser(
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
-        foreldrepenger: Pair<LocalDate, LocalDate>? = null,
-        svangerskapspenger: Pair<LocalDate, LocalDate>? = null
+        foreldrepenger: Periode? = null,
+        svangerskapspenger: Periode? = null
     ) = ModelYtelser(
         hendelseId = UUID.randomUUID(),
         aktørId = aktørId,

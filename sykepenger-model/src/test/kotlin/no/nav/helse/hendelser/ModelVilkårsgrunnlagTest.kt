@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class ModelVilkårsgrunnlagTest {
     private val aktivitetslogger = Aktivitetslogger()
@@ -146,7 +147,7 @@ internal class ModelVilkårsgrunnlagTest {
             førsteFraværsdag = 10.januar,
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,
-            arbeidsgiverperioder = listOf(8.januar..10.januar),
+            arbeidsgiverperioder = listOf(Periode(8.januar, 10.januar)),
             ferieperioder = listOf(),
             originalJson = Inntektsmelding(
                 inntektsmeldingId = "",
@@ -167,7 +168,7 @@ internal class ModelVilkårsgrunnlagTest {
                 ),
                 opphoerAvNaturalytelser = emptyList(),
                 gjenopptakelseNaturalytelser = emptyList(),
-                arbeidsgiverperioder = listOf(Periode(fom = 8.januar, tom = 10.januar)),
+                arbeidsgiverperioder = listOf(InntektsmeldingPeriode(fom = 8.januar, tom = 10.januar)),
                 status = Status.GYLDIG,
                 arkivreferanse = "",
                 ferieperioder = emptyList(),

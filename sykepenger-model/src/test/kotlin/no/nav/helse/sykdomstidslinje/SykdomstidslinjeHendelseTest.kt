@@ -4,6 +4,7 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
@@ -17,6 +18,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class SykdomstidslinjeHendelseTest {
     private val nySøknad = ModelNySøknad(
@@ -105,7 +107,7 @@ internal class SykdomstidslinjeHendelseTest {
             opphoerAvNaturalytelser = emptyList(),
             gjenopptakelseNaturalytelser = emptyList(),
             arbeidsgiverperioder = listOf(
-                Periode(10.september, 10.september.plusDays(16))
+                InntektsmeldingPeriode(10.september, 10.september.plusDays(16))
             ),
             status = Status.GYLDIG,
             arkivreferanse = "",
@@ -113,7 +115,7 @@ internal class SykdomstidslinjeHendelseTest {
             foersteFravaersdag = LocalDate.now(),
             mottattDato = LocalDateTime.now()
         ).toJson(),
-        arbeidsgiverperioder = listOf(1.januar..2.januar),
+        arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
         ferieperioder = emptyList(),
         aktivitetslogger = Aktivitetslogger()
     ).toJson()
