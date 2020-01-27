@@ -21,7 +21,14 @@ class ApplicationBuilder(env: Map<String, String>) {
 
     private val applicationLog = LoggerFactory.getLogger(ApplicationBuilder::class.java)
 
-    private val kafkaConfigBuilder = KafkaConfigBuilder(env)
+    private val kafkaConfigBuilder = KafkaConfigBuilder(
+        applicationId = env.getOrDefault("KAFKA_APP_ID", "spleis-v3"),
+        bootstrapServers = env.getValue("KAFKA_BOOTSTRAP_SERVERS"),
+        username = "/var/run/secrets/nais.io/service_user/username".readFile() ?: env.getValue("KAFKA_USERNAME"),
+        password = "/var/run/secrets/nais.io/service_user/password".readFile() ?: env.getValue("KAFKA_PASSWORD"),
+        truststorePath = env["NAV_TRUSTSTORE_PATH"],
+        truststorePassword = env["NAV_TRUSTSTORE_PASSWORD"]
+    )
     private val dataSourceBuilder = DataSourceBuilder(env)
 
     private val rapid = KafkaRapid(Topics.hendelseKildeTopics)

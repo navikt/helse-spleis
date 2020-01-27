@@ -36,6 +36,8 @@ spec:
         kvPath: /kv/preprod/fss/spleis/default
       - mountPath: /var/run/secrets/nais.io/azure
         kvPath: /azuread/data/dev/creds/spleis
+      - mountPath: /var/run/secrets/nais.io/service_user
+        kvPath: /serviceuser/data/dev/srvspleis
   secureLogs:
     enabled: true
   env:

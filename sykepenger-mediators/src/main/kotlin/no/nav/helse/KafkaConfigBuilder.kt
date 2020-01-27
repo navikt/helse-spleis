@@ -11,19 +11,21 @@ import java.io.File
 import java.util.*
 
 // Understands how to configure kafka from environment variables
-internal class KafkaConfigBuilder(private val env: Map<String, String>) {
+internal class KafkaConfigBuilder(private val applicationId: String,
+                                  private val bootstrapServers: String,
+                                  private val username: String?,
+                                  private val password: String?,
+                                  private val truststorePath: String?,
+                                  private val truststorePassword: String?) {
     private val log = LoggerFactory.getLogger(KafkaConfigBuilder::class.java)
 
     fun streamsConfig() = kafkaBaseConfig().apply {
-        put(StreamsConfig.APPLICATION_ID_CONFIG, env["KAFKA_APP_ID"] ?: "spleis-v3")
+        put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId)
         put(
             StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
             LogAndFailExceptionHandler::class.java
         )
-        put(
-            StreamsConfig.COMMIT_INTERVAL_MS_CONFIG,
-            env["KAFKA_COMMIT_INTERVAL_MS_CONFIG"] ?: "1000"
-        )
+        put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "1000")
     }
 
     fun producerConfig() = kafkaBaseConfig().apply {
@@ -32,19 +34,19 @@ internal class KafkaConfigBuilder(private val env: Map<String, String>) {
     }
 
     private fun kafkaBaseConfig() = Properties().apply {
-        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env["KAFKA_BOOTSTRAP_SERVERS"])
+        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
         put(SaslConfigs.SASL_MECHANISM, "PLAIN")
         put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
 
-        env["KAFKA_USERNAME"]?.let { username ->
+        username?.let {
             put(
                 SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"${env["KAFKA_PASSWORD"]}\";"
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
             )
         }
 
-        env["NAV_TRUSTSTORE_PATH"]?.let { truststorePath ->
-            env["NAV_TRUSTSTORE_PASSWORD"].let { truststorePassword ->
+        truststorePath?.let {
+            truststorePassword?.let {
                 try {
                     put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
                     put(
