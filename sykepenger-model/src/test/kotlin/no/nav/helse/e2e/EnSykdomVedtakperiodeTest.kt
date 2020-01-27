@@ -52,7 +52,7 @@ internal class EnSykdomVedtakperiodeTest {
         håndterInntektsmelding(listOf(3.januar..26.januar))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
-        håndterManuelSaksbehandling()
+        håndterManuelSaksbehandling(true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -64,7 +64,7 @@ internal class EnSykdomVedtakperiodeTest {
         }
         assertTilstander(0,
             START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING)
+            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
@@ -73,7 +73,7 @@ internal class EnSykdomVedtakperiodeTest {
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
-        håndterManuelSaksbehandling()
+        håndterManuelSaksbehandling(true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -83,7 +83,7 @@ internal class EnSykdomVedtakperiodeTest {
         }
         assertTilstander(0,
             START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING)
+            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
     }
 
     private fun assertEndringTeller() {
@@ -149,8 +149,10 @@ internal class EnSykdomVedtakperiodeTest {
         assertEndringTeller()
     }
 
-    private fun håndterManuelSaksbehandling() {
+    private fun håndterManuelSaksbehandling(utbetalingGodkjent: Boolean) {
         assertTrue(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
+        person.håndter(manuellSaksbehandling(utbetalingGodkjent))
+        assertEndringTeller()
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
@@ -237,6 +239,18 @@ internal class EnSykdomVedtakperiodeTest {
         foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
         rapportertdato = rapportertdato,
         originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
+    )
+
+    private fun manuellSaksbehandling(utbetalingGodkjent: Boolean) = ModelManuellSaksbehandling(
+        hendelseId = UUID.randomUUID(),
+        aktørId = AKTØRID,
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = vedtaksperiodeId,
+        saksbehandler = "Ola Nordmann",
+        utbetalingGodkjent = utbetalingGodkjent,
+        rapportertdato = rapportertdato,
         aktivitetslogger = Aktivitetslogger()
     )
 
