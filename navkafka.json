@@ -14,6 +14,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspleis",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspleis",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvspenn",
                     "role": "PRODUCER"
                 },
@@ -43,6 +51,14 @@
                 },
                 {
                     "member": "srvsparkel-sykepen",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelsykepeng",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelsykepeng",
                     "role": "CONSUMER"
                 },
                 {
