@@ -94,6 +94,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspetakkel",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspetakkel",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvspleistestdata",
                     "role": "PRODUCER"
                 },
