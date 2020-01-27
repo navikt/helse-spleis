@@ -49,15 +49,15 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere(this)
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere(this)
-    override fun preVisitInntektHistorie(inntektHistorie: InntektHistorie) =
-        currentState.preVisitInntektHistorie(this, inntektHistorie)
+    override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
+        currentState.preVisitInntektHistorie(this, inntekthistorikk)
 
-    override fun postVisitInntektHistorie(inntektHistorie: InntektHistorie) {
-        currentState.postVisitInntektHistorie(this, inntektHistorie)
+    override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+        currentState.postVisitInntektHistorie(this, inntekthistorikk)
     }
 
     override fun preVisitInntekter() = currentState.preVisitInntekter(this)
-    override fun visitInntekt(inntekt: InntektHistorie.Inntekt) = currentState.visitInntekt(this, inntekt)
+    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(this, inntekt)
     override fun preVisitTidslinjer() = currentState.preVisitTidslinjer(this)
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(this, tidslinje)
@@ -148,9 +148,9 @@ internal class JsonBuilder : PersonVisitor {
         fun preVisitArbeidsgivere(jsonBuilder: JsonBuilder) {}
         fun postVisitArbeidsgivere(jsonBuilder: JsonBuilder) {}
         fun preVisitInntekter(jsonBuilder: JsonBuilder) {}
-        fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: InntektHistorie.Inntekt) {}
-        fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {}
-        fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {}
+        fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: Inntekthistorikk.Inntekt) {}
+        fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {}
+        fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {}
         fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {}
         fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsdag(jsonBuilder: JsonBuilder, arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
@@ -261,7 +261,7 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
-        override fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {
+        override fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {
             val inntekter = mutableListOf<MutableMap<String, Any?>>()
             arbeidsgiverMap["inntekter"] = inntekter
             jsonBuilder.pushState(InntektHistorieState(inntekter))
@@ -298,14 +298,14 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     private class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: InntektHistorie.Inntekt) {
+        override fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: Inntekthistorikk.Inntekt) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
             inntektMap.putAll(InntektReflect(inntekt).toMap())
         }
 
-        override fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntektHistorie: InntektHistorie) {
+        override fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {
             jsonBuilder.popState()
         }
     }

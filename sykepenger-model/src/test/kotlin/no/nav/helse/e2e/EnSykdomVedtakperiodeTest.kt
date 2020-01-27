@@ -13,12 +13,17 @@ import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import kotlin.reflect.KClass
 
 internal class EnSykdomVedtakperiodeTest {
 
@@ -49,9 +54,13 @@ internal class EnSykdomVedtakperiodeTest {
         håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling()
         inspektør.also {
-            assertFalse(it.personLogger.hasErrors())
-            assertFalse(it.personLogger.hasWarnings())
-            assertTrue(it.personLogger.hasMessages())
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(18, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(0,
             START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
@@ -66,9 +75,11 @@ internal class EnSykdomVedtakperiodeTest {
         håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling()
         inspektør.also {
-            assertFalse(it.personLogger.hasErrors())
-            assertFalse(it.personLogger.hasWarnings())
-            assertTrue(it.personLogger.hasMessages())
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
         }
         assertTilstander(0,
             START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
@@ -82,6 +93,24 @@ internal class EnSykdomVedtakperiodeTest {
 
     private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
         assertEquals(tilstander.asList(), observatør.tilstander[indeks])
+    }
+
+    private fun assertNoErrors(inspektør: TestPersonInspektør) {
+        assertFalse(inspektør.personLogger.hasErrors())
+        assertFalse(inspektør.arbeidsgiverLogger.hasErrors())
+        assertFalse(inspektør.periodeLogger.hasErrors())
+    }
+
+    private fun assertNoWarnings(inspektør: TestPersonInspektør) {
+        assertFalse(inspektør.personLogger.hasWarnings())
+        assertFalse(inspektør.arbeidsgiverLogger.hasWarnings())
+        assertFalse(inspektør.periodeLogger.hasWarnings())
+    }
+
+    private fun assertMessages(inspektør: TestPersonInspektør) {
+        assertTrue(inspektør.personLogger.hasMessages())
+        assertTrue(inspektør.arbeidsgiverLogger.hasMessages())
+//        assertTrue(inspektør.periodeLogger.hasMessages())
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -247,6 +276,10 @@ internal class EnSykdomVedtakperiodeTest {
         internal lateinit var personLogger: Aktivitetslogger
         internal lateinit var arbeidsgiver: Arbeidsgiver
         internal lateinit var arbeidsgiverLogger: Aktivitetslogger
+        internal lateinit var periodeLogger: Aktivitetslogger
+        internal lateinit var inntektshistorikk: Inntekthistorikk
+        internal lateinit var sykdomshistorikk: Sykdomshistorikk
+        internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
 
         init {
             person.accept(this)
@@ -264,9 +297,34 @@ internal class EnSykdomVedtakperiodeTest {
             arbeidsgiverLogger = aktivitetslogger
         }
 
+        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+            this.inntektshistorikk = inntekthistorikk
+        }
+
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = mutableListOf()
+        }
+
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            this.sykdomshistorikk = sykdomshistorikk
+            this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
+        }
+
+        private inner class Dagteller : SykdomstidslinjeVisitor {
+            override fun visitSykedag(sykedag: Sykedag) = inkrementer(Sykedag::class)
+
+            override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = inkrementer(SykHelgedag::class)
+
+            private fun inkrementer(klass: KClass<out Dag>) {
+                dagtelling.compute(klass) { _, value ->
+                    1 + (value ?: 0)
+                }
+            }
+        }
+
+        override fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            periodeLogger = aktivitetslogger
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

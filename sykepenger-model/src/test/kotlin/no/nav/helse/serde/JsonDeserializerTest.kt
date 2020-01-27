@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.InntektHistorie
+import no.nav.helse.person.Inntekthistorikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -15,11 +15,11 @@ internal class JsonDeserializerTest {
         val c = Arbeidsgiver::class.java.getDeclaredConstructor(
             String::class.java,
             UUID::class.java,
-            InntektHistorie::class.java
+            Inntekthistorikk::class.java
         )
         c.isAccessible = true
         val uuid = UUID.randomUUID()
-        val ih = InntektHistorie()
+        val ih = Inntekthistorikk()
         val arb: Arbeidsgiver = c.newInstance("999888777", uuid, ih)
         println(arb)
     }
@@ -42,8 +42,8 @@ internal class JsonDeserializerTest {
         val arbeidsgiver = arbeidsgivere[organisasjonsnummer]
         assertNotNull(arbeidsgiver)
         assertEquals(organisasjonsnummer, arbeidsgiver!!.privatProp("organisasjonsnummer"))
-        val inntekter = arbeidsgiver.privatProp<InntektHistorie>("inntektHistorie")
-            .privatProp<MutableList<InntektHistorie.Inntekt>>("inntekter")
+        val inntekter = arbeidsgiver.privatProp<Inntekthistorikk>("inntekthistorikk")
+            .privatProp<MutableList<Inntekthistorikk.Inntekt>>("inntekter")
         assertEquals(1, inntekter.size)
         assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
     }

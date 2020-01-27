@@ -6,7 +6,7 @@ import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.InntektHistorie
+import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.september
 import no.nav.helse.toJson
 import no.nav.inntektsmeldingkontrakt.*
@@ -23,23 +23,23 @@ internal class ArbeidsgiverTest {
 
     @Test
     fun `restoring av arbeidsgiver gir samme objekt`() {
-        val arbeidsgiverMemento = Arbeidsgiver.Memento(uuid, "2", emptyList(), InntektHistorie.Memento(listOf()))
+        val arbeidsgiverMemento = Arbeidsgiver.Memento(uuid, "2", emptyList(), Inntekthistorikk.Memento(listOf()))
         val arbeidsgiverString = arbeidsgiverMemento.state()
         val arbeidsgiverMementoFromString = Arbeidsgiver.Memento.fromString(arbeidsgiverString)
         val restoredArbeidsgiver = Arbeidsgiver.restore(arbeidsgiverMementoFromString)
 
         assertEquals(uuid, restoredArbeidsgiver.memento().id)
         assertEquals("2", restoredArbeidsgiver.memento().organisasjonsnummer)
-        assertEquals(0, restoredArbeidsgiver.memento().inntektHistorie.inntekter.size)
+        assertEquals(0, restoredArbeidsgiver.memento().inntekthistorikk.inntekter.size)
         assertEquals(0, restoredArbeidsgiver.memento().perioder.size)
     }
 
     @Test
     fun `restoring av arbeidsgiver med inntektHistorie gir samme objekt`() {
         val arbeidsgiverMemento = Arbeidsgiver.Memento(
-            uuid, "2", emptyList(), InntektHistorie.Memento(
+            uuid, "2", emptyList(), Inntekthistorikk.Memento(
                 listOf(
-                    InntektHistorie.Memento.Inntekt(
+                    Inntekthistorikk.Memento.Inntekt(
                         1.januar,
                         inntektsmelding(),
                         100.00.toBigDecimal()
@@ -52,8 +52,8 @@ internal class ArbeidsgiverTest {
         val restoredArbeidsgiver = Arbeidsgiver.restore(arbeidsgiverMementoFromString)
 
         assertEquals(uuid, restoredArbeidsgiver.memento().id)
-        assertEquals(1, restoredArbeidsgiver.memento().inntektHistorie.inntekter.size)
-        assertEquals(100.0.toBigDecimal(), restoredArbeidsgiver.memento().inntektHistorie.inntekter.first().beløp)
+        assertEquals(1, restoredArbeidsgiver.memento().inntekthistorikk.inntekter.size)
+        assertEquals(100.0.toBigDecimal(), restoredArbeidsgiver.memento().inntekthistorikk.inntekter.first().beløp)
     }
 
 
@@ -81,18 +81,18 @@ internal class ArbeidsgiverTest {
         val arbeidsgiver = Arbeidsgiver("12345678")
         arbeidsgiver.håndter(inntektsmelding)
         assertTrue(inntektsmelding.hasErrors())
-        assertEquals(1, arbeidsgiver.memento().inntektHistorie.inntekter.size)
-        assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntektHistorie.inntekter.first().beløp.setScale(2))
-        assertEquals(1.januar, arbeidsgiver.memento().inntektHistorie.inntekter.first().fom)
+        assertEquals(1, arbeidsgiver.memento().inntekthistorikk.inntekter.size)
+        assertEquals(120.00.toBigDecimal().setScale(2), arbeidsgiver.memento().inntekthistorikk.inntekter.first().beløp.setScale(2))
+        assertEquals(1.januar, arbeidsgiver.memento().inntekthistorikk.inntekter.first().fom)
     }
 
     @Test
     fun `restoring av arbeidsgiver uten inntekstHistorie legger på tom inntekstHistorie`() {
 
         val arbeidsgiverMemento = Arbeidsgiver.Memento(
-            uuid, "2", emptyList(), InntektHistorie.Memento(
+            uuid, "2", emptyList(), Inntekthistorikk.Memento(
                 listOf(
-                    InntektHistorie.Memento.Inntekt(
+                    Inntekthistorikk.Memento.Inntekt(
                         1.januar,
                         inntektsmelding(),
                         100.00.toBigDecimal()
@@ -108,7 +108,7 @@ internal class ArbeidsgiverTest {
 
         val arbeidsgiverMementoFromString = Arbeidsgiver.Memento.fromString(json.toString())
 
-        assertTrue(arbeidsgiverMementoFromString.inntektHistorie.inntekter.isEmpty())
+        assertTrue(arbeidsgiverMementoFromString.inntekthistorikk.inntekter.isEmpty())
 
     }
 

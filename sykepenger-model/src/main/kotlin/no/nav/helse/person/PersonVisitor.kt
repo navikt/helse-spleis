@@ -31,8 +31,8 @@ internal interface HendelseVisitor {
 internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
     fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
-    fun preVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
-    fun postVisitInntektHistorie(inntektHistorie: InntektHistorie) {}
+    fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
+    fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
     fun preVisitTidslinjer() {}
     fun postVisitTidslinjer() {}
     fun preVisitPerioder() {}
@@ -40,7 +40,7 @@ internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVi
     fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {}
     fun preVisitInntekter() {}
     fun postVisitInntekter() {}
-    fun visitInntekt(inntekt: InntektHistorie.Inntekt) {}
+    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {}
 }
 
 internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, SykdomshistorikkVisitor {

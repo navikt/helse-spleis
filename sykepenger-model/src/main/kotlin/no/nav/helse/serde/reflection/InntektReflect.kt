@@ -1,11 +1,11 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.InntektHistorie
+import no.nav.helse.person.Inntekthistorikk
 import java.math.BigDecimal
 import java.time.LocalDate
 
-internal class InntektReflect(inntekt: InntektHistorie.Inntekt) {
+internal class InntektReflect(inntekt: Inntekthistorikk.Inntekt) {
     private val fom: LocalDate = inntekt.getProp("fom")
     private val hendelse: ArbeidstakerHendelse = inntekt.getProp("hendelse")
     private val beløp: BigDecimal = inntekt.getProp("beløp")

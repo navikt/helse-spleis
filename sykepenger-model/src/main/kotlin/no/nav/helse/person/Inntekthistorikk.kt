@@ -12,38 +12,37 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import java.math.BigDecimal
 import java.time.LocalDate
 
-internal class InntektHistorie {
-    internal class Inntekt(val fom: LocalDate, val hendelse: ModelInntektsmelding, val beløp: BigDecimal){
+internal class Inntekthistorikk {
+    internal class Inntekt(private val fom: LocalDate, internal val hendelse: ModelInntektsmelding, val beløp: BigDecimal){
+        companion object {
+            internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
+                inntekter.lastOrNull { it.fom <= dato }?.beløp
+        }
+
         fun accept(visitor: ArbeidsgiverVisitor) {
             visitor.visitInntekt(this)
         }
+
+        internal fun memento() = Memento.Inntekt(fom, hendelse, beløp)
     }
 
     private val inntekter = mutableListOf<Inntekt>()
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitInntektHistorie(this)
+        visitor.preVisitInntekthistorikk(this)
 
         visitor.preVisitInntekter()
         inntekter.forEach{ it.accept(visitor) }
         visitor.postVisitInntekter()
 
-        visitor.postVisitInntektHistorie(this)
+        visitor.postVisitInntekthistorikk(this)
     }
 
-    fun add(dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
+    internal fun add(dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
         inntekter.add(Inntekt(dagen, hendelse, beløp))
     }
 
-    fun add(inntektsmelding: ModelInntektsmelding) {
-        inntekter.add(
-            Inntekt(
-                inntektsmelding.førsteFraværsdag,
-                inntektsmelding,
-                inntektsmelding.beregnetInntekt.toBigDecimal()
-            )
-        )
-    }
+    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
 
     internal class Memento internal constructor(
         internal val inntekter: List<Inntekt> = emptyList()
@@ -89,17 +88,11 @@ internal class InntektHistorie {
     }
 
     internal companion object {
-        fun restore(memento: Memento) = InntektHistorie().apply {
+        fun restore(memento: Memento) = Inntekthistorikk().apply {
             memento.inntekter.forEach { this.add(it.fom, it.hendelse, it.beløp) }
         }
     }
 
-    internal fun memento() = Memento(inntekter.map {
-        Memento.Inntekt(
-            it.fom,
-            it.hendelse,
-            it.beløp
-        )
-    })
+    internal fun memento() = Memento(inntekter.map { it.memento() })
 
 }

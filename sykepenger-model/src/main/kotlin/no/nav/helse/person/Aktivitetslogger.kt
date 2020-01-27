@@ -26,9 +26,9 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         throw AktivitetException(this)
     }
 
-    override fun hasMessages() = info().isNotEmpty() || hasWarnings() || hasErrors()
+    override fun hasMessages() = info().isNotEmpty() || hasWarnings()
 
-    override fun hasWarnings() = warn().isNotEmpty()
+    override fun hasWarnings() = warn().isNotEmpty() || hasErrors()
 
     override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
 

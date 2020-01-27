@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.InntektHistorie
+import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import java.math.BigDecimal
@@ -170,7 +170,7 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
     private inner class ArbeidsgiverState(private val setter: (String, Arbeidsgiver) -> Unit) : ModelState {
         private lateinit var organisasjonsnummer: String
         private lateinit var uuid: UUID
-        private lateinit var inntektHistorie: InntektHistorie
+        private lateinit var inntekthistorikk: Inntekthistorikk
 
         override fun visitStringField(name: String, value: String) {
             when (name) {
@@ -181,25 +181,25 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
 
         override fun preVisitArrayField(name: String) {
             if (name == "inntekter") {
-                inntektHistorie = InntektHistorie()
-                stack.push(InntekterArrayState(inntektHistorie))
+                inntekthistorikk = Inntekthistorikk()
+                stack.push(InntekterArrayState(inntekthistorikk))
             }
         }
 
         override fun postVisitObject() {
             setter(
                 organisasjonsnummer, reflector.lagArbeidsgiver(
-                    organisasjonsnummer, uuid, inntektHistorie
+                    organisasjonsnummer, uuid, inntekthistorikk
                 )
             )
             stack.pop()
         }
     }
 
-    private inner class InntekterArrayState(private val inntektHistorie: InntektHistorie) : ModelState {
+    private inner class InntekterArrayState(private val inntekthistorikk: Inntekthistorikk) : ModelState {
         override fun preVisitObject() {
             stack.push(InntektState { dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal ->
-                inntektHistorie.add(dagen, hendelse, beløp)
+                inntekthistorikk.add(dagen, hendelse, beløp)
             })
         }
 

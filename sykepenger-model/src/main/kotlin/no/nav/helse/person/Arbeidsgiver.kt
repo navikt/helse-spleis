@@ -13,17 +13,17 @@ import java.util.*
 internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
     private val id: UUID,
-    private val inntektHistorie: InntektHistorie) {
+    private val inntekthistorikk: Inntekthistorikk) {
 
     internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(),
-        InntektHistorie()
+        Inntekthistorikk()
     )
 
     internal class Memento internal constructor(
         internal val id: UUID,
         internal val organisasjonsnummer: String,
         internal val perioder: List<Vedtaksperiode.Memento>,
-        internal val inntektHistorie: InntektHistorie.Memento
+        internal val inntekthistorikk: Inntekthistorikk.Memento
     ) {
         internal companion object {
 
@@ -38,7 +38,7 @@ internal class Arbeidsgiver private constructor(
                     perioder = json["saker"].map {
                         Vedtaksperiode.Memento.fromJsonNode(it)
                     },
-                    inntektHistorie = json["inntektHistorie"]?.takeUnless { it.isNull }?.let { InntektHistorie.Memento.fromJsonNode(it) }?: InntektHistorie.Memento()
+                    inntekthistorikk = json["inntektHistorie"]?.takeUnless { it.isNull }?.let { Inntekthistorikk.Memento.fromJsonNode(it) }?: Inntekthistorikk.Memento()
                 )
             }
 
@@ -54,7 +54,7 @@ internal class Arbeidsgiver private constructor(
                 this.perioder.fold(it.putArray("saker")) { result, current ->
                     result.addRawValue(RawValue(current.state()))
                 }
-                it.set<ObjectNode>("inntektHistorie", this.inntektHistorie.state())
+                it.set<ObjectNode>("inntektHistorie", this.inntekthistorikk.state())
             }.toString()
     }
 
@@ -63,7 +63,7 @@ internal class Arbeidsgiver private constructor(
             return Arbeidsgiver(
                 id = memento.id,
                 organisasjonsnummer = memento.organisasjonsnummer,
-                inntektHistorie = InntektHistorie.restore(memento.inntektHistorie)
+                inntekthistorikk = Inntekthistorikk.restore(memento.inntekthistorikk)
             ).apply {
                 this.perioder.addAll(memento.perioder.map {
                     Vedtaksperiode.restore(it)
@@ -81,7 +81,7 @@ internal class Arbeidsgiver private constructor(
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this)
         visitor.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
-        inntektHistorie.accept(visitor)
+        inntekthistorikk.accept(visitor)
         visitor.preVisitTidslinjer()
         tidslinjer.forEach { it.accept(visitor) }
         visitor.postVisitTidslinjer()
@@ -97,7 +97,7 @@ internal class Arbeidsgiver private constructor(
         id = this.id,
         organisasjonsnummer = this.organisasjonsnummer,
         perioder = this.perioder.map { it.memento() },
-        inntektHistorie = this.inntektHistorie.memento()
+        inntekthistorikk = this.inntekthistorikk.memento()
     )
 
     internal fun peekTidslinje() = tidslinjer.last()
@@ -119,7 +119,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(inntektsmelding: ModelInntektsmelding) {
-        inntektHistorie.add(inntektsmelding)
+        inntekthistorikk.add(
+            inntektsmelding.førsteFraværsdag,
+            inntektsmelding,
+            inntektsmelding.beregnetInntekt.toBigDecimal()
+        )
         if (perioder.none { it.håndter(inntektsmelding) }) {
             inntektsmelding.error("Uventet inntektsmelding, mangler ny søknad")
         }
