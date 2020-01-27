@@ -9,15 +9,15 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("net.logstash.logback:logstash-logback-encoder:5.2")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    api(kotlin("stdlib"))
+    api("ch.qos.logback:logback-classic:1.2.3")
+    api("net.logstash.logback:logstash-logback-encoder:5.2")
+    api("io.ktor:ktor-server-netty:$ktorVersion")
 
-    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+    api("org.apache.kafka:kafka-clients:$kafkaVersion")
 
-    implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
-    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
+    api("io.ktor:ktor-metrics-micrometer:$ktorVersion")
+    api("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
     testImplementation("no.nav:kafka-embedded-env:2.3.0")
     testImplementation("org.awaitility:awaitility:4.0.1")
