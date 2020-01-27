@@ -10,9 +10,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.hendelser.ModelSendtSøknad.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
@@ -33,6 +32,7 @@ internal class EnSykdomVedtakperiodeTest {
     private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
+    private val inspektør get() = TestPersonInspektør(person)
     private lateinit var vedtaksperiodeId: String
     private var forventetEndringTeller = 0
 
@@ -52,6 +52,7 @@ internal class EnSykdomVedtakperiodeTest {
         assertFalse(aktivitetslogger.hasErrors())
         assertFalse(aktivitetslogger.hasWarnings())
         assertTrue(aktivitetslogger.hasMessages())
+        assertEquals(6, observatør.tilstander[0]?.size)
     }
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
@@ -64,6 +65,7 @@ internal class EnSykdomVedtakperiodeTest {
         assertFalse(aktivitetslogger.hasErrors())
         assertFalse(aktivitetslogger.hasWarnings())
         assertTrue(aktivitetslogger.hasMessages())
+        assertEquals(6, observatør.tilstander[0]?.size)
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -201,6 +203,9 @@ internal class EnSykdomVedtakperiodeTest {
     private inner class TestObservatør: PersonObserver {
         internal var endreTeller = 0
         private val etterspurteBehov = mutableMapOf<String, Boolean>()
+        private var periodeIndek = -1
+        private val periodeIndekser = mutableMapOf<UUID, Int>()
+        internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
 
         internal fun ettersburteBehov(key: Behovstype) = etterspurteBehov.getOrDefault(key.name, false)
 
@@ -208,10 +213,57 @@ internal class EnSykdomVedtakperiodeTest {
             endreTeller += 1
         }
 
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+            val indeks = periodeIndekser.getOrPut(event.id, {
+                periodeIndek++
+                tilstander[periodeIndek] = mutableListOf(TilstandType.START)
+                periodeIndek
+            })
+            tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
+        }
+
         override fun vedtaksperiodeTrengerLøsning(event: Behov) {
             event.behovType().forEach { etterspurteBehov[it] = true }
             vedtaksperiodeId = event.vedtaksperiodeId()
         }
 
+    }
+
+    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
+        private var vedtaksperiodeindeks: Int = -1
+        private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
+        private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        internal lateinit var personLogger: Aktivitetslogger
+        internal lateinit var arbeidsgiver: Arbeidsgiver
+        internal lateinit var arbeidsgiverLogger: Aktivitetslogger
+
+        init {
+            person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            personLogger = aktivitetslogger
+        }
+
+        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
+            this.arbeidsgiver = arbeidsgiver
+        }
+
+        override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            arbeidsgiverLogger = aktivitetslogger
+        }
+
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiodeindeks += 1
+            tilstander[vedtaksperiodeindeks] = mutableListOf()
+        }
+
+        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+            tilstander[vedtaksperiodeindeks]?.add(tilstand.type) ?: fail("Missing collection initialization")
+        }
+
+        internal val vedtaksperiodeTeller get() = tilstander.size
+
+        internal fun tilstand(indeks: Int) = tilstander[indeks] ?: fail("Missing collection initialization")
     }
 }

@@ -121,13 +121,13 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.warn("Invaliderer vedtaksperiode: %s", this.id.toString())
-        setTilstand(hendelse, TilInfotrygd)
+        tilstand(hendelse, TilInfotrygd)
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
         this.sykdomstidslinje.overlapperMed(hendelse.sykdomstidslinje())
 
-    private fun setTilstand(
+    private fun tilstand(
         event: ArbeidstakerHendelse,
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
@@ -156,9 +156,9 @@ internal class Vedtaksperiode internal constructor(
 
         if (tidslinje.erUtenforOmfang()) {
             hendelse.error("Ikke støttet dag")
-            setTilstand(hendelse, TilInfotrygd)
+            tilstand(hendelse, TilInfotrygd)
         } else {
-            setTilstand(hendelse, nesteTilstand) {
+            tilstand(hendelse, nesteTilstand) {
                 sykdomstidslinje = tidslinje
             }
         }
@@ -240,17 +240,17 @@ internal class Vedtaksperiode internal constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             nySøknad.error("uventet NySøknad")
-            vedtaksperiode.setTilstand(nySøknad, TilInfotrygd)
+            vedtaksperiode.tilstand(nySøknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             sendtSøknad.error("uventet SendtSøknad")
-            vedtaksperiode.setTilstand(sendtSøknad, TilInfotrygd)
+            vedtaksperiode.tilstand(sendtSøknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             inntektsmelding.error("uventet Inntektsmelding")
-            vedtaksperiode.setTilstand(inntektsmelding, TilInfotrygd)
+            vedtaksperiode.tilstand(inntektsmelding, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
@@ -265,7 +265,7 @@ internal class Vedtaksperiode internal constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
-            vedtaksperiode.setTilstand(påminnelse, TilInfotrygd)
+            vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
         }
 
         fun leaving(aktivitetslogger: IAktivitetslogger) {}
@@ -276,7 +276,7 @@ internal class Vedtaksperiode internal constructor(
     internal object StartTilstand : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
-            vedtaksperiode.setTilstand(nySøknad, MottattNySøknad) {
+            vedtaksperiode.tilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
                 vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
@@ -353,9 +353,9 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
 
             if (behandlesManuelt)
-                return vedtaksperiode.setTilstand(vilkårsgrunnlag, TilInfotrygd)
+                return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
 
-            vedtaksperiode.setTilstand(vilkårsgrunnlag, BeregnUtbetaling)
+            vedtaksperiode.tilstand(vilkårsgrunnlag, BeregnUtbetaling)
         }
 
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
@@ -397,11 +397,11 @@ internal class Vedtaksperiode internal constructor(
                     vedtaksperiode.sykdomstidslinje.sisteDag()
                 )
             ) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             val dagsats = requireNotNull(vedtaksperiode.dagsats()) {
@@ -411,7 +411,7 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsberegning = try {
                 vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
@@ -420,10 +420,10 @@ internal class Vedtaksperiode internal constructor(
             }
 
             if (sisteUtbetalingsdag == null || inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
-                return vedtaksperiode.setTilstand(ytelser, TilInfotrygd)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
-            vedtaksperiode.setTilstand(ytelser, TilGodkjenning) {
+            vedtaksperiode.tilstand(ytelser, TilGodkjenning) {
                 vedtaksperiode.maksdato = utbetalingsberegning.maksdato
                 vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
             }
@@ -460,11 +460,11 @@ internal class Vedtaksperiode internal constructor(
             manuellSaksbehandling: ModelManuellSaksbehandling
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
-                vedtaksperiode.setTilstand(manuellSaksbehandling, TilUtbetaling) {
+                vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
                     vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler()
                 }
             } else {
-                vedtaksperiode.setTilstand(manuellSaksbehandling, TilInfotrygd)
+                vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
     }
