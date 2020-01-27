@@ -97,7 +97,7 @@ class ModelSendtSøknad(
             .also { tom = it.maxBy { it.tom }?.tom ?: aktivitetslogger.severe("Søknad mangler tildato") }
     }
 
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Sendt søknad")
     }
 

@@ -111,7 +111,7 @@ class ModelInntektsmelding(
         return (årssats / 260).toInt()
     }
 
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Inntektsmelding")
     }
 

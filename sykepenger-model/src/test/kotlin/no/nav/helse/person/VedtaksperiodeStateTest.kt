@@ -27,6 +27,13 @@ import kotlin.reflect.KClass
 
 internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
 
+    private lateinit var aktivitetslogger: Aktivitetslogger
+
+    @BeforeEach
+    fun setup() {
+        aktivitetslogger = Aktivitetslogger()
+    }
+
     @Test
     fun `motta ny søknad`() {
         val vedtaksperiode = beInStartTilstand()
@@ -47,6 +54,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         sendtSøknad().also {
             vedtaksperiode.håndter(it)
             assertTrue(it.hasErrors())
+            println(aktivitetslogger.toString())
         }
         assertTilstandsendring(TIL_INFOTRYGD, ModelSendtSøknad::class)
     }
@@ -280,7 +288,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     )
                 },
                 erEgenAnsatt = false,
-                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogger = aktivitetslogger,
                 originalJson = "{}"
             )
         )
@@ -311,7 +319,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = emptyList(),
                 erEgenAnsatt = true,
-                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogger = aktivitetslogger,
                 originalJson = "{}"
             )
         )
@@ -348,7 +356,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 },
                 erEgenAnsatt = false,
                 originalJson = "{}",
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = aktivitetslogger
             )
         )
 
@@ -912,7 +920,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             egenmeldinger = emptyList(),
             soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
         ).toJsonNode().toString(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = aktivitetslogger
     )
 
     private fun sendtSøknad(
@@ -932,7 +940,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             rapportertdato = rapportertDato,
             perioder = perioder,
             originalJson = "{}",
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = aktivitetslogger
         )
 
     private fun inntektsmelding(
@@ -952,7 +960,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             mottattDato = LocalDateTime.now(),
             førsteFraværsdag = LocalDate.now(),
             beregnetInntekt = 1000.0,
-            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogger = aktivitetslogger,
             originalJson = "{}",
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
@@ -968,7 +976,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             utbetalingGodkjent = utbetalingGodkjent,
             saksbehandler = "en_saksbehandler_ident",
             rapportertdato = LocalDateTime.now(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = aktivitetslogger
         )
     }
 
@@ -983,7 +991,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = aktivitetslogger
     )
 
     private fun ytelser(
@@ -1005,30 +1013,28 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 )
             },
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = aktivitetslogger
         ),
         foreldrepenger = ModelForeldrepenger(
             foreldrepengeytelse = fordrepengeYtelse,
             svangerskapsytelse = svangerskapsytelse,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = aktivitetslogger
         ),
         rapportertdato = LocalDateTime.now(),
         originalJson = "{}",
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = aktivitetslogger
     )
 
 
-    private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()): Vedtaksperiode {
-        return Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
+    private fun beInStartTilstand(nySøknad: ModelNySøknad = nySøknad()) =
+        Vedtaksperiode.nyPeriode(nySøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
-    }
 
-    private fun beInStartTilstand(sendtSøknad: ModelSendtSøknad): Vedtaksperiode {
-        return Vedtaksperiode.nyPeriode(sendtSøknad, vedtaksperiodeId).apply {
+    private fun beInStartTilstand(sendtSøknad: ModelSendtSøknad) =
+        Vedtaksperiode.nyPeriode(sendtSøknad, vedtaksperiodeId).apply {
             addVedtaksperiodeObserver(this@VedtaksperiodeStateTest)
         }
-    }
 
     private fun beInTilInfotrygd(sendtSøknad: ModelSendtSøknad = sendtSøknad()) =
         beInStartTilstand(sendtSøknad).apply {
@@ -1101,7 +1107,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             mottattDato = LocalDateTime.now(),
             førsteFraværsdag = LocalDate.now(),
             beregnetInntekt = 1000.0,
-            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogger = aktivitetslogger,
             originalJson = "{}",
             arbeidsgiverperioder = listOf(
                 10.september..10.september.plusDays(16)

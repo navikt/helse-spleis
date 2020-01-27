@@ -66,7 +66,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         }
     }
 
-    override fun toString() = aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s}
+    override fun toString() = this.aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s}
 
 
     private fun info() = Aktivitet.filter(INFO, aktiviteter)
@@ -94,7 +94,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
         internal fun cloneWith(label: String) = Aktivitet(
                 alvorlighetsgrad,
-                melding + " ($label)",
+            "$melding ($label)",
                 tidsstempel
             )
 

@@ -70,7 +70,7 @@ class ModelNySøknad(
         return aktivitetslogger
     }
 
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
+    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Ny søknad")
     }
 

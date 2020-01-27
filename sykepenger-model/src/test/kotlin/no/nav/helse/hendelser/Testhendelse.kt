@@ -18,7 +18,7 @@ internal class Testhendelse(
     override fun nøkkelHendelseType(): Dag.NøkkelHendelseType = hendelsetype
 
     override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented")
     }
 
     override fun aktørId(): String {
@@ -38,6 +38,10 @@ internal class Testhendelse(
     }
 
     override fun toJson(): String {
+        TODO("not implemented")
+    }
+
+    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         TODO("not implemented")
     }
 

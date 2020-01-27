@@ -33,7 +33,8 @@ internal class Vedtaksperiode internal constructor(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private var sykdomstidslinje: ConcreteSykdomstidslinje,
-    private var tilstand: Vedtaksperiodetilstand = StartTilstand
+    private var tilstand: Vedtaksperiodetilstand = StartTilstand,
+    private val aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
 ) {
 
     private var maksdato: LocalDate? = null
@@ -49,8 +50,6 @@ internal class Vedtaksperiode internal constructor(
     private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata? = null
 
     private val sykdomshistorikk = Sykdomshistorikk()
-
-    private val aktivitetslogger = Aktivitetslogger()
 
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
@@ -73,24 +72,23 @@ internal class Vedtaksperiode internal constructor(
 
     internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
     internal fun dataForVilkårsvurdering() = dataForVilkårsvurdering
-    internal fun inntektFraInntektsmelding() = inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt?.toDouble()
+    internal fun inntektFraInntektsmelding() = inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
 
     private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
 
     internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
+        nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad) = overlapperMed(sendtSøknad).also {
         if (it) tilstand.håndter(this, sendtSøknad)
+        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding): Boolean {
-        return overlapperMed(inntektsmelding).also {
-            if (it) {
-                tilstand.håndter(this, inntektsmelding)
-            }
-        }
+    internal fun håndter(inntektsmelding: ModelInntektsmelding) = overlapperMed(inntektsmelding).also {
+        if (it) tilstand.håndter(this, inntektsmelding)
+        inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, ytelser: ModelYtelser) {
@@ -100,6 +98,7 @@ internal class Vedtaksperiode internal constructor(
             this,
             ytelser
         )
+        ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
@@ -107,15 +106,18 @@ internal class Vedtaksperiode internal constructor(
             this,
             manuellSaksbehandling
         )
+        manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
         if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
+        vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId()) return false
         tilstand.håndter(this, påminnelse)
+        påminnelse.kopierAktiviteterTil(aktivitetslogger)
         return true
     }
 
@@ -148,9 +150,6 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
-//        sykdomshistorikk.håndter(hendelse).also {
-//            setTilstand(hendelse, if(hendelse.hasErrors()) TilInfotrygd else nesteTilstand)
-//        }
         sykdomshistorikk.håndter(hendelse)
         val tidslinje = this.sykdomstidslinje + hendelse.sykdomstidslinje()
 
@@ -162,6 +161,7 @@ internal class Vedtaksperiode internal constructor(
                 sykdomstidslinje = tidslinje
             }
         }
+        hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
     private fun trengerYtelser() {
@@ -397,35 +397,40 @@ internal class Vedtaksperiode internal constructor(
                     vedtaksperiode.sykdomstidslinje.sisteDag()
                 )
             ) {
+                ytelser.warn("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
+                ytelser.warn("Har fraværsdag innenfor seks måneder, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
-            val dagsats = requireNotNull(vedtaksperiode.dagsats()) {
-                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
-            }
+            val dagsats = if (vedtaksperiode.dagsats() == null) {
+                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+            } else vedtaksperiode.dagsats()!!
 
             val utbetalingsberegning = try {
                 vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
+                vedtaksperiode.aktivitetslogger.warn("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
-            val inntektsmelding = requireNotNull(vedtaksperiode.inntektsmeldingHendelse()) {
-                "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
-            }
+            val inntektsmelding = if (vedtaksperiode.inntektsmeldingHendelse() == null) {
+                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+            } else vedtaksperiode.inntektsmeldingHendelse()!!
 
             if (sisteUtbetalingsdag == null || inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
+                vedtaksperiode.aktivitetslogger.warn("Mangler enten siste utbetalingsdag eller inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             vedtaksperiode.tilstand(ytelser, TilGodkjenning) {
                 vedtaksperiode.maksdato = utbetalingsberegning.maksdato
                 vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
+                vedtaksperiode.aktivitetslogger.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
             }
         }
 

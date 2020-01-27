@@ -22,6 +22,8 @@ abstract class SykdomstidslinjeHendelse(
 
     abstract fun toJson(): String
 
+    internal abstract fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger)
+
     companion object Builder {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
