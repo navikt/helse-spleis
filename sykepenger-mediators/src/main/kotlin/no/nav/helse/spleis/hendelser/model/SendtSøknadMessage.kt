@@ -15,7 +15,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
     SøknadMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValue("status", "SENDT")
-        requiredKey("sendtNav", "tom", "egenmeldinger", "fravar")
+        requiredKey("sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
     }
 
@@ -24,6 +24,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
     }
 
     internal fun asModelSendtSøknad(): ModelSendtSøknad {
+        val søknadFom = this["fom"].asLocalDate()
         val søknadTom = this["tom"].asLocalDate()
         return ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
@@ -47,7 +48,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
                 val fraværstype = it["type"].asText()
                 val fom = it.path("fom").asLocalDate()
                 when (fraværstype) {
-                    in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
+                    in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(søknadFom, søknadTom, fom)
                     "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
                     "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
                     else -> {

@@ -61,7 +61,7 @@ internal class SykdomshistorikkTest {
     internal fun `Håndterer Ubestemt dag`() {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
         sendtSøknad(
-            ModelSendtSøknad.Periode.Utdanning(8.januar, 9.januar),
+            ModelSendtSøknad.Periode.Utdanning(8.januar, 12.januar, 9.januar),
             ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)

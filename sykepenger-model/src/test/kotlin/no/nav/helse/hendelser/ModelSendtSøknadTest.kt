@@ -47,7 +47,7 @@ internal class ModelSendtSøknadTest {
 
     @Test
     internal fun `søknad med utdanning`() {
-        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar))
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 10.januar, 5.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
@@ -72,7 +72,7 @@ internal class ModelSendtSøknadTest {
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
-        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 16.januar))
+        sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(2.januar, 10.januar, 16.januar))
         assertTrue(sendtSøknad.valider().hasErrors())
     }
 
@@ -97,12 +97,12 @@ internal class ModelSendtSøknadTest {
 
     @Test
     internal fun `må ha perioder`() {
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad()}
+        assertThrows<Aktivitetslogger.AktivitetException> { sendtSøknad() }
     }
 
     @Test
     internal fun `må ha sykdomsperioder`() {
-        assertThrows<Aktivitetslogger.AktivitetException>{sendtSøknad(Ferie(2.januar, 16.januar))}
+        assertThrows<Aktivitetslogger.AktivitetException> { sendtSøknad(Ferie(2.januar, 16.januar)) }
     }
 
     private fun sendtSøknad(vararg perioder: Periode) {

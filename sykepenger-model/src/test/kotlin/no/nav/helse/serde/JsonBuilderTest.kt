@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import no.nav.helse.fixtures.august
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
 import no.nav.helse.hendelser.*
@@ -45,7 +46,10 @@ private val sendtSøknad = ModelSendtSøknad(
     aktørId = aktørId,
     orgnummer = orgnummer,
     rapportertdato = LocalDateTime.now(),
-    perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
+    perioder = listOf(
+        ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100),
+        ModelSendtSøknad.Periode.Utdanning(1.januar, 31.januar, 1.august)
+    ),
     originalJson = "{}",
     aktivitetslogger = Aktivitetslogger()
 )

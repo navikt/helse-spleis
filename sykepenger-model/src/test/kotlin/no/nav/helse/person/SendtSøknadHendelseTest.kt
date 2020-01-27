@@ -9,7 +9,6 @@ import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -72,7 +71,7 @@ internal class SendtSøknadHendelseTest {
     @Test
     internal fun `sendtSøknad med utdanning avvist`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(1.januar, 5.januar, 4.januar)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }

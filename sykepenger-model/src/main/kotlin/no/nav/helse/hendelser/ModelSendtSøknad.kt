@@ -34,6 +34,7 @@ class ModelSendtSøknad(
 
         fun fromJson(json: String): ModelSendtSøknad {
             return objectMapper.readTree(json).let {
+                val søknadFom = it["søknad"].path("fom").asLocalDate()
                 val søknadTom = it["søknad"].path("tom").asLocalDate()
                 val aktivitetslogger = Aktivitetslogger(json)
                 ModelSendtSøknad(
@@ -58,7 +59,7 @@ class ModelSendtSøknad(
                         val fraværstype = it["type"].asText()
                         val fom = it.path("fom").asLocalDate()
                         when (fraværstype) {
-                            in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
+                            in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(søknadFom, søknadTom, fom)
                             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
                             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
                             else -> {
@@ -168,9 +169,9 @@ class ModelSendtSøknad(
             }
         }
 
-        class Utdanning(fom: LocalDate, private val _tom: LocalDate? = null) : Periode(fom, LocalDate.MAX) {
+        class Utdanning(fom: LocalDate, tom: LocalDate, private val utdanningFom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
-                ConcreteSykdomstidslinje.utenlandsdager(fom, _tom ?: sendtSøknad.tom, sendtSøknad)
+                ConcreteSykdomstidslinje.studiedager(utdanningFom, tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.error("Utdanning foreløpig ikke understøttet")
