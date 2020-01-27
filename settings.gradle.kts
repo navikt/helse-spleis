@@ -1,2 +1,2 @@
 rootProject.name = "sykepenger-spleis"
-include("sykepenger-model", "sykepenger-mediators")
+include("sykepenger-model", "sykepenger-mediators", "rapids-rivers")

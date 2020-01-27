@@ -20,7 +20,7 @@ jobs:
         echo $DOCKER_IMAGE > .docker_image
         echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
     - name: test and build
-      run: ./gradlew test build
+      run: ./gradlew -Pversion="1.$(echo $GITHUB_SHA | cut -c1-7)" test build publish
       env:
         ORG_GRADLE_PROJECT_githubUser: x-access-token
         ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
