@@ -38,8 +38,8 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(dagen: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
-        inntekter.add(Inntekt(dagen, hendelse, beløp))
+    internal fun add(fom: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
+        inntekter.add(Inntekt(fom, hendelse, beløp))
     }
 
     internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)

@@ -99,6 +99,7 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
 
     private inner class InntektsmeldingDataState(private val setter: (ModelInntektsmelding) -> Unit) : ModelState {
         private lateinit var hendelseId: String
+        private var cnt = 0
 
         override fun visitStringField(name: String, value: String) {
             when (name) {
@@ -106,24 +107,31 @@ internal class ModelBuilder(private val jsonString: String) : StructureVisitor {
             }
         }
 
+        override fun preVisitObject() {
+            cnt++
+        }
+
         override fun postVisitObjectField() {
-            setter(
-                ModelInntektsmelding(
-                    hendelseId = UUID.fromString(hendelseId),
-                    refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 30000.0, null),
-                    orgnummer = "88888888",
-                    fødselsnummer = "12020052345",
-                    aktørId = "100010101010",
-                    mottattDato = LocalDateTime.now(),
-                    førsteFraværsdag = LocalDate.now(),
-                    beregnetInntekt = 30000.0,
-                    aktivitetslogger = Aktivitetslogger(),
-                    originalJson = "{}",
-                    arbeidsgiverperioder = emptyList(),
-                    ferieperioder = emptyList()
+            if (cnt == 0) {
+                setter(
+                    ModelInntektsmelding(
+                        hendelseId = UUID.fromString(hendelseId),
+                        refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 30000.0, null),
+                        orgnummer = "88888888",
+                        fødselsnummer = "12020052345",
+                        aktørId = "100010101010",
+                        mottattDato = LocalDateTime.now(),
+                        førsteFraværsdag = LocalDate.now(),
+                        beregnetInntekt = 30000.0,
+                        aktivitetslogger = Aktivitetslogger(),
+                        originalJson = "{}",
+                        arbeidsgiverperioder = emptyList(),
+                        ferieperioder = emptyList()
+                    )
                 )
-            )
-            stack.pop()
+                stack.pop()
+            }
+            cnt --
         }
     }
 

@@ -13,7 +13,7 @@ private const val CURRENT_SKJEMA_VERSJON = 3
 
 class Person(private val aktørId: String, private val fødselsnummer: String) : VedtaksperiodeObserver {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
-    private var skjemaVersjon = CURRENT_SKJEMA_VERSJON
+    private val skjemaVersjon = CURRENT_SKJEMA_VERSJON
     private val aktivitetslogger = Aktivitetslogger()
     private val hendelser = mutableListOf<ArbeidstakerHendelse>()
 

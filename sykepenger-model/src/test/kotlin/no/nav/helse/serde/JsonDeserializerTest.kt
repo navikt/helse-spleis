@@ -1,11 +1,14 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class JsonDeserializerTest {
@@ -33,7 +36,8 @@ internal class JsonDeserializerTest {
 
     @Test
     fun test1() {
-        val result = ModelBuilder(enkelPersonJson()).result()
+        //val result = ModelBuilder(enkelPersonJson()).result()
+        val result = JsonNodeModelBuilder(enkelPersonJson()).result()
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))
@@ -49,32 +53,51 @@ internal class JsonDeserializerTest {
     }
 
     private fun enkelPersonJson() =
-        jacksonObjectMapper().writeValueAsString(
-            mapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "arbeidsgivere" to listOf(
-                    mapOf(
-                        "organisasjonsnummer" to organisasjonsnummer,
-                        "id" to arbeidsgiverId,
-                        "inntekter" to listOf(
-                            mapOf(
-                                "fom" to "2020-01-01",
-                                "hendelse" to inntektsmeldingHendelseId,
-                                "beløp" to 30000.0
+        jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .writeValueAsString(
+                mapOf(
+                    "aktørId" to aktørId,
+                    "fødselsnummer" to fødselsnummer,
+                    "arbeidsgivere" to listOf(
+                        mapOf(
+                            "organisasjonsnummer" to organisasjonsnummer,
+                            "id" to arbeidsgiverId,
+                            "inntekter" to listOf(
+                                mapOf(
+                                    "fom" to "2020-01-01",
+                                    "hendelse" to inntektsmeldingHendelseId,
+                                    "beløp" to 30000.0
+                                )
                             )
                         )
-                    )
-                ),
-                "hendelser" to listOf(
-                    mapOf(
-                        "type" to "Inntektsmelding",
-                        "tidspunkt" to "2020-01-01T00:00:00",
-                        "data" to mapOf(
-                            "hendelseId" to inntektsmeldingHendelseId
+                    ),
+                    "hendelser" to listOf(
+                        mapOf(
+                            "type" to "Inntektsmelding",
+                            "tidspunkt" to "2020-01-01T00:00:00",
+                            "data" to mapOf(
+                                "hendelseId" to inntektsmeldingHendelseId,
+                                "refusjon" to mapOf(
+                                    "beløpPrMåned" to 30000.00
+                                ),
+                                "orgnummer" to organisasjonsnummer,
+                                "fødselsnummer" to fødselsnummer,
+                                "aktørId" to aktørId,
+                                "mottattDato" to "2020-01-09T14:02:28",
+                                "førsteFraværsdag" to LocalDate.now().minusDays(18),
+                                "beregnetInntekt" to 30000.00,
+                                "arbeidsgiverperioder" to listOf(
+                                    mapOf(
+                                        "fom" to LocalDate.now().minusDays(18),
+                                        "tom" to LocalDate.now().minusDays(2)
+                                    )
+                                ),
+                                "ferieperioder" to emptyList<Map<String, Any>>()
+                            )
                         )
                     )
                 )
             )
-        )
 }
