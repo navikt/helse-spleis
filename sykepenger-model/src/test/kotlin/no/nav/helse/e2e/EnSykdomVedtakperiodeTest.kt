@@ -330,8 +330,8 @@ internal class EnSykdomVedtakperiodeTest {
 
             override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = inkrementer(SykHelgedag::class)
 
-            private fun inkrementer(klass: KClass<out Dag>) {
-                dagtelling.compute(klass) { _, value ->
+            private fun inkrementer(klasse: KClass<out Dag>) {
+                dagtelling.compute(klasse) { _, value ->
                     1 + (value ?: 0)
                 }
             }
