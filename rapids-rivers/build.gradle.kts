@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-    api(kotlin("stdlib"))
     api("ch.qos.logback:logback-classic:1.2.3")
     api("net.logstash.logback:logstash-logback-encoder:5.2")
     api("io.ktor:ktor-server-netty:$ktorVersion")

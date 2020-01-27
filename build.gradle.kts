@@ -13,7 +13,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation(kotlin("stdlib-jdk8"))
+        api(kotlin("stdlib-jdk8"))
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
@@ -70,8 +70,8 @@ subprojects {
     }
 
     dependencies {
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
