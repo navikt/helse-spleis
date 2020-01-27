@@ -35,6 +35,7 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().allSource)
 }
 
+version = properties["rapidVersion"] ?: "local-build"
 val githubUser: String by project
 val githubPassword: String by project
 
