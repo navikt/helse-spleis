@@ -254,12 +254,15 @@ internal class Vedtaksperiode internal constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+            vilkårsgrunnlag.error("uventet vilkårsgrunnlag")
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: ModelYtelser) {
+            ytelser.error("uventet sykdom- og inntektshistorikk")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, manuellSaksbehandling: ModelManuellSaksbehandling) {
+            manuellSaksbehandling.error("uventet manuell saksbehandling")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
@@ -280,6 +283,7 @@ internal class Vedtaksperiode internal constructor(
                 vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
                 vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av ny søknad")
         }
 
         override val type = START
@@ -290,11 +294,13 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, MottattSendtSøknad)
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av sendt søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av inntektsmelding")
         }
 
         override val type = MOTTATT_NY_SØKNAD
@@ -309,6 +315,7 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, Vilkårsprøving)
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av inntektsmelding")
         }
 
         override val type = MOTTATT_SENDT_SØKNAD
@@ -321,6 +328,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sendtSøknad: ModelSendtSøknad) {
             vedtaksperiode.håndter(sendtSøknad, Vilkårsprøving)
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av sendt søknad")
         }
 
         override val type = MOTTATT_INNTEKTSMELDING
@@ -336,6 +344,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
+            aktivitetslogger.info("Forespør vilkårsgrunnlag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
@@ -378,6 +387,7 @@ internal class Vedtaksperiode internal constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             vedtaksperiode.trengerYtelser()
+            aktivitetslogger.info("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
@@ -397,12 +407,12 @@ internal class Vedtaksperiode internal constructor(
                     vedtaksperiode.sykdomstidslinje.sisteDag()
                 )
             ) {
-                ytelser.warn("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")
+                ytelser.error("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
             if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
-                ytelser.warn("Har fraværsdag innenfor seks måneder, sender saken til Infotrygd")
+                ytelser.error("Har fraværsdag innenfor seks måneder, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
@@ -413,7 +423,7 @@ internal class Vedtaksperiode internal constructor(
             val utbetalingsberegning = try {
                 vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
-                vedtaksperiode.aktivitetslogger.warn("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
+                vedtaksperiode.aktivitetslogger.error("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
@@ -423,7 +433,7 @@ internal class Vedtaksperiode internal constructor(
             } else vedtaksperiode.inntektsmeldingHendelse()!!
 
             if (sisteUtbetalingsdag == null || inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
-                vedtaksperiode.aktivitetslogger.warn("Mangler enten siste utbetalingsdag eller inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
+                vedtaksperiode.aktivitetslogger.error("Mangler enten siste utbetalingsdag eller inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
@@ -458,6 +468,7 @@ internal class Vedtaksperiode internal constructor(
                     vedtaksperiode.organisasjonsnummer
                 )
             )
+            aktivitetslogger.info("Forespør godkjenning fra saksbehandler")
         }
 
         override fun håndter(
@@ -470,7 +481,7 @@ internal class Vedtaksperiode internal constructor(
                     vedtaksperiode.aktivitetslogger.info("Utbetaling markert som godkjent av saksbehandler")
                 }
             } else {
-                vedtaksperiode.aktivitetslogger.warn("Utbetaling markert som ikke godkjent av saksbehandler")
+                vedtaksperiode.aktivitetslogger.error("Utbetaling markert som ikke godkjent av saksbehandler")
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
