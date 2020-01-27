@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.hendelser.ModelSendtSøknad.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
 import no.nav.helse.person.*
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -29,7 +30,6 @@ internal class EnSykdomVedtakperiodeTest {
         private val rapportertdato = 1.februar.atStartOfDay()
     }
 
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private val inspektør get() = TestPersonInspektør(person)
@@ -37,7 +37,6 @@ internal class EnSykdomVedtakperiodeTest {
     private var forventetEndringTeller = 0
 
     @BeforeEach internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         person = Person(UNG_PERSON_FNR_2018, AKTØRID)
         observatør = TestObservatør().also {person.addObserver(it)}
     }
@@ -49,10 +48,14 @@ internal class EnSykdomVedtakperiodeTest {
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling()
-        assertFalse(aktivitetslogger.hasErrors())
-        assertFalse(aktivitetslogger.hasWarnings())
-        assertTrue(aktivitetslogger.hasMessages())
-        assertEquals(6, observatør.tilstander[0]?.size)
+        inspektør.also {
+            assertFalse(it.personLogger.hasErrors())
+            assertFalse(it.personLogger.hasWarnings())
+            assertTrue(it.personLogger.hasMessages())
+        }
+        assertTilstander(0,
+            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
+            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING)
     }
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
@@ -62,10 +65,23 @@ internal class EnSykdomVedtakperiodeTest {
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
         håndterManuelSaksbehandling()
-        assertFalse(aktivitetslogger.hasErrors())
-        assertFalse(aktivitetslogger.hasWarnings())
-        assertTrue(aktivitetslogger.hasMessages())
-        assertEquals(6, observatør.tilstander[0]?.size)
+        inspektør.also {
+            assertFalse(it.personLogger.hasErrors())
+            assertFalse(it.personLogger.hasWarnings())
+            assertTrue(it.personLogger.hasMessages())
+        }
+        assertTilstander(0,
+            START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
+            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING)
+    }
+
+    private fun assertEndringTeller() {
+        forventetEndringTeller += 1
+        assertEquals(forventetEndringTeller, observatør.endreTeller)
+    }
+
+    private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
+        assertEquals(tilstander.asList(), observatør.tilstander[indeks])
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -108,11 +124,6 @@ internal class EnSykdomVedtakperiodeTest {
         assertTrue(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
     }
 
-    private fun assertEndringTeller() {
-        forventetEndringTeller += 1
-        assertEquals(forventetEndringTeller, observatør.endreTeller)
-    }
-
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -121,7 +132,7 @@ internal class EnSykdomVedtakperiodeTest {
             rapportertdato = rapportertdato,
             sykeperioder = listOf(*sykeperioder),
             originalJson = "{}",
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun sendtSøknad(vararg perioder: Periode) = ModelSendtSøknad(
@@ -132,7 +143,7 @@ internal class EnSykdomVedtakperiodeTest {
             rapportertdato = rapportertdato,
             perioder = listOf(*perioder),
             originalJson = "{}",
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun inntektsmelding(
@@ -155,7 +166,7 @@ internal class EnSykdomVedtakperiodeTest {
             originalJson = "{}",
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = Aktivitetslogger()
         )
 
     private fun vilkårsgrunnlag(inntekt: Double) = ModelVilkårsgrunnlag(
@@ -169,7 +180,7 @@ internal class EnSykdomVedtakperiodeTest {
             YearMonth.of(2017, it),
             listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))) },
         erEgenAnsatt = false,
-        aktivitetslogger = aktivitetslogger,
+        aktivitetslogger = Aktivitetslogger(),
         originalJson = "{}"
     )
 
@@ -192,12 +203,12 @@ internal class EnSykdomVedtakperiodeTest {
                 )
             },
             inntektshistorikk = emptyList(),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = Aktivitetslogger()
         ),
-        foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, aktivitetslogger),
+        foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
         rapportertdato = rapportertdato,
         originalJson = "{}",
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private inner class TestObservatør: PersonObserver {
@@ -216,7 +227,7 @@ internal class EnSykdomVedtakperiodeTest {
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             val indeks = periodeIndekser.getOrPut(event.id, {
                 periodeIndek++
-                tilstander[periodeIndek] = mutableListOf(TilstandType.START)
+                tilstander[periodeIndek] = mutableListOf(START)
                 periodeIndek
             })
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
