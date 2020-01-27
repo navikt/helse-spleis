@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 private const val aktørId = "12345"
@@ -16,11 +17,12 @@ private const val orgnummer = "987654321"
 
 internal class JsonBuilderTest {
     @Test
-    internal fun `maybe what?`() {
+    internal fun `print person som json`() {
         val person = Person(aktørId, fnr).apply {
             håndter(nySøknad)
             håndter(sendtSøknad)
             håndter(inntektsmelding)
+            håndter(vilkårsgrunnlag)
         }
 
         val jsonBuilder = JsonBuilder()
@@ -68,3 +70,26 @@ private val inntektsmelding = ModelInntektsmelding(
     ferieperioder = emptyList(),
     aktivitetslogger = Aktivitetslogger()
 )
+
+private val vilkårsgrunnlag = ModelVilkårsgrunnlag(
+    hendelseId = UUID.randomUUID(),
+    vedtaksperiodeId = "1",
+    aktørId = aktørId,
+    fødselsnummer = fnr,
+    orgnummer = orgnummer,
+    rapportertDato = LocalDateTime.now(),
+    inntektsmåneder = (1.rangeTo(12)).map {
+        ModelVilkårsgrunnlag.Måned(
+            årMåned = YearMonth.of(2018, it),
+            inntektsliste = listOf(
+                ModelVilkårsgrunnlag.Inntekt(
+                    beløp = 1000.0
+                )
+            )
+        )
+    },
+    erEgenAnsatt = false,
+    aktivitetslogger = Aktivitetslogger(),
+    originalJson = "{}"
+)
+

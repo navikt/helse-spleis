@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -204,7 +205,8 @@ internal class JsonBuilder : PersonVisitor {
         override fun toJson(): String = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-            .writeValueAsString(personMap)
+            .valueToTree<JsonNode>(personMap)
+            .toPrettyString()
     }
 
     private class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
@@ -248,6 +250,22 @@ internal class JsonBuilder : PersonVisitor {
             manuellSaksbehandling: ModelManuellSaksbehandling
         ) {
             hendelser.add(ManuellSaksbehandlingReflect(manuellSaksbehandling).toMap())
+        }
+
+        override fun visitNySøknadHendelse(jsonBuilder: JsonBuilder, nySøknad: ModelNySøknad) {
+            hendelser.add(NySøknadReflect(nySøknad).toMap())
+        }
+
+        override fun visitSendtSøknadHendelse(jsonBuilder: JsonBuilder, sendtSøknad: ModelSendtSøknad) {
+            hendelser.add(SendtSøknadReflect(sendtSøknad).toMap())
+        }
+
+        override fun visitVilkårsgrunnlagHendelse(jsonBuilder: JsonBuilder, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+            hendelser.add(VilkårsgrunnlagReflect(vilkårsgrunnlag).toMap())
+        }
+
+        override fun visitYtelserHendelse(jsonBuilder: JsonBuilder, ytelser: ModelYtelser) {
+            hendelser.add(YtelserReflect(ytelser).toMap())
         }
 
         override fun postVisitHendelser(jsonBuilder: JsonBuilder) {
