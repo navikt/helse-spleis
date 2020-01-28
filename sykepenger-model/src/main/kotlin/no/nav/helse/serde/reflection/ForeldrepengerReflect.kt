@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.Periode
 
 internal class ForeldrepengerReflect(foreldrepenger: ModelForeldrepenger) {
-    private val foreldrepengeytelse: Periode? = foreldrepenger.getProp("foreldrepengeytelse")
-    private val svangerskapsytelse: Periode? = foreldrepenger.getProp("svangerskapsytelse")
+    private val foreldrepengeytelse: Periode? = foreldrepenger["foreldrepengeytelse"]
+    private val svangerskapsytelse: Periode? = foreldrepenger["svangerskapsytelse"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "foreldrepengeytelse" to foreldrepengeytelse?.let(::periode),

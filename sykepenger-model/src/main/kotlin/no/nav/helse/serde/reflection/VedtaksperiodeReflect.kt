@@ -6,16 +6,16 @@ import java.time.LocalDate
 import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
-    private val id: UUID = vedtaksperiode.getProp("id")
-    private val aktørId: String = vedtaksperiode.getProp("aktørId")
-    private val fødselsnummer: String = vedtaksperiode.getProp("fødselsnummer")
-    private val organisasjonsnummer: String = vedtaksperiode.getProp("organisasjonsnummer")
-    private val maksdato: LocalDate? = vedtaksperiode.getProp("maksdato")
-    private val godkjentAv: String? = vedtaksperiode.getProp("godkjentAv")
-    private val utbetalingsreferanse: String? = vedtaksperiode.getProp("utbetalingsreferanse")
-    private val førsteFraværsdag:LocalDate? = vedtaksperiode.getProp("førsteFraværsdag")
-    private val inntektFraInntektsmelding: Double? = vedtaksperiode.getProp("inntektFraInntektsmelding")
-    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.getProp<Vedtaksperiode, ModelVilkårsgrunnlag
+    private val id: UUID = vedtaksperiode["id"]
+    private val aktørId: String = vedtaksperiode["aktørId"]
+    private val fødselsnummer: String = vedtaksperiode["fødselsnummer"]
+    private val organisasjonsnummer: String = vedtaksperiode["organisasjonsnummer"]
+    private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
+    private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
+    private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
+    private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
+    private val inntektFraInntektsmelding: Double? = vedtaksperiode["inntektFraInntektsmelding"]
+    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, ModelVilkårsgrunnlag
         .Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
             "erEgenAnsatt" to it.erEgenAnsatt,
@@ -24,7 +24,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         )
     }
 
-    internal fun toMap(): Map<String, Any?> = mapOf(
+    internal fun toMap() = mutableMapOf<String, Any?>(
         "id" to id,
         "aktørId" to aktørId,
         "fødselsnummer" to fødselsnummer,

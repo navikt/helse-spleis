@@ -80,7 +80,7 @@ class ModelNySøknad(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map { it.sykdomstidslinje(this) }.reduce(ConcreteSykdomstidslinje::plus)
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce(ConcreteSykdomstidslinje::plus)
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
 
@@ -109,15 +109,15 @@ class ModelNySøknad(
         aktivitetslogger.continueIfNoErrors(*steps) { onError() }
     }
 
-    class Sykeperiode(
+    private inner class Sykeperiode(
         private val fom: LocalDate,
         private val tom: LocalDate,
         private val sykdomsgrad: Int
     ) {
         internal fun kanBehandles() = sykdomsgrad == 100
 
-        internal fun sykdomstidslinje(hendelse: ModelNySøknad) =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, hendelse)
+        internal fun sykdomstidslinje() =
+            ConcreteSykdomstidslinje.sykedager(fom, tom, this@ModelNySøknad)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
