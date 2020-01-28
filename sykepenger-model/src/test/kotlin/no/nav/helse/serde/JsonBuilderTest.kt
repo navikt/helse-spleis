@@ -3,6 +3,7 @@ package no.nav.helse.serde
 import no.nav.helse.fixtures.august
 import no.nav.helse.fixtures.februar
 import no.nav.helse.fixtures.januar
+import no.nav.helse.fixtures.juli
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
@@ -23,6 +24,7 @@ internal class JsonBuilderTest {
             håndter(sendtSøknad)
             håndter(inntektsmelding)
             håndter(vilkårsgrunnlag)
+            håndter(ytelser)
         }
 
         val jsonBuilder = JsonBuilder()
@@ -93,3 +95,35 @@ private val vilkårsgrunnlag = ModelVilkårsgrunnlag(
     originalJson = "{}"
 )
 
+    private val ytelser = ModelYtelser(
+        hendelseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fnr,
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = "1",
+        sykepengehistorikk = ModelSykepengehistorikk(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    fom = 1.januar.minusYears(1),
+                    tom = 31.januar.minusYears(1),
+                    dagsats = 1000
+                )
+            ),
+            inntektshistorikk = emptyList(),
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        foreldrepenger = ModelForeldrepenger(
+            foreldrepengeytelse = Periode(
+                fom = 1.januar.minusYears(2),
+                tom = 31.januar.minusYears(2)
+            ),
+            svangerskapsytelse = Periode(
+                fom = 1.juli.minusYears(2),
+                tom = 31.juli.minusYears(2)
+            ),
+            aktivitetslogger = Aktivitetslogger()
+        ),
+        rapportertdato = LocalDateTime.now(),
+        originalJson = "{}",
+        aktivitetslogger = Aktivitetslogger()
+    )

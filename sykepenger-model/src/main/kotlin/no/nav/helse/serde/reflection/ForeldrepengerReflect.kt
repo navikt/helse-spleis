@@ -7,5 +7,13 @@ internal class ForeldrepengerReflect(foreldrepenger: ModelForeldrepenger) {
     private val foreldrepengeytelse: Periode? = foreldrepenger.getProp("foreldrepengeytelse")
     private val svangerskapsytelse: Periode? = foreldrepenger.getProp("svangerskapsytelse")
 
-    internal fun toMap() = mutableMapOf<String, Any?>()
+    internal fun toMap() = mutableMapOf<String, Any?>(
+        "foreldrepengeytelse" to foreldrepengeytelse?.let(::periode),
+        "svangerskapsytelse" to svangerskapsytelse?.let(::periode)
+    )
+
+    private fun periode(periode: Periode) = mutableMapOf<String, Any?>(
+        "fom" to periode.start,
+        "tom" to periode.endInclusive
+    )
 }
