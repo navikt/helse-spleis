@@ -71,7 +71,7 @@ internal class SendtSøknadHendelseTest {
     @Test
     internal fun `sendtSøknad med utdanning avvist`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(1.januar, 5.januar, 4.januar)))
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(aktivitetslogger.hasErrors())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }

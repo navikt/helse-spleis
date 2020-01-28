@@ -52,7 +52,7 @@ private val sendtSøknad = ModelSendtSøknad(
     rapportertdato = LocalDateTime.now(),
     perioder = listOf(
         ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100),
-        ModelSendtSøknad.Periode.Utdanning(1.januar, 31.januar, 1.august)
+        ModelSendtSøknad.Periode.Utdanning(1.august, 31.januar)
     ),
     originalJson = "{}",
     aktivitetslogger = Aktivitetslogger()

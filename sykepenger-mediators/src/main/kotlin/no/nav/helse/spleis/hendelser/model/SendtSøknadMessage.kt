@@ -48,7 +48,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
                 val fraværstype = it["type"].asText()
                 val fom = it.path("fom").asLocalDate()
                 when (fraværstype) {
-                    in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(søknadFom, søknadTom, fom)
+                    in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
                     "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
                     "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
                     else -> {

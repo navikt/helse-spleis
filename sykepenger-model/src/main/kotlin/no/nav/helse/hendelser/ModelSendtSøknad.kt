@@ -60,7 +60,7 @@ class ModelSendtSøknad(
                         val fraværstype = it["type"].asText()
                         val fom = it.path("fom").asLocalDate()
                         when (fraværstype) {
-                            in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(søknadFom, søknadTom, fom)
+                            in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
                             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
                             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
                             else -> {
@@ -174,9 +174,9 @@ class ModelSendtSøknad(
             }
         }
 
-        class Utdanning(fom: LocalDate, tom: LocalDate, private val utdanningFom: LocalDate) : Periode(fom, tom) {
+        class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad) =
-                ConcreteSykdomstidslinje.studiedager(utdanningFom, tom, sendtSøknad)
+                ConcreteSykdomstidslinje.studiedager(fom, tom, sendtSøknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.error("Utdanning foreløpig ikke understøttet")

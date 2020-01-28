@@ -38,7 +38,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
                     it["faktiskGrad"] = periode.getProp<ModelSendtSøknad.Periode.Sykdom, Double>("faktiskGrad")
                 }
                 is ModelSendtSøknad.Periode.Utdanning -> {
-                    it["utdanningFom"] = periode.getProp<ModelSendtSøknad.Periode.Utdanning, LocalDate?>("utdanningFom")
+                    it["fom"] = periode.getProp<ModelSendtSøknad.Periode.Utdanning, LocalDate?>("fom")
                 }
             }
         }
