@@ -194,13 +194,12 @@ internal class JsonBuilder : PersonVisitor {
 
     private class Root : JsonState {
         private val personMap = mutableMapOf<String, Any?>()
-        private val hendelseMap = mutableMapOf<String, Any?>()
 
         override fun preVisitPerson(jsonBuilder: JsonBuilder, person: Person) {
             jsonBuilder.pushState(PersonState(person, personMap))
         }
 
-        override fun toString() = listOf(hendelseMap, personMap).toString()
+        override fun toString() = personMap.toString()
 
         override fun toJson(): String = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

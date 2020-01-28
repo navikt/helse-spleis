@@ -10,12 +10,14 @@ interface PersonObserver : VedtaksperiodeObserver {
         val fødselsnummer: String
     )
 
-    data class VedtaksperiodeIkkeFunnetEvent(val vedtaksperiodeId: UUID,
-                                             val aktørId: String,
-                                             val fødselsnummer: String,
-                                             val organisasjonsnummer: String)
+    data class VedtaksperiodeIkkeFunnetEvent(
+        val vedtaksperiodeId: UUID,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String
+    )
 
-    fun personEndret(personEndretEvent: PersonEndretEvent)
+    fun personEndret(personEndretEvent: PersonEndretEvent) {}
 
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
 }
