@@ -41,7 +41,6 @@ jobs:
         cluster: dev-fss
         team: tbd
         resources: deploy/preprod.yaml
-        rawresources: deploy/alerts-preprod.yaml
     - name: deploy to prod
       uses: navikt/deployment-cli/action@0.4.1
       env:
@@ -51,4 +50,3 @@ jobs:
         cluster: prod-fss
         team: tbd
         resources: deploy/prod.yaml
-        rawresources: deploy/alerts-prod.yaml
