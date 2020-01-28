@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 class AppBuilder(private val env: Map<String, String>) {
     init {
         Thread.currentThread().setUncaughtExceptionHandler(::uncaughtExceptionHandler)
-        Runtime.getRuntime().addShutdownHook(Thread(::stop))
+        Runtime.getRuntime().addShutdownHook(Thread(::shutdownHook))
     }
 
     private val log = LoggerFactory.getLogger(AppBuilder::class.java)
@@ -47,6 +47,11 @@ class AppBuilder(private val env: Map<String, String>) {
     fun stop() {
         rapid.stop()
         app.stop(1, 1, TimeUnit.SECONDS)
+    }
+
+    private fun shutdownHook() {
+        log.info("received shutdown signal, stopping app")
+        stop()
     }
 
     private fun uncaughtExceptionHandler(thread: Thread, err: Throwable) {
