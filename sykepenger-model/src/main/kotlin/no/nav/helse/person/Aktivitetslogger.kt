@@ -42,7 +42,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         return true
     }
 
-    internal fun continueIfNoErrors(onError: () -> Unit, vararg steps: ValidationStep) {
+    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
         if (this.hasErrors()) return
         steps.forEach {
             it()

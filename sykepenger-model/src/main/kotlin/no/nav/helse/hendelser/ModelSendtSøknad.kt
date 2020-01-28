@@ -137,8 +137,8 @@ class ModelSendtSøknad(
         visitor.visitSendtSøknadHendelse(this)
     }
 
-    internal fun continueIfNoErrors(onError: () -> Unit, vararg steps: ValidationStep) {
-        aktivitetslogger.continueIfNoErrors(onError, *steps)
+    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
+        aktivitetslogger.continueIfNoErrors(*steps) { onError() }
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {

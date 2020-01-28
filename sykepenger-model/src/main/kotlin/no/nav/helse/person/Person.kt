@@ -37,13 +37,16 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         fun validate(): ValidationStep = { sendtSøknad.valider() }
         fun arbeidsgiver(): ValidationStep = { arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad) }
         fun håndterSendtSøknad(): ValidationStep = { arbeidsgiver?.håndter(sendtSøknad) }
-        fun onError(): ValidationStep = { invaliderAllePerioder(sendtSøknad) }
+        fun onError() {
+            invaliderAllePerioder(sendtSøknad)
+        }
+
         sendtSøknad.continueIfNoErrors(
-            onError(),
             validate(),
             arbeidsgiver(),
             håndterSendtSøknad()
-        )
+        ) { onError() }
+
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
