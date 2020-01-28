@@ -42,6 +42,14 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         return true
     }
 
+    internal fun continueIfNoErrors(onError: () -> Unit, vararg steps: ValidationStep) {
+        if (this.hasErrors()) return
+        steps.forEach {
+            it()
+            if (this.hasErrors()) return onError()
+        }
+    }
+
     fun toReport(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
@@ -115,6 +123,8 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         override fun toString() = label
     }
 }
+
+internal typealias ValidationStep = () -> Unit
 
 interface IAktivitetslogger {
     fun info(melding: String, vararg params: Any)

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.ValidationStep
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -134,6 +135,10 @@ class ModelSendtSøknad(
 
     override fun accept(visitor: PersonVisitor) {
         visitor.visitSendtSøknadHendelse(this)
+    }
+
+    internal fun continueIfNoErrors(onError: () -> Unit, vararg steps: ValidationStep) {
+        aktivitetslogger.continueIfNoErrors(onError, *steps)
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {

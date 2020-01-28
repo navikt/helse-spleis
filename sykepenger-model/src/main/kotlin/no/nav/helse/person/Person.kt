@@ -8,6 +8,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import java.util.*
+import javax.swing.ViewportLayout
+import kotlin.reflect.jvm.internal.ReflectProperties
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -32,10 +34,16 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     fun håndter(sendtSøknad: ModelSendtSøknad) {
         registrer(sendtSøknad, "Behandler sendt søknad")
         var arbeidsgiver: Arbeidsgiver? = null
-        continueIfNoErrors(sendtSøknad,
-            { sendtSøknad.valider() },
-            { arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad) },
-            { arbeidsgiver?.håndter(sendtSøknad) })
+        fun validate(): ValidationStep = { sendtSøknad.valider() }
+        fun arbeidsgiver(): ValidationStep = { arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad) }
+        fun håndterSendtSøknad(): ValidationStep = { arbeidsgiver?.håndter(sendtSøknad) }
+        fun onError(): ValidationStep = { invaliderAllePerioder(sendtSøknad) }
+        sendtSøknad.continueIfNoErrors(
+            onError(),
+            validate(),
+            arbeidsgiver(),
+            håndterSendtSøknad()
+        )
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -114,7 +122,7 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         visitor.postVisitPerson(this)
     }
 
-    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: () -> Unit) {
+    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: ValidationStep) {
         if (hendelse.hasErrors()) return
         blocks.forEach {
             it()

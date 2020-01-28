@@ -8,6 +8,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -150,6 +152,9 @@ internal class Arbeidsgiver private constructor(
             påminnelse.kopierAktiviteterTil(aktivitetslogger)
         }
     }
+
+    internal fun inntekt(dato: LocalDate): BigDecimal? =
+        inntekthistorikk.inntekt(dato)
 
     internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse) {
         perioder.forEach { it.invaliderPeriode(hendelse) }
