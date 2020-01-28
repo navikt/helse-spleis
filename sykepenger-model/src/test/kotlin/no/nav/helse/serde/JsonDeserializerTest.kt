@@ -37,7 +37,8 @@ internal class JsonDeserializerTest {
     @Test
     fun test1() {
         //val result = ModelBuilder(enkelPersonJson()).result()
-        val result = JsonNodeModelBuilder(enkelPersonJson()).result()
+        //val result = JsonNodeModelBuilder(enkelPersonJson()).result()
+        val result = DataClassModelBuilder(enkelPersonJson()).result()
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))
@@ -50,6 +51,12 @@ internal class JsonDeserializerTest {
             .privatProp<MutableList<Inntekthistorikk.Inntekt>>("inntekter")
         assertEquals(1, inntekter.size)
         assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
+    }
+
+    @Test
+    fun test2() {
+        val data = parseJson(enkelPersonJson())
+        println(data)
     }
 
     private fun enkelPersonJson() =
@@ -80,7 +87,8 @@ internal class JsonDeserializerTest {
                             "data" to mapOf(
                                 "hendelseId" to inntektsmeldingHendelseId,
                                 "refusjon" to mapOf(
-                                    "beløpPrMåned" to 30000.00
+                                    "beløpPrMåned" to 30000.00,
+                                    "endringerIRefusjon" to emptyList<Any>()
                                 ),
                                 "orgnummer" to organisasjonsnummer,
                                 "fødselsnummer" to fødselsnummer,

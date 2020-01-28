@@ -105,19 +105,6 @@ class JsonNodeModelBuilder(json: String) {
                 val arbeidsgiverData = objectMapper.convertValue<ArbeidsgiverData>(jsonNode)
                 val inntektHistorie = Inntekthistorikk()
 
-                /*jsonNode["inntekter"].forEach {
-                    inntektHistorie.add(
-                        fom = it["fom"].asDate(),
-                        hendelse = hendelser[it["hendelse"].asText()] as ModelInntektsmelding,
-                        beløp = it["beløp"].decimalValue()
-                    )
-                }
-
-                return reflector.lagArbeidsgiver(
-                    organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
-                    id = jsonNode["id"].asUUID(),
-                    inntektHistorie = inntektHistorie
-                )*/
                 arbeidsgiverData.inntekter.forEach {
                     inntektHistorie.add(it.fom, hendelser[it.hendelse.toString()] as ModelInntektsmelding, it.beløp)
                 }
