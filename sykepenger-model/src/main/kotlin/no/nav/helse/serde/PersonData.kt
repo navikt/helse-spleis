@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -82,8 +83,8 @@ class DataClassModelBuilder(private val json: String) {
             beregnetInntekt = data.beregnetInntekt,
             aktivitetslogger = Aktivitetslogger(),
             originalJson = "{}",
-            arbeidsgiverperioder = data.arbeidsgiverperioder.map { it.fom.rangeTo(it.tom) },
-            ferieperioder = data.ferieperioder.map { it.fom.rangeTo(it.tom) }
+            arbeidsgiverperioder = data.arbeidsgiverperioder.map { Periode(it.fom, it.tom) },
+            ferieperioder = data.ferieperioder.map { Periode(it.fom, it.tom) }
         )
     }
 }
