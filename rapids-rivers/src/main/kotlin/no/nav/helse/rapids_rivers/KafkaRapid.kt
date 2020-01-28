@@ -20,7 +20,7 @@ class KafkaRapid(
 
     private val log = LoggerFactory.getLogger(KafkaRapid::class.java)
 
-    private val running = AtomicBoolean(false)
+    private val running = AtomicBoolean(Stopped)
 
     private val stringDeserializer = StringDeserializer()
     private val stringSerializer = StringSerializer()
@@ -39,19 +39,13 @@ class KafkaRapid(
 
     override fun start() {
         log.info("starting rapid")
-        running.set(true)
-        try {
-            consumer.use { consumeMessages() }
-        } finally {
-            stop()
-        }
+        if (Started == running.getAndSet(Started)) return log.info("rapid already started")
+        consumeMessages()
     }
 
     override fun stop() {
         log.info("stopping rapid")
-        if (!running.get()) return log.info("rappid already stopped")
-        running.set(false)
-        producer.close()
+        if (Stopped == running.getAndSet(Stopped)) return log.info("rapid already stopped")
         consumer.wakeup()
     }
 
@@ -71,9 +65,19 @@ class KafkaRapid(
             // throw exception if we have not been told to stop
             if (running.get()) throw err
         } finally {
-            log.info("stopped consuming messages")
-            consumer.unsubscribe()
+            closeResources()
         }
+    }
+
+    private fun closeResources() {
+        if (Started == running.getAndSet(Stopped)) {
+            log.info("stopped consuming messages due to an error")
+        } else {
+            log.info("stopped consuming messages after receiving stop signal")
+        }
+        producer.close()
+        consumer.unsubscribe()
+        consumer.close()
     }
 
     private class KafkaMessageContext(
@@ -87,5 +91,10 @@ class KafkaRapid(
         override fun send(key: String, message: String) {
             rapidsConnection.publish(key, message)
         }
+    }
+
+    private companion object {
+        private const val Stopped = false
+        private const val Started = true
     }
 }

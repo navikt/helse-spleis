@@ -19,9 +19,8 @@ import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
@@ -32,9 +31,8 @@ internal class RapidIntegrationTest {
         private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-
         private val consumerId = "test-app"
+
 
         private val testTopic = "a-test-topic"
 
@@ -45,9 +43,11 @@ internal class RapidIntegrationTest {
                 withSchemaRegistry = false,
                 withSecurity = false
         )
+
         private lateinit var kafkaProducer: Producer<String, String>
         private lateinit var kafkaConsumer: Consumer<String, String>
 
+        private lateinit var config: KafkaConfigBuilder
         private lateinit var rapid: KafkaRapid
 
         private fun producerProperties() =
@@ -80,15 +80,10 @@ internal class RapidIntegrationTest {
             kafkaConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
             kafkaConsumer.subscribe(listOf(testTopic))
 
-            val config = KafkaConfigBuilder(
+            config = KafkaConfigBuilder(
                     bootstrapServers = embeddedKafkaEnvironment.brokersURL,
                     consumerGroupId = consumerId
             )
-            rapid = KafkaRapid(config.consumerConfig(), config.producerConfig(), testTopic)
-
-            GlobalScope.launch {
-                rapid.start()
-            }
         }
 
         @AfterAll
@@ -97,9 +92,59 @@ internal class RapidIntegrationTest {
             kafkaConsumer.unsubscribe()
             kafkaConsumer.close()
             kafkaProducer.close()
-            rapid.stop()
             embeddedKafkaEnvironment.tearDown()
         }
+    }
+
+    @BeforeEach
+    internal fun start() {
+        rapid = KafkaRapid(config.consumerConfig(), config.producerConfig(), testTopic)
+
+        GlobalScope.launch {
+            try {
+                rapid.start()
+            } catch (err: Exception) {
+                // swallow
+            }
+        }
+
+        await("wait until the rapid has started")
+            .atMost(5, SECONDS)
+            .until(rapid::isRunning)
+    }
+
+    @AfterEach
+    internal fun stop() {
+        rapid.stop()
+    }
+
+    @Test
+    fun `no effect calling start multiple times`() {
+        assertDoesNotThrow { rapid.start() }
+        assertTrue(rapid.isRunning())
+    }
+
+    @Test
+    fun `can stop`() {
+        rapid.stop()
+        assertFalse(rapid.isRunning())
+        assertDoesNotThrow { rapid.stop() }
+    }
+
+    @Test
+    fun `should stop on errors`() {
+        rapid.register(object : RapidsConnection.MessageListener {
+            override fun onMessage(message: String, context: RapidsConnection.MessageContext) {
+                throw RuntimeException()
+            }
+        })
+
+        await("wait until the rapid stops")
+            .atMost(10, SECONDS)
+            .until {
+                kafkaProducer.send(ProducerRecord(testTopic, UUID.randomUUID().toString()))
+                !rapid.isRunning()
+            }
     }
 
     @Test
