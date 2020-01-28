@@ -12,7 +12,10 @@ import java.time.LocalDate
 internal class ForeldrepengerReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
-        assertMembers<ModelForeldrepenger, ForeldrepengerReflect>(listOf("foreldrepengeytelse", "svangerskapsytelse"))
+        assertMembers<ModelForeldrepenger, ForeldrepengerReflect>(
+            listOf("foreldrepengeytelse", "svangerskapsytelse"),
+            listOf("aktivitetslogger")
+        )
     }
 
     @Test

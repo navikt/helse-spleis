@@ -384,8 +384,6 @@ internal class Vedtaksperiode internal constructor(
         override val type = BEREGN_UTBETALING
         override val timeout: Duration = Duration.ofHours(1)
 
-        private const val seksMåneder = 180
-
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             vedtaksperiode.trengerYtelser()
             aktivitetslogger.info("Forespør sykdoms- og inntektshistorikk")
@@ -403,56 +401,76 @@ internal class Vedtaksperiode internal constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: ModelYtelser
         ) {
-            if (ytelser.foreldrepenger().overlapperMedSyketilfelle(
-                    Periode(vedtaksperiode.sykdomstidslinje.førsteDag(), vedtaksperiode.sykdomstidslinje.sisteDag())
-                )
-            ) {
-                ytelser.error("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            fun onError() {
+                vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
-            if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
-                ytelser.error("Har fraværsdag innenfor seks måneder, sender saken til Infotrygd")
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            fun overlappendeForeldrepenger(): ValidationStep = {
+                ytelser.foreldrepenger().overlapperMedSyketilfelle(
+                    Periode(
+                        vedtaksperiode.sykdomstidslinje.førsteDag(),
+                        vedtaksperiode.sykdomstidslinje.sisteDag()
+                    )
+                ).also { ytelser.foreldrepenger().kopierAktiviteterTil(vedtaksperiode.aktivitetslogger) }
             }
 
-            val dagsats = if (vedtaksperiode.dagsats() == null) {
-                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
-            } else vedtaksperiode.dagsats()!!
-
-            val utbetalingsberegning = try {
-                vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
-            } catch (ie: IllegalArgumentException) {
-                vedtaksperiode.aktivitetslogger.error("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            fun harFraværsdagInnen6Mnd(): ValidationStep = {
+                ytelser.validerFraværsdagInnen6Mnd(vedtaksperiode.sykdomstidslinje)
+                    .also { ytelser.kopierAktiviteterTil(vedtaksperiode.aktivitetslogger) }
             }
 
-            val sisteUtbetalingsdag = utbetalingsberegning.utbetalingslinjer.lastOrNull()?.tom
-            val inntektsmelding = if (vedtaksperiode.inntektsmeldingHendelse() == null) {
-                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
-            } else vedtaksperiode.inntektsmeldingHendelse()!!
-
-            if (sisteUtbetalingsdag == null || inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
-                vedtaksperiode.aktivitetslogger.error("Mangler enten siste utbetalingsdag eller inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            var dagsats: Int? = null
+            fun validerDagsats(): ValidationStep = {
+                dagsats = vedtaksperiode.dagsats().also {
+                    if (it == null) vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+                }
             }
 
-            vedtaksperiode.tilstand(ytelser, TilGodkjenning) {
-                vedtaksperiode.maksdato = utbetalingsberegning.maksdato
-                vedtaksperiode.utbetalingslinjer = utbetalingsberegning.utbetalingslinjer
-                vedtaksperiode.aktivitetslogger.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+
+            var utbetalingsberegning: Utbetalingsberegning? = null
+            fun validerUtbetalingsberegning(): ValidationStep = {
+                utbetalingsberegning = dagsats!!.let {
+                    try {
+                        vedtaksperiode.sykdomstidslinje.utbetalingsberegning(it, vedtaksperiode.fødselsnummer)
+                    } catch (ie: IllegalArgumentException) {
+                        vedtaksperiode.aktivitetslogger.severe("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
+                    }
+                }
+            }
+
+            fun validerInntektFraInntektsmelding(): ValidationStep = {
+                val sisteUtbetalingsdag = utbetalingsberegning!!.utbetalingslinjer.lastOrNull()?.tom
+                    ?: vedtaksperiode.aktivitetslogger.severe("Mangler siste utbetalingsdag")
+                val inntektsmelding =
+                    if (vedtaksperiode.inntektsmeldingHendelse() == null) vedtaksperiode.aktivitetslogger.severe(
+                        "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
+                    ) else vedtaksperiode.inntektsmeldingHendelse()!!
+                if (inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
+                    vedtaksperiode.aktivitetslogger.error("Inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
+                }
+            }
+
+            vedtaksperiode.continueIfNoErrors(
+                overlappendeForeldrepenger(),
+                harFraværsdagInnen6Mnd(),
+                validerDagsats(),
+                validerUtbetalingsberegning(),
+                validerInntektFraInntektsmelding()
+            ) { onError() }
+
+            if (!vedtaksperiode.aktivitetslogger.hasErrors()) {
+                vedtaksperiode.tilstand(ytelser, TilGodkjenning) {
+                    vedtaksperiode.maksdato = utbetalingsberegning!!.maksdato
+                    vedtaksperiode.utbetalingslinjer = utbetalingsberegning!!.utbetalingslinjer
+                    vedtaksperiode.aktivitetslogger.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+                }
             }
         }
+    }
 
-        private fun harFraværsdagInnen6Mnd(
-            ytelser: ModelYtelser,
-            tidslinje: ConcreteSykdomstidslinje
-        ): Boolean {
-            val sisteFraværsdag = ytelser.sykepengehistorikk().sisteFraværsdag() ?: return false
 
-            return sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
-                || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
-        }
+    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
+        return aktivitetslogger.continueIfNoErrors(*steps) { onError() }
     }
 
     private object TilGodkjenning : Vedtaksperiodetilstand {

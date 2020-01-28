@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -73,9 +74,21 @@ class ModelYtelser(
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         sykepengehistorikk.kopierAktiviteterTil(aktivitetslogger)
+        aktivitetslogger.addAll(this.aktivitetslogger, "Ytelser")
     }
 
     override fun accept(visitor: PersonVisitor) {
         visitor.visitYtelserHendelse(this)
+    }
+
+    internal fun validerFraværsdagInnen6Mnd(tidslinje: ConcreteSykdomstidslinje) {
+        val seksMåneder = 180
+        val sisteFraværsdag = sykepengehistorikk.sisteFraværsdag() ?: return
+
+        if (sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
+            || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
+        ) {
+            aktivitetslogger.error("Har fraværsdag innenfor seks måneder")
+        }
     }
 }
