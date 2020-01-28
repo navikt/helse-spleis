@@ -153,7 +153,7 @@ internal class RapidIntegrationTest {
         val eventName = "heartbeat"
         val value = "{ \"@event\": \"$eventName\" }"
 
-        rapid.register(River().apply {
+        River(rapid).apply {
             validate { it.path("@event").asText() == eventName }
             validate { it.path("service_id").let { it.isMissingNode || it.isNull } }
             register(object : River.PacketListener {
@@ -162,7 +162,7 @@ internal class RapidIntegrationTest {
                     context.send(packet.toJson())
                 }
             })
-        })
+        }
 
         val sentMessages = mutableListOf<String>()
         await("wait until we get a reply")

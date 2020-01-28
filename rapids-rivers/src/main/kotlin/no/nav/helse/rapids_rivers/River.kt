@@ -7,10 +7,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-open class River : RapidsConnection.MessageListener {
+class River(rapidsConnection: RapidsConnection) : RapidsConnection.MessageListener {
 
     private val validations = mutableListOf<(JsonNode) -> Boolean>()
     private val listeners = mutableListOf<PacketListener>()
+
+    init {
+        rapidsConnection.register(this)
+    }
 
     fun validate(validation: (JsonNode) -> Boolean) {
         validations.add(validation)

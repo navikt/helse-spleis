@@ -42,10 +42,19 @@ internal class RiverTest {
 
     private var gotMessage = false
     private lateinit var river: River
+    private val rapid = object : RapidsConnection() {
+        override fun publish(message: String) {}
+
+        override fun publish(key: String, message: String) {}
+
+        override fun start() {}
+
+        override fun stop() {}
+    }
 
     @BeforeEach
     internal fun setup() {
-        river = River().apply {
+        river = River(rapid).apply {
             register(object : River.PacketListener {
                 override fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
                     gotMessage = true
