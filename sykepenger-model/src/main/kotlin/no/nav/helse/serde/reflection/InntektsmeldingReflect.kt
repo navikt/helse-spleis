@@ -1,12 +1,15 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val hendelseId: UUID = inntektsmelding.hendelseId()
+    private val hendelsetype: Hendelsestype = inntektsmelding.hendelsetype()
     private val refusjon: ModelInntektsmelding.Refusjon = inntektsmelding.getProp("refusjon")
     private val orgnummer: String = inntektsmelding.getProp("orgnummer")
     private val fødselsnummer: String = inntektsmelding.getProp("fødselsnummer")
@@ -22,6 +25,7 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
 
     fun toMap() = mutableMapOf<String, Any?>(
         "hendelseId" to hendelseId,
+        "hendelsetype" to hendelsetype.name,
         "refusjon" to refusjon,
         "orgnummer" to orgnummer,
         "fødselsnummer" to fødselsnummer,

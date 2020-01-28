@@ -1,11 +1,14 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDateTime
 import java.util.*
 
 internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellSaksbehandling) {
     private val hendelseId: UUID = manuellSaksbehandling.hendelseId()
+    private val hendelsestype: Hendelsestype = manuellSaksbehandling.hendelsetype()
     private val aktørId: String = manuellSaksbehandling.getProp("aktørId")
     private val fødselsnummer: String = manuellSaksbehandling.getProp("fødselsnummer")
     private val organisasjonsnummer: String = manuellSaksbehandling.getProp("organisasjonsnummer")
@@ -16,6 +19,7 @@ internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellS
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "hendelseId" to hendelseId,
+        "hendelsetype" to hendelsestype.name,
         "aktørId" to aktørId,
         "fødselsnummer" to fødselsnummer,
         "organisasjonsnummer" to organisasjonsnummer,

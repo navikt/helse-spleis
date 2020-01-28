@@ -65,6 +65,19 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
         currentState.visitArbeidsdag(this, dag)
+    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
+        currentState.visitArbeidsgiverperiodeDag(this, dag)
+    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
+        currentState.visitNavDag(this, dag)
+    override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
+        currentState.visitNavHelgDag(this, dag)
+    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
+        currentState.visitFridag(this, dag)
+    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
+        currentState.visitAvvistDag(this, dag)
+    override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
+        currentState.visitUkjentDag(this, dag)
+
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.postVisitUtbetalingstidslinje(this, tidslinje)
@@ -155,6 +168,12 @@ internal class JsonBuilder : PersonVisitor {
         fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {}
         fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsdag(jsonBuilder: JsonBuilder, arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
+        fun visitArbeidsgiverperiodeDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
+        fun visitNavDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
+        fun visitNavHelgDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
+        fun visitFridag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
+        fun visitAvvistDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
+        fun visitUkjentDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
         fun postVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
         fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {}
         fun preVisitPerioder(jsonBuilder: JsonBuilder) {}
@@ -338,12 +357,50 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun visitArbeidsdag(
             jsonBuilder: JsonBuilder,
-            arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+            dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
         ) {
-            val arbeidsdagMap = mutableMapOf<String, Any?>()
-            dager.add(arbeidsdagMap)
+            dager.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
+        }
 
-            arbeidsdagMap.putAll(ArbeidsdagReflect(arbeidsdag).toMap())
+        override fun visitArbeidsgiverperiodeDag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+        ) {
+            dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
+        }
+        override fun visitNavDag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.NavDag
+        ) {
+            dager.add(UtbetalingsdagReflect(dag, "NavDag").toMap())
+        }
+        override fun visitNavHelgDag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+        ) {
+            dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
+        }
+        override fun visitFridag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.Fridag
+        ) {
+            dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
+        }
+        override fun visitUkjentDag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+        ) {
+            dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
+        }
+
+        override fun visitAvvistDag(
+            jsonBuilder: JsonBuilder,
+            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+        ) {
+            val avvistDagMap = mutableMapOf<String, Any?>()
+            dager.add(avvistDagMap)
+
+            avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
         }
 
         override fun postVisitUtbetalingstidslinje(
