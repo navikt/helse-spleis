@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
+import kotlin.streams.toList
 
 internal class JsonDeserializerTest {
 
@@ -33,6 +34,7 @@ internal class JsonDeserializerTest {
 
     private val arbeidsgiverId = UUID.randomUUID().toString()
     private val inntektsmeldingHendelseId = UUID.randomUUID().toString()
+    private val vedtaksperiodeId = UUID.randomUUID().toString()
 
     @Test
     fun test1() {
@@ -59,9 +61,24 @@ internal class JsonDeserializerTest {
         println(data)
     }
 
-    private fun enkelPersonJson() =
-        jacksonObjectMapper()
+    private val førsteFraværsdag = LocalDate.now().minusDays(18)
+
+    private fun enkelPersonJson(): String {
+
+        val tidslinje = førsteFraværsdag.datesUntil(LocalDate.now().minusDays(2))
+            .map {
+                mapOf(
+                    "dagen" to it.toString(),
+                    "hendelseId" to inntektsmeldingHendelseId,
+                    "type" to "SYKEDAG",
+                    "erstatter" to emptyList<Map<String,Any>>()
+                )
+            }
+            .toList()
+
+        return jacksonObjectMapper()
             .registerModule(JavaTimeModule())
+            .enable(SerializationFeature.INDENT_OUTPUT)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .writeValueAsString(
                 mapOf(
@@ -76,6 +93,28 @@ internal class JsonDeserializerTest {
                                     "fom" to "2020-01-01",
                                     "hendelse" to inntektsmeldingHendelseId,
                                     "beløp" to 30000.0
+                                )
+                            ),
+                            "vedtaksperioder" to listOf(
+                                mapOf(
+                                    "id" to vedtaksperiodeId,
+                                    "maksdato" to LocalDate.now().plusMonths(3),
+                                    "godkjentAv" to null,
+                                    "utbetalingsreferanse" to null,
+                                    "førsteFraværsdag" to førsteFraværsdag,
+                                    "inntektFraInntektsmelding" to 30000.00,
+                                    "dataForVilkårsvurdering" to null,
+                                    "sykdomshistorikk" to listOf(
+                                        mapOf(
+                                            "tidsstempel" to "2020-01-28T12:01:21.813492",
+                                            "hendelseId" to  inntektsmeldingHendelseId,
+                                            "hendelseSykdomstidslinje" to tidslinje,
+                                            "beregnetSykdomstidslinje" to tidslinje
+
+                                        )),
+                                    "tilstand" to "TIL_INFOTRYGD",
+                                    "sykdomstidslinje" to tidslinje,
+                                    "utbetalingslinjer" to emptyList<Map<String,Any>>()
                                 )
                             )
                         )
@@ -94,11 +133,11 @@ internal class JsonDeserializerTest {
                                 "fødselsnummer" to fødselsnummer,
                                 "aktørId" to aktørId,
                                 "mottattDato" to "2020-01-09T14:02:28",
-                                "førsteFraværsdag" to LocalDate.now().minusDays(18),
+                                "førsteFraværsdag" to førsteFraværsdag,
                                 "beregnetInntekt" to 30000.00,
                                 "arbeidsgiverperioder" to listOf(
                                     mapOf(
-                                        "fom" to LocalDate.now().minusDays(18),
+                                        "fom" to førsteFraværsdag,
                                         "tom" to LocalDate.now().minusDays(2)
                                     )
                                 ),
@@ -107,5 +146,6 @@ internal class JsonDeserializerTest {
                         )
                     )
                 )
-            )
+            ).also { println(it) }
+    }
 }

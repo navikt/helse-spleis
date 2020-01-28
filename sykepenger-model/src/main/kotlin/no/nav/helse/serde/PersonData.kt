@@ -8,24 +8,23 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Person
+import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.PersonData.HendelseWrapperData.InntektsmeldingData
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
+import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-fun parseJson(json: String): PersonData = objectMapper.readValue(json)
+internal fun parseJson(json: String): PersonData = objectMapper.readValue(json)
+
+private typealias SykdomstidslinjeData = List<ArbeidsgiverData.DagData>
 
 class DataClassModelBuilder(private val json: String) {
     private val reflector = ReflectionCreationHelper()
@@ -89,7 +88,7 @@ class DataClassModelBuilder(private val json: String) {
     }
 }
 
-data class PersonData(
+internal data class PersonData(
     val skjemaVersjon: Int = 1,
     val aktørId: String,
     val fødselsnummer: String,
@@ -135,12 +134,42 @@ data class PersonData(
     data class ArbeidsgiverData(
         val organisasjonsnummer: String,
         val id: UUID,
-        val inntekter: List<InntektData>
+        val inntekter: List<InntektData>,
+        val vedtaksperioder: List<VedtaksperiodeData>
     ) {
         data class InntektData(
             val fom: LocalDate,
             val hendelse: UUID,
             val beløp: BigDecimal
         )
+
+        data class VedtaksperiodeData(
+            val id: UUID,
+            val maksdato: LocalDate?,
+            val godkjentAv: String?,
+            val utbetalingsreferanse: String?,
+            val førsteFraværsdag: LocalDate?,
+            val inntektFraInntektsmelding: BigDecimal?,
+            val dataForVilkårsvurdering: LocalDateTime?,
+            val sykdomshistorikk: List<SykdomshistorikkData>,
+            val tilstand: TilstandType,
+            val sykdomstidslinje: SykdomstidslinjeData,
+            val utbetalingslinjer: List<Any>
+        )
+
+        data class DagData(
+            val dagen: LocalDate,
+            val hendelseId: UUID,
+            val type: JsonDagType,
+            val erstatter: List<DagData>
+        )
+
+        data class SykdomshistorikkData(
+            val tidsstempel: LocalDateTime,
+            val hendelseId: UUID,
+            val hendelseSykdomstidslinje: SykdomstidslinjeData,
+            val beregnetSykdomstidslinje: SykdomstidslinjeData
+        )
+
     }
 }
