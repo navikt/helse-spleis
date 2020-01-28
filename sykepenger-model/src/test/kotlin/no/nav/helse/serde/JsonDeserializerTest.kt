@@ -130,8 +130,6 @@ internal class JsonDeserializerTest {
                                     "endringerIRefusjon" to emptyList<Any>()
                                 ),
                                 "orgnummer" to organisasjonsnummer,
-                                "fødselsnummer" to fødselsnummer,
-                                "aktørId" to aktørId,
                                 "mottattDato" to "2020-01-09T14:02:28",
                                 "førsteFraværsdag" to førsteFraværsdag,
                                 "beregnetInntekt" to 30000.00,

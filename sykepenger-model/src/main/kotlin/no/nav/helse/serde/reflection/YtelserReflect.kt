@@ -15,7 +15,6 @@ internal class YtelserReflect(ytelser: ModelYtelser) {
     private val sykepengehistorikk: ModelSykepengehistorikk = ytelser.getProp("sykepengehistorikk")
     private val foreldrepenger: ModelForeldrepenger = ytelser.getProp("foreldrepenger")
     private val rapportertdato: LocalDateTime = ytelser.getProp("rapportertdato")
-    private val originalJson: String = ytelser.getProp("originalJson")
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "hendelseId" to hendelseId,
@@ -25,7 +24,6 @@ internal class YtelserReflect(ytelser: ModelYtelser) {
         "vedtaksperiodeId" to vedtaksperiodeId,
         "sykepengehistorikk" to sykepengehistorikk.let { SykepengehistorikkReflect(it).toMap() },
         "foreldrepenger" to foreldrepenger.let { ForeldrepengerReflect(it).toMap() },
-        "rapportertdato" to rapportertdato,
-        "originalJson" to originalJson
+        "rapportertdato" to rapportertdato
     )
 }

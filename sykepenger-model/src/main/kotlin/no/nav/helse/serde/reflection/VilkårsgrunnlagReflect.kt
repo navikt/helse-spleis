@@ -13,7 +13,6 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
     private val rapportertDato: LocalDateTime = vilkårsgrunnlag.getProp("rapportertDato")
     private val inntektsmåneder: List<ModelVilkårsgrunnlag.Måned> = vilkårsgrunnlag.getProp("inntektsmåneder")
     private val erEgenAnsatt: Boolean = vilkårsgrunnlag.getProp("erEgenAnsatt")
-    private val originalJson: String = vilkårsgrunnlag.getProp("originalJson")
 
     fun toMap() = mutableMapOf<String, Any?>(
         "hendelseId" to hendelseId,
@@ -23,8 +22,7 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
         "orgnummer" to orgnummer,
         "rapportertDato" to rapportertDato,
         "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
-        "erEgenAnsatt" to erEgenAnsatt,
-        "originalJson" to originalJson
+        "erEgenAnsatt" to erEgenAnsatt
     )
 
     private class InntektsmånederReflect(private val måned: ModelVilkårsgrunnlag.Måned) {
