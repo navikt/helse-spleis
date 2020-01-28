@@ -42,6 +42,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitPerson(person: Person) = currentState.preVisitPerson(this, person)
     override fun postVisitPerson(person: Person) = currentState.postVisitPerson(this, person)
+    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(this, aktivitetslogger)
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
         currentState.preVisitArbeidsgiver(this, arbeidsgiver)
 
@@ -157,6 +158,7 @@ internal class JsonBuilder : PersonVisitor {
 
         fun preVisitPerson(jsonBuilder: JsonBuilder, person: Person) {}
         fun postVisitPerson(jsonBuilder: JsonBuilder, person: Person) {}
+        fun visitPersonAktivitetslogger(jsonBuilder: JsonBuilder, aktivitetslogger: Aktivitetslogger) {}
         fun preVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {}
         fun postVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {}
         fun preVisitArbeidsgivere(jsonBuilder: JsonBuilder) {}
@@ -167,7 +169,7 @@ internal class JsonBuilder : PersonVisitor {
         fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {}
         fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {}
         fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {}
-        fun visitArbeidsdag(jsonBuilder: JsonBuilder, arbeidsdag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
+        fun visitArbeidsdag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
         fun visitArbeidsgiverperiodeDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
         fun visitNavDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
         fun visitNavHelgDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
@@ -236,6 +238,10 @@ internal class JsonBuilder : PersonVisitor {
             val hendelser = mutableListOf<MutableMap<String, Any?>>()
             personMap["hendelser"] = hendelser
             jsonBuilder.pushState(HendelseState(hendelser))
+        }
+
+        override fun visitPersonAktivitetslogger(jsonBuilder: JsonBuilder, aktivitetslogger: Aktivitetslogger) {
+            personMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
         }
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
