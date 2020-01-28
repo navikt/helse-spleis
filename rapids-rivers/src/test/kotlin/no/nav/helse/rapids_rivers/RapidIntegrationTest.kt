@@ -108,16 +108,15 @@ internal class RapidIntegrationTest {
         val eventName = "heartbeat"
         val value = "{ \"@event\": \"$eventName\" }"
 
-        rapid.register(object : River() {
-            init {
-                validate { it.path("@event").asText() == eventName }
-                validate { it.path("service_id").let { it.isMissingNode || it.isNull } }
-            }
-
-            override fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
-                packet.put("service_id", serviceId)
-                context.send(packet.toJson())
-            }
+        rapid.register(River().apply {
+            validate { it.path("@event").asText() == eventName }
+            validate { it.path("service_id").let { it.isMissingNode || it.isNull } }
+            register(object : River.PacketListener {
+                override fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
+                    packet.put("service_id", serviceId)
+                    context.send(packet.toJson())
+                }
+            })
         })
 
         val sentMessages = mutableListOf<String>()
