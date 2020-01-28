@@ -3,7 +3,6 @@ package no.nav.helse.rapids_rivers
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.errors.WakeupException
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -30,6 +29,14 @@ class KafkaRapid(
 
     fun isRunning() = running.get()
 
+    override fun publish(message: String) {
+        producer.send(ProducerRecord(topic, message))
+    }
+
+    override fun publish(key: String, message: String) {
+        producer.send(ProducerRecord(topic, key, message))
+    }
+
     override fun start() {
         log.info("starting rapid")
         running.set(true)
@@ -48,15 +55,17 @@ class KafkaRapid(
         consumer.wakeup()
     }
 
+    private fun onRecord(record: ConsumerRecord<String, String>) {
+        val context = KafkaMessageContext(record, this)
+        listeners.forEach { it.onMessage(record.value(), context) }
+    }
+
     private fun consumeMessages() {
         try {
             consumer.subscribe(listOf(topic))
             while (running.get()) {
-                val records = consumer.poll(Duration.ofSeconds(1))
-                records.forEach { record ->
-                    val context = KafkaMessageContext(record, producer)
-                    listeners.forEach { it.onMessage(record.value(), context) }
-                }
+                consumer.poll(Duration.ofSeconds(1))
+                    .forEach(::onRecord)
             }
         } catch (err: WakeupException) {
             // throw exception if we have not been told to stop
@@ -69,14 +78,14 @@ class KafkaRapid(
 
     private class KafkaMessageContext(
         private val record: ConsumerRecord<String, String>,
-        private val producer: Producer<String, String>
+        private val rapidsConnection: RapidsConnection
     ) : MessageContext {
         override fun send(message: String) {
             send(record.key(), message)
         }
 
         override fun send(key: String, message: String) {
-            producer.send(ProducerRecord(record.topic(), key, message))
+            rapidsConnection.publish(key, message)
         }
     }
 }

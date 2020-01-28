@@ -34,6 +34,14 @@ class RapidApplication private constructor(
         ktor.stop(1, 1, TimeUnit.SECONDS)
     }
 
+    override fun publish(message: String) {
+        rapid.publish(message)
+    }
+
+    override fun publish(key: String, message: String) {
+        rapid.publish(key, message)
+    }
+
     private fun shutdownHook() {
         log.info("received shutdown signal, stopping app")
         stop()

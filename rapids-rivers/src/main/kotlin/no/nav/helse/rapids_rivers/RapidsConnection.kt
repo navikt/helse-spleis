@@ -8,6 +8,9 @@ abstract class RapidsConnection {
         listeners.add(listener)
     }
 
+    abstract fun publish(message: String)
+    abstract fun publish(key: String, message: String)
+
     abstract fun start()
     abstract fun stop()
 
