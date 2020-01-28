@@ -30,7 +30,7 @@ class KafkaRapid(
 
     fun isRunning() = running.get()
 
-    fun start() {
+    override fun start() {
         log.info("starting rapid")
         running.set(true)
         try {
@@ -40,7 +40,7 @@ class KafkaRapid(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         log.info("stopping rapid")
         if (!running.get()) return log.info("rappid already stopped")
         running.set(false)

@@ -8,6 +8,9 @@ abstract class RapidsConnection {
         listeners.add(listener)
     }
 
+    abstract fun start()
+    abstract fun stop()
+
     interface MessageContext {
         fun send(message: String)
         fun send(key: String, message: String)
