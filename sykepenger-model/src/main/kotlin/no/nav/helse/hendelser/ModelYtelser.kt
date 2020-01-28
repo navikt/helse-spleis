@@ -20,7 +20,6 @@ class ModelYtelser(
     private val sykepengehistorikk: ModelSykepengehistorikk,
     private val foreldrepenger: ModelForeldrepenger,
     private val rapportertdato: LocalDateTime,
-    private val originalJson: String,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger), VedtaksperiodeHendelse {
     internal companion object {

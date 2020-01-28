@@ -76,7 +76,6 @@ internal class YtelserTest {
         ),
         foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
         rapportertdato = LocalDateTime.now(),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 

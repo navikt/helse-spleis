@@ -18,7 +18,6 @@ class ModelVilkårsgrunnlag(
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
     private val erEgenAnsatt: Boolean,
-    private val originalJson: String,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
     override fun vedtaksperiodeId() = vedtaksperiodeId

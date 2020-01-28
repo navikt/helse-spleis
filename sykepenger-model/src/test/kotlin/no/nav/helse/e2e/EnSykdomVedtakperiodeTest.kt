@@ -211,8 +211,7 @@ internal class EnSykdomVedtakperiodeTest {
             YearMonth.of(2017, it),
             listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))) },
         erEgenAnsatt = false,
-        aktivitetslogger = Aktivitetslogger(),
-        originalJson = "{}"
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun ytelser(
@@ -238,7 +237,6 @@ internal class EnSykdomVedtakperiodeTest {
         ),
         foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
         rapportertdato = rapportertdato,
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 

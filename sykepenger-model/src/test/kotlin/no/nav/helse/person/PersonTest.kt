@@ -265,7 +265,6 @@ internal class PersonTest {
                 sykepengehistorikk = ModelSykepengehistorikk(emptyList(), emptyList(), Aktivitetslogger()),
                 foreldrepenger = ModelForeldrepenger(null, null, Aktivitetslogger()),
                 rapportertdato = LocalDateTime.now(),
-                originalJson = "",
                 aktivitetslogger = Aktivitetslogger()
             ))
         }

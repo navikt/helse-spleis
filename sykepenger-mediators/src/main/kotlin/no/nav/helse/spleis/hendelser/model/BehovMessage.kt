@@ -58,7 +58,7 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
                     in listOf("2", "3") -> { Etterbetaling(fom, tom, dagsats) }
                     "4" -> { KontertRegnskap(fom, tom, dagsats) }
                     "5" -> { RefusjonTilArbeidsgiver(fom, tom, dagsats) }
-                    "6" -> { ReduksjonArbRef(fom, tom, dagsats) }
+                    "6" -> { ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats) }
                     "7" -> { Tilbakeført(fom, tom, dagsats) }
                     "8" -> { Konvertert(fom, tom, dagsats) }
                     "9" -> { Ferie(fom, tom, dagsats) }
@@ -89,7 +89,6 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
             sykepengehistorikk = sykepengehistorikk,
             foreldrepenger = foreldrepenger,
             rapportertdato = this["@besvart"].asLocalDateTime(),
-            originalJson = this.toJson(),
             aktivitetslogger = aktivitetslogger
         )
     }
@@ -130,8 +129,7 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
                 )
             },
             erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
-            aktivitetslogger = aktivitetslogger,
-            originalJson = this.toJson()
+            aktivitetslogger = aktivitetslogger
         )
     }
 

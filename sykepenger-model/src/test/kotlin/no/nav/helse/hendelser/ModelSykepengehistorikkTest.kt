@@ -29,7 +29,7 @@ internal class ModelSykepengehistorikkTest {
         assertInvalid(ReduksjonMedlem(1.juni, 10.juni, 1200))
         assertInvalid(Etterbetaling(1.juni, 10.juni, 1200))
         assertInvalid(KontertRegnskap(1.juni, 10.juni, 1200))
-        assertInvalid(ReduksjonArbRef(1.juni, 10.juni, 1200))
+        assertInvalid(ReduksjonArbeidsgiverRefusjon(1.juni, 10.juni, 1200))
         assertInvalid(Tilbakeført(1.juni, 10.juni, 1200))
         assertInvalid(Konvertert(1.juni, 10.juni, 1200))
         assertInvalid(Ferie(1.juni, 10.juni, 1200))

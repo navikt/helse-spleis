@@ -91,8 +91,7 @@ private val vilkårsgrunnlag = ModelVilkårsgrunnlag(
         )
     },
     erEgenAnsatt = false,
-    aktivitetslogger = Aktivitetslogger(),
-    originalJson = "{}"
+    aktivitetslogger = Aktivitetslogger()
 )
 
     private val ytelser = ModelYtelser(
@@ -124,6 +123,5 @@ private val vilkårsgrunnlag = ModelVilkårsgrunnlag(
             aktivitetslogger = Aktivitetslogger()
         ),
         rapportertdato = LocalDateTime.now(),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )

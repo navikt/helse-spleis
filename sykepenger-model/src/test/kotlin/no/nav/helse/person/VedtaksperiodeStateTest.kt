@@ -286,8 +286,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     )
                 },
                 erEgenAnsatt = false,
-                aktivitetslogger = aktivitetslogger,
-                originalJson = "{}"
+                aktivitetslogger = aktivitetslogger
             )
         )
         assertTilstandsendring(BEREGN_UTBETALING)
@@ -317,8 +316,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                 rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = emptyList(),
                 erEgenAnsatt = true,
-                aktivitetslogger = aktivitetslogger,
-                originalJson = "{}"
+                aktivitetslogger = aktivitetslogger
             )
         )
         assertTilstandsendring(TIL_INFOTRYGD)
@@ -353,7 +351,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
                     )
                 },
                 erEgenAnsatt = false,
-                originalJson = "{}",
                 aktivitetslogger = aktivitetslogger
             )
         )
@@ -1019,7 +1016,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             aktivitetslogger = aktivitetslogger
         ),
         rapportertdato = LocalDateTime.now(),
-        originalJson = "{}",
         aktivitetslogger = aktivitetslogger
     )
 
