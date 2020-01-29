@@ -5,13 +5,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.testhelpers.mai
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
@@ -34,37 +34,16 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     }
 
     @Test
-    fun `motta ny søknad`() {
-        val vedtaksperiode = beInStartTilstand()
-        vedtaksperiode.håndter(nySøknad())
-        assertTilstandsendring(MOTTATT_NY_SØKNAD, ModelNySøknad::class)
-        assertPåminnelse(Duration.ofDays(30))
-    }
-
-    @Test
-    fun `skal ikke påminnes hvis "TilInfotrygd"`() {
-        beInTilInfotrygd()
-        assertPåminnelse(Duration.ZERO)
-    }
-
-    @Test
-    fun `motta sendt søknad på feil tidspunkt`() {
-        val vedtaksperiode = beInStartTilstand()
-        sendtSøknad().also {
-            vedtaksperiode.håndter(it)
-            assertTrue(it.hasErrors())
-        }
-        assertTilstandsendring(TIL_INFOTRYGD, ModelSendtSøknad::class)
-    }
-
-    @Test
-    fun `motta inntektsmelding på feil tidspunkt`() {
-        val vedtaksperiode = beInStartTilstand()
-        inntektsmelding().also {
-            vedtaksperiode.håndter(it)
-            assertTrue(it.hasErrors())
-        }
-        assertTilstandsendring(TIL_INFOTRYGD, ModelInntektsmelding::class)
+    fun `timeoutverdier`() {
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.StartTilstand.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattNySøknad.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSendtSøknad.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattInntektsmelding.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.Vilkårsprøving.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.BeregnUtbetaling.timeout)
+        assertEquals(Duration.ofDays(7), Vedtaksperiode.TilGodkjenning.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.TilUtbetaling.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.TilInfotrygd.timeout)
     }
 
     @Test

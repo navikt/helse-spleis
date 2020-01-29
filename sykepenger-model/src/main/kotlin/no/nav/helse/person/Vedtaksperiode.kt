@@ -472,7 +472,7 @@ internal class Vedtaksperiode internal constructor(
         return aktivitetslogger.continueIfNoErrors(*steps) { onError() }
     }
 
-    private object TilGodkjenning : Vedtaksperiodetilstand {
+    internal object TilGodkjenning : Vedtaksperiodetilstand {
         override val type = TIL_GODKJENNING
         override val timeout: Duration = Duration.ofDays(7)
 
@@ -504,7 +504,7 @@ internal class Vedtaksperiode internal constructor(
         }
     }
 
-    private object TilUtbetaling : Vedtaksperiodetilstand {
+    internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
         override val timeout: Duration = Duration.ZERO
 
@@ -563,7 +563,7 @@ internal class Vedtaksperiode internal constructor(
         }.array()
     }
 
-    private object TilInfotrygd : Vedtaksperiodetilstand {
+    internal object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
