@@ -3,8 +3,11 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.person.SykdomshistorikkVisitor
 import java.time.LocalDateTime
 
-internal class Sykdomshistorikk {
-    private val elementer = mutableListOf<Element>()
+internal class Sykdomshistorikk private constructor(
+    private val elementer: MutableList<Element>
+) {
+    internal constructor() : this(mutableListOf())
+
     internal val size get() = elementer.size
 
     internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
@@ -19,16 +22,34 @@ internal class Sykdomshistorikk {
         visitor.postVisitSykdomshistorikk(this)
     }
 
-    internal inner class Element (private val hendelse: SykdomstidslinjeHendelse) {
-        internal val tidsstempel = LocalDateTime.now()
-        internal val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
-        internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje =
-            if (elementer.isEmpty()) hendelseSykdomstidslinje
-            else {
-                (sykdomstidslinje() + hendelseSykdomstidslinje).also {
-                    if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
-                }
-            }
+    fun kalkulerBeregnetSykdomstidslinje(
+        hendelse: SykdomstidslinjeHendelse,
+        hendelseSykdomstidslinje: ConcreteSykdomstidslinje
+    ) = if (elementer.isEmpty()) {
+        hendelse.sykdomstidslinje()
+    } else {
+        (sykdomstidslinje() + hendelseSykdomstidslinje).also {
+            if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
+        }
+    }
+
+    internal inner class Element private constructor(
+        internal val tidsstempel: LocalDateTime,
+        private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
+        internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
+        private val hendelse: SykdomstidslinjeHendelse
+    ) {
+        private constructor(
+            hendelse: SykdomstidslinjeHendelse,
+            hendelseSykdomstidslinje: ConcreteSykdomstidslinje
+        ) : this(
+            tidsstempel = LocalDateTime.now(),
+            hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+            beregnetSykdomstidslinje = kalkulerBeregnetSykdomstidslinje(hendelse, hendelseSykdomstidslinje),
+            hendelse = hendelse
+        )
+        internal constructor(hendelse: SykdomstidslinjeHendelse) : this(hendelse, hendelse.sykdomstidslinje())
+
 
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this)
@@ -41,6 +62,5 @@ internal class Sykdomshistorikk {
             visitor.postVisitBeregnetSykdomstidslinje()
             visitor.postVisitSykdomshistorikkElement(this)
         }
-
     }
 }
