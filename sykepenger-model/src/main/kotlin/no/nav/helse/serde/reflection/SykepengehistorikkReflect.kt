@@ -3,6 +3,7 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.ModelSykepengehistorikk
 import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehistorikk) {
     private val utbetalinger: List<ModelSykepengehistorikk.Periode> = sykepengehistorikk["utbetalinger"]

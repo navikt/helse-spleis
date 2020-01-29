@@ -8,10 +8,9 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
-import no.nav.helse.serde.reflection.*
 import no.nav.helse.serde.reflection.ReflectClass
 import no.nav.helse.serde.reflection.ReflectClass.Companion.getNestedClass
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.getReflectInstance
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
@@ -55,9 +54,8 @@ class DataClassModelBuilder(private val json: String) {
         val alvorlighetsgradClass: ReflectClass = getNestedClass<Aktivitetslogger>("Alvorlighetsgrad")
 
         aktivitetsloggerData.aktiviteter.forEach {
-            aktivitetslogger.add(
-                property = "aktiviteter",
-                value = aktivitetClass.getReflectInstance(
+            aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter").add(
+                aktivitetClass.getInstance(
                     alvorlighetsgradClass.getEnumValue(it.alvorlighetsgrad.name),
                     it.melding,
                     it.tidsstempel

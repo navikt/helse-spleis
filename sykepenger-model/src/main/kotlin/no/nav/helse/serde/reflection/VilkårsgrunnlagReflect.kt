@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
     private val hendelseId: UUID = vilkårsgrunnlag.hendelseId()

@@ -3,6 +3,7 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: String) {
     private val inntekt: Double = utbetalingsdag["inntekt"]

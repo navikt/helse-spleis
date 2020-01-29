@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val id: UUID = vedtaksperiode["id"]

@@ -6,6 +6,7 @@ import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class NySøknadReflect(nySøknad: ModelNySøknad) {
     private val hendelseId: UUID = nySøknad.hendelseId()

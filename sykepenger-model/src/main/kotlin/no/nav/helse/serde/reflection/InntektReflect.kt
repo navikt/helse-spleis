@@ -4,6 +4,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import java.math.BigDecimal
 import java.time.LocalDate
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class InntektReflect(inntekt: Inntekthistorikk.Inntekt) {
     private val fom: LocalDate = inntekt["fom"]

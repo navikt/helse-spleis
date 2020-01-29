@@ -2,6 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class ForeldrepengerReflect(foreldrepenger: ModelForeldrepenger) {
     private val foreldrepengeytelse: Periode? = foreldrepenger["foreldrepengeytelse"]

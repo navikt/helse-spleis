@@ -2,6 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Arbeidsgiver
 import java.util.*
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class ArbeidsgiverReflect(arbeidsgiver: Arbeidsgiver) {
     private val organisasjonsnummer: String = arbeidsgiver["organisasjonsnummer"]

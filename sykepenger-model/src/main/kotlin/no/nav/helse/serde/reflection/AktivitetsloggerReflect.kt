@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class AktivitetsloggerReflect(aktivitetslogger: Aktivitetslogger) {
     private val originalMessage: String? = aktivitetslogger["originalMessage"]
