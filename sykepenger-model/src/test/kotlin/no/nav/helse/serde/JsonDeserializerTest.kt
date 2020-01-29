@@ -86,7 +86,7 @@ internal class JsonDeserializerTest {
                     "fødselsnummer" to fødselsnummer,
                     "arbeidsgivere" to listOf(
                         mapOf(
-                            "organisasjonsnummer" to organisasjonsnummer,
+                            "orgnummer" to organisasjonsnummer,
                             "id" to arbeidsgiverId,
                             "inntekter" to listOf(
                                 mapOf(
