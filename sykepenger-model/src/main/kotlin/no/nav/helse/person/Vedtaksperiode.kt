@@ -15,6 +15,9 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.math.RoundingMode
 import java.nio.ByteBuffer

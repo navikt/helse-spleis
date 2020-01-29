@@ -3,6 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.AlderRegler
+import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
 
 @Deprecated("EPIC 1")
@@ -24,7 +26,13 @@ internal class Utbetalingsberegner(private val dagsats: Int, private val alderRe
         require(state != Ugyldig)
         return Utbetalingsberegning(
             maksdato,
-            utbetalingslinjer.map { Utbetalingslinje(it.startdato, it.tom, it.dagsats) }
+            utbetalingslinjer.map {
+                Utbetalingslinje(
+                    it.startdato,
+                    it.tom,
+                    it.dagsats
+                )
+            }
         )
     }
 

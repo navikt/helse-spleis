@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
 
 class ModelSykepengehistorikk(

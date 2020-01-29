@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
-import no.nav.helse.sykdomstidslinje.joinForOppdrag
 import no.nav.helse.testhelpers.fredag
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.testhelpers.tirsdag
@@ -19,7 +17,8 @@ internal class UtbetalingslinjerJoinTest {
 
     @Test
     fun `en utbetalingstidslinje forblir uendret`() {
-        val utbetalingslinje = Utbetalingslinje(1.mandag, 1.fredag, 0)
+        val utbetalingslinje =
+            Utbetalingslinje(1.mandag, 1.fredag, 0)
         assertUtbetalingslinjer(listOf(utbetalingslinje), utbetalingslinje)
     }
 

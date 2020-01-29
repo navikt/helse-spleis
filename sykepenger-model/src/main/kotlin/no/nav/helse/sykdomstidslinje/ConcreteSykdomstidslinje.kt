@@ -22,6 +22,7 @@ import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.AlderRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID

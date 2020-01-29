@@ -4,6 +4,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Inntektsberegner
 import java.time.LocalDate
 
+@Deprecated("EPIC 1")
 internal class ArbeidsgiverSykdomstidslinje(
     private val sykdomstidslinjer: List<ConcreteSykdomstidslinje>,
     internal val arbeidsgiverRegler: ArbeidsgiverRegler,

@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.PersonSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F

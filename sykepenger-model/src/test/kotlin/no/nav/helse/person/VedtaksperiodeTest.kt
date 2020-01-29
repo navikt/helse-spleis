@@ -14,7 +14,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*

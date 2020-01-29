@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import java.time.LocalDate
@@ -165,7 +164,8 @@ internal class Utbetalingstidslinje internal constructor() {
             override val prioritet = 50
             internal var utbetaling = 0
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
-            internal fun utbetalingslinje() = Utbetalingslinje(dato, dato, inntekt.roundToInt())
+            internal fun utbetalingslinje() =
+                Utbetalingslinje(dato, dato, inntekt.roundToInt())
             internal fun oppdater(last: Utbetalingslinje) { last.tom = dato }
             internal fun avvistDag(begrunnelse: Begrunnelse) = AvvistDag(dato, begrunnelse)
         }

@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.testhelpers.fredag
 import no.nav.helse.testhelpers.mandag
 import org.junit.jupiter.api.Assertions.*

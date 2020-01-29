@@ -1,7 +1,6 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -36,7 +35,11 @@ internal fun List<Utbetalingslinje>.joinForOppdrag(): List<Utbetalingslinje> {
         if (results.last().tilstøtende(utbetalingslinje)) {
             require(results.last().dagsats == utbetalingslinje.dagsats) { "Uventet dagsats - forventet samme" }
             results[results.size - 1] =
-                Utbetalingslinje(results.last().fom, utbetalingslinje.tom, results.last().dagsats)
+                Utbetalingslinje(
+                    results.last().fom,
+                    utbetalingslinje.tom,
+                    results.last().dagsats
+                )
         } else {
             results.add(utbetalingslinje)
         }

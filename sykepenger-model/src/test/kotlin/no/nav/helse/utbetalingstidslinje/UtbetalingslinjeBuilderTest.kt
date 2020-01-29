@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.HELG

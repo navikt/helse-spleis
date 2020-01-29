@@ -3,8 +3,10 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.UtbetalingBuilder
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
 
+@Deprecated("EPIC 1")
 internal class PersonSykdomstidslinje(
     private val sykdomstidslinjer: List<ArbeidsgiverSykdomstidslinje>,
     private val alder: Alder,

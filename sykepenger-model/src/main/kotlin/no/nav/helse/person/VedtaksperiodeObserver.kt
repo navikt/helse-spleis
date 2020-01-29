@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
