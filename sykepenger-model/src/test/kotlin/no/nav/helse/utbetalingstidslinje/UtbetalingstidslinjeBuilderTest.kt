@@ -255,54 +255,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
     }
 
-//    @Test
-//    fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
-//        (20.S).utbetalingslinjer()
-//        assertEquals(28.desember, maksdato) // 3 dager already paid, 245 left. So should be fredag!
-//    }
-
-//    @Test
-//    fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-//        (2.A + 20.S + 7.A + 20.S).utbetalingslinjer() //18feb
-//        assertEquals(8.januar(2019), maksdato)
-//    }
-//
-//    @Test
-//    fun `beregn maksdato (med rest) der den ville falt på en lørdag`() {
-//        (351.S + 1.F + 1.S).utbetalingslinjer()
-//        assertEquals(31.desember, maksdato)
-//    }
-//
-//    @Test
-//    fun `beregn maksdato (med rest) der den ville falt på en søndag`() {
-//        (23.S + 2.F + 1.S).utbetalingslinjer()
-//        assertEquals(1.januar(2019), maksdato )
-//    }
-//
-//    @Test
-//    fun `maksdato forskyves av ferie etterfulgt av sykedager`() {
-//        (21.S + 3.F + 1.S).utbetalingslinjer()
-//        assertEquals(2.januar(2019), maksdato)
-//    }
-//
-//    @Test
-//    fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() {
-//        (21.S + 3.F).utbetalingslinjer()
-//        assertEquals(28.desember, maksdato)
-//    }
-//
-//    @Test
-//    fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() {
-//        (21.S + 3.F + 1.A).utbetalingslinjer()
-//        assertEquals(28.desember, maksdato)
-//    }
-//
-//    @Test
-//    fun `maksdato er udefinert hvis det ikke er utbetalingsdager`() {
-//        (16.S).utbetalingslinjer()
-//        assertNull(maksdato)
-//    }
-//
     @Test
     fun `arbeidsgiverperiode med tre påfølgende sykedager i helg`() {
         (3.A + 19.S).utbetalingslinjer()
@@ -319,32 +271,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(2, inspektør.dagtelling[NavDag::class])
         assertEquals(3, inspektør.dagtelling[Arbeidsdag::class])
     }
-//
-//    @Test
-//    fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() {
-//        (368.S).utbetalingslinjer()
-//        assertEquals(1, betalingslinjer.size)
-//        assert(betalingslinjer.first(), 17.januar, 28.desember, 1200)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-//        (16.S + 90.S).utbetalingslinjer(fødselsnummer = AlderReglerTest.PERSON_67_ÅR_FNR_2018)
-//        assert(betalingslinjer.first(), 17.januar, 10.april, 1200)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 67 og 248 dager er brukt opp`() {
-//        (400.S).utbetalingslinjer(fødselsnummer = "01125112345")
-//        assert(betalingslinjer.first(), 17.januar, 28.desember, 1200)
-//    }
-//
-//    @Test
-//    fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-//        (400.S).utbetalingslinjer(fødselsnummer = "01024812345")
-//        assert(betalingslinjer.first(), 17.januar, 31.januar, 1200)
-//    }
-//
+
     @Test
     fun `ferie før arbeidsdag etter arbeidsgiverperioden teller ikke som opphold`() {
         (16.S + 6.S + 16.F + 1.A + 16.S).utbetalingslinjer()
