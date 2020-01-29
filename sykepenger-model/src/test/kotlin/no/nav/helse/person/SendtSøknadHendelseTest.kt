@@ -1,11 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -88,6 +88,17 @@ internal class SendtSøknadHendelseTest {
     }
 
     @Test
+    internal fun `flere sendte søknader`() {
+        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
+        person.håndter(sendtSøknad(Sykdom(6.januar, 10.januar, 100)))
+        person.håndter(sendtSøknad(Sykdom(6.januar, 10.januar, 100)))
+        assertTrue(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+
+    @Test
     internal fun `To søknader uten overlapp`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
@@ -99,6 +110,16 @@ internal class SendtSøknadHendelseTest {
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
         assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
+    }
+
+    @Test
+    internal fun `Ny søknad med overlapp på en periode`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
+        person.håndter(nySøknad(Triple(4.januar, 10.januar, 100)))
+        assertTrue(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test

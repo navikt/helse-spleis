@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -67,6 +67,17 @@ internal class NySøknadHendelseTest {
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
         assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
+    }
+
+    @Test
+    internal fun `To søknader med overlapp`() {
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        assertTrue(aktivitetslogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasMessages())
+        assertTrue(inspektør.personLogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     @Test

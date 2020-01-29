@@ -180,7 +180,10 @@ internal class Vedtaksperiode internal constructor(
         )
     }
 
-    internal fun trengerVilkårsgrunnlag(beregningStart: YearMonth, beregningSlutt: YearMonth) {
+    internal fun trengerVilkårsgrunnlag() {
+        val beregningSlutt = YearMonth.from(førsteFraværsdag())
+        val beregningStart = beregningSlutt.minusMonths(11)
+
         emitTrengerLøsning(
             Behov.nyttBehov(
                 hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
@@ -358,9 +361,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-            val inntektFraInntektsmelding = if (vedtaksperiode.inntektFraInntektsmelding() == null) {
-                vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
-            } else vedtaksperiode.inntektFraInntektsmelding()!!
+            val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding() ?: vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
 
             val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
             vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
@@ -372,12 +373,7 @@ internal class Vedtaksperiode internal constructor(
         }
 
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
-            val inntektsberegningSlutt = YearMonth.from(vedtaksperiode.førsteFraværsdag())
-            val inntektsberegningStart = inntektsberegningSlutt.minusMonths(11)
-            vedtaksperiode.trengerVilkårsgrunnlag(
-                beregningStart = inntektsberegningStart,
-                beregningSlutt = inntektsberegningSlutt
-            )
+            vedtaksperiode.trengerVilkårsgrunnlag()
         }
 
     }

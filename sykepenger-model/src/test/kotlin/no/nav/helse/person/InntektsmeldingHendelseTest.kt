@@ -61,6 +61,27 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
+    internal fun `sendt søknad etter inntektsmelding`() {
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+        person.håndter(inntektsmelding())
+        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        assertFalse(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.VILKÅRSPRØVING, inspektør.tilstand(0))
+    }
+
+    @Test
+    internal fun `Ny søknad med overlapp på en periode`() {
+        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+        person.håndter(inntektsmelding())
+        person.håndter(nySøknad(Triple(19.januar, 30.januar, 100)))
+        assertTrue(aktivitetslogger.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+
+    @Test
     internal fun `mangler ny søknad`() {
         person.håndter(inntektsmelding())
         assertTrue(aktivitetslogger.hasErrors())
