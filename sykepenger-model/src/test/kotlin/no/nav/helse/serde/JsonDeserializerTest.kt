@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 import kotlin.streams.toList
 
 internal class JsonDeserializerTest {
@@ -21,10 +23,13 @@ internal class JsonDeserializerTest {
     private val inntektsmeldingHendelseId = UUID.randomUUID().toString()
     private val vedtaksperiodeId = UUID.randomUUID().toString()
 
+    private inline fun <reified T> Any.privatProp(fieldName: String): T =
+        this::class.memberProperties.first { it.name == fieldName }.apply {
+            isAccessible = true
+        }.call(this) as T
+
     @Test
     fun test1() {
-        //val result = ModelBuilder(enkelPersonJson()).result()
-        //val result = JsonNodeModelBuilder(enkelPersonJson()).result()
         val result = DataClassModelBuilder(enkelPersonJson()).result()
 
         assertEquals(aktørId, result.privatProp("aktørId"))
