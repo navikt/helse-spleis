@@ -157,6 +157,7 @@ class Person private constructor(
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
+        aktivitetslogger.info("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }

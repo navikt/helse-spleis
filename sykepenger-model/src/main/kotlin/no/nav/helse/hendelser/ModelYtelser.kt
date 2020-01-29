@@ -83,11 +83,11 @@ class ModelYtelser(
     internal fun validerFraværsdagInnen6Mnd(tidslinje: ConcreteSykdomstidslinje) {
         val seksMåneder = 180
         val sisteFraværsdag = sykepengehistorikk.sisteFraværsdag() ?: return
-
-        if (sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse()
-            || sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count() <= seksMåneder
-        ) {
-            aktivitetslogger.error("Har fraværsdag innenfor seks måneder")
-        }
+        if (sisteFraværsdag > tidslinje.utgangspunktForBeregningAvYtelse())
+            return aktivitetslogger.error("Det finnes historikk i Infotrygd nyere enn perioden. Usikkert hvorvidt perioden er behandlet i Infotrygd eller ikke.")
+        val antallDagerSiden = sisteFraværsdag.datesUntil(tidslinje.utgangspunktForBeregningAvYtelse()).count()
+        if (antallDagerSiden <= seksMåneder)
+            return aktivitetslogger.error("Har historikk innenfor 6 måneder: forrige historiske sykedag var for $antallDagerSiden dager siden")
+        aktivitetslogger.info("Forrige historiske sykedag var for $antallDagerSiden dager siden")
     }
 }

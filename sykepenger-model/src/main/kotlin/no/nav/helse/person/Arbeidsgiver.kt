@@ -125,6 +125,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(nySøknad: ModelNySøknad) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
+            aktivitetslogger.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
         }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
