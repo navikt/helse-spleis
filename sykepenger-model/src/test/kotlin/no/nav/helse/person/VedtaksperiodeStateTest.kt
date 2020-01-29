@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -110,108 +109,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             vedtaksperiode.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
         }
         assertNull(forrigePåminnelse)
-    }
-
-    @Test
-    fun `når vi går inn i BeregnUtbetaling, ber vi om sykepengehistorikk frem til og med dagen før perioden starter`() {
-        val periodeFom = 1.juli
-        val periodeTom = 20.juli
-        val vedtaksperiode = beInVilkårsprøving(
-            tidslinje = tidslinje(
-                fom = periodeFom,
-                tom = periodeTom
-            )
-        )
-        vedtaksperiode.håndter(
-            ModelVilkårsgrunnlag(
-                hendelseId = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                orgnummer = organisasjonsnummer,
-                rapportertDato = LocalDateTime.now(),
-                inntektsmåneder = (1.rangeTo(12)).map {
-                    ModelVilkårsgrunnlag.Måned(
-                        årMåned = YearMonth.of(2018, it),
-                        inntektsliste = listOf(
-                            ModelVilkårsgrunnlag.Inntekt(
-                                beløp = 1000.0
-                            )
-                        )
-                    )
-                },
-                erEgenAnsatt = false,
-                aktivitetslogger = aktivitetslogger
-            )
-        )
-        assertTilstandsendring(BEREGN_UTBETALING)
-        assertBehov(Behovstype.Sykepengehistorikk)
-        finnBehov(Behovstype.Sykepengehistorikk).get<LocalDate>("utgangspunktForBeregningAvYtelse").also {
-            assertEquals(periodeFom.minusDays(1), it)
-        }
-    }
-
-    @Test
-    fun `Skal ikke behandle egen ansatt`() {
-        val periodeFom = 1.juli
-        val periodeTom = 20.juli
-        val vedtaksperiode = beInVilkårsprøving(
-            tidslinje = tidslinje(
-                fom = periodeFom,
-                tom = periodeTom
-            )
-        )
-
-        vedtaksperiode.håndter(
-            ModelVilkårsgrunnlag(
-                hendelseId = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                orgnummer = organisasjonsnummer,
-                rapportertDato = LocalDateTime.now(),
-                inntektsmåneder = emptyList(),
-                erEgenAnsatt = true,
-                aktivitetslogger = aktivitetslogger
-            )
-        )
-        assertTilstandsendring(TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `skal gå til infotrygd hvis det er avvik mellom inntektsmelding og inntekt fra inntektskomponenten`() {
-        val periodeFom = 1.juli
-        val periodeTom = 20.juli
-        val vedtaksperiode = beInVilkårsprøving(
-            tidslinje = tidslinje(
-                fom = periodeFom,
-                tom = periodeTom
-            )
-        )
-        vedtaksperiode.håndter(
-            ModelVilkårsgrunnlag(
-                hendelseId = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                orgnummer = organisasjonsnummer,
-                rapportertDato = LocalDateTime.now(),
-                inntektsmåneder = (1.rangeTo(12)).map {
-                    ModelVilkårsgrunnlag.Måned(
-                        årMåned = YearMonth.of(2018, it),
-                        inntektsliste = listOf(
-                            ModelVilkårsgrunnlag.Inntekt(
-                                beløp = 532.7
-                            )
-                        )
-                    )
-                },
-                erEgenAnsatt = false,
-                aktivitetslogger = aktivitetslogger
-            )
-        )
-
-        assertTilstandsendring(TIL_INFOTRYGD)
     }
 
     @Test
