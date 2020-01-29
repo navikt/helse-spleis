@@ -10,11 +10,20 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.joinForOppdrag
@@ -24,35 +33,55 @@ import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 private inline fun <reified T> Set<*>.førsteAvType(): T? {
     return firstOrNull { it is T } as T?
 }
 
-internal class Vedtaksperiode internal constructor(
+internal class Vedtaksperiode private constructor(
     private val id: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private var sykdomstidslinje: ConcreteSykdomstidslinje,
-    private var tilstand: Vedtaksperiodetilstand = StartTilstand,
-    private val aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
+    private var tilstand: Vedtaksperiodetilstand,
+    private val aktivitetslogger: Aktivitetslogger,
+    private var maksdato: LocalDate?,
+    private var utbetalingslinjer: List<Utbetalingslinje>?,
+    private var godkjentAv: String?,
+    private var utbetalingsreferanse: String?,
+    private var førsteFraværsdag: LocalDate?,
+    private var inntektFraInntektsmelding: Double?,
+    private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?,
+    private val sykdomshistorikk: Sykdomshistorikk
 ) {
 
-    private var maksdato: LocalDate? = null
-
-    private var utbetalingslinjer: List<Utbetalingslinje>? = null
-
-    private var godkjentAv: String? = null
-
-    private var utbetalingsreferanse: String? = null
-
-    private var førsteFraværsdag: LocalDate? = null
-    private var inntektFraInntektsmelding: Double? = null
-    private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata? = null
-
-    private val sykdomshistorikk = Sykdomshistorikk()
+    internal constructor(
+        id: UUID,
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        sykdomstidslinje: ConcreteSykdomstidslinje,
+        tilstand: Vedtaksperiodetilstand = StartTilstand,
+        aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
+    ) : this(
+        id = id,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        sykdomstidslinje = sykdomstidslinje,
+        tilstand = tilstand,
+        aktivitetslogger = aktivitetslogger,
+        maksdato = null,
+        utbetalingslinjer = null,
+        godkjentAv = null,
+        utbetalingsreferanse = null,
+        førsteFraværsdag = null,
+        inntektFraInntektsmelding = null,
+        dataForVilkårsvurdering = null,
+        sykdomshistorikk = Sykdomshistorikk()
+    )
 
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
@@ -361,7 +390,8 @@ internal class Vedtaksperiode internal constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-            val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding() ?: vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+            val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding()
+                ?: vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
 
             val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
             vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
@@ -576,7 +606,7 @@ internal class Vedtaksperiode internal constructor(
     companion object {
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
-            .map{ it.sykdomshistorikk.sykdomstidslinje()}
+            .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce(ConcreteSykdomstidslinje::plus)
 
         internal fun restore(memento: Memento): Vedtaksperiode {

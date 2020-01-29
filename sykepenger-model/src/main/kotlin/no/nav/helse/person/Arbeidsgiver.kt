@@ -16,11 +16,10 @@ import java.util.*
 internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
     private val id: UUID,
-    private val inntekthistorikk: Inntekthistorikk) {
+    private val inntekthistorikk: Inntekthistorikk
+) {
 
-    internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(),
-        Inntekthistorikk()
-    )
+    internal constructor(organisasjonsnummer: String) : this(organisasjonsnummer, UUID.randomUUID(), Inntekthistorikk())
 
     internal class Memento internal constructor(
         internal val id: UUID,
