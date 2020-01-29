@@ -18,9 +18,9 @@ import kotlin.collections.set
 internal class InntektsmeldingHendelseTest {
 
     companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
-        internal const val AKTØRID = "12345"
-        internal const val ORGNR = "987654321"
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val AKTØRID = "12345"
+        private const val ORGNR = "987654321"
     }
 
     private lateinit var person: Person
@@ -144,7 +144,7 @@ internal class InntektsmeldingHendelseTest {
     private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode, orgnummer: String = ORGNR) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
-            fnr = SendtSøknadHendelseTest.UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),

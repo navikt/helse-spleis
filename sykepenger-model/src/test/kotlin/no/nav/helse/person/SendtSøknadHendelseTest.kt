@@ -16,7 +16,7 @@ import java.util.*
 internal class SendtSøknadHendelseTest {
 
     companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
     private lateinit var person: Person
