@@ -106,9 +106,11 @@ internal class JsonDeserializerTest {
                                         )),
                                     "tilstand" to "TIL_INFOTRYGD",
                                     "sykdomstidslinje" to tidslinje,
-                                    "utbetalingslinjer" to emptyList<Map<String,Any>>()
+                                    "utbetalingslinjer" to emptyList<Map<String,Any>>(),
+                                    "aktivitetslogger" to "TODO"
                                 )
-                            )
+                            ),
+                            "aktivitetslogger" to "TODO"
                         )
                     ),
                     "hendelser" to listOf(
@@ -132,7 +134,8 @@ internal class JsonDeserializerTest {
                                         "tom" to LocalDate.now().minusDays(2)
                                     )
                                 ),
-                                "ferieperioder" to emptyList<Map<String, Any>>()
+                                "ferieperioder" to emptyList<Map<String, Any>>(),
+                                "aktivitetslogger" to "TODO"
                             )
                         )
                     )

@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,6 +17,7 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val mottattDato: LocalDateTime = inntektsmelding["mottattDato"]
     private val førsteFraværsdag: LocalDate = inntektsmelding["førsteFraværsdag"]
     private val beregnetInntekt: Double = inntektsmelding["beregnetInntekt"]
+    private val aktivitetslogger: Aktivitetslogger = inntektsmelding["aktivitetslogger"]
     private val arbeidsgiverperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode> =
         inntektsmelding["arbeidsgiverperioder"]
     private val ferieperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode> =
@@ -32,6 +34,7 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
             "mottattDato" to mottattDato,
             "førsteFraværsdag" to førsteFraværsdag,
             "beregnetInntekt" to beregnetInntekt,
+            "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap(),
             "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
             "ferieperioder" to ferieperioder.map(::periodeToMap)
         )

@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import java.time.LocalDate
 import java.util.*
@@ -15,6 +16,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     private val inntektFraInntektsmelding: Double? = vedtaksperiode["inntektFraInntektsmelding"]
+    private val aktivitetslogger: Aktivitetslogger = vedtaksperiode["aktivitetslogger"]
     private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, ModelVilkårsgrunnlag
         .Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
@@ -31,6 +33,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
         "inntektFraInntektsmelding" to inntektFraInntektsmelding,
-        "dataForVilkårsvurdering" to dataForVilkårsvurdering
+        "dataForVilkårsvurdering" to dataForVilkårsvurdering,
+        "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
     )
 }

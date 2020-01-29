@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDateTime
 import java.util.*
@@ -15,6 +16,7 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
     private val rapportertDato: LocalDateTime = vilkårsgrunnlag["rapportertDato"]
     private val inntektsmåneder: List<ModelVilkårsgrunnlag.Måned> = vilkårsgrunnlag["inntektsmåneder"]
     private val erEgenAnsatt: Boolean = vilkårsgrunnlag["erEgenAnsatt"]
+    private val aktivitetslogger: Aktivitetslogger = vilkårsgrunnlag["aktivitetslogger"]
 
     fun toMap() = mutableMapOf<String, Any?>(
         "type" to hendelsestype.name,
@@ -26,7 +28,8 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
             "orgnummer" to orgnummer,
             "rapportertDato" to rapportertDato,
             "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
-            "erEgenAnsatt" to erEgenAnsatt
+            "erEgenAnsatt" to erEgenAnsatt,
+            "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
     )
 

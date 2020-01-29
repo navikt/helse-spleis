@@ -49,6 +49,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
         currentState.postVisitArbeidsgiver(arbeidsgiver)
 
+    override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+        currentState.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
+    }
+
     override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
@@ -245,6 +249,10 @@ internal class JsonBuilder : PersonVisitor {
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
+        }
+
+        override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+            arbeidsgiverMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
         }
 
         override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {

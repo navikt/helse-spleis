@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -14,6 +15,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
     private val orgnummer: String = sendtSøknad["orgnummer"]
     private val rapportertdato: LocalDateTime = sendtSøknad["rapportertdato"]
     private val perioder: List<ModelSendtSøknad.Periode> = sendtSøknad["perioder"]
+    private val aktivitetslogger: Aktivitetslogger = sendtSøknad["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to hendelsestype.name,
@@ -23,7 +25,8 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
             "aktørId" to aktørId,
             "orgnummer" to orgnummer,
             "rapportertdato" to rapportertdato,
-            "perioder" to perioder.map { PeriodeReflect(it).toMap() }
+            "perioder" to perioder.map { PeriodeReflect(it).toMap() },
+            "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
     )
 

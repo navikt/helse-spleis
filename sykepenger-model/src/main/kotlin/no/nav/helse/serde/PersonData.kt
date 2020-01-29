@@ -90,7 +90,8 @@ internal data class PersonData(
             val førsteFraværsdag: LocalDate,
             val beregnetInntekt: Double,
             val arbeidsgiverperioder: List<PeriodeData>,
-            val ferieperioder: List<PeriodeData>
+            val ferieperioder: List<PeriodeData>,
+            val aktivitetslogger: Any // TODO
         ) {
             data class RefusjonData(
                 val opphørsdato: LocalDate?,
@@ -109,7 +110,8 @@ internal data class PersonData(
             val organisasjonsnummer: String,
             val rapportertdato: LocalDateTime,
             val sykepengehistorikk: SykepengehistorikkData,
-            val foreldrepenger: ForeldrepengerData
+            val foreldrepenger: ForeldrepengerData,
+            val aktivitetslogger: Any // TODO
         ) {
 
             data class SykepengehistorikkData(
@@ -158,7 +160,8 @@ internal data class PersonData(
             val organisasjonsnummer: String,
             val saksbehandler: String,
             val utbetalingGodkjent: Boolean,
-            val rapportertdato: LocalDateTime
+            val rapportertdato: LocalDateTime,
+            val aktivitetslogger: Any // TODO
         ) {
         }
 
@@ -168,7 +171,8 @@ internal data class PersonData(
             val hendelseId: UUID,
             val orgnummer: String,
             val rapportertdato: LocalDateTime,
-            val sykeperioder: List<SykeperiodeData>
+            val sykeperioder: List<SykeperiodeData>,
+            val aktivitetslogger: Any // TODO
         ) {
             data class SykeperiodeData(
                 val fom: LocalDate,
@@ -183,7 +187,8 @@ internal data class PersonData(
             val hendelseId: UUID,
             val orgnummer: String,
             val rapportertdato: LocalDateTime,
-            val perioder: List<SykeperiodeData>
+            val perioder: List<SykeperiodeData>,
+            val aktivitetslogger: Any // TODO
         ) {
             data class SykeperiodeData(
                 val type: TypeData,
@@ -209,7 +214,8 @@ internal data class PersonData(
             val orgnummer: String,
             val rapportertDato: LocalDateTime,
             val inntektsmåneder: List<Måned>,
-            val erEgenAnsatt: Boolean
+            val erEgenAnsatt: Boolean,
+            val aktivitetslogger: Any // TODO
         ) {
             data class Måned(
                 val årMåned: YearMonth,
@@ -236,7 +242,8 @@ internal data class PersonData(
         val id: UUID,
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
-        val utbetalingstidslinjer: List<Any> // TODO
+        val utbetalingstidslinjer: List<Any>, // TODO
+        val aktivitetslogger: Any
     ) {
         data class InntektData(
             val fom: LocalDate,
@@ -255,7 +262,8 @@ internal data class PersonData(
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
             val sykdomstidslinje: SykdomstidslinjeData,
-            val utbetalingslinjer: List<UtbetalingslinjeData>
+            val utbetalingslinjer: List<UtbetalingslinjeData>,
+            val aktivitetslogger: Any // TODO
         ) {
             data class DagData(
                 val dagen: LocalDate,

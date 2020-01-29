@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import java.time.LocalDateTime
 import java.util.*
@@ -15,6 +16,7 @@ internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellS
     private val saksbehandler: String = manuellSaksbehandling["saksbehandler"]
     private val utbetalingGodkjent: Boolean = manuellSaksbehandling["utbetalingGodkjent"]
     private val rapportertdato: LocalDateTime = manuellSaksbehandling["rapportertdato"]
+    private val aktivitetslogger: Aktivitetslogger = manuellSaksbehandling["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to hendelsestype.name,
@@ -26,7 +28,8 @@ internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellS
             "vedtaksperiodeId" to vedtaksperiodeId,
             "saksbehandler" to saksbehandler,
             "utbetalingGodkjent" to utbetalingGodkjent,
-            "rapportertdato" to rapportertdato
+            "rapportertdato" to rapportertdato,
+            "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
     )
 }
