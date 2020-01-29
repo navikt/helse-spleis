@@ -13,6 +13,8 @@ import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.Validation
+import no.nav.helse.hendelser.Valideringssteg
 import java.util.UUID
 
 private const val CURRENT_SKJEMA_VERSJON = 3
@@ -35,20 +37,49 @@ class Person private constructor(
 
     fun håndter(nySøknad: ModelNySøknad) {
         registrer(nySøknad, "Behandler ny søknad")
-        var arbeidsgiver: Arbeidsgiver? = null
-        fun validate(): ValidationStep = { nySøknad.valider() }
-        fun arbeidsgiver(): ValidationStep = { arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad) }
-        fun håndterNySøknad(): ValidationStep = { arbeidsgiver?.håndter(nySøknad) }
-        fun onError() {
-            invaliderAllePerioder(nySøknad)
+        Validation(nySøknad).also {
+            it.onError { invaliderAllePerioder(nySøknad) }
+            it.valider { ValiderNySøknad(nySøknad) }
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver2(nySøknad)
+            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
+            it.valider { HåndterNySøknad(nySøknad, arbeidsgiver) }
         }
-        nySøknad.continueIfNoErrors(
-            validate(),
-            arbeidsgiver(),
-            håndterNySøknad()
-        ) { onError() }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
+
+    private inner class ValiderNySøknad(private val nySøknad: ModelNySøknad) : Valideringssteg {
+        override fun isValid() =
+            !nySøknad.valider().hasErrors()
+
+        override fun feilmelding() = "Kunne ikke validere ny søknad"
+    }
+
+    private inner class ValiderKunEnArbeidsgiver(
+        private val arbeidsgivere: List<Arbeidsgiver>
+    ) : Valideringssteg {
+        override fun isValid() = arbeidsgivere.size == 1
+        override fun feilmelding() = "Bruker har mer enn en arbeidsgiver"
+    }
+
+    private inner class HåndterNySøknad(
+        private val nySøknad: ModelNySøknad,
+        private val arbeidsgiver: Arbeidsgiver?
+    ) : Valideringssteg {
+        override fun isValid(): Boolean {
+            arbeidsgiver?.håndter(nySøknad)
+            return !nySøknad.hasErrors()
+        }
+
+        override fun feilmelding() = "Kunne ikke validere håndtering av ny søknad"
+    }
+
+    private fun finnEllerOpprettArbeidsgiver2(hendelse: ArbeidstakerHendelse) =
+        hendelse.organisasjonsnummer().let { orgnr ->
+            arbeidsgivere.finnEllerOpprett(orgnr) {
+                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+                arbeidsgiver(orgnr)
+            }
+        }
 
     fun håndter(sendtSøknad: ModelSendtSøknad) {
         registrer(sendtSøknad, "Behandler sendt søknad")

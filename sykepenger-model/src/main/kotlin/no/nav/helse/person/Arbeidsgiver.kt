@@ -94,7 +94,6 @@ internal class Arbeidsgiver private constructor(
                 aktivitetslogger = Aktivitetslogger()
             )
         }
-
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

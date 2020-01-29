@@ -10,47 +10,67 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class ValidationTest {
 
     private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
-    internal fun setup(){
+    internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
     }
 
     @Test
-    internal fun `Valideringstest`() {
+    internal fun success() {
         var success = false
         Validation(TestHendelse(aktivitetslogger)).also {
-            it.onError{ fail("Uventet kall") }
-            it.onSuccess{ success = true }
+            it.onError { fail("Uventet kall") }
+            it.onSuccess { success = true }
         }
         assertTrue(success)
     }
 
     @Test
-    internal fun `failure`() {
+    internal fun failure() {
         var failure = false
         Validation(TestHendelse(aktivitetslogger)).also {
-            it.onError{ failure = true }
-            it.valider(FailureBlock())
-            it.onSuccess{ fail("Uventet kall") }
+            it.onError { failure = true }
+            it.valider { FailureBlock() }
+            it.onSuccess { fail("Uventet kall") }
         }
         assertTrue(failure)
     }
 
-    private inner class FailureBlock: Valideringssteg {
-        override fun valider() = false
-        override fun melding() = "feilmelding"
+    @Test internal fun `when does constructor run`() {
+        var variableChanged = false
+        Validation(TestHendelse(aktivitetslogger)).also {
+            it.onError { fail("we failed") }
+            it.valider { ReturnValues().also { variableChanged = it.variable()}}
+        }
+        assertTrue(variableChanged)
     }
 
-    private inner class TestHendelse(aktivitetslogger: Aktivitetslogger):
+    private class ReturnValues : Valideringssteg {
+        private var variable = false
+        init {
+            variable = true
+        }
+        override fun isValid() = true
+        internal fun variable() = variable
+        override fun feilmelding(): String {
+            fail("Uventet kall")
+        }
+    }
+
+    private inner class FailureBlock : Valideringssteg {
+        override fun isValid() = false
+        override fun feilmelding() = "feilmelding"
+    }
+
+    private inner class TestHendelse(aktivitetslogger: Aktivitetslogger) :
         ArbeidstakerHendelse(UUID.randomUUID(), Ytelser, aktivitetslogger),
-        IAktivitetslogger by aktivitetslogger
-    {
+        IAktivitetslogger by aktivitetslogger {
         override fun rapportertdato(): LocalDateTime {
             fail("Uventet kall")
         }

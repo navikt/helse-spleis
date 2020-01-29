@@ -13,9 +13,11 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse){
         if(!hendelse.hasErrors()) successBlock()
     }
 
-    internal fun valider(steg: Valideringssteg) {
+    internal fun valider(block: ValiderBlock) {
         if (hendelse.hasErrors()) return
-        if (!steg.valider()) hendelse.error(steg.melding())
+        val steg = block()
+        if (steg.isValid()) return
+        hendelse.error(steg.feilmelding())
         errorBlock()
     }
 
@@ -23,7 +25,8 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse){
 
 internal typealias ErrorBlock = () -> Unit
 internal typealias SuccessBlock = () -> Unit
+internal typealias ValiderBlock = () -> Valideringssteg
 internal interface Valideringssteg {
-    fun valider(): Boolean
-    fun melding(): String
+    fun isValid(): Boolean
+    fun feilmelding(): String
 }
