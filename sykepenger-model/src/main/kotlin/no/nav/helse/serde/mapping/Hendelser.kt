@@ -1,17 +1,8 @@
 package no.nav.helse.serde.mapping
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.helse.hendelser.ModelForeldrepenger
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSykepengehistorikk
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.serde.PersonData
@@ -33,14 +24,14 @@ internal fun konverterTilHendelse(
     }
 }
 
-private fun parseSendtSøknad(objectMapper: ObjectMapper, personData: PersonData, jsonNode: JsonNode): ModelSendtSøknad {
+private fun parseSendtSøknad(objectMapper: ObjectMapper, personData: PersonData, jsonNode: Map<String,Any?>): ModelSendtSøknad {
     val data: HendelseWrapperData.SendtSøknadData = objectMapper.convertValue(jsonNode)
     return ModelSendtSøknad(
         hendelseId = data.hendelseId,
-        fnr = personData.fødselsnummer,
-        aktørId = personData.aktørId,
+        fnr = data.fnr,
+        aktørId = data.aktørId,
         orgnummer = data.orgnummer,
-        rapportertdato = data.mottattDato,
+        rapportertdato = data.rapportertdato,
         perioder = data.perioder.map(::parseSykeperiode),
         originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
@@ -76,15 +67,15 @@ private fun parseSykeperiode(data: HendelseWrapperData.SendtSøknadData.Sykeperi
     )
 }
 
-private fun parseNySøknad(objectMapper: ObjectMapper, personData: PersonData, jsonNode: JsonNode): ModelNySøknad {
+private fun parseNySøknad(objectMapper: ObjectMapper, personData: PersonData, jsonNode: Map<String,Any?>): ModelNySøknad {
     val data: HendelseWrapperData.NySøknadData = objectMapper.convertValue(jsonNode)
     return ModelNySøknad(
         hendelseId = data.hendelseId,
-        fnr = personData.fødselsnummer,
-        aktørId = personData.aktørId,
+        fnr = data.fnr,
+        aktørId = data.aktørId,
         orgnummer = data.orgnummer,
-        rapportertdato = data.mottattDato,
-        sykeperioder = data.sykeperioder.map { Triple(it.fom, it.tom, it.grad) },
+        rapportertdato = data.rapportertdato,
+        sykeperioder = data.sykeperioder.map { Triple(it.fom, it.tom, it.sykdomsgrad) },
         originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
@@ -93,23 +84,23 @@ private fun parseNySøknad(objectMapper: ObjectMapper, personData: PersonData, j
 private fun parseManuellSaksbehandling(
     objectMapper: ObjectMapper,
     personData: PersonData,
-    jsonNode: JsonNode
+    jsonNode: Map<String,Any?>
 ): ModelManuellSaksbehandling {
     val data: HendelseWrapperData.ManuellSaksbehandlingData = objectMapper.convertValue(jsonNode)
     return ModelManuellSaksbehandling(
         hendelseId = data.hendelseId,
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
-        organisasjonsnummer = data.orgnummer,
+        organisasjonsnummer = data.organisasjonsnummer,
         vedtaksperiodeId = data.vedtaksperiodeId.toString(),
         saksbehandler = data.saksbehandler,
         utbetalingGodkjent = data.utbetalingGodkjent,
-        rapportertdato = data.mottattDato,
+        rapportertdato = data.rapportertdato,
         aktivitetslogger = Aktivitetslogger()
     )
 }
 
-private fun parseVilkårsgrunnlag(objectMapper: ObjectMapper, personData: PersonData, jsonNode: JsonNode): ModelVilkårsgrunnlag {
+private fun parseVilkårsgrunnlag(objectMapper: ObjectMapper, personData: PersonData, jsonNode: Map<String,Any?>): ModelVilkårsgrunnlag {
     val data: HendelseWrapperData.VilkårsgrunnlagData = objectMapper.convertValue(jsonNode)
     return ModelVilkårsgrunnlag(
         hendelseId = data.hendelseId,
@@ -117,7 +108,7 @@ private fun parseVilkårsgrunnlag(objectMapper: ObjectMapper, personData: Person
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
         orgnummer = data.orgnummer,
-        rapportertDato = data.mottattDato,
+        rapportertDato = data.rapportertDato,
         inntektsmåneder = data.inntektsmåneder.map(::parseInntektsmåneder),
         erEgenAnsatt = data.erEgenAnsatt,
         aktivitetslogger = Aktivitetslogger()
@@ -136,14 +127,14 @@ private fun parseInntektsmåneder(data: HendelseWrapperData.VilkårsgrunnlagData
 private fun parseInntektsmelding(
     objectMapper: ObjectMapper,
     personData: PersonData,
-    jsonNode: JsonNode
+    jsonNode: Map<String,Any?>
 ): ModelInntektsmelding {
     val data: HendelseWrapperData.InntektsmeldingData = objectMapper.convertValue(jsonNode)
     return ModelInntektsmelding(
         hendelseId = data.hendelseId,
         orgnummer = data.orgnummer,
-        fødselsnummer = personData.fødselsnummer,
-        aktørId = personData.aktørId,
+        fødselsnummer = data.fødselsnummer,
+        aktørId = data.aktørId,
         mottattDato = data.mottattDato,
         refusjon = ModelInntektsmelding.Refusjon(
             opphørsdato = data.refusjon.opphørsdato,
@@ -159,15 +150,15 @@ private fun parseInntektsmelding(
     )
 }
 
-private fun parseYtelser(objectMapper: ObjectMapper, personData: PersonData, jsonNode: JsonNode): ModelYtelser {
+private fun parseYtelser(objectMapper: ObjectMapper, personData: PersonData, jsonNode: Map<String,Any?>): ModelYtelser {
     val data: HendelseWrapperData.YtelserData = objectMapper.convertValue(jsonNode)
     return ModelYtelser(
         hendelseId = data.hendelseId,
         vedtaksperiodeId = data.vedtaksperiodeId.toString(),
-        organisasjonsnummer = data.orgnummer,
+        organisasjonsnummer = data.organisasjonsnummer,
         fødselsnummer = personData.fødselsnummer,
         aktørId = personData.aktørId,
-        rapportertdato = data.mottattDato,
+        rapportertdato = data.rapportertdato,
         sykepengehistorikk = ModelSykepengehistorikk(
             utbetalinger = data.sykepengehistorikk.utbetalinger.map(::parseUtbetaling),
             inntektshistorikk = data.sykepengehistorikk.inntektshistorikk.map(::parseInntektsopplysning),

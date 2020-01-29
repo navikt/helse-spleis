@@ -26,9 +26,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "id" to id,
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
         "maksdato" to maksdato,
         "godkjentAv" to godkjentAv,
         "utbetalingsreferanse" to utbetalingsreferanse,

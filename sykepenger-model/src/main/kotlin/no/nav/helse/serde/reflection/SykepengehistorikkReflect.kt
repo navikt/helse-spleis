@@ -13,7 +13,20 @@ internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehisto
             mutableMapOf<String, Any?>(
                 "fom" to it.fom,
                 "tom" to it.tom,
-                "dagsats" to it.dagsats
+                "dagsats" to it.dagsats,
+                "type" to when(it) {
+                    is ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver -> "RefusjonTilArbeidsgiver"
+                    is ModelSykepengehistorikk.Periode.ReduksjonMedlem -> "ReduksjonMedlem"
+                    is ModelSykepengehistorikk.Periode.Etterbetaling -> "Etterbetaling"
+                    is ModelSykepengehistorikk.Periode.KontertRegnskap -> "KontertRegnskap"
+                    is ModelSykepengehistorikk.Periode.ReduksjonArbeidsgiverRefusjon -> "ReduksjonArbeidsgiverRefusjon"
+                    is ModelSykepengehistorikk.Periode.Tilbakeført -> "Tilbakeført"
+                    is ModelSykepengehistorikk.Periode.Konvertert -> "Konvertert"
+                    is ModelSykepengehistorikk.Periode.Ferie -> "Ferie"
+                    is ModelSykepengehistorikk.Periode.Opphold -> "Opphold"
+                    is ModelSykepengehistorikk.Periode.Sanksjon -> "Sanksjon"
+                    is ModelSykepengehistorikk.Periode.Ukjent -> "Ukjent"
+                }
             )
         },
         "inntektshistorikk" to inntektshistorikk.map { InntektsopplysningReflect(it).toMap() }

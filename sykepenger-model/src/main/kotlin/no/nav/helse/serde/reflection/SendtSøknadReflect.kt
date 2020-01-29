@@ -14,17 +14,17 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
     private val orgnummer: String = sendtSøknad["orgnummer"]
     private val rapportertdato: LocalDateTime = sendtSøknad["rapportertdato"]
     private val perioder: List<ModelSendtSøknad.Periode> = sendtSøknad["perioder"]
-    private val originalJson: String = sendtSøknad["originalJson"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "hendelseId" to hendelseId,
-        "hendelsetype" to hendelsestype.name,
-        "fnr" to fnr,
-        "aktørId" to aktørId,
-        "orgnummer" to orgnummer,
-        "rapportertdato" to rapportertdato,
-        "perioder" to perioder.map { PeriodeReflect(it).toMap() },
-        "originalJson" to originalJson
+        "type" to hendelsestype.name,
+        "data" to mutableMapOf<String, Any?>(
+            "hendelseId" to hendelseId,
+            "fnr" to fnr,
+            "aktørId" to aktørId,
+            "orgnummer" to orgnummer,
+            "rapportertdato" to rapportertdato,
+            "perioder" to perioder.map { PeriodeReflect(it).toMap() }
+        )
     )
 
     private class PeriodeReflect(private val periode: ModelSendtSøknad.Periode) {
@@ -36,13 +36,19 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
             "tom" to tom
         ).also {
             when (periode) {
+                is ModelSendtSøknad.Periode.Ferie -> it["type"] = "Ferie"
                 is ModelSendtSøknad.Periode.Sykdom -> {
+                    it["type"] = "Sykdom"
                     it["grad"] = periode.get<ModelSendtSøknad.Periode.Sykdom, Int>("grad")
                     it["faktiskGrad"] = periode.get<ModelSendtSøknad.Periode.Sykdom, Double>("faktiskGrad")
                 }
                 is ModelSendtSøknad.Periode.Utdanning -> {
+                    it["type"] = "Utdanning"
                     it["fom"] = periode.get<ModelSendtSøknad.Periode.Utdanning, LocalDate?>("fom")
                 }
+                is ModelSendtSøknad.Periode.Permisjon -> it["type"] = "Permisjon"
+                is ModelSendtSøknad.Periode.Egenmelding -> it["type"] = "Egenmelding"
+                is ModelSendtSøknad.Periode.Arbeid -> it["type"] = "Arbeid"
             }
         }
     }

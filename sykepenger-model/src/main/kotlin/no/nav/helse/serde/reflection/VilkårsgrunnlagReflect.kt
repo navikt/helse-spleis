@@ -17,15 +17,17 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
     private val erEgenAnsatt: Boolean = vilkårsgrunnlag["erEgenAnsatt"]
 
     fun toMap() = mutableMapOf<String, Any?>(
-        "hendelseId" to hendelseId,
-        "hendelsetype" to hendelsestype.name,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "orgnummer" to orgnummer,
-        "rapportertDato" to rapportertDato,
-        "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
-        "erEgenAnsatt" to erEgenAnsatt
+        "type" to hendelsestype.name,
+        "data" to mutableMapOf<String, Any?>(
+            "hendelseId" to hendelseId,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            //"aktørId" to aktørId, // TODO ?
+            //"fødselsnummer" to fødselsnummer, // TODO ?
+            "orgnummer" to orgnummer,
+            "rapportertDato" to rapportertDato,
+            "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
+            "erEgenAnsatt" to erEgenAnsatt
+        )
     )
 
     private class InntektsmånederReflect(private val måned: ModelVilkårsgrunnlag.Måned) {

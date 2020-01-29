@@ -16,25 +16,25 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val mottattDato: LocalDateTime = inntektsmelding["mottattDato"]
     private val førsteFraværsdag: LocalDate = inntektsmelding["førsteFraværsdag"]
     private val beregnetInntekt: Double = inntektsmelding["beregnetInntekt"]
-    private val originalJson: String = inntektsmelding["originalJson"]
     private val arbeidsgiverperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode> =
         inntektsmelding["arbeidsgiverperioder"]
     private val ferieperioder: List<ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode> =
         inntektsmelding["ferieperioder"]
 
     fun toMap() = mutableMapOf<String, Any?>(
-        "hendelseId" to hendelseId,
-        "hendelsetype" to hendelsetype.name,
-        "refusjon" to refusjon,
-        "orgnummer" to orgnummer,
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "mottattDato" to mottattDato,
-        "førsteFraværsdag" to førsteFraværsdag,
-        "beregnetInntekt" to beregnetInntekt,
-        "originalJson" to originalJson,
-        "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
-        "ferieperioder" to ferieperioder.map(::periodeToMap)
+        "type" to hendelsetype.name,
+        "data" to mutableMapOf<String, Any?>(
+            "hendelseId" to hendelseId,
+            "refusjon" to refusjon,
+            "orgnummer" to orgnummer,
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "mottattDato" to mottattDato,
+            "førsteFraværsdag" to førsteFraværsdag,
+            "beregnetInntekt" to beregnetInntekt,
+            "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
+            "ferieperioder" to ferieperioder.map(::periodeToMap)
+        )
     )
 
     private fun periodeToMap(periode: ModelInntektsmelding.InntektsmeldingPeriode) = mutableMapOf<String, Any?>(

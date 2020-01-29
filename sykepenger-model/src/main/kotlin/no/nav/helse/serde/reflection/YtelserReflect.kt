@@ -19,14 +19,16 @@ internal class YtelserReflect(ytelser: ModelYtelser) {
     private val rapportertdato: LocalDateTime = ytelser["rapportertdato"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "hendelseId" to hendelseId,
-        "hendelsetype" to hendelsestype.name,
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "sykepengehistorikk" to sykepengehistorikk.let { SykepengehistorikkReflect(it).toMap() },
-        "foreldrepenger" to foreldrepenger.let { ForeldrepengerReflect(it).toMap() },
-        "rapportertdato" to rapportertdato
+        "type" to hendelsestype.name,
+        "data" to mutableMapOf<String, Any?>(
+            "hendelseId" to hendelseId,
+            //"aktørId" to aktørId, // TODO ?
+            //"fødselsnummer" to fødselsnummer, // TODO ?
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "sykepengehistorikk" to sykepengehistorikk.let { SykepengehistorikkReflect(it).toMap() },
+            "foreldrepenger" to foreldrepenger.let { ForeldrepengerReflect(it).toMap() },
+            "rapportertdato" to rapportertdato
+        )
     )
 }

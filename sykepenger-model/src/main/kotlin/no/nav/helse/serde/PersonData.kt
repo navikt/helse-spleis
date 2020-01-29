@@ -1,17 +1,11 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
@@ -22,7 +16,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -62,7 +56,7 @@ class DataClassModelBuilder(private val json: String) {
         }
 
         return createArbeidsgiver(
-            data.orgnummer,
+            data.organisasjonsnummer,
             data.id,
             inntekthistorikk,
             mutableListOf(),
@@ -78,15 +72,18 @@ internal data class PersonData(
     val aktørId: String,
     val fødselsnummer: String,
     val hendelser: List<HendelseWrapperData>,
-    val arbeidsgivere: List<ArbeidsgiverData>
+    val arbeidsgivere: List<ArbeidsgiverData>,
+    val aktivitetslogger: Any // TODO
 ) {
     data class HendelseWrapperData(
         val type: Hendelsestype,
-        val tidspunkt: LocalDateTime,
-        val data: JsonNode
+        //val tidspunkt: LocalDateTime,
+        val data: Map<String, Any?>
     ) {
         data class InntektsmeldingData(
             val hendelseId: UUID,
+            val fødselsnummer: String,
+            val aktørId: String,
             val orgnummer: String,
             val refusjon: RefusjonData,
             val mottattDato: LocalDateTime,
@@ -109,15 +106,13 @@ internal data class PersonData(
         data class YtelserData(
             val hendelseId: UUID,
             val vedtaksperiodeId: UUID,
-            val orgnummer: String,
-            val mottattDato: LocalDateTime,
+            val organisasjonsnummer: String,
+            val rapportertdato: LocalDateTime,
             val sykepengehistorikk: SykepengehistorikkData,
             val foreldrepenger: ForeldrepengerData
         ) {
 
             data class SykepengehistorikkData(
-                val hendelseId: UUID,
-                val orgnummer: String,
                 val utbetalinger: List<UtbetalingPeriodeData>,
                 val inntektshistorikk: List<InntektsopplysningData>
             ) {
@@ -143,7 +138,6 @@ internal data class PersonData(
                 }
 
                 data class InntektsopplysningData(
-                    val hendelseId: UUID,
                     val orgnummer: String,
                     val sykepengerFom: LocalDate,
                     val inntektPerMåned: Int
@@ -161,30 +155,34 @@ internal data class PersonData(
         data class ManuellSaksbehandlingData(
             val hendelseId: UUID,
             val vedtaksperiodeId: UUID,
-            val orgnummer: String,
+            val organisasjonsnummer: String,
             val saksbehandler: String,
             val utbetalingGodkjent: Boolean,
-            val mottattDato: LocalDateTime
+            val rapportertdato: LocalDateTime
         ) {
         }
 
         data class NySøknadData(
+            val fnr: String,
+            val aktørId: String,
             val hendelseId: UUID,
             val orgnummer: String,
-            val mottattDato: LocalDateTime,
+            val rapportertdato: LocalDateTime,
             val sykeperioder: List<SykeperiodeData>
         ) {
             data class SykeperiodeData(
                 val fom: LocalDate,
                 val tom: LocalDate,
-                val grad: Int
+                val sykdomsgrad: Int
             )
         }
 
         data class SendtSøknadData(
+            val fnr: String,
+            val aktørId: String,
             val hendelseId: UUID,
             val orgnummer: String,
-            val mottattDato: LocalDateTime,
+            val rapportertdato: LocalDateTime,
             val perioder: List<SykeperiodeData>
         ) {
             data class SykeperiodeData(
@@ -209,7 +207,7 @@ internal data class PersonData(
             val hendelseId: UUID,
             val vedtaksperiodeId: UUID,
             val orgnummer: String,
-            val mottattDato: LocalDateTime,
+            val rapportertDato: LocalDateTime,
             val inntektsmåneder: List<Måned>,
             val erEgenAnsatt: Boolean
         ) {
@@ -234,10 +232,11 @@ internal data class PersonData(
     }
 
     data class ArbeidsgiverData(
-        val orgnummer: String,
+        val organisasjonsnummer: String,
         val id: UUID,
         val inntekter: List<InntektData>,
-        val vedtaksperioder: List<VedtaksperiodeData>
+        val vedtaksperioder: List<VedtaksperiodeData>,
+        val utbetalingstidslinjer: List<Any> // TODO
     ) {
         data class InntektData(
             val fom: LocalDate,

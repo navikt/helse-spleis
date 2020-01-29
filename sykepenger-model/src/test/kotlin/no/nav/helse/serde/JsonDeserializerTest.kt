@@ -69,9 +69,11 @@ internal class JsonDeserializerTest {
                 mapOf(
                     "aktørId" to aktørId,
                     "fødselsnummer" to fødselsnummer,
+                    "aktivitetslogger" to "TODO",
                     "arbeidsgivere" to listOf(
                         mapOf(
-                            "orgnummer" to organisasjonsnummer,
+                            "utbetalingstidslinjer" to emptyList<Map<String,Any>>(),
+                            "organisasjonsnummer" to organisasjonsnummer,
                             "id" to arbeidsgiverId,
                             "inntekter" to listOf(
                                 mapOf(
@@ -107,8 +109,9 @@ internal class JsonDeserializerTest {
                     "hendelser" to listOf(
                         mapOf(
                             "type" to "Inntektsmelding",
-                            "tidspunkt" to "2020-01-01T00:00:00",
                             "data" to mapOf(
+                                "fødselsnummer" to fødselsnummer,
+                                "aktørId" to aktørId,
                                 "hendelseId" to inntektsmeldingHendelseId,
                                 "refusjon" to mapOf(
                                     "beløpPrMåned" to 30000.00,

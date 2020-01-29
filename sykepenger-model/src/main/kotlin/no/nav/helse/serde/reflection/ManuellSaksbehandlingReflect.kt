@@ -17,14 +17,16 @@ internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellS
     private val rapportertdato: LocalDateTime = manuellSaksbehandling["rapportertdato"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "hendelseId" to hendelseId,
-        "hendelsetype" to hendelsestype.name,
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "saksbehandler" to saksbehandler,
-        "utbetalingGodkjent" to utbetalingGodkjent,
-        "rapportertdato" to rapportertdato
+        "type" to hendelsestype.name,
+        "data" to mutableMapOf<String, Any?>(
+            "hendelseId" to hendelseId,
+            //"aktørId" to aktørId, // TODO ?
+            //"fødselsnummer" to fødselsnummer, // TODO ?
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "saksbehandler" to saksbehandler,
+            "utbetalingGodkjent" to utbetalingGodkjent,
+            "rapportertdato" to rapportertdato
+        )
     )
 }

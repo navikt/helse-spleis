@@ -1,11 +1,14 @@
 package no.nav.helse.serde
 
 import no.nav.helse.behov.Behov
+import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -17,9 +20,9 @@ private const val orgnummer = "987654321"
 private var vedtaksperiodeId = "1"
 
 internal class JsonBuilderTest {
-    @Test
-    internal fun `print person som json`() {
-        val person = Person(aktørId, fnr).apply {
+
+    private fun lagPerson() =
+        Person(aktørId, fnr).apply {
             addObserver(object : PersonObserver {
                 override fun vedtaksperiodeTrengerLøsning(event: Behov) {
                     if (event.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
@@ -36,9 +39,24 @@ internal class JsonBuilderTest {
             håndter(manuellSaksbehandling)
         }
 
+    @Test
+    internal fun `print person som json`() {
+        val person = lagPerson()
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         println(jsonBuilder.toString())
+    }
+
+    @Test
+    fun test2() {
+        val person = lagPerson()
+        val jsonBuilder = JsonBuilder()
+        person.accept(jsonBuilder)
+        val json = jsonBuilder.toString()
+        //println(json)
+
+        val result = DataClassModelBuilder(json).result()
+        println(result)
     }
 }
 
