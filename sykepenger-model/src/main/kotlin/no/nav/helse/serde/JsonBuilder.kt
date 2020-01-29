@@ -10,8 +10,8 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
@@ -29,195 +29,140 @@ internal class JsonBuilder : PersonVisitor {
     override fun toString() = currentState.toJson()
 
     private fun pushState(state: JsonState) {
-        currentState.leaving(this)
+        currentState.leaving()
         stack.push(state)
-        currentState.entering(this)
+        currentState.entering()
     }
 
     private fun popState() {
-        currentState.leaving(this)
+        currentState.leaving()
         stack.pop()
-        currentState.entering(this)
+        currentState.entering()
     }
 
-    override fun preVisitPerson(person: Person) = currentState.preVisitPerson(this, person)
-    override fun postVisitPerson(person: Person) = currentState.postVisitPerson(this, person)
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(this, aktivitetslogger)
+    override fun preVisitPerson(person: Person) = currentState.preVisitPerson(person)
+    override fun postVisitPerson(person: Person) = currentState.postVisitPerson(person)
+    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(aktivitetslogger)
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
-        currentState.preVisitArbeidsgiver(this, arbeidsgiver)
+        currentState.preVisitArbeidsgiver(arbeidsgiver)
 
     override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
-        currentState.postVisitArbeidsgiver(this, arbeidsgiver)
+        currentState.postVisitArbeidsgiver(arbeidsgiver)
 
-    override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere(this)
-    override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere(this)
+    override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
+    override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
-        currentState.preVisitInntektHistorie(this, inntekthistorikk)
+        currentState.preVisitInntekthistorikk(inntekthistorikk)
 
     override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
-        currentState.postVisitInntektHistorie(this, inntekthistorikk)
+        currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun preVisitInntekter() = currentState.preVisitInntekter(this)
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(this, inntekt)
-    override fun preVisitTidslinjer() = currentState.preVisitTidslinjer(this)
+    override fun preVisitInntekter() = currentState.preVisitInntekter()
+    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(inntekt)
+    override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
-        currentState.preVisitUtbetalingstidslinje(this, tidslinje)
+        currentState.preVisitUtbetalingstidslinje(tidslinje)
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
-        currentState.visitArbeidsdag(this, dag)
+        currentState.visitArbeidsdag(dag)
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
-        currentState.visitArbeidsgiverperiodeDag(this, dag)
+        currentState.visitArbeidsgiverperiodeDag(dag)
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
-        currentState.visitNavDag(this, dag)
+        currentState.visitNavDag(dag)
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
-        currentState.visitNavHelgDag(this, dag)
+        currentState.visitNavHelgDag(dag)
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
-        currentState.visitFridag(this, dag)
+        currentState.visitFridag(dag)
     override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
-        currentState.visitAvvistDag(this, dag)
+        currentState.visitAvvistDag(dag)
     override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
-        currentState.visitUkjentDag(this, dag)
+        currentState.visitUkjentDag(dag)
 
 
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
-        currentState.postVisitUtbetalingstidslinje(this, tidslinje)
+        currentState.postVisitUtbetalingstidslinje(tidslinje)
 
-    override fun preVisitPerioder() = currentState.preVisitPerioder(this)
+    override fun preVisitPerioder() = currentState.preVisitPerioder()
     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) =
-        currentState.preVisitVedtaksperiode(this, vedtaksperiode)
+        currentState.preVisitVedtaksperiode(vedtaksperiode)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
-        currentState.preVisitSykdomshistorikk(this, sykdomshistorikk)
+        currentState.preVisitSykdomshistorikk(sykdomshistorikk)
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
-        currentState.preVisitSykdomshistorikkElement(this, element)
+        currentState.preVisitSykdomshistorikkElement(element)
 
-    override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) = currentState.visitHendelse(this, hendelse)
+    override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) = currentState.visitHendelse(hendelse)
 
-    override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje(this)
-    override fun postVisitHendelseSykdomstidslinje() = currentState.postVisitHendelseSykdomstidslinje(this)
-    override fun preVisitBeregnetSykdomstidslinje() = currentState.preVisitBeregnetSykdomstidslinje(this)
-    override fun postVisitBeregnetSykdomstidslinje() = currentState.postVisitBeregnetSykdomstidslinje(this)
+    override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje()
+    override fun postVisitHendelseSykdomstidslinje() = currentState.postVisitHendelseSykdomstidslinje()
+    override fun preVisitBeregnetSykdomstidslinje() = currentState.preVisitBeregnetSykdomstidslinje()
+    override fun postVisitBeregnetSykdomstidslinje() = currentState.postVisitBeregnetSykdomstidslinje()
     override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
-        currentState.preVisitComposite(this, compositeSykdomstidslinje)
+        currentState.preVisitComposite(compositeSykdomstidslinje)
 
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
-        currentState.postVisitComposite(this, compositeSykdomstidslinje)
+        currentState.postVisitComposite(compositeSykdomstidslinje)
 
     override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
-        currentState.postVisitSykdomshistorikkElement(this, element)
+        currentState.postVisitSykdomshistorikkElement(element)
 
     override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) =
-        currentState.postVisitVedtaksperiode(this, vedtaksperiode)
+        currentState.postVisitVedtaksperiode(vedtaksperiode)
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = currentState.visitDag(this, arbeidsdag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = currentState.visitDag(this, egenmeldingsdag)
-    override fun visitFeriedag(feriedag: Feriedag) = currentState.visitDag(this, feriedag)
-    override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitDag(this, implisittDag)
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = currentState.visitDag(this, permisjonsdag)
-    override fun visitStudiedag(studiedag: Studiedag) = currentState.visitDag(this, studiedag)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = currentState.visitDag(this, sykHelgedag)
-    override fun visitSykedag(sykedag: Sykedag) = currentState.visitDag(this, sykedag)
-    override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitDag(this, ubestemtdag)
-    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitDag(this, utenlandsdag)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = currentState.visitDag(arbeidsdag)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = currentState.visitDag(egenmeldingsdag)
+    override fun visitFeriedag(feriedag: Feriedag) = currentState.visitDag(feriedag)
+    override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitDag(implisittDag)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = currentState.visitDag(permisjonsdag)
+    override fun visitStudiedag(studiedag: Studiedag) = currentState.visitDag(studiedag)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = currentState.visitDag(sykHelgedag)
+    override fun visitSykedag(sykedag: Sykedag) = currentState.visitDag(sykedag)
+    override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitDag(ubestemtdag)
+    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitDag(utenlandsdag)
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
-        currentState.visitTilstand(this, tilstand)
+        currentState.visitTilstand(tilstand)
 
-    override fun preVisitVedtaksperiodeSykdomstidslinje() = currentState.preVisitVedtaksperiodeSykdomstidslinje(this)
-    override fun postVisitVedtaksperiodeSykdomstidslinje() = currentState.postVisitVedtaksperiodeSykdomstidslinje(this)
-    override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer(this)
+    override fun preVisitVedtaksperiodeSykdomstidslinje() = currentState.preVisitVedtaksperiodeSykdomstidslinje()
+    override fun postVisitVedtaksperiodeSykdomstidslinje() = currentState.postVisitVedtaksperiodeSykdomstidslinje()
+    override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer()
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
-        currentState.visitUtbetalingslinje(this, utbetalingslinje)
+        currentState.visitUtbetalingslinje(utbetalingslinje)
 
-    override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer(this)
-    override fun preVisitHendelser() = currentState.preVisitHendelser(this)
-    override fun postVisitHendelser() = currentState.postVisitHendelser(this)
+    override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer()
+    override fun preVisitHendelser() = currentState.preVisitHendelser()
+    override fun postVisitHendelser() = currentState.postVisitHendelser()
     override fun visitInntektsmeldingHendelse(inntektsmelding: ModelInntektsmelding) =
-        currentState.visitInntektsmeldingHendelse(this, inntektsmelding)
+        currentState.visitInntektsmeldingHendelse(inntektsmelding)
 
     override fun visitManuellSaksbehandlingHendelse(manuellSaksbehandling: ModelManuellSaksbehandling) =
-        currentState.visitManuellSaksbehandlingHendelse(this, manuellSaksbehandling)
+        currentState.visitManuellSaksbehandlingHendelse(manuellSaksbehandling)
 
-    override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) = currentState.visitNySøknadHendelse(this, nySøknad)
+    override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) = currentState.visitNySøknadHendelse(nySøknad)
     override fun visitPåminnelseHendelse(påminnelse: ModelPåminnelse) =
-        currentState.visitPåminnelseHendelse(this, påminnelse)
+        currentState.visitPåminnelseHendelse(påminnelse)
 
     override fun visitSendtSøknadHendelse(sendtSøknad: ModelSendtSøknad) =
-        currentState.visitSendtSøknadHendelse(this, sendtSøknad)
+        currentState.visitSendtSøknadHendelse(sendtSøknad)
 
     override fun visitVilkårsgrunnlagHendelse(vilkårsgrunnlag: ModelVilkårsgrunnlag) =
-        currentState.visitVilkårsgrunnlagHendelse(this, vilkårsgrunnlag)
+        currentState.visitVilkårsgrunnlagHendelse(vilkårsgrunnlag)
 
-    override fun visitYtelserHendelse(ytelser: ModelYtelser) = currentState.visitYtelserHendelse(this, ytelser)
+    override fun visitYtelserHendelse(ytelser: ModelYtelser) = currentState.visitYtelserHendelse(ytelser)
 
-    private interface JsonState {
-        fun entering(jsonBuilder: JsonBuilder) {}
-        fun leaving(jsonBuilder: JsonBuilder) {}
+    private interface JsonState : PersonVisitor {
+        fun entering() {}
+        fun leaving() {}
         fun toJson(): String = throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
-
-        fun preVisitPerson(jsonBuilder: JsonBuilder, person: Person) {}
-        fun postVisitPerson(jsonBuilder: JsonBuilder, person: Person) {}
-        fun visitPersonAktivitetslogger(jsonBuilder: JsonBuilder, aktivitetslogger: Aktivitetslogger) {}
-        fun preVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {}
-        fun postVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {}
-        fun preVisitArbeidsgivere(jsonBuilder: JsonBuilder) {}
-        fun postVisitArbeidsgivere(jsonBuilder: JsonBuilder) {}
-        fun preVisitInntekter(jsonBuilder: JsonBuilder) {}
-        fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: Inntekthistorikk.Inntekt) {}
-        fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {}
-        fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {}
-        fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {}
-        fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {}
-        fun visitArbeidsdag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
-        fun visitArbeidsgiverperiodeDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
-        fun visitNavDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
-        fun visitNavHelgDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
-        fun visitFridag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
-        fun visitAvvistDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
-        fun visitUkjentDag(jsonBuilder: JsonBuilder, dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
-        fun postVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
-        fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {}
-        fun preVisitPerioder(jsonBuilder: JsonBuilder) {}
-        fun preVisitSykdomshistorikk(jsonBuilder: JsonBuilder, sykdomshistorikk: Sykdomshistorikk) {}
-        fun preVisitSykdomshistorikkElement(jsonBuilder: JsonBuilder, element: Sykdomshistorikk.Element) {}
-        fun visitHendelse(jsonBuilder: JsonBuilder, hendelse: SykdomstidslinjeHendelse) {}
-        fun preVisitHendelseSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun postVisitHendelseSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun preVisitBeregnetSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun postVisitBeregnetSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun preVisitComposite(jsonBuilder: JsonBuilder, compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
-        fun postVisitComposite(jsonBuilder: JsonBuilder, compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
-        fun postVisitSykdomshistorikkElement(jsonBuilder: JsonBuilder, element: Sykdomshistorikk.Element) {}
-        fun postVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {}
-        fun visitDag(jsonBuilder: JsonBuilder, dag: Dag) {}
-        fun visitTilstand(jsonBuilder: JsonBuilder, tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {}
-        fun postVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun preVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {}
-        fun preVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
-        fun visitUtbetalingslinje(jsonBuilder: JsonBuilder, utbetalingslinje: Utbetalingslinje) {}
-        fun postVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {}
-        fun preVisitHendelser(jsonBuilder: JsonBuilder) {}
-        fun postVisitHendelser(jsonBuilder: JsonBuilder) {}
-        fun visitInntektsmeldingHendelse(jsonBuilder: JsonBuilder, inntektsmelding: ModelInntektsmelding) {}
-        fun visitManuellSaksbehandlingHendelse(
-            jsonBuilder: JsonBuilder,
-            manuellSaksbehandling: ModelManuellSaksbehandling
-        ) {
-        }
-
-        fun visitNySøknadHendelse(jsonBuilder: JsonBuilder, nySøknad: ModelNySøknad) {}
-        fun visitPåminnelseHendelse(jsonBuilder: JsonBuilder, påminnelse: ModelPåminnelse) {}
-        fun visitSendtSøknadHendelse(jsonBuilder: JsonBuilder, sendtSøknad: ModelSendtSøknad) {}
-        fun visitVilkårsgrunnlagHendelse(jsonBuilder: JsonBuilder, vilkårsgrunnlag: ModelVilkårsgrunnlag) {}
-        fun visitYtelserHendelse(jsonBuilder: JsonBuilder, ytelser: ModelYtelser) {}
+        fun visitDag(dag: Dag) {}
     }
 
-    private class Root : JsonState {
+    private inner class Root : JsonState {
         private val personMap = mutableMapOf<String, Any?>()
 
-        override fun preVisitPerson(jsonBuilder: JsonBuilder, person: Person) {
-            jsonBuilder.pushState(PersonState(person, personMap))
+        override fun preVisitPerson(person: Person) {
+            pushState(PersonState(person, personMap))
         }
 
         override fun toString() = personMap.toString()
@@ -229,40 +174,40 @@ internal class JsonBuilder : PersonVisitor {
             .toPrettyString()
     }
 
-    private class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
+    private inner class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
         init {
             personMap.putAll(PersonReflect(person).toMap())
         }
 
-        override fun preVisitHendelser(jsonBuilder: JsonBuilder) {
+        override fun preVisitHendelser() {
             val hendelser = mutableListOf<MutableMap<String, Any?>>()
             personMap["hendelser"] = hendelser
-            jsonBuilder.pushState(HendelseState(hendelser))
+            pushState(HendelseState(hendelser))
         }
 
-        override fun visitPersonAktivitetslogger(jsonBuilder: JsonBuilder, aktivitetslogger: Aktivitetslogger) {
+        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
             personMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
         }
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitArbeidsgivere(jsonBuilder: JsonBuilder) {
+        override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
         }
 
-        override fun preVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {
+        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
             arbeidsgivere.add(arbeidsgiverMap)
-            jsonBuilder.pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap))
+            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap))
         }
 
-        override fun postVisitPerson(jsonBuilder: JsonBuilder, person: Person) {
-            jsonBuilder.popState()
+        override fun postVisitPerson(person: Person) {
+            popState()
         }
     }
 
-    private class HendelseState(private val hendelser: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntektsmeldingHendelse(jsonBuilder: JsonBuilder, inntektsmelding: ModelInntektsmelding) {
+    private inner class HendelseState(private val hendelser: MutableList<MutableMap<String, Any?>>) : JsonState {
+        override fun visitInntektsmeldingHendelse(inntektsmelding: ModelInntektsmelding) {
             hendelser.add(InntektsmeldingReflect(inntektsmelding).toMap())
 
             // (private val (.+): .+),
@@ -270,89 +215,88 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun visitManuellSaksbehandlingHendelse(
-            jsonBuilder: JsonBuilder,
             manuellSaksbehandling: ModelManuellSaksbehandling
         ) {
             hendelser.add(ManuellSaksbehandlingReflect(manuellSaksbehandling).toMap())
         }
 
-        override fun visitNySøknadHendelse(jsonBuilder: JsonBuilder, nySøknad: ModelNySøknad) {
+        override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) {
             hendelser.add(NySøknadReflect(nySøknad).toMap())
         }
 
-        override fun visitSendtSøknadHendelse(jsonBuilder: JsonBuilder, sendtSøknad: ModelSendtSøknad) {
+        override fun visitSendtSøknadHendelse(sendtSøknad: ModelSendtSøknad) {
             hendelser.add(SendtSøknadReflect(sendtSøknad).toMap())
         }
 
-        override fun visitVilkårsgrunnlagHendelse(jsonBuilder: JsonBuilder, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        override fun visitVilkårsgrunnlagHendelse(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
             hendelser.add(VilkårsgrunnlagReflect(vilkårsgrunnlag).toMap())
         }
 
-        override fun visitYtelserHendelse(jsonBuilder: JsonBuilder, ytelser: ModelYtelser) {
+        override fun visitYtelserHendelse(ytelser: ModelYtelser) {
             hendelser.add(YtelserReflect(ytelser).toMap())
         }
 
-        override fun postVisitHendelser(jsonBuilder: JsonBuilder) {
-            jsonBuilder.popState()
+        override fun postVisitHendelser() {
+            popState()
         }
     }
 
-    private class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
+    private inner class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
-        override fun preVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {
+        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
             val inntekter = mutableListOf<MutableMap<String, Any?>>()
             arbeidsgiverMap["inntekter"] = inntekter
-            jsonBuilder.pushState(InntektHistorieState(inntekter))
+            pushState(InntektHistorieState(inntekter))
         }
 
         private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitTidslinjer(jsonBuilder: JsonBuilder) {
+        override fun preVisitTidslinjer() {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
         }
 
-        override fun preVisitUtbetalingstidslinje(jsonBuilder: JsonBuilder, tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
-            jsonBuilder.pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
+            pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitPerioder(jsonBuilder: JsonBuilder) {
+        override fun preVisitPerioder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
         }
 
-        override fun preVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperioder.add(vedtaksperiodeMap)
-            jsonBuilder.pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
+            pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
 
         }
 
-        override fun postVisitArbeidsgiver(jsonBuilder: JsonBuilder, arbeidsgiver: Arbeidsgiver) {
-            jsonBuilder.popState()
+        override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
+            popState()
         }
     }
 
-    private class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntekt(jsonBuilder: JsonBuilder, inntekt: Inntekthistorikk.Inntekt) {
+    private inner class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : JsonState {
+        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
             inntektMap.putAll(InntektReflect(inntekt).toMap())
         }
 
-        override fun postVisitInntektHistorie(jsonBuilder: JsonBuilder, inntekthistorikk: Inntekthistorikk) {
-            jsonBuilder.popState()
+        override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+            popState()
         }
     }
 
-    private class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
+    private inner class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
         JsonState {
 
         private val dager = mutableListOf<MutableMap<String, Any?>>()
@@ -361,63 +305,39 @@ internal class JsonBuilder : PersonVisitor {
             utbetalingstidslinjeMap["dager"] = dager
         }
 
-        override fun visitArbeidsdag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
-        ) {
+        override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
             dager.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
         }
 
-        override fun visitArbeidsgiverperiodeDag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-        ) {
+        override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
-        override fun visitNavDag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavDag
-        ) {
+        override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavDag").toMap())
         }
-        override fun visitNavHelgDag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-        ) {
+        override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
         }
-        override fun visitFridag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.Fridag
-        ) {
+        override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
         }
-        override fun visitUkjentDag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag
-        ) {
+        override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
         }
 
-        override fun visitAvvistDag(
-            jsonBuilder: JsonBuilder,
-            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-        ) {
+        override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
             val avvistDagMap = mutableMapOf<String, Any?>()
             dager.add(avvistDagMap)
 
             avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
         }
 
-        override fun postVisitUtbetalingstidslinje(
-            jsonBuilder: JsonBuilder,
-            utbetalingstidslinje: Utbetalingstidslinje
-        ) {
-            jsonBuilder.popState()
+        override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
+            popState()
         }
     }
 
-    private class VedtaksperiodeState(
+    private inner class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
         private val vedtaksperiodeMap: MutableMap<String, Any?>
     ) : JsonState {
@@ -427,41 +347,41 @@ internal class JsonBuilder : PersonVisitor {
 
         private val sykdomshistorikkElementer = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitSykdomshistorikk(jsonBuilder: JsonBuilder, sykdomshistorikk: Sykdomshistorikk) {
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             vedtaksperiodeMap["sykdomshistorikk"] = sykdomshistorikkElementer
         }
 
-        override fun preVisitSykdomshistorikkElement(jsonBuilder: JsonBuilder, element: Sykdomshistorikk.Element) {
+        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
             val elementMap = mutableMapOf<String, Any?>()
             sykdomshistorikkElementer.add(elementMap)
 
-            jsonBuilder.pushState(SykdomshistorikkElementState(element, elementMap))
+            pushState(SykdomshistorikkElementState(element, elementMap))
         }
 
-        override fun visitTilstand(jsonBuilder: JsonBuilder, tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
         }
 
-        override fun preVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {
+        override fun preVisitVedtaksperiodeSykdomstidslinje() {
             val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinjeListe
-            jsonBuilder.pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
-        override fun preVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {
+        override fun preVisitUtbetalingslinjer() {
             val utbetalingstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
-            jsonBuilder.pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
+            pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
         }
 
-        override fun postVisitVedtaksperiode(jsonBuilder: JsonBuilder, vedtaksperiode: Vedtaksperiode) {
-            jsonBuilder.popState()
+        override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+            popState()
         }
     }
 
-    private class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+    private inner class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
-        override fun visitUtbetalingslinje(jsonBuilder: JsonBuilder, utbetalingslinje: Utbetalingslinje) {
+        override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
                 "fom" to utbetalingslinje.fom,
                 "tom" to utbetalingslinje.tom,
@@ -470,12 +390,12 @@ internal class JsonBuilder : PersonVisitor {
             utbetalingstidslinjeListe.add(utbetalingstidslinjeMap)
         }
 
-        override fun postVisitUtbetalingslinjer(jsonBuilder: JsonBuilder) {
-            jsonBuilder.popState()
+        override fun postVisitUtbetalingslinjer() {
+            popState()
         }
     }
 
-    private class SykdomshistorikkElementState(
+    private inner class SykdomshistorikkElementState(
         element: Sykdomshistorikk.Element,
         private val elementMap: MutableMap<String, Any?>
     ) : JsonState {
@@ -483,31 +403,31 @@ internal class JsonBuilder : PersonVisitor {
             elementMap["tidsstempel"] = element.tidsstempel
         }
 
-        override fun visitHendelse(jsonBuilder: JsonBuilder, hendelse: SykdomstidslinjeHendelse) {
+        override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) {
             elementMap["hendelseId"] = hendelse.hendelseId()
         }
 
-        override fun preVisitHendelseSykdomstidslinje(jsonBuilder: JsonBuilder) {
+        override fun preVisitHendelseSykdomstidslinje() {
             val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             elementMap["hendelseSykdomstidslinje"] = sykdomstidslinjeListe
-            jsonBuilder.pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
-        override fun preVisitBeregnetSykdomstidslinje(jsonBuilder: JsonBuilder) {
+        override fun preVisitBeregnetSykdomstidslinje() {
             val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             elementMap["beregnetSykdomstidslinje"] = sykdomstidslinjeListe
-            jsonBuilder.pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
-        override fun postVisitSykdomshistorikkElement(jsonBuilder: JsonBuilder, element: Sykdomshistorikk.Element) {
-            jsonBuilder.popState()
+        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            popState()
         }
     }
 
-    private class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+    private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
 
-        override fun visitDag(jsonBuilder: JsonBuilder, dag: Dag) {
+        override fun visitDag(dag: Dag) {
             fun mapDag(dagen: Dag): MutableMap<String, Any?> = mutableMapOf(
                 "dagen" to dagen.dagen,
                 "hendelseId" to dagen.hendelse.hendelseId(),
@@ -518,16 +438,16 @@ internal class JsonBuilder : PersonVisitor {
             sykdomstidslinjeListe.add(mapDag(dag))
         }
 
-        override fun postVisitHendelseSykdomstidslinje(jsonBuilder: JsonBuilder) {
-            jsonBuilder.popState()
+        override fun postVisitHendelseSykdomstidslinje() {
+            popState()
         }
 
-        override fun postVisitBeregnetSykdomstidslinje(jsonBuilder: JsonBuilder) {
-            jsonBuilder.popState()
+        override fun postVisitBeregnetSykdomstidslinje() {
+            popState()
         }
 
-        override fun postVisitVedtaksperiodeSykdomstidslinje(jsonBuilder: JsonBuilder) {
-            jsonBuilder.popState()
+        override fun postVisitVedtaksperiodeSykdomstidslinje() {
+            popState()
         }
     }
 }
