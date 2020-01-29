@@ -44,9 +44,9 @@ internal class JsonDeserializerTest {
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))
-        val arbeidsgivere = result.privatProp<MutableMap<String, Arbeidsgiver>>("arbeidsgivere")
+        val arbeidsgivere = result.privatProp<MutableList<Arbeidsgiver>>("arbeidsgivere")
         assertEquals(1, arbeidsgivere.size)
-        val arbeidsgiver = arbeidsgivere[organisasjonsnummer]
+        val arbeidsgiver = arbeidsgivere.find { it.organisasjonsnummer() == organisasjonsnummer }
         assertNotNull(arbeidsgiver)
         assertEquals(organisasjonsnummer, arbeidsgiver!!.privatProp("organisasjonsnummer"))
         val inntekter = arbeidsgiver.privatProp<Inntekthistorikk>("inntekthistorikk")

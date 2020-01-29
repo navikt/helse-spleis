@@ -6,17 +6,21 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
-import java.util.*
-import javax.swing.ViewportLayout
-import kotlin.reflect.jvm.internal.ReflectProperties
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
+import java.util.UUID
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
 class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
-    private val arbeidsgivere: MutableMap<String, Arbeidsgiver>,
+    private val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val hendelser: MutableList<ArbeidstakerHendelse>,
     private val aktivitetslogger: Aktivitetslogger
 ) : VedtaksperiodeObserver {
@@ -25,7 +29,7 @@ class Person private constructor(
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableMapOf(), mutableListOf(), Aktivitetslogger())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), mutableListOf(), Aktivitetslogger())
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -124,7 +128,7 @@ class Person private constructor(
 
     fun addObserver(observer: PersonObserver) {
         observers.add(observer)
-        arbeidsgivere.values.forEach { it.addObserver(observer) }
+        arbeidsgivere.forEach { it.addObserver(observer) }
     }
 
     internal fun accept(visitor: PersonVisitor) {
@@ -134,7 +138,7 @@ class Person private constructor(
         visitor.postVisitHendelser()
         visitor.visitPersonAktivitetslogger(aktivitetslogger)
         visitor.preVisitArbeidsgivere()
-        arbeidsgivere.values.forEach { it.accept(visitor) }
+        arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
         visitor.postVisitPerson(this)
     }
@@ -153,21 +157,21 @@ class Person private constructor(
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        arbeidsgivere.forEach { (_, arbeidsgiver) ->
+        arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }
     }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let {
-            arbeidsgivere[it].also {
+        hendelse.organisasjonsnummer().let { orgnr ->
+            arbeidsgivere.finn(orgnr).also {
                 if (it == null) hendelse.error("Finner ikke arbeidsgiver")
             }
         }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.getOrPut(orgnr) {
+            arbeidsgivere.finnEllerOpprett(orgnr) {
                 hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 arbeidsgiver(orgnr)
             }.also {
@@ -176,6 +180,15 @@ class Person private constructor(
                 }
             }
         }
+
+    private fun MutableList<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
+
+    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, creator: () -> Arbeidsgiver) =
+        finn(orgnr) ?: run {
+                val newValue = creator()
+                add(newValue)
+                newValue
+            }
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
         Arbeidsgiver(organisasjonsnummer).also {
@@ -190,7 +203,7 @@ class Person private constructor(
             aktørId = this.aktørId,
             fødselsnummer = this.fødselsnummer,
             skjemaVersjon = this.skjemaVersjon,
-            arbeidsgivere = this.arbeidsgivere.values.map { it.memento() }
+            arbeidsgivere = this.arbeidsgivere.map { it.memento() }
         )
 
     class Memento internal constructor(
@@ -246,11 +259,9 @@ class Person private constructor(
         fun restore(memento: Memento): Person {
             return Person(memento.aktørId, memento.fødselsnummer)
                 .apply {
-                    this.arbeidsgivere.putAll(memento.arbeidsgivere.map { arbeidsgiverMemento ->
+                    this.arbeidsgivere.addAll(memento.arbeidsgivere.map { arbeidsgiverMemento ->
                         Arbeidsgiver.restore(arbeidsgiverMemento).also { arbeidsgiver ->
                             arbeidsgiver.addObserver(this)
-                        }.let { arbeidsgiver ->
-                            arbeidsgiver.organisasjonsnummer() to arbeidsgiver
                         }
                     })
                 }

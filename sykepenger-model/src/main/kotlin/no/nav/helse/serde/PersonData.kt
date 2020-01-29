@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
@@ -14,6 +15,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
+import no.nav.helse.serde.reflection.createPerson
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -37,10 +39,13 @@ class DataClassModelBuilder(private val json: String) {
         val hendelser = personData.hendelser.map { konverterTilHendelse(objectMapper, personData, it) }
         val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(it, hendelser) }
 
-        return Person(personData.aktørId, personData.fødselsnummer).apply {
-            val personArbeidsgivere = privatProp<MutableMap<String, Arbeidsgiver>>("arbeidsgivere")
-            personArbeidsgivere.putAll(arbeidsgivere.map { it.organisasjonsnummer() to it }.toMap())
-        }
+        return createPerson(
+            aktørId = personData.aktørId,
+            fødselsnummer = personData.fødselsnummer,
+            arbeidsgivere = arbeidsgivere.toMutableList(),
+            hendelser = hendelser.toMutableList(),
+            aktivitetslogger = Aktivitetslogger()
+        )
     }
 
 
