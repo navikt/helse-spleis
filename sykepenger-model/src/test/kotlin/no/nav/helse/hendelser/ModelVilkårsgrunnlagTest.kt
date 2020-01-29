@@ -1,11 +1,11 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
@@ -138,7 +138,7 @@ internal class ModelVilkårsgrunnlagTest {
     private fun inntektsmelding() =
         ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 1000.0, null),
+            refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 1000.0),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

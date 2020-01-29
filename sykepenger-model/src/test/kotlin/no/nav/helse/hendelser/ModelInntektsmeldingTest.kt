@@ -1,11 +1,11 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Uke
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -79,14 +79,13 @@ internal class ModelInntektsmeldingTest {
 
     @Test
     internal fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
-        assertThrows<Aktivitetslogger.AktivitetException> {
-            inntektsmelding(
-                emptyList(),
-                emptyList(),
-                refusjonBeløp = 100000.00,
-                beregnetInntekt = 10000.00
-            )
-        }
+        inntektsmelding(
+            emptyList(),
+            emptyList(),
+            refusjonBeløp = 100000.00,
+            beregnetInntekt = 10000.00
+        )
+        assertTrue(inntektsmelding.valider().hasErrors())
     }
 
     @Test

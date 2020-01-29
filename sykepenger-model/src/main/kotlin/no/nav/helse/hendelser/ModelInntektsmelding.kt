@@ -22,7 +22,7 @@ import java.util.*
 
 class ModelInntektsmelding(
     hendelseId: UUID,
-    private val refusjon: Refusjon,
+    private val refusjon: Refusjon?,
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
@@ -73,14 +73,12 @@ class ModelInntektsmelding(
 
     }
 
-    class Refusjon(val opphørsdato: LocalDate?, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate>?)
+    class Refusjon(val opphørsdato: LocalDate?, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate> = emptyList())
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
 
     init {
-        if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.severe("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
-
         this.arbeidsgiverperioder =
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
@@ -140,6 +138,8 @@ class ModelInntektsmelding(
 
     internal fun valider(): Aktivitetslogger {
         if (!ingenOverlappende()) aktivitetslogger.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
+        if (refusjon == null) aktivitetslogger.error("Arbeidsgiver forskutterer ikke")
+        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.error("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
         return aktivitetslogger
     }
 
@@ -169,12 +169,13 @@ class ModelInntektsmelding(
 
 
     fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
+        if (refusjon == null) return false
         refusjon.opphørsdato?.also {
             if (it <= sisteUtbetalingsdag) {
                 return true
             }
         }
-        return refusjon.endringerIRefusjon?.any { it <= sisteUtbetalingsdag } ?: false
+        return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
     }
 }
 

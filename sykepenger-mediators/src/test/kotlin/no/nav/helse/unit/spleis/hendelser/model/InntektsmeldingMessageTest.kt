@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
+import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -44,6 +45,27 @@ internal class InntektsmeldingMessageTest {
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now()
     ).asJsonNode()
+    private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
+        inntektsmeldingId = "",
+        arbeidstakerFnr = "fødselsnummer",
+        arbeidstakerAktorId = "aktørId",
+        virksomhetsnummer = "virksomhetsnummer",
+        arbeidsgiverFnr = null,
+        arbeidsgiverAktorId = null,
+        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+        arbeidsforholdId = null,
+        beregnetInntekt = BigDecimal.ONE,
+        refusjon = Refusjon(beloepPrMnd = null, opphoersdato = null),
+        endringIRefusjoner = listOf(EndringIRefusjon(endringsdato = LocalDate.now(), beloep = BigDecimal.ONE)),
+        opphoerAvNaturalytelser = emptyList(),
+        gjenopptakelseNaturalytelser = emptyList(),
+        arbeidsgiverperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+        status = Status.GYLDIG,
+        arkivreferanse = "",
+        ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
+        foersteFravaersdag = LocalDate.now(),
+        mottattDato = LocalDateTime.now()
+    ).toJsonNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
     private val ValidInntektsmeldingWithUnknownFieldsJson = ValidInntektsmelding.let {
@@ -61,6 +83,7 @@ internal class InntektsmeldingMessageTest {
     internal fun `valid inntektsmelding`() {
         assertValidInntektsmeldingMessage(ValidInntektsmeldingWithUnknownFieldsJson)
         assertValidInntektsmeldingMessage(ValidInntektsmeldingJson)
+        assertValidInntektsmeldingMessage(ValidInntektsmeldingUtenRefusjon)
     }
 
     private fun assertValidInntektsmeldingMessage(message: String) {

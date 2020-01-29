@@ -2,10 +2,10 @@ package no.nav.helse.person
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.september
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
 import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,8 +62,7 @@ internal class ArbeidsgiverTest {
             hendelseId = UUID.randomUUID(),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
-                beløpPrMåned = 120.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 120.0
             ),
             orgnummer = "orgnr",
             fødselsnummer = "fnr",
@@ -117,7 +116,7 @@ internal class ArbeidsgiverTest {
     private fun inntektsmelding(): ModelInntektsmelding {
         return ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 1.0, null),
+            refusjon = ModelInntektsmelding.Refusjon(null, 1.0),
             orgnummer = "orgnummer",
             fødselsnummer = "fnr",
             aktørId = "aktør",

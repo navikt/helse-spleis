@@ -8,14 +8,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.april
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.april
 import no.nav.helse.toJsonNode
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -200,8 +200,7 @@ internal class VedtaksperiodeTest {
             hendelseId = UUID.randomUUID(),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
-                beløpPrMåned = 1000.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 1000.0
             ),
             orgnummer = organisasjonsnummer,
             fødselsnummer = fødselsnummer,

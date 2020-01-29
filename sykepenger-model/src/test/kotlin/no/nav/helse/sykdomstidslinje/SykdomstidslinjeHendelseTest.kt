@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
@@ -8,9 +7,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.*
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -85,7 +88,7 @@ internal class SykdomstidslinjeHendelseTest {
     ).toJson()
     private val inntektsmelding = ModelInntektsmelding(
         hendelseId = UUID.randomUUID(),
-        refusjon = ModelInntektsmelding.Refusjon(null, 0.0, null),
+        refusjon = ModelInntektsmelding.Refusjon(null, 0.0),
         orgnummer = "orgnr",
         fødselsnummer = "fnr",
         aktørId = "aktørId",

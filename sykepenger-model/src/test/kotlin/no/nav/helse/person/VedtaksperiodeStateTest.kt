@@ -224,8 +224,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = periodeTom.plusDays(1),
-                beløpPrMåned = 1000.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 1000.0
             )
         )
 
@@ -259,14 +258,11 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
         val periodeFom = 1.juli
         val periodeTom = 19.juli
 
-        val sisteHistoriskeSykedag = periodeFom.minusMonths(7)
-
         val inntektsmeldingHendelse = inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = periodeTom,
-                beløpPrMåned = 1000.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 1000.0
             )
         )
 
@@ -432,8 +428,7 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
             arbeidsgiverperioder = listOf(Periode(periodeFom, periodeFom.plusDays(16))),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
-                beløpPrMåned = 1000.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 1000.0
             )
         )
 

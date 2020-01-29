@@ -325,8 +325,7 @@ internal class PersonTest {
             hendelseId = UUID.randomUUID(),
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
-                beløpPrMåned = 1000.0,
-                endringerIRefusjon = null
+                beløpPrMåned = 1000.0
             ),
             orgnummer = virksomhetsnummer,
             fødselsnummer = fødselsnummer,
