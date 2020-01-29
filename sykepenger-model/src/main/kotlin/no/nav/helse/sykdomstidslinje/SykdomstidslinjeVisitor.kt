@@ -15,8 +15,6 @@ internal interface SykdomstidslinjeVisitor {
     fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {}
     fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
     fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {}
-    fun preVisitPerson(personSykdomstidslinje: PersonSykdomstidslinje) {}
-    fun postVisitSak(personSykdomstidslinje: PersonSykdomstidslinje) {}
     fun preVisitArbeidsgiver(arbeidsgiverSykdomstidslinje: ArbeidsgiverSykdomstidslinje) {}
     fun postVisitArbeidsgiver(arbeidsgiverSykdomstidslinje: ArbeidsgiverSykdomstidslinje) {}
 }

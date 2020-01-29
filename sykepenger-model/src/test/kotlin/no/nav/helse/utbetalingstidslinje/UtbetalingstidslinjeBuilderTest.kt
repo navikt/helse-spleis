@@ -1,13 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
-import no.nav.helse.fixtures.A
-import no.nav.helse.fixtures.F
-import no.nav.helse.fixtures.S
-import no.nav.helse.fixtures.resetSeed
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
