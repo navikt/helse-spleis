@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.fixtures.januar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

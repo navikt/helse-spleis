@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
-import no.nav.helse.fixtures.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -75,7 +75,11 @@ internal class HistoriskUtbetalingTest {
             fom,
             tom
         ) })
-        inspektør = UtbetalingstidslinjeInspektør(builder.results().reduce(Utbetalingstidslinje::plus)).result()
+        inspektør = UtbetalingstidslinjeInspektør(
+            builder.results().reduce(
+                Utbetalingstidslinje::plus
+            )
+        ).result()
     }
 
 }

@@ -426,7 +426,6 @@ internal class Vedtaksperiode internal constructor(
                 }
             }
 
-
             var utbetalingsberegning: Utbetalingsberegning? = null
             fun validerUtbetalingsberegning(): ValidationStep = {
                 utbetalingsberegning = dagsats!!.let {

@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.fixtures.november
 import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.person.UtenforOmfangException
 import no.nav.helse.sykdomstidslinje.dag.Dag

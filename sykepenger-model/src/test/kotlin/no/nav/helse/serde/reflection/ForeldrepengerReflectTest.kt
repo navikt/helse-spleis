@@ -1,7 +1,7 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.fixtures.januar
-import no.nav.helse.fixtures.juli
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juli
 import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger

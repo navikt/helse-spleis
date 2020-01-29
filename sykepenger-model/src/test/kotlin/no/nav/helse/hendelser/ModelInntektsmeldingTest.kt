@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Uke
-import no.nav.helse.fixtures.februar
-import no.nav.helse.fixtures.januar
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag

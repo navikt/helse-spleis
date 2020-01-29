@@ -1,4 +1,4 @@
-package no.nav.helse.fixtures
+package no.nav.helse.testhelpers
 
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*

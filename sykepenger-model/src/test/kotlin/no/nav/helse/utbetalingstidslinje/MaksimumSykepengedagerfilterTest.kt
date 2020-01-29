@@ -1,6 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -24,12 +28,12 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test internal fun `26 uker arbeid resetter utbetalingsgrense`() {
-        val tidslinje = tidslinjeOf(248.NAV, (26*7).ARB, 10.NAV)
+        val tidslinje = tidslinjeOf(248.NAV, (26 * 7).ARB, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test internal fun `en ubetalt sykedag før opphold`() {
-        val tidslinje = tidslinjeOf(249.NAV, (26*7).ARB, 10.NAV)
+        val tidslinje = tidslinjeOf(249.NAV, (26 * 7).ARB, 10.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -39,17 +43,18 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test internal fun `noe som helst sykdom i opphold resetter teller`() {
-        val tidslinje = tidslinjeOf(248.NAV, (24*7).ARB, 7.NAV, (2*7).ARB, 10.NAV)
+        val tidslinje =
+            tidslinjeOf(248.NAV, (24 * 7).ARB, 7.NAV, (2 * 7).ARB, 10.NAV)
         assertEquals(7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test internal fun `fridag etter sykdag er en del av opphold`() {
-        val tidslinje = tidslinjeOf(248.NAV, (25*7).FRI, 7.ARB, 7.NAV)
+        val tidslinje = tidslinjeOf(248.NAV, (25 * 7).FRI, 7.ARB, 7.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test internal fun `opphold på mindre enn 26 uker skal ikke nullstille telleren`() {
-        val tidslinje = tidslinjeOf(248.NAV, (26*7 - 1).FRI, 1.NAV)
+        val tidslinje = tidslinjeOf(248.NAV, (26 * 7 - 1).FRI, 1.NAV)
         assertEquals(listOf(6.mars(2019)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -59,32 +64,33 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test internal fun `sjekk 60 dagers grense for 67 åringer med 26 ukers opphold`() {
-        val tidslinje = tidslinjeOf(10.NAV, 60.NAV, (26*7).ARB, 60.NAV)
+        val tidslinje = tidslinjeOf(10.NAV, 60.NAV, (26 * 7).ARB, 60.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018))
     }
 
     @Test internal fun `sjekk at 26 uker med syk etter karantene starter utbetaling`() {
-        val tidslinje = tidslinjeOf(248.NAV, (26*7).NAV, 60.NAV)
+        val tidslinje = tidslinjeOf(248.NAV, (26 * 7).NAV, 60.NAV)
         assertEquals(26*7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test internal fun `sjekk at 26 uker med syk etter karantene starter utbetaling gammel person`() {
-        val tidslinje = tidslinjeOf(60.NAV, (26*7).NAV, 60.NAV)
+        val tidslinje = tidslinjeOf(60.NAV, (26 * 7).NAV, 60.NAV)
         assertEquals(26*7, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
     }
 
     @Test internal fun `helgedager teller som opphold`() {
-        val tidslinje = tidslinjeOf(248.NAV, (26*7).HELG, 60.NAV)
+        val tidslinje = tidslinjeOf(248.NAV, (26 * 7).HELG, 60.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test internal fun `helgedager sammen med utbetalingsdager teller som opphold`() {
-        val tidslinje = tidslinjeOf(248.NAV, (20*7).HELG, 7.NAV, (5*7).HELG, 60.NAV)
+        val tidslinje =
+            tidslinjeOf(248.NAV, (20 * 7).HELG, 7.NAV, (5 * 7).HELG, 60.NAV)
         assertEquals(7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
     @Test internal fun `sjekk at sykdom i arbgiver periode ikke ødelegger oppholdsperioden`() {
-        val tidslinje = tidslinjeOf(50.NAV, (25*7).ARB, 7.AP, 248.NAV)
+        val tidslinje = tidslinjeOf(50.NAV, (25 * 7).ARB, 7.AP, 248.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -94,18 +100,18 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test internal fun `26 uker tilbakestilles ikke for 70 år gammel`() {
-        val tidslinje = tidslinjeOf(9.NAV, (26*7).ARB, 2.NAV)
+        val tidslinje = tidslinjeOf(9.NAV, (26 * 7).ARB, 2.NAV)
         assertEquals(listOf(11.juli, 12.juli), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_FNR_2018))
     }
 
     @Test internal fun `ingen utbetaling når 70 år gammel`() {
-        val tidslinje = tidslinjeOf(15.UTELATE, 1.NAV, (26*7).ARB, 1.NAV)
+        val tidslinje = tidslinjeOf(15.UTELATE, 1.NAV, (26 * 7).ARB, 1.NAV)
         assertEquals(listOf(16.januar, 18.juli), tidslinje.utbetalingsavgrenser(PERSON_70_ÅR_FNR_2018))
     }
 
     @Test internal fun `ukjente dager generert når du legger til to utbetalingstidslinjer teller som ikke-utbetalingsdager`() {
         val tidslinje1 = tidslinjeOf(50.NAV)
-        val tidslinje2 = tidslinjeOf(50.UTELATE, (26*7).UTELATE, 248.NAV)
+        val tidslinje2 = tidslinjeOf(50.UTELATE, (26 * 7).UTELATE, 248.NAV)
         assertEquals(emptyList<LocalDate>(), (tidslinje1 + tidslinje2).utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
@@ -126,12 +132,42 @@ internal class MaksimumSykepengedagerfilterTest {
 
     // No 26 week gap with base of 246 NAV days
     private fun tilbakevendendeSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>): Utbetalingstidslinje {
-        return tidslinjeOf(365.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 6.NAV, 90.ARB, *dagTriple)
+        return tidslinjeOf(
+            365.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            6.NAV,
+            90.ARB,
+            *dagTriple
+        )
     }
 
     // 26 week gap inside 3 year window of 246 days with 54 NAV days days after the gap
     private fun enAnnenSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>): Utbetalingstidslinje {
-        return tidslinjeOf(365.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 48.NAV, 152.ARB, 18.NAV, 182.ARB, 48.NAV, 152.ARB, 6.NAV, 90.ARB, *dagTriple)
+        return tidslinjeOf(
+            365.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            48.NAV,
+            152.ARB,
+            18.NAV,
+            182.ARB,
+            48.NAV,
+            152.ARB,
+            6.NAV,
+            90.ARB,
+            *dagTriple
+        )
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =

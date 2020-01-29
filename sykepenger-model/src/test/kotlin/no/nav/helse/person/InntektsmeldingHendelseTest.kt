@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.fixtures.februar
-import no.nav.helse.fixtures.januar
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad

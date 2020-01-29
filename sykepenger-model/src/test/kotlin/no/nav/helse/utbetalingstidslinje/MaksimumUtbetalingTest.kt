@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.NAV
-import no.nav.helse.fixtures.UtbetalingstidslinjeInspektør
-import no.nav.helse.fixtures.tidslinjeOf
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
-import no.nav.helse.fixtures.AP
-import no.nav.helse.fixtures.HELG
-import no.nav.helse.fixtures.NAV
-import no.nav.helse.fixtures.tidslinjeOf
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.fixtures.S
+import no.nav.helse.testhelpers.S
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode

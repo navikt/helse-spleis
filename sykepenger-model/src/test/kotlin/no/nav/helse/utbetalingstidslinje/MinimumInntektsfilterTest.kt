@@ -1,10 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
-import no.nav.helse.fixtures.NAV
-import no.nav.helse.fixtures.UTELATE
-import no.nav.helse.fixtures.UtbetalingstidslinjeInspektør
-import no.nav.helse.fixtures.tidslinjeOf
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -70,7 +70,8 @@ internal class MinimumInntektsfilterTest {
 
     @Test internal fun `total inntekt per dag avgjør minstelønnskravet for person som er 67 år`() {
         val tidslinje1 = tidslinjeOf(10.NAV(150.0), 10.NAV(400.0))
-        val tidslinje2 = tidslinjeOf(1.NAV(5.0), 14.NAV(150.0), 5.NAV(400.0))
+        val tidslinje2 =
+            tidslinjeOf(1.NAV(5.0), 14.NAV(150.0), 5.NAV(400.0))
         MinimumInntektsfilter(Alder(PERSON_67_ÅR_FNR_2018), listOf(tidslinje1, tidslinje2)).filter()
 
         undersøke(tidslinje1)

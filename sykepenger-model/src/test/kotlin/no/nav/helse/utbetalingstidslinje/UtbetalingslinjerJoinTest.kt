@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
 import no.nav.helse.sykdomstidslinje.joinForOppdrag
+import no.nav.helse.testhelpers.fredag
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.tirsdag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

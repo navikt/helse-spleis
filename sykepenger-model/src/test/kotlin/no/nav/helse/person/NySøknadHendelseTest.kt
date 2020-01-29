@@ -1,13 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.fixtures.januar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

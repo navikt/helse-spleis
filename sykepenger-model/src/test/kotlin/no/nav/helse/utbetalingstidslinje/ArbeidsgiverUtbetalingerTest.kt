@@ -1,11 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
-import no.nav.helse.fixtures.HELG
-import no.nav.helse.fixtures.NAV
-import no.nav.helse.fixtures.UtbetalingstidslinjeInspektør
-import no.nav.helse.fixtures.tidslinjeOf
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -134,7 +135,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             it.beregn()
             maksdato = it.maksdato()
         }
-        inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.peekTidslinje()).result()
+        inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.peekTidslinje())
+            .result()
     }
 
 }

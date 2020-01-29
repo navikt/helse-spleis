@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.fixtures.mai
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober

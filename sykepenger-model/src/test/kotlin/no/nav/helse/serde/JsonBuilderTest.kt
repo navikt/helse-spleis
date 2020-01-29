@@ -1,9 +1,9 @@
 package no.nav.helse.serde
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.fixtures.februar
-import no.nav.helse.fixtures.januar
-import no.nav.helse.fixtures.juli
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juli
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import org.junit.jupiter.api.Test

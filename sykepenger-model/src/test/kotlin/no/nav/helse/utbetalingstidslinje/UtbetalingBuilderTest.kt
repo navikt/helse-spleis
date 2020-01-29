@@ -1,10 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
 import no.nav.helse.sykdomstidslinje.ArbeidsgiverSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.PersonSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Utbetalingslinje
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.AlderReglerTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals

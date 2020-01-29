@@ -1,6 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.fixtures.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

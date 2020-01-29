@@ -2,7 +2,7 @@ package no.nav.helse.arbeidsgiver
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.fixtures.januar
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger

@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.fixtures.april
-import no.nav.helse.fixtures.august
-import no.nav.helse.fixtures.juli
-import no.nav.helse.fixtures.juni
+import no.nav.helse.testhelpers.april
+import no.nav.helse.testhelpers.august
+import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.juni
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

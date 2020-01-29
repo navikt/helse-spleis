@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.fixtures.S
-import no.nav.helse.fixtures.april
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.april
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
