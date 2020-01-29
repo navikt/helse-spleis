@@ -57,6 +57,10 @@ internal class JsonBuilderTest {
 
         val result = DataClassModelBuilder(json).result()
         println(result)
+
+        val jsonBuilder2 = JsonBuilder()
+        result.accept(jsonBuilder2)
+        println(jsonBuilder2.toString())
     }
 }
 

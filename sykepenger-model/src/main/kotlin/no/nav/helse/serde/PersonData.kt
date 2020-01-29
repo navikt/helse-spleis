@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
+import no.nav.helse.serde.reflection.Reflect
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
@@ -17,6 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import kotlin.reflect.KClass
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -33,14 +35,26 @@ class DataClassModelBuilder(private val json: String) {
         val personData: PersonData = objectMapper.readValue(json)
         val hendelser = personData.hendelser.map { konverterTilHendelse(objectMapper, personData, it) }
         val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(it, hendelser) }
+        val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
 
         return createPerson(
             aktørId = personData.aktørId,
             fødselsnummer = personData.fødselsnummer,
             arbeidsgivere = arbeidsgivere.toMutableList(),
             hendelser = hendelser.toMutableList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = aktivitetslogger
         )
+    }
+
+    private fun konverterTilAktivitetslogger(aktivitetslogger: AktivitetsloggerData): Aktivitetslogger {
+        val reflect = Reflect.getInstance(Aktivitetslogger::class, aktivitetslogger.originalMessage)
+
+        val subClass: KClass<*> = reflect.getNestedClass("Aktivitet")
+        aktivitetslogger.aktiviteter.forEach {
+            reflect.add("aktiviteter", Reflect.getInstance(subClass, it.alvorlighetsgrad, it.melding, it.tidsstempel))
+        }
+
+        return reflect.get()
     }
 
 
@@ -67,13 +81,31 @@ class DataClassModelBuilder(private val json: String) {
     }
 }
 
+internal data class AktivitetsloggerData(
+    val originalMessage: String?,
+    val aktiviteter: List<AktivitetData>
+) {
+    data class AktivitetData(
+        val alvorlighetsgrad: Alvorlighetsgrad,
+        val melding: String,
+        val tidsstempel: String
+    )
+
+    enum class Alvorlighetsgrad {
+        INFO,
+        WARN,
+        ERROR,
+        SEVERE
+    }
+}
+
 internal data class PersonData(
     val skjemaVersjon: Int = 1,
     val aktørId: String,
     val fødselsnummer: String,
     val hendelser: List<HendelseWrapperData>,
     val arbeidsgivere: List<ArbeidsgiverData>,
-    val aktivitetslogger: Any // TODO
+    val aktivitetslogger: AktivitetsloggerData
 ) {
     data class HendelseWrapperData(
         val type: Hendelsestype,
@@ -91,7 +123,7 @@ internal data class PersonData(
             val beregnetInntekt: Double,
             val arbeidsgiverperioder: List<PeriodeData>,
             val ferieperioder: List<PeriodeData>,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
             data class RefusjonData(
                 val opphørsdato: LocalDate?,
@@ -111,13 +143,13 @@ internal data class PersonData(
             val rapportertdato: LocalDateTime,
             val sykepengehistorikk: SykepengehistorikkData,
             val foreldrepenger: ForeldrepengerData,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
 
             data class SykepengehistorikkData(
                 val utbetalinger: List<UtbetalingPeriodeData>,
                 val inntektshistorikk: List<InntektsopplysningData>,
-                val aktivitetslogger: Any // TODO
+                val aktivitetslogger: AktivitetsloggerData
             ) {
                 data class UtbetalingPeriodeData(
                     val fom: LocalDate,
@@ -162,7 +194,7 @@ internal data class PersonData(
             val saksbehandler: String,
             val utbetalingGodkjent: Boolean,
             val rapportertdato: LocalDateTime,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
         }
 
@@ -173,7 +205,7 @@ internal data class PersonData(
             val orgnummer: String,
             val rapportertdato: LocalDateTime,
             val sykeperioder: List<SykeperiodeData>,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
             data class SykeperiodeData(
                 val fom: LocalDate,
@@ -189,7 +221,7 @@ internal data class PersonData(
             val orgnummer: String,
             val rapportertdato: LocalDateTime,
             val perioder: List<SykeperiodeData>,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
             data class SykeperiodeData(
                 val type: TypeData,
@@ -216,7 +248,7 @@ internal data class PersonData(
             val rapportertDato: LocalDateTime,
             val inntektsmåneder: List<Måned>,
             val erEgenAnsatt: Boolean,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
             data class Måned(
                 val årMåned: YearMonth,
@@ -244,7 +276,7 @@ internal data class PersonData(
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val utbetalingstidslinjer: List<Any>, // TODO
-        val aktivitetslogger: Any
+        val aktivitetslogger: AktivitetsloggerData
     ) {
         data class InntektData(
             val fom: LocalDate,
@@ -264,7 +296,7 @@ internal data class PersonData(
             val tilstand: TilstandType,
             val sykdomstidslinje: SykdomstidslinjeData,
             val utbetalingslinjer: List<UtbetalingslinjeData>,
-            val aktivitetslogger: Any // TODO
+            val aktivitetslogger: AktivitetsloggerData
         ) {
             data class DagData(
                 val dagen: LocalDate,
