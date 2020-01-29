@@ -576,6 +576,10 @@ internal class Vedtaksperiode internal constructor(
     // Gang of four Memento pattern
     companion object {
 
+        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
+            .map{ it.sykdomshistorikk.sykdomstidslinje()}
+            .reduce(ConcreteSykdomstidslinje::plus)
+
         internal fun restore(memento: Memento): Vedtaksperiode {
             return Vedtaksperiode(
                 id = memento.id,

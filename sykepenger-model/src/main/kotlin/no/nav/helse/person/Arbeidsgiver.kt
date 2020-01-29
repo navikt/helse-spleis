@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
@@ -147,11 +148,13 @@ internal class Arbeidsgiver private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
-        return perioder.any { it.håndter(påminnelse) }.also {
+    internal fun håndter(påminnelse: ModelPåminnelse) =
+        perioder.any { it.håndter(påminnelse) }.also {
             påminnelse.kopierAktiviteterTil(aktivitetslogger)
         }
-    }
+
+    internal fun sykdomstidslinje(): ConcreteSykdomstidslinje? =
+        Vedtaksperiode.sykdomstidslinje(perioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)
