@@ -13,11 +13,19 @@ import kotlin.reflect.jvm.internal.ReflectProperties
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
-class Person(private val aktørId: String, private val fødselsnummer: String) : VedtaksperiodeObserver {
-    private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
+class Person private constructor(
+    private val aktørId: String,
+    private val fødselsnummer: String,
+    private val arbeidsgivere: MutableMap<String, Arbeidsgiver>,
+    private val hendelser: MutableList<ArbeidstakerHendelse>,
+    private val aktivitetslogger: Aktivitetslogger
+) : VedtaksperiodeObserver {
     private val skjemaVersjon = CURRENT_SKJEMA_VERSJON
-    private val aktivitetslogger = Aktivitetslogger()
-    private val hendelser = mutableListOf<ArbeidstakerHendelse>()
+
+    constructor(
+        aktørId: String,
+        fødselsnummer: String
+    ) : this(aktørId, fødselsnummer, mutableMapOf(), mutableListOf(), Aktivitetslogger())
 
     private val observers = mutableListOf<PersonObserver>()
 
