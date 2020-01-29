@@ -46,7 +46,13 @@ class ModelVilkårsgrunnlag(
         )
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
-        aktivitetslogger.info("Er egen ansatt: $erEgenAnsatt, har avvik i oppgitt inntekt: $harAvvikIOppgittInntekt")
+
+        if (erEgenAnsatt) aktivitetslogger.warn("Er egen ansatt")
+        else aktivitetslogger.info("er ikke egen ansatt")
+
+        if (harAvvikIOppgittInntekt) aktivitetslogger.warn("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
+        else aktivitetslogger.info("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
+
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt, grunnlag)
     }
 
