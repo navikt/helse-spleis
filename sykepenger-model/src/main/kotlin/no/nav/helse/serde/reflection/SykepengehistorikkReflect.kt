@@ -1,12 +1,14 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
 
 internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehistorikk) {
     private val utbetalinger: List<ModelSykepengehistorikk.Periode> = sykepengehistorikk["utbetalinger"]
     private val inntektshistorikk: List<ModelSykepengehistorikk.Inntektsopplysning> =
         sykepengehistorikk["inntektshistorikk"]
+    private val aktivitetslogger: Aktivitetslogger = sykepengehistorikk["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "utbetalinger" to utbetalinger.map {
@@ -14,7 +16,7 @@ internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehisto
                 "fom" to it.fom,
                 "tom" to it.tom,
                 "dagsats" to it.dagsats,
-                "type" to when(it) {
+                "type" to when (it) {
                     is ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver -> "RefusjonTilArbeidsgiver"
                     is ModelSykepengehistorikk.Periode.ReduksjonMedlem -> "ReduksjonMedlem"
                     is ModelSykepengehistorikk.Periode.Etterbetaling -> "Etterbetaling"
@@ -29,7 +31,8 @@ internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehisto
                 }
             )
         },
-        "inntektshistorikk" to inntektshistorikk.map { InntektsopplysningReflect(it).toMap() }
+        "inntektshistorikk" to inntektshistorikk.map { InntektsopplysningReflect(it).toMap() },
+        "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
     )
 
     private class InntektsopplysningReflect(inntektsopplysning: ModelSykepengehistorikk.Inntektsopplysning) {

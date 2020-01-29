@@ -116,7 +116,8 @@ internal data class PersonData(
 
             data class SykepengehistorikkData(
                 val utbetalinger: List<UtbetalingPeriodeData>,
-                val inntektshistorikk: List<InntektsopplysningData>
+                val inntektshistorikk: List<InntektsopplysningData>,
+                val aktivitetslogger: Any // TODO
             ) {
                 data class UtbetalingPeriodeData(
                     val fom: LocalDate,
