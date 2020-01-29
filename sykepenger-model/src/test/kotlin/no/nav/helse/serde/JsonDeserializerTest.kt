@@ -13,21 +13,6 @@ import java.util.*
 import kotlin.streams.toList
 
 internal class JsonDeserializerTest {
-
-    @Test
-    fun testPrivateConstructorReflectionStuff() {
-        val c = Arbeidsgiver::class.java.getDeclaredConstructor(
-            String::class.java,
-            UUID::class.java,
-            Inntekthistorikk::class.java
-        )
-        c.isAccessible = true
-        val uuid = UUID.randomUUID()
-        val ih = Inntekthistorikk()
-        val arb: Arbeidsgiver = c.newInstance("999888777", uuid, ih)
-        println(arb)
-    }
-
     private val aktørId = "AKTID"
     private val fødselsnummer = "FNR"
     private val organisasjonsnummer = "ORGNR"

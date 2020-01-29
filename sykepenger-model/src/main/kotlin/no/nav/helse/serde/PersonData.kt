@@ -15,6 +15,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
+import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import java.math.BigDecimal
@@ -60,10 +61,14 @@ class DataClassModelBuilder(private val json: String) {
             )
         }
 
-        return reflector.lagArbeidsgiver(
-            organisasjonsnummer = data.orgnummer,
-            id = data.id,
-            inntekthistorikk = inntekthistorikk
+        return createArbeidsgiver(
+            data.orgnummer,
+            data.id,
+            inntekthistorikk,
+            mutableListOf(),
+            mutableListOf(),
+            mutableListOf(),
+            Aktivitetslogger()
         )
     }
 }
