@@ -24,10 +24,17 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
     fun håndter(nySøknad: ModelNySøknad) {
         registrer(nySøknad, "Behandler ny søknad")
         var arbeidsgiver: Arbeidsgiver? = null
-        continueIfNoErrors(nySøknad,
-            { nySøknad.valider() },
-            { arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad) },
-            { arbeidsgiver?.håndter(nySøknad) })
+        fun validate(): ValidationStep = { nySøknad.valider() }
+        fun arbeidsgiver(): ValidationStep = { arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad) }
+        fun håndterNySøknad(): ValidationStep = { arbeidsgiver?.håndter(nySøknad) }
+        fun onError() {
+            invaliderAllePerioder(nySøknad)
+        }
+        nySøknad.continueIfNoErrors(
+            validate(),
+            arbeidsgiver(),
+            håndterNySøknad()
+        ) { onError() }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -40,7 +47,6 @@ class Person(private val aktørId: String, private val fødselsnummer: String) :
         fun onError() {
             invaliderAllePerioder(sendtSøknad)
         }
-
         sendtSøknad.continueIfNoErrors(
             validate(),
             arbeidsgiver(),
