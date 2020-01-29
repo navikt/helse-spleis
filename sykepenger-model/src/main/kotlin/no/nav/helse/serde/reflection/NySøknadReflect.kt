@@ -14,7 +14,7 @@ internal class NySøknadReflect(nySøknad: ModelNySøknad) {
     private val aktørId: String = nySøknad["aktørId"]
     private val orgnummer: String = nySøknad["orgnummer"]
     private val rapportertdato: LocalDateTime = nySøknad["rapportertdato"]
-    private val sykeperioder: List<Reflect> = nySøknad["Sykeperiode", "sykeperioder"]
+    private val sykeperioder: List<ReflectInstance> = nySøknad["Sykeperiode", "sykeperioder"]
     private val aktivitetslogger: Aktivitetslogger = nySøknad["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
@@ -30,7 +30,7 @@ internal class NySøknadReflect(nySøknad: ModelNySøknad) {
         )
     )
 
-    private class SykeperiodeReflect(sykeperiode: Reflect) {
+    private class SykeperiodeReflect(sykeperiode: ReflectInstance) {
         private val fom: LocalDate = sykeperiode["fom"]
         private val tom: LocalDate = sykeperiode["tom"]
         private val sykdomsgrad: Int = sykeperiode["sykdomsgrad"]

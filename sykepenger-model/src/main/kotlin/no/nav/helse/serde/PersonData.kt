@@ -8,7 +8,10 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
-import no.nav.helse.serde.reflection.Reflect
+import no.nav.helse.serde.reflection.*
+import no.nav.helse.serde.reflection.ReflectClass
+import no.nav.helse.serde.reflection.ReflectClass.Companion.getNestedClass
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.getReflectInstance
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
@@ -18,7 +21,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import kotlin.reflect.KClass
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -46,21 +48,24 @@ class DataClassModelBuilder(private val json: String) {
         )
     }
 
-    private fun konverterTilAktivitetslogger(aktivitetslogger: AktivitetsloggerData): Aktivitetslogger {
-        val reflect = Reflect.getInstance(Aktivitetslogger::class, aktivitetslogger.originalMessage)
+    private fun konverterTilAktivitetslogger(aktivitetsloggerData: AktivitetsloggerData): Aktivitetslogger {
+        val aktivitetslogger = Aktivitetslogger(aktivitetsloggerData.originalMessage)
 
-        val aktivitetClass: KClass<*> = reflect.getNestedClass("Aktivitet")
-        val alvorlighetsgradClass: KClass<Enum<*>> = reflect.getNestedClass("Alvorlighetsgrad") as KClass<Enum<*>>
+        val aktivitetClass: ReflectClass = getNestedClass<Aktivitetslogger>("Aktivitet")
+        val alvorlighetsgradClass: ReflectClass = getNestedClass<Aktivitetslogger>("Alvorlighetsgrad")
 
-
-
-        fun getEnumValue(string: String) = alvorlighetsgradClass.java.enumConstants.single { it.name == string }
-
-        aktivitetslogger.aktiviteter.forEach {
-            reflect.add("aktiviteter", Reflect.getInstance(aktivitetClass, getEnumValue(it.alvorlighetsgrad.name), it.melding, it.tidsstempel))
+        aktivitetsloggerData.aktiviteter.forEach {
+            aktivitetslogger.add(
+                property = "aktiviteter",
+                value = aktivitetClass.getReflectInstance(
+                    alvorlighetsgradClass.getEnumValue(it.alvorlighetsgrad.name),
+                    it.melding,
+                    it.tidsstempel
+                )
+            )
         }
 
-        return reflect.get()
+        return aktivitetslogger
     }
 
 

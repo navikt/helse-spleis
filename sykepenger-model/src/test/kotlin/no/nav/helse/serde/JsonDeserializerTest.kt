@@ -61,7 +61,7 @@ internal class JsonDeserializerTest {
                     "dagen" to it.toString(),
                     "hendelseId" to inntektsmeldingHendelseId,
                     "type" to "SYKEDAG",
-                    "erstatter" to emptyList<Map<String,Any>>()
+                    "erstatter" to emptyList<Map<String, Any>>()
                 )
             }
             .toList()
@@ -74,10 +74,18 @@ internal class JsonDeserializerTest {
                 mapOf(
                     "aktørId" to aktørId,
                     "fødselsnummer" to fødselsnummer,
-                    "aktivitetslogger" to "TODO",
+                    "aktivitetslogger" to mapOf(
+                        "aktiviteter" to listOf(
+                            mapOf(
+                                "alvorlighetsgrad" to "INFO",
+                                "melding" to "Behandler ny søknad",
+                                "tidsstempel" to "2020-01-29 22:45:38.876"
+                            )
+                        )
+                    ),
                     "arbeidsgivere" to listOf(
                         mapOf(
-                            "utbetalingstidslinjer" to emptyList<Map<String,Any>>(),
+                            "utbetalingstidslinjer" to emptyList<Map<String, Any>>(),
                             "organisasjonsnummer" to organisasjonsnummer,
                             "id" to arbeidsgiverId,
                             "inntekter" to listOf(
@@ -99,18 +107,23 @@ internal class JsonDeserializerTest {
                                     "sykdomshistorikk" to listOf(
                                         mapOf(
                                             "tidsstempel" to "2020-01-28T12:01:21.813492",
-                                            "hendelseId" to  inntektsmeldingHendelseId,
+                                            "hendelseId" to inntektsmeldingHendelseId,
                                             "hendelseSykdomstidslinje" to tidslinje,
                                             "beregnetSykdomstidslinje" to tidslinje
 
-                                        )),
+                                        )
+                                    ),
                                     "tilstand" to "TIL_INFOTRYGD",
                                     "sykdomstidslinje" to tidslinje,
-                                    "utbetalingslinjer" to emptyList<Map<String,Any>>(),
-                                    "aktivitetslogger" to "TODO"
+                                    "utbetalingslinjer" to emptyList<Map<String, Any>>(),
+                                    "aktivitetslogger" to mapOf(
+                                        "aktiviteter" to emptyList<Any>()
+                                    )
                                 )
                             ),
-                            "aktivitetslogger" to "TODO"
+                            "aktivitetslogger" to mapOf(
+                                "aktiviteter" to emptyList<Any>()
+                            )
                         )
                     ),
                     "hendelser" to listOf(
@@ -135,7 +148,9 @@ internal class JsonDeserializerTest {
                                     )
                                 ),
                                 "ferieperioder" to emptyList<Map<String, Any>>(),
-                                "aktivitetslogger" to "TODO"
+                                "aktivitetslogger" to mapOf(
+                                    "aktiviteter" to emptyList<Any>()
+                                )
                             )
                         )
                     )
