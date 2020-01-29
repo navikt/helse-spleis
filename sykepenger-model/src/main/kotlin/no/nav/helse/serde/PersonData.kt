@@ -6,7 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.hendelser.ModelForeldrepenger
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.hendelser.ModelYtelser
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
@@ -14,7 +17,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.PersonData.ArbeidsgiverData
+import no.nav.helse.serde.PersonData.*
 import no.nav.helse.serde.PersonData.HendelseWrapperData.InntektsmeldingData
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
@@ -48,16 +51,15 @@ class DataClassModelBuilder(private val json: String) {
 
     private fun konverterTilHendelse(
         personData: PersonData,
-        data: PersonData.HendelseWrapperData
+        data: HendelseWrapperData
     ): ArbeidstakerHendelse {
         return when (data.type) {
-            PersonData.HendelseWrapperData.Hendelsestype.Inntektsmelding -> parseInntektsmelding(personData, data.data)
-            PersonData.HendelseWrapperData.Hendelsestype.Foreldrepenger -> TODO()
-            PersonData.HendelseWrapperData.Hendelsestype.Sykepengehistorikk -> TODO()
-            PersonData.HendelseWrapperData.Hendelsestype.Vilkårsgrunnlag -> TODO()
-            PersonData.HendelseWrapperData.Hendelsestype.ManuellSaksbehandling -> TODO()
-            PersonData.HendelseWrapperData.Hendelsestype.NySøknad -> TODO()
-            PersonData.HendelseWrapperData.Hendelsestype.SendtSøknad -> TODO()
+            HendelseWrapperData.Hendelsestype.Inntektsmelding -> parseInntektsmelding(personData, data.data)
+            HendelseWrapperData.Hendelsestype.Ytelser -> parseForeldrepenger(personData, data.data)
+            HendelseWrapperData.Hendelsestype.Vilkårsgrunnlag -> TODO()
+            HendelseWrapperData.Hendelsestype.ManuellSaksbehandling -> TODO()
+            HendelseWrapperData.Hendelsestype.NySøknad -> TODO()
+            HendelseWrapperData.Hendelsestype.SendtSøknad -> TODO()
         }
     }
 
@@ -86,15 +88,15 @@ class DataClassModelBuilder(private val json: String) {
         val data: InntektsmeldingData = objectMapper.convertValue(jsonNode)
         return ModelInntektsmelding(
             hendelseId = data.hendelseId,
+            orgnummer = data.orgnummer,
+            fødselsnummer = personData.fødselsnummer,
+            aktørId = personData.aktørId,
+            mottattDato = data.mottattDato,
             refusjon = ModelInntektsmelding.Refusjon(
                 opphørsdato = data.refusjon.opphørsdato,
                 beløpPrMåned = data.refusjon.beløpPrMåned,
                 endringerIRefusjon = data.refusjon.endringerIRefusjon.map { it.endringsdato }
             ),
-            orgnummer = data.orgnummer,
-            fødselsnummer = personData.fødselsnummer,
-            aktørId = personData.aktørId,
-            mottattDato = data.mottattDato,
             førsteFraværsdag = data.førsteFraværsdag,
             beregnetInntekt = data.beregnetInntekt,
             aktivitetslogger = Aktivitetslogger(),
@@ -103,6 +105,122 @@ class DataClassModelBuilder(private val json: String) {
             ferieperioder = data.ferieperioder.map { Periode(it.fom, it.tom) }
         )
     }
+
+    private fun parseForeldrepenger(personData: PersonData, jsonNode: JsonNode): ModelYtelser {
+        val data: HendelseWrapperData.YtelserData = objectMapper.convertValue(jsonNode)
+        return ModelYtelser(
+            hendelseId = data.hendelseId,
+            vedtaksperiodeId = data.vedtaksperiodeId,
+            organisasjonsnummer = data.orgnummer,
+            fødselsnummer = personData.fødselsnummer,
+            aktørId = personData.aktørId,
+            rapportertdato = data.mottattDato,
+            sykepengehistorikk = ModelSykepengehistorikk(
+                utbetalinger = data.sykepengehistorikk.utbetalinger.map(::parseUtbetaling),
+                inntektshistorikk = data.sykepengehistorikk.inntektshistorikk.map(::parseInntektsopplysning),
+                aktivitetslogger = Aktivitetslogger()
+            ),
+            foreldrepenger = ModelForeldrepenger(
+                foreldrepengeytelse = parsePeriode(data.foreldrepenger.foreldrepengeytelse),
+                svangerskapsytelse = parsePeriode(data.foreldrepenger.svangerskapsytelse),
+                aktivitetslogger = Aktivitetslogger()
+            ),
+            aktivitetslogger = Aktivitetslogger()
+        )
+    }
+
+    private fun parseUtbetaling(
+        periode: HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData
+    ): ModelSykepengehistorikk.Periode = when (periode.type) {
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.RefusjonTilArbeidsgiver -> {
+            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.ReduksjonMedlem -> {
+            ModelSykepengehistorikk.Periode.ReduksjonMedlem(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Etterbetaling -> {
+            ModelSykepengehistorikk.Periode.Etterbetaling(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.KontertRegnskap -> {
+            ModelSykepengehistorikk.Periode.KontertRegnskap(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.ReduksjonArbeidsgiverRefusjon -> {
+            ModelSykepengehistorikk.Periode.ReduksjonArbeidsgiverRefusjon(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Tilbakeført -> {
+            ModelSykepengehistorikk.Periode.Tilbakeført(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Konvertert -> {
+            ModelSykepengehistorikk.Periode.Konvertert(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Ferie -> {
+            ModelSykepengehistorikk.Periode.Ferie(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Opphold -> {
+            ModelSykepengehistorikk.Periode.Opphold(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Sanksjon -> {
+            ModelSykepengehistorikk.Periode.Sanksjon(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+        HendelseWrapperData.YtelserData.SykepengehistorikkData.UtbetalingPeriodeData.TypeData.Ukjent -> {
+            ModelSykepengehistorikk.Periode.Ukjent(
+                fom = periode.fom,
+                tom = periode.tom,
+                dagsats = periode.dagsats
+            )
+        }
+    }
+
+    private fun parseInntektsopplysning(
+        data: HendelseWrapperData.YtelserData.SykepengehistorikkData.InntektsopplysningData
+    ) = ModelSykepengehistorikk.Inntektsopplysning(
+        sykepengerFom = data.sykepengerFom,
+        inntektPerMåned = data.inntektPerMåned,
+        orgnummer = data.orgnummer
+    )
+
+    private fun parsePeriode(periodeData: PeriodeData) =
+        Periode(periodeData.fom, periodeData.tom)
 }
 
 internal data class PersonData(
@@ -136,12 +254,59 @@ internal data class PersonData(
                     val endringsdato: LocalDate
                 )
             }
-
-            data class PeriodeData(
-                val fom: LocalDate,
-                val tom: LocalDate
-            )
         }
+
+        data class YtelserData(
+            val hendelseId: UUID,
+            val vedtaksperiodeId: String,
+            val orgnummer: String,
+            val mottattDato: LocalDateTime,
+            val sykepengehistorikk: SykepengehistorikkData,
+            val foreldrepenger: ForeldrepengerData
+            ) {
+
+            data class SykepengehistorikkData(
+                val hendelseId: UUID,
+                val orgnummer: String,
+                val utbetalinger: List<UtbetalingPeriodeData>,
+                val inntektshistorikk: List<InntektsopplysningData>
+            ) {
+                data class UtbetalingPeriodeData(
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val dagsats: Int,
+                    val type: TypeData
+                ) {
+                    enum class TypeData {
+                        RefusjonTilArbeidsgiver,
+                        ReduksjonMedlem,
+                        Etterbetaling,
+                        KontertRegnskap,
+                        ReduksjonArbeidsgiverRefusjon,
+                        Tilbakeført,
+                        Konvertert,
+                        Ferie,
+                        Opphold,
+                        Sanksjon,
+                        Ukjent
+                    }
+                }
+
+                data class InntektsopplysningData(
+                    val hendelseId: UUID,
+                    val orgnummer: String,
+                    val sykepengerFom: LocalDate,
+                    val inntektPerMåned: Int
+                )
+            }
+
+            data class ForeldrepengerData(
+                val foreldrepengeytelse: PeriodeData,
+                val svangerskapsytelse: PeriodeData
+            ) {
+            }
+        }
+
 
         data class ManuellSaksbehandlingData(
             val hendelseId: UUID,
@@ -170,7 +335,7 @@ internal data class PersonData(
             val perioder: List<SykeperiodeData>
         ) {
             data class SykeperiodeData(
-                val type: SykeperiodeData.TypeData,
+                val type: TypeData,
                 val fom: LocalDate,
                 val tom: LocalDate,
                 val grad: Int?,
@@ -185,41 +350,6 @@ internal data class PersonData(
                     Arbeid
                 }
             }
-        }
-
-        data class Sykepengehistorikk(
-            val hendelseId: UUID,
-            val orgnummer: String,
-            val utbetalinger: List<PeriodeData>,
-            val inntektshistorikk: List<InntektsopplysningData>
-        ) {
-            data class PeriodeData(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val dagsats: Int,
-                val type: TypeData
-            ) {
-                enum class TypeData {
-                    RefusjonTilArbeidsgiver,
-                    ReduksjonMedlem,
-                    Etterbetaling,
-                    KontertRegnskap,
-                    ReduksjonArbeidsRefusjon,
-                    Tilbakeført,
-                    Konvertert,
-                    Ferie,
-                    Opphold,
-                    Sanksjon,
-                    Ukjent
-                }
-            }
-
-            data class InntektsopplysningData(
-                val hendelseId: UUID,
-                val orgnummer: String,
-                val sykepengerFom: LocalDate,
-                val inntektPerMåned: Int
-            )
         }
 
         data class VilkårsgrunnlagData(
@@ -240,8 +370,7 @@ internal data class PersonData(
         }
 
         enum class Hendelsestype {
-            Foreldrepenger,
-            Sykepengehistorikk,
+            Ytelser,
             Vilkårsgrunnlag,
             ManuellSaksbehandling,
             Inntektsmelding,
@@ -273,7 +402,7 @@ internal data class PersonData(
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
             val sykdomstidslinje: SykdomstidslinjeData,
-            val utbetalingslinjer: List<Any>
+            val utbetalingslinjer: List<UtbetalingslinjeData>
         ) {
             data class DagData(
                 val dagen: LocalDate,
@@ -294,6 +423,17 @@ internal data class PersonData(
                 val beregnetÅrsinntektFraInntektskomponenten: Double,
                 val avviksprosent: Double
             )
+
+            data class UtbetalingslinjeData(
+                val fom: LocalDate,
+                val tom: LocalDate,
+                val dagsats: Int
+            )
         }
     }
+
+    data class PeriodeData(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
 }
