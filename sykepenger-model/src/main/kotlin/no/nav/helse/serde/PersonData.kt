@@ -49,9 +49,15 @@ class DataClassModelBuilder(private val json: String) {
     private fun konverterTilAktivitetslogger(aktivitetslogger: AktivitetsloggerData): Aktivitetslogger {
         val reflect = Reflect.getInstance(Aktivitetslogger::class, aktivitetslogger.originalMessage)
 
-        val subClass: KClass<*> = reflect.getNestedClass("Aktivitet")
+        val aktivitetClass: KClass<*> = reflect.getNestedClass("Aktivitet")
+        val alvorlighetsgradClass: KClass<Enum<*>> = reflect.getNestedClass("Alvorlighetsgrad") as KClass<Enum<*>>
+
+
+
+        fun getEnumValue(string: String) = alvorlighetsgradClass.java.enumConstants.single { it.name == string }
+
         aktivitetslogger.aktiviteter.forEach {
-            reflect.add("aktiviteter", Reflect.getInstance(subClass, it.alvorlighetsgrad, it.melding, it.tidsstempel))
+            reflect.add("aktiviteter", Reflect.getInstance(aktivitetClass, getEnumValue(it.alvorlighetsgrad.name), it.melding, it.tidsstempel))
         }
 
         return reflect.get()

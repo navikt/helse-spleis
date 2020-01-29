@@ -13,16 +13,16 @@ internal class Reflect(
         return instance as T
     }
 
-    internal inline operator fun <reified R> get(name: String): R =
+    internal inline operator fun <reified R> get(property: String): R =
         kClass.memberProperties
-            .single { it.name == name }
+            .single { it.name == property }
             .also {
                 it.isAccessible = true
             }.call(instance) as R
 
-    internal operator fun get(nestedClassName: String, name: String): List<Reflect> {
+    internal operator fun get(nestedClassName: String, property: String): List<Reflect> {
         val nestedClass = getNestedClass(nestedClassName)
-        return get<List<Any>>(name).map { Reflect(nestedClass, it) }
+        return get<List<Any>>(property).map { Reflect(nestedClass, it) }
     }
 
     internal operator fun set(property: String, value: Any?) {
@@ -51,8 +51,8 @@ internal class Reflect(
     }
 }
 
-internal inline operator fun <reified T : Any, reified R> T.get(name: String): R =
-    Reflect(T::class, this)[name]
+internal inline operator fun <reified T : Any, reified R> T.get(property: String): R =
+    Reflect(T::class, this)[property]
 
-internal inline operator fun <reified T : Any> T.get(nestedClassName: String, name: String) =
-    Reflect(T::class, this)[nestedClassName, name]
+internal inline operator fun <reified T : Any> T.get(nestedClassName: String, property: String) =
+    Reflect(T::class, this)[nestedClassName, property]
