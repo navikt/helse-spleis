@@ -51,7 +51,7 @@ internal class HendelseMediator(
             message.accept(messageProcessor)
 
             if (aktivitetslogger.hasMessages()) {
-                sikkerLogg.info("meldinger om melding: $aktivitetslogger")
+                sikkerLogg.info("meldinger om melding: ${aktivitetslogger.toReport()}")
             }
         } catch (err: Aktivitetslogger.AktivitetException) {
             sikkerLogg.info("feil på melding: $err")
@@ -67,7 +67,7 @@ internal class HendelseMediator(
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
-        sikkerLogg.info("ukjent melding: $aktivitetslogger")
+        sikkerLogg.info("ukjent melding: ${aktivitetslogger.toReport()}")
     }
 
     private inner class Processor : MessageProcessor {
