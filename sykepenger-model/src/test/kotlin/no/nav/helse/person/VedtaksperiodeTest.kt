@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.DecimalNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -44,7 +44,7 @@ internal class VedtaksperiodeTest {
         assertEquals(aktør, jsonRepresentation.aktørId)
         assertEquals(fødselsnummer, jsonRepresentation.fødselsnummer)
         assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
-        assertNotNull(jsonRepresentation.sykdomstidslinje)
+        assertNotNull(jsonRepresentation.sykepengehistorikk)
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
+            sykepengehistorikk = JsonNodeFactory.instance.missingNode(),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
             førsteFraværsdag = null,
@@ -130,7 +130,7 @@ internal class VedtaksperiodeTest {
             },
             godkjentAv = null,
             maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
+            sykepengehistorikk = JsonNodeFactory.instance.missingNode(),
             tilstandType = TilstandType.TIL_GODKJENNING,
             utbetalingsreferanse = null,
             førsteFraværsdag = null,
@@ -170,7 +170,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `påminnelse returnerer boolean etter om påminnelsen ble håndtert eller ikke`() {
         val id = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(id, "123", "123", "123", 1.S)
+        val vedtaksperiode = Vedtaksperiode(id, "123", "123", "123")
 
         assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.START)))
         assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.START)))

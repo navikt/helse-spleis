@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.fixtures.S
+import no.nav.helse.fixtures.januar
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
@@ -60,9 +60,19 @@ internal class ModelPåminnelseTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
-            sykdomstidslinje = 10.S,
             tilstand = tilstand
-        )
+        ).apply { håndter(
+            ModelNySøknad(
+            hendelseId = UUID.randomUUID(),
+                fnr = fødselsnummer,
+                orgnummer = orgnummer,
+                aktørId = aktørId,
+                rapportertdato = LocalDateTime.now(),
+                sykeperioder = listOf(Triple(1.januar, 10.januar, 100)),
+                originalJson = "",
+                aktivitetslogger = aktivitetslogger
+        ))
+        }
 
 
     private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId:UUID = vedtaksperiodeId) =

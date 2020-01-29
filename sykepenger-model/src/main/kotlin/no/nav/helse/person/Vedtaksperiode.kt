@@ -32,7 +32,6 @@ internal class Vedtaksperiode internal constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private var sykdomstidslinje: ConcreteSykdomstidslinje,
     private var tilstand: Vedtaksperiodetilstand = StartTilstand,
     private val aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
 ) {
@@ -54,16 +53,13 @@ internal class Vedtaksperiode internal constructor(
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
-        this.sykdomstidslinje.hendelser().førsteAvType<ModelInntektsmelding>()
+        this.sykdomshistorikk.sykdomstidslinje().hendelser().førsteAvType<ModelInntektsmelding>()
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this)
         visitor.visitVedtaksperiodeAktivitetslogger(aktivitetslogger)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
-        visitor.preVisitVedtaksperiodeSykdomstidslinje()
-        sykdomstidslinje.accept(visitor)
-        visitor.postVisitVedtaksperiodeSykdomstidslinje()
         visitor.preVisitUtbetalingslinjer()
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer()
@@ -81,6 +77,7 @@ internal class Vedtaksperiode internal constructor(
         if (it) tilstand.håndter(this, nySøknad)
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
+
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad) = overlapperMed(sendtSøknad).also {
         if (it) tilstand.håndter(this, sendtSøknad)
@@ -128,7 +125,9 @@ internal class Vedtaksperiode internal constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        this.sykdomstidslinje.overlapperMed(hendelse.sykdomstidslinje())
+        erTomHistorikk() || this.sykdomshistorikk.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
+
+    private fun erTomHistorikk() = sykdomshistorikk.size == 0
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -152,15 +151,12 @@ internal class Vedtaksperiode internal constructor(
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
-        val tidslinje = this.sykdomstidslinje + hendelse.sykdomstidslinje()
 
-        if (tidslinje.erUtenforOmfang()) {
+        if (sykdomshistorikk.sykdomstidslinje().erUtenforOmfang()) {
             hendelse.error("Ikke støttet dag")
             tilstand(hendelse, TilInfotrygd)
         } else {
-            tilstand(hendelse, nesteTilstand) {
-                sykdomstidslinje = tidslinje
-            }
+            tilstand(hendelse, nesteTilstand)
         }
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -172,7 +168,9 @@ internal class Vedtaksperiode internal constructor(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
+                utgangspunktForBeregningAvYtelse = sykdomshistorikk.sykdomstidslinje().utgangspunktForBeregningAvYtelse().minusDays(
+                    1
+                )
             )
         )
     }
@@ -282,7 +280,6 @@ internal class Vedtaksperiode internal constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             vedtaksperiode.tilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
-                vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
             vedtaksperiode.aktivitetslogger.info("Fullført behandling av ny søknad")
         }
@@ -404,14 +401,17 @@ internal class Vedtaksperiode internal constructor(
             ytelser: ModelYtelser
         ) {
             if (ytelser.foreldrepenger().overlapperMedSyketilfelle(
-                    Periode(vedtaksperiode.sykdomstidslinje.førsteDag(), vedtaksperiode.sykdomstidslinje.sisteDag())
+                    Periode(
+                        vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag(),
+                        vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag()
+                    )
                 )
             ) {
                 ytelser.error("Foreldrepenger overlapper med syketilfelle, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
 
-            if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomstidslinje)) {
+            if (harFraværsdagInnen6Mnd(ytelser, vedtaksperiode.sykdomshistorikk.sykdomstidslinje())) {
                 ytelser.error("Har fraværsdag innenfor seks måneder, sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
             }
@@ -421,7 +421,8 @@ internal class Vedtaksperiode internal constructor(
             } else vedtaksperiode.dagsats()!!
 
             val utbetalingsberegning = try {
-                vedtaksperiode.sykdomstidslinje.utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
+                vedtaksperiode.sykdomshistorikk.sykdomstidslinje()
+                    .utbetalingsberegning(dagsats, vedtaksperiode.fødselsnummer)
             } catch (ie: IllegalArgumentException) {
                 vedtaksperiode.aktivitetslogger.error("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
@@ -564,8 +565,8 @@ internal class Vedtaksperiode internal constructor(
                 id = memento.id,
                 aktørId = memento.aktørId,
                 fødselsnummer = memento.fødselsnummer,
-                organisasjonsnummer = memento.organisasjonsnummer,
-                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString())
+                organisasjonsnummer = memento.organisasjonsnummer
+//                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString()) //TODO: Ask a grownup
             ).also { vedtaksperiode ->
                 vedtaksperiode.tilstand = tilstandFraEnum(memento.tilstandType)
                 vedtaksperiode.maksdato = memento.maksdato
@@ -605,8 +606,7 @@ internal class Vedtaksperiode internal constructor(
                 id = id,
                 aktørId = hendelse.aktørId(),
                 fødselsnummer = hendelse.fødselsnummer(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                sykdomstidslinje = hendelse.sykdomstidslinje()
+                organisasjonsnummer = hendelse.organisasjonsnummer()
             )
         }
 
@@ -622,7 +622,7 @@ internal class Vedtaksperiode internal constructor(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             tilstandType = tilstand.type,
-            sykdomstidslinje = objectMapper.readTree(sykdomstidslinje.toJson()),
+            sykepengehistorikk = objectMapper.readTree(sykdomshistorikk.toString()), //TODO: Denne må serialiseres
             maksdato = maksdato,
             utbetalingslinjer = utbetalingslinjer
                 ?.let { objectMapper.convertValue<JsonNode>(it) },
@@ -639,7 +639,7 @@ internal class Vedtaksperiode internal constructor(
         internal val fødselsnummer: String,
         internal val organisasjonsnummer: String,
         internal val tilstandType: TilstandType,
-        internal val sykdomstidslinje: JsonNode,
+        internal val sykepengehistorikk: JsonNode,
         internal val maksdato: LocalDate?,
         internal val utbetalingslinjer: JsonNode?,
         internal val godkjentAv: String?,
@@ -660,7 +660,7 @@ internal class Vedtaksperiode internal constructor(
                     fødselsnummer = json["fødselsnummer"].textValue(),
                     organisasjonsnummer = json["organisasjonsnummer"].textValue(),
                     tilstandType = valueOf(json["tilstandType"].textValue()),
-                    sykdomstidslinje = json["sykdomstidslinje"],
+                    sykepengehistorikk = json["sykepengehistorikk"], //TODO: Recovery for vedtaksperioder på forrige format..
                     maksdato = json["maksdato"].safelyUnwrapDate(),
                     utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
                     godkjentAv = json["godkjentAv"]?.textValue(),
@@ -679,7 +679,7 @@ internal class Vedtaksperiode internal constructor(
                     "fødselsnummer" to this.fødselsnummer,
                     "organisasjonsnummer" to this.organisasjonsnummer,
                     "tilstandType" to this.tilstandType,
-                    "sykdomstidslinje" to this.sykdomstidslinje,
+                    "sykepengehistorikk" to this.sykepengehistorikk,
                     "maksdato" to this.maksdato,
                     "utbetalingslinjer" to this.utbetalingslinjer,
                     "godkjentAv" to this.godkjentAv,

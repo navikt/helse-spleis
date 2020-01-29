@@ -132,9 +132,8 @@ internal class ModelVilkårsgrunnlagTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
-            sykdomstidslinje = ConcreteSykdomstidslinje.sykedager(10.januar, 12.januar, sendtSøknad),
             tilstand = Vedtaksperiode.MottattSendtSøknad
-        )
+        ).apply { håndter(sendtSøknad) }
 
     private fun inntektsmelding() =
         ModelInntektsmelding(
