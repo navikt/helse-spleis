@@ -61,7 +61,7 @@ class DataClassModelBuilder(private val json: String) {
             inntekthistorikk.add(
                 fom = inntektData.fom,
                 hendelse = hendelser.find { it.hendelseId() == inntektData.hendelse } as ModelInntektsmelding,
-                beløp = inntektData.beløp
+                beløp = inntektData.beløp.toBigDecimal().setScale(1)
             )
         }
 
@@ -125,7 +125,7 @@ class DataClassModelBuilder(private val json: String) {
             sykdomstidslinje = parseSykdomstidslinje(data.sykdomstidslinje, hendelser),
             tilstand = parseTilstand(data.tilstand),
             maksdato = data.maksdato,
-            utbetalingslinjer = data.utbetalingslinjer.map(::parseUtbetalingslinje),
+            utbetalingslinjer = data.utbetalingslinjer?.map(::parseUtbetalingslinje),
             godkjentAv = data.godkjentAv,
             utbetalingsreferanse = data.utbetalingsreferanse,
             førsteFraværsdag = data.førsteFraværsdag,
@@ -411,7 +411,7 @@ internal data class PersonData(
         data class InntektData(
             val fom: LocalDate,
             val hendelse: UUID,
-            val beløp: BigDecimal
+            val beløp: String
         )
 
         data class VedtaksperiodeData(
@@ -425,7 +425,7 @@ internal data class PersonData(
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
             val sykdomstidslinje: SykdomstidslinjeData,
-            val utbetalingslinjer: List<UtbetalingslinjeData>,
+            val utbetalingslinjer: List<UtbetalingslinjeData>?,
             val aktivitetslogger: AktivitetsloggerData
         ) {
             data class DagData(

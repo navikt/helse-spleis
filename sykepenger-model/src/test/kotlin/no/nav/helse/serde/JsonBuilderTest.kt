@@ -1,11 +1,14 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
@@ -21,6 +24,30 @@ private const val orgnummer = "987654321"
 private var vedtaksperiodeId = "1"
 
 internal class JsonBuilderTest {
+    val objectMapper = jacksonObjectMapper()
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
+
+    @Test
+    internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
+        val person = lagPerson()
+        person.get<Person, MutableList<PersonObserver>>("observers").clear()
+        person.get<Person, MutableList<Arbeidsgiver>>("arbeidsgivere").forEach { arbeidsgiver ->
+            arbeidsgiver.get<Arbeidsgiver, MutableList<VedtaksperiodeObserver>>("vedtaksperiodeObservers")
+                .clear()
+            arbeidsgiver.get<Arbeidsgiver, MutableList<Vedtaksperiode>>("perioder").forEach { vedtaksperiode ->
+                vedtaksperiode.get<Vedtaksperiode, MutableList<VedtaksperiodeObserver>>("observers").clear()
+            }
+        }
+        val personPre = objectMapper.writeValueAsString(person)
+        val jsonBuilder = JsonBuilder()
+        person.accept(jsonBuilder)
+        val personDeserialisert = DataClassModelBuilder(jsonBuilder.toString()).result()
+        val personPost = objectMapper.writeValueAsString(personDeserialisert)
+
+        assertEquals(personPre, personPost)
+    }
 
     private fun lagPerson() =
         Person(aktørId, fnr).apply {
