@@ -34,7 +34,7 @@ class Person private constructor(
             it.valider { ValiderSykdomshendelse(nySøknad) }
             val arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { HåndterHendelse(nySøknad, arbeidsgiver) }
+            it.valider { ArbeidsgiverHåndterHendelse(nySøknad, arbeidsgiver) }
         }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -46,7 +46,7 @@ class Person private constructor(
             it.valider { ValiderSykdomshendelse(sendtSøknad) }
             val arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { HåndterHendelse(sendtSøknad, arbeidsgiver) }
+            it.valider { ArbeidsgiverHåndterHendelse(sendtSøknad, arbeidsgiver) }
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -58,7 +58,7 @@ class Person private constructor(
             it.valider { ValiderSykdomshendelse(inntektsmelding) }
             val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { HåndterHendelse(inntektsmelding, arbeidsgiver) }
+            it.valider { ArbeidsgiverHåndterHendelse(inntektsmelding, arbeidsgiver) }
         }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }

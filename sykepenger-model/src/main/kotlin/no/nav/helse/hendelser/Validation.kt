@@ -22,7 +22,6 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse){
     internal fun onSuccess(successBlock:SuccessBlock) {
         if(!hendelse.hasErrors()) successBlock()
     }
-
 }
 
 internal typealias ErrorBlock = () -> Unit
@@ -48,7 +47,8 @@ internal class ValiderKunEnArbeidsgiver(
     override fun feilmelding() = "Bruker har mer enn en arbeidsgiver"
 }
 
-internal class HåndterHendelse(
+// Continue processing Hendelse with appropriate Arbeidsgiver
+internal class ArbeidsgiverHåndterHendelse(
     private val hendelse: SykdomstidslinjeHendelse,
     private val arbeidsgiver: Arbeidsgiver?
 ) : Valideringssteg {

@@ -116,7 +116,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: ModelNySøknad) {
+    internal fun håndter(nySøknad: ModelNySøknad, arbeidsgiver: Arbeidsgiver) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
             aktivitetslogger.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
@@ -124,14 +124,14 @@ internal class Arbeidsgiver private constructor(
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: ModelSendtSøknad) {
+    internal fun håndter(sendtSøknad: ModelSendtSøknad, arbeidsgiver: Arbeidsgiver) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
             sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding) {
+    internal fun håndter(inntektsmelding: ModelInntektsmelding, arbeidsgiver: Arbeidsgiver) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag,
             inntektsmelding,

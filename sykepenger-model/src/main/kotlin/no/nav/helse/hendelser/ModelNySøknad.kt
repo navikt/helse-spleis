@@ -106,7 +106,7 @@ class ModelNySøknad(
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
-        arbeidsgiver?.håndter(this)
+        arbeidsgiver?.håndter(this, arbeidsgiver)
     }
 
     private inner class Sykeperiode(

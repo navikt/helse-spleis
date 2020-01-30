@@ -77,7 +77,7 @@ internal class ArbeidsgiverTest {
         )
 
         val arbeidsgiver = Arbeidsgiver("12345678")
-        arbeidsgiver.håndter(inntektsmelding)
+        arbeidsgiver.håndter(inntektsmelding, arbeidsgiver)
         assertTrue(inntektsmelding.hasErrors())
         assertEquals(1, arbeidsgiver.memento().inntekthistorikk.inntekter.size)
         assertEquals(

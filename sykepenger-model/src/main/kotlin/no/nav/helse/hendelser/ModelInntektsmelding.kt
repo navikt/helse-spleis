@@ -161,7 +161,7 @@ class ModelInntektsmelding(
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
-        arbeidsgiver?.håndter(this)
+        arbeidsgiver?.håndter(this, arbeidsgiver)
     }
 
     override fun toJson(): String = objectMapper.writeValueAsString(

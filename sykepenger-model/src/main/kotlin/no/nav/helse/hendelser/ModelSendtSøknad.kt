@@ -139,7 +139,7 @@ class ModelSendtSøknad(
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
-        arbeidsgiver?.håndter(this)
+        arbeidsgiver?.håndter(this, arbeidsgiver)
     }
 
     internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
