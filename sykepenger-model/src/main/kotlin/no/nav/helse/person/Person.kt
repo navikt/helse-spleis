@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation
 import no.nav.helse.hendelser.ValiderSykdomshendelse
-import no.nav.helse.hendelser.Valideringssteg
 import java.util.UUID
 
 private const val CURRENT_SKJEMA_VERSJON = 3
@@ -35,7 +34,7 @@ class Person private constructor(
         Validation(nySøknad).also {
             it.onError { invaliderAllePerioder(nySøknad) }
             it.valider { ValiderSykdomshendelse(nySøknad) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver2(nySøknad)
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
             it.valider { HåndterHendelse(nySøknad, arbeidsgiver) }
         }
@@ -47,7 +46,7 @@ class Person private constructor(
         Validation(sendtSøknad).also {
             it.onError { invaliderAllePerioder(sendtSøknad) }
             it.valider { ValiderSykdomshendelse(sendtSøknad) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver2(sendtSøknad)
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
             it.valider { HåndterHendelse(sendtSøknad, arbeidsgiver) }
         }
@@ -56,11 +55,13 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: ModelInntektsmelding) {
         registrer(inntektsmelding, "Behandler inntektsmelding")
-        var arbeidsgiver: Arbeidsgiver? = null
-        continueIfNoErrors(inntektsmelding,
-            { inntektsmelding.valider() },
-            { arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding) },
-            { arbeidsgiver?.håndter(inntektsmelding) })
+        Validation(inntektsmelding).also {
+            it.onError { invaliderAllePerioder(inntektsmelding) }
+            it.valider { ValiderSykdomshendelse(inntektsmelding) }
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
+            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
+            it.valider { HåndterHendelse(inntektsmelding, arbeidsgiver) }
+        }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -129,14 +130,6 @@ class Person private constructor(
         visitor.postVisitPerson(this)
     }
 
-    private fun continueIfNoErrors(hendelse: ArbeidstakerHendelse, vararg blocks: ValidationStep) {
-        if (hendelse.hasErrors()) return
-        blocks.forEach {
-            it()
-            if (hendelse.hasErrors()) return invaliderAllePerioder(hendelse)
-        }
-    }
-
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
         hendelser.add(hendelse)
         hendelse.info(melding)
@@ -149,7 +142,7 @@ class Person private constructor(
         }
     }
 
-    private fun finnEllerOpprettArbeidsgiver2(hendelse: ArbeidstakerHendelse) =
+    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finnEllerOpprett(orgnr) {
                 hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
@@ -161,18 +154,6 @@ class Person private constructor(
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finn(orgnr).also {
                 if (it == null) hendelse.error("Finner ikke arbeidsgiver")
-            }
-        }
-
-    private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finnEllerOpprett(orgnr) {
-                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
-                arbeidsgiver(orgnr)
-            }.also {
-                if (arbeidsgivere.size > 1) {
-                    hendelse.error("Forsøk på å legge til arbeidsgiver nummer to: %s", hendelse.organisasjonsnummer())
-                }
             }
         }
 
