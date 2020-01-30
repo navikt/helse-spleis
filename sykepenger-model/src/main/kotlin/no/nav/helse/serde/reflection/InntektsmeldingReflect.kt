@@ -10,7 +10,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val hendelseId: UUID = inntektsmelding.hendelseId()
-    private val hendelsetype: Hendelsestype = inntektsmelding.hendelsestype()
+    private val hendelsestype: Hendelsestype = inntektsmelding.hendelsestype()
     private val refusjon: ModelInntektsmelding.Refusjon = inntektsmelding["refusjon"]
     private val orgnummer: String = inntektsmelding["orgnummer"]
     private val fødselsnummer: String = inntektsmelding["fødselsnummer"]
@@ -25,7 +25,7 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
         inntektsmelding["ferieperioder"]
 
     fun toMap() = mutableMapOf<String, Any?>(
-        "type" to hendelsetype.name,
+        "type" to hendelsestype.name,
         "data" to mutableMapOf<String, Any?>(
             "hendelseId" to hendelseId,
             "refusjon" to refusjon,

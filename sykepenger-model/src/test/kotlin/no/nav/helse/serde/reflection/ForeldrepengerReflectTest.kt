@@ -13,8 +13,8 @@ internal class ForeldrepengerReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<ModelForeldrepenger, ForeldrepengerReflect>(
-            listOf("foreldrepengeytelse", "svangerskapsytelse"),
-            listOf("aktivitetslogger")
+            skalMappes = listOf("foreldrepengeytelse", "svangerskapsytelse"),
+            skalIkkeMappes = listOf("aktivitetslogger")
         )
     }
 

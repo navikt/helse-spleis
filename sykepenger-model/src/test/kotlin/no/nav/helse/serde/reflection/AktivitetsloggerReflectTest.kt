@@ -9,7 +9,11 @@ internal class AktivitetsloggerReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<Aktivitetslogger, AktivitetsloggerReflect>(
-            listOf("aktiviteter", "originalMessage")
+            skalMappes = listOf("aktiviteter", "originalMessage")
+        )
+        assertMembers<Aktivitetslogger, AktivitetsloggerReflect>(
+            subClasses = "Aktivitet" to "AktivitetReflect",
+            skalMappes = listOf("alvorlighetsgrad", "melding", "tidsstempel")
         )
     }
 

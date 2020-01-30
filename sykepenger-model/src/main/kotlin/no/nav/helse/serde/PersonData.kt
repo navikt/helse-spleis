@@ -53,8 +53,9 @@ class DataClassModelBuilder(private val json: String) {
         val aktivitetClass: ReflectClass = getNestedClass<Aktivitetslogger>("Aktivitet")
         val alvorlighetsgradClass: ReflectClass = getNestedClass<Aktivitetslogger>("Alvorlighetsgrad")
 
+        val aktiviteter = aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter")
         aktivitetsloggerData.aktiviteter.forEach {
-            aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter").add(
+            aktiviteter.add(
                 aktivitetClass.getInstance(
                     alvorlighetsgradClass.getEnumValue(it.alvorlighetsgrad.name),
                     it.melding,
