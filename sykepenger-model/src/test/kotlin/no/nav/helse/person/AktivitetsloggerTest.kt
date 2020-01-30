@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,8 +19,10 @@ internal class AktivitetsloggerTest {
     @Test
     internal fun `inneholder original melding`() {
         assertFalse(aktivitetslogger.toString().contains(Message))
-        aktivitetslogger.info("info message")
+        val infomelding = "info message"
+        aktivitetslogger.info(infomelding)
         assertTrue(aktivitetslogger.toReport().contains(Message))
+        assertInfo(infomelding)
     }
 
     @Test
@@ -31,22 +32,72 @@ internal class AktivitetsloggerTest {
 
     @Test
     internal fun `severe oppdaget og kaster exception`() {
-        assertThrows<Aktivitetslogger.AktivitetException> { aktivitetslogger.severe("Severe error") }
+        val melding = "Severe error"
+        assertThrows<Aktivitetslogger.AktivitetException> { aktivitetslogger.severe(melding) }
         assertTrue(aktivitetslogger.hasErrors())
-        assertTrue(aktivitetslogger.toString().contains("Severe error"))
+        assertTrue(aktivitetslogger.toString().contains(melding))
+        assertSevere(melding)
     }
 
     @Test
     internal fun `error oppdaget`() {
-        aktivitetslogger.error("Error")
+        val melding = "Error"
+        aktivitetslogger.error(melding)
         assertTrue(aktivitetslogger.hasErrors())
-        assertTrue(aktivitetslogger.toString().contains("Error"))
+        assertTrue(aktivitetslogger.toString().contains(melding))
+        assertError(melding)
     }
 
     @Test
     internal fun `warning oppdaget`() {
-        aktivitetslogger.warn("Warning explanation")
+        val melding = "Warning explanation"
+        aktivitetslogger.warn(melding)
         assertFalse(aktivitetslogger.hasErrors())
-        assertTrue(aktivitetslogger.toString().contains("Warning explanation"))
+        assertTrue(aktivitetslogger.toString().contains(melding))
+        assertWarn(melding)
+    }
+
+    private fun assertInfo(message: String) {
+        var visitorCalled = false
+        aktivitetslogger.accept(object : AktivitetsloggerVisitor {
+            override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+                visitorCalled = true
+                assertEquals(message, melding)
+            }
+        })
+        assertTrue(visitorCalled)
+    }
+
+    private fun assertWarn(message: String) {
+        var visitorCalled = false
+        aktivitetslogger.accept(object : AktivitetsloggerVisitor {
+            override fun visitWarn(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+                visitorCalled = true
+                assertEquals(message, melding)
+            }
+        })
+        assertTrue(visitorCalled)
+    }
+
+    private fun assertError(message: String) {
+        var visitorCalled = false
+        aktivitetslogger.accept(object : AktivitetsloggerVisitor {
+            override fun visitError(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+                visitorCalled = true
+                assertEquals(message, melding)
+            }
+        })
+        assertTrue(visitorCalled)
+    }
+
+    private fun assertSevere(message: String) {
+        var visitorCalled = false
+        aktivitetslogger.accept(object : AktivitetsloggerVisitor {
+            override fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+                visitorCalled = true
+                assertEquals(message, melding)
+            }
+        })
+        assertTrue(visitorCalled)
     }
 }

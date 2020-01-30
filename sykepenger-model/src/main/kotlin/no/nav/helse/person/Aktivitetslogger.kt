@@ -6,8 +6,15 @@ import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
+// Implements Visitor pattern to traverse the messages
 class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitetslogger {
     private val aktiviteter = mutableListOf<Aktivitet>()
+
+    fun accept(visitor: AktivitetsloggerVisitor) {
+        visitor.preVisitAktivitetslogger(this)
+        aktiviteter.forEach { it.accept(visitor) }
+        visitor.postVisitAktivitetslogger(this)
+    }
 
     override fun info(melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet(INFO, String.format(melding, *params)))
@@ -84,7 +91,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
     class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
 
-    private class Aktivitet(
+    class Aktivitet(
         private val alvorlighetsgrad: Alvorlighetsgrad,
         private var melding: String,
         private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
@@ -112,9 +119,18 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         override fun toString() = tidsstempel + "\t" + melding
         internal fun inOrder() = alvorlighetsgrad
             .toString() + "\t" + tidsstempel + "\t" + melding
+
+        fun accept(visitor: AktivitetsloggerVisitor) {
+            when (alvorlighetsgrad) {
+                INFO -> visitor.visitInfo(this, melding, tidsstempel)
+                WARN -> visitor.visitWarn(this, melding, tidsstempel)
+                ERROR -> visitor.visitError(this, melding, tidsstempel)
+                SEVERE -> visitor.visitSevere(this, melding, tidsstempel)
+            }
+        }
     }
 
-    private enum class Alvorlighetsgrad(private val label: String): Comparable<Alvorlighetsgrad> {
+    enum class Alvorlighetsgrad(private val label: String): Comparable<Alvorlighetsgrad> {
         INFO("I"),
         WARN("W"),
         ERROR("E"),
