@@ -13,7 +13,7 @@ internal class Sykdomshistorikk private constructor(
     internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
-        elementer.add(0, Element(hendelse))
+        elementer.add(0, Element.opprett(this, hendelse))
     }
 
     fun accept(visitor: SykdomshistorikkVisitor) {
@@ -33,24 +33,12 @@ internal class Sykdomshistorikk private constructor(
         }
     }
 
-    internal inner class Element private constructor(
+    internal class Element private constructor(
         internal val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
         internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
         private val hendelse: SykdomstidslinjeHendelse
     ) {
-        private constructor(
-            hendelse: SykdomstidslinjeHendelse,
-            hendelseSykdomstidslinje: ConcreteSykdomstidslinje
-        ) : this(
-            tidsstempel = LocalDateTime.now(),
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-            beregnetSykdomstidslinje = kalkulerBeregnetSykdomstidslinje(hendelse, hendelseSykdomstidslinje),
-            hendelse = hendelse
-        )
-        internal constructor(hendelse: SykdomstidslinjeHendelse) : this(hendelse, hendelse.sykdomstidslinje())
-
-
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this)
             visitor.visitHendelse(hendelse)
@@ -61,6 +49,24 @@ internal class Sykdomshistorikk private constructor(
             beregnetSykdomstidslinje.accept(visitor)
             visitor.postVisitBeregnetSykdomstidslinje()
             visitor.postVisitSykdomshistorikkElement(this)
+        }
+
+        companion object {
+            fun opprett(
+                historikk: Sykdomshistorikk,
+                hendelse: SykdomstidslinjeHendelse
+            ): Element {
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
+                return Element(
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                    beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                        hendelse,
+                        hendelseSykdomstidslinje
+                    ),
+                    hendelse = hendelse
+                )
+            }
         }
     }
 }

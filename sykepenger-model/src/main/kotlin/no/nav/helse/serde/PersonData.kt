@@ -5,7 +5,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.person.*
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.ReflectClass
@@ -14,12 +21,30 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
+import no.nav.helse.serde.reflection.createSykdomshistorikk
+import no.nav.helse.serde.reflection.createSykdomshistorikkElement
+import no.nav.helse.serde.reflection.createVedtaksperiode
+import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.JsonDagType
+import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.dag.Studiedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
+import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -30,12 +55,10 @@ internal fun parseJson(json: String): PersonData = objectMapper.readValue(json)
 private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeData.DagData>
 
 class DataClassModelBuilder(private val json: String) {
-    private val reflector = ReflectionCreationHelper()
-
     fun result(): Person {
         val personData: PersonData = objectMapper.readValue(json)
         val hendelser = personData.hendelser.map { konverterTilHendelse(objectMapper, personData, it) }
-        val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(it, hendelser) }
+        val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(personData, it, hendelser) }
         val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
 
         return createPerson(
@@ -68,8 +91,13 @@ class DataClassModelBuilder(private val json: String) {
     }
 
 
-    private fun konverterTilArbeidsgiver(data: ArbeidsgiverData, hendelser: List<ArbeidstakerHendelse>): Arbeidsgiver {
+    private fun konverterTilArbeidsgiver(
+        personData: PersonData,
+        data: ArbeidsgiverData,
+        hendelser: List<ArbeidstakerHendelse>
+    ): Arbeidsgiver {
         val inntekthistorikk = Inntekthistorikk()
+        val vedtaksperioder = data.vedtaksperioder.map { parseVedtaksperiode(personData, data, it, hendelser) }
 
         data.inntekter.forEach { inntektData ->
             inntekthistorikk.add(
@@ -84,11 +112,100 @@ class DataClassModelBuilder(private val json: String) {
             data.id,
             inntekthistorikk,
             mutableListOf(),
-            mutableListOf(),
+            vedtaksperioder.toMutableList(),
             mutableListOf(),
             Aktivitetslogger()
         )
     }
+
+    private fun parseVedtaksperiode(
+        personData: PersonData,
+        arbeidsgiverData: ArbeidsgiverData,
+        data: ArbeidsgiverData.VedtaksperiodeData,
+        hendelser: List<ArbeidstakerHendelse>
+    ): Vedtaksperiode {
+        return createVedtaksperiode(
+            id = data.id,
+            aktørId = personData.aktørId,
+            fødselsnummer = personData.fødselsnummer,
+            organisasjonsnummer = arbeidsgiverData.organisasjonsnummer,
+            sykdomstidslinje = parseSykdomstidslinje(data.sykdomstidslinje, hendelser),
+            tilstand = parseTilstand(data.tilstand),
+            maksdato = data.maksdato,
+            utbetalingslinjer = data.utbetalingslinjer.map(::parseUtbetalingslinje),
+            godkjentAv = data.godkjentAv,
+            utbetalingsreferanse = data.utbetalingsreferanse,
+            førsteFraværsdag = data.førsteFraværsdag,
+            inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
+            dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
+            sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk, hendelser),
+            aktivitetslogger =  konverterTilAktivitetslogger(data.aktivitetslogger)
+        )
+    }
+
+    private fun parseSykdomstidslinje(
+        tidslinjeData: SykdomstidslinjeData,
+        hendelser: List<ArbeidstakerHendelse>
+    ): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map{ parseDag(it, hendelser) })
+
+    private fun parseDag(data: ArbeidsgiverData.VedtaksperiodeData.DagData, hendelser: List<ArbeidstakerHendelse>): Dag {
+        val hendelse = hendelser.find { it.hendelseId() == data.hendelseId } as SykdomstidslinjeHendelse
+        val dag: Dag = when (data.type) {
+            JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, hendelse)
+            JsonDagType.EGENMELDINGSDAG -> Egenmeldingsdag(data.dagen, hendelse)
+            JsonDagType.FERIEDAG -> Feriedag(data.dagen, hendelse)
+            JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen, hendelse)
+            JsonDagType.PERMISJONSDAG -> Permisjonsdag(data.dagen, hendelse)
+            JsonDagType.STUDIEDAG -> Studiedag(data.dagen, hendelse)
+            JsonDagType.SYKEDAG -> Sykedag(data.dagen, hendelse)
+            JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, hendelse)
+            JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen, hendelse)
+            JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen, hendelse)
+        }
+
+        val erstatter = data.erstatter.map { parseDag(it, hendelser) }
+        dag.erstatter.addAll(erstatter)
+        return dag
+    }
+
+    private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
+        TilstandType.START -> Vedtaksperiode.StartTilstand
+        TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
+        TilstandType.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.MottattSendtSøknad
+        TilstandType.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.MottattInntektsmelding
+        TilstandType.VILKÅRSPRØVING -> Vedtaksperiode.Vilkårsprøving
+        TilstandType.BEREGN_UTBETALING -> Vedtaksperiode.BeregnUtbetaling
+        TilstandType.TIL_GODKJENNING -> Vedtaksperiode.TilGodkjenning
+        TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
+        TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
+    }
+
+    private fun parseUtbetalingslinje(
+        data: ArbeidsgiverData.VedtaksperiodeData.UtbetalingslinjeData
+    ): Utbetalingslinje = Utbetalingslinje(fom = data.fom, tom = data.tom, dagsats = data.dagsats)
+
+    private fun parseDataForVilkårsvurdering(
+        data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData
+    ): ModelVilkårsgrunnlag.Grunnlagsdata =
+        ModelVilkårsgrunnlag.Grunnlagsdata(
+            erEgenAnsatt = data.erEgenAnsatt,
+            beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
+            avviksprosent = data.avviksprosent
+        )
+
+    private fun parseSykdomshistorikk(
+        data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>,
+        hendelser: List<ArbeidstakerHendelse>
+    ): Sykdomshistorikk {
+        return createSykdomshistorikk(data.map { sykdomshistorikkData ->
+            createSykdomshistorikkElement(
+                timestamp = sykdomshistorikkData.tidsstempel,
+                hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje, hendelser),
+                beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje, hendelser),
+                hendelse = hendelser.find { it.hendelseId() == sykdomshistorikkData.hendelseId } as SykdomstidslinjeHendelse) }
+        )
+    }
+
 }
 
 internal data class AktivitetsloggerData(

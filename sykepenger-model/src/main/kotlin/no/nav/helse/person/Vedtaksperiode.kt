@@ -46,7 +46,6 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var sykdomstidslinje: ConcreteSykdomstidslinje,
     private var tilstand: Vedtaksperiodetilstand,
-    private val aktivitetslogger: Aktivitetslogger,
     private var maksdato: LocalDate?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
     private var godkjentAv: String?,
@@ -54,7 +53,8 @@ internal class Vedtaksperiode private constructor(
     private var førsteFraværsdag: LocalDate?,
     private var inntektFraInntektsmelding: Double?,
     private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?,
-    private val sykdomshistorikk: Sykdomshistorikk
+    private val sykdomshistorikk: Sykdomshistorikk,
+    private val aktivitetslogger: Aktivitetslogger
 ) {
 
     internal constructor(
