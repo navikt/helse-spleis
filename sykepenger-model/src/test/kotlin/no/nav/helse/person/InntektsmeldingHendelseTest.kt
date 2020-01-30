@@ -163,10 +163,13 @@ internal class InntektsmeldingHendelseTest {
             person.accept(this)
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
-            førsteFraværsdager[vedtaksperiodeindeks] = vedtaksperiode.førsteFraværsdag()
+        }
+
+        override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
+            førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

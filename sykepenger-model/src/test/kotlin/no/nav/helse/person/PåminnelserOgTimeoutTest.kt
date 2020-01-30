@@ -77,7 +77,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.VILKÅRSPRØVING))
         assertTilstand(TilstandType.VILKÅRSPRØVING)
         assertBehov(
-            behov = personObserver.etterspurteBehov(0),
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 2,
             inneholder = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
         )
@@ -92,7 +92,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.BEREGN_UTBETALING))
         assertTilstand(TilstandType.BEREGN_UTBETALING)
         assertBehov(
-            behov = personObserver.etterspurteBehov(0),
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 2,
             inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
         )
@@ -108,7 +108,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.TIL_GODKJENNING))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
         assertBehov(
-            behov = personObserver.etterspurteBehov(0),
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 1,
             inneholder = listOf(Behovstype.GodkjenningFraSaksbehandler)
         )
@@ -125,7 +125,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
         assertTilstand(TilstandType.TIL_UTBETALING)
         assertBehov(
-            behov = personObserver.etterspurteBehov(0),
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 1,
             inneholder = listOf(Behovstype.Utbetaling)
         )
@@ -212,7 +212,7 @@ class PåminnelserOgTimeoutTest {
     private fun vilkårsgrunnlag() =
         ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
@@ -233,7 +233,7 @@ class PåminnelserOgTimeoutTest {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         sykepengehistorikk = ModelSykepengehistorikk(
             utbetalinger = listOf(
                 ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
@@ -259,7 +259,7 @@ class PåminnelserOgTimeoutTest {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
         rapportertdato = LocalDateTime.now(),
@@ -271,7 +271,7 @@ class PåminnelserOgTimeoutTest {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         tilstand = tilstandType,
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
@@ -291,14 +291,16 @@ class PåminnelserOgTimeoutTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        private val vedtaksperiodeIder = mutableSetOf<UUID>()
 
         init {
             person.accept(this)
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
+            vedtaksperiodeIder.add(id)
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -309,25 +311,19 @@ class PåminnelserOgTimeoutTest {
             sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
         }
 
+        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-
         override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
             this@PåminnelserOgTimeoutTest.aktivitetslogger = aktivitetslogger
         }
-    }
 
+    }
     private inner class TestPersonObserver : PersonObserver {
-        val vedtaksperiodeIder = mutableSetOf<UUID>()
+
         private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
 
-        fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-        fun etterspurteBehov(vedtaksperiodeindeks: Int) =
-            etterspurteBehov.getValue(vedtaksperiodeId(vedtaksperiodeindeks)).toList()
-
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            vedtaksperiodeIder.add(event.id)
-        }
+        fun etterspurteBehov(vedtaksperiodeId: UUID) =
+            etterspurteBehov.getValue(vedtaksperiodeId).toList()
 
         override fun vedtaksperiodeTrengerLøsning(event: Behov) {
             etterspurteBehov.computeIfAbsent(UUID.fromString(event.vedtaksperiodeId())) { mutableListOf() }

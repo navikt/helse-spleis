@@ -21,15 +21,12 @@ internal class YtelserHendelseTest {
     }
 
     private lateinit var person: Person
-    private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun opprettPerson() {
-        personObserver = TestPersonObserver()
         person = Person("12345", UNG_PERSON_FNR_2018)
-        person.addObserver(personObserver)
     }
 
     @Test
@@ -56,15 +53,9 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie eldre enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(181)
-        håndterYtelser(
-            utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
-                    sisteHistoriskeSykedag.minusDays(14),
-                    sisteHistoriskeSykedag,
-                    1000
-                )
-            )
-        )
+        håndterYtelser(utbetalinger = listOf(
+            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
+        ))
 
         assertTilstand(TilstandType.TIL_GODKJENNING)
     }
@@ -72,15 +63,9 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie nyere enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(180)
-        håndterYtelser(
-            utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
-                    sisteHistoriskeSykedag.minusDays(14),
-                    sisteHistoriskeSykedag,
-                    1000
-                )
-            )
-        )
+        håndterYtelser(utbetalinger = listOf(
+            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
+        ))
 
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
@@ -97,8 +82,6 @@ internal class YtelserHendelseTest {
                 )
             )
         )
-
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
     @Test
@@ -138,10 +121,7 @@ internal class YtelserHendelseTest {
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        assertEquals(expectedTilstand, inspektør.tilstand(0)) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
     }
 
     private fun håndterYtelser(
@@ -163,7 +143,7 @@ internal class YtelserHendelseTest {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = personObserver.vedtaksperiodeId(0),
+        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -230,17 +210,15 @@ internal class YtelserHendelseTest {
     private fun vilkårsgrunnlag() =
         ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(
-                    YearMonth.of(2018, it), listOf(
-                        ModelVilkårsgrunnlag.Inntekt(1000.0)
-                    )
-                )
+                ModelVilkårsgrunnlag.Måned(YearMonth.of(2018, it), listOf(
+                    ModelVilkårsgrunnlag.Inntekt(1000.0)
+                ))
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger()
@@ -249,15 +227,17 @@ internal class YtelserHendelseTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
+        private val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
 
         init {
             person.accept(this)
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
+            vedtaksperiodeIder.add(id)
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -274,22 +254,7 @@ internal class YtelserHendelseTest {
 
         internal val vedtaksperiodeTeller get() = tilstander.size
 
+        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-    }
-
-    private inner class TestPersonObserver : PersonObserver {
-        val vedtaksperiodeIder = mutableSetOf<UUID>()
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
-
-        fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            vedtaksperiodeIder.add(event.id)
-        }
-
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(event.vedtaksperiodeId())) { mutableListOf() }
-                .add(event)
-        }
     }
 }

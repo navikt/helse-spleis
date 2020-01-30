@@ -7,9 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Validation
-import no.nav.helse.hendelser.ValiderSykdomshendelse
-import java.util.UUID
+import java.util.*
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -119,7 +117,7 @@ class Person private constructor(
     }
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this)
+        visitor.preVisitPerson(this, aktørId, fødselsnummer)
         visitor.preVisitHendelser()
         hendelser.forEach { it.accept(visitor) }
         visitor.postVisitHendelser()
@@ -127,7 +125,7 @@ class Person private constructor(
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
-        visitor.postVisitPerson(this)
+        visitor.postVisitPerson(this, aktørId, fødselsnummer)
     }
 
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {

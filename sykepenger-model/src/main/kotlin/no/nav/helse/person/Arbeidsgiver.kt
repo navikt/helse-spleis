@@ -5,19 +5,13 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
@@ -97,7 +91,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitArbeidsgiver(this)
+        visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         visitor.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
         inntekthistorikk.accept(visitor)
         visitor.preVisitTidslinjer()
@@ -106,7 +100,7 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitPerioder()
         perioder.forEach { it.accept(visitor) }
         visitor.postVisitPerioder()
-        visitor.postVisitArbeidsgiver(this)
+        visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer

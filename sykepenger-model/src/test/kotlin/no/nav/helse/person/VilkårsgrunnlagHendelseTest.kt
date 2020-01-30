@@ -37,7 +37,7 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = emptyList())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -46,7 +46,7 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -56,10 +56,11 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = månedslønn, inntekter = tolvMånederMedInntekt(månedslønn))
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.BEREGN_UTBETALING)
         val utgangspunktForBeregningAvYtelse = inspektør.sykdomstidslinje(0).utgangspunktForBeregningAvYtelse()
-        assertEquals(utgangspunktForBeregningAvYtelse.minusDays(1), personObserver.etterspurtBehov(0, Behovstype.Sykepengehistorikk, "utgangspunktForBeregningAvYtelse"))
+        val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
+        assertEquals(utgangspunktForBeregningAvYtelse.minusDays(1), personObserver.etterspurtBehov(vedtaksperiodeId, Behovstype.Sykepengehistorikk, "utgangspunktForBeregningAvYtelse"))
     }
 
     @Test
@@ -69,7 +70,7 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = `25 % mer`, inntekter = tolvMånederMedInntekt(månedslønn))
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -80,7 +81,7 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = `25 % mindre`, inntekter = tolvMånederMedInntekt(månedslønn))
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -155,7 +156,7 @@ internal class VilkårsgrunnlagHendelseTest {
     ) =
         ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
@@ -169,14 +170,16 @@ internal class VilkårsgrunnlagHendelseTest {
 
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
+        internal val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
         init {
             person.accept(this)
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
+            vedtaksperiodeIder.add(id)
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -189,6 +192,8 @@ internal class VilkårsgrunnlagHendelseTest {
 
         internal val vedtaksperiodeTeller get() = tilstander.size
 
+        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
+
         internal fun tilstand(indeks: Int) = tilstander[indeks]
 
         internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:
@@ -197,20 +202,13 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private inner class TestPersonObserver : PersonObserver {
-        val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
 
-        fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
+        fun etterspurteBehov(vedtaksperiodeId: UUID) = etterspurteBehov.getValue(vedtaksperiodeId).toList()
 
-        fun etterspurteBehov(vedtaksperiodeindeks: Int) = etterspurteBehov.getValue(vedtaksperiodeId(vedtaksperiodeindeks)).toList()
-
-        fun <T> etterspurtBehov(vedtaksperiodeindeks: Int, behov: Behovstype, felt: String): T? {
-            return personObserver.etterspurteBehov(vedtaksperiodeindeks)
+        fun <T> etterspurtBehov(vedtaksperiodeId: UUID, behov: Behovstype, felt: String): T? {
+            return personObserver.etterspurteBehov(vedtaksperiodeId)
                 .first { behov.name in it.behovType() }[felt]
-        }
-
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            vedtaksperiodeIder.add(event.id)
         }
 
         override fun vedtaksperiodeTrengerLøsning(event: Behov) {

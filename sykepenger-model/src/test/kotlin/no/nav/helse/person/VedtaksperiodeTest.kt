@@ -183,7 +183,7 @@ internal class VedtaksperiodeTest {
             førsteFraværsdag = førsteFraværsdag
         ))
 
-        assertEquals(førsteFraværsdag, vedtaksperiode.førsteFraværsdag())
+        assertEquals(førsteFraværsdag, førsteFraværsdag(vedtaksperiode))
     }
 
     @Test
@@ -192,7 +192,17 @@ internal class VedtaksperiodeTest {
             nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
-        assertEquals(null, vedtaksperiode.førsteFraværsdag())
+        assertNull(førsteFraværsdag(vedtaksperiode))
+    }
+
+    private fun førsteFraværsdag(vedtaksperiode: Vedtaksperiode): LocalDate? {
+        var _førsteFraværsdag: LocalDate? = null
+        vedtaksperiode.accept(object : VedtaksperiodeVisitor {
+            override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
+                _førsteFraværsdag = førsteFraværsdag
+            }
+        })
+        return _førsteFraværsdag
     }
 
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =

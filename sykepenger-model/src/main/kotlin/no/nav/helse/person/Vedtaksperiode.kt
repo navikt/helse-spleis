@@ -10,14 +10,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.serde.safelyUnwrapDate
@@ -33,7 +26,7 @@ import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private inline fun <reified T> Set<*>.førsteAvType(): T? {
     return firstOrNull { it is T } as T?
@@ -89,7 +82,12 @@ internal class Vedtaksperiode private constructor(
         this.sykdomstidslinje.hendelser().førsteAvType<ModelInntektsmelding>()
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this)
+        visitor.preVisitVedtaksperiode(this, id)
+        visitor.visitMaksdato(maksdato)
+        visitor.visitGodkjentAv(godkjentAv)
+        visitor.visitFørsteFraværsdag(førsteFraværsdag())
+        visitor.visitInntektFraInntektsmelding(inntektFraInntektsmelding())
+        visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitVedtaksperiodeAktivitetslogger(aktivitetslogger)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
@@ -99,12 +97,11 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitUtbetalingslinjer()
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer()
-        visitor.postVisitVedtaksperiode(this)
+        visitor.postVisitVedtaksperiode(this, id)
     }
 
-    internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
-    internal fun dataForVilkårsvurdering() = dataForVilkårsvurdering
-    internal fun inntektFraInntektsmelding() =
+    private fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
+    private fun inntektFraInntektsmelding() =
         inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
 
     private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)

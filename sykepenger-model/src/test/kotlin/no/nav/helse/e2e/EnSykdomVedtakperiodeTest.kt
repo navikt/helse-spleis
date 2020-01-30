@@ -3,13 +3,8 @@ package no.nav.helse.e2e
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.ModelNySøknadTest
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -18,8 +13,12 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import org.junit.jupiter.api.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -301,7 +300,11 @@ internal class EnSykdomVedtakperiodeTest {
             personLogger = aktivitetslogger
         }
 
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
+        override fun preVisitArbeidsgiver(
+            arbeidsgiver: Arbeidsgiver,
+            id: UUID,
+            organisasjonsnummer: String
+        ) {
             this.arbeidsgiver = arbeidsgiver
         }
 
@@ -313,7 +316,7 @@ internal class EnSykdomVedtakperiodeTest {
             this.inntektshistorikk = inntekthistorikk
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = mutableListOf()
         }

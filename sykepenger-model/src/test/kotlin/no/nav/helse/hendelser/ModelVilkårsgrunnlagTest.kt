@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
@@ -78,8 +79,8 @@ internal class ModelVilkårsgrunnlagTest {
         vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(12000.0, vedtaksperiode.dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(0.0, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
+        assertEquals(12000.0, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
@@ -91,12 +92,12 @@ internal class ModelVilkårsgrunnlagTest {
         vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        val beforeRestore = vedtaksperiode.dataForVilkårsvurdering()
+        val beforeRestore = dataForVilkårsvurdering(vedtaksperiode)
         assertNotNull(beforeRestore)
 
         val memento = vedtaksperiode.memento()
 
-        assertEquals(beforeRestore, Vedtaksperiode.restore(memento).dataForVilkårsvurdering())
+        assertEquals(beforeRestore, dataForVilkårsvurdering(Vedtaksperiode.restore(memento)))
     }
 
     @Test
@@ -108,10 +109,21 @@ internal class ModelVilkårsgrunnlagTest {
         vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        assertEquals(0.20, vedtaksperiode.dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(15000.00, vedtaksperiode.dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
-        assertEquals(false, vedtaksperiode.dataForVilkårsvurdering()?.erEgenAnsatt)
+        assertEquals(0.20, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
+        assertEquals(15000.00, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.erEgenAnsatt)
     }
+
+    private fun dataForVilkårsvurdering(vedtaksperiode: Vedtaksperiode): ModelVilkårsgrunnlag.Grunnlagsdata? {
+        var _dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata? = null
+        vedtaksperiode.accept(object : VedtaksperiodeVisitor {
+            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?) {
+                _dataForVilkårsvurdering = dataForVilkårsvurdering
+            }
+        })
+        return _dataForVilkårsvurdering
+    }
+
 
     private fun vilkårsgrunnlag(inntektsmåneder: List<Måned>) = ModelVilkårsgrunnlag(
         hendelseId = UUID.randomUUID(),
