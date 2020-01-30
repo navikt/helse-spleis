@@ -56,9 +56,15 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie eldre enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(181)
-        håndterYtelser(utbetalinger = listOf(
-            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
-        ))
+        håndterYtelser(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    sisteHistoriskeSykedag.minusDays(14),
+                    sisteHistoriskeSykedag,
+                    1000
+                )
+            )
+        )
 
         assertTilstand(TilstandType.TIL_GODKJENNING)
     }
@@ -66,9 +72,15 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie nyere enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(180)
-        håndterYtelser(utbetalinger = listOf(
-            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
-        ))
+        håndterYtelser(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    sisteHistoriskeSykedag.minusDays(14),
+                    sisteHistoriskeSykedag,
+                    1000
+                )
+            )
+        )
 
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
@@ -76,28 +88,85 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie nyere enn perioden`() {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
-        håndterYtelser(utbetalinger = listOf(
-            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
-        ))
+        håndterYtelser(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    sisteHistoriskeSykedag.minusDays(14),
+                    sisteHistoriskeSykedag,
+                    1000
+                )
+            )
+        )
 
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
-    private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(expectedTilstand, inspektør.tilstand(0)) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+    @Test
+    fun `fordrepengeytelse før periode`() {
+        håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
+        assertTilstand(TilstandType.TIL_GODKJENNING)
     }
 
-    private fun håndterYtelser(utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList()) {
+    @Test
+    fun `fordrepengeytelse i periode`() {
+        håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `fordrepengeytelse etter periode`() {
+        håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
+        assertTilstand(TilstandType.TIL_GODKJENNING)
+    }
+
+    @Test
+    fun `svangerskapsytelse før periode`() {
+        håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
+        assertTilstand(TilstandType.TIL_GODKJENNING)
+    }
+
+    @Test
+    fun `svangerskapsytelse i periode`() {
+        håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `svangerskapsytelse etter periode`() {
+        håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
+        assertTilstand(TilstandType.TIL_GODKJENNING)
+    }
+
+    private fun assertTilstand(expectedTilstand: TilstandType) {
+        assertEquals(
+            expectedTilstand,
+            inspektør.tilstand(0)
+        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+    }
+
+    private fun håndterYtelser(
+        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
+        foreldrepengeytelse: Periode? = null,
+        svangerskapsytelse: Periode? = null
+    ) {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        person.håndter(ytelser(utbetalinger = utbetalinger))
+        person.håndter(
+            ytelser(
+                utbetalinger = utbetalinger,
+                foreldrepengeYtelse = foreldrepengeytelse,
+                svangerskapYtelse = svangerskapsytelse
+            )
+        )
     }
 
     private fun ytelser(
         vedtaksperiodeId: UUID = personObserver.vedtaksperiodeId(0),
-        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList()
+        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
+        foreldrepengeYtelse: Periode? = null,
+        svangerskapYtelse: Periode? = null
     ) = ModelYtelser(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
@@ -110,8 +179,8 @@ internal class YtelserHendelseTest {
             aktivitetslogger = Aktivitetslogger()
         ),
         foreldrepenger = ModelForeldrepenger(
-            foreldrepengeytelse = null,
-            svangerskapsytelse = null,
+            foreldrepengeytelse = foreldrepengeYtelse,
+            svangerskapsytelse = svangerskapYtelse,
             aktivitetslogger = Aktivitetslogger()
         ),
         rapportertdato = LocalDateTime.now(),
@@ -167,9 +236,11 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(YearMonth.of(2018, it), listOf(
-                    ModelVilkårsgrunnlag.Inntekt(1000.0)
-                ))
+                ModelVilkårsgrunnlag.Måned(
+                    YearMonth.of(2018, it), listOf(
+                        ModelVilkårsgrunnlag.Inntekt(1000.0)
+                    )
+                )
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger()

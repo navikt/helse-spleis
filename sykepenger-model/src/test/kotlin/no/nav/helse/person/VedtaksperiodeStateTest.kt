@@ -11,7 +11,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.testhelpers.mai
 import no.nav.helse.toJsonNode
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
@@ -31,79 +30,6 @@ internal class VedtaksperiodeStateTest : VedtaksperiodeObserver {
     fun setup() {
         aktivitetslogger = Aktivitetslogger()
     }
-
-
-    @Test
-    fun `dersom en person har foreldrepenger i perioden behandles saken i infotrygd`() {
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 30.mai,
-            foreldrepengerTom = 14.juli,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 2.juli,
-            foreldrepengerTom = 21.juli,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 30.mai,
-            foreldrepengerTom = 21.juli,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_INFOTRYGD)
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 2.juli,
-            foreldrepengerTom = 14.juli,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_INFOTRYGD)
-    }
-
-
-    @Test
-    fun `dersom en person ikke har foreldrepenger i perioden kan saken behandles`() {
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 1.mai,
-            foreldrepengerTom = 30.mai,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_GODKJENNING)
-        vedtaksperiodeMedForeldrepenger(
-            foreldrepengerFom = 21.juli,
-            foreldrepengerTom = 30.juli,
-            sykeperiodeFom = 1.juli,
-            sykeperiodeTom = 20.juli
-        )
-        assertTilstandsendring(TIL_GODKJENNING)
-    }
-
-    private fun vedtaksperiodeMedForeldrepenger(
-        foreldrepengerFom: LocalDate,
-        foreldrepengerTom: LocalDate,
-        sykeperiodeFom: LocalDate,
-        sykeperiodeTom: LocalDate
-    ) {
-        val vedtaksperiode = beInBeregnUtbetaling(
-            tidslinje(sykeperiodeFom, sykeperiodeTom)
-        )
-
-        vedtaksperiode.håndter(
-            Person(aktørId, fødselsnummer),
-            Arbeidsgiver(organisasjonsnummer),
-            ytelser(
-                fordrepengeYtelse = Periode(foreldrepengerFom, foreldrepengerTom)
-            )
-
-        )
-    }
-
 
     @Test
     fun `gitt tilstand BeregnUtbetaling, når vi mottar svar på saksbehandler-behov vi ikke trenger, skal ingenting skje`() {
