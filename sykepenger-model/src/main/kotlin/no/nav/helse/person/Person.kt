@@ -42,29 +42,15 @@ class Person private constructor(
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    private fun finnEllerOpprettArbeidsgiver2(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finnEllerOpprett(orgnr) {
-                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
-                arbeidsgiver(orgnr)
-            }
-        }
-
     fun håndter(sendtSøknad: ModelSendtSøknad) {
         registrer(sendtSøknad, "Behandler sendt søknad")
-        var arbeidsgiver: Arbeidsgiver? = null
-        fun validate(): ValidationStep = { sendtSøknad.valider() }
-        fun arbeidsgiver(): ValidationStep = { arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad) }
-        fun håndterSendtSøknad(): ValidationStep = { arbeidsgiver?.håndter(sendtSøknad) }
-        fun onError() {
-            invaliderAllePerioder(sendtSøknad)
+        Validation(sendtSøknad).also {
+            it.onError { invaliderAllePerioder(sendtSøknad) }
+            it.valider { ValiderSykdomshendelse(sendtSøknad) }
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver2(sendtSøknad)
+            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
+            it.valider { HåndterHendelse(sendtSøknad, arbeidsgiver) }
         }
-        sendtSøknad.continueIfNoErrors(
-            validate(),
-            arbeidsgiver(),
-            håndterSendtSøknad()
-        ) { onError() }
-
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -162,6 +148,14 @@ class Person private constructor(
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }
     }
+
+    private fun finnEllerOpprettArbeidsgiver2(hendelse: ArbeidstakerHendelse) =
+        hendelse.organisasjonsnummer().let { orgnr ->
+            arbeidsgivere.finnEllerOpprett(orgnr) {
+                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+                arbeidsgiver(orgnr)
+            }
+        }
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
