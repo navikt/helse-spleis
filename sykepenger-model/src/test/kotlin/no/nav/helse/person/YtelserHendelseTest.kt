@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.februar
@@ -205,9 +204,6 @@ internal class YtelserHendelseTest {
         internal val vedtaksperiodeTeller get() = tilstander.size
 
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-
-        internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:
-        throw IllegalAccessException()
     }
 
     private inner class TestPersonObserver : PersonObserver {
@@ -215,13 +211,6 @@ internal class YtelserHendelseTest {
         private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
 
         fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-        fun etterspurteBehov(vedtaksperiodeindeks: Int) = etterspurteBehov.getValue(vedtaksperiodeId(vedtaksperiodeindeks)).toList()
-
-        fun <T> etterspurtBehov(vedtaksperiodeindeks: Int, behov: Behovstype, felt: String): T? {
-            return personObserver.etterspurteBehov(vedtaksperiodeindeks)
-                .first { behov.name in it.behovType() }[felt]
-        }
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             vedtaksperiodeIder.add(event.id)
