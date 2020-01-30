@@ -1,11 +1,13 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -33,11 +35,45 @@ internal class GodkjenningHendelseTest {
     }
 
     @Test
+    fun `utbetaling er godkjent`() {
+        håndterYtelser()
+        person.håndter(manuellSaksbehandling(true))
+        assertTilstand(TilstandType.TIL_UTBETALING)
+        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(Behovstype.Utbetaling, "utbetalingsreferanse")
+        assertNotNull(utbetalingsreferanse)
+    }
+
+    @Test
+    fun `utbetaling ikke godkjent`() {
+        håndterYtelser()
+        person.håndter(manuellSaksbehandling(false))
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `hendelse etter til utbetaling`() {
+        håndterYtelser()
+        person.håndter(manuellSaksbehandling(true))
+        assertTilstand(TilstandType.TIL_UTBETALING)
+        person.håndter(ytelser())
+        assertTilstand(TilstandType.TIL_UTBETALING)
+        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+    }
+
+    @Test
     fun `dobbelt svar fra saksbehandler`() {
         håndterYtelser()
         person.håndter(manuellSaksbehandling(true))
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
+    }
+
+    private fun assertBehov(behov: List<Behov>, antall: Int, inneholder: List<Behovstype>) {
+        val behovTyperAsString = inneholder.map { it.name }
+        assertEquals(antall, behov
+            .filter { it.behovType() == behovTyperAsString }
+            .count()
+        )
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
@@ -185,6 +221,14 @@ internal class GodkjenningHendelseTest {
         private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
 
         fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
+
+        fun etterspurteBehov() =
+            etterspurteBehov.getValue(vedtaksperiodeIder.elementAt(0)).toList()
+
+        fun <T> etterspurtBehov(behov: Behovstype, felt: String): T? {
+            return personObserver.etterspurteBehov()
+                .first { behov.name in it.behovType() }[felt]
+        }
 
         override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
             vedtaksperiodeIder.add(event.id)
