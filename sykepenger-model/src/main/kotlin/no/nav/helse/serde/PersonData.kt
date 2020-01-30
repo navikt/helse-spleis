@@ -6,39 +6,15 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
+import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.mapping.konverterTilHendelse
-import no.nav.helse.serde.reflection.ReflectClass
-import no.nav.helse.serde.reflection.ReflectClass.Companion.getNestedClass
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.serde.reflection.createArbeidsgiver
-import no.nav.helse.serde.reflection.createPerson
-import no.nav.helse.serde.reflection.createSykdomshistorikk
-import no.nav.helse.serde.reflection.createSykdomshistorikkElement
-import no.nav.helse.serde.reflection.createUtbetalingstidslinje
-import no.nav.helse.serde.reflection.createVedtaksperiode
+import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.sykdomstidslinje.dag.Feriedag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.sykdomstidslinje.dag.JsonDagType
-import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.dag.Studiedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
-import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -47,7 +23,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -72,27 +48,6 @@ class DataClassModelBuilder(private val json: String) {
             aktivitetslogger = aktivitetslogger
         )
     }
-
-    private fun konverterTilAktivitetslogger(aktivitetsloggerData: AktivitetsloggerData): Aktivitetslogger {
-        val aktivitetslogger = Aktivitetslogger(aktivitetsloggerData.originalMessage)
-
-        val aktivitetClass: ReflectClass = getNestedClass<Aktivitetslogger>("Aktivitet")
-        val alvorlighetsgradClass: ReflectClass = getNestedClass<Aktivitetslogger>("Alvorlighetsgrad")
-
-        val aktiviteter = aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter")
-        aktivitetsloggerData.aktiviteter.forEach {
-            aktiviteter.add(
-                aktivitetClass.getInstance(
-                    alvorlighetsgradClass.getEnumValue(it.alvorlighetsgrad.name),
-                    it.melding,
-                    it.tidsstempel
-                )
-            )
-        }
-
-        return aktivitetslogger
-    }
-
 
     private fun konverterTilArbeidsgiver(
         personData: PersonData,
