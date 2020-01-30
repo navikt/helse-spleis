@@ -11,6 +11,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -136,7 +137,7 @@ class ModelInntektsmelding(
         )
     }
 
-    internal fun valider(): Aktivitetslogger {
+    override fun valider(): Aktivitetslogger {
         if (!ingenOverlappende()) aktivitetslogger.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
         if (refusjon == null) aktivitetslogger.error("Arbeidsgiver forskutterer ikke")
         else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.error("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
@@ -154,8 +155,13 @@ class ModelInntektsmelding(
     override fun fødselsnummer() = fødselsnummer
 
     override fun organisasjonsnummer() = orgnummer
+
     override fun accept(visitor: PersonVisitor) {
         visitor.visitInntektsmeldingHendelse(this)
+    }
+
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
+        arbeidsgiver?.håndter(this)
     }
 
     override fun toJson(): String = objectMapper.writeValueAsString(

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.ValidationStep
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -66,7 +67,7 @@ class ModelNySøknad(
 
     override fun kanBehandles() = !valider().hasErrors()
 
-    fun valider(): Aktivitetslogger {
+    override fun valider(): Aktivitetslogger {
         if (!hundreProsentSykmeldt()) aktivitetslogger.error("Støtter bare 100%% sykmeldt")
         return aktivitetslogger
     }
@@ -105,8 +106,8 @@ class ModelNySøknad(
         visitor.visitNySøknadHendelse(this)
     }
 
-    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
-        aktivitetslogger.continueIfNoErrors(*steps) { onError() }
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
+        arbeidsgiver?.håndter(this)
     }
 
     private inner class Sykeperiode(

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.util.*
@@ -22,7 +23,11 @@ abstract class SykdomstidslinjeHendelse(
 
     abstract fun toJson(): String
 
+    abstract internal fun valider(): Aktivitetslogger
+
     internal abstract fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger)
+
+    internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?)
 
     companion object Builder {
         private val objectMapper = jacksonObjectMapper()

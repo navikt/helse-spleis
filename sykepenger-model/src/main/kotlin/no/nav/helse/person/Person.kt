@@ -6,14 +6,9 @@ import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation
+import no.nav.helse.hendelser.ValiderSykdomshendelse
 import no.nav.helse.hendelser.Valideringssteg
 import java.util.UUID
 
@@ -39,38 +34,12 @@ class Person private constructor(
         registrer(nySøknad, "Behandler ny søknad")
         Validation(nySøknad).also {
             it.onError { invaliderAllePerioder(nySøknad) }
-            it.valider { ValiderNySøknad(nySøknad) }
+            it.valider { ValiderSykdomshendelse(nySøknad) }
             val arbeidsgiver = finnEllerOpprettArbeidsgiver2(nySøknad)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { HåndterNySøknad(nySøknad, arbeidsgiver) }
+            it.valider { HåndterHendelse(nySøknad, arbeidsgiver) }
         }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
-    }
-
-    private inner class ValiderNySøknad(private val nySøknad: ModelNySøknad) : Valideringssteg {
-        override fun isValid() =
-            !nySøknad.valider().hasErrors()
-
-        override fun feilmelding() = "Kunne ikke validere ny søknad"
-    }
-
-    private inner class ValiderKunEnArbeidsgiver(
-        private val arbeidsgivere: List<Arbeidsgiver>
-    ) : Valideringssteg {
-        override fun isValid() = arbeidsgivere.size == 1
-        override fun feilmelding() = "Bruker har mer enn en arbeidsgiver"
-    }
-
-    private inner class HåndterNySøknad(
-        private val nySøknad: ModelNySøknad,
-        private val arbeidsgiver: Arbeidsgiver?
-    ) : Valideringssteg {
-        override fun isValid(): Boolean {
-            arbeidsgiver?.håndter(nySøknad)
-            return !nySøknad.hasErrors()
-        }
-
-        override fun feilmelding() = "Kunne ikke validere håndtering av ny søknad"
     }
 
     private fun finnEllerOpprettArbeidsgiver2(hendelse: ArbeidstakerHendelse) =
