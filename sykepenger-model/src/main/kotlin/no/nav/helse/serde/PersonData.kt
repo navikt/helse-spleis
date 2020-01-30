@@ -18,11 +18,11 @@ import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.ReflectClass
 import no.nav.helse.serde.reflection.ReflectClass.Companion.getNestedClass
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.serde.reflection.create.ReflectionCreationHelper
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createPerson
 import no.nav.helse.serde.reflection.createSykdomshistorikk
 import no.nav.helse.serde.reflection.createSykdomshistorikkElement
+import no.nav.helse.serde.reflection.createUtbetalingstidslinje
 import no.nav.helse.serde.reflection.createVedtaksperiode
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -39,7 +39,10 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -111,11 +114,46 @@ class DataClassModelBuilder(private val json: String) {
             data.organisasjonsnummer,
             data.id,
             inntekthistorikk,
-            mutableListOf(),
+            data.utbetalingstidslinjer.map(::konverterTilUtbetalingslinje).toMutableList(),
             vedtaksperioder.toMutableList(),
             mutableListOf(),
-            Aktivitetslogger()
+            konverterTilAktivitetslogger(data.aktivitetslogger)
         )
+    }
+
+    private fun konverterTilUtbetalingslinje(data: List<ArbeidsgiverData.UtbetalingsdagData>): Utbetalingstidslinje {
+        return createUtbetalingstidslinje(data.map {
+            when (it.type) {
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.ArbeidsgiverperiodeDag -> {
+                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.NavDag -> {
+                    Utbetalingsdag.NavDag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.NavHelgDag -> {
+                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.Arbeidsdag -> {
+                    Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.Fridag -> {
+                    Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.AvvistDag -> {
+                    Utbetalingsdag.AvvistDag(
+                        inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
+                            ArbeidsgiverData.UtbetalingsdagData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
+                            ArbeidsgiverData.UtbetalingsdagData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
+                            null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
+                        }
+                    )
+                }
+                ArbeidsgiverData.UtbetalingsdagData.TypeData.UkjentDag -> {
+                    Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
+                }
+            }
+        }
+            .toMutableList())
     }
 
     private fun parseVedtaksperiode(
@@ -139,16 +177,19 @@ class DataClassModelBuilder(private val json: String) {
             inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
             dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
             sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk, hendelser),
-            aktivitetslogger =  konverterTilAktivitetslogger(data.aktivitetslogger)
+            aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
         )
     }
 
     private fun parseSykdomstidslinje(
         tidslinjeData: SykdomstidslinjeData,
         hendelser: List<ArbeidstakerHendelse>
-    ): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map{ parseDag(it, hendelser) })
+    ): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map { parseDag(it, hendelser) })
 
-    private fun parseDag(data: ArbeidsgiverData.VedtaksperiodeData.DagData, hendelser: List<ArbeidstakerHendelse>): Dag {
+    private fun parseDag(
+        data: ArbeidsgiverData.VedtaksperiodeData.DagData,
+        hendelser: List<ArbeidstakerHendelse>
+    ): Dag {
         val hendelse = hendelser.find { it.hendelseId() == data.hendelseId } as SykdomstidslinjeHendelse
         val dag: Dag = when (data.type) {
             JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, hendelse)
@@ -200,9 +241,16 @@ class DataClassModelBuilder(private val json: String) {
         return createSykdomshistorikk(data.map { sykdomshistorikkData ->
             createSykdomshistorikkElement(
                 timestamp = sykdomshistorikkData.tidsstempel,
-                hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje, hendelser),
-                beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje, hendelser),
-                hendelse = hendelser.find { it.hendelseId() == sykdomshistorikkData.hendelseId } as SykdomstidslinjeHendelse) }
+                hendelseSykdomstidslinje = parseSykdomstidslinje(
+                    sykdomshistorikkData.hendelseSykdomstidslinje,
+                    hendelser
+                ),
+                beregnetSykdomstidslinje = parseSykdomstidslinje(
+                    sykdomshistorikkData.beregnetSykdomstidslinje,
+                    hendelser
+                ),
+                hendelse = hendelser.find { it.hendelseId() == sykdomshistorikkData.hendelseId } as SykdomstidslinjeHendelse)
+        }
         )
     }
 
@@ -402,7 +450,7 @@ internal data class PersonData(
         val id: UUID,
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
-        val utbetalingstidslinjer: List<Any>, // TODO
+        val utbetalingstidslinjer: List<List<UtbetalingsdagData>>,
         val aktivitetslogger: AktivitetsloggerData
     ) {
         data class InntektData(
@@ -450,6 +498,28 @@ internal data class PersonData(
                 val tom: LocalDate,
                 val dagsats: Int
             )
+        }
+
+        data class UtbetalingsdagData(
+            val type: TypeData,
+            val dato: LocalDate,
+            val inntekt: Double,
+            val begrunnelse: BegrunnelseData?
+        ) {
+            enum class BegrunnelseData {
+                SykepengedagerOppbrukt,
+                MinimumInntekt
+            }
+
+            enum class TypeData {
+                ArbeidsgiverperiodeDag,
+                NavDag,
+                NavHelgDag,
+                Arbeidsdag,
+                Fridag,
+                AvvistDag,
+                UkjentDag
+            }
         }
     }
 

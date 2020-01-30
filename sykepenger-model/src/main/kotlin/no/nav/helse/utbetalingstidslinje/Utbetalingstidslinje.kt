@@ -191,7 +191,7 @@ internal class Utbetalingstidslinje private constructor(
                 last.tom = dato
             }
 
-            internal fun avvistDag(begrunnelse: Begrunnelse) = AvvistDag(dato, begrunnelse)
+            internal fun avvistDag(begrunnelse: Begrunnelse) = AvvistDag(dato = dato, begrunnelse = begrunnelse)
         }
 
         internal class NavHelgDag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(0.0, dato) {
@@ -202,7 +202,7 @@ internal class Utbetalingstidslinje private constructor(
             }
         }
 
-        internal class Arbeidsdag(inntekt: Double, dagen: LocalDate) : Utbetalingsdag(inntekt, dagen) {
+        internal class Arbeidsdag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(inntekt, dato) {
             override val prioritet = 20
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsdag(this)
         }
@@ -212,7 +212,7 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitFridag(this)
         }
 
-        internal class AvvistDag(dato: LocalDate, internal val begrunnelse: Begrunnelse, inntekt: Double = 0.0) :
+        internal class AvvistDag(inntekt: Double = 0.0, dato: LocalDate, internal val begrunnelse: Begrunnelse) :
             Utbetalingsdag(inntekt, dato) {
             override val prioritet = 60
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitAvvistDag(this)

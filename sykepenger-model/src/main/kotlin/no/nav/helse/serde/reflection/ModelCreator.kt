@@ -79,3 +79,9 @@ internal fun createSykdomshistorikkElement(
 ) = Sykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje, hendelse)
+
+internal fun createUtbetalingstidslinje(
+    utbetalingsdager: MutableList<Utbetalingstidslinje.Utbetalingsdag>
+) = Utbetalingstidslinje::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(utbetalingsdager)
