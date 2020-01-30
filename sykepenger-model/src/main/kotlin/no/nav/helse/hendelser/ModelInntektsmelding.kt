@@ -168,7 +168,7 @@ class ModelInntektsmelding(
         objectMapper.convertValue<ObjectNode>(
             mapOf(
                 "hendelseId" to hendelseId(),
-                "type" to hendelsetype()
+                "type" to hendelsestype()
             )
         ).putRawValue("inntektsmelding", RawValue(originalJson))
     )

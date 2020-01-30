@@ -122,7 +122,7 @@ class ModelSendtSøknad(
     override fun toJson(): String = objectMapper.writeValueAsString(
         mapOf(
             "hendelseId" to hendelseId(),
-            "type" to hendelsetype(),
+            "type" to hendelsestype(),
             "søknad" to objectMapper.readTree(originalJson)
         )
     )

@@ -9,7 +9,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellSaksbehandling) {
     private val hendelseId: UUID = manuellSaksbehandling.hendelseId()
-    private val hendelsestype: Hendelsestype = manuellSaksbehandling.hendelsetype()
+    private val hendelsestype: Hendelsestype = manuellSaksbehandling.hendelsestype()
     private val aktørId: String = manuellSaksbehandling["aktørId"]
     private val fødselsnummer: String = manuellSaksbehandling["fødselsnummer"]
     private val organisasjonsnummer: String = manuellSaksbehandling["organisasjonsnummer"]

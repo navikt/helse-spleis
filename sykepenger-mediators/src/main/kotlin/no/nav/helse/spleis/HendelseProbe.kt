@@ -52,6 +52,6 @@ class HendelseProbe {
     }
 
     private fun ArbeidstakerHendelse.tell() {
-        hendelseCounter.labels(this.hendelsetype().name).inc()
+        hendelseCounter.labels(this.hendelsestype().name).inc()
     }
 }

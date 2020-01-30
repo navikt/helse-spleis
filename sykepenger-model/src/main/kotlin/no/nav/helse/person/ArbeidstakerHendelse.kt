@@ -21,7 +21,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     }
 
     fun hendelseId() = hendelseId
-    fun hendelsetype() = hendelsestype
+    fun hendelsestype() = hendelsestype
 
     open fun kanBehandles() = true
 

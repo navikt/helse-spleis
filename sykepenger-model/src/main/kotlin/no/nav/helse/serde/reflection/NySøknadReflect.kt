@@ -10,7 +10,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class NySøknadReflect(nySøknad: ModelNySøknad) {
     private val hendelseId: UUID = nySøknad.hendelseId()
-    private val hendelsestype: Hendelsestype = nySøknad.hendelsetype()
+    private val hendelsestype: Hendelsestype = nySøknad.hendelsestype()
     private val fnr: String = nySøknad["fnr"]
     private val aktørId: String = nySøknad["aktørId"]
     private val orgnummer: String = nySøknad["orgnummer"]

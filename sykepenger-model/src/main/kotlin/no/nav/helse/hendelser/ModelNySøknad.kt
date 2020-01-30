@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.ValidationStep
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -97,7 +96,7 @@ class ModelNySøknad(
     override fun toJson(): String = objectMapper.writeValueAsString(
         mapOf(
             "hendelseId" to hendelseId(),
-            "type" to hendelsetype(),
+            "type" to hendelsestype(),
             "søknad" to objectMapper.readTree(originalJson)
         )
     )

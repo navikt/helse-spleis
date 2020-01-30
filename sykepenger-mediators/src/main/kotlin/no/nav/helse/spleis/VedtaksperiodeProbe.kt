@@ -67,13 +67,13 @@ object VedtaksperiodeProbe : PersonObserver {
         tilstandCounter.labels(
             event.forrigeTilstand.name,
             event.gjeldendeTilstand.name,
-            event.sykdomshendelse.hendelsetype().name
+            event.sykdomshendelse.hendelsestype().name
         ).inc()
 
         log.info(
             "vedtaksperiode endret {}, {}, {}, {}",
             keyValue("vedtaksperiodeId", "${event.id}"),
-            keyValue("hendelse", event.sykdomshendelse.hendelsetype().name),
+            keyValue("hendelse", event.sykdomshendelse.hendelsestype().name),
             keyValue("tilstand", event.gjeldendeTilstand.name),
             keyValue("forrigeTilstand", event.forrigeTilstand.name)
         )
@@ -96,6 +96,6 @@ object VedtaksperiodeProbe : PersonObserver {
     }
 
     fun utenforOmfang(hendelse: ArbeidstakerHendelse) {
-        utenforOmfangCounter.labels(hendelse.hendelsetype().name).inc()
+        utenforOmfangCounter.labels(hendelse.hendelsestype().name).inc()
     }
 }

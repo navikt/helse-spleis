@@ -9,7 +9,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
     private val hendelseId: UUID = vilkårsgrunnlag.hendelseId()
-    private val hendelsestype: Hendelsestype = vilkårsgrunnlag.hendelsetype()
+    private val hendelsestype: Hendelsestype = vilkårsgrunnlag.hendelsestype()
     private val vedtaksperiodeId: String = vilkårsgrunnlag["vedtaksperiodeId"]
     private val aktørId: String = vilkårsgrunnlag["aktørId"]
     private val fødselsnummer: String = vilkårsgrunnlag["fødselsnummer"]

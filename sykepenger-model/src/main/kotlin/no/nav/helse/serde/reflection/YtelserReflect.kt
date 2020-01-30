@@ -11,7 +11,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class YtelserReflect(ytelser: ModelYtelser) {
     private val hendelseId: UUID = ytelser.hendelseId()
-    private val hendelsestype: Hendelsestype = ytelser.hendelsetype()
+    private val hendelsestype: Hendelsestype = ytelser.hendelsestype()
     private val aktørId: String = ytelser["aktørId"]
     private val fødselsnummer: String = ytelser["fødselsnummer"]
     private val organisasjonsnummer: String = ytelser["organisasjonsnummer"]
