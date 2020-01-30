@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.februar
@@ -53,9 +52,15 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie eldre enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(181)
-        håndterYtelser(utbetalinger = listOf(
-            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
-        ))
+        håndterYtelser(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    sisteHistoriskeSykedag.minusDays(14),
+                    sisteHistoriskeSykedag,
+                    1000
+                )
+            )
+        )
 
         assertTilstand(TilstandType.TIL_GODKJENNING)
     }
@@ -63,9 +68,15 @@ internal class YtelserHendelseTest {
     @Test
     fun `historie nyere enn 6 måneder`() {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(180)
-        håndterYtelser(utbetalinger = listOf(
-            ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(sisteHistoriskeSykedag.minusDays(14), sisteHistoriskeSykedag, 1000)
-        ))
+        håndterYtelser(
+            utbetalinger = listOf(
+                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    sisteHistoriskeSykedag.minusDays(14),
+                    sisteHistoriskeSykedag,
+                    1000
+                )
+            )
+        )
 
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
@@ -120,8 +131,80 @@ internal class YtelserHendelseTest {
         assertTilstand(TilstandType.TIL_GODKJENNING)
     }
 
+    @Test
+    fun `opphør av refusjon i perioden`() {
+        håndterYtelser(
+            ModelInntektsmelding.Refusjon(
+                opphørsdato = sisteSykedag,
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = emptyList()
+            )
+        )
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+
+    @Test
+    fun `opphør av refusjon etter perioden`() {
+        håndterYtelser(
+            ModelInntektsmelding.Refusjon(
+                opphørsdato = sisteSykedag.plusDays(1),
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = emptyList()
+            )
+        )
+        assertTilstand(TilstandType.TIL_GODKJENNING)
+    }
+
+    @Test
+    fun `endring i refusjon i periode`() {
+        håndterYtelser(
+            ModelInntektsmelding.Refusjon(
+                opphørsdato = null,
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = listOf(sisteSykedag)
+            )
+        )
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `endring i refusjon før periode`() {
+        håndterYtelser(
+            ModelInntektsmelding.Refusjon(
+                opphørsdato = null,
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = listOf(førsteSykedag.minusDays(1))
+            )
+        )
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `endring i refusjon etter periode`() {
+        håndterYtelser(
+            ModelInntektsmelding.Refusjon(
+                opphørsdato = null,
+                beløpPrMåned = 1000.0,
+                endringerIRefusjon = listOf(sisteSykedag.plusDays(1))
+            )
+        )
+        assertTilstand(TilstandType.TIL_GODKJENNING)
+    }
+
     private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(expectedTilstand, inspektør.tilstand(0)) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        assertEquals(
+            expectedTilstand,
+            inspektør.tilstand(0)
+        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+    }
+
+    private fun håndterYtelser(refusjon: ModelInntektsmelding.Refusjon) {
+        person.håndter(nySøknad())
+        person.håndter(sendtSøknad())
+        person.håndter(inntektsmelding(refusjon = refusjon))
+        person.håndter(vilkårsgrunnlag())
+        person.håndter(ytelser())
     }
 
     private fun håndterYtelser(
@@ -191,10 +274,16 @@ internal class YtelserHendelseTest {
             aktivitetslogger = Aktivitetslogger()
         )
 
-    private fun inntektsmelding() =
+    private fun inntektsmelding(
+        refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
+            null,
+            1000.0,
+            emptyList()
+        )
+    ) =
         ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 1000.0, emptyList()),
+            refusjon = refusjon,
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -216,9 +305,11 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(YearMonth.of(2018, it), listOf(
-                    ModelVilkårsgrunnlag.Inntekt(1000.0)
-                ))
+                ModelVilkårsgrunnlag.Måned(
+                    YearMonth.of(2018, it), listOf(
+                        ModelVilkårsgrunnlag.Inntekt(1000.0)
+                    )
+                )
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger()
