@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Validation
 import no.nav.helse.hendelser.ValiderKunEnArbeidsgiver
 import no.nav.helse.hendelser.ValiderSykdomshendelse
 import java.util.UUID
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 private const val CURRENT_SKJEMA_VERSJON = 3
 
@@ -30,40 +31,22 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(nySøknad: ModelNySøknad) {
-        registrer(nySøknad, "Behandler ny søknad")
-        Validation(nySøknad).also {
-            it.onError { invaliderAllePerioder(nySøknad) }
-            it.valider { ValiderSykdomshendelse(nySøknad) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver(nySøknad)
-            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { ArbeidsgiverHåndterHendelse(nySøknad, arbeidsgiver) }
-        }
-        nySøknad.kopierAktiviteterTil(aktivitetslogger)
-    }
+    fun håndter(nySøknad: ModelNySøknad) = håndter(nySøknad, "ny søknad")
 
-    fun håndter(sendtSøknad: ModelSendtSøknad) {
-        registrer(sendtSøknad, "Behandler sendt søknad")
-        Validation(sendtSøknad).also {
-            it.onError { invaliderAllePerioder(sendtSøknad) }
-            it.valider { ValiderSykdomshendelse(sendtSøknad) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver(sendtSøknad)
-            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { ArbeidsgiverHåndterHendelse(sendtSøknad, arbeidsgiver) }
-        }
-        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
-    }
+    fun håndter(sendtSøknad: ModelSendtSøknad) = håndter(sendtSøknad, "sendt søknad")
 
-    fun håndter(inntektsmelding: ModelInntektsmelding) {
-        registrer(inntektsmelding, "Behandler inntektsmelding")
-        Validation(inntektsmelding).also {
-            it.onError { invaliderAllePerioder(inntektsmelding) }
-            it.valider { ValiderSykdomshendelse(inntektsmelding) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
+    fun håndter(inntektsmelding: ModelInntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
+
+    private fun håndter(hendelse: SykdomstidslinjeHendelse, hendelsesmelding: String) {
+        registrer(hendelse, "Behandler $hendelsesmelding")
+        Validation(hendelse).also {
+            it.onError { invaliderAllePerioder(hendelse) }
+            it.valider { ValiderSykdomshendelse(hendelse) }
+            val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { ArbeidsgiverHåndterHendelse(inntektsmelding, arbeidsgiver) }
+            it.valider { ArbeidsgiverHåndterHendelse(hendelse, arbeidsgiver, this) }
         }
-        inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
+        hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(ytelser: ModelYtelser) {

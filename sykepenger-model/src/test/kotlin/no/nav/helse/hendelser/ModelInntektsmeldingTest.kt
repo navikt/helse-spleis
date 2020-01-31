@@ -32,7 +32,6 @@ internal class ModelInntektsmeldingTest {
         assertEquals(Egenmeldingsdag::class, tidslinje.dag(2.januar)!!::class)
         assertEquals(Egenmeldingsdag::class, tidslinje.dag(4.januar)!!::class)
         assertEquals(Egenmeldingsdag::class, tidslinje.dag(5.januar)!!::class)
-        assertEquals(Uke(1).torsdag, tidslinje.utgangspunktForBeregningAvYtelse())
     }
 
     @Test
@@ -40,12 +39,6 @@ internal class ModelInntektsmeldingTest {
         inntektsmelding(emptyList(), listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
         val sykdomstidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, sykdomstidslinje.førsteDag())
-        assertThrows<IllegalStateException> {
-            assertEquals(
-                1.januar,
-                sykdomstidslinje.utgangspunktForBeregningAvYtelse()
-            )
-        }
     }
 
     @Test
@@ -63,7 +56,6 @@ internal class ModelInntektsmeldingTest {
     internal fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
         assertEquals(2.januar, inntektsmelding.sykdomstidslinje().førsteDag())
-        assertEquals(2.januar, inntektsmelding.sykdomstidslinje().utgangspunktForBeregningAvYtelse())
         assertEquals(2.januar, inntektsmelding.sykdomstidslinje().sisteDag())
     }
 
@@ -72,7 +64,6 @@ internal class ModelInntektsmeldingTest {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), listOf(Periode(17.januar, 18.januar)))
 
         assertEquals(1.januar, inntektsmelding.sykdomstidslinje().førsteDag())
-        assertEquals(1.januar, inntektsmelding.sykdomstidslinje().utgangspunktForBeregningAvYtelse())
         assertEquals(18.januar, inntektsmelding.sykdomstidslinje().sisteDag())
         assertEquals(18, inntektsmelding.sykdomstidslinje().flatten().size)
     }

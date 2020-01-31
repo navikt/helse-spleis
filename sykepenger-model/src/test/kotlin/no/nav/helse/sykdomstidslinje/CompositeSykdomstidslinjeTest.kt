@@ -49,7 +49,6 @@ internal class CompositeSykdomstidslinjeTest {
         val interval = andreInterval + førsteInterval
 
         assertEquals(Uke(1).mandag, interval.førsteDag())
-        assertEquals(Uke(1).fredag, interval.utgangspunktForBeregningAvYtelse())
         assertEquals(Uke(2).mandag, interval.sisteDag())
         assertEquals(8, interval.flatten().size)
     }

@@ -25,8 +25,9 @@ import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
@@ -112,6 +113,11 @@ internal class Vedtaksperiode private constructor(
         inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
 
     private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
+
+    private fun periode() = Periode(
+        sykdomshistorikk.sykdomstidslinje().førsteDag(),
+        sykdomshistorikk.sykdomstidslinje().sisteDag()
+    )
 
     internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
         if (it) tilstand.håndter(this, nySøknad)
@@ -208,7 +214,7 @@ internal class Vedtaksperiode private constructor(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                utgangspunktForBeregningAvYtelse = sykdomstidslinje.utgangspunktForBeregningAvYtelse().minusDays(1)
+                utgangspunktForBeregningAvYtelse = sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
             )
         )
     }
@@ -346,7 +352,6 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_NY_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)
-
     }
 
     internal object MottattSendtSøknad : Vedtaksperiodetilstand {
@@ -361,7 +366,6 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SENDT_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)
-
     }
 
     internal object MottattInntektsmelding : Vedtaksperiodetilstand {
@@ -434,69 +438,48 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: ModelYtelser
         ) {
-            fun onError() {
-                vedtaksperiode.tilstand(ytelser, TilInfotrygd)
-            }
-
-            fun overlappendeForeldrepenger(): ValidationStep = {
-                ytelser.foreldrepenger().overlapperMedSyketilfelle(
-                    Periode(
-                        vedtaksperiode.sykdomstidslinje.førsteDag(),
-                        vedtaksperiode.sykdomstidslinje.sisteDag()
+            Validation(ytelser).also { it ->
+                it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
+                val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
+                it.valider { GapPå26Uker(vedtaksperiode.sykdomshistorikk.sykdomstidslinje(), sisteHistoriskeSykedag) }
+                it.valider {
+                    HarInntektshistorikk(
+                        arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
                     )
-                ).also { ytelser.foreldrepenger().kopierAktiviteterTil(vedtaksperiode.aktivitetslogger) }
-            }
-
-            fun harFraværsdagInnen6Mnd(): ValidationStep = {
-                ytelser.validerFraværsdagInnen6Mnd(vedtaksperiode.sykdomstidslinje)
-                    .also { ytelser.kopierAktiviteterTil(vedtaksperiode.aktivitetslogger) }
-            }
-
-            var dagsats: Int? = null
-            fun validerDagsats(): ValidationStep = {
-                dagsats = vedtaksperiode.dagsats().also {
-                    if (it == null) vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+                }
+                it.valider { HarArbeidsgivertidslinje(arbeidsgiver) }
+                val utbetalingslinje = utbetalingstidslinje(arbeidsgiver, vedtaksperiode, sisteHistoriskeSykedag)
+                var engineForTimeline: ByggUtbetalingstidlinjer? = null
+                it.valider {
+                    ByggUtbetalingstidlinjer(
+                        mapOf(arbeidsgiver to utbetalingslinje),
+                        ytelser,
+                        Alder(vedtaksperiode.fødselsnummer)
+                    ).also { engineForTimeline = it }
+                }
+                var engineForLine: ByggUtbetalingslinjer? = null
+                it.valider { ByggUtbetalingslinjer(ytelser, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
+                it.onSuccess {
+                    vedtaksperiode.maksdato = engineForTimeline?.maksdato()
+                    vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
+                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                 }
             }
+        }
 
-            var utbetalingsberegning: Utbetalingsberegning? = null
-            fun validerUtbetalingsberegning(): ValidationStep = {
-                utbetalingsberegning = dagsats!!.let {
-                    try {
-                        vedtaksperiode.sykdomstidslinje.utbetalingsberegning(it, vedtaksperiode.fødselsnummer)
-                    } catch (ie: IllegalArgumentException) {
-                        vedtaksperiode.aktivitetslogger.severe("Kunne ikke beregne utbetaling: ${ie.message}. Sender saken til Infotrygd")
-                    }
-                }
-            }
-
-            fun validerInntektFraInntektsmelding(): ValidationStep = {
-                val sisteUtbetalingsdag = utbetalingsberegning!!.utbetalingslinjer.lastOrNull()?.tom
-                    ?: vedtaksperiode.aktivitetslogger.severe("Mangler siste utbetalingsdag")
-                val inntektsmelding =
-                    if (vedtaksperiode.inntektsmeldingHendelse() == null) vedtaksperiode.aktivitetslogger.severe(
-                        "Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)"
-                    ) else vedtaksperiode.inntektsmeldingHendelse()!!
-                if (inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag)) {
-                    vedtaksperiode.aktivitetslogger.error("Inntektsmelding har endringer i refusjon, sender saken til Infotrygd")
-                }
-            }
-
-            vedtaksperiode.continueIfNoErrors(
-                overlappendeForeldrepenger(),
-                harFraværsdagInnen6Mnd(),
-                validerDagsats(),
-                validerUtbetalingsberegning(),
-                validerInntektFraInntektsmelding()
-            ) { onError() }
-
-            if (!vedtaksperiode.aktivitetslogger.hasErrors()) {
-                vedtaksperiode.tilstand(ytelser, TilGodkjenning) {
-                    vedtaksperiode.maksdato = utbetalingsberegning!!.maksdato
-                    vedtaksperiode.utbetalingslinjer = utbetalingsberegning!!.utbetalingslinjer
-                    vedtaksperiode.aktivitetslogger.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
-                }
-            }
+        private fun utbetalingstidslinje(
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            sisteHistoriskeSykedag: LocalDate?
+        ): Utbetalingstidslinje {
+            return UtbetalingstidslinjeBuilder(
+                sykdomstidslinje = arbeidsgiver.sykdomstidslinje()!!,
+                sisteDag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag(),
+                inntekthistorikk = arbeidsgiver.inntektshistorikk(),
+                sisteNavDagForArbeidsgiverFørPerioden = sisteHistoriskeSykedag,
+                arbeidsgiverRegler = NormalArbeidstaker
+            ).result()
         }
     }
 

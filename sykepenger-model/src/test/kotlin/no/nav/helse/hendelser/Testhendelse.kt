@@ -1,9 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.IAktivitetslogger
-import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -46,7 +43,7 @@ internal class Testhendelse(
         TODO("not implemented")
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

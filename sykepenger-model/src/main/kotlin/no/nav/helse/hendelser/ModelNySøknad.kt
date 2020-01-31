@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -105,8 +106,8 @@ class ModelNySøknad(
         visitor.visitNySøknadHendelse(this)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver?) {
-        arbeidsgiver?.håndter(this, arbeidsgiver)
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person) {
+        arbeidsgiver.håndter(this, person)
     }
 
     private inner class Sykeperiode(

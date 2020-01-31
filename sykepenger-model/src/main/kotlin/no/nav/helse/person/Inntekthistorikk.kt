@@ -22,6 +22,12 @@ internal class Inntekthistorikk {
 
     private val inntekter = mutableListOf<Inntekt>()
 
+    internal fun clone(): Inntekthistorikk {
+        return Inntekthistorikk().also {
+            it.inntekter.addAll(this.inntekter)
+        }
+    }
+
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitInntekthistorikk(this)
 

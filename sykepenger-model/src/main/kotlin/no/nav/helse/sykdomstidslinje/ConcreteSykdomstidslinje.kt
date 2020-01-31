@@ -36,13 +36,6 @@ internal interface SykdomstidslinjeElement {
 }
 
 internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
-    // Første fraværsdag i den siste sammenhengende perioden
-    fun utgangspunktForBeregningAvYtelse(): LocalDate {
-        val visitor = UtgangspunktForBeregningAvYtelseVisitor()
-        accept(visitor)
-        return visitor.utgangspunktForBeregningAvYtelse()
-    }
-
     abstract fun førsteDag(): LocalDate
     abstract fun sisteDag(): LocalDate
     abstract fun hendelser(): Set<SykdomstidslinjeHendelse>

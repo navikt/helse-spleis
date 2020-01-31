@@ -33,9 +33,9 @@ internal class ArbeidsgiverTest {
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
-
+        val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver("12345678")
-        arbeidsgiver.håndter(inntektsmelding, arbeidsgiver)
+        arbeidsgiver.håndter(inntektsmelding, person)
         assertTrue(inntektsmelding.hasErrors())
 
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
