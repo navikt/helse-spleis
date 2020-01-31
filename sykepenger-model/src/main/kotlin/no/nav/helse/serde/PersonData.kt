@@ -60,13 +60,18 @@ fun parsePerson(json: String): Person {
     val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(personData, it, hendelser) }
     val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
 
-    return createPerson(
+    val person = createPerson(
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
         arbeidsgivere = arbeidsgivere.toMutableList(),
         hendelser = hendelser.toMutableList(),
         aktivitetslogger = aktivitetslogger
     )
+
+    arbeidsgivere.forEach {
+        it.addObserver(person)
+    }
+    return person
 }
 
 private fun konverterTilArbeidsgiver(

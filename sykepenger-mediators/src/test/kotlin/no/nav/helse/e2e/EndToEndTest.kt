@@ -80,7 +80,6 @@ import java.util.Properties
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 
-@Disabled
 internal class EndToEndTest {
 
     private companion object {
@@ -280,11 +279,12 @@ internal class EndToEndTest {
             typer = listOf(GodkjenningFraSaksbehandler.name)
         )
 
-        aktørID.hentPerson {
-            assertTrue(this.contains("maksdato"))
-            assertTrue(this.contains("utbetalingslinjer"))
-            assertTrue(this.contains("dagsats"))
-        }
+        // TODO: Trenger å implementerer api for å eksponere person til speil
+//        aktørID.hentPerson {
+//            assertTrue(this.contains("maksdato"))
+//            assertTrue(this.contains("utbetalingslinjer"))
+//            assertTrue(this.contains("dagsats"))
+//        }
     }
 
     @Disabled("Søk opp: B803FB72-7BC7-486B-B21A-FBE5EA84C127")
@@ -328,6 +328,7 @@ internal class EndToEndTest {
         }
     }
 
+    @Disabled("Må implementere api for speil")
     @Test
     fun `gitt en ny søknad, så skal den kunne hentes ut på personen`() {
         val enAktørId = "1211109876543"
