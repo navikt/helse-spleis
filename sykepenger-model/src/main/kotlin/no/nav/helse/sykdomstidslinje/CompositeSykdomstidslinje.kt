@@ -1,9 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.JsonDag
 import java.time.LocalDate
-import java.util.*
 
 internal class CompositeSykdomstidslinje internal constructor(
     tidslinjer: List<ConcreteSykdomstidslinje>
@@ -37,13 +34,4 @@ internal class CompositeSykdomstidslinje internal constructor(
     override fun sisteDag() = tidslinje.last().dagen
 
     override fun toString() = tidslinje.joinToString(separator = "\n") { it.toString() }
-
-    companion object {
-        internal fun fromJsonRepresentation(
-            jsonDager: List<JsonDag>,
-            hendelseMap: Map<UUID, SykdomstidslinjeHendelse>
-        ): CompositeSykdomstidslinje {
-            return CompositeSykdomstidslinje(jsonDager.map { Dag.fromJsonRepresentation(it, hendelseMap) })
-        }
-    }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -10,8 +9,6 @@ import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.sykdomstidslinje.dag.JsonDag
-import no.nav.helse.sykdomstidslinje.dag.JsonDagType
 import no.nav.helse.sykdomstidslinje.dag.JsonTidslinje
 import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.dag.Studiedag
@@ -25,7 +22,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -56,8 +52,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun sisteHendelse(): SykdomstidslinjeHendelse
 
     internal abstract fun dag(dato: LocalDate): Dag?
-
-    fun toJson(): String = objectMapper.writeValueAsString(jsonRepresentation())
 
     fun plus(
         other: ConcreteSykdomstidslinje,
@@ -143,7 +137,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun jsonRepresentation(): JsonTidslinje {
         val dager = flatten().map { it.toJsonDag() }
-        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }.map { objectMapper.readTree(it.toJson()) }
+        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }
+            .map { objectMapper.readTree(it.toJson()) }
         return JsonTidslinje(dager = dager, hendelser = hendelser)
     }
 
@@ -320,34 +315,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                     .toList())
         }
 
-        fun fromJson(json: String): ConcreteSykdomstidslinje {
-            val jsonTidslinje = objectMapper.readTree(json)
-
-            val map = gruppererHendelserPrHendelsesId(jsonTidslinje["hendelser"])
-            val dager = jsonTidslinje["dager"].map { jsonDagFromJson(it) }
-
-            return CompositeSykdomstidslinje.fromJsonRepresentation(dager, map)
-        }
-
         private fun beste(a: Dag?, b: Dag?): Dag? {
             if (a == null) return b
             if (b == null) return a
             return a.beste(b)
-        }
-
-        private fun jsonDagFromJson(it: JsonNode): JsonDag {
-            return JsonDag(
-                JsonDagType.valueOf(it["type"].asText()),
-                LocalDate.parse(it["dato"].asText()),
-                UUID.fromString(it["hendelseId"].asText()),
-                it["erstatter"].map { jsonDagFromJson(it) })
-        }
-
-
-        private fun gruppererHendelserPrHendelsesId(json: JsonNode): Map<UUID, SykdomstidslinjeHendelse> {
-            return json.map { SykdomstidslinjeHendelse.fromJson(it.toString()) }
-                .groupBy(keySelector = { it.hendelseId() })
-                .mapValues { (_, v) -> v.first() }
         }
     }
 }

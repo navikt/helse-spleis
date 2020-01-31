@@ -1,6 +1,5 @@
 package no.nav.helse.component
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -17,15 +16,21 @@ import no.nav.helse.september
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class PersonPersisteringPostgresTest {
 
@@ -34,7 +39,6 @@ class PersonPersisteringPostgresTest {
         private lateinit var postgresConnection: Connection
 
         private lateinit var hikariConfig: HikariConfig
-        private val objectMapper = jacksonObjectMapper()
 
         @BeforeAll
         @JvmStatic
@@ -85,8 +89,6 @@ class PersonPersisteringPostgresTest {
 
         val hentetPerson = repo.hentPerson("2")
         assertNotNull(hentetPerson)
-        val parsedHentetPerson = objectMapper.readTree(hentetPerson!!.memento().state())
-        assertEquals("fnr", parsedHentetPerson["fødselsnummer"].textValue())
     }
 
     @Test
@@ -97,43 +99,50 @@ class PersonPersisteringPostgresTest {
         val person = Person(aktørId, "fnr")
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknad(aktørId))
-        person.håndter(ModelSendtSøknad(
-            hendelseId = UUID.randomUUID(),
-            fnr = "fnr",
-            aktørId = aktørId,
-            orgnummer = "123456789",
-            rapportertdato = LocalDateTime.now(),
-            perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-            originalJson = SykepengesoknadDTO(
-                id = "123",
-                type = SoknadstypeDTO.ARBEIDSTAKERE,
-                status = SoknadsstatusDTO.SENDT,
-                aktorId = aktørId,
+        person.håndter(
+            ModelSendtSøknad(
+                hendelseId = UUID.randomUUID(),
                 fnr = "fnr",
-                sykmeldingId = UUID.randomUUID().toString(),
-                arbeidsgiver = ArbeidsgiverDTO(
-                    "Hello world",
-                    "123456789"
-                ),
-                fom = 16.september,
-                tom = 5.oktober,
-                opprettet = LocalDateTime.now(),
-                sendtNav = LocalDateTime.now(),
-                egenmeldinger = emptyList(),
-                soknadsperioder = listOf(
-                    SoknadsperiodeDTO(16.september, 5.oktober,100)
-                ),
-                fravar = emptyList()
-            ).toJsonNode().toString(),
-            aktivitetslogger = Aktivitetslogger()
-        ))
+                aktørId = aktørId,
+                orgnummer = "123456789",
+                rapportertdato = LocalDateTime.now(),
+                perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
+                originalJson = SykepengesoknadDTO(
+                    id = "123",
+                    type = SoknadstypeDTO.ARBEIDSTAKERE,
+                    status = SoknadsstatusDTO.SENDT,
+                    aktorId = aktørId,
+                    fnr = "fnr",
+                    sykmeldingId = UUID.randomUUID().toString(),
+                    arbeidsgiver = ArbeidsgiverDTO(
+                        "Hello world",
+                        "123456789"
+                    ),
+                    fom = 16.september,
+                    tom = 5.oktober,
+                    opprettet = LocalDateTime.now(),
+                    sendtNav = LocalDateTime.now(),
+                    egenmeldinger = emptyList(),
+                    soknadsperioder = listOf(
+                        SoknadsperiodeDTO(16.september, 5.oktober, 100)
+                    ),
+                    fravar = emptyList()
+                ).toJsonNode().toString(),
+                aktivitetslogger = Aktivitetslogger()
+            )
+        )
 
-        val alleVersjoner = using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id", aktørId).map {
-                Person.restore(Person.Memento.fromString(it.string("data")))
-            }.asList)
+        val antallVersjoner = using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT count(data) as rowCount FROM person WHERE aktor_id = ?",
+                    aktørId
+                )
+                    .map { it.int("rowCount") }
+                    .asSingle
+            )
         }
-        assertEquals(2, alleVersjoner.size, "Antall versjoner av personaggregat skal være 2, men var ${alleVersjoner.size}")
+        assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }
 
     private fun nySøknad(aktørId: String) = ModelNySøknad(
@@ -159,7 +168,7 @@ class PersonPersisteringPostgresTest {
             opprettet = LocalDateTime.now(),
             egenmeldinger = emptyList(),
             soknadsperioder = listOf(
-                SoknadsperiodeDTO(16.september, 5.oktober,100)
+                SoknadsperiodeDTO(16.september, 5.oktober, 100)
             ),
             fravar = emptyList()
         ).toJsonNode().toString(),

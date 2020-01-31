@@ -4,16 +4,57 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
-import no.nav.helse.serde.reflection.*
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.reflection.AktivitetsloggerReflect
+import no.nav.helse.serde.reflection.ArbeidsgiverReflect
+import no.nav.helse.serde.reflection.AvvistdagReflect
+import no.nav.helse.serde.reflection.InntektReflect
+import no.nav.helse.serde.reflection.InntektsmeldingReflect
+import no.nav.helse.serde.reflection.ManuellSaksbehandlingReflect
+import no.nav.helse.serde.reflection.NySøknadReflect
+import no.nav.helse.serde.reflection.PersonReflect
+import no.nav.helse.serde.reflection.SendtSøknadReflect
+import no.nav.helse.serde.reflection.UtbetalingsdagReflect
+import no.nav.helse.serde.reflection.VedtaksperiodeReflect
+import no.nav.helse.serde.reflection.VilkårsgrunnlagReflect
+import no.nav.helse.serde.reflection.YtelserReflect
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
+import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.dag.Studiedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
+import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.util.*
+import java.util.Stack
+import java.util.UUID
+
+
+fun serializePerson(person: Person): String {
+    val jsonBuilder = JsonBuilder()
+    person.accept(jsonBuilder)
+    return jsonBuilder.toJson()
+}
 
 internal class JsonBuilder : PersonVisitor {
 
@@ -22,6 +63,8 @@ internal class JsonBuilder : PersonVisitor {
     init {
         stack.push(Root())
     }
+
+    internal fun toJson() = currentState.toJson()
 
     private val currentState: JsonState
         get() = stack.peek()

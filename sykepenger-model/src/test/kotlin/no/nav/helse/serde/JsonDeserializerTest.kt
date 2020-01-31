@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.streams.toList
@@ -30,7 +30,7 @@ internal class JsonDeserializerTest {
 
     @Test
     fun test1() {
-        val result = DataClassModelBuilder(enkelPersonJson()).result()
+        val result = parsePerson(enkelPersonJson())
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))

@@ -1,19 +1,27 @@
 package no.nav.helse.person
 
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.DecimalNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
+import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
+import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_GODKJENNING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.VILKÅRSPRØVING
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
-import no.nav.helse.serde.safelyUnwrapDate
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -21,12 +29,11 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
-import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 private inline fun <reified T> Set<*>.førsteAvType(): T? {
     return firstOrNull { it is T } as T?
@@ -606,47 +613,6 @@ internal class Vedtaksperiode private constructor(
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce(ConcreteSykdomstidslinje::plus)
 
-        internal fun restore(memento: Memento): Vedtaksperiode {
-            return Vedtaksperiode(
-                id = memento.id,
-                aktørId = memento.aktørId,
-                fødselsnummer = memento.fødselsnummer,
-                organisasjonsnummer = memento.organisasjonsnummer,
-                sykdomstidslinje = ConcreteSykdomstidslinje.fromJson(memento.sykdomstidslinje.toString())
-            ).also { vedtaksperiode ->
-                vedtaksperiode.tilstand = tilstandFraEnum(memento.tilstandType)
-                vedtaksperiode.maksdato = memento.maksdato
-                vedtaksperiode.utbetalingslinjer = memento.utbetalingslinjer?.map {
-                    Utbetalingslinje(
-                        fom = LocalDate.parse(it["fom"].textValue()),
-                        tom = LocalDate.parse(it["tom"].textValue()),
-                        dagsats = when (it["dagsats"]) {
-                            is DecimalNode -> it["dagsats"].decimalValue().setScale(0, RoundingMode.HALF_UP).toInt()
-                            else -> it["dagsats"].intValue()
-                        }
-                    )
-                }
-                vedtaksperiode.godkjentAv = memento.godkjentAv
-                vedtaksperiode.utbetalingsreferanse = memento.utbetalingsreferanse
-                vedtaksperiode.førsteFraværsdag = memento.førsteFraværsdag
-                vedtaksperiode.dataForVilkårsvurdering = memento.dataForVilkårsvurdering?.let {
-                    objectMapper.convertValue(it)
-                }
-            }
-        }
-
-        private fun tilstandFraEnum(tilstand: TilstandType) = when (tilstand) {
-            START -> StartTilstand
-            MOTTATT_NY_SØKNAD -> MottattNySøknad
-            MOTTATT_SENDT_SØKNAD -> MottattSendtSøknad
-            MOTTATT_INNTEKTSMELDING -> MottattInntektsmelding
-            VILKÅRSPRØVING -> Vilkårsprøving
-            BEREGN_UTBETALING -> BeregnUtbetaling
-            TIL_GODKJENNING -> TilGodkjenning
-            TIL_UTBETALING -> TilUtbetaling
-            TIL_INFOTRYGD -> TilInfotrygd
-        }
-
         internal fun nyPeriode(hendelse: SykdomstidslinjeHendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode {
             return Vedtaksperiode(
                 id = id,
@@ -656,85 +622,6 @@ internal class Vedtaksperiode private constructor(
                 sykdomstidslinje = hendelse.sykdomstidslinje()
             )
         }
-
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
-    internal fun memento(): Memento {
-        return Memento(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            tilstandType = tilstand.type,
-            sykdomstidslinje = objectMapper.readTree(sykdomstidslinje.toJson()),
-            maksdato = maksdato,
-            utbetalingslinjer = utbetalingslinjer
-                ?.let { objectMapper.convertValue<JsonNode>(it) },
-            godkjentAv = godkjentAv,
-            utbetalingsreferanse = utbetalingsreferanse,
-            førsteFraværsdag = førsteFraværsdag,
-            dataForVilkårsvurdering = dataForVilkårsvurdering?.let { objectMapper.convertValue<JsonNode>(it) }
-        )
-    }
-
-    internal class Memento internal constructor(
-        internal val id: UUID,
-        internal val aktørId: String,
-        internal val fødselsnummer: String,
-        internal val organisasjonsnummer: String,
-        internal val tilstandType: TilstandType,
-        internal val sykdomstidslinje: JsonNode,
-        internal val maksdato: LocalDate?,
-        internal val utbetalingslinjer: JsonNode?,
-        internal val godkjentAv: String?,
-        internal val utbetalingsreferanse: String?,
-        internal val førsteFraværsdag: LocalDate?,
-        internal val dataForVilkårsvurdering: JsonNode?
-    ) {
-
-        internal companion object {
-            private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-            fun fromJsonNode(json: JsonNode): Memento {
-                return Memento(
-                    id = UUID.fromString(json["id"].textValue()),
-                    aktørId = json["aktørId"].textValue(),
-                    fødselsnummer = json["fødselsnummer"].textValue(),
-                    organisasjonsnummer = json["organisasjonsnummer"].textValue(),
-                    tilstandType = valueOf(json["tilstandType"].textValue()),
-                    sykdomstidslinje = json["sykdomstidslinje"],
-                    maksdato = json["maksdato"].safelyUnwrapDate(),
-                    utbetalingslinjer = json["utbetalingslinjer"]?.takeUnless { it.isNull },
-                    godkjentAv = json["godkjentAv"]?.textValue(),
-                    utbetalingsreferanse = json["utbetalingsreferanse"]?.textValue(),
-                    førsteFraværsdag = json["førsteFraværsdag"].safelyUnwrapDate(),
-                    dataForVilkårsvurdering = json["dataForVilkårsvurdering"]
-                )
-            }
-        }
-
-        fun state(): String =
-            objectMapper.writeValueAsString(
-                mapOf(
-                    "id" to this.id,
-                    "aktørId" to this.aktørId,
-                    "fødselsnummer" to this.fødselsnummer,
-                    "organisasjonsnummer" to this.organisasjonsnummer,
-                    "tilstandType" to this.tilstandType,
-                    "sykdomstidslinje" to this.sykdomstidslinje,
-                    "maksdato" to this.maksdato,
-                    "utbetalingslinjer" to this.utbetalingslinjer,
-                    "godkjentAv" to this.godkjentAv,
-                    "utbetalingsreferanse" to this.utbetalingsreferanse,
-                    "førsteFraværsdag" to this.førsteFraværsdag,
-                    "dataForVilkårsvurdering" to this.dataForVilkårsvurdering
-                )
-            )
     }
 }
 

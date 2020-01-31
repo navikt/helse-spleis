@@ -1,17 +1,18 @@
 package no.nav.helse.person
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.util.RawValue
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
@@ -33,63 +34,6 @@ internal class Arbeidsgiver private constructor(
         aktivitetslogger = Aktivitetslogger()
     )
 
-    internal class Memento internal constructor(
-        internal val id: UUID,
-        internal val organisasjonsnummer: String,
-        internal val perioder: List<Vedtaksperiode.Memento>,
-        internal val inntekthistorikk: Inntekthistorikk.Memento
-    ) {
-        internal companion object {
-
-            private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-
-            fun fromString(state: String): Memento {
-                val json = objectMapper.readTree(state)
-                return Memento(
-                    id = UUID.fromString(json["id"].textValue()),
-                    organisasjonsnummer = json["organisasjonsnummer"].textValue(),
-                    perioder = json["saker"].map {
-                        Vedtaksperiode.Memento.fromJsonNode(it)
-                    },
-                    inntekthistorikk = json["inntektHistorie"]?.takeUnless { it.isNull }?.let {
-                        Inntekthistorikk.Memento.fromJsonNode(
-                            it
-                        )
-                    } ?: Inntekthistorikk.Memento()
-                )
-            }
-
-        }
-
-        fun state(): String =
-            objectMapper.convertValue<ObjectNode>(
-                mapOf(
-                    "id" to this.id,
-                    "organisasjonsnummer" to this.organisasjonsnummer
-                )
-            ).also {
-                this.perioder.fold(it.putArray("saker")) { result, current ->
-                    result.addRawValue(RawValue(current.state()))
-                }
-                it.set<ObjectNode>("inntektHistorie", this.inntekthistorikk.state())
-            }.toString()
-    }
-
-    internal companion object {
-        fun restore(memento: Memento): Arbeidsgiver {
-            return Arbeidsgiver(
-                id = memento.id,
-                organisasjonsnummer = memento.organisasjonsnummer,
-                inntekthistorikk = Inntekthistorikk.restore(memento.inntekthistorikk),
-                tidslinjer = mutableListOf(),
-                perioder = memento.perioder.map { Vedtaksperiode.restore(it) }.toMutableList(),
-                vedtaksperiodeObservers = mutableListOf(),
-                aktivitetslogger = Aktivitetslogger()
-            )
-        }
-    }
-
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         visitor.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
@@ -104,13 +48,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
-
-    internal fun memento() = Memento(
-        id = this.id,
-        organisasjonsnummer = this.organisasjonsnummer,
-        perioder = this.perioder.map { it.memento() },
-        inntekthistorikk = this.inntekthistorikk.memento()
-    )
 
     internal fun peekTidslinje() = tidslinjer.last()
 

@@ -4,11 +4,13 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.Person
+import no.nav.helse.serde.parsePerson
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
-class PersonPostgresRepository(private val dataSource: DataSource,
-                               private val probe: PostgresProbe = PostgresProbe
+class PersonPostgresRepository(
+    private val dataSource: DataSource,
+    private val probe: PostgresProbe = PostgresProbe
 ) : PersonRepository {
 
     override fun hentPerson(aktørId: String): Person? {
@@ -17,9 +19,9 @@ class PersonPostgresRepository(private val dataSource: DataSource,
                 it.string("data")
             }.asSingle)
         }?.let {
-            Person.restore(Person.Memento.fromString(it))
+            parsePerson(it)
         }?.also {
-            PostgresProbe.personLestFraDb()
+            probe.personLestFraDb()
         }
     }
 

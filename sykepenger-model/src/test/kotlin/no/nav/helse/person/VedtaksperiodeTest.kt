@@ -1,27 +1,32 @@
 package no.nav.helse.person
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.DecimalNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.april
 import no.nav.helse.toJsonNode
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class VedtaksperiodeTest {
 
@@ -36,114 +41,6 @@ internal class VedtaksperiodeTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    @Test
-    internal fun `gyldig jsonrepresentasjon av tomt vedtaksperiode`() {
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(nySøknad())
-        val jsonRepresentation = vedtaksperiode.memento()
-
-        assertEquals(aktør, jsonRepresentation.aktørId)
-        assertEquals(fødselsnummer, jsonRepresentation.fødselsnummer)
-        assertEquals(organisasjonsnummer, jsonRepresentation.organisasjonsnummer)
-        assertNotNull(jsonRepresentation.sykdomstidslinje)
-    }
-
-    @Test
-    internal fun `gyldig vedtaksperiode fra jsonrepresentasjon av tomt vedtaksperiode`() {
-        val originalJson = Vedtaksperiode.nyPeriode(nySøknad()).memento()
-        val gjenopprettetJson = Vedtaksperiode.restore(originalJson)
-
-        assertEquals(
-            objectMapper.valueToTree<JsonNode>(originalJson.state()),
-            objectMapper.valueToTree<JsonNode>(gjenopprettetJson.memento().state())
-        )
-    }
-
-    @Test
-    internal fun `dagsats leses som intnode`() {
-        val id = UUID.randomUUID()
-        val aktørId = "1234"
-        val fødselsnummer = "5678"
-        val organisasjonsnummer = "123456789"
-
-        val dagsats = 1000
-
-        val utbetalingslinje = Utbetalingslinje(
-            fom = LocalDate.now(),
-            tom = LocalDate.now(),
-            dagsats = dagsats
-        ).let {
-            objectMapper.convertValue<ObjectNode>(it)
-        }
-
-        val memento = Vedtaksperiode.Memento(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingslinjer = listOf(utbetalingslinje).let {
-                objectMapper.convertValue<JsonNode>(it)
-            },
-            godkjentAv = null,
-            maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
-            tilstandType = TilstandType.TIL_GODKJENNING,
-            utbetalingsreferanse = null,
-            førsteFraværsdag = null,
-            dataForVilkårsvurdering = null
-        )
-
-        val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(memento)
-        val nyJson = gjenopprettetVedtaksperiode.memento()
-
-        val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
-
-        assertEquals(dagsats, dagsatsFraNyJson!!)
-    }
-
-    @Test
-    internal fun `gamle dagsatser lagret som bigdecimal leses riktig`() {
-        val id = UUID.randomUUID()
-        val aktørId = "1234"
-        val fødselsnummer = "5678"
-        val organisasjonsnummer = "123456789"
-
-        val dagsats = 1000
-        val dagsatsMedDesimal = "999.50".toBigDecimal()
-
-        val utbetalingslinje = Utbetalingslinje(
-            fom = LocalDate.now(),
-            tom = LocalDate.now(),
-            dagsats = dagsats
-        ).let {
-            objectMapper.convertValue<ObjectNode>(it)
-        }.also {
-            it.set<DecimalNode>("dagsats", DecimalNode(dagsatsMedDesimal))
-        }
-
-        val jsonRepresentation = Vedtaksperiode.Memento(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingslinjer = listOf(utbetalingslinje).let {
-                objectMapper.convertValue<JsonNode>(it)
-            },
-            godkjentAv = null,
-            maksdato = null,
-            sykdomstidslinje = ObjectMapper().readTree(nySøknad().sykdomstidslinje().toJson()),
-            tilstandType = TilstandType.TIL_GODKJENNING,
-            utbetalingsreferanse = null,
-            førsteFraværsdag = null,
-            dataForVilkårsvurdering = null
-        )
-
-        val gjenopprettetVedtaksperiode = Vedtaksperiode.restore(jsonRepresentation)
-        val nyJson = gjenopprettetVedtaksperiode.memento()
-
-        val dagsatsFraNyJson = nyJson.utbetalingslinjer?.first()?.get("dagsats")?.asInt()
-
-        assertEquals(dagsats, dagsatsFraNyJson!!)
-    }
 
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
@@ -179,9 +76,11 @@ internal class VedtaksperiodeTest {
     @Test
     fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
         val førsteFraværsdag = 20.april
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(inntektsmelding(
-            førsteFraværsdag = førsteFraværsdag
-        ))
+        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+            inntektsmelding(
+                førsteFraværsdag = førsteFraværsdag
+            )
+        )
 
         assertEquals(førsteFraværsdag, førsteFraværsdag(vedtaksperiode))
     }
@@ -256,7 +155,15 @@ internal class VedtaksperiodeTest {
         ).toJsonNode().toString()
     )
 
-    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad(
+        perioder: List<ModelSendtSøknad.Periode> = listOf(
+            ModelSendtSøknad.Periode.Sykdom(
+                16.september,
+                5.oktober,
+                100
+            )
+        ), rapportertDato: LocalDateTime = LocalDateTime.now()
+    ) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,

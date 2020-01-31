@@ -6,8 +6,22 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
+import no.nav.helse.hendelser.ModelForeldrepenger
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeObserver
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -16,7 +30,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 private const val aktørId = "12345"
 private const val fnr = "12020052345"
@@ -24,7 +38,7 @@ private const val orgnummer = "987654321"
 private var vedtaksperiodeId = "1"
 
 internal class JsonBuilderTest {
-    val objectMapper = jacksonObjectMapper()
+    private val objectMapper = jacksonObjectMapper()
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .registerModule(JavaTimeModule())
@@ -43,7 +57,7 @@ internal class JsonBuilderTest {
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
-        val personDeserialisert = DataClassModelBuilder(jsonBuilder.toString()).result()
+        val personDeserialisert = parsePerson(jsonBuilder.toString())
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
         assertEquals(personPre, personPost)
@@ -82,7 +96,7 @@ internal class JsonBuilderTest {
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
-        val result = DataClassModelBuilder(json).result()
+        val result = parsePerson(json)
         val jsonBuilder2 = JsonBuilder()
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()

@@ -1,12 +1,11 @@
 package no.nav.helse.person
 
-import java.util.*
+import java.util.UUID
 
 interface PersonObserver : VedtaksperiodeObserver {
     data class PersonEndretEvent(
         val aktørId: String,
-        val sykdomshendelse: ArbeidstakerHendelse,
-        val memento: Person.Memento,
+        val person: Person,
         val fødselsnummer: String
     )
 

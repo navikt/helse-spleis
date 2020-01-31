@@ -9,15 +9,25 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
+import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
+import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class ModelVilkårsgrunnlagTest {
@@ -81,23 +91,6 @@ internal class ModelVilkårsgrunnlagTest {
 
         assertEquals(0.0, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
         assertEquals(12000.0, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
-    }
-
-    @Test
-    internal fun `lagring og restoring av memento fører til samme grunnlagsdata for vilkårsgrunnlag`() {
-        val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2018, it), listOf(Inntekt(1000.0))) })
-
-        val vedtaksperiode = vedtaksperiode()
-        vedtaksperiode.håndter(inntektsmelding())
-        vedtaksperiode.håndter(vilkårsgrunnlag)
-
-        val beforeRestore = dataForVilkårsvurdering(vedtaksperiode)
-        assertNotNull(beforeRestore)
-
-        val memento = vedtaksperiode.memento()
-
-        assertEquals(beforeRestore, dataForVilkårsvurdering(Vedtaksperiode.restore(memento)))
     }
 
     @Test

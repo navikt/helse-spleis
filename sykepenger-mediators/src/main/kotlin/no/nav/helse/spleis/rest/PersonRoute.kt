@@ -19,7 +19,8 @@ internal fun Route.person(personRestInterface: PersonRestInterface) {
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.finnPerson(personRestInterface: PersonRestInterface) {
-    personRestInterface.hentSak(call.parameters["aktørId"]!!)?.let {
-        call.respond(it.memento().state())
-    } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+    personRestInterface.hentSak(call.parameters["aktørId"]!!)
+        ?.let {
+            call.respond(TODO())
+        } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
 }
