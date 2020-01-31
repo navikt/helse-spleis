@@ -33,6 +33,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.randomPort
 import no.nav.helse.responseBody
+import no.nav.helse.serde.parsePerson
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -323,10 +324,7 @@ internal class EndToEndTest {
 
         utbetalingsreferanse.hentUtbetaling {
             assertTrue(this.contains(aktørID))
-
-            assertDoesNotThrow {
-//                Person.restore(Person.Memento.fromString(this))
-            }
+            assertDoesNotThrow { parsePerson(this) }
         }
     }
 

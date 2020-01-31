@@ -606,9 +606,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {}
     }
 
-    // Gang of four Memento pattern
     companion object {
-
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce(ConcreteSykdomstidslinje::plus)
