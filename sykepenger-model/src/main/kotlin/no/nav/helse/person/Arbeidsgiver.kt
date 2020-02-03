@@ -24,6 +24,8 @@ internal class Arbeidsgiver private constructor(
     private val aktivitetslogger: Aktivitetslogger
 ) {
 
+    internal fun inntektshistorikk() = inntekthistorikk.clone()
+
     internal constructor(organisasjonsnummer: String) : this(
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
@@ -70,7 +72,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: ModelInntektsmelding, person: Person) {
         inntekthistorikk.add(
-            inntektsmelding.førsteFraværsdag,
+            inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             inntektsmelding,
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )

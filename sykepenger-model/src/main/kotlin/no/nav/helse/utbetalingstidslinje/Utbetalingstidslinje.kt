@@ -17,11 +17,6 @@ internal class Utbetalingstidslinje private constructor(
 
     internal constructor() : this(mutableListOf())
 
-    private fun utbetalingslinjer(): List<Utbetalingslinje> {
-        MaksimumUtbetaling(Sykdomsgrader(listOf(this)), listOf(this)).beregn()
-        return UtbetalingslinjeBuilder(this).result()
-    }
-
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag) it.navDag() else it }.toMutableList())
 
@@ -41,21 +36,6 @@ internal class Utbetalingstidslinje private constructor(
                 utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
         }
     }
-
-    internal fun utbetalingslinjer(
-        others: List<Utbetalingstidslinje>,
-        alder: Alder,
-        arbeidsgiverRegler: ArbeidsgiverRegler,
-        førsteDag: LocalDate,
-        sisteDag: LocalDate
-    ) =
-        this
-            .reduserAvSykdomsgrad(others)
-            .filterByMinimumInntekt(others, alder)
-            .avgrens(others, alder, arbeidsgiverRegler)
-            .subset(førsteDag, sisteDag, others)
-            .utbetalingslinjer()
-
     internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
     }
@@ -78,22 +58,6 @@ internal class Utbetalingstidslinje private constructor(
 
     private fun addUkjentDag(inntekt: Double, dagen: LocalDate) {
         utbetalingsdager.add(Utbetalingsdag.UkjentDag(0.0, dagen))
-    }
-
-    private fun avgrens(
-        others: List<Utbetalingstidslinje>,
-        alder: Alder,
-        arbeidsgiverRegler: ArbeidsgiverRegler
-    ): Utbetalingstidslinje {
-        visitor = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler)
-        this.merge(others).accept(visitor)
-        avvis(visitor.avvisteDatoer(), Begrunnelse.SykepengedagerOppbrukt)
-        return Utbetalingstidslinje(utbetalingsdager)
-    }
-
-    private fun merge(others: List<Utbetalingstidslinje>): Utbetalingstidslinje {
-        require(others.isEmpty()) { "Hello future programmer, you need to implement support for multiple employers" }
-        return this
     }
 
     operator internal fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
@@ -126,13 +90,6 @@ internal class Utbetalingstidslinje private constructor(
 
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.utbetalingsdager.last().dato, other.utbetalingsdager.last().dato)
-
-    private fun filterByMinimumInntekt(
-        others: List<Utbetalingstidslinje>,
-        alder: Alder
-    ) = this
-
-    private fun reduserAvSykdomsgrad(others: List<Utbetalingstidslinje>) = this
 
     private fun subset(
         fom: LocalDate,
@@ -180,9 +137,14 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsgiverperiodeDag(this)
         }
 
-        internal class NavDag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(inntekt, dato) {
+        internal class NavDag private constructor(
+            inntekt: Double,
+            dato: LocalDate,
+            internal var utbetaling: Int
+        ) : Utbetalingsdag(inntekt, dato) {
             override val prioritet = 50
-            internal var utbetaling = 0
+
+            internal constructor(inntekt: Double, dato: LocalDate) : this(inntekt, dato, 0)
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
             internal fun utbetalingslinje() =
                 Utbetalingslinje(dato, dato, inntekt.roundToInt())

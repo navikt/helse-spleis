@@ -85,3 +85,11 @@ internal fun createUtbetalingstidslinje(
 ) = Utbetalingstidslinje::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(utbetalingsdager)
+
+internal fun createNavUtbetalingdag(
+    inntekt: Double,
+    dato: LocalDate,
+    utbetaling: Int
+) = Utbetalingstidslinje.Utbetalingsdag.NavDag::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(inntekt, dato, utbetaling)

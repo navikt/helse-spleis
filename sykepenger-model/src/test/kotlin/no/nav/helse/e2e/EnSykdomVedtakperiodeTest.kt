@@ -48,9 +48,10 @@ internal class EnSykdomVedtakperiodeTest {
     @Test internal fun `ingen historie med SendtSøknad først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(3.januar, 26.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
+        println(inspektør.arbeidsgiverLogger)
         håndterManuelSaksbehandling(true)
         inspektør.also {
             assertNoErrors(it)
@@ -68,10 +69,11 @@ internal class EnSykdomVedtakperiodeTest {
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(3.januar, 26.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
+        println(inspektør.arbeidsgiverLogger)
         håndterManuelSaksbehandling(true)
         inspektør.also {
             assertNoErrors(it)

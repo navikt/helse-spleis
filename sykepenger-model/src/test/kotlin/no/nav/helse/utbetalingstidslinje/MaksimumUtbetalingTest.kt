@@ -1,5 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -11,21 +14,34 @@ internal class MaksimumUtbetalingTest {
 
     @Test fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
         val tidslinje = tidslinjeOf(10.NAV)
-        MaksimumUtbetaling(Sykdomsgrader(listOf(tidslinje)), listOf(tidslinje)).beregn()
+        MaksimumUtbetaling(Sykdomsgrader(
+            listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            Aktivitetslogger()).beregn()
         undersøke(tidslinje)
         assertEquals(12000, inspektør.totalUtbetaling())
     }
 
     @Test fun `når inntekt er over 6G blir utbetaling lik 6G`() {
         val tidslinje = tidslinjeOf(10.NAV(3500.00))
-        MaksimumUtbetaling(Sykdomsgrader(listOf(tidslinje)), listOf(tidslinje)).beregn()
+        MaksimumUtbetaling(Sykdomsgrader(
+            listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            Aktivitetslogger()).beregn()
         undersøke(tidslinje)
         assertEquals(21610, inspektør.totalUtbetaling())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
         val tidslinje = tidslinjeOf(10.NAV(3500.00), 10.NAV(1200.00))
-        MaksimumUtbetaling(Sykdomsgrader(listOf(tidslinje)), listOf(tidslinje)).beregn()
+        MaksimumUtbetaling(Sykdomsgrader(
+            listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            Aktivitetslogger()
+        ).beregn()
         undersøke(tidslinje)
         assertEquals(21610 + 12000, inspektør.totalUtbetaling())
     }

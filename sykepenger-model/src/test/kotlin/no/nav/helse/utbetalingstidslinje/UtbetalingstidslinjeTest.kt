@@ -1,7 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,7 +19,12 @@ internal class UtbetalingstidslinjeTest {
 
     @Test internal fun `avviste dager blir konvertert til Navdager`() {
         val tidslinje = tidslinjeOf(10.NAV(12.0), 5.NAV(1200.0))
-        MinimumInntektsfilter(UNG_PERSON_FNR_2018, listOf(tidslinje)).filter()
+        MinimumInntektsfilter(
+            UNG_PERSON_FNR_2018,
+            listOf(tidslinje),
+            Periode(1.januar, 15.januar),
+            Aktivitetslogger()
+        ).filter()
         undersøke(tidslinje)
         assertEquals(10, inspektør.avvistDagTeller)
         assertEquals(5, inspektør.navDagTeller)

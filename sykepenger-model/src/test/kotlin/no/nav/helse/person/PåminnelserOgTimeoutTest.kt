@@ -25,6 +25,7 @@ class PåminnelserOgTimeoutTest {
     private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private val rapportertdato = 1.februar.atStartOfDay()
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -175,7 +176,7 @@ class PåminnelserOgTimeoutTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
+            rapportertdato = rapportertdato,
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
@@ -187,7 +188,7 @@ class PåminnelserOgTimeoutTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
+            rapportertdato = rapportertdato,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
             originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
@@ -219,7 +220,7 @@ class PåminnelserOgTimeoutTest {
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
-                    YearMonth.of(2018, it), listOf(
+                    YearMonth.of(2017, it), listOf(
                         ModelVilkårsgrunnlag.Inntekt(1000.0)
                     )
                 )
@@ -250,7 +251,7 @@ class PåminnelserOgTimeoutTest {
             svangerskapsytelse = null,
             aktivitetslogger = Aktivitetslogger()
         ),
-        rapportertdato = LocalDateTime.now(),
+        rapportertdato = rapportertdato,
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -262,7 +263,7 @@ class PåminnelserOgTimeoutTest {
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
-        rapportertdato = LocalDateTime.now(),
+        rapportertdato = rapportertdato,
         aktivitetslogger = Aktivitetslogger()
     )
 

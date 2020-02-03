@@ -1,10 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -171,7 +174,12 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
-        MaksimumSykepengedagerfilter(Alder(fnr), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        MaksimumSykepengedagerfilter(
+            Alder(fnr),
+            NormalArbeidstaker,
+            Periode(1.januar, 31.desember),
+            Aktivitetslogger()
+        )
             .also { this.accept(it) }
             .avvisteDatoer()
 }

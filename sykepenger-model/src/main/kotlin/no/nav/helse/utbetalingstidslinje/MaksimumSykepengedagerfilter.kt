@@ -1,10 +1,15 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import java.time.LocalDate
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
-internal class MaksimumSykepengedagerfilter(private val alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler):
+internal class MaksimumSykepengedagerfilter(private val alder: Alder,
+                                            arbeidsgiverRegler: ArbeidsgiverRegler,
+                                            private val periode: Periode,
+                                            private val aktivitetslogger: Aktivitetslogger):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     companion object {

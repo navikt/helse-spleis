@@ -8,6 +8,8 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
     override val start: LocalDate = fom
     override val endInclusive: LocalDate = tom
 
+    private val range = start..endInclusive
+
     init {
         require(start <= endInclusive) { "fom kan ikke være etter tom" }
     }
@@ -17,4 +19,6 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
 
     private operator fun contains(other: Periode) =
         this.start < other.endInclusive && this.endInclusive > other.start
+
+    internal operator fun contains(datoer: MutableSet<LocalDate>) = datoer.any { it in range }
 }

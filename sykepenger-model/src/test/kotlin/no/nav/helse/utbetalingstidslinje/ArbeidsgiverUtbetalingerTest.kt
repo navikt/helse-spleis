@@ -1,11 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -13,6 +15,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     private var maksdato: LocalDate? = null
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -27,6 +30,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(12000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
+        assertTrue(aktivitetslogger.hasMessages())
+        assertFalse(aktivitetslogger.hasWarnings())
     }
 
     @Test
@@ -39,6 +44,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(5, inspektør.avvistDagTeller)
         assertEquals(6000, inspektør.totalUtbetaling())
         assertEquals(19.desember, maksdato)
+        assertTrue(aktivitetslogger.hasWarnings())
+        assertFalse(aktivitetslogger.hasErrors())
     }
 
     @Test
@@ -280,9 +287,18 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(fnr, tidslinje, tidslinjeOf())
     }
 
-    private fun undersøke(fnr: String, arbeidsgiverTidslinje: Utbetalingstidslinje, historiskTidslinje: Utbetalingstidslinje) {
+    private fun undersøke(fnr: String,
+                          arbeidsgiverTidslinje: Utbetalingstidslinje, historiskTidslinje: Utbetalingstidslinje) {
         val arbeidsgiver = Arbeidsgiver("88888888")
-        ArbeidsgiverUtbetalinger(mapOf(arbeidsgiver to arbeidsgiverTidslinje), historiskTidslinje, Alder(fnr)).also {
+        aktivitetslogger = Aktivitetslogger()
+        ArbeidsgiverUtbetalinger(
+            mapOf(arbeidsgiver to arbeidsgiverTidslinje),
+            historiskTidslinje,
+            Periode(1.januar, 31.desember(2019)),
+            Alder(fnr),
+            NormalArbeidstaker,
+            aktivitetslogger
+        ).also {
             it.beregn()
             maksdato = it.maksdato()
         }

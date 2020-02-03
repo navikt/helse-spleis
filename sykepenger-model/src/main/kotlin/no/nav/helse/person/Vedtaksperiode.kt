@@ -4,14 +4,8 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Overlappende
 import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
 import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
@@ -454,6 +448,7 @@ internal class Vedtaksperiode private constructor(
                 it.valider {
                     ByggUtbetalingstidlinjer(
                         mapOf(arbeidsgiver to utbetalingslinje),
+                        vedtaksperiode.periode(),
                         ytelser,
                         Alder(vedtaksperiode.fødselsnummer)
                     ).also { engineForTimeline = it }
@@ -464,6 +459,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
                     ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+                    vedtaksperiode.tilstand(ytelser, TilGodkjenning)
                 }
             }
         }

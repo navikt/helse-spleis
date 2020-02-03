@@ -41,7 +41,9 @@ private class ModelDeepEquals {
             if (one is BigDecimal && other is BigDecimal) {
                 Assertions.assertEquals(one.toLong(), other.toLong())
             } else {
-                Assertions.assertEquals(one, other)
+                Assertions.assertEquals(one, other, {
+                    "TODO"
+                })
             }
         }
     }

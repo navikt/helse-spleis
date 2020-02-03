@@ -17,12 +17,14 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.reflection.*
 import no.nav.helse.serde.reflection.AktivitetsloggerReflect
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.AvvistdagReflect
 import no.nav.helse.serde.reflection.InntektReflect
 import no.nav.helse.serde.reflection.InntektsmeldingReflect
 import no.nav.helse.serde.reflection.ManuellSaksbehandlingReflect
+import no.nav.helse.serde.reflection.NavDagReflect
 import no.nav.helse.serde.reflection.NySøknadReflect
 import no.nav.helse.serde.reflection.PersonReflect
 import no.nav.helse.serde.reflection.SendtSøknadReflect
@@ -396,7 +398,7 @@ internal class JsonBuilder : PersonVisitor {
             dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            dager.add(UtbetalingsdagReflect(dag, "NavDag").toMap())
+            dager.add(NavDagReflect(dag, "NavDag").toMap())
         }
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())

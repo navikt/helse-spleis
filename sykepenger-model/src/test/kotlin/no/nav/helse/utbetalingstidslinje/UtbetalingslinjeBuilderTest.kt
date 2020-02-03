@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.HELG
@@ -46,7 +48,12 @@ internal class UtbetalingslinjeBuilderTest {
 
     private fun opprettUtbetalingslinjer(vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
-        MaksimumUtbetaling(Sykdomsgrader(listOf(tidslinje)), listOf(tidslinje)).beregn()
+        MaksimumUtbetaling(
+            Sykdomsgrader(listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 1.mars),
+            Aktivitetslogger()
+        ).beregn()
         linjer = UtbetalingslinjeBuilder(tidslinje).result()
     }
 
