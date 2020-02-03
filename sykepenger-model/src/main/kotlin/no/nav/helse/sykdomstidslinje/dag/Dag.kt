@@ -6,7 +6,6 @@ import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
@@ -17,22 +16,6 @@ internal abstract class Dag internal constructor(
     internal val erstatter: MutableList<Dag> = mutableListOf()
 
     internal abstract fun dagType(): JsonDagType
-
-    internal fun toJsonDag(): JsonDag {
-        val hendelseId = hendelse.hendelseId()
-        return JsonDag(
-            dagType(),
-            dagen,
-            hendelseId,
-            erstatter.map { it.toJsonDag() })
-
-    }
-
-    internal fun toJsonHendelse(): List<SykdomstidslinjeHendelse> {
-        val alleHendelser = mutableListOf(hendelse)
-        alleHendelser.addAll(erstatter.flatMap { it.toJsonHendelse() })
-        return alleHendelser
-    }
 
     internal fun erHelg() = this.dagen.erHelg()
 
@@ -87,20 +70,6 @@ internal abstract class Dag internal constructor(
 
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
-        internal fun fromJsonRepresentation(jsonDag: JsonDag, hendelseMap: Map<UUID, SykdomstidslinjeHendelse>): Dag =
-            jsonDag.type.creator(
-                jsonDag.dato,
-                hendelseMap.getOrElse(jsonDag.hendelseId,
-                    { throw RuntimeException("hendelse med id ${jsonDag.hendelseId} finnes ikke") })
-            ).also {
-                it.erstatter.addAll(jsonDag.erstatter.map { erstatterJsonDag ->
-                    fromJsonRepresentation(
-                        erstatterJsonDag,
-                        hendelseMap
-                    )
-                })
-            }
     }
 }
 

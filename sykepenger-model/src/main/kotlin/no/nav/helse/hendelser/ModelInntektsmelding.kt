@@ -1,9 +1,5 @@
 package no.nav.helse.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode
@@ -32,45 +28,11 @@ class ModelInntektsmelding(
     ferieperioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger) {
-    companion object {
-
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromJson(json: String): ModelInntektsmelding {
-            return objectMapper.readTree(json).let {
-                ModelInntektsmelding(
-                    UUID.fromString(it["hendelseId"].textValue()),
-                    refusjon = Refusjon(
-                        it["inntektsmelding"]["refusjon"]["opphoersdato"]?.takeIf(JsonNode::isTextual)?.asLocalDate(),
-                        it["inntektsmelding"]["refusjon"]["beloepPrMnd"].asDouble(),
-                        it["inntektsmelding"]["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }),
-                    orgnummer = it["inntektsmelding"]["virksomhetsnummer"].asText(),
-                    fødselsnummer = it["inntektsmelding"]["arbeidstakerFnr"].asText(),
-                    aktørId = it["inntektsmelding"]["arbeidstakerAktorId"].asText(),
-                    mottattDato = it["inntektsmelding"]["mottattDato"].asLocalDateTime(),
-                    førsteFraværsdag = it["inntektsmelding"]["foersteFravaersdag"].asLocalDate(),
-                    beregnetInntekt = it["inntektsmelding"]["beregnetInntekt"].asDouble(),
-                    aktivitetslogger = Aktivitetslogger(),
-                    arbeidsgiverperioder = it["inntektsmelding"]["arbeidsgiverperioder"].map(::asPeriode),
-                    ferieperioder = it["inntektsmelding"]["ferieperioder"].map(::asPeriode)
-                )
-            }
-        }
-
-        private fun JsonNode.asLocalDate() =
-            asText().let { LocalDate.parse(it) }
-
-        private fun JsonNode.asLocalDateTime() =
-            asText().let { LocalDateTime.parse(it) }
-
-        private fun asPeriode(jsonNode: JsonNode) =
-            Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate())
-
-    }
-
-    class Refusjon(val opphørsdato: LocalDate?, val beløpPrMåned: Double, val endringerIRefusjon: List<LocalDate> = emptyList())
+    class Refusjon(
+        val opphørsdato: LocalDate?,
+        val beløpPrMåned: Double,
+        val endringerIRefusjon: List<LocalDate> = emptyList()
+    )
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
