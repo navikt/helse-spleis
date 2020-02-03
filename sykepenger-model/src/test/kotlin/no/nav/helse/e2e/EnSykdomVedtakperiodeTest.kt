@@ -73,7 +73,6 @@ internal class EnSykdomVedtakperiodeTest {
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(INNTEKT)
         håndterYtelser(emptyList())   // No history
-        println(inspektør.arbeidsgiverLogger)
         håndterManuelSaksbehandling(true)
         inspektør.also {
             assertNoErrors(it)

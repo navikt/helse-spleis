@@ -21,7 +21,7 @@ internal class MinimumInntektsfilter (
 
         tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
 
-        if (inntekter.keys in periode)
+        if (inntekter.keys.toList() in periode)
             aktivitetslogger.warn("Avvist minst en dag som faller under minimum inntekt")
         else
             aktivitetslogger.info("Minimum inntekt har blitt sjekket uten problemer")

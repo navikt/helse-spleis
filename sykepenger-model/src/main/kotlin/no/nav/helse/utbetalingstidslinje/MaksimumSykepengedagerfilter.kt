@@ -36,6 +36,11 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
         val tidslinje = (tidslinjer + historiskTidslinje).reduce(Utbetalingstidslinje::plus)
         tidslinje.accept(this)
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
+
+        if (avvisteDatoer in periode)
+            aktivitetslogger.warn("Maksimum sykdomsgrense nådd")
+        else
+            aktivitetslogger.info("Maksimum sykdomsgrense ikke nådd")
     }
 
     private fun state(nyState: State) {

@@ -1,5 +1,8 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import java.time.LocalDate
 
 // Understands beginning and end of a time interval
@@ -20,5 +23,5 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
     private operator fun contains(other: Periode) =
         this.start < other.endInclusive && this.endInclusive > other.start
 
-    internal operator fun contains(datoer: MutableSet<LocalDate>) = datoer.any { it in range }
+    internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in range }
 }
