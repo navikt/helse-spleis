@@ -16,13 +16,13 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprett(this, hendelse))
     }
 
-    fun accept(visitor: SykdomshistorikkVisitor) {
+    internal fun accept(visitor: SykdomshistorikkVisitor) {
         visitor.preVisitSykdomshistorikk(this)
         elementer.forEach { it.accept(visitor) }
         visitor.postVisitSykdomshistorikk(this)
     }
 
-    fun kalkulerBeregnetSykdomstidslinje(
+    private fun kalkulerBeregnetSykdomstidslinje(
         hendelse: SykdomstidslinjeHendelse,
         hendelseSykdomstidslinje: ConcreteSykdomstidslinje
     ) = if (elementer.isEmpty()) {

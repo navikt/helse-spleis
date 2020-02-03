@@ -1,14 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
-
-data class Utbetalingsberegning(
-    val maksdato: LocalDate?,
-    val utbetalingslinjer: List<Utbetalingslinje>
-)
 
 data class Utbetalingslinje(
     val fom: LocalDate,

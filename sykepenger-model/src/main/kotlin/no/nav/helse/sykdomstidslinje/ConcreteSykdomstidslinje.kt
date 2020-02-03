@@ -4,22 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.sykdomstidslinje.dag.Feriedag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.sykdomstidslinje.dag.JsonTidslinje
-import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.dag.Studiedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
-import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
-import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingstidslinje.AlderRegler
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.Utbetalingsberegning
+import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
@@ -81,21 +66,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     fun erUtenforOmfang(): Boolean {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
-    }
-
-    @Deprecated("EPIC 1")
-    fun utbetalingsberegning(dagsats: Int, fødselsnummer: String): Utbetalingsberegning {
-        val beregner = Utbetalingsberegner(
-            dagsats,
-            AlderRegler(
-                fødselsnummer,
-                førsteDag(),
-                sisteDag(),
-                ArbeidsgiverRegler.Companion.NormalArbeidstaker
-            )
-        )
-        this.accept(beregner)
-        return beregner.results()
     }
 
     internal fun antallDagerMellom(other: ConcreteSykdomstidslinje) =
