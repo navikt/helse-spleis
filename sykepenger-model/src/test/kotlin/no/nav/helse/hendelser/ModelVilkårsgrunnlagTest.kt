@@ -6,18 +6,13 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class ModelVilkårsgrunnlagTest {
     private val aktivitetslogger = Aktivitetslogger()
@@ -59,7 +54,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2018, it), listOf(Inntekt(1000.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1000.0))) })
 
         assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1000.00))
         assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.01))
@@ -72,10 +67,9 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2018, it), listOf(Inntekt(1000.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1000.0))) })
 
         val vedtaksperiode = vedtaksperiode()
-        vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
         assertEquals(0.0, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
@@ -85,11 +79,12 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2018, it), listOf(Inntekt(1250.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) })
 
         val vedtaksperiode = vedtaksperiode()
-        vedtaksperiode.håndter(inntektsmelding())
         vedtaksperiode.håndter(vilkårsgrunnlag)
+
+        println(aktivitetslogger)
 
         assertEquals(0.20, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
         assertEquals(15000.00, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
@@ -116,7 +111,7 @@ internal class ModelVilkårsgrunnlagTest {
         rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
         erEgenAnsatt = false,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = aktivitetslogger
     )
 
     private fun vedtaksperiode() =
@@ -124,48 +119,48 @@ internal class ModelVilkårsgrunnlagTest {
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = orgnummer,
-            tilstand = Vedtaksperiode.MottattSendtSøknad
-        )
+            organisasjonsnummer = orgnummer
+        ).also {
+            it.håndter(nySøknad())
+            it.håndter(sendtSøknad())
+            it.håndter(inntektsmelding())
+        }
+
+    private fun nySøknad() = ModelNySøknad(
+        hendelseId = UUID.randomUUID(),
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
+        originalJson = "{}",
+        aktivitetslogger = aktivitetslogger
+    )
+
+    private fun sendtSøknad() = ModelSendtSøknad(
+        hendelseId = UUID.randomUUID(),
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = LocalDateTime.now(),
+        perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
+        originalJson = "{}",
+        aktivitetslogger = aktivitetslogger
+    )
 
     private fun inntektsmelding() =
         ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(LocalDate.now(), 1000.0),
+            refusjon = ModelInntektsmelding.Refusjon(16.januar, 1000.0),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            mottattDato = LocalDateTime.now(),
-            førsteFraværsdag = 10.januar,
+            mottattDato = 20.januar.atTime(12, 30),
+            førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,
-            arbeidsgiverperioder = listOf(Periode(8.januar, 10.januar)),
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(),
-            originalJson = Inntektsmelding(
-                inntektsmeldingId = "",
-                arbeidstakerFnr = "fødselsnummer",
-                arbeidstakerAktorId = "aktørId",
-                virksomhetsnummer = "virksomhetsnummer",
-                arbeidsgiverFnr = null,
-                arbeidsgiverAktorId = null,
-                arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
-                arbeidsforholdId = null,
-                beregnetInntekt = BigDecimal.valueOf(1000),
-                refusjon = Refusjon(beloepPrMnd = BigDecimal.valueOf(1000), opphoersdato = LocalDate.now()),
-                endringIRefusjoner = listOf(
-                    EndringIRefusjon(
-                        endringsdato = LocalDate.now(),
-                        beloep = BigDecimal.valueOf(1000)
-                    )
-                ),
-                opphoerAvNaturalytelser = emptyList(),
-                gjenopptakelseNaturalytelser = emptyList(),
-                arbeidsgiverperioder = listOf(InntektsmeldingPeriode(fom = 8.januar, tom = 10.januar)),
-                status = Status.GYLDIG,
-                arkivreferanse = "",
-                ferieperioder = emptyList(),
-                foersteFravaersdag = LocalDate.now(),
-                mottattDato = LocalDateTime.now()
-            ).toJson()
+            originalJson = "{}"
         )
 }

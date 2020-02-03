@@ -6,10 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.streams.toList
 
 private val objectMapper: ObjectMapper = jacksonObjectMapper()
@@ -68,35 +64,14 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
     }
 
-    internal fun antallDagerMellom(other: ConcreteSykdomstidslinje) =
-        when {
-            this.length() == 0 || other.length() == 0 -> throw IllegalStateException("Kan ikke regne antall dager mellom tidslinjer, når én eller begge er tomme.")
-            erDelAv(other) -> -min(this.length(), other.length())
-            overlapperMed(other) -> max(this.avstandMedOverlapp(other), other.avstandMedOverlapp(this))
-            else -> min(this.avstand(other), other.avstand(this))
-        }
-
     private fun førsteStartdato(other: ConcreteSykdomstidslinje) =
         if (this.førsteDag().isBefore(other.førsteDag())) this.førsteDag() else other.førsteDag()
 
     private fun sisteSluttdato(other: ConcreteSykdomstidslinje) =
         if (this.sisteDag().isAfter(other.sisteDag())) this.sisteDag() else other.sisteDag()
 
-    private fun avstand(other: ConcreteSykdomstidslinje) =
-        this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() - 1
-
-    private fun avstandMedOverlapp(other: ConcreteSykdomstidslinje) =
-        -(this.sisteDag().until(other.førsteDag(), ChronoUnit.DAYS).absoluteValue.toInt() + 1)
-
-    private fun erDelAv(other: ConcreteSykdomstidslinje) =
-        this.harBeggeGrenseneInnenfor(other) || other.harBeggeGrenseneInnenfor(this)
-
-    private fun harBeggeGrenseneInnenfor(other: ConcreteSykdomstidslinje) =
-        this.førsteDag() in other.førsteDag()..other.sisteDag() && this.sisteDag() in other.førsteDag()..other.sisteDag()
-
     private fun harGrenseInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in (other.førsteDag()..other.sisteDag())
-
 
     private fun jsonRepresentation(): JsonTidslinje {
         val dager = flatten().map { it.toJsonDag() }
@@ -106,7 +81,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     }
 
     companion object {
-
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =
             if (!gjelder.erHelg()) Sykedag(
                 gjelder,

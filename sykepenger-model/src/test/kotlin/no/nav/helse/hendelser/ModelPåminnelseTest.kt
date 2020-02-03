@@ -29,7 +29,7 @@ internal class ModelPåminnelseTest {
     @Test
     fun `warning ved påminnelse for nåværende tilstand`() {
         val tilstand = Vedtaksperiode.StartTilstand
-        val vedtaksperiode = vedtaksperiode(tilstand)
+        val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
         assertTrue(aktivitetslogger.hasWarnings())
@@ -38,7 +38,7 @@ internal class ModelPåminnelseTest {
     @Test
     fun `info ved påminnelse for annen tilstand`() {
         val tilstand = Vedtaksperiode.MottattNySøknad
-        val vedtaksperiode = vedtaksperiode(Vedtaksperiode.StartTilstand)
+        val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
         assertFalse(aktivitetslogger.hasWarnings())
@@ -48,18 +48,17 @@ internal class ModelPåminnelseTest {
     @Test
     fun `påminnelse for en annen periode`() {
         val tilstand = Vedtaksperiode.StartTilstand
-        val vedtaksperiode = vedtaksperiode(Vedtaksperiode.StartTilstand)
+        val vedtaksperiode = vedtaksperiode()
         assertFalse(vedtaksperiode.håndter(påminnelse(tilstand.type, UUID.randomUUID())))
         assertFalse(aktivitetslogger.hasMessages())
     }
 
-    private fun vedtaksperiode(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
+    private fun vedtaksperiode() =
         Vedtaksperiode(
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = orgnummer,
-            tilstand = tilstand
+            organisasjonsnummer = orgnummer
         )
 
 
