@@ -1,13 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Person
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeObserver
+import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -15,7 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
@@ -46,7 +40,6 @@ internal fun createVedtaksperiode(
     aktørId: String,
     fødselsnummer: String,
     organisasjonsnummer: String,
-    sykdomstidslinje: ConcreteSykdomstidslinje,
     tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
     maksdato: LocalDate?,
     utbetalingslinjer: List<Utbetalingslinje>?,
@@ -60,9 +53,9 @@ internal fun createVedtaksperiode(
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
-        id, aktørId, fødselsnummer, organisasjonsnummer, sykdomstidslinje, tilstand, maksdato, utbetalingslinjer,
-        godkjentAv, utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering,
-        sykdomshistorikk, aktivitetslogger
+        id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, utbetalingslinjer, godkjentAv,
+        utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk,
+        aktivitetslogger
     )
 
 internal fun createSykdomshistorikk(

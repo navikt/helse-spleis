@@ -5,29 +5,18 @@ import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJson
 import no.nav.helse.toJsonNode
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
-import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.inntektsmeldingkontrakt.*
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.inntektsmeldingkontrakt.Periode as InntektsmeldingPeriode
 
 internal class ModelVilkårsgrunnlagTest {
@@ -136,7 +125,6 @@ internal class ModelVilkårsgrunnlagTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
-            sykdomstidslinje = ConcreteSykdomstidslinje.sykedager(10.januar, 12.januar, sendtSøknad),
             tilstand = Vedtaksperiode.MottattSendtSøknad
         )
 

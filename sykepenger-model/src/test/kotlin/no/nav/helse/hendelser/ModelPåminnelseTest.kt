@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.testhelpers.S
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
@@ -60,7 +59,6 @@ internal class ModelPåminnelseTest {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
-            sykdomstidslinje = 10.S,
             tilstand = tilstand
         )
 

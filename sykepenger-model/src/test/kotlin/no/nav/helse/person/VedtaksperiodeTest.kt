@@ -3,30 +3,18 @@ package no.nav.helse.person
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
-import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.april
 import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VedtaksperiodeTest {
 
@@ -44,7 +32,7 @@ internal class VedtaksperiodeTest {
 
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+        val vedtaksperiode = periodeFor(
             nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
@@ -65,29 +53,26 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `påminnelse returnerer boolean etter om påminnelsen ble håndtert eller ikke`() {
+    fun `påminnelse returnerer true basert på om påminnelsen ble håndtert eller ikke`() {
         val id = UUID.randomUUID()
-        val vedtaksperiode = Vedtaksperiode(id, "123", "123", "123", 1.S)
+        val vedtaksperiode = periodeFor(nySøknad = nySøknad(), id = id)
 
-        assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.START)))
-        assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.START)))
+        assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.MOTTATT_NY_SØKNAD)))
+        assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.MOTTATT_NY_SØKNAD)))
     }
 
     @Test
     fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
         val førsteFraværsdag = 20.april
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(
-            inntektsmelding(
-                førsteFraværsdag = førsteFraværsdag
-            )
-        )
+        val vedtaksperiode = periodeFor(nySøknad())
+        vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 
         assertEquals(førsteFraværsdag, førsteFraværsdag(vedtaksperiode))
     }
 
     @Test
     fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
-        val vedtaksperiode = Vedtaksperiode.nyPeriode(
+        val vedtaksperiode = periodeFor(
             nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
@@ -189,4 +174,12 @@ internal class VedtaksperiodeTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
+    private fun periodeFor(nySøknad: ModelNySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
+        id = id,
+        aktørId = nySøknad.aktørId(),
+        fødselsnummer = nySøknad.fødselsnummer(),
+        organisasjonsnummer = nySøknad.organisasjonsnummer()
+    ).also {
+        it.håndter(nySøknad)
+    }
 }

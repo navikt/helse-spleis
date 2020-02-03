@@ -9,6 +9,7 @@ internal class Sykdomshistorikk private constructor(
     internal constructor() : this(mutableListOf())
 
     internal val size get() = elementer.size
+    internal fun isEmpty() = elementer.isEmpty()
 
     internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
 

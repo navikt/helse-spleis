@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.streams.toList
@@ -114,7 +114,6 @@ internal class JsonDeserializerTest {
                                         )
                                     ),
                                     "tilstand" to "TIL_INFOTRYGD",
-                                    "sykdomstidslinje" to tidslinje,
                                     "utbetalingslinjer" to emptyList<Map<String, Any>>(),
                                     "aktivitetslogger" to mapOf(
                                         "aktiviteter" to emptyList<Any>()

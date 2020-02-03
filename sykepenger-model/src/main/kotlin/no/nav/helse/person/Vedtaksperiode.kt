@@ -1,34 +1,22 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Overlappende
-import no.nav.helse.person.TilstandType.BEREGN_UTBETALING
-import no.nav.helse.person.TilstandType.MOTTATT_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.MOTTATT_NY_SØKNAD
-import no.nav.helse.person.TilstandType.MOTTATT_SENDT_SØKNAD
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_GODKJENNING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.TilstandType.VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.utbetalingstidslinje.joinForOppdrag
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private inline fun <reified T> Set<*>.førsteAvType(): T? {
     return firstOrNull { it is T } as T?
@@ -39,7 +27,6 @@ internal class Vedtaksperiode private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private var sykdomstidslinje: ConcreteSykdomstidslinje,
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
@@ -57,7 +44,6 @@ internal class Vedtaksperiode private constructor(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        sykdomstidslinje: ConcreteSykdomstidslinje,
         tilstand: Vedtaksperiodetilstand = StartTilstand,
         aktivitetslogger: Aktivitetslogger = Aktivitetslogger()
     ) : this(
@@ -65,7 +51,6 @@ internal class Vedtaksperiode private constructor(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
-        sykdomstidslinje = sykdomstidslinje,
         tilstand = tilstand,
         aktivitetslogger = aktivitetslogger,
         maksdato = null,
@@ -81,7 +66,7 @@ internal class Vedtaksperiode private constructor(
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
     private fun inntektsmeldingHendelse() =
-        this.sykdomstidslinje.hendelser().førsteAvType<ModelInntektsmelding>()
+        this.sykdomshistorikk.sykdomstidslinje().hendelser().førsteAvType<ModelInntektsmelding>()
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id)
@@ -94,7 +79,7 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
         visitor.preVisitVedtaksperiodeSykdomstidslinje()
-        sykdomstidslinje.accept(visitor)
+        sykdomshistorikk.sykdomstidslinje().accept(visitor)
         visitor.postVisitVedtaksperiodeSykdomstidslinje()
         visitor.preVisitUtbetalingslinjer()
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
@@ -105,8 +90,6 @@ internal class Vedtaksperiode private constructor(
     private fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
     private fun inntektFraInntektsmelding() =
         inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
-
-    private fun dagsats() = inntektsmeldingHendelse()?.dagsats(LocalDate.MAX, Grunnbeløp.`6G`)
 
     private fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
@@ -164,7 +147,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        this.sykdomstidslinje.overlapperMed(hendelse.sykdomstidslinje())
+        this.sykdomshistorikk.isEmpty() || this.sykdomshistorikk.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -188,15 +171,12 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
-        val tidslinje = this.sykdomstidslinje + hendelse.sykdomstidslinje()
 
-        if (tidslinje.erUtenforOmfang()) {
+        if (sykdomshistorikk.sykdomstidslinje().erUtenforOmfang()) {
             hendelse.error("Ikke støttet dag")
             tilstand(hendelse, TilInfotrygd)
         } else {
-            tilstand(hendelse, nesteTilstand) {
-                sykdomstidslinje = tidslinje
-            }
+            tilstand(hendelse, nesteTilstand)
         }
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -321,7 +301,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
             vedtaksperiode.tilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
-                vedtaksperiode.sykdomstidslinje = nySøknad.sykdomstidslinje()
             }
             vedtaksperiode.aktivitetslogger.info("Fullført behandling av ny søknad")
         }
@@ -589,16 +568,5 @@ internal class Vedtaksperiode private constructor(
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce(ConcreteSykdomstidslinje::plus)
-
-        internal fun nyPeriode(hendelse: SykdomstidslinjeHendelse, id: UUID = UUID.randomUUID()): Vedtaksperiode {
-            return Vedtaksperiode(
-                id = id,
-                aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                sykdomstidslinje = hendelse.sykdomstidslinje()
-            )
-        }
     }
 }
-

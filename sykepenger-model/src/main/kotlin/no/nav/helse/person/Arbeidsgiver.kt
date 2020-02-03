@@ -1,18 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
@@ -117,8 +110,13 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.addVedtaksperiodeObserver(observer) }
     }
 
-    private fun nyVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Vedtaksperiode {
-        return Vedtaksperiode.nyPeriode(hendelse).also {
+    private fun nyVedtaksperiode(nySøknad: ModelNySøknad): Vedtaksperiode {
+        return Vedtaksperiode(
+            id = UUID.randomUUID(),
+            aktørId = nySøknad.aktørId(),
+            fødselsnummer = nySøknad.fødselsnummer(),
+            organisasjonsnummer = nySøknad.organisasjonsnummer()
+        ).also {
             vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
             perioder.add(it)
         }
