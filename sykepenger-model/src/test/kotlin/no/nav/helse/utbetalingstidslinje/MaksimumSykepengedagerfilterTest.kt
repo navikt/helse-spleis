@@ -8,7 +8,8 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -20,6 +21,12 @@ internal class MaksimumSykepengedagerfilterTest {
         private const val PERSON_67_ÅR_FNR_2018 = "10015112345"
     }
 
+    private lateinit var aktivitetslogger: Aktivitetslogger
+
+    @BeforeEach internal fun setup() {
+        aktivitetslogger = Aktivitetslogger()
+    }
+
     @Test internal fun `riktig antall dager`() {
         val tidslinje = tidslinjeOf(10.AP, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
@@ -28,6 +35,14 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test internal fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertTrue(aktivitetslogger.hasWarnings())
+    }
+
+    @Test internal fun `stopper betaling etter 248 dager `() {
+        val tidslinje = tidslinjeOf(249.NAV)
+        assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 1.mars)))
+        assertTrue(aktivitetslogger.hasMessages())
+        assertFalse(aktivitetslogger.hasWarnings())
     }
 
     @Test internal fun `26 uker arbeid resetter utbetalingsgrense`() {
@@ -173,13 +188,26 @@ internal class MaksimumSykepengedagerfilterTest {
         )
     }
 
-    private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String) =
+    private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String, periode: Periode = Periode(1.januar, 31.desember)): List<LocalDate> {
         MaksimumSykepengedagerfilter(
             Alder(fnr),
             NormalArbeidstaker,
-            Periode(1.januar, 31.desember),
-            Aktivitetslogger()
-        )
-            .also { this.accept(it) }
-            .avvisteDatoer()
+            periode,
+            aktivitetslogger
+        ).filter(listOf(this), tidslinjeOf())
+        return AvvisteDager(this).datoer
+    }
+
+    private class AvvisteDager(tidslinje: Utbetalingstidslinje): Utbetalingstidslinje.UtbetalingsdagVisitor {
+        internal val datoer = mutableListOf<LocalDate>()
+
+        init {
+            tidslinje.accept(this)
+        }
+
+        override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+            datoer.add(dag.dato)
+        }
+
+    }
 }

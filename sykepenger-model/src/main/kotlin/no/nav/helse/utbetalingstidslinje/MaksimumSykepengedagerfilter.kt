@@ -27,10 +27,6 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
 
     internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
 
-    internal fun avvisteDatoer(): List<LocalDate> {
-        return avvisteDatoer
-    }
-
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, historiskTidslinje: Utbetalingstidslinje) {
         require(tidslinjer.size == 1) {"Flere arbeidsgivere er ikke støttet enda"}
         val tidslinje = (tidslinjer + historiskTidslinje).reduce(Utbetalingstidslinje::plus)

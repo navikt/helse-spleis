@@ -2,22 +2,29 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.AktivitetsloggerVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.tidslinjeOf
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MinimumInntektsfilterTest {
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
+    private lateinit var aktivitetslogger: Aktivitetslogger
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val PERSON_67_ÅR_FNR_2018 = "05015112345"
+    }
+
+    @BeforeEach internal fun setup() {
+        aktivitetslogger = Aktivitetslogger()
     }
 
     @Test internal fun `ung person som oppfyller minstelønnskravet får ingen avviste dager`() {
@@ -26,7 +33,8 @@ internal class MinimumInntektsfilterTest {
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje),
             Periode(1.januar, 31.desember),
-            Aktivitetslogger()).filter()
+            aktivitetslogger
+        ).filter()
         undersøke(tidslinje)
         assertEquals(5, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
@@ -38,12 +46,15 @@ internal class MinimumInntektsfilterTest {
         MinimumInntektsfilter(Alder(
             UNG_PERSON_FNR_2018),
             listOf(tidslinje),
-            Periode(1.januar, 31.desember),
-            Aktivitetslogger()).filter()
+            Periode(1.januar, 5.januar),
+            aktivitetslogger
+        ).filter()
         undersøke(tidslinje)
         assertEquals(15, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
         assertEquals(10, inspektør.avvistDagTeller)
+        assertTrue(aktivitetslogger.hasMessages())
+        assertFalse(aktivitetslogger.hasWarnings()) // Even though days rejected, the days were not in the periode
     }
 
     @Test internal fun `dager under minstelønnskravet blir avvist i flere tidslinjer`() {
@@ -53,7 +64,8 @@ internal class MinimumInntektsfilterTest {
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje1, tidslinje2),
             Periode(1.januar, 31.desember),
-            Aktivitetslogger()).filter()
+            aktivitetslogger
+        ).filter()
 
         undersøke(tidslinje1)
         assertEquals(15, inspektør.size)
@@ -74,7 +86,8 @@ internal class MinimumInntektsfilterTest {
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje1, tidslinje2),
             Periode(1.januar, 31.desember),
-            Aktivitetslogger()).filter()
+            aktivitetslogger
+        ).filter()
 
         undersøke(tidslinje1)
         assertEquals(10, inspektør.size)
@@ -95,7 +108,7 @@ internal class MinimumInntektsfilterTest {
             Alder(PERSON_67_ÅR_FNR_2018),
             listOf(tidslinje1, tidslinje2),
             Periode(1.januar, 31.desember),
-            Aktivitetslogger()
+            aktivitetslogger
         ).filter()
 
         undersøke(tidslinje1)
