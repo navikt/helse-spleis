@@ -15,7 +15,6 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.mapping.konverterTilHendelse
-import no.nav.helse.serde.reflection.*
 import no.nav.helse.serde.reflection.createArbeidsgiver
 import no.nav.helse.serde.reflection.createNavUtbetalingdag
 import no.nav.helse.serde.reflection.createPerson
@@ -335,8 +334,8 @@ internal data class PersonData(
             }
 
             data class ForeldrepengerData(
-                val foreldrepengeytelse: PeriodeData,
-                val svangerskapsytelse: PeriodeData
+                val foreldrepengeytelse: PeriodeData?,
+                val svangerskapsytelse: PeriodeData?
             ) {
             }
         }

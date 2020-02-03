@@ -189,8 +189,8 @@ private fun parseYtelser(objectMapper: ObjectMapper, personData: PersonData, jso
             aktivitetslogger = Aktivitetslogger()
         ),
         foreldrepenger = ModelForeldrepenger(
-            foreldrepengeytelse = parsePeriode(data.foreldrepenger.foreldrepengeytelse),
-            svangerskapsytelse = parsePeriode(data.foreldrepenger.svangerskapsytelse),
+            foreldrepengeytelse = data.foreldrepenger.foreldrepengeytelse?.let { parsePeriode(it) },
+            svangerskapsytelse = data.foreldrepenger.svangerskapsytelse?.let { parsePeriode(it) },
             aktivitetslogger = Aktivitetslogger()
         ),
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
