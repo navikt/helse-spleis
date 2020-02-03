@@ -6,8 +6,6 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -20,36 +18,6 @@ internal class ModelVilkårsgrunnlagTest {
     private val aktørId = "123"
     private val fødselsnummer = "234"
     private val orgnummer = "345"
-    private val sendtSøknad = ModelSendtSøknad(
-        hendelseId = UUID.randomUUID(),
-        fnr = fødselsnummer,
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
-        perioder = listOf(ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)),
-        originalJson = SykepengesoknadDTO(
-            id = "123",
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.SENDT,
-            aktorId = aktørId,
-            fnr = fødselsnummer,
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "Hello world",
-                orgnummer
-            ),
-            fom = 10.januar,
-            tom = 12.januar,
-            opprettet = LocalDateTime.now(),
-            sendtNav = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = listOf(
-                SoknadsperiodeDTO(10.januar, 12.januar, 100)
-            ),
-            fravar = emptyList()
-        ).toJsonNode().toString(),
-        aktivitetslogger = aktivitetslogger
-    )
 
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
@@ -133,7 +101,6 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
-        originalJson = "{}",
         aktivitetslogger = aktivitetslogger
     )
 
@@ -144,7 +111,6 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
-        originalJson = "{}",
         aktivitetslogger = aktivitetslogger
     )
 
@@ -160,7 +126,6 @@ internal class ModelVilkårsgrunnlagTest {
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = listOf(),
-            originalJson = "{}"
+            ferieperioder = listOf()
         )
 }

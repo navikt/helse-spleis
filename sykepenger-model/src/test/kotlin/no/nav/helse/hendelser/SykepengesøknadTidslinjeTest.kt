@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.*
+import no.nav.helse.Uke
+import no.nav.helse.get
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -101,7 +103,6 @@ internal class SykepengesøknadTidslinjeTest {
             orgnummer = "orgnr",
             rapportertdato = rapportertDato,
             perioder = perioder,
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -112,26 +113,6 @@ internal class SykepengesøknadTidslinjeTest {
         orgnummer = "123456789",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
-        originalJson = SykepengesoknadDTO(
-            id = "123",
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            aktorId = "aktørId",
-            fnr = "fnr",
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "Hello world",
-                "123456789"
-            ),
-            fom = sykeperiodeFOM,
-            tom = sykeperiodeTOM,
-            opprettet = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = listOf(
-                SoknadsperiodeDTO(sykeperiodeFOM, sykeperiodeTOM,100)
-            ),
-            fravar = emptyList()
-        ).toJsonNode().toString(),
         aktivitetslogger = Aktivitetslogger()
     )
 

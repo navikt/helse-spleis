@@ -173,7 +173,6 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -185,7 +184,6 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -205,7 +203,6 @@ internal class YtelserHendelseTest {
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 1000.0,
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()

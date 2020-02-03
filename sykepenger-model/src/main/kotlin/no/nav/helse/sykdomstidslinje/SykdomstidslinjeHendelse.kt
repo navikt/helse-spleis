@@ -1,11 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -22,28 +16,9 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun nøkkelHendelseType(): Dag.NøkkelHendelseType
 
-    abstract fun toJson(): String
-
-    abstract internal fun valider(): Aktivitetslogger
+    internal abstract fun valider(): Aktivitetslogger
 
     internal abstract fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger)
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person)
-
-    companion object Builder {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        fun fromJson(json: String): SykdomstidslinjeHendelse {
-            return objectMapper.readTree(json).let {
-                when (val hendelsetype = Hendelsestype.valueOf(it["type"].textValue())) {
-                    Hendelsestype.Inntektsmelding -> ModelInntektsmelding.fromJson(json)
-                    Hendelsestype.NySøknad -> ModelNySøknad.fromJson(json)
-                    Hendelsestype.SendtSøknad -> ModelSendtSøknad.fromJson(json)
-                    else -> throw RuntimeException("kjenner ikke hendelsetypen $hendelsetype")
-                }
-            }
-        }
-    }
 }

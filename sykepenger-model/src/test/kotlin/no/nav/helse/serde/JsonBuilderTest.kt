@@ -6,22 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.behov.Behov
-import no.nav.helse.hendelser.ModelForeldrepenger
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSykepengehistorikk
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeObserver
+import no.nav.helse.hendelser.*
+import no.nav.helse.person.*
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -31,7 +17,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 private const val aktørId = "12345"
 private const val fnr = "12020052345"
@@ -116,7 +102,6 @@ private val nySøknad
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -130,7 +115,6 @@ private val sendtSøknad
         perioder = listOf(
             ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
         ),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -144,7 +128,6 @@ private val inntektsmelding
         mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = 1.januar,
         beregnetInntekt = 1000.00,
-        originalJson = "{}",
         arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
         ferieperioder = emptyList(),
         aktivitetslogger = Aktivitetslogger()

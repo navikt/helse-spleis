@@ -124,7 +124,6 @@ internal class InntektsmeldingHendelseTest {
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
             aktivitetslogger = aktivitetslogger
@@ -137,7 +136,6 @@ internal class InntektsmeldingHendelseTest {
         orgnummer = orgnr,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
-        originalJson = "{}",
         aktivitetslogger = aktivitetslogger
     )
 
@@ -149,7 +147,6 @@ internal class InntektsmeldingHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(*perioder),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 

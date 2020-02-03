@@ -41,7 +41,6 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
         førsteFraværsdag = this["foersteFravaersdag"].asLocalDate(),
         beregnetInntekt = this["beregnetInntekt"].asDouble(),
         aktivitetslogger = aktivitetslogger,
-        originalJson = this.toJson(),
         arbeidsgiverperioder = this["arbeidsgiverperioder"].map(::asPeriode),
         ferieperioder = this["ferieperioder"].map(::asPeriode)
     )

@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -113,7 +113,6 @@ internal class ModelSendtSøknadTest {
             orgnummer = "987654321",
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(*perioder),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
     }

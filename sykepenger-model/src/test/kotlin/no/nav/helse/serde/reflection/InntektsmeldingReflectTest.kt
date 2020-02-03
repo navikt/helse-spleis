@@ -28,8 +28,7 @@ internal class InntektsmeldingReflectTest {
                 "arbeidsgiverperioder",
                 "ferieperioder",
                 "aktivitetslogger"
-            ),
-            skalIkkeMappes = listOf("originalJson")
+            )
         )
     }
 
@@ -57,7 +56,6 @@ internal class InntektsmeldingReflectTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )

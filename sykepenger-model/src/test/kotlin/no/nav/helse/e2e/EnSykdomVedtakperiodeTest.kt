@@ -162,7 +162,6 @@ internal class EnSykdomVedtakperiodeTest {
             orgnummer = ORGNUMMER,
             rapportertdato = rapportertdato,
             sykeperioder = listOf(*sykeperioder),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -173,7 +172,6 @@ internal class EnSykdomVedtakperiodeTest {
             orgnummer = ORGNUMMER,
             rapportertdato = rapportertdato,
             perioder = listOf(*perioder),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -194,7 +192,6 @@ internal class EnSykdomVedtakperiodeTest {
             mottattDato = rapportertdato,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
-            originalJson = "{}",
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
             aktivitetslogger = Aktivitetslogger()

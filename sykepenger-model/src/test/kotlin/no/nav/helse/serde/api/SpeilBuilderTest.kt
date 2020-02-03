@@ -58,7 +58,6 @@ private val nySøknad
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -72,7 +71,6 @@ private val sendtSøknad
         perioder = listOf(
             ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
         ),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -86,7 +84,6 @@ private val inntektsmelding
         mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = 1.januar,
         beregnetInntekt = 1000.00,
-        originalJson = "{}",
         arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
         ferieperioder = emptyList(),
         aktivitetslogger = Aktivitetslogger()

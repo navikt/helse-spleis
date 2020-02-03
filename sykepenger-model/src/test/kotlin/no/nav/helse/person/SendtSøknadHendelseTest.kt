@@ -141,7 +141,6 @@ internal class SendtSøknadHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(*perioder),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 
@@ -153,7 +152,6 @@ internal class SendtSøknadHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 

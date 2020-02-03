@@ -178,7 +178,6 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             rapportertdato = rapportertdato,
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -190,7 +189,6 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             rapportertdato = rapportertdato,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -204,7 +202,6 @@ class PåminnelserOgTimeoutTest {
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()

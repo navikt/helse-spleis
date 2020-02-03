@@ -1,11 +1,14 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class Testhendelse(
     private val rapportertdato: LocalDateTime = LocalDateTime.of(2019, 9, 16, 10, 45),
@@ -33,10 +36,6 @@ internal class Testhendelse(
 
     override fun rapportertdato(): LocalDateTime {
         return rapportertdato
-    }
-
-    override fun toJson(): String {
-        TODO("not implemented")
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {

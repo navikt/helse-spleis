@@ -57,7 +57,6 @@ private fun parseSendtSøknad(objectMapper: ObjectMapper, personData: PersonData
         orgnummer = data.orgnummer,
         rapportertdato = data.rapportertdato,
         perioder = data.perioder.map(::parseSykeperiode),
-        originalJson = "{}",
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }
@@ -100,7 +99,6 @@ private fun parseNySøknad(objectMapper: ObjectMapper, personData: PersonData, j
         orgnummer = data.orgnummer,
         rapportertdato = data.rapportertdato,
         sykeperioder = data.sykeperioder.map { Triple(it.fom, it.tom, it.sykdomsgrad) },
-        originalJson = "{}",
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }
@@ -168,7 +166,6 @@ private fun parseInntektsmelding(
         førsteFraværsdag = data.førsteFraværsdag,
         beregnetInntekt = data.beregnetInntekt,
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger),
-        originalJson = "{}",
         arbeidsgiverperioder = data.arbeidsgiverperioder.map { Periode(it.fom, it.tom) },
         ferieperioder = data.ferieperioder.map { Periode(it.fom, it.tom) }
     )

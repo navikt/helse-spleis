@@ -15,22 +15,14 @@ import no.nav.helse.person.Person
 import no.nav.helse.september
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
-import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.ArbeidsgiverDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsstatusDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadstypeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SykepengesoknadDTO
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class PersonPersisteringPostgresTest {
 
@@ -107,27 +99,6 @@ class PersonPersisteringPostgresTest {
                 orgnummer = "123456789",
                 rapportertdato = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                originalJson = SykepengesoknadDTO(
-                    id = "123",
-                    type = SoknadstypeDTO.ARBEIDSTAKERE,
-                    status = SoknadsstatusDTO.SENDT,
-                    aktorId = aktørId,
-                    fnr = "fnr",
-                    sykmeldingId = UUID.randomUUID().toString(),
-                    arbeidsgiver = ArbeidsgiverDTO(
-                        "Hello world",
-                        "123456789"
-                    ),
-                    fom = 16.september,
-                    tom = 5.oktober,
-                    opprettet = LocalDateTime.now(),
-                    sendtNav = LocalDateTime.now(),
-                    egenmeldinger = emptyList(),
-                    soknadsperioder = listOf(
-                        SoknadsperiodeDTO(16.september, 5.oktober, 100)
-                    ),
-                    fravar = emptyList()
-                ).toJsonNode().toString(),
                 aktivitetslogger = Aktivitetslogger()
             )
         )
@@ -152,26 +123,6 @@ class PersonPersisteringPostgresTest {
         orgnummer = "123456789",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
-        originalJson = SykepengesoknadDTO(
-            id = "123",
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            aktorId = aktørId,
-            fnr = "fnr",
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "Hello world",
-                "123456789"
-            ),
-            fom = 16.september,
-            tom = 5.oktober,
-            opprettet = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = listOf(
-                SoknadsperiodeDTO(16.september, 5.oktober, 100)
-            ),
-            fravar = emptyList()
-        ).toJsonNode().toString(),
         aktivitetslogger = Aktivitetslogger()
     )
 

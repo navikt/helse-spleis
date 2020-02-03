@@ -32,8 +32,7 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
                 third = it.path("sykmeldingsgrad").asInt()
             )
         },
-        aktivitetslogger = aktivitetslogger,
-        originalJson = this.toJson()
+        aktivitetslogger = aktivitetslogger
     )
 
     object Factory : MessageFactory {

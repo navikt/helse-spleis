@@ -1,13 +1,13 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -127,7 +127,6 @@ internal class SykdomshistorikkTest {
         orgnummer = "987654321",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -138,7 +137,6 @@ internal class SykdomshistorikkTest {
         orgnummer = "987654321",
         rapportertdato = LocalDateTime.now(),
         perioder = listOf(*perioder),
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -159,7 +157,6 @@ internal class SykdomshistorikkTest {
         mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
-        originalJson = "{}",
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder,
         aktivitetslogger = Aktivitetslogger()

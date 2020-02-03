@@ -1,16 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
 import kotlin.streams.toList
-
-private val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 internal interface SykdomstidslinjeElement {
     fun accept(visitor: SykdomstidslinjeVisitor)
@@ -72,13 +64,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun harGrenseInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in (other.førsteDag()..other.sisteDag())
-
-    private fun jsonRepresentation(): JsonTidslinje {
-        val dager = flatten().map { it.toJsonDag() }
-        val hendelser = flatten().flatMap { it.toJsonHendelse() }.distinctBy { it.hendelseId() }
-            .map { objectMapper.readTree(it.toJson()) }
-        return JsonTidslinje(dager = dager, hendelser = hendelser)
-    }
 
     companion object {
         fun sykedag(gjelder: LocalDate, hendelse: SykdomstidslinjeHendelse) =

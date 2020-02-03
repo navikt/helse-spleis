@@ -68,14 +68,6 @@ internal class GodkjenningHendelseTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
-    private fun assertBehov(behov: List<Behov>, antall: Int, inneholder: List<Behovstype>) {
-        val behovTyperAsString = inneholder.map { it.name }
-        assertEquals(antall, behov
-            .filter { it.behovType() == behovTyperAsString }
-            .count()
-        )
-    }
-
     private fun assertTilstand(expectedTilstand: TilstandType) {
         assertEquals(
             expectedTilstand,
@@ -136,7 +128,6 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -148,7 +139,6 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -162,7 +152,6 @@ internal class GodkjenningHendelseTest {
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 1000.0,
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()

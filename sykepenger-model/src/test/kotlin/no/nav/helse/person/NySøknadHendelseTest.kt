@@ -97,7 +97,6 @@ internal class NySøknadHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 

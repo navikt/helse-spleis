@@ -2,10 +2,7 @@ package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.util.RawValue
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
@@ -31,7 +28,6 @@ class ModelInntektsmelding(
     private val mottattDato: LocalDateTime,
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
-    private val originalJson: String,
     arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger
@@ -57,7 +53,6 @@ class ModelInntektsmelding(
                     førsteFraværsdag = it["inntektsmelding"]["foersteFravaersdag"].asLocalDate(),
                     beregnetInntekt = it["inntektsmelding"]["beregnetInntekt"].asDouble(),
                     aktivitetslogger = Aktivitetslogger(),
-                    originalJson = objectMapper.writeValueAsString(it["inntektsmelding"]),
                     arbeidsgiverperioder = it["inntektsmelding"]["arbeidsgiverperioder"].map(::asPeriode),
                     ferieperioder = it["inntektsmelding"]["ferieperioder"].map(::asPeriode)
                 )
@@ -164,16 +159,6 @@ class ModelInntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person) {
         arbeidsgiver.håndter(this, person)
     }
-
-    override fun toJson(): String = objectMapper.writeValueAsString(
-        objectMapper.convertValue<ObjectNode>(
-            mapOf(
-                "hendelseId" to hendelseId(),
-                "type" to hendelsestype()
-            )
-        ).putRawValue("inntektsmelding", RawValue(originalJson))
-    )
-
 
     fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
         if (refusjon == null) return false

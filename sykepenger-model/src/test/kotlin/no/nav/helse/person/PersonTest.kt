@@ -334,7 +334,6 @@ internal class PersonTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
-            originalJson = "{}",
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
         )
@@ -349,7 +348,6 @@ internal class PersonTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = perioder,
-        originalJson = "{}",
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -361,7 +359,6 @@ internal class PersonTest {
             orgnummer = organisasjonsnummer,
             rapportertdato = rapportertDato,
             perioder = perioder,
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 
@@ -427,7 +424,7 @@ internal class PersonTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.START
+            tilstander[vedtaksperiodeindeks] = START
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

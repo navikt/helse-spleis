@@ -53,21 +53,36 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `ikke egen ansatt og ingen avvik i inntekt`() {
         val månedslønn = 1000.0
-        håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = månedslønn, inntekter = tolvMånederMedInntekt(månedslønn))
+        håndterVilkårsgrunnlag(
+            egenAnsatt = false,
+            beregnetInntekt = månedslønn,
+            inntekter = tolvMånederMedInntekt(månedslønn)
+        )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.BEREGN_UTBETALING)
         val utgangspunktForBeregningAvYtelse = inspektør.sykdomstidslinje(0).førsteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
-        assertEquals(utgangspunktForBeregningAvYtelse.minusDays(1), personObserver.etterspurtBehov(vedtaksperiodeId, Behovstype.Sykepengehistorikk, "utgangspunktForBeregningAvYtelse"))
+        assertEquals(
+            utgangspunktForBeregningAvYtelse.minusDays(1),
+            personObserver.etterspurtBehov(
+                vedtaksperiodeId,
+                Behovstype.Sykepengehistorikk,
+                "utgangspunktForBeregningAvYtelse"
+            )
+        )
     }
 
     @Test
     fun `ikke egen ansatt og mer enn 25 % avvik i inntekt`() {
         val månedslønn = 1000.0
-        val `25 % mer` = månedslønn*1.25 + 1
-        håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = `25 % mer`, inntekter = tolvMånederMedInntekt(månedslønn))
+        val `25 % mer` = månedslønn * 1.25 + 1
+        håndterVilkårsgrunnlag(
+            egenAnsatt = false,
+            beregnetInntekt = `25 % mer`,
+            inntekter = tolvMånederMedInntekt(månedslønn)
+        )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
@@ -77,8 +92,12 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `ikke egen ansatt og mindre enn 25 % avvik i inntekt`() {
         val månedslønn = 1000.0
-        val `25 % mindre` = månedslønn*0.75 - 1
-        håndterVilkårsgrunnlag(egenAnsatt = false, beregnetInntekt = `25 % mindre`, inntekter = tolvMånederMedInntekt(månedslønn))
+        val `25 % mindre` = månedslønn * 0.75 - 1
+        håndterVilkårsgrunnlag(
+            egenAnsatt = false,
+            beregnetInntekt = `25 % mindre`,
+            inntekter = tolvMånederMedInntekt(månedslønn)
+        )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
@@ -96,7 +115,10 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(expectedTilstand, inspektør.tilstand(0)) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        assertEquals(
+            expectedTilstand,
+            inspektør.tilstand(0)
+        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
     }
 
     private fun håndterVilkårsgrunnlag(
@@ -118,7 +140,6 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 
@@ -130,7 +151,6 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
-            originalJson = "{}",
             aktivitetslogger = aktivitetslogger
         )
 
@@ -144,7 +164,6 @@ internal class VilkårsgrunnlagHendelseTest {
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = beregnetInntekt,
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
             aktivitetslogger = aktivitetslogger
@@ -172,6 +191,7 @@ internal class VilkårsgrunnlagHendelseTest {
         private val tilstander = mutableMapOf<Int, TilstandType>()
         internal val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+
         init {
             person.accept(this)
         }
@@ -196,8 +216,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
         internal fun tilstand(indeks: Int) = tilstander[indeks]
 
-        internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:
-        throw IllegalAccessException()
+        internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?: throw IllegalAccessException()
 
     }
 

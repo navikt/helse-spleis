@@ -8,8 +8,6 @@ import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.testhelpers.april
-import no.nav.helse.toJsonNode
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -103,7 +101,6 @@ internal class VedtaksperiodeTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
@@ -120,24 +117,7 @@ internal class VedtaksperiodeTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = perioder,
-        aktivitetslogger = Aktivitetslogger(),
-        originalJson = SykepengesoknadDTO(
-            id = "123",
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            status = SoknadsstatusDTO.NY,
-            aktorId = aktørId,
-            fnr = fnr,
-            sykmeldingId = UUID.randomUUID().toString(),
-            arbeidsgiver = ArbeidsgiverDTO(
-                "Hello world",
-                orgnummer
-            ),
-            fom = 16.september,
-            tom = 5.oktober,
-            opprettet = LocalDateTime.now(),
-            egenmeldinger = emptyList(),
-            soknadsperioder = perioder.map { SoknadsperiodeDTO(it.first, it.second, it.third) }
-        ).toJsonNode().toString()
+        aktivitetslogger = Aktivitetslogger()
     )
 
     private fun sendtSøknad(
@@ -156,7 +136,6 @@ internal class VedtaksperiodeTest {
             orgnummer = organisasjonsnummer,
             rapportertdato = rapportertDato,
             perioder = perioder,
-            originalJson = "{}",
             aktivitetslogger = Aktivitetslogger()
         )
 

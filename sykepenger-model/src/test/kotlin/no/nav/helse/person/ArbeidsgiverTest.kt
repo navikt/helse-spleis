@@ -9,11 +9,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class ArbeidsgiverTest {
-    private val uuid = UUID.randomUUID()
-
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
         val inntektsmelding = ModelInntektsmelding(
@@ -29,7 +27,6 @@ internal class ArbeidsgiverTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),
-            originalJson = "{}",
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )

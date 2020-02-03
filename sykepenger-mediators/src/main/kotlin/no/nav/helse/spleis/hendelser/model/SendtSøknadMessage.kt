@@ -58,8 +58,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
                 }
             } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
                 ?: emptyList()),
-            aktivitetslogger = aktivitetslogger,
-            originalJson = this.toJson()
+            aktivitetslogger = aktivitetslogger
         )
     }
 
