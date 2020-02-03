@@ -1,8 +1,8 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Arbeidsgiver
-import java.util.*
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import java.util.*
 
 internal class ArbeidsgiverReflect(arbeidsgiver: Arbeidsgiver) {
     private val organisasjonsnummer: String = arbeidsgiver["organisasjonsnummer"]
@@ -12,4 +12,6 @@ internal class ArbeidsgiverReflect(arbeidsgiver: Arbeidsgiver) {
         "organisasjonsnummer" to organisasjonsnummer,
         "id" to id
     )
+
+    internal fun toSpeilMap() = toMap()
 }

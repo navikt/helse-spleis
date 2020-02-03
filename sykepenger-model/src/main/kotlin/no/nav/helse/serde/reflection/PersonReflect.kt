@@ -11,4 +11,6 @@ internal class PersonReflect(person: Person) {
         "aktørId" to aktørId,
         "fødselsnummer" to fødselsnummer
     )
+
+    internal fun toSpeilMap() = toMap()
 }

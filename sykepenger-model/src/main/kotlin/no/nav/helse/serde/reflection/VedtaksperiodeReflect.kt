@@ -3,9 +3,9 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val id: UUID = vedtaksperiode["id"]
@@ -36,5 +36,15 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "inntektFraInntektsmelding" to inntektFraInntektsmelding,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
+    )
+
+    internal fun toSpeilMap() = mutableMapOf<String, Any?>(
+        "id" to id,
+        "maksdato" to maksdato,
+        "godkjentAv" to godkjentAv,
+        "utbetalingsreferanse" to utbetalingsreferanse,
+        "førsteFraværsdag" to førsteFraværsdag,
+        "inntektFraInntektsmelding" to inntektFraInntektsmelding,
+        "dataForVilkårsvurdering" to dataForVilkårsvurdering
     )
 }

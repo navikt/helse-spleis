@@ -3,10 +3,10 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.ModelNySøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class NySøknadReflect(nySøknad: ModelNySøknad) {
     private val hendelseId: UUID = nySøknad.hendelseId()
@@ -29,6 +29,16 @@ internal class NySøknadReflect(nySøknad: ModelNySøknad) {
             "sykeperioder" to sykeperioder.map { SykeperiodeReflect(it).toMap() },
             "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
+    )
+
+    internal fun toSpeilMap() = mutableMapOf<String, Any?>(
+        "type" to hendelsestype.name,
+        "hendelseId" to hendelseId,
+        "fnr" to fnr,
+        "aktørId" to aktørId,
+        "orgnummer" to orgnummer,
+        "rapportertdato" to rapportertdato,
+        "sykeperioder" to sykeperioder.map { SykeperiodeReflect(it).toMap() }
     )
 
     private class SykeperiodeReflect(sykeperiode: ReflectInstance) {

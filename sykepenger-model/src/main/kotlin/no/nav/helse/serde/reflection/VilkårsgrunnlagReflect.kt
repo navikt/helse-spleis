@@ -3,9 +3,9 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
     private val hendelseId: UUID = vilkårsgrunnlag.hendelseId()
@@ -32,6 +32,16 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
             "erEgenAnsatt" to erEgenAnsatt,
             "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
+    )
+
+    internal fun toSpeilMap() = mutableMapOf<String, Any?>(
+        "type" to hendelsestype.name,
+        "hendelseId" to hendelseId,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "orgnummer" to orgnummer,
+        "rapportertDato" to rapportertDato,
+        "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
+        "erEgenAnsatt" to erEgenAnsatt
     )
 
     private class InntektsmånederReflect(private val måned: ModelVilkårsgrunnlag.Måned) {

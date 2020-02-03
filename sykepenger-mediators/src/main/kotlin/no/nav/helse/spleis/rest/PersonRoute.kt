@@ -7,6 +7,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.helse.serde.api.serializePersonForSpeil
 
 internal fun Route.person(personRestInterface: PersonRestInterface) {
     get("/api/person/{aktørId}") {
@@ -21,6 +22,6 @@ internal fun Route.person(personRestInterface: PersonRestInterface) {
 private suspend fun PipelineContext<Unit, ApplicationCall>.finnPerson(personRestInterface: PersonRestInterface) {
     personRestInterface.hentSak(call.parameters["aktørId"]!!)
         ?.let {
-            call.respond(TODO())
+            call.respond(serializePersonForSpeil(it))
         } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
 }

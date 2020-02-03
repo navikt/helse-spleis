@@ -3,10 +3,10 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
 internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
     private val hendelseId: UUID = inntektsmelding.hendelseId()
@@ -39,6 +39,20 @@ internal class InntektsmeldingReflect(inntektsmelding: ModelInntektsmelding) {
             "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
             "ferieperioder" to ferieperioder.map(::periodeToMap)
         )
+    )
+
+    internal fun toSpeilMap() = mutableMapOf<String, Any?>(
+        "type" to hendelsestype.name,
+        "hendelseId" to hendelseId,
+        "refusjon" to refusjon,
+        "orgnummer" to orgnummer,
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "mottattDato" to mottattDato,
+        "førsteFraværsdag" to førsteFraværsdag,
+        "beregnetInntekt" to beregnetInntekt,
+        "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
+        "ferieperioder" to ferieperioder.map(::periodeToMap)
     )
 
     private fun periodeToMap(periode: ModelInntektsmelding.InntektsmeldingPeriode) = mutableMapOf<String, Any?>(
