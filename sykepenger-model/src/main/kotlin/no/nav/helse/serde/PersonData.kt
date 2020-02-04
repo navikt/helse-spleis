@@ -149,7 +149,7 @@ private fun parseDag(
     hendelser: List<ArbeidstakerHendelse>
 ): Dag {
     val hendelse = hendelser.find { it.hendelseId() == data.hendelseId } as SykdomstidslinjeHendelse
-    val dag: Dag = when (data.type) {
+    return when (data.type) {
         JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, hendelse)
         JsonDagType.EGENMELDINGSDAG -> Egenmeldingsdag(data.dagen, hendelse)
         JsonDagType.FERIEDAG -> Feriedag(data.dagen, hendelse)
@@ -161,10 +161,6 @@ private fun parseDag(
         JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen, hendelse)
         JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen, hendelse)
     }
-
-    val erstatter = data.erstatter.map { parseDag(it, hendelser) }
-    dag.erstatter.addAll(erstatter)
-    return dag
 }
 
 private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
@@ -431,8 +427,7 @@ internal data class PersonData(
             data class DagData(
                 val dagen: LocalDate,
                 val hendelseId: UUID,
-                val type: JsonDagType,
-                val erstatter: List<DagData>
+                val type: JsonDagType
             )
 
             data class SykdomshistorikkData(

@@ -63,30 +63,30 @@ internal object Undecided : Strategy() {
 }
 
 internal object Row : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = row.erstatter(column)
+    override fun decide(row: Dag, column: Dag): Dag = row
 }
 
 internal object Column : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = column.erstatter(row)
+    override fun decide(row: Dag, column: Dag): Dag = column
 }
 
 internal object Latest : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
         when {
             row.sisteHendelse() == column.sisteHendelse() -> throw IllegalStateException("Strategien latest støtter ikke sammenliging av eventer med samme tidspunkt. (row: $row, column: $column)")
-            row.sisteHendelse() > (column.sisteHendelse()) -> row.erstatter(column)
-            else -> column.erstatter(row)
+            row.sisteHendelse() > (column.sisteHendelse()) -> row
+            else -> column
         }
 }
 
 internal object LatestOrRow : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
-        if (row.sisteHendelse() >= (column.sisteHendelse())) row.erstatter(column) else column.erstatter(row)
+        if (row.sisteHendelse() >= (column.sisteHendelse())) row else column
 }
 
 internal object LatestOrColumn : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
-        if (row.sisteHendelse() > (column.sisteHendelse())) row.erstatter(column) else column.erstatter(row)
+        if (row.sisteHendelse() > (column.sisteHendelse())) row else column
 }
 
 internal object Impossible : Strategy() {

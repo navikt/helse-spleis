@@ -13,26 +13,15 @@ internal abstract class Dag internal constructor(
 ) :
     ConcreteSykdomstidslinje() {
 
-    internal val erstatter: MutableList<Dag> = mutableListOf()
-
     internal abstract fun dagType(): JsonDagType
 
     internal fun erHelg() = this.dagen.erHelg()
 
     override fun førsteDag() = dagen
     override fun sisteDag() = dagen
-    override fun hendelser(): Set<SykdomstidslinjeHendelse> = setOf(hendelse) + erstatter.flatMap { it.hendelser() }
+    override fun hendelser(): Set<SykdomstidslinjeHendelse> = setOf(hendelse)
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
-
-    internal fun erstatter(vararg dager: Dag): Dag {
-        erstatter.addAll(dager
-            .filterNot { it is ImplisittDag }
-            .flatMap { it.erstatter + it })
-        return this
-    }
-
-    fun dagerErstattet(): List<Dag> = erstatter
 
     internal open fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
 
@@ -73,5 +62,5 @@ internal abstract class Dag internal constructor(
     }
 }
 
-private val helgedager = listOf<DayOfWeek>(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+private val helgedager = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager

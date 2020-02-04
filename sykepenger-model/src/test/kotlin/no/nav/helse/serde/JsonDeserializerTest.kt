@@ -60,8 +60,7 @@ internal class JsonDeserializerTest {
                 mapOf(
                     "dagen" to it.toString(),
                     "hendelseId" to inntektsmeldingHendelseId,
-                    "type" to "SYKEDAG",
-                    "erstatter" to emptyList<Map<String, Any>>()
+                    "type" to "SYKEDAG"
                 )
             }
             .toList()

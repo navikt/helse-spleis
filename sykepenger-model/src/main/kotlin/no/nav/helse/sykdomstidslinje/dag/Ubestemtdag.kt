@@ -5,9 +5,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
 internal class Ubestemtdag internal constructor(dato: LocalDate, hendelse: SykdomstidslinjeHendelse): Dag(dato, hendelse) {
-    internal constructor(left: Dag, right: Dag) : this(left.dagen, sykdomshendelse(left, right)) {
-        erstatter(left,right)
-    }
+    internal constructor(left: Dag, right: Dag) : this(left.dagen, sykdomshendelse(left, right))
 
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitUbestemt(this)

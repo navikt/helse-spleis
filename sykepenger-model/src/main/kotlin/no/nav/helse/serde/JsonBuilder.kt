@@ -471,14 +471,11 @@ internal class JsonBuilder : PersonVisitor {
         JsonState {
 
         override fun visitDag(dag: Dag) {
-            fun mapDag(dagen: Dag): MutableMap<String, Any?> = mutableMapOf(
-                "dagen" to dagen.dagen,
-                "hendelseId" to dagen.hendelse.hendelseId(),
-                "type" to dagen.dagType().name,
-                "erstatter" to dagen.erstatter.map { mapDag(it) }
-            )
-
-            sykdomstidslinjeListe.add(mapDag(dag))
+            sykdomstidslinjeListe.add(mutableMapOf(
+                "dagen" to dag.dagen,
+                "hendelseId" to dag.hendelse.hendelseId(),
+                "type" to dag.dagType().name
+            ))
         }
 
         override fun postVisitHendelseSykdomstidslinje() {

@@ -18,10 +18,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
-private inline fun <reified T> Set<*>.førsteAvType(): T? {
-    return firstOrNull { it is T } as T?
-}
-
 internal class Vedtaksperiode private constructor(
     private val id: UUID,
     private val aktørId: String,
@@ -65,9 +61,6 @@ internal class Vedtaksperiode private constructor(
 
     private val observers: MutableList<VedtaksperiodeObserver> = mutableListOf()
 
-    private fun inntektsmeldingHendelse() =
-        this.sykdomshistorikk.sykdomstidslinje().hendelser().førsteAvType<ModelInntektsmelding>()
-
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id)
         visitor.visitMaksdato(maksdato)
@@ -87,9 +80,8 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    private fun førsteFraværsdag(): LocalDate? = førsteFraværsdag ?: inntektsmeldingHendelse()?.førsteFraværsdag
-    private fun inntektFraInntektsmelding() =
-        inntektFraInntektsmelding ?: inntektsmeldingHendelse()?.beregnetInntekt
+    private fun førsteFraværsdag(): LocalDate? = førsteFraværsdag
+    private fun inntektFraInntektsmelding() = inntektFraInntektsmelding
 
     private fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
@@ -318,6 +310,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
+            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, MottattInntektsmelding)
             vedtaksperiode.aktivitetslogger.info("Fullført behandling av inntektsmelding")
         }

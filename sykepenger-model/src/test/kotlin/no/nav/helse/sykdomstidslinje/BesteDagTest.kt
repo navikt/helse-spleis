@@ -25,68 +25,65 @@ internal class BesteDagTest {
 
     @Test
     fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
-        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Feriedag::class, 1)
-        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Feriedag::class, 1)
+        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Feriedag::class)
+        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Feriedag::class)
     }
 
     @Test
     fun `nulldag taper mot en gitt dag`() {
-        assertWinner(implisittDag, sykdomFraSendtSøknad, Sykedag::class, 0)
-        assertWinner(sykdomFraSendtSøknad, implisittDag, Sykedag::class, 0)
+        assertWinner(implisittDag, sykdomFraSendtSøknad, Sykedag::class)
+        assertWinner(sykdomFraSendtSøknad, implisittDag, Sykedag::class)
     }
 
     @Test
     fun `ferie vinner over sykdom`() {
-        assertWinner(ferieFraSøknad, sykdomFraSendtSøknad, Feriedag::class, 1)
+        assertWinner(ferieFraSøknad, sykdomFraSendtSøknad, Feriedag::class)
     }
 
     @Test
     fun `søknad med egenmelding vinner over en gitt dag`() {
-        assertWinner(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class, 1)
-        assertWinner(egenmeldingFraInntektsmelding, ferieFraSøknad, Egenmeldingsdag::class, 1)
+        assertWinner(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class)
+        assertWinner(egenmeldingFraInntektsmelding, ferieFraSøknad, Egenmeldingsdag::class)
     }
 
     @Test
     fun `sammenligning med utenlandsdag git altid ubestemtdag`() {
-        assertWinnerBidirectional(implisittDag, utenlandsFraSendtSøknad, Ubestemtdag::class, 1)
-        assertWinnerBidirectional(arbeidsdag, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
-        assertWinnerBidirectional(sykdomFraSendtSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
-        assertWinnerBidirectional(egenmeldingFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
-        assertWinnerBidirectional(ferieFraSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
-        assertWinnerBidirectional(ferieFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class, 2)
+        assertWinnerBidirectional(implisittDag, utenlandsFraSendtSøknad, Ubestemtdag::class)
+        assertWinnerBidirectional(arbeidsdag, utenlandsFraSendtSøknad, Ubestemtdag::class)
+        assertWinnerBidirectional(sykdomFraSendtSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class)
+        assertWinnerBidirectional(egenmeldingFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class)
+        assertWinnerBidirectional(ferieFraSøknad, utenlandsFraSendtSøknad, Ubestemtdag::class)
+        assertWinnerBidirectional(ferieFraInntektsmelding, utenlandsFraSendtSøknad, Ubestemtdag::class)
     }
 
     @Test
     fun `arbeidsdag vinner over sykedag`() {
-        assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class, 1)
-        assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class, 1)
+        assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class)
+        assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class)
     }
 
     @Test
     fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
-        assertWinner(sykdomFraSendtSøknad, egenmeldingFraInntektsmelding, Sykedag::class, 1)
-        assertWinner(egenmeldingFraInntektsmelding, sykdomFraSendtSøknad, Sykedag::class, 1)
+        assertWinner(sykdomFraSendtSøknad, egenmeldingFraInntektsmelding, Sykedag::class)
+        assertWinner(egenmeldingFraInntektsmelding, sykdomFraSendtSøknad, Sykedag::class)
     }
 
     private fun <T : Dag> assertWinner(
         dag1: Dag,
         dag2: Dag,
-        expectedWinnerClass: KClass<T>,
-        antallDagerErstattet: Int
+        expectedWinnerClass: KClass<T>
     ) {
         val winner = dag1.beste(dag2)
         assertEquals(expectedWinnerClass, winner::class)
-        assertEquals(antallDagerErstattet, winner.dagerErstattet().size)
     }
 
     private fun <T : Dag> assertWinnerBidirectional(
         dag1: Dag,
         dag2: Dag,
-        expectedWinnerClass: KClass<T>,
-        antallDagerErstattet: Int
+        expectedWinnerClass: KClass<T>
     ) {
-        assertWinner(dag1, dag2, expectedWinnerClass, antallDagerErstattet)
-        assertWinner(dag2, dag1, expectedWinnerClass, antallDagerErstattet)
+        assertWinner(dag1, dag2, expectedWinnerClass)
+        assertWinner(dag2, dag1, expectedWinnerClass)
     }
 }
 
