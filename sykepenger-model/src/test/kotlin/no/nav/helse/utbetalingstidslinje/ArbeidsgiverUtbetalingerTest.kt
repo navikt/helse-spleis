@@ -3,8 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
@@ -287,16 +285,6 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertTrue(aktivitetslogger.hasWarnings())
         assertFalse(aktivitetslogger.hasErrors())
     }
-
-    private fun ConcreteSykdomstidslinje.utbetalingslinjer(
-        sisteDag: LocalDate = this.sisteDag(),
-        sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null
-    ) = UtbetalingstidslinjeBuilder(
-        sykdomstidslinje = this.kutt(sisteDag)!!,
-        sisteDag = sisteDag,
-        inntekthistorikk = Inntekthistorikk(),
-        sisteNavDagForArbeidsgiverFørPerioden = sisteNavDagForArbeidsgiverFørPerioden
-    ).result()
 
     private fun undersøke(fnr: String, vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
