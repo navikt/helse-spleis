@@ -72,7 +72,6 @@ class ModelYtelser(
     }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        sykepengehistorikk.kopierAktiviteterTil(aktivitetslogger)
         aktivitetslogger.addAll(this.aktivitetslogger, "Ytelser")
     }
 
