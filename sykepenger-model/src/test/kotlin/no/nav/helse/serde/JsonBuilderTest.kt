@@ -13,7 +13,6 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -31,50 +30,15 @@ internal class JsonBuilderTest {
         .registerModule(JavaTimeModule())
 
     @Test
-    @Disabled("Out of memory 😭")
     internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
-        val person = lagPerson()
-        person.get<Person, MutableList<PersonObserver>>("observers").clear()
-        person.get<Person, MutableList<Arbeidsgiver>>("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.get<Arbeidsgiver, MutableList<VedtaksperiodeObserver>>("vedtaksperiodeObservers")
-                .clear()
-            arbeidsgiver.get<Arbeidsgiver, MutableList<Vedtaksperiode>>("perioder").forEach { vedtaksperiode ->
-                vedtaksperiode.get<Vedtaksperiode, MutableList<VedtaksperiodeObserver>>("observers").clear()
-            }
-        }
+        val person = lagPerson().removeObservers()
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
-        val personDeserialisert = parsePerson(jsonBuilder.toString())
+        val personDeserialisert = parsePerson(jsonBuilder.toString()).removeObservers()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
         assertEquals(personPre, personPost)
-    }
-
-    private fun lagPerson() =
-        Person(aktørId, fnr).apply {
-            addObserver(object : PersonObserver {
-                override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-                    if (event.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
-                        vedtaksperiodeId = event.vedtaksperiodeId()
-                    }
-                }
-            })
-
-            håndter(nySøknad)
-            håndter(sendtSøknad)
-            håndter(inntektsmelding)
-            håndter(vilkårsgrunnlag)
-            håndter(ytelser)
-            håndter(manuellSaksbehandling)
-        }
-
-    @Test
-    internal fun `print person som json`() {
-        val person = lagPerson()
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
-        println(jsonBuilder.toString())
     }
 
     @Test
@@ -91,6 +55,35 @@ internal class JsonBuilderTest {
 
         assertEquals(json, json2)
         assertDeepEquals(person, result)
+    }
+}
+
+private fun lagPerson() =
+    Person(aktørId, fnr).apply {
+        addObserver(object : PersonObserver {
+            override fun vedtaksperiodeTrengerLøsning(event: Behov) {
+                if (event.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
+                    vedtaksperiodeId = event.vedtaksperiodeId()
+                }
+            }
+        })
+
+        håndter(nySøknad)
+        håndter(sendtSøknad)
+        håndter(inntektsmelding)
+        håndter(vilkårsgrunnlag)
+        håndter(ytelser)
+        håndter(manuellSaksbehandling)
+    }
+
+private fun Person.removeObservers() = apply {
+    get<Person, MutableList<PersonObserver>>("observers").clear()
+    get<Person, MutableList<Arbeidsgiver>>("arbeidsgivere").forEach { arbeidsgiver ->
+        arbeidsgiver.get<Arbeidsgiver, MutableList<VedtaksperiodeObserver>>("vedtaksperiodeObservers")
+            .clear()
+        arbeidsgiver.get<Arbeidsgiver, MutableList<Vedtaksperiode>>("perioder").forEach { vedtaksperiode ->
+            vedtaksperiode.get<Vedtaksperiode, MutableList<VedtaksperiodeObserver>>("observers").clear()
+        }
     }
 }
 
