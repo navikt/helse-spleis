@@ -132,11 +132,11 @@ internal class HendelseMediator(
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            producer.send(event.producerRecord()).get().also {
+        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+            producer.send(behov.producerRecord()).get().also {
                 log.info(
-                    "produserte behov=$event, {}, {}, {}",
-                    StructuredArguments.keyValue("vedtaksperiodeId", event.vedtaksperiodeId()),
+                    "produserte behov=$behov, {}, {}, {}",
+                    StructuredArguments.keyValue("vedtaksperiodeId", behov.vedtaksperiodeId()),
                     StructuredArguments.keyValue("partisjon", it.partition()),
                     StructuredArguments.keyValue("offset", it.offset())
                 )

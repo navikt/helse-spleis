@@ -38,6 +38,6 @@ interface VedtaksperiodeObserver {
 
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
 
-    fun vedtaksperiodeTrengerLøsning(event: Behov) {}
+    fun vedtaksperiodeTrengerLøsning(behov: Behov) {}
 
 }

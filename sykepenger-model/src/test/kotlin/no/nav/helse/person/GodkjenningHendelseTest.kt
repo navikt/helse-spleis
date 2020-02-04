@@ -223,9 +223,9 @@ internal class GodkjenningHendelseTest {
             vedtaksperiodeIder.add(event.id)
         }
 
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(event.vedtaksperiodeId())) { mutableListOf() }
-                .add(event)
+        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
+                .add(behov)
         }
     }
 }

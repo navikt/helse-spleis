@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -24,7 +23,7 @@ import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class EnSykdomVedtakperiodeTest {
+internal class KunEnArbeidsgiverTest {
 
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -37,7 +36,6 @@ internal class EnSykdomVedtakperiodeTest {
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var vedtaksperiodeId: String
     private lateinit var hendelselogger: Aktivitetslogger
     private var forventetEndringTeller = 0
 
@@ -50,9 +48,9 @@ internal class EnSykdomVedtakperiodeTest {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(INNTEKT)
-        håndterYtelser(emptyList())   // No history
-        håndterManuelSaksbehandling(true)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, emptyList())   // No history
+        håndterManuelSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -71,9 +69,9 @@ internal class EnSykdomVedtakperiodeTest {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(INNTEKT)
-        håndterYtelser(emptyList())   // No history
-        håndterManuelSaksbehandling(true)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, emptyList())   // No history
+        håndterManuelSaksbehandling(0,true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -90,18 +88,39 @@ internal class EnSykdomVedtakperiodeTest {
         håndterNySøknad(Triple(3.januar, 5.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 5.januar)))
         håndterSendtSøknad(Sykdom(3.januar, 5.januar, 100))
-        håndterVilkårsgrunnlag(INNTEKT)
+        håndterVilkårsgrunnlag(0, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
             assertMessages(it)
         }
-        håndterYtelser(emptyList())   // No history
+        håndterYtelser(0, emptyList())   // No history
         assertTrue(hendelselogger.hasErrors())
         println(hendelselogger)
         assertTilstander(0,
             START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
             VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_INFOTRYGD)
+    }
+
+    @Test internal fun `To perioder med opphold`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterSendtSøknad(Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, emptyList())   // No history
+        håndterManuelSaksbehandling(0, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(18, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
+        }
+        assertTilstander(0,
+            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
+            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
     }
 
     private fun assertEndringTeller() {
@@ -128,7 +147,7 @@ internal class EnSykdomVedtakperiodeTest {
     private fun assertMessages(inspektør: TestPersonInspektør) {
         assertTrue(inspektør.personLogger.hasMessages())
         assertTrue(inspektør.arbeidsgiverLogger.hasMessages())
-//        assertTrue(inspektør.periodeLogger.hasMessages())
+        assertTrue(inspektør.periodeLogger.hasMessages())
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -150,26 +169,26 @@ internal class EnSykdomVedtakperiodeTest {
         assertEndringTeller()
     }
 
-    private fun håndterVilkårsgrunnlag(inntekt: Double) {
+    private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
         assertTrue(observatør.ettersburteBehov(Inntektsberegning))
         assertTrue(observatør.ettersburteBehov(EgenAnsatt))
         assertFalse(observatør.ettersburteBehov(Sykepengehistorikk))
         assertFalse(observatør.ettersburteBehov(Foreldrepenger))
-        person.håndter(vilkårsgrunnlag(INNTEKT))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT))
         assertEndringTeller()
     }
 
-    private fun håndterYtelser(utbetalinger: List<Triple<LocalDate, LocalDate, Int>>) {
+    private fun håndterYtelser(vedtaksperiodeIndex: Int, utbetalinger: List<Triple<LocalDate, LocalDate, Int>>) {
         assertTrue(observatør.ettersburteBehov(Sykepengehistorikk))
         assertTrue(observatør.ettersburteBehov(Foreldrepenger))
         assertFalse(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
-        person.håndter(ytelser(utbetalinger))
+        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger))
         assertEndringTeller()
     }
 
-    private fun håndterManuelSaksbehandling(utbetalingGodkjent: Boolean) {
+    private fun håndterManuelSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
         assertTrue(observatør.ettersburteBehov(GodkjenningFraSaksbehandler))
-        person.håndter(manuellSaksbehandling(utbetalingGodkjent))
+        person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
         assertEndringTeller()
     }
 
@@ -224,11 +243,11 @@ internal class EnSykdomVedtakperiodeTest {
         )
     }
 
-    private fun vilkårsgrunnlag(inntekt: Double): ModelVilkårsgrunnlag {
+    private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): ModelVilkårsgrunnlag {
         hendelselogger = Aktivitetslogger()
         return ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -242,6 +261,7 @@ internal class EnSykdomVedtakperiodeTest {
     }
 
     private fun ytelser(
+        vedtaksperiodeIndex: Int,
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
@@ -252,7 +272,7 @@ internal class EnSykdomVedtakperiodeTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             sykepengehistorikk = ModelSykepengehistorikk(
                 utbetalinger = utbetalinger.map {
                     ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
@@ -270,14 +290,14 @@ internal class EnSykdomVedtakperiodeTest {
         )
     }
 
-    private fun manuellSaksbehandling(utbetalingGodkjent: Boolean): ModelManuellSaksbehandling {
+    private fun manuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean): ModelManuellSaksbehandling {
         hendelselogger = Aktivitetslogger()
         return ModelManuellSaksbehandling(
             hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             saksbehandler = "Ola Nordmann",
             utbetalingGodkjent = utbetalingGodkjent,
             rapportertdato = rapportertdato,
@@ -290,9 +310,12 @@ internal class EnSykdomVedtakperiodeTest {
         private val etterspurteBehov = mutableMapOf<String, Boolean>()
         private var periodeIndek = -1
         private val periodeIndekser = mutableMapOf<UUID, Int>()
+        private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
 
         internal fun ettersburteBehov(key: Behovstype) = etterspurteBehov.getOrDefault(key.name, false)
+
+        internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
             endreTeller += 1
@@ -302,14 +325,14 @@ internal class EnSykdomVedtakperiodeTest {
             val indeks = periodeIndekser.getOrPut(event.id, {
                 periodeIndek++
                 tilstander[periodeIndek] = mutableListOf(START)
+                vedtaksperiodeIder[periodeIndek] = event.id.toString()
                 periodeIndek
             })
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }
 
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            event.behovType().forEach { etterspurteBehov[it] = true }
-            vedtaksperiodeId = event.vedtaksperiodeId()
+        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+            behov.behovType().forEach { etterspurteBehov[it] = true }
         }
 
     }
@@ -317,7 +340,6 @@ internal class EnSykdomVedtakperiodeTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
         internal lateinit var personLogger: Aktivitetslogger
         internal lateinit var arbeidsgiver: Arbeidsgiver
         internal lateinit var arbeidsgiverLogger: Aktivitetslogger

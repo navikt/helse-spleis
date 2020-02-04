@@ -48,8 +48,8 @@ object VedtaksperiodeProbe : PersonObserver {
             .labelNames("skjemaVersjon")
             .register()
 
-    override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-        event.behovType().forEach { behovCounter.labels(it, event.hendelsetype().name).inc() }
+    override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+        behov.behovType().forEach { behovCounter.labels(it, behov.hendelsetype().name).inc() }
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}

@@ -230,9 +230,9 @@ internal class VilkårsgrunnlagHendelseTest {
                 .first { behov.name in it.behovType() }[felt]
         }
 
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(event.vedtaksperiodeId())) { mutableListOf() }
-                .add(event)
+        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
+                .add(behov)
         }
     }
 }

@@ -25,9 +25,9 @@ class SpeilBuilderTest {
     private fun lagPerson() =
         Person(aktørId, fnr).apply {
             addObserver(object : PersonObserver {
-                override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-                    if (event.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
-                        vedtaksperiodeId = event.vedtaksperiodeId()
+                override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+                    if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
+                        vedtaksperiodeId = behov.vedtaksperiodeId()
                     }
                 }
             })

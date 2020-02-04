@@ -404,8 +404,8 @@ internal class PersonTest {
             tilstandsendringer[event.id] = event
         }
 
-        override fun vedtaksperiodeTrengerLøsning(event: Behov) {
-            behovsliste.add(event)
+        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+            behovsliste.add(behov)
         }
     }
 
