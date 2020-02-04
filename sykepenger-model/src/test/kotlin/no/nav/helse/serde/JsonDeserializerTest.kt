@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -59,7 +60,7 @@ internal class JsonDeserializerTest {
             .map {
                 mapOf(
                     "dagen" to it.toString(),
-                    "hendelseId" to inntektsmeldingHendelseId,
+                    "hendelseType" to Dag.NøkkelHendelseType.Inntektsmelding,
                     "type" to "SYKEDAG"
                 )
             }

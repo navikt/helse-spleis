@@ -5,6 +5,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.implisittDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import java.time.LocalDate
@@ -45,7 +46,7 @@ class ModelNySøknad(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce(ConcreteSykdomstidslinje::plus)
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag)}
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
 
@@ -73,7 +74,7 @@ class ModelNySøknad(
         internal fun kanBehandles() = sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, this@ModelNySøknad)
+            ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Sykmelding)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)

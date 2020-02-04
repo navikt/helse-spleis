@@ -1,34 +1,31 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class CompositeLeafSykdomstidslinjeTest {
-
     companion object {
-        private val sendtSøknad = Testhendelse()
-
         private val førsteMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).mandag,
-            hendelse = sendtSøknad
+            hendelseType = Dag.NøkkelHendelseType.Søknad
         )
         private val førsteTirsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).tirsdag,
-            hendelse = sendtSøknad
+            hendelseType = Dag.NøkkelHendelseType.Søknad
         )
         private val førsteOnsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).onsdag,
-            hendelse = sendtSøknad
+            hendelseType = Dag.NøkkelHendelseType.Søknad
         )
         private val førsteTorsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).torsdag,
-            hendelse = sendtSøknad
+            hendelseType = Dag.NøkkelHendelseType.Søknad
         )
         private val andreMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(2).mandag,
-            hendelse = sendtSøknad
+            hendelseType = Dag.NøkkelHendelseType.Søknad
         )
 
     }
@@ -66,4 +63,7 @@ internal class CompositeLeafSykdomstidslinjeTest {
         assertEquals(andreMandag.sisteDag(), interval.sisteDag())
         assertEquals(8, interval.flatten().size)
     }
+
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }

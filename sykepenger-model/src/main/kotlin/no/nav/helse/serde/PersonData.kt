@@ -140,26 +140,23 @@ private fun parseVedtaksperiode(
 }
 
 private fun parseSykdomstidslinje(
-    tidslinjeData: SykdomstidslinjeData,
-    hendelser: List<ArbeidstakerHendelse>
-): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map { parseDag(it, hendelser) })
+    tidslinjeData: SykdomstidslinjeData
+): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map(::parseDag))
 
 private fun parseDag(
-    data: ArbeidsgiverData.VedtaksperiodeData.DagData,
-    hendelser: List<ArbeidstakerHendelse>
+    data: ArbeidsgiverData.VedtaksperiodeData.DagData
 ): Dag {
-    val hendelse = hendelser.find { it.hendelseId() == data.hendelseId } as SykdomstidslinjeHendelse
     return when (data.type) {
-        JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, hendelse)
-        JsonDagType.EGENMELDINGSDAG -> Egenmeldingsdag(data.dagen, hendelse)
-        JsonDagType.FERIEDAG -> Feriedag(data.dagen, hendelse)
-        JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen, hendelse)
-        JsonDagType.PERMISJONSDAG -> Permisjonsdag(data.dagen, hendelse)
-        JsonDagType.STUDIEDAG -> Studiedag(data.dagen, hendelse)
-        JsonDagType.SYKEDAG -> Sykedag(data.dagen, hendelse)
-        JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, hendelse)
-        JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen, hendelse)
-        JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen, hendelse)
+        JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, data.hendelseType)
+        JsonDagType.EGENMELDINGSDAG -> Egenmeldingsdag(data.dagen, data.hendelseType)
+        JsonDagType.FERIEDAG -> Feriedag(data.dagen, data.hendelseType)
+        JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen, data.hendelseType)
+        JsonDagType.PERMISJONSDAG -> Permisjonsdag(data.dagen, data.hendelseType)
+        JsonDagType.STUDIEDAG -> Studiedag(data.dagen, data.hendelseType)
+        JsonDagType.SYKEDAG -> Sykedag(data.dagen, data.hendelseType)
+        JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, data.hendelseType)
+        JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen, data.hendelseType)
+        JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen, data.hendelseType)
     }
 }
 
@@ -195,14 +192,8 @@ private fun parseSykdomshistorikk(
     return createSykdomshistorikk(data.map { sykdomshistorikkData ->
         createSykdomshistorikkElement(
             timestamp = sykdomshistorikkData.tidsstempel,
-            hendelseSykdomstidslinje = parseSykdomstidslinje(
-                sykdomshistorikkData.hendelseSykdomstidslinje,
-                hendelser
-            ),
-            beregnetSykdomstidslinje = parseSykdomstidslinje(
-                sykdomshistorikkData.beregnetSykdomstidslinje,
-                hendelser
-            ),
+            hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
+            beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
             hendelse = hendelser.find { it.hendelseId() == sykdomshistorikkData.hendelseId } as SykdomstidslinjeHendelse)
     }
     )
@@ -427,7 +418,7 @@ internal data class PersonData(
         ) {
             data class DagData(
                 val dagen: LocalDate,
-                val hendelseId: UUID,
+                val hendelseType: Dag.NøkkelHendelseType,
                 val type: JsonDagType
             )
 

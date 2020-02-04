@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
@@ -9,20 +9,12 @@ import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class CompositeSykdomstidslinjeTest {
-
-    companion object {
-        private val tidspunktRapportert = Testhendelse(
-            rapportertdato = LocalDateTime.of(2019, 7, 31, 20, 0)
-        )
-    }
-
     @Test
     internal fun `kan bestemme hvilken type dager mellom to perioder skal ha`() {
-        val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, tidspunktRapportert)
-        val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, tidspunktRapportert)
+        val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, Dag.NøkkelHendelseType.Søknad)
+        val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, Dag.NøkkelHendelseType.Søknad)
 
         val arbeidsgiverperiode =
             arbeidsgiverperiode1.plus(arbeidsgiverperiode2, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
@@ -43,8 +35,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
-        val førsteInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, tidspunktRapportert)
-        val andreInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, tidspunktRapportert)
+        val førsteInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, Dag.NøkkelHendelseType.Søknad)
+        val andreInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
 
         val interval = andreInterval + førsteInterval
 
@@ -55,8 +47,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `tidslinje med ubestemt dag er utenfor omfang`() {
-        val studiedag = ConcreteSykdomstidslinje.studiedag(Uke(1).mandag, tidspunktRapportert)
-        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, tidspunktRapportert)
+        val studiedag = ConcreteSykdomstidslinje.studiedag(Uke(1).mandag, Dag.NøkkelHendelseType.Søknad)
+        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, Dag.NøkkelHendelseType.Søknad)
         val tidslinje = studiedag + sykedag
 
         assertTrue(tidslinje.erUtenforOmfang())
@@ -64,7 +56,10 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `tidslinje med permisjonsdag er utenfor omfang`() {
-        val permisjonsdag = ConcreteSykdomstidslinje.permisjonsdag(Uke(1).mandag, tidspunktRapportert)
+        val permisjonsdag = ConcreteSykdomstidslinje.permisjonsdag(Uke(1).mandag, Dag.NøkkelHendelseType.Søknad)
         assertTrue(permisjonsdag.erUtenforOmfang())
     }
+
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }

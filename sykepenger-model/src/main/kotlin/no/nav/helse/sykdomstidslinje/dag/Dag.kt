@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.tournament.dagTurnering
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -9,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
-    internal val hendelse: SykdomstidslinjeHendelse
+    internal val hendelseType: NøkkelHendelseType
 ) :
     ConcreteSykdomstidslinje() {
 
@@ -19,15 +18,12 @@ internal abstract class Dag internal constructor(
 
     override fun førsteDag() = dagen
     override fun sisteDag() = dagen
-    override fun hendelser(): Set<SykdomstidslinjeHendelse> = setOf(hendelse)
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
 
     internal open fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
 
     override fun length() = 1
-
-    override fun sisteHendelse() = this.hendelse
 
     enum class NøkkelHendelseType {
         Sykmelding,

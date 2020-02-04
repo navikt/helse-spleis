@@ -60,4 +60,7 @@ internal class VisitorTest {
             sykedagerCount += 1
         }
     }
+
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }

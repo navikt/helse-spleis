@@ -18,14 +18,10 @@ internal class CompositeSykdomstidslinje internal constructor(
         visitor.postVisitComposite(this)
     }
 
-    override fun sisteHendelse() = tidslinje.map { it.sisteHendelse() }.maxBy { it.rapportertdato() }!!
-
     override fun length() = tidslinje.size
 
     override fun dag(dato: LocalDate) =
         tidslinje.find { it.dagen == dato }
-
-    override fun hendelser() = tidslinje.flatMapTo(mutableSetOf()) { it.hendelser() }
 
     override fun flatten() = tidslinje
 

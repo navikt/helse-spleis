@@ -1,9 +1,6 @@
 package no.nav.helse.tournament
 
-
-import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -19,9 +16,6 @@ internal class DagTurneringTest {
     companion object {
         val turnering = DagTurnering()
         val microturnering = DagTurnering("/microturnering.csv")
-        val testhendelse = { dato: LocalDate ->
-            Testhendelse(dato.atStartOfDay())
-        }
 
         private val mandag get() = TestHendelseBuilder(LocalDate.of(2018, 1, 1))
         private val søndag get() = TestHendelseBuilder(LocalDate.of(2018, 1, 7))
@@ -59,25 +53,17 @@ internal class DagTurneringTest {
         val sykedag = mandag.sykedag.fraSykmelding.rapportertTidlig
         val arbeidsdag = mandag.arbeidsdag.fraSøknad.rapportertSent
 
-        val vinner = turnering.slåss(arbeidsdag, sykedag)
+        val vinner = turnering.slåss(sykedag, arbeidsdag)
 
         assertEquals(vinner, arbeidsdag)
     }
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val nySøknad = ConcreteSykdomstidslinje.sykedager(
-            Uke(1).mandag, Uke(1).fredag, Testhendelse(
-                rapportertdato = Uke(1).mandag.atTime(9, 0)
-            )
-        )
-        val sendtSøknad = Testhendelse(
-            rapportertdato = Uke(1).mandag.atTime(12, 0)
-        )
-        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, sendtSøknad)
-        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, sendtSøknad)
+        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
+        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
 
-        val tidslinje = nySøknad + (sendtSøknadSykedager + sendtSøknadArbeidsdager)
+        val tidslinje = (sendtSøknadSykedager + sendtSøknadArbeidsdager)
         assertTrue(
             tidslinje[Uke(1).onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad"
@@ -116,24 +102,24 @@ internal class DagTurneringTest {
     }
 
     private class TestHendelseBuilder(private val dato: LocalDate) {
-        private var dagbuilder: ((LocalDate, SykdomstidslinjeHendelse) -> Dag)? = null
+        private var dagbuilder: ((LocalDate, Dag.NøkkelHendelseType) -> Dag)? = null
         private var hendelsetype: Dag.NøkkelHendelseType? = null
 
         val sykedag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.sykedag(dato, hendelse) }
+                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.sykedag(dato, hendelseType) }
                 return this
             }
 
         val arbeidsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.ikkeSykedag(dato, hendelse) }
+                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.ikkeSykedag(dato, hendelseType) }
                 return this
             }
 
         val egenmeldingsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelse -> ConcreteSykdomstidslinje.egenmeldingsdag(dato, hendelse) }
+                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.egenmeldingsdag(dato, hendelseType) }
                 return this
             }
 
@@ -156,19 +142,16 @@ internal class DagTurneringTest {
             }
         val rapportertTidlig
             get() = dagbuilder!!(
-                dato, Testhendelse(
-                    dato.atStartOfDay(),
-                    hendelsetype ?: Dag.NøkkelHendelseType.Søknad
-                )
+                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
             )
         val rapportertSent
             get() = dagbuilder!!(
-                dato, Testhendelse(
-                    dato.atTime(18, 0),
-                    hendelsetype ?: Dag.NøkkelHendelseType.Søknad
-                )
+                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
             )
 
     }
+
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }
 

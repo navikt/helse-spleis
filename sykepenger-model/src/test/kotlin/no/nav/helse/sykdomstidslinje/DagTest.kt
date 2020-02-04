@@ -1,21 +1,17 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class DagTest {
 
-    companion object {
-        val rapporterthendelse = Testhendelse()
-    }
-
     @Test
     internal fun sykedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
         val sykedag = ConcreteSykdomstidslinje.sykedag(dagSykedagenDekker,
-            rapporterthendelse
+            Dag.NøkkelHendelseType.Søknad
         )
 
         assertEquals(dagSykedagenDekker, sykedag.førsteDag())
@@ -26,7 +22,7 @@ internal class DagTest {
     internal fun feriedag() {
         val dagFeriedagenDekker = LocalDate.of(2019,9,24)
         val feriedag = ConcreteSykdomstidslinje.ferie(dagFeriedagenDekker,
-            rapporterthendelse
+            Dag.NøkkelHendelseType.Søknad
         )
 
         assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
@@ -37,7 +33,7 @@ internal class DagTest {
     internal fun arbeidsdag() {
         val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
         val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder,
-            rapporterthendelse
+            Dag.NøkkelHendelseType.Søknad
         )
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
@@ -48,7 +44,7 @@ internal class DagTest {
     internal fun helgedag() {
         val helgedagenGjelder = LocalDate.of(2019,9,28)
         val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(helgedagenGjelder,
-            rapporterthendelse
+            Dag.NøkkelHendelseType.Søknad
         )
 
         assertEquals(helgedagenGjelder, helgedag.førsteDag())
@@ -59,7 +55,7 @@ internal class DagTest {
     internal fun studiedag() {
         val dagSykedagenDekker = LocalDate.of(2019,9,23)
         val studiedag = ConcreteSykdomstidslinje.studiedag(dagSykedagenDekker,
-            rapporterthendelse
+            Dag.NøkkelHendelseType.Søknad
         )
 
         assertEquals(dagSykedagenDekker, studiedag.førsteDag())

@@ -6,7 +6,7 @@ internal data class Syketilfelle(
 ) {
     val tidslinje
         get() = when {
-            dagerEtterArbeidsgiverperiode != null -> arbeidsgiverperiode.plus(dagerEtterArbeidsgiverperiode)
+            dagerEtterArbeidsgiverperiode != null -> arbeidsgiverperiode.plus(dagerEtterArbeidsgiverperiode, ConcreteSykdomstidslinje.Companion::implisittDag)
             else -> arbeidsgiverperiode
         }
 }

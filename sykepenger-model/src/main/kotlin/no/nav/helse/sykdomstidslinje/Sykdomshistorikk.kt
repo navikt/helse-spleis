@@ -29,7 +29,7 @@ internal class Sykdomshistorikk private constructor(
     ) = if (elementer.isEmpty()) {
         hendelse.sykdomstidslinje()
     } else {
-        (sykdomstidslinje() + hendelseSykdomstidslinje).also {
+        sykdomstidslinje().plus(hendelseSykdomstidslinje, ConcreteSykdomstidslinje.Companion::implisittDag).also {
             if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
         }
     }

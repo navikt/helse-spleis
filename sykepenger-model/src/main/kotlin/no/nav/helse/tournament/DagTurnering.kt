@@ -14,7 +14,7 @@ internal class DagTurnering(val source: String = "/dagturnering.csv") {
         val rightKey = høyre.nøkkel()
 
         return strategies[leftKey]?.get(rightKey)?.decide(venstre, høyre)
-            ?: strategies[rightKey]?.get(leftKey)?.decide(høyre, venstre)
+            ?: strategies[rightKey]?.get(leftKey)?.decideInverse(venstre, høyre)
             ?: throw RuntimeException("Fant ikke strategi for $leftKey + $rightKey")
 
     }
@@ -56,40 +56,50 @@ internal class DagTurnering(val source: String = "/dagturnering.csv") {
 
 internal sealed class Strategy {
     abstract fun decide(row: Dag, column: Dag): Dag
+    abstract fun decideInverse(row: Dag, column: Dag): Dag
 }
 
 internal object Undecided : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = Ubestemtdag(row, column)
+    override fun decideInverse(row: Dag, column: Dag) = Ubestemtdag(row, column)
 }
 
 internal object Row : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = row
+    override fun decideInverse(row: Dag, column: Dag) = column
 }
 
 internal object Column : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = row
 }
 
 internal object Latest : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag =
-        when {
+    override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = column
+        /*when {
             row.sisteHendelse() == column.sisteHendelse() -> throw IllegalStateException("Strategien latest støtter ikke sammenliging av eventer med samme tidspunkt. (row: $row, column: $column)")
             row.sisteHendelse() > (column.sisteHendelse()) -> row
             else -> column
-        }
+        }*/
 }
 
 internal object LatestOrRow : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag =
-        if (row.sisteHendelse() >= (column.sisteHendelse())) row else column
+    override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = column
+        //TODO() // if (row.sisteHendelse() >= (column.sisteHendelse())) row else column
 }
 
 internal object LatestOrColumn : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag =
-        if (row.sisteHendelse() > (column.sisteHendelse())) row else column
+    override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = column
+        //TODO() // if (row.sisteHendelse() > (column.sisteHendelse())) row else column
 }
 
 internal object Impossible : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
+        throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
+
+    override fun decideInverse(row: Dag, column: Dag) =
         throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
 }

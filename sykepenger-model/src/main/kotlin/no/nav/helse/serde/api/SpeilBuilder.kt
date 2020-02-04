@@ -384,7 +384,7 @@ internal class SpeilBuilder : PersonVisitor {
         override fun visitDag(dag: Dag) {
             sykdomstidslinjeListe.add(mutableMapOf(
                 "dagen" to dag.dagen,
-                "hendelseId" to dag.hendelse.hendelseId(),
+                "hendelseType" to dag.hendelseType,
                 "type" to dag.dagType().name
             ))
         }

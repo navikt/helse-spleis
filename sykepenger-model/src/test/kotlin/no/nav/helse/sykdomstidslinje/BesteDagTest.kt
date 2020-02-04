@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,17 +9,13 @@ import kotlin.reflect.KClass
 internal class BesteDagTest {
 
     companion object {
-
-        private val inntektsmeldingHendelse = Testhendelse(hendelsetype = Dag.NøkkelHendelseType.Inntektsmelding)
-        private val sendtSøknadHendelse = Testhendelse(hendelsetype = Dag.NøkkelHendelseType.Søknad)
-
-        private val implisittDag get() = ImplisittDag(Uke(2).mandag, inntektsmeldingHendelse)
-        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, sendtSøknadHendelse)
-        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, inntektsmeldingHendelse)
-        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, inntektsmeldingHendelse)
-        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, sendtSøknadHendelse)
-        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, sendtSøknadHendelse)
-        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, sendtSøknadHendelse)
+        private val implisittDag get() = ImplisittDag(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
+        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
+        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
+        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
     }
 
     @Test
@@ -37,13 +32,12 @@ internal class BesteDagTest {
 
     @Test
     fun `ferie vinner over sykdom`() {
-        assertWinner(ferieFraSøknad, sykdomFraSendtSøknad, Feriedag::class)
+        assertWinner(sykdomFraSendtSøknad, ferieFraSøknad, Feriedag::class)
     }
 
     @Test
     fun `søknad med egenmelding vinner over en gitt dag`() {
-        assertWinner(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class)
-        assertWinner(egenmeldingFraInntektsmelding, ferieFraSøknad, Egenmeldingsdag::class)
+        assertWinnerBidirectional(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class)
     }
 
     @Test
@@ -58,7 +52,6 @@ internal class BesteDagTest {
 
     @Test
     fun `arbeidsdag vinner over sykedag`() {
-        assertWinner(arbeidsdag, sykdomFraSendtSøknad, Arbeidsdag::class)
         assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class)
     }
 

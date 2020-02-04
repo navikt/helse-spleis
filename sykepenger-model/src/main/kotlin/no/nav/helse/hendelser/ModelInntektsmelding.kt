@@ -54,12 +54,12 @@ class ModelInntektsmelding(
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, inntektsmelding)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
-                ConcreteSykdomstidslinje.ferie(fom, tom, inntektsmelding)
+                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
         }
     }
 
@@ -87,11 +87,11 @@ class ModelInntektsmelding(
         val ferietidslinje = this.ferieperioder
             .takeUnless { it.isEmpty() }
             ?.map { it.sykdomstidslinje(this) }
-            ?.reduce(ConcreteSykdomstidslinje::plus)
+            ?.reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) }
 
         return arbeidsgivertidslinje.plus(ferietidslinje) ?: ConcreteSykdomstidslinje.egenmeldingsdag(
             førsteFraværsdag,
-            this
+            Dag.NøkkelHendelseType.Inntektsmelding
         )
     }
 
@@ -135,5 +135,5 @@ class ModelInntektsmelding(
 
 private fun ConcreteSykdomstidslinje?.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje? {
     if (other == null) return this
-    return this?.plus(other) ?: other
+    return this?.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) ?: other
 }

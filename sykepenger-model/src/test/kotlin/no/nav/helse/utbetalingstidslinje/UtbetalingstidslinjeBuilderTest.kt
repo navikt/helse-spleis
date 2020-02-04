@@ -489,5 +489,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             aktivitetslogger = Aktivitetslogger()
         )
 
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }
-

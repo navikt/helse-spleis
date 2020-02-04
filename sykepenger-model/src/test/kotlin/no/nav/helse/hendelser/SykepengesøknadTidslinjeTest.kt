@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -47,12 +48,12 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får ferien fra søknaden`() {
-        val tidslinje = (sendtSøknad(
+        val tidslinje = (nySøknad().sykdomstidslinje() + sendtSøknad(
             perioder = listOf(
                 Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100),
                 Periode.Ferie(ferieFom, ferieTom)
             )
-        ).sykdomstidslinje() + nySøknad().sykdomstidslinje())
+        ).sykdomstidslinje())
 
         assertType(Feriedag::class, tidslinje[ferieFom])
         assertType(Feriedag::class, tidslinje[ferieTom])
@@ -116,5 +117,6 @@ internal class SykepengesøknadTidslinjeTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
 }
-

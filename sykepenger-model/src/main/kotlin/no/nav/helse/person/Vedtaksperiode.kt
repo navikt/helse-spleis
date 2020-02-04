@@ -554,6 +554,6 @@ internal class Vedtaksperiode private constructor(
     companion object {
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
-            .reduce(ConcreteSykdomstidslinje::plus)
+            .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) }
     }
 }

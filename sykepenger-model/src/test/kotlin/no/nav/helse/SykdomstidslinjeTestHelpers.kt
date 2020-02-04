@@ -1,22 +1,18 @@
 package no.nav.helse
 
-import no.nav.helse.hendelser.Testhendelse
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import java.time.LocalDate
 import kotlin.streams.toList
 
 internal val mandag = Uke(1).mandag
 internal val tirsdag = mandag.plusDays(1)
-internal val onsdag =  tirsdag.plusDays(1)
+internal val onsdag = tirsdag.plusDays(1)
 internal val torsdag = onsdag.plusDays(1)
 internal val fredag = torsdag.plusDays(1)
 internal val lørdag = fredag.plusDays(1)
 internal val søndag = lørdag.plusDays(1)
-
-private val testhendelse = Testhendelse(rapportertdato = mandag.atStartOfDay())
 
 internal val Int.sykedager get() = lagTidslinje(this, ::Sykedag)
 internal val Int.sykHelgdager get() = lagTidslinje(this, ::SykHelgedag)
@@ -28,25 +24,40 @@ internal val Int.utenlandsdager get() = lagTidslinje(this, ::Utenlandsdag)
 internal val Int.feriedager get() = lagTidslinje(this, ::Feriedag)
 internal val Int.permisjonsdager get() = lagTidslinje(this, ::Permisjonsdag)
 
-internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
+internal fun perioder(
+    periode1: ConcreteSykdomstidslinje,
+    periode2: ConcreteSykdomstidslinje,
+    test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
+) {
     (periode1 + periode2).test(periode1, periode2)
 }
 
-internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, periode3: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
+internal fun perioder(
+    periode1: ConcreteSykdomstidslinje,
+    periode2: ConcreteSykdomstidslinje,
+    periode3: ConcreteSykdomstidslinje,
+    test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
+) {
     (periode1 + periode2 + periode3).test(periode1, periode2, periode3)
 }
 
 
-internal fun perioder(periode1: ConcreteSykdomstidslinje, periode2: ConcreteSykdomstidslinje, periode3: ConcreteSykdomstidslinje, periode4: ConcreteSykdomstidslinje, test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit) {
+internal fun perioder(
+    periode1: ConcreteSykdomstidslinje,
+    periode2: ConcreteSykdomstidslinje,
+    periode3: ConcreteSykdomstidslinje,
+    periode4: ConcreteSykdomstidslinje,
+    test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
+) {
     (periode1 + periode2 + periode3 + periode4).test(periode1, periode2, periode3, periode4)
 }
 
-internal fun ConcreteSykdomstidslinje.fra(hendelse: SykdomstidslinjeHendelse): ConcreteSykdomstidslinje {
-    return this.fra(this.førsteDag(), hendelse)
+internal fun ConcreteSykdomstidslinje.fra(hendelseType: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad): ConcreteSykdomstidslinje {
+    return this.fra(this.førsteDag())
 }
 
-internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelse: SykdomstidslinjeHendelse = testhendelse): ConcreteSykdomstidslinje {
-    val builder = SykdomstidslinjeBuilder(hendelse, fraOgMed)
+internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelseType: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad): ConcreteSykdomstidslinje {
+    val builder = SykdomstidslinjeBuilder(fraOgMed)
         .antallDager(1)
 
     return CompositeSykdomstidslinje(this.flatten().map {
@@ -66,14 +77,17 @@ internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelse: Sykdoms
     })
 }
 
-internal fun fra(sykdomstidslinjeHendelse: SykdomstidslinjeHendelse): SykdomstidslinjeBuilder {
-    return SykdomstidslinjeBuilder(sykdomstidslinjeHendelse)
+internal fun fra(): SykdomstidslinjeBuilder {
+    return SykdomstidslinjeBuilder()
 }
 
-private fun lagTidslinje(antallDager: Int, generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): ConcreteSykdomstidslinje =
-    SykdomstidslinjeBuilder(testhendelse).antallDager(antallDager).lagTidslinje(generator)
+private fun lagTidslinje(
+    antallDager: Int,
+    generator: (LocalDate, Dag.NøkkelHendelseType) -> Dag
+): ConcreteSykdomstidslinje =
+    SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator)
 
-internal class SykdomstidslinjeBuilder(private val hendelse: SykdomstidslinjeHendelse, startdato: LocalDate? = null) {
+internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null) {
 
     private companion object {
         private var dato = LocalDate.of(2019, 1, 1)
@@ -85,22 +99,15 @@ internal class SykdomstidslinjeBuilder(private val hendelse: SykdomstidslinjeHen
         }
     }
 
-    internal val `1` get() = antallDager(1)
-    internal val `2` get() = antallDager(2)
-    internal val `3` get() = antallDager(3)
-    internal val `4` get() = antallDager(4)
-    internal val `5` get() = antallDager(5)
-    internal val `6` get() = antallDager(6)
-    internal val `7` get() = antallDager(7)
-
     internal fun antallDager(antall: Int) =
-        DagBuilder(hendelse, antall.toLong())
+        DagBuilder(antall.toLong())
 
-    internal inner class DagBuilder(private val hendelse: SykdomstidslinjeHendelse, private val antallDager: Long) {
+    internal inner class DagBuilder(private val antallDager: Long) {
 
-        private val dager get() = dato.datesUntil(dato.plusDays(antallDager)).also {
-            dato = dato.plusDays(antallDager)
-        }
+        private val dager
+            get() = dato.datesUntil(dato.plusDays(antallDager)).also {
+                dato = dato.plusDays(antallDager)
+            }
 
         internal val sykedager get() = lagTidslinje(::Sykedag)
         internal val sykHelgedag get() = lagTidslinje(::SykHelgedag)
@@ -113,10 +120,12 @@ internal class SykdomstidslinjeBuilder(private val hendelse: SykdomstidslinjeHen
         internal val permisjonsdager get() = lagTidslinje(::Permisjonsdag)
         internal val ubestemtdag get() = lagTidslinje(::Ubestemtdag)
 
-        internal fun lagTidslinje(generator: (LocalDate, SykdomstidslinjeHendelse) -> Dag): ConcreteSykdomstidslinje {
-            return CompositeSykdomstidslinje(dager.map { generator(it, hendelse) }.toList())
+        internal fun lagTidslinje(generator: (LocalDate, Dag.NøkkelHendelseType) -> Dag): ConcreteSykdomstidslinje {
+            return CompositeSykdomstidslinje(dager.map { generator(it, Dag.NøkkelHendelseType.Søknad) }.toList())
 
         }
     }
-
 }
+
+private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
+    this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
