@@ -2,7 +2,7 @@ package no.nav.helse.behov
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class Behov internal constructor(private val pakke: Pakke) {
 
@@ -43,19 +43,6 @@ class Behov internal constructor(private val pakke: Pakke) {
             )
             return Behov(pakke)
         }
-
-        fun fromJson(json: String) =
-            Behov(Pakke.fromJson(json).also {
-                it.requireKey(BehovKey)
-                it.requireKey(IdKey)
-                it.requireKey(OpprettetKey)
-                it.requireKey(HendelsetypeKey)
-                it.requireKey(AktørIdKey)
-                it.requireKey(FødselsnummerKey)
-                it.requireKey(OrganisasjonsnummerKey)
-                it.requireKey(VedtaksperiodeIdKey)
-            })
-
     }
 
     fun behovType(): List<String> = requireNotNull(get(BehovKey))

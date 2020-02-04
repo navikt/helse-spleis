@@ -127,12 +127,12 @@ internal object TestConstants {
 
 }
 
-internal fun Behov.løsBehov(løsning: Any): Behov {
+internal fun Behov.løsBehov(løsning: Any): String {
     val pakke = objectMapper.readTree(this.toJson()) as ObjectNode
     pakke.put("@besvart", LocalDateTime.now().toString())
     pakke.set<JsonNode>("@løsning", objectMapper.valueToTree<JsonNode>(løsning))
     pakke.put("@final", true)
-    return Behov.fromJson(pakke.toString())
+    return pakke.toString()
 }
 
 internal data class SpolePeriode(
@@ -142,7 +142,6 @@ internal data class SpolePeriode(
 )
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
-internal fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
 internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
 internal val Int.juni

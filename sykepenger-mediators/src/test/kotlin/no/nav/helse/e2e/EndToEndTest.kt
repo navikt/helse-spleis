@@ -1,8 +1,12 @@
 package no.nav.helse.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -17,7 +21,6 @@ import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.ModelPåminnelse
@@ -135,7 +138,7 @@ internal class EndToEndTest {
             }
         }
 
-        var apiport:Int = -1
+        var apiport: Int = -1
 
         @BeforeAll
         @JvmStatic
@@ -300,7 +303,7 @@ internal class EndToEndTest {
         )
 
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)
-        val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"]!!
+        val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"].asText()
 
         utbetalingsreferanse.hentUtbetaling {
             assertTrue(this.contains(aktørID))
@@ -316,14 +319,22 @@ internal class EndToEndTest {
         val nySøknad = sendNySøknad(enAktørId, fødselsnummer, virksomhetsnummer)
 
         enAktørId.hentPerson {
-            val lagretNySøknadISpeilFormat = objectMapper.readTree(this)["hendelser"].find { it["type"].textValue() == "NySøknad" }!!
-            assertEquals(nySøknad.toJsonNode()["aktorId"].textValue(), lagretNySøknadISpeilFormat["aktørId"].textValue())
+            val lagretNySøknadISpeilFormat =
+                objectMapper.readTree(this)["hendelser"].find { it["type"].textValue() == "NySøknad" }!!
+            assertEquals(
+                nySøknad.toJsonNode()["aktorId"].textValue(),
+                lagretNySøknadISpeilFormat["aktørId"].textValue()
+            )
         }
 
         // TODO: fjern route når speil er oppdatert med ny url
         enAktørId.hentSak {
-            val lagretNySøknadISpeilFormat = objectMapper.readTree(this)["hendelser"].find { it["type"].textValue() == "NySøknad" }!!
-            assertEquals(nySøknad.toJsonNode()["aktorId"].textValue(), lagretNySøknadISpeilFormat["aktørId"].textValue())
+            val lagretNySøknadISpeilFormat =
+                objectMapper.readTree(this)["hendelser"].find { it["type"].textValue() == "NySøknad" }!!
+            assertEquals(
+                nySøknad.toJsonNode()["aktorId"].textValue(),
+                lagretNySøknadISpeilFormat["aktørId"].textValue()
+            )
         }
     }
 
@@ -456,7 +467,7 @@ internal class EndToEndTest {
         val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
 
         val løstBehov = behov
-            .apply { set("saksbehandlerIdent", saksbehandler) }
+            .apply { put("saksbehandlerIdent", saksbehandler) }
             .løsBehov(mapOf(GodkjenningFraSaksbehandler.name to mapOf("godkjent" to utbetalingGodkjent)))
         sendBehov(løstBehov)
     }
@@ -511,26 +522,20 @@ internal class EndToEndTest {
         return nySøknad
     }
 
-    private fun sendBehov(behov: Behov) {
-        sendKafkaMessage(rapidTopic, behov.fødselsnummer(), behov.toJson())
+    private fun sendBehov(behov: String) {
+        sendKafkaMessage(rapidTopic, UUID.randomUUID().toString(), behov)
     }
 
-    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovstype): Behov {
-        var behov: Behov? = null
-
+    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovstype): ObjectNode {
+        var behov: ObjectNode? = null
         await()
             .atMost(5, SECONDS)
             .until {
                 behov = TestConsumer.records(rapidTopic)
-                    .mapNotNull {
-                        try {
-                            Behov.fromJson(it.value())
-                        } catch (e: IllegalArgumentException) {
-                            null
-                        }
-                    }
-                    .filter { it.behovType().contains(behovType.name) }
-                    .firstOrNull { aktørId == it["aktørId"] && fødselsnummer == it["fødselsnummer"] }
+                    .map { objectMapper.readValue<ObjectNode>(it.value()) }
+                    .filter { it.hasNonNull("@behov") }
+                    .filter { it["@behov"].map(JsonNode::asText).contains(behovType.name) }
+                    .firstOrNull { aktørId == it["aktørId"].asText() && fødselsnummer == it["fødselsnummer"].asText() }
 
                 behov != null
             }
@@ -573,21 +578,15 @@ internal class EndToEndTest {
                 val meldingerPåTopic =
                     TestConsumer.records(rapidTopic)
                 val behov = meldingerPåTopic
-                    .mapNotNull {
-                        try {
-                            Behov.fromJson(it.value())
-                        } catch (e: IllegalArgumentException) {
-                            null
-                        }
-                    }
-                    .filter { aktørId == it["aktørId"] }
-                    .filter { fødselsnummer == it["fødselsnummer"] }
-                    .filter { virksomhetsnummer == it["organisasjonsnummer"] }
-                    .filter { it.behovType().containsAll(typer) }
-                    .flatMap(Behov::behovType)
+                    .map { objectMapper.readTree(it.value()) }
+                    .filter { it.hasNonNull("@behov") }
+                    .filter { aktørId == it["aktørId"].asText() }
+                    .filter { fødselsnummer == it["fødselsnummer"].asText() }
+                    .filter { virksomhetsnummer == it["organisasjonsnummer"].asText() }
+                    .filter { it["@behov"].map(JsonNode::asText).containsAll(typer) }
                     .distinct()
 
-                assertEquals(typer, behov)
+                assertNotNull(behov, "Fant ingen behov med type $typer")
             }
     }
 
@@ -595,7 +594,8 @@ internal class EndToEndTest {
         kafkaProducer.send(ProducerRecord(topic, key, message))
 
     /**
-     * Trick Kafka into behaving synchronously by sending the message, and then confirming that it is read by the consumer group
+     * Trick Kafka into behaving synchronously by sending the message, and then confirming that it is read by the
+     * consumer group
      */
     private fun synchronousSendKafkaMessage(topic: String, key: String, message: String) {
         val metadata = sendKafkaMessage(topic, key, message)
@@ -603,8 +603,16 @@ internal class EndToEndTest {
         metadata.get().assertMessageIsConsumed()
     }
 
+    private fun JsonNode.løsBehov(løsning: Any) = also {
+        it as ObjectNode
+        it.set<ObjectNode>("@løsning", objectMapper.convertValue(løsning))
+        it.put("@final", true)
+        it.put("@besvart", LocalDateTime.now().toString())
+    }.toString()
+
     /**
-     * Check that the consumers has received this message, by comparing the position of the message with the reported last read message of the consumer group
+     * Check that the consumers has received this message, by comparing the position of the message with the reported
+     * last read message of the consumer group
      */
     private fun RecordMetadata.assertMessageIsConsumed(recordMetadata: RecordMetadata = this) {
         await()

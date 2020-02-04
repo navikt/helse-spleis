@@ -402,8 +402,8 @@ internal class HendelseMediatorTest {
             return nySøknad
         }
 
-        private fun sendBehov(behov: Behov) {
-            sendKafkaMessage(behov.id().toString(), behov.toJson())
+        private fun sendBehov(behov: String) {
+            sendKafkaMessage(UUID.randomUUID().toString(), behov)
         }
 
         private fun sendKafkaMessage(key: String, message: String) =
