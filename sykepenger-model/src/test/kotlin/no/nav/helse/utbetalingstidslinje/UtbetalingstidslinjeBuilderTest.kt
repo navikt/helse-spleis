@@ -470,7 +470,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         private fun inkrementer(klasse: KClass<out Utbetalingsdag>) {
             dagtelling.compute(klasse) { _, value -> 1 + (value ?: 0) }
         }
-
     }
 
     private fun inntektsmelding(

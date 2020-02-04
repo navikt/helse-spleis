@@ -89,40 +89,39 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
-        if (it) tilstand.håndter(this, nySøknad)
+        if (!it) return it
+        tilstand.håndter(this, nySøknad)
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad) = overlapperMed(sendtSøknad).also {
-        if (it) tilstand.håndter(this, sendtSøknad)
+        if (!it) return it
+        tilstand.håndter(this, sendtSøknad)
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(inntektsmelding: ModelInntektsmelding) = overlapperMed(inntektsmelding).also {
-        if (it) tilstand.håndter(this, inntektsmelding)
+        if (!it) return it
+        tilstand.håndter(this, inntektsmelding)
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, ytelser: ModelYtelser) {
-        if (id.toString() == ytelser.vedtaksperiodeId()) tilstand.håndter(
-            person,
-            arbeidsgiver,
-            this,
-            ytelser
-        )
+        if (id.toString() != ytelser.vedtaksperiodeId()) return
+        tilstand.håndter(person, arbeidsgiver, this, ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
+
     }
 
     internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
-        if (id.toString() == manuellSaksbehandling.vedtaksperiodeId()) tilstand.håndter(
-            this,
-            manuellSaksbehandling
-        )
+        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId()) return
+        tilstand.håndter(this, manuellSaksbehandling)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-        if (id.toString() == vilkårsgrunnlag.vedtaksperiodeId()) tilstand.håndter(this, vilkårsgrunnlag)
+        if (id.toString() != vilkårsgrunnlag.vedtaksperiodeId()) return
+        tilstand.håndter(this, vilkårsgrunnlag)
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
