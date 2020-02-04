@@ -64,11 +64,11 @@ private class ModelDeepEquals {
     }
 
     private fun assertCollectionEquals(one: Collection<*>, other: Collection<*>) {
-        val a1 = one.toTypedArray()
-        val a2 = other.toTypedArray()
-        Assertions.assertEquals(a1.size, a2.size)
-        for (i in a1.indices) {
-            assertDeepEquals(a1[i], a2[i])
-        }
+        Assertions.assertEquals(one.size, other.size)
+        (one.toTypedArray() to other.toTypedArray()).forEach(this::assertDeepEquals)
+    }
+
+    private fun Pair<Array<*>, Array<*>>.forEach(block: (Any?, Any?) -> Unit) {
+        first.forEachIndexed { i, any -> block(any, second[i]) }
     }
 }

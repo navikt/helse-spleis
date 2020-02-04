@@ -451,11 +451,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-
-    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
-        return aktivitetslogger.continueIfNoErrors(*steps) { onError() }
-    }
-
     internal object TilGodkjenning : Vedtaksperiodetilstand {
         override val type = TIL_GODKJENNING
         override val timeout: Duration = Duration.ofDays(7)

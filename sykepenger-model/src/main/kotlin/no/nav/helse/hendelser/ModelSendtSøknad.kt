@@ -61,10 +61,6 @@ class ModelSendtSøknad(
         arbeidsgiver.håndter(this, person)
     }
 
-    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
-        aktivitetslogger.continueIfNoErrors(*steps) { onError() }
-    }
-
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
 
         internal abstract fun sykdomstidslinje(sendtSøknad: ModelSendtSøknad): ConcreteSykdomstidslinje

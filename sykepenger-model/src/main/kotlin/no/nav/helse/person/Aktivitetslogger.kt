@@ -24,6 +24,10 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         aktiviteter.add(Aktivitet(WARN, String.format(melding, *params)))
     }
 
+    override fun help(melding: String, vararg params: Any) {
+        aktiviteter.add(Aktivitet(HELP, String.format(melding, *params)))
+    }
+
     override fun error(melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet(ERROR, String.format(melding, *params)))
     }
@@ -35,7 +39,9 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
     override fun hasMessages() = info().isNotEmpty() || hasWarnings()
 
-    override fun hasWarnings() = warn().isNotEmpty() || hasErrors()
+    override fun hasWarnings() = warn().isNotEmpty() || hasHelps()
+
+    override fun hasHelps() = help().isNotEmpty() || hasErrors()
 
     override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
 
@@ -49,20 +55,13 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         return true
     }
 
-    internal fun continueIfNoErrors(vararg steps: ValidationStep, onError: () -> Unit) {
-        if (this.hasErrors()) return
-        steps.forEach {
-            it()
-            if (this.hasErrors()) return onError()
-        }
-    }
-
     fun toReport(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
         results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }?: ""} \n\t")
         append("Severe errors", severe(), results)
         append("Errors", error(), results)
+        append("Helps", help(), results)
         append("Warnings", warn(), results)
         append("Information", info(), results)
         results.append("\n")
@@ -86,6 +85,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
     private fun info() = Aktivitet.filter(INFO, aktiviteter)
     private fun warn() = Aktivitet.filter(WARN, aktiviteter)
+    private fun help() = Aktivitet.filter(HELP, aktiviteter)
     private fun error() = Aktivitet.filter(ERROR, aktiviteter)
     private fun severe() = Aktivitet.filter(SEVERE, aktiviteter)
 
@@ -124,6 +124,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
             when (alvorlighetsgrad) {
                 INFO -> visitor.visitInfo(this, melding, tidsstempel)
                 WARN -> visitor.visitWarn(this, melding, tidsstempel)
+                HELP -> visitor.visitHelp(this, melding, tidsstempel)
                 ERROR -> visitor.visitError(this, melding, tidsstempel)
                 SEVERE -> visitor.visitSevere(this, melding, tidsstempel)
             }
@@ -133,6 +134,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     enum class Alvorlighetsgrad(private val label: String): Comparable<Alvorlighetsgrad> {
         INFO("I"),
         WARN("W"),
+        HELP("H"),
         ERROR("E"),
         SEVERE("S");
 
@@ -140,16 +142,16 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     }
 }
 
-internal typealias ValidationStep = () -> Unit
-
 interface IAktivitetslogger {
     fun info(melding: String, vararg params: Any)
     fun warn(melding: String, vararg params: Any)
+    fun help(melding: String, vararg params: Any)
     fun error(melding: String, vararg params: Any)
     fun severe(melding: String, vararg params: Any): Nothing
 
     fun hasMessages(): Boolean
     fun hasWarnings(): Boolean
+    fun hasHelps(): Boolean
 
     fun hasErrors(): Boolean
 
