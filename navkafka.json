@@ -102,6 +102,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvhelserisk",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvhelserisk",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvhelsesjekk",
                     "role": "CONSUMER"
                 },
