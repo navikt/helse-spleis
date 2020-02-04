@@ -448,7 +448,7 @@ internal class EndToEndTest {
                             årMåned = YearMonth.of(2018, it),
                             inntektsliste = listOf(
                                 ModelVilkårsgrunnlag.Inntekt(
-                                    beløp = 666.0
+                                    beløp = 31000.0
                                 )
                             )
                         )
@@ -481,7 +481,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             refusjon = Refusjon(
-                beloepPrMnd = 666.toBigDecimal(),
+                beloepPrMnd = 31000.toBigDecimal(),
                 opphoersdato = LocalDate.now()
             )
         )

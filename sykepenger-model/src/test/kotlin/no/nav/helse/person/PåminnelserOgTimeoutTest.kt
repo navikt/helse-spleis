@@ -195,13 +195,13 @@ class PåminnelserOgTimeoutTest {
     private fun inntektsmelding() =
         ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 1000.0, emptyList()),
+            refusjon = ModelInntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()
@@ -218,7 +218,7 @@ class PåminnelserOgTimeoutTest {
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it), listOf(
-                        ModelVilkårsgrunnlag.Inntekt(1000.0)
+                        ModelVilkårsgrunnlag.Inntekt(31000.0)
                     )
                 )
             },

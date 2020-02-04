@@ -190,7 +190,7 @@ internal class YtelserHendelseTest {
     private fun inntektsmelding(
         refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
             null,
-            1000.0,
+            31000.0,
             emptyList()
         )
     ) =
@@ -202,7 +202,7 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()
@@ -219,7 +219,7 @@ internal class YtelserHendelseTest {
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(
-                        ModelVilkårsgrunnlag.Inntekt(1000.0)
+                        ModelVilkårsgrunnlag.Inntekt(31000.0)
                     )
                 )
             },

@@ -114,13 +114,13 @@ private val sendtSøknad
 private val inntektsmelding
     get() = ModelInntektsmelding(
         hendelseId = UUID.randomUUID(),
-        refusjon = ModelInntektsmelding.Refusjon(1.juli, 1000.00, emptyList()),
+        refusjon = ModelInntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
         orgnummer = orgnummer,
         fødselsnummer = fnr,
         aktørId = aktørId,
         mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = 1.januar,
-        beregnetInntekt = 1000.00,
+        beregnetInntekt = 31000.00,
         arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
         ferieperioder = emptyList(),
         aktivitetslogger = Aktivitetslogger()
@@ -139,7 +139,7 @@ private val vilkårsgrunnlag
                 årMåned = YearMonth.of(2018, it),
                 inntektsliste = listOf(
                     ModelVilkårsgrunnlag.Inntekt(
-                        beløp = 1000.0
+                        beløp = 31000.0
                     )
                 )
             )
@@ -161,7 +161,7 @@ private val ytelser
                 ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
                     fom = 1.januar.minusYears(1),
                     tom = 31.januar.minusYears(1),
-                    dagsats = 1000
+                    dagsats = 31000
                 )
             ),
             inntektshistorikk = emptyList(),

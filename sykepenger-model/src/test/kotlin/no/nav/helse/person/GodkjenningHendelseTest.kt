@@ -145,13 +145,13 @@ internal class GodkjenningHendelseTest {
     private fun inntektsmelding() =
         ModelInntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 1000.0, emptyList()),
+            refusjon = ModelInntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger()
@@ -168,7 +168,7 @@ internal class GodkjenningHendelseTest {
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(
-                        ModelVilkårsgrunnlag.Inntekt(1000.0)
+                        ModelVilkårsgrunnlag.Inntekt(31000.0)
                     )
                 )
             },

@@ -97,11 +97,11 @@ internal object TestConstants {
         ),
         feriePerioder: List<Periode> = emptyList(),
         refusjon: Refusjon = Refusjon(
-            beloepPrMnd = 666.toBigDecimal(),
+            beloepPrMnd = 31000.toBigDecimal(),
             opphoersdato = null
         ),
         endringerIRefusjoner: List<EndringIRefusjon> = emptyList(),
-        beregnetInntekt: BigDecimal? = 666.toBigDecimal()
+        beregnetInntekt: BigDecimal? = 31000.toBigDecimal()
     ) =
         Inntektsmeldingkontrakt(
             inntektsmeldingId = "",

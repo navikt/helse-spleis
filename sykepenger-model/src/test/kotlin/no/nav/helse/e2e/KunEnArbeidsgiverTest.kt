@@ -29,7 +29,7 @@ internal class KunEnArbeidsgiverTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
-        private const val INNTEKT = 1000.00
+        private const val INNTEKT = 31000.00
         private val rapportertdato = 1.februar.atStartOfDay()
     }
 
