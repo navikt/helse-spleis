@@ -5,6 +5,7 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -45,11 +46,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = egenmeldingsdag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykHelgedag(sykHelgedag.dagen)
-//    override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
-//        if(utbetalingslinjer.isNotEmpty()) {
-//            maksdato = alder.maksdato(betalteSykedager, betalteSykepengerEtter67, utbetalingslinjer.last().tom)
-//        }
-//    }
 
     private fun egenmeldingsdag(dagen: LocalDate) = if (dagen.erHelg()) sykHelgedag(dagen) else sykedag(dagen)
 
@@ -74,8 +70,12 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun setNåværendeInntekt(dagen: LocalDate) {
-        nåværendeInntekt =
-            inntekthistorikk.inntekt(dagen)?.toDouble()?.times(arbeidsgiverRegler.prosentLønn()) ?: Double.NaN
+        nåværendeInntekt = inntekthistorikk.inntekt(dagen)
+            ?.multiply(arbeidsgiverRegler.prosentLønn().toBigDecimal())
+            ?.multiply(12.toBigDecimal())
+            ?.divide(260.toBigDecimal(), RoundingMode.HALF_UP)
+            ?.toDouble()
+            ?: Double.NaN
     }
 
     private fun addArbeidsgiverdag(dagen: LocalDate) {

@@ -1,5 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -11,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 import kotlin.reflect.KClass
 
 internal class UtbetalingstidslinjeBuilderTest {
@@ -380,6 +384,36 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(NavDag::class, inspektør.datoer[22.januar])
     }
 
+    private val inntekthistorikk = Inntekthistorikk().apply {
+        add(1.januar.minusDays(1), inntektsmelding(beregnetInntekt = 31000.0), 31000.toBigDecimal())
+        add(1.februar.minusDays(1), inntektsmelding(beregnetInntekt = 25000.0), 25000.toBigDecimal())
+        add(1.mars.minusDays(1), inntektsmelding(beregnetInntekt = 50000.0), 50000.toBigDecimal())
+    }
+
+    @Test
+    fun `riktig inntekt for riktig dag`() {
+        resetSeed(1.desember(2017))
+        20.S.utbetalingslinjer()
+        assertInntekt(Double.NaN)
+
+        resetSeed(8.januar)
+        20.S.utbetalingslinjer()
+        assertInntekt(1430.8)
+
+        resetSeed(8.januar)
+        40.S.utbetalingslinjer()
+        assertInntekt(1430.8)
+
+        resetSeed(1.februar)
+        40.S.utbetalingslinjer()
+        assertInntekt(1153.8)
+    }
+
+
+    private fun assertInntekt(inntekt: Double) {
+        inspektør.navdager.forEach { assertEquals(inntekt, it.inntekt) }
+    }
+
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.sisteDag(),
         sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null
@@ -387,13 +421,14 @@ internal class UtbetalingstidslinjeBuilderTest {
         tidslinje = UtbetalingstidslinjeBuilder(
             sykdomstidslinje = this.kutt(sisteDag)!!,
             sisteDag = sisteDag,
-            inntekthistorikk = Inntekthistorikk(),
+            inntekthistorikk = inntekthistorikk,
             sisteNavDagForArbeidsgiverFørPerioden = sisteNavDagForArbeidsgiverFørPerioden
         ).result()
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
 
+        internal val navdager = mutableListOf<NavDag>()
         internal val dagtelling: MutableMap<KClass<out Utbetalingsdag>, Int> = mutableMapOf()
         internal val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingsdag>>()
 
@@ -403,6 +438,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
         override fun visitNavDag(dag: NavDag) {
             datoer[dag.dato] = NavDag::class
+            navdager.add(dag)
             inkrementer(NavDag::class)
         }
 
@@ -436,6 +472,23 @@ internal class UtbetalingstidslinjeBuilderTest {
         }
 
     }
+
+    private fun inntektsmelding(
+        beregnetInntekt: Double = 1000.00
+    ) =
+        ModelInntektsmelding(
+            hendelseId = UUID.randomUUID(),
+            refusjon = ModelInntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
+            orgnummer = "virksomhetsnummer",
+            fødselsnummer = "fnr",
+            aktørId = "aktørId",
+            mottattDato = 1.februar.atStartOfDay(),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = listOf(Periode(1.januar.minusDays(1), 16.januar.minusDays(1))),
+            ferieperioder = emptyList(),
+            aktivitetslogger = Aktivitetslogger()
+        )
 
 }
 
