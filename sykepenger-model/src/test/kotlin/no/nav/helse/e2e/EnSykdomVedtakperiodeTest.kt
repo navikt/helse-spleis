@@ -193,7 +193,7 @@ internal class EnSykdomVedtakperiodeTest {
             fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            rapportertdato = rapportertdato,
+            sendtNav = rapportertdato,
             perioder = listOf(*perioder),
             aktivitetslogger = hendelselogger
         )

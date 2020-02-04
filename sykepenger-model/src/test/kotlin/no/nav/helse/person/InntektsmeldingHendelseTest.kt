@@ -145,7 +145,7 @@ internal class InntektsmeldingHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger
         )

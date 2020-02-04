@@ -67,7 +67,7 @@ private val sendtSøknad
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
+        sendtNav = LocalDateTime.now(),
         perioder = listOf(
             ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
         ),

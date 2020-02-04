@@ -95,13 +95,13 @@ internal class SykepengesøknadTidslinjeTest {
         assertEquals(expected, actual?.let { it::class })
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                            rapportertDato: LocalDateTime = LocalDateTime.now()) =
+                            sendtNav: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
             orgnummer = "orgnr",
-            rapportertdato = rapportertDato,
+            sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger()
         )

@@ -14,7 +14,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
     private val fnr: String = sendtSøknad["fnr"]
     private val aktørId: String = sendtSøknad["aktørId"]
     private val orgnummer: String = sendtSøknad["orgnummer"]
-    private val rapportertdato: LocalDateTime = sendtSøknad["rapportertdato"]
+    private val sendtNav: LocalDateTime = sendtSøknad["sendtNav"]
     private val perioder: List<ModelSendtSøknad.Periode> = sendtSøknad["perioder"]
     private val aktivitetslogger: Aktivitetslogger = sendtSøknad["aktivitetslogger"]
 
@@ -25,7 +25,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
             "fnr" to fnr,
             "aktørId" to aktørId,
             "orgnummer" to orgnummer,
-            "rapportertdato" to rapportertdato,
+            "sendtNav" to sendtNav,
             "perioder" to perioder.map { PeriodeReflect(it).toMap() },
             "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
@@ -37,7 +37,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
         "fnr" to fnr,
         "aktørId" to aktørId,
         "orgnummer" to orgnummer,
-        "rapportertdato" to rapportertdato,
+        "sendtNav" to sendtNav,
         "perioder" to perioder.map { PeriodeReflect(it).toMap() }
     )
 

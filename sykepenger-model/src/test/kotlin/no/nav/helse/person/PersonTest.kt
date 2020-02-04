@@ -217,7 +217,7 @@ internal class PersonTest {
             perioder = listOf(
                 ModelSendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
             ),
-            rapportertDato = Uke(1).mandag.plusMonths(4).atStartOfDay()
+            sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
         ).also {
             testPerson.håndter(it)
             assertTrue(it.hasErrors())
@@ -351,13 +351,13 @@ internal class PersonTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), rapportertDato: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
         ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
-            rapportertdato = rapportertDato,
+            sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger()
         )

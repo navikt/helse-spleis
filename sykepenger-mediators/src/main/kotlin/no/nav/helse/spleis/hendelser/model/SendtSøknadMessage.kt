@@ -31,7 +31,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             fnr = this["fnr"].asText(),
             aktørId = this["aktorId"].asText(),
             orgnummer = this["arbeidsgiver.orgnummer"].asText(),
-            rapportertdato = this["opprettet"].asText().let { LocalDateTime.parse(it) },
+            sendtNav = this["sendtNav"].asText().let { LocalDateTime.parse(it) },
             perioder = this["soknadsperioder"].map {
                 Periode.Sykdom(
                     fom = it.path("fom").asLocalDate(),

@@ -111,7 +111,7 @@ internal class ModelSendtSøknadTest {
             fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
-            rapportertdato = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger
         )

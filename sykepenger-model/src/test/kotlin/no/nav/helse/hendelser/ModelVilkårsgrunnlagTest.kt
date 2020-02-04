@@ -109,7 +109,7 @@ internal class ModelVilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
+        sendtNav = LocalDateTime.now(),
         perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger
     )

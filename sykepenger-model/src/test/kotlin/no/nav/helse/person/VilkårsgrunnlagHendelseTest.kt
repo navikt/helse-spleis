@@ -149,7 +149,7 @@ internal class VilkårsgrunnlagHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            rapportertdato = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger
         )

@@ -13,7 +13,7 @@ class ModelSendtSøknad(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val rapportertdato: LocalDateTime,
+    private val sendtNav: LocalDateTime,
     private val perioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger) {
@@ -42,7 +42,7 @@ class ModelSendtSøknad(
 
     override fun organisasjonsnummer() = orgnummer
 
-    override fun rapportertdato() = rapportertdato
+    override fun rapportertdato() = sendtNav
 
     override fun aktørId() = aktørId
 

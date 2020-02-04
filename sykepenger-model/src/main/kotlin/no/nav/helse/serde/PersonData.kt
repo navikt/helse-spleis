@@ -350,7 +350,7 @@ internal data class PersonData(
             val aktørId: String,
             val hendelseId: UUID,
             val orgnummer: String,
-            val rapportertdato: LocalDateTime,
+            val sendtNav: LocalDateTime,
             val perioder: List<SykeperiodeData>,
             val aktivitetslogger: AktivitetsloggerData
         ) {

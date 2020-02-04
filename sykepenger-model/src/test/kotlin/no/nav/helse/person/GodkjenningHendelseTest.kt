@@ -137,7 +137,7 @@ internal class GodkjenningHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
+            sendtNav = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger()
         )

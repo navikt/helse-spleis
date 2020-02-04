@@ -97,7 +97,7 @@ class PersonPersisteringPostgresTest {
                 fnr = "fnr",
                 aktørId = aktørId,
                 orgnummer = "123456789",
-                rapportertdato = LocalDateTime.now(),
+                sendtNav = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                 aktivitetslogger = Aktivitetslogger()
             )

@@ -176,7 +176,7 @@ class PåminnelserOgTimeoutTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = rapportertdato,
+            sendtNav = rapportertdato,
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger()
         )

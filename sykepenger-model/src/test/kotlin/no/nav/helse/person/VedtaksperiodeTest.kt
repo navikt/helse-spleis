@@ -134,7 +134,7 @@ internal class VedtaksperiodeTest {
             fnr = fødselsnummer,
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
-            rapportertdato = rapportertDato,
+            sendtNav = rapportertDato,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger()
         )
