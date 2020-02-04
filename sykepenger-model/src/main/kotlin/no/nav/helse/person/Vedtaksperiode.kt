@@ -415,11 +415,11 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 it.valider { HarArbeidsgivertidslinje(arbeidsgiver) }
-                val utbetalingslinje = utbetalingstidslinje(arbeidsgiver, vedtaksperiode, sisteHistoriskeSykedag)
+                val utbetalingstidslinje = utbetalingstidslinje(arbeidsgiver, vedtaksperiode, sisteHistoriskeSykedag)
                 var engineForTimeline: ByggUtbetalingstidlinjer? = null
                 it.valider {
                     ByggUtbetalingstidlinjer(
-                        mapOf(arbeidsgiver to utbetalingslinje),
+                        mapOf(arbeidsgiver to utbetalingstidslinje),
                         vedtaksperiode.periode(),
                         ytelser,
                         Alder(vedtaksperiode.fødselsnummer)
