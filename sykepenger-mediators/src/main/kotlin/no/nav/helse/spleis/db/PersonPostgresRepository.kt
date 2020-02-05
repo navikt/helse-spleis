@@ -8,6 +8,8 @@ import no.nav.helse.serde.parsePerson
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
+private const val REQUIRED_SCHEMA_VERSION: Int = 4
+
 class PersonPostgresRepository(
     private val dataSource: DataSource,
     private val probe: PostgresProbe = PostgresProbe
@@ -15,9 +17,15 @@ class PersonPostgresRepository(
 
     override fun hentPerson(aktørId: String): Person? {
         return using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1", aktørId).map {
-                it.string("data")
-            }.asSingle)
+            session.run(
+                queryOf(
+                    "SELECT data FROM person WHERE aktor_id = ? AND skjema_versjon >= ? ORDER BY id DESC LIMIT 1",
+                    aktørId,
+                    REQUIRED_SCHEMA_VERSION
+                ).map {
+                    it.string("data")
+                }.asSingle
+            )
         }?.let {
             parsePerson(it)
         }?.also {

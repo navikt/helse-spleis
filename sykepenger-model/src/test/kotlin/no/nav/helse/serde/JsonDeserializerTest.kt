@@ -46,12 +46,6 @@ internal class JsonDeserializerTest {
         assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
     }
 
-    @Test
-    fun test2() {
-        val data = parseJson(enkelPersonJson())
-        println(data)
-    }
-
     private val førsteFraværsdag = LocalDate.now().minusDays(18)
 
     private fun enkelPersonJson(): String {

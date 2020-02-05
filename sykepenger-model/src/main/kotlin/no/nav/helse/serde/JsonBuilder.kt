@@ -15,11 +15,12 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
+data class SerialisertPerson(val skjemaVersjon: Int, val personJson: String)
 
-fun serializePerson(person: Person): String {
+fun serializePerson(person: Person): SerialisertPerson {
     val jsonBuilder = JsonBuilder()
     person.accept(jsonBuilder)
-    return jsonBuilder.toJson()
+    return SerialisertPerson(PersonData.skjemaVersjon, jsonBuilder.toJson())
 }
 
 internal class JsonBuilder : PersonVisitor {

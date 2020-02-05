@@ -116,6 +116,23 @@ class PersonPersisteringPostgresTest {
         assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }
 
+    @Test
+    internal fun `ignorerer en skjema versjoner når man henter ut personer`() {
+        val dataSource = HikariDataSource(hikariConfig)
+        val personRepository = PersonPostgresRepository(dataSource)
+        val aktørId = "1234"
+        val fnr = "4567"
+
+        using(sessionOf(dataSource)) { session ->
+            session.run(queryOf(
+                "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, -1, '{}')",
+                aktørId, fnr
+            ).asExecute)
+        }
+
+        assertNull(personRepository.hentPerson(aktørId))
+    }
+
     private fun nySøknad(aktørId: String) = ModelNySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",

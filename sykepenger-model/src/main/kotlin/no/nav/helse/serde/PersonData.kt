@@ -219,13 +219,16 @@ internal data class AktivitetsloggerData(
 }
 
 internal data class PersonData(
-    val skjemaVersjon: Int = 1,
     val aktørId: String,
     val fødselsnummer: String,
     val hendelser: List<HendelseWrapperData>,
     val arbeidsgivere: List<ArbeidsgiverData>,
     val aktivitetslogger: AktivitetsloggerData
 ) {
+    companion object {
+        const val skjemaVersjon: Int = 4
+    }
+
     data class HendelseWrapperData(
         val type: Hendelsestype,
         //val tidspunkt: LocalDateTime,
