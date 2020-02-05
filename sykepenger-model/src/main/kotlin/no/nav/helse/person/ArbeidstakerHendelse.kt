@@ -23,8 +23,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     fun hendelseId() = hendelseId
     fun hendelsestype() = hendelsestype
 
-    open fun kanBehandles() = true
-
     abstract fun rapportertdato(): LocalDateTime
 
     abstract fun aktørId(): String

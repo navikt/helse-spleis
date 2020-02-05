@@ -30,8 +30,6 @@ class ModelNySøknad(
         if (!ingenOverlappende()) aktivitetslogger.severe("Sykeperioder overlapper")
     }
 
-    override fun kanBehandles() = !valider().hasErrors()
-
     override fun valider(): Aktivitetslogger {
         if (!hundreProsentSykmeldt()) aktivitetslogger.error("Støtter bare 100%% sykmeldt")
         return aktivitetslogger

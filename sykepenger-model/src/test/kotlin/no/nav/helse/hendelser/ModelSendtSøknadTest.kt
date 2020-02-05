@@ -48,7 +48,7 @@ internal class ModelSendtSøknadTest {
     @Test
     internal fun `søknad med utdanning`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(5.januar, 10.januar))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasNeeds())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
 
@@ -73,13 +73,13 @@ internal class ModelSendtSøknadTest {
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(16.januar, 10.januar))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasNeeds())
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasNeeds())
     }
 
     @Test

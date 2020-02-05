@@ -102,8 +102,6 @@ class ModelInntektsmelding(
         return aktivitetslogger
     }
 
-    override fun kanBehandles() = !valider().hasErrors()
-
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
 
     override fun rapportertdato() = mottattDato

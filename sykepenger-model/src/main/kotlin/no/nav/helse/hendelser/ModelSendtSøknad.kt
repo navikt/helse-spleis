@@ -49,8 +49,6 @@ class ModelSendtSøknad constructor(
 
     override fun aktørId() = aktørId
 
-    override fun kanBehandles() = !valider().hasErrors()
-
     override fun valider(): Aktivitetslogger {
         perioder.forEach { it.valider(this, aktivitetslogger) }
         return aktivitetslogger
@@ -102,7 +100,7 @@ class ModelSendtSøknad constructor(
                 ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.error("Utdanning foreløpig ikke understøttet")
+                aktivitetslogger.need("Utdanning foreløpig ikke støttet")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -110,7 +108,7 @@ class ModelSendtSøknad constructor(
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.error("Permisjon foreløpig ikke understøttet")
+                aktivitetslogger.need("Permisjon foreløpig ikke støttet")
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {

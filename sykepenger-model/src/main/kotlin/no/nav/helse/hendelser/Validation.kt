@@ -21,15 +21,15 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse) {
     }
 
     internal fun valider(block: ValiderBlock) {
-        if (hendelse.hasErrors()) return
+        if (hendelse.hasErrors() || hendelse.hasNeeds()) return
         val steg = block()
         if (steg.isValid()) return
-        hendelse.error(steg.feilmelding())
+        steg.feilmelding()?.also { hendelse.error(it) }
         errorBlock()
     }
 
     internal fun onSuccess(successBlock: SuccessBlock) {
-        if (!hendelse.hasErrors()) successBlock()
+        if (!hendelse.hasErrors() && !hendelse.hasNeeds()) successBlock()
     }
 }
 
@@ -39,15 +39,13 @@ internal typealias ValiderBlock = () -> Valideringssteg
 
 internal interface Valideringssteg {
     fun isValid(): Boolean
-    fun feilmelding(): String
+    fun feilmelding(): String? = null
 }
 
 // Invoke internal validation of a Hendelse
 internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHendelse) : Valideringssteg {
     override fun isValid() =
-        !hendelse.valider().hasErrors()
-
-    override fun feilmelding() = "Kunne ikke validere hendelse"
+        !hendelse.valider().let { it.hasErrors() || it.hasNeeds() }
 }
 
 // Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
