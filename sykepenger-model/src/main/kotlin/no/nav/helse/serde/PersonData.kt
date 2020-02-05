@@ -20,6 +20,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -65,7 +66,7 @@ private fun konverterTilArbeidsgiver(
         inntekthistorikk.add(
             fom = inntektData.fom,
             hendelse = hendelser.find { it.hendelseId() == inntektData.hendelse } as ModelInntektsmelding,
-            beløp = inntektData.beløp.toBigDecimal().setScale(1)
+            beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
         )
     }
 
@@ -403,7 +404,7 @@ internal data class PersonData(
         data class InntektData(
             val fom: LocalDate,
             val hendelse: UUID,
-            val beløp: String
+            val beløp: BigDecimal
         )
 
         data class VedtaksperiodeData(
