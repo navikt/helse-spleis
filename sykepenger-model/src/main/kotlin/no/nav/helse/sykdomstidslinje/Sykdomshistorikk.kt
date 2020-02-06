@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDateTime
 
 internal class Sykdomshistorikk private constructor(
@@ -11,7 +12,7 @@ internal class Sykdomshistorikk private constructor(
     internal val size get() = elementer.size
     internal fun isEmpty() = elementer.isEmpty()
 
-    internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
+    internal fun   sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(0, Element.opprett(this, hendelse))
@@ -29,7 +30,7 @@ internal class Sykdomshistorikk private constructor(
     ) = if (elementer.isEmpty()) {
         hendelse.sykdomstidslinje()
     } else {
-        sykdomstidslinje().plus(hendelseSykdomstidslinje, ConcreteSykdomstidslinje.Companion::implisittDag).also {
+        sykdomstidslinje().plus(hendelseSykdomstidslinje, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering).also {
             if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
         }
     }

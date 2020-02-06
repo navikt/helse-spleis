@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.tournament.dagTurnering
+import no.nav.helse.tournament.Dagturnering
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -21,7 +21,7 @@ internal abstract class Dag internal constructor(
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
 
-    internal open fun beste(other: Dag): Dag = dagTurnering.slåss(this, other)
+    internal open fun beste(other: Dag, turnering: Dagturnering): Dag = turnering.beste(this, other)
 
     override fun length() = 1
 

@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
+import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
@@ -66,7 +67,7 @@ internal class BesteDagTest {
         dag2: Dag,
         expectedWinnerClass: KClass<T>
     ) {
-        val winner = dag1.beste(dag2)
+        val winner = dag1.beste(dag2, historiskDagturnering)
         assertEquals(expectedWinnerClass, winner::class)
     }
 

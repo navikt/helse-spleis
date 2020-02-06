@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.time.DayOfWeek
+import no.nav.helse.tournament.Dagturnering
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 import kotlin.streams.toList
@@ -19,7 +19,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     fun plus(
         other: ConcreteSykdomstidslinje,
-        gapDayCreator: (LocalDate, Dag.NøkkelHendelseType) -> Dag
+        gapDayCreator: (LocalDate, Dag.NøkkelHendelseType) -> Dag,
+        dagturnering: Dagturnering
     ): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
@@ -30,7 +31,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             førsteStartdato.datesUntil(this.sisteSluttdato(other).plusDays(1))
                 .map {
                     val firstOfOther = other.dag(other.førsteDag())
-                    beste(this.dag(it), other.dag(it)) ?: gapDayCreator(it, firstOfOther!!.hendelseType)
+                    beste(this.dag(it), other.dag(it), dagturnering) ?: gapDayCreator(it, firstOfOther!!.hendelseType)
                 }.toList()
         )
     }
@@ -207,10 +208,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                     .toList())
         }
 
-        private fun beste(a: Dag?, b: Dag?): Dag? {
+        private fun beste(a: Dag?, b: Dag?, dagturnering: Dagturnering): Dag? {
             if (a == null) return b
             if (b == null) return a
-            return a.beste(b)
+            return a.beste(b, dagturnering)
         }
     }
 }

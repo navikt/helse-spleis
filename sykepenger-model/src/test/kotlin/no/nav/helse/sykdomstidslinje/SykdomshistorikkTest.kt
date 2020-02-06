@@ -82,8 +82,8 @@ internal class SykdomshistorikkTest {
         )
         historikk.håndter(
             inntektsmelding(
-                listOf(Periode(1.januar, 3.januar), Periode(9.januar, 12.januar)),
-                listOf(Periode(4.januar, 8.januar))
+                arbeidsgiverperioder = listOf(Periode(1.januar, 3.januar), Periode(9.januar, 12.januar)),
+                ferieperioder = listOf(Periode(4.januar, 8.januar))
             )
         )
         val inspektør = HistorikkInspektør(historikk)

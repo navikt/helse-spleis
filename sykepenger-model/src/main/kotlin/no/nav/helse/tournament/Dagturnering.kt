@@ -1,15 +1,32 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 
-internal val dagTurnering = DagTurnering()
+internal interface Dagturnering {
+    fun beste(venstre: Dag, høyre: Dag): Dag
+}
 
-internal class DagTurnering(val source: String = "/dagturnering.csv") {
 
-    internal val strategies: Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> = readStrategies()
+internal val sendtSøknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
+internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
-    fun slåss(venstre: Dag, høyre: Dag): Dag {
+internal object KonfliktskyDagturnering : Dagturnering {
+    override fun beste(venstre: Dag, høyre: Dag): Dag {
+        return when {
+            venstre is ImplisittDag -> høyre
+            høyre is ImplisittDag -> venstre
+            else -> error("Strategien ${this::class.simpleName} kan ikke bestemme beste dag siden ingen er ImplisittDag")
+        }
+    }
+}
+
+private class CsvDagturnering(private val source: String): Dagturnering {
+
+    private val strategies: Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> = readStrategies()
+
+    override fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = venstre.nøkkel()
         val rightKey = høyre.nøkkel()
 
@@ -48,8 +65,6 @@ internal class DagTurnering(val source: String = "/dagturnering.csv") {
             "C" -> Column
             "X" -> Impossible
             "L" -> Latest
-            "LR" -> LatestOrRow
-            "LC" -> LatestOrColumn
             else -> throw RuntimeException("$cellValue is not a known strategy for deciding between days")
         }
 }
@@ -77,23 +92,6 @@ internal object Column : Strategy() {
 internal object Latest : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag = column
     override fun decideInverse(row: Dag, column: Dag) = column
-        /*when {
-            row.sisteHendelse() == column.sisteHendelse() -> throw IllegalStateException("Strategien latest støtter ikke sammenliging av eventer med samme tidspunkt. (row: $row, column: $column)")
-            row.sisteHendelse() > (column.sisteHendelse()) -> row
-            else -> column
-        }*/
-}
-
-internal object LatestOrRow : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = column
-    override fun decideInverse(row: Dag, column: Dag) = column
-        //TODO() // if (row.sisteHendelse() >= (column.sisteHendelse())) row else column
-}
-
-internal object LatestOrColumn : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag = column
-    override fun decideInverse(row: Dag, column: Dag) = column
-        //TODO() // if (row.sisteHendelse() > (column.sisteHendelse())) row else column
 }
 
 internal object Impossible : Strategy() {

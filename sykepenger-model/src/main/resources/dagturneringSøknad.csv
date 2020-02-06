@@ -1,0 +1,12 @@
+,I,WD_A,S_A,V_A,Le_A,SW,SRD_A,EDU,OI_A,DA,Undecided
+I,L,,,,,,,,,,
+WD_A,R,L,,,,,,,,,
+S_A,R,C,L,,,,,,,,
+V_A,R,R,R,L,,,,,,,
+Le_A,R,U,R,U,L,,,,,,
+SW,R,C,R,C,C,L,,,,,
+SRD_A,R,L,C,U,L,C,L,,,,
+EDU,U,U,U,U,U,U,U,L,,,
+OI_A,U,U,U,U,U,U,U,U,L,,
+DA,U,U,U,U,U,U,U,U,U,L,
+Undecided,U,U,U,U,U,U,U,U,U,U,U

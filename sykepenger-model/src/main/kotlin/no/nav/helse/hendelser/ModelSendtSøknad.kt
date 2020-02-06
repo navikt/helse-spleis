@@ -7,6 +7,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.tournament.sendtSøknadDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -37,7 +38,7 @@ class ModelSendtSøknad constructor(
 
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje() }
-        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) }
+        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, sendtSøknadDagturnering) }
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
 

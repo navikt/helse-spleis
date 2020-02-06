@@ -3,6 +3,7 @@ package no.nav.helse
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -128,4 +129,4 @@ internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null) {
 }
 
 private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-    this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
+    this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)

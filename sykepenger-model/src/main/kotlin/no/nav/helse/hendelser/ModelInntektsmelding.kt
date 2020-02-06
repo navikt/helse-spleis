@@ -10,6 +10,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.lang.Double.min
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -77,23 +78,17 @@ class ModelInntektsmelding(
         .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
         .all { it }
 
-    override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
-        val arbeidsgivertidslinje = this.arbeidsgiverperioder
-            .takeUnless { it.isEmpty() }
-            ?.map { it.sykdomstidslinje(this) }
-            ?.reduce { acc, sykdomstidslinje ->
-                acc.plus(sykdomstidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag)
-            }
-        val ferietidslinje = this.ferieperioder
-            .takeUnless { it.isEmpty() }
-            ?.map { it.sykdomstidslinje(this) }
-            ?.reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) }
-
-        return arbeidsgivertidslinje.plus(ferietidslinje) ?: ConcreteSykdomstidslinje.egenmeldingsdag(
+    override fun sykdomstidslinje() = (ferieperioder + arbeidsgiverperioder)
+        .map { it.sykdomstidslinje(this) }
+        .sortedBy { it.førsteDag() }
+        .takeUnless { it.isEmpty() }
+        ?.reduce { acc, tidslinje ->
+            acc.plus(tidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag, KonfliktskyDagturnering)
+        }
+        ?: ConcreteSykdomstidslinje.egenmeldingsdag(
             førsteFraværsdag,
             Dag.NøkkelHendelseType.Inntektsmelding
         )
-    }
 
     override fun valider(): Aktivitetslogger {
         if (!ingenOverlappende()) aktivitetslogger.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
@@ -129,9 +124,4 @@ class ModelInntektsmelding(
         }
         return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
     }
-}
-
-private fun ConcreteSykdomstidslinje?.plus(other: ConcreteSykdomstidslinje?): ConcreteSykdomstidslinje? {
-    if (other == null) return this
-    return this?.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) ?: other
 }

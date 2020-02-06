@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.implisittDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -44,7 +45,7 @@ class ModelNySøknad(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag)}
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)}
 
     override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
 

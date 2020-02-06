@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -118,5 +119,5 @@ internal class SykepengesøknadTidslinjeTest {
     )
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)
 }

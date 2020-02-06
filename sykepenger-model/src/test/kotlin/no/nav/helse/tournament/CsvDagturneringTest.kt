@@ -11,49 +11,20 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class DagTurneringTest {
+internal class CsvDagturneringTest {
 
     companion object {
-        val turnering = DagTurnering()
-        val microturnering = DagTurnering("/microturnering.csv")
-
+        val turnering = historiskDagturnering
         private val mandag get() = TestHendelseBuilder(LocalDate.of(2018, 1, 1))
         private val søndag get() = TestHendelseBuilder(LocalDate.of(2018, 1, 7))
     }
-
-    @Test
-    internal fun `Turneringen skal inneholde riktige strategier basert på en csv-fil`() {
-
-        assertEquals(
-            LatestOrRow::class,
-            microturnering.strategies.getValue(Dag.Nøkkel.I).getValue(Dag.Nøkkel.I)::class
-        )
-        assertEquals(
-            LatestOrColumn::class,
-            microturnering.strategies.getValue(Dag.Nøkkel.S_A).getValue(Dag.Nøkkel.I)::class
-        )
-        assertEquals(Row::class, microturnering.strategies.getValue(Dag.Nøkkel.WD_A).getValue(Dag.Nøkkel.I)::class)
-        assertEquals(
-            Undecided::class,
-            microturnering.strategies.getValue(Dag.Nøkkel.WD_A).getValue(Dag.Nøkkel.WD_A)::class
-        )
-        assertEquals(
-            Column::class,
-            microturnering.strategies.getValue(Dag.Nøkkel.S_A).getValue(Dag.Nøkkel.WD_A)::class
-        )
-        assertEquals(
-            Impossible::class,
-            microturnering.strategies.getValue(Dag.Nøkkel.S_A).getValue(Dag.Nøkkel.S_A)::class
-        )
-    }
-
 
     @Test
     internal fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
         val sykedag = mandag.sykedag.fraSykmelding.rapportertTidlig
         val arbeidsdag = mandag.arbeidsdag.fraSøknad.rapportertSent
 
-        val vinner = turnering.slåss(sykedag, arbeidsdag)
+        val vinner = turnering.beste(sykedag, arbeidsdag)
 
         assertEquals(vinner, arbeidsdag)
     }
@@ -79,7 +50,7 @@ internal class DagTurneringTest {
         val egenmeldingsdagFraArbeidsgiver = søndag.egenmeldingsdag.fraInntektsmelding.rapportertSent
         val sykHelgedag = søndag.sykedag.fraSykmelding.rapportertTidlig
 
-        val vinner = turnering.slåss(egenmeldingsdagFraArbeidsgiver, sykHelgedag)
+        val vinner = turnering.beste(egenmeldingsdagFraArbeidsgiver, sykHelgedag)
         assertEquals(sykHelgedag, vinner)
     }
 
@@ -88,7 +59,7 @@ internal class DagTurneringTest {
         val egenmeldingsdag = mandag.egenmeldingsdag.fraSøknad.rapportertTidlig
         val arbeidsdag = mandag.arbeidsdag.fraInntektsmelding.rapportertTidlig
 
-        val vinner = turnering.slåss(egenmeldingsdag, arbeidsdag)
+        val vinner = turnering.beste(egenmeldingsdag, arbeidsdag)
         assertEquals(arbeidsdag, vinner)
     }
 
@@ -97,7 +68,7 @@ internal class DagTurneringTest {
         val sykedag = mandag.sykedag.fraSykmelding.rapportertTidlig
         val arbeidsdag = mandag.arbeidsdag.fraInntektsmelding.rapportertTidlig
 
-        val vinner = turnering.slåss(sykedag, arbeidsdag)
+        val vinner = turnering.beste(sykedag, arbeidsdag)
         assertEquals(arbeidsdag, vinner)
     }
 
@@ -152,6 +123,6 @@ internal class DagTurneringTest {
     }
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)
 }
 

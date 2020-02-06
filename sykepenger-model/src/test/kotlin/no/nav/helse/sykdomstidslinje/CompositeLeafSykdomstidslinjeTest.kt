@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.testhelpers.Uke
+import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -65,5 +66,5 @@ internal class CompositeLeafSykdomstidslinjeTest {
     }
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)
 }

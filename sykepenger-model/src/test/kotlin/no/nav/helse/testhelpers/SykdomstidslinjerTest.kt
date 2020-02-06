@@ -1,6 +1,7 @@
 package no.nav.helse.testhelpers
 
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.tournament.KonfliktskyDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,5 +28,5 @@ internal class SykdomstidslinjerTest {
     }
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag)
+        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)
 }

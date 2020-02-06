@@ -9,6 +9,7 @@ import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.tournament.historiskDagturnering
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.apache.commons.codec.binary.Base32
@@ -564,6 +565,6 @@ internal class Vedtaksperiode private constructor(
     companion object {
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
-            .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag) }
+            .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering) }
     }
 }
