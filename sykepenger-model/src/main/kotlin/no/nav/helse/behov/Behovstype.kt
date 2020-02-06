@@ -6,5 +6,6 @@ enum class Behovstype {
     EgenAnsatt,
     GodkjenningFraSaksbehandler,
     Utbetaling,
-    Inntektsberegning
+    Inntektsberegning,
+    Opptjening
 }

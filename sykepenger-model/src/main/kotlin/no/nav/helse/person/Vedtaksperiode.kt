@@ -192,7 +192,7 @@ internal class Vedtaksperiode private constructor(
         emitTrengerLøsning(
             Behov.nyttBehov(
                 hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
-                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt),
+                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -373,13 +373,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+            val førsteFraværsdag = vedtaksperiode.førsteFraværsdag ?: vedtaksperiode.aktivitetslogger.severe("Første fraværsdag mangler i Vilkårsprøving tilstand")
             val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding()
                 ?: vedtaksperiode.aktivitetslogger.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
 
-            val (behandlesManuelt, grunnlagsdata) = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding)
-            vedtaksperiode.dataForVilkårsvurdering = grunnlagsdata
+            val resultat = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding, førsteFraværsdag)
+            vedtaksperiode.dataForVilkårsvurdering = resultat.grunnlagsdata
 
-            if (behandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
+            if (resultat.måBehandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
 
             vedtaksperiode.aktivitetslogger.info("Vilkårsgrunnlag verifisert")
             vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)

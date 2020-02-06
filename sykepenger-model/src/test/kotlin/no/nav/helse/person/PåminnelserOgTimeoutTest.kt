@@ -80,7 +80,7 @@ class PåminnelserOgTimeoutTest {
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 2,
-            inneholder = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
+            inneholder = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
         )
     }
 
@@ -224,7 +224,8 @@ class PåminnelserOgTimeoutTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold("999888777", 1.januar(2017)))
         )
 
     private fun ytelser() = ModelYtelser(

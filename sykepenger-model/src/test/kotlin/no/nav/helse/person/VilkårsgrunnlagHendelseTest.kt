@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -34,7 +35,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `egen ansatt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = emptyList())
+        håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
@@ -43,7 +44,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `avvik i inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList())
+        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
@@ -56,7 +57,8 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = månedslønn,
-            inntekter = tolvMånederMedInntekt(månedslønn)
+            inntekter = tolvMånederMedInntekt(månedslønn),
+            arbeidsforhold = ansattSidenStart2017()
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -81,7 +83,8 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mer`,
-            inntekter = tolvMånederMedInntekt(månedslønn)
+            inntekter = tolvMånederMedInntekt(månedslønn),
+            arbeidsforhold = ansattSidenStart2017()
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -96,13 +99,18 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mindre`,
-            inntekter = tolvMånederMedInntekt(månedslønn)
+            inntekter = tolvMånederMedInntekt(månedslønn),
+            arbeidsforhold = ansattSidenStart2017()
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
+
+    private fun ansattSidenStart2017() =
+        listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
+
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Double): List<ModelVilkårsgrunnlag.Måned> {
         return (1..12).map {
@@ -124,12 +132,13 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
-        inntekter: List<ModelVilkårsgrunnlag.Måned>
+        inntekter: List<ModelVilkårsgrunnlag.Måned>,
+        arbeidsforhold: List<ModelVilkårsgrunnlag.Arbeidsforhold>
     ) {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
-        person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter))
+        person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
     private fun nySøknad() =
@@ -172,7 +181,8 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: List<ModelVilkårsgrunnlag.Måned>
+        inntekter: List<ModelVilkårsgrunnlag.Måned>,
+        arbeidsforhold: List<ModelVilkårsgrunnlag.Arbeidsforhold>
     ) =
         ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
@@ -183,7 +193,8 @@ internal class VilkårsgrunnlagHendelseTest {
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            arbeidsforhold = arbeidsforhold
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

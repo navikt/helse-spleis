@@ -185,7 +185,8 @@ private fun parseDataForVilkårsvurdering(
     ModelVilkårsgrunnlag.Grunnlagsdata(
         erEgenAnsatt = data.erEgenAnsatt,
         beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
-        avviksprosent = data.avviksprosent
+        avviksprosent = data.avviksprosent,
+        harOpptjening = data.harOpptjening
     )
 
 private fun parseSykdomshistorikk(
@@ -374,6 +375,7 @@ internal data class PersonData(
             val rapportertDato: LocalDateTime,
             val inntektsmåneder: List<Måned>,
             val erEgenAnsatt: Boolean,
+            val arbeidsforhold: List<ArbeidsforholdData>,
             val aktivitetslogger: AktivitetsloggerData
         ) {
             data class Måned(
@@ -384,6 +386,11 @@ internal data class PersonData(
                     val beløp: Double
                 )
             }
+            data class ArbeidsforholdData(
+                val orgnummer: String,
+                val fom: LocalDate,
+                val tom: LocalDate?
+            )
         }
 
         enum class Hendelsestype {
@@ -439,7 +446,8 @@ internal data class PersonData(
             data class DataForVilkårsvurderingData(
                 val erEgenAnsatt: Boolean,
                 val beregnetÅrsinntektFraInntektskomponenten: Double,
-                val avviksprosent: Double
+                val avviksprosent: Double,
+                val harOpptjening: Boolean
             )
 
             data class UtbetalingslinjeData(
