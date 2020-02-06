@@ -216,7 +216,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.MOTTATT_NY_SØKNAD,
-            currentState = TilstandType.MOTTATT_SENDT_SØKNAD,
+            currentState = TilstandType.AVVENTER_INNTEKTSMELDING,
             timeout = Duration.ofDays(30)
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
@@ -224,8 +224,8 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.MOTTATT_SENDT_SØKNAD,
-            currentState = TilstandType.VILKÅRSPRØVING,
+            previousState = TilstandType.AVVENTER_INNTEKTSMELDING,
+            currentState = TilstandType.AVVENTER_VILKÅRSPRØVING,
             timeout = Duration.ofHours(1)
         )
 
@@ -235,8 +235,8 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.VILKÅRSPRØVING,
-            currentState = TilstandType.BEREGN_UTBETALING,
+            previousState = TilstandType.AVVENTER_VILKÅRSPRØVING,
+            currentState = TilstandType.AVVENTER_HISTORIKK,
             timeout = Duration.ofHours(1)
         )
 
@@ -253,7 +253,7 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.BEREGN_UTBETALING,
+            previousState = TilstandType.AVVENTER_HISTORIKK,
             currentState = TilstandType.AVVENTER_GODKJENNING,
             timeout = Duration.ofDays(7)
         )
