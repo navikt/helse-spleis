@@ -138,7 +138,8 @@ internal class VedtaksperiodeTest {
             orgnummer = organisasjonsnummer,
             sendtNav = rapportertDato,
             perioder = perioder,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = ModelPåminnelse(

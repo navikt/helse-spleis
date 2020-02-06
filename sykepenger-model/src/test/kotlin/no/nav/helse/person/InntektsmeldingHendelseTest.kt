@@ -147,7 +147,8 @@ internal class InntektsmeldingHendelseTest {
             orgnummer = orgnummer,
             sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            harAndreInntektskilder = false
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

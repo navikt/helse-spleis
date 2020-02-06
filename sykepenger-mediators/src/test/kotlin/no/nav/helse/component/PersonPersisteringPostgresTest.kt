@@ -99,7 +99,8 @@ class PersonPersisteringPostgresTest {
                 orgnummer = "123456789",
                 sendtNav = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                harAndreInntektskilder = false
             )
         )
 

@@ -287,7 +287,8 @@ internal class KunEnArbeidsgiverTest {
             orgnummer = ORGNUMMER,
             sendtNav = rapportertdato,
             perioder = listOf(*perioder),
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            harAndreInntektskilder = false
         )
     }
 

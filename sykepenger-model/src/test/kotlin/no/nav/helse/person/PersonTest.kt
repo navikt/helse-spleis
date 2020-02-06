@@ -359,7 +359,8 @@ internal class PersonTest {
             orgnummer = organisasjonsnummer,
             sendtNav = sendtNav,
             perioder = perioder,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
 

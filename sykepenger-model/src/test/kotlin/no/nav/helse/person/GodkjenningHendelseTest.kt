@@ -139,7 +139,8 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             sendtNav = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
     private fun inntektsmelding() =

@@ -178,7 +178,8 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             sendtNav = rapportertdato,
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
     private fun nySøknad() =

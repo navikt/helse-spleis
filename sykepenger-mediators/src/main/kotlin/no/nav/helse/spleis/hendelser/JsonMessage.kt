@@ -87,7 +87,7 @@ internal open class JsonMessage(private val originalMessage: String, private val
         recognizedKeys.computeIfAbsent(key) { node(key) }
     }
 
-    private fun isKeyMissing(key: String) = node(key).isMissingNode
+    internal fun isKeyMissing(key: String) = node(key).isMissingNode
 
     private fun node(path: String): JsonNode {
         if (!path.contains(nestedKeySeparator)) return json.path(path)

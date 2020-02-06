@@ -137,7 +137,8 @@ internal class SykdomshistorikkTest {
         orgnummer = "987654321",
         sendtNav = LocalDateTime.now(),
         perioder = listOf(*perioder),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        harAndreInntektskilder = false
     )
 
     private fun inntektsmelding(

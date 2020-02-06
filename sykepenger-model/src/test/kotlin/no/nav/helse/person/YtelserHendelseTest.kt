@@ -184,7 +184,8 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             sendtNav = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
     private fun inntektsmelding(

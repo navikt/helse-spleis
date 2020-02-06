@@ -19,6 +19,7 @@ class ModelSendtSøknad constructor(
     private val orgnummer: String,
     private val sendtNav: LocalDateTime,
     private val perioder: List<Periode>,
+    private val harAndreInntektskilder: Boolean,
     aktivitetslogger: Aktivitetslogger
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger) {
 
@@ -52,6 +53,7 @@ class ModelSendtSøknad constructor(
 
     override fun valider(): Aktivitetslogger {
         perioder.forEach { it.valider(this, aktivitetslogger) }
+        if ( harAndreInntektskilder ) aktivitetslogger.error("Søknaden inneholder andre inntektskilder")
         return aktivitetslogger
     }
 

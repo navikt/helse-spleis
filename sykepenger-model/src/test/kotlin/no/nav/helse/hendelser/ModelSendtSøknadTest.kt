@@ -96,6 +96,18 @@ internal class ModelSendtSøknadTest {
     }
 
     @Test
+    internal fun `søknad med andre inntektskilder`() {
+        sendtSøknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = true)
+        assertTrue(sendtSøknad.valider().hasErrors())
+    }
+
+    @Test
+    internal fun `søknad uten andre inntektskilder`() {
+        sendtSøknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = false)
+        assertFalse(sendtSøknad.valider().hasErrors())
+    }
+
+    @Test
     internal fun `må ha perioder`() {
         assertThrows<Aktivitetslogger.AktivitetException> { sendtSøknad() }
     }
@@ -105,7 +117,7 @@ internal class ModelSendtSøknadTest {
         assertThrows<Aktivitetslogger.AktivitetException> { sendtSøknad(Ferie(2.januar, 16.januar)) }
     }
 
-    private fun sendtSøknad(vararg perioder: Periode) {
+    private fun sendtSøknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
         sendtSøknad = ModelSendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
@@ -113,7 +125,8 @@ internal class ModelSendtSøknadTest {
             orgnummer = "987654321",
             sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            harAndreInntektskilder = harAndreInntektskilder
         )
     }
 }

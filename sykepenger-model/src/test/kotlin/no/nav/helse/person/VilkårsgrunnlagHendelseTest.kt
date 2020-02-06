@@ -151,7 +151,8 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             sendtNav = LocalDateTime.now(),
             perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            harAndreInntektskilder = false
         )
 
     private fun inntektsmelding(beregnetInntekt: Double) =

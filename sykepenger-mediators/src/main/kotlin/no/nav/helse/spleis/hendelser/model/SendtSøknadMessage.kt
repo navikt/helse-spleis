@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.hendelser.ModelSendtSøknad.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -17,6 +17,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         requiredValue("status", "SENDT")
         requiredKey("sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
+        interestedIn("andreInntektskilder")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -58,9 +59,13 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
                 }
             } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
                 ?: emptyList()),
+            harAndreInntektskilder = harAndreInntektskilder(),
             aktivitetslogger = aktivitetslogger
         )
     }
+
+    private fun harAndreInntektskilder() =
+        !this.isKeyMissing("andreInntektskilder") && !this["andreInntektskilder"].let { it.isNull || it.isEmpty }
 
     object Factory : MessageFactory {
 

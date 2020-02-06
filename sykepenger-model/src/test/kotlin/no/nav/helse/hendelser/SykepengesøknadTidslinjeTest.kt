@@ -105,7 +105,8 @@ internal class SykepengesøknadTidslinjeTest {
             orgnummer = "orgnr",
             sendtNav = sendtNav,
             perioder = perioder,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            harAndreInntektskilder = false
         )
 
     private fun nySøknad() = ModelNySøknad(

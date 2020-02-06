@@ -57,7 +57,8 @@ private fun parseSendtSøknad(objectMapper: ObjectMapper, personData: PersonData
         orgnummer = data.orgnummer,
         sendtNav = data.sendtNav,
         perioder = data.perioder.map(::parseSykeperiode),
-        aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
+        aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger),
+        harAndreInntektskilder = data.harAndreInntektskilder
     )
 }
 

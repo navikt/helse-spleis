@@ -53,7 +53,7 @@ internal class ValiderKunEnArbeidsgiver(
     private val arbeidsgivere: List<Arbeidsgiver>
 ) : Valideringssteg {
     override fun isValid() = arbeidsgivere.size == 1
-    override fun feilmelding() = "Bruker har mer enn en arbeidsgiver"
+    override fun feilmelding() = "Bruker har mer enn én arbeidsgiver"
 }
 
 // Continue processing Hendelse with appropriate Arbeidsgiver

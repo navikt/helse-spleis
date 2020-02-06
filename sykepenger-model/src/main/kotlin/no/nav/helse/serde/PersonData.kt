@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
@@ -345,7 +346,8 @@ internal data class PersonData(
             val orgnummer: String,
             val sendtNav: LocalDateTime,
             val perioder: List<SykeperiodeData>,
-            val aktivitetslogger: AktivitetsloggerData
+            val aktivitetslogger: AktivitetsloggerData,
+            val harAndreInntektskilder: Boolean
         ) {
             data class SykeperiodeData(
                 val type: TypeData,

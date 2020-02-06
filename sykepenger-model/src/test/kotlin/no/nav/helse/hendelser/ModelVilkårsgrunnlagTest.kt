@@ -111,7 +111,8 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = orgnummer,
         sendtNav = LocalDateTime.now(),
         perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = aktivitetslogger,
+        harAndreInntektskilder = false
     )
 
     private fun inntektsmelding() =
