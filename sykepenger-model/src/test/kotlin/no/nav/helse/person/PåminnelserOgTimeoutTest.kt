@@ -58,8 +58,8 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i sendt søknad`() {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
-        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
+        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
     }
 
     @Test
@@ -94,7 +94,7 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
-            antall = 2,
+            antall = 3,
             inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
         )
     }
@@ -148,7 +148,10 @@ class PåminnelserOgTimeoutTest {
 
         person.håndter(sendtSøknad())
         person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
-        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING)
+        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+
+        person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
+        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
 
         person.håndter(inntektsmelding())
         person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING))

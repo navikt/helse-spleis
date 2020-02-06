@@ -6,7 +6,6 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

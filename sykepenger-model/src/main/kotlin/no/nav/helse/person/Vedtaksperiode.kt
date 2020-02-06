@@ -9,9 +9,11 @@ import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.tournament.historiskDagturnering
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.HistoriskUtbetaling.Companion.utbetalingstidslinje
 import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
 import java.time.Duration
@@ -306,7 +308,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattNySøknad : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, person: Person, sendtSøknad: ModelSendtSøknad) {
-            val nesteTilstand = if (arbeidsgiver.harTilstøtendePeriode(vedtaksperiode)) AvventerHistorikk else AvventerInntektsmelding
+            val nesteTilstand = if (arbeidsgiver.harTilstøtendePeriode(vedtaksperiode)) AvventerHistorikk else UndersøkerHistorikk
             vedtaksperiode.håndter(sendtSøknad, nesteTilstand)
             vedtaksperiode.aktivitetslogger.info("Fullført behandling av sendt søknad")
         }
@@ -324,6 +326,80 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal object UndersøkerHistorikk : Vedtaksperiodetilstand {
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+            vedtaksperiode.trengerYtelser()
+            aktivitetslogger.info("Forespør sykdoms- og inntektshistorikk")
+        }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: ModelYtelser
+        ) {
+            val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
+            if (sisteHistoriskeSykedag == null || !sisteHistoriskeSykedag.harTilstøtende(vedtaksperiode.periode().start))
+                return vedtaksperiode.tilstand(ytelser, AvventerInntektsmelding)
+            Validation(ytelser).also { it ->
+                it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
+                it.valider {
+                    HarInntektshistorikk(
+                        arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
+                    )
+                }
+                it.valider { HarArbeidsgivertidslinje(arbeidsgiver) }
+                val utbetalingstidslinje =
+                    utbetalingstidslinje(arbeidsgiver, vedtaksperiode, sisteHistoriskeSykedag)
+                var engineForTimeline: ByggUtbetalingstidlinjer? = null
+                it.valider {
+                    ByggUtbetalingstidlinjer(
+                        mapOf(arbeidsgiver to utbetalingstidslinje),
+                        vedtaksperiode.periode(),
+                        ytelser,
+                        Alder(vedtaksperiode.fødselsnummer)
+                    ).also { engineForTimeline = it }
+                }
+                var engineForLine: ByggUtbetalingslinjer? = null
+                it.valider { ByggUtbetalingslinjer(ytelser, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
+                it.onSuccess {
+                    vedtaksperiode.maksdato = engineForTimeline?.maksdato()
+                    vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
+                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+                    vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
+                }
+            }
+
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
+            if (!påminnelse.gjelderTilstand(AvventerHistorikk.type)) return
+            vedtaksperiode.emitVedtaksperiodePåminnet(påminnelse)
+            vedtaksperiode.trengerYtelser()
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
+            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
+            vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
+            vedtaksperiode.aktivitetslogger.info("Fullført behandling av inntektsmelding")
+        }
+
+        private fun utbetalingstidslinje(
+                arbeidsgiver: Arbeidsgiver,
+                vedtaksperiode: Vedtaksperiode,
+                sisteHistoriskeSykedag: LocalDate?
+            ): Utbetalingstidslinje {
+                return UtbetalingstidslinjeBuilder(
+                    sykdomstidslinje = arbeidsgiver.sykdomstidslinje()!!,
+                    sisteDag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag(),
+                    inntekthistorikk = arbeidsgiver.inntektshistorikk(),
+                    sisteNavDagForArbeidsgiverFørPerioden = sisteHistoriskeSykedag,
+                    arbeidsgiverRegler = NormalArbeidstaker
+                ).result()
+            }
+
 
         override val type = UNDERSØKER_HISTORIKK
 

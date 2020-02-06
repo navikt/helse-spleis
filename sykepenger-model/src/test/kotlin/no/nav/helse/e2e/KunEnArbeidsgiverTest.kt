@@ -52,8 +52,8 @@ internal class KunEnArbeidsgiverTest {
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, emptyList())   // No history
-        håndterManuelSaksbehandling(0, true)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -64,8 +64,25 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+    }
+
+    @Test internal fun `Har tilstøtende perioder i historikk`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
+        håndterManuellSaksbehandling(0, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+//            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(2, it.sykdomshistorikk.size)
+            assertEquals(18, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
+        }
+        assertTilstander(0, START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
@@ -73,8 +90,8 @@ internal class KunEnArbeidsgiverTest {
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, emptyList())   // No history
-        håndterManuelSaksbehandling(0,true)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0,true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -97,7 +114,7 @@ internal class KunEnArbeidsgiverTest {
             assertNoWarnings(it)
             assertMessages(it)
         }
-        håndterYtelser(0, emptyList())   // No history
+        håndterYtelser(0)   // No history
         assertTrue(hendelselogger.hasErrors())
         println(hendelselogger)
         assertTilstander(0,
@@ -110,15 +127,15 @@ internal class KunEnArbeidsgiverTest {
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, emptyList())   // No history
-        håndterManuelSaksbehandling(0, true)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
         håndterNySøknad(Triple(1.februar, 23.februar, 100))
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1, emptyList())   // No history
-        håndterManuelSaksbehandling(1, true)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -130,10 +147,10 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(3, it.dagTeller(Arbeidsdag::class))
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
         assertTilstander(1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
@@ -145,12 +162,12 @@ internal class KunEnArbeidsgiverTest {
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, emptyList())   // No history
-        håndterManuelSaksbehandling(0, true)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1, emptyList())   // No history
-        håndterManuelSaksbehandling(1, true)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -164,7 +181,7 @@ internal class KunEnArbeidsgiverTest {
             START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
         assertTilstander(1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
@@ -175,11 +192,11 @@ internal class KunEnArbeidsgiverTest {
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, emptyList())   // No history
-        håndterManuelSaksbehandling(0, true)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
-        håndterYtelser(1, emptyList())   // No history
-        håndterManuelSaksbehandling(1, true)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -229,38 +246,36 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun håndterSendtSøknad(vedtaksperiodeIndex: Int, vararg perioder: ModelSendtSøknad.Periode) {
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, EgenAnsatt))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(sendtSøknad(*perioder))
         assertEndringTeller()
     }
 
     private fun håndterInntektsmelding(vedtaksperiodeIndex: Int, arbeidsgiverperioder: List<Periode>) {
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, EgenAnsatt))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(inntektsmelding(arbeidsgiverperioder))
         assertEndringTeller()
     }
 
     private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
-        assertTrue(observatør.ettersburteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertTrue(observatør.ettersburteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, Foreldrepenger))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT))
         assertEndringTeller()
     }
 
-    private fun håndterYtelser(vedtaksperiodeIndex: Int, utbetalinger: List<Triple<LocalDate, LocalDate, Int>>) {
-        assertTrue(observatør.ettersburteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
-        assertTrue(observatør.ettersburteBehov(vedtaksperiodeIndex, Foreldrepenger))
-        assertFalse(observatør.ettersburteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
-        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger))
+    private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
+        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
         assertEndringTeller()
     }
 
-    private fun håndterManuelSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
-        assertTrue(observatør.ettersburteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
+    private fun håndterManuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
         assertEndringTeller()
     }
@@ -387,7 +402,7 @@ internal class KunEnArbeidsgiverTest {
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
 
-        internal fun ettersburteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
+        internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
             etterspurteBehov[vedtaksperiodeIndex]?.getOrDefault(key.name, false) ?: false
 
         internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")

@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje.dag
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 import java.time.DayOfWeek
+import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -58,5 +59,14 @@ internal abstract class Dag internal constructor(
     }
 }
 
-private val helgedager = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
+
+internal fun LocalDate.harTilstøtende(other: LocalDate) =
+    when (this.dayOfWeek) {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
+        FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
+        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+        else -> false
+    }
+

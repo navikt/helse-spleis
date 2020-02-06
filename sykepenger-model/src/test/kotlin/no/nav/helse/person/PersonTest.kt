@@ -143,7 +143,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test
@@ -251,7 +251,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(AVVENTER_INNTEKTSMELDING)
+        assertVedtaksperiodetilstand(UNDERSØKER_HISTORIKK)
     }
 
     @Test
