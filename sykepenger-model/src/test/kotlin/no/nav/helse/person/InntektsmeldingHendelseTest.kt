@@ -93,9 +93,10 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(aktivitetslogger.hasErrors())
+        assertTrue(aktivitetslogger.hasWarnings())
+        assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test

@@ -190,11 +190,12 @@ internal class PersonTest {
             arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasWarnings())
+            assertFalse(it.hasErrors())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(AVVENTER_SENDT_SØKNAD, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD)
     }
 
 

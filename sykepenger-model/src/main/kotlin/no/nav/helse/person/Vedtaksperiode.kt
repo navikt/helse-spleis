@@ -264,8 +264,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
-            inntektsmelding.error("uventet Inntektsmelding")
-            vedtaksperiode.tilstand(inntektsmelding, TilInfotrygd)
+            inntektsmelding.warn("uventet Inntektsmelding")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
