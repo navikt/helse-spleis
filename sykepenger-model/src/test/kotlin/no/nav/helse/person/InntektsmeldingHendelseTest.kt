@@ -47,7 +47,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_INNTEKTSMELDING, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(inntektsmelding())
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.VILKÅRSPRØVING, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors(), aktivitetslogger.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.VILKÅRSPRØVING, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
     }
 
     @Test

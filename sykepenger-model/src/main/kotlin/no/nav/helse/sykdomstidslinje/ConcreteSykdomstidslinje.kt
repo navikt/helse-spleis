@@ -1,6 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
+import java.time.DayOfWeek
+import java.time.DayOfWeek.*
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -57,6 +59,16 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun harGrenseInnenfor(other: ConcreteSykdomstidslinje) =
         this.førsteDag() in (other.førsteDag()..other.sisteDag())
+
+    internal fun harTilstøtende(other: ConcreteSykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
+
+    private fun LocalDate.harTilstøtende(other: LocalDate) =
+        when (this.dayOfWeek) {
+            MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
+            FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
+            SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+            else -> false
+        }
 
     companion object {
         fun sykedag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =

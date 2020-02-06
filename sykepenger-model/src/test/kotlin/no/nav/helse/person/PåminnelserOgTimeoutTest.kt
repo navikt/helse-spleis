@@ -38,11 +38,11 @@ class PåminnelserOgTimeoutTest {
     fun `timeoutverdier`() {
         assertEquals(Duration.ofDays(30), Vedtaksperiode.StartTilstand.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattNySøknad.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSendtSøknad.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattInntektsmelding.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.Vilkårsprøving.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.BeregnUtbetaling.timeout)
-        assertEquals(Duration.ofDays(7), Vedtaksperiode.TilGodkjenning.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmelding.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSendtSøknad.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøving.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
+        assertEquals(Duration.ofDays(7), Vedtaksperiode.AvventerGodkjenning.timeout)
         assertEquals(Duration.ZERO, Vedtaksperiode.TilUtbetaling.timeout)
         assertEquals(Duration.ZERO, Vedtaksperiode.TilInfotrygd.timeout)
     }
@@ -58,7 +58,7 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i sendt søknad`() {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SENDT_SØKNAD))
+        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -66,7 +66,7 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i mottatt inntektsmelding`() {
         person.håndter(nySøknad())
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.MOTTATT_INNTEKTSMELDING))
+        person.håndter(påminnelse(TilstandType.AVVENTER_SENDT_SØKNAD))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -75,8 +75,8 @@ class PåminnelserOgTimeoutTest {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.VILKÅRSPRØVING))
-        assertTilstand(TilstandType.VILKÅRSPRØVING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 2,
@@ -90,8 +90,8 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sendtSøknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        person.håndter(påminnelse(TilstandType.BEREGN_UTBETALING))
-        assertTilstand(TilstandType.BEREGN_UTBETALING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
+        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 2,
@@ -106,7 +106,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
-        person.håndter(påminnelse(TilstandType.TIL_GODKJENNING))
+        person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
@@ -148,22 +148,22 @@ class PåminnelserOgTimeoutTest {
 
         person.håndter(sendtSøknad())
         person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
-        assertTilstand(TilstandType.MOTTATT_SENDT_SØKNAD)
+        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING)
 
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SENDT_SØKNAD))
-        assertTilstand(TilstandType.VILKÅRSPRØVING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING))
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
 
         person.håndter(vilkårsgrunnlag())
-        person.håndter(påminnelse(TilstandType.VILKÅRSPRØVING))
-        assertTilstand(TilstandType.BEREGN_UTBETALING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
+        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
 
         person.håndter(ytelser())
-        person.håndter(påminnelse(TilstandType.BEREGN_UTBETALING))
-        assertTilstand(TilstandType.TIL_GODKJENNING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
 
         person.håndter(manuellSaksbehandling())
-        person.håndter(påminnelse(TilstandType.TIL_GODKJENNING))
+        person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
         assertTilstand(TilstandType.TIL_UTBETALING)
 
         person.håndter(påminnelse(TilstandType.TIL_UTBETALING))

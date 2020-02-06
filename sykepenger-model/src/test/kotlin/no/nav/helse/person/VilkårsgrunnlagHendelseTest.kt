@@ -61,7 +61,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
-        assertTilstand(TilstandType.BEREGN_UTBETALING)
+        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         val utgangspunktForBeregningAvYtelse = inspektør.sykdomstidslinje(0).førsteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
         assertEquals(

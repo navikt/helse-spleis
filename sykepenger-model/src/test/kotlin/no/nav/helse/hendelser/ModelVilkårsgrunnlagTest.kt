@@ -2,9 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.person.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -18,6 +16,8 @@ internal class ModelVilkårsgrunnlagTest {
     private val aktørId = "123"
     private val fødselsnummer = "234"
     private val orgnummer = "345"
+    private val arbeidsgiver = Arbeidsgiver(orgnummer)
+    private val person = Person(aktørId, fødselsnummer)
 
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
@@ -90,7 +90,7 @@ internal class ModelVilkårsgrunnlagTest {
             organisasjonsnummer = orgnummer
         ).also {
             it.håndter(nySøknad())
-            it.håndter(sendtSøknad())
+            it.håndter(sendtSøknad(), arbeidsgiver, person)
             it.håndter(inntektsmelding())
         }
 

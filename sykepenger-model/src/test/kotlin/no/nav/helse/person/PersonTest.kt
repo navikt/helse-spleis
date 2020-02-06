@@ -101,7 +101,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING)
+        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD)
     }
 
     @Test
@@ -143,7 +143,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
     @Test
@@ -194,7 +194,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertVedtaksperiodetilstand(AVVENTER_SENDT_SØKNAD, TIL_INFOTRYGD)
     }
 
 
@@ -250,7 +250,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SENDT_SØKNAD)
+        assertVedtaksperiodetilstand(AVVENTER_INNTEKTSMELDING)
     }
 
     @Test

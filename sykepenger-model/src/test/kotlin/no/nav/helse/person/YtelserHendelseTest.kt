@@ -41,12 +41,12 @@ internal class YtelserHendelseTest {
         person.håndter(sendtSøknad())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.MOTTATT_SENDT_SØKNAD)
+        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING)
 
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.VILKÅRSPRØVING)
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class YtelserHendelseTest {
     @Test
     fun `fordrepengeytelse før periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
-        assertTilstand(TilstandType.TIL_GODKJENNING)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -94,13 +94,13 @@ internal class YtelserHendelseTest {
     @Test
     fun `fordrepengeytelse etter periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
-        assertTilstand(TilstandType.TIL_GODKJENNING)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     @Test
     fun `svangerskapsytelse før periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
-        assertTilstand(TilstandType.TIL_GODKJENNING)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class YtelserHendelseTest {
     @Test
     fun `svangerskapsytelse etter periode`() {
         håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
-        assertTilstand(TilstandType.TIL_GODKJENNING)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {

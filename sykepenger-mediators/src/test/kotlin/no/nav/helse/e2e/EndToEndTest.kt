@@ -254,7 +254,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.BEREGN_UTBETALING,
-            currentState = TilstandType.TIL_GODKJENNING,
+            currentState = TilstandType.AVVENTER_GODKJENNING,
             timeout = Duration.ofDays(7)
         )
         assertBehov(
@@ -297,7 +297,7 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.TIL_GODKJENNING,
+            previousState = TilstandType.AVVENTER_GODKJENNING,
             currentState = TilstandType.TIL_UTBETALING,
             timeout = Duration.ZERO
         )

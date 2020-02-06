@@ -19,6 +19,8 @@ internal class VedtaksperiodeTest {
     private val aktør = "1234"
     private val fødselsnummer = "5678"
     private val organisasjonsnummer = "123456789"
+    private val arbeidsgiver = Arbeidsgiver(organisasjonsnummer)
+    private val person = Person(aktør, fødselsnummer)
 
     private companion object {
 
@@ -44,7 +46,7 @@ internal class VedtaksperiodeTest {
                             grad = 100
                         )
                     )
-                )
+                ), arbeidsgiver, person
             )
         )
 

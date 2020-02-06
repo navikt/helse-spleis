@@ -164,11 +164,12 @@ private fun parseDag(
 private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
     TilstandType.START -> Vedtaksperiode.StartTilstand
     TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
-    TilstandType.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.MottattSendtSøknad
-    TilstandType.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.MottattInntektsmelding
-    TilstandType.VILKÅRSPRØVING -> Vedtaksperiode.Vilkårsprøving
-    TilstandType.BEREGN_UTBETALING -> Vedtaksperiode.BeregnUtbetaling
-    TilstandType.TIL_GODKJENNING -> Vedtaksperiode.TilGodkjenning
+    TilstandType.AVVENTER_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
+    TilstandType.AVVENTER_INNTEKTSMELDING-> Vedtaksperiode.AvventerInntektsmelding
+    TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
+    TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk
+    TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
+    TilstandType.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
     TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
     TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
 }

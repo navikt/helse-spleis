@@ -38,7 +38,7 @@ internal class SendtSøknadHendelseTest {
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_INNTEKTSMELDING, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
     }
 
@@ -64,7 +64,7 @@ internal class SendtSøknadHendelseTest {
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_INNTEKTSMELDING, inspektør.tilstand(0))
         assertEquals(10, inspektør.sykdomstidslinje(0).length())
     }
 
@@ -108,9 +108,9 @@ internal class SendtSøknadHendelseTest {
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_INNTEKTSMELDING, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
-        assertEquals(TilstandType.MOTTATT_SENDT_SØKNAD, inspektør.tilstand(1))
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.tilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
     }
 

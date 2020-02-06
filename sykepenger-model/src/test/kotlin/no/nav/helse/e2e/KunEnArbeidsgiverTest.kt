@@ -64,8 +64,8 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test internal fun `ingen historie med Inntektsmelding først`() {
@@ -83,8 +83,8 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(3, it.sykdomshistorikk.size)
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test internal fun `ingen nav utbetaling kreves`() {
@@ -101,8 +101,8 @@ internal class KunEnArbeidsgiverTest {
         assertTrue(hendelselogger.hasErrors())
         println(hendelselogger)
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_INFOTRYGD)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test internal fun `To perioder med opphold`() {
@@ -130,11 +130,11 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(3, it.dagTeller(Arbeidsdag::class))
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
         assertTilstander(1,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test internal fun `Sammenblandede hendelser fra forskjellige perioder`() {
@@ -155,18 +155,45 @@ internal class KunEnArbeidsgiverTest {
             assertNoErrors(it)
             assertNoWarnings(it)
             assertMessages(it)
-            println(it.personLogger)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
             assertEquals(8, it.dagTeller(NavHelgDag::class))
             assertEquals(3, it.dagTeller(Arbeidsdag::class))
         }
         assertTilstander(0,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_INNTEKTSMELDING,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
         assertTilstander(1,
-            START, MOTTATT_NY_SØKNAD, MOTTATT_SENDT_SØKNAD,
-            VILKÅRSPRØVING, BEREGN_UTBETALING, TIL_GODKJENNING, TIL_UTBETALING)
+            START, MOTTATT_NY_SØKNAD, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+    }
+
+    @Test internal fun `To tilstøtende perioder`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterNySøknad(Triple(29.januar, 23.februar, 100))
+        håndterSendtSøknad(1, Sykdom(29.januar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, emptyList())   // No history
+        håndterManuelSaksbehandling(0, true)
+        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        håndterYtelser(1, emptyList())   // No history
+        håndterManuelSaksbehandling(1, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(26, it.dagTeller(NavDag::class))
+            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
+            assertEquals(8, it.dagTeller(NavHelgDag::class))
+            assertEquals(0, it.dagTeller(Arbeidsdag::class))
+        }
+        assertTilstander(0,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(1,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     private fun assertEndringTeller() {

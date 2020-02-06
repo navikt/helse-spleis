@@ -57,7 +57,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sendtSøknad: ModelSendtSøknad, person: Person) {
-        if (perioder.none { it.håndter(sendtSøknad) }) {
+        if (perioder.none { it.håndter(sendtSøknad, this, person) }) {
             sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
@@ -120,6 +120,10 @@ internal class Arbeidsgiver private constructor(
             vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
             perioder.add(it)
         }
+    }
+
+    internal fun harTilstøtendePeriode(vedtaksperiode: Vedtaksperiode): Boolean {
+        return perioder.any{ it.harTilstøtende(vedtaksperiode) }
     }
 
 }
