@@ -1,6 +1,8 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -15,7 +17,8 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
     private val fødselsnummer: String = vilkårsgrunnlag["fødselsnummer"]
     private val orgnummer: String = vilkårsgrunnlag["orgnummer"]
     private val rapportertDato: LocalDateTime = vilkårsgrunnlag["rapportertDato"]
-    private val inntektsmåneder: List<ModelVilkårsgrunnlag.Måned> = vilkårsgrunnlag["inntektsmåneder"]
+    private val inntektsmåneder: List<Måned> = vilkårsgrunnlag["inntektsmåneder"]
+    private val arbeidsforhold: List<Arbeidsforhold> = vilkårsgrunnlag["arbeidsforhold"]
     private val erEgenAnsatt: Boolean = vilkårsgrunnlag["erEgenAnsatt"]
     private val aktivitetslogger: Aktivitetslogger = vilkårsgrunnlag["aktivitetslogger"]
 
@@ -28,7 +31,8 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
             //"fødselsnummer" to fødselsnummer, // TODO ?
             "orgnummer" to orgnummer,
             "rapportertDato" to rapportertDato,
-            "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
+            "inntektsmåneder" to inntektsmåneder.map { it.toMap() },
+            "arbeidsforhold" to arbeidsforhold.map { it.toMap() },
             "erEgenAnsatt" to erEgenAnsatt,
             "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
         )
@@ -40,14 +44,17 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
         "vedtaksperiodeId" to vedtaksperiodeId,
         "orgnummer" to orgnummer,
         "rapportertDato" to rapportertDato,
-        "inntektsmåneder" to inntektsmåneder.map { InntektsmånederReflect(it).toMap() },
+        "inntektsmåneder" to inntektsmåneder.map { it.toMap() },
         "erEgenAnsatt" to erEgenAnsatt
     )
 
-    private class InntektsmånederReflect(private val måned: ModelVilkårsgrunnlag.Måned) {
-        internal fun toMap() = mutableMapOf<String, Any?>(
-            "årMåned" to måned.årMåned,
-            "inntektsliste" to måned.inntektsliste.map { mutableMapOf("beløp" to it.beløp) }
-        )
-    }
+    private fun Måned.toMap(): MutableMap<String, Any> = mutableMapOf(
+        "årMåned" to this.årMåned,
+        "inntektsliste" to this.inntektsliste.map { mutableMapOf("beløp" to it.beløp) }
+    )
+    private fun Arbeidsforhold.toMap(): MutableMap<String, Any?> = mutableMapOf(
+        "orgnummer" to this.orgnummer,
+        "fom" to this.fom,
+        "tom" to this.tom
+    )
 }
