@@ -8,6 +8,11 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
 import no.nav.helse.person.*
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag.*
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
