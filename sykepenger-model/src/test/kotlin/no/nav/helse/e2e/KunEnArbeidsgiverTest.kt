@@ -302,7 +302,8 @@ internal class KunEnArbeidsgiverTest {
                 YearMonth.of(2017, it),
                 listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))) },
             erEgenAnsatt = false,
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold("999888777", 1.januar(2017)))
         )
     }
 

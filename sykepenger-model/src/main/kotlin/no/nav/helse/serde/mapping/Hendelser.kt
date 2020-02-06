@@ -133,6 +133,7 @@ private fun parseVilkårsgrunnlag(objectMapper: ObjectMapper, personData: Person
         rapportertDato = data.rapportertDato,
         inntektsmåneder = data.inntektsmåneder.map(::parseInntektsmåneder),
         erEgenAnsatt = data.erEgenAnsatt,
+        arbeidsforhold = data.arbeidsforhold.map(::parseArbeidsforhold),
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }
@@ -144,6 +145,12 @@ private fun parseInntektsmåneder(data: HendelseWrapperData.VilkårsgrunnlagData
             beløp = inntekt.beløp
         )
     }
+)
+
+private fun parseArbeidsforhold(data: HendelseWrapperData.VilkårsgrunnlagData.ArbeidsforholdData) = ModelVilkårsgrunnlag.Arbeidsforhold(
+    orgnummer = data.orgnummer,
+    fom = data.fom,
+    tom = data.tom
 )
 
 private fun parseInntektsmelding(

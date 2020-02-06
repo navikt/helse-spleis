@@ -105,9 +105,10 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
 internal class VilkårsgrunnlagMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
     BehovMessage(originalMessage, aktivitetslogger) {
     init {
-        requiredValues("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
+        requiredValues("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
         requiredKey("@løsning.${Behovstype.Inntektsberegning.name}")
         requiredKey("@løsning.${Behovstype.EgenAnsatt.name}")
+        requiredKey("@løsning.${Behovstype.Opptjening.name}")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -126,6 +127,13 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
                 ModelVilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
                     inntektsliste = it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
+                )
+            },
+            arbeidsforhold = this["@løsning.${Behovstype.Opptjening.name}"].map {
+                ModelVilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = it["orgnummer"].asText(),
+                    fom = it["ansattSiden"].asLocalDate(),
+                    tom = it["ansattTil"].asOptionalLocalDate()
                 )
             },
             erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),

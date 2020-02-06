@@ -224,7 +224,8 @@ internal class YtelserHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
