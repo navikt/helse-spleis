@@ -69,6 +69,9 @@ class ModelVilkårsgrunnlag(
         if (harAvvikIOppgittInntekt) aktivitetslogger.warn("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
         else aktivitetslogger.info("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
 
+        if(grunnlag.harOpptjening) aktivitetslogger.info("Har tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
+        else aktivitetslogger.warn("Har ikke tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
+
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }
 
