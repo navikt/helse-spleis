@@ -31,7 +31,7 @@ jobs:
         echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
         docker push $(cat .docker_image):$(cat .docker_tag)
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GHPKG_WORKAROUND }}
     - name: deploy to dev
       uses: navikt/deployment-cli/action@0.4.1
       env:
