@@ -43,7 +43,36 @@ internal class JsonBuilderTest {
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
-        val person = lagPerson()
+        testSerialiseringAvPerson(lagPerson())
+    }
+
+    @Test
+    fun `serialisering og deserialisering skal funke for alle states`() {
+        Person(aktørId, fnr).apply {
+            addObserver(object : PersonObserver {
+                override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+                    if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
+                        vedtaksperiodeId = behov.vedtaksperiodeId()
+                    }
+                }
+            })
+            testSerialiseringAvPerson(this)
+            håndter(nySøknad)
+            testSerialiseringAvPerson(this)
+            håndter(sendtSøknad)
+            testSerialiseringAvPerson(this)
+            håndter(inntektsmelding)
+            testSerialiseringAvPerson(this)
+            håndter(vilkårsgrunnlag)
+            testSerialiseringAvPerson(this)
+            håndter(ytelser)
+            testSerialiseringAvPerson(this)
+            håndter(manuellSaksbehandling)
+            testSerialiseringAvPerson(this)
+        }
+    }
+
+    private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
