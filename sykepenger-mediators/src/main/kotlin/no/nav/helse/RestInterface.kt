@@ -3,7 +3,10 @@ package no.nav.helse
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
@@ -11,7 +14,6 @@ import io.ktor.auth.jwt.jwt
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.httpMethod
-import io.ktor.request.uri
 import io.ktor.response.ApplicationSendPipeline
 import io.ktor.routing.routing
 import io.prometheus.client.Counter
@@ -43,21 +45,6 @@ internal fun Application.restInterface(
     val idProvider = configurationUrl.getJson()
     val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].textValue())).build()
 
-    intercept(ApplicationCallPipeline.Monitoring) {
-        val timer = httpRequestDuration.startTimer()
-
-        httpTraceLog.info("incoming ${call.request.httpMethod.value} ${call.request.uri}")
-
-        try {
-            proceed()
-        } catch (err: Throwable) {
-            httpTraceLog.info("exception thrown during processing: ${err.message}", err)
-            throw err
-        } finally {
-            timer.observeDuration()
-        }
-    }
-
     sendPipeline.intercept(ApplicationSendPipeline.After) { message ->
         val status = call.response.status() ?: (when (message) {
             is OutgoingContent -> message.status
@@ -67,7 +54,6 @@ internal fun Application.restInterface(
             call.response.status(status)
         }
 
-        httpTraceLog.info("responding with ${status.value}")
         httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
     }
 

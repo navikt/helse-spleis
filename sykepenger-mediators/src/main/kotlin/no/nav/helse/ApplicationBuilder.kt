@@ -1,5 +1,8 @@
 package no.nav.helse
 
+import io.ktor.application.install
+import io.ktor.features.CallLogging
+import io.ktor.request.path
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -12,6 +15,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.KafkaStreams
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
@@ -36,7 +40,11 @@ class ApplicationBuilder(env: Map<String, String>) {
     private val helseBuilder = HelseBuilder(
         dataSource = dataSourceBuilder.getDataSource(),
         kafkaRapid = rapid,
-        hendelseProducer = KafkaProducer<String, String>(kafkaConfigBuilder.producerConfig(), StringSerializer(), StringSerializer())
+        hendelseProducer = KafkaProducer<String, String>(
+            kafkaConfigBuilder.producerConfig(),
+            StringSerializer(),
+            StringSerializer()
+        )
     )
 
     private val app = embeddedServer(Netty, applicationEngineEnvironment {
@@ -51,9 +59,13 @@ class ApplicationBuilder(env: Map<String, String>) {
 
         module {
             nais(::isApplicationAlive, ::isApplicationReady)
+            install(CallLogging) {
+                logger = LoggerFactory.getLogger("sikkerLogg")
+                level = Level.INFO
+                filter { call -> call.request.path().startsWith("/api/") }
+            }
 
             val clientId = "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID")
-            // val clientSecret = "/var/run/secrets/nais.io/azure/client_secret".readFile() ?: env.getValue("AZURE_CLIENT_SECRET")
 
             restInterface(
                 personRestInterface = helseBuilder.personRestInterface,
