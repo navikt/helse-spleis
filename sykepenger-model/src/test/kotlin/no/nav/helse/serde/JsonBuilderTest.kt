@@ -48,28 +48,12 @@ internal class JsonBuilderTest {
 
     @Test
     fun `serialisering og deserialisering skal funke for alle states`() {
-        Person(aktørId, fnr).apply {
-            addObserver(object : PersonObserver {
-                override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-                    if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
-                        vedtaksperiodeId = behov.vedtaksperiodeId()
-                    }
-                }
-            })
-            testSerialiseringAvPerson(this)
-            håndter(nySøknad)
-            testSerialiseringAvPerson(this)
-            håndter(sendtSøknad)
-            testSerialiseringAvPerson(this)
-            håndter(inntektsmelding)
-            testSerialiseringAvPerson(this)
-            håndter(vilkårsgrunnlag)
-            testSerialiseringAvPerson(this)
-            håndter(ytelser)
-            testSerialiseringAvPerson(this)
-            håndter(manuellSaksbehandling)
-            testSerialiseringAvPerson(this)
-        }
+        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_NY_SØKNAD))
+        testSerialiseringAvPerson(lagPerson(TilstandType.UNDERSØKER_HISTORIKK))
+        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_VILKÅRSPRØVING))
+        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_HISTORIKK))
+        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_GODKJENNING))
+        testSerialiseringAvPerson(lagPerson(TilstandType.TIL_UTBETALING))
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -85,143 +69,168 @@ internal class JsonBuilderTest {
         assertEquals(json, json2)
         assertDeepEquals(person, result)
     }
-}
 
-private fun lagPerson() =
-    Person(aktørId, fnr).apply {
-        addObserver(object : PersonObserver {
-            override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-                if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
-                    vedtaksperiodeId = behov.vedtaksperiodeId()
+    companion object {
+        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING) =
+            Person(aktørId, fnr).apply {
+                addObserver(object : PersonObserver {
+                    override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+                        if (behov.hendelsetype() == ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag) {
+                            vedtaksperiodeId = behov.vedtaksperiodeId()
+                        }
+                    }
+                })
+                håndter(nySøknad)
+                assertEquals(TilstandType.MOTTATT_NY_SØKNAD, hentTilstand(this)?.type)
+                if (stopState == TilstandType.MOTTATT_NY_SØKNAD) return@apply
+                håndter(sendtSøknad)
+                assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this)?.type)
+                if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply
+                håndter(inntektsmelding)
+                assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, hentTilstand(this)?.type)
+                if (stopState == TilstandType.AVVENTER_VILKÅRSPRØVING) return@apply
+                håndter(vilkårsgrunnlag)
+                assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand(this)?.type)
+                if (stopState == TilstandType.AVVENTER_HISTORIKK) return@apply
+                håndter(ytelser)
+                assertEquals(TilstandType.AVVENTER_GODKJENNING, hentTilstand(this)?.type)
+                if (stopState == TilstandType.AVVENTER_GODKJENNING) return@apply
+                håndter(manuellSaksbehandling)
+                assertEquals(TilstandType.TIL_UTBETALING, hentTilstand(this)?.type)
+                if (stopState == TilstandType.TIL_UTBETALING) return@apply
+            }
+
+        private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand? {
+            var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand? = null
+            person.accept(object : PersonVisitor {
+                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+                    _tilstand = tilstand
+                }
+            })
+            return _tilstand
+        }
+
+        private fun Person.removeObservers() = apply {
+            get<Person, MutableList<PersonObserver>>("observers").clear()
+            get<Person, MutableList<Arbeidsgiver>>("arbeidsgivere").forEach { arbeidsgiver ->
+                arbeidsgiver.get<Arbeidsgiver, MutableList<VedtaksperiodeObserver>>("vedtaksperiodeObservers")
+                    .clear()
+                arbeidsgiver.get<Arbeidsgiver, MutableList<Vedtaksperiode>>("perioder").forEach { vedtaksperiode ->
+                    vedtaksperiode.get<Vedtaksperiode, MutableList<VedtaksperiodeObserver>>("observers").clear()
                 }
             }
-        })
-
-        håndter(nySøknad)
-        håndter(sendtSøknad)
-        håndter(inntektsmelding)
-        håndter(vilkårsgrunnlag)
-        håndter(ytelser)
-        håndter(manuellSaksbehandling)
-    }
-
-private fun Person.removeObservers() = apply {
-    get<Person, MutableList<PersonObserver>>("observers").clear()
-    get<Person, MutableList<Arbeidsgiver>>("arbeidsgivere").forEach { arbeidsgiver ->
-        arbeidsgiver.get<Arbeidsgiver, MutableList<VedtaksperiodeObserver>>("vedtaksperiodeObservers")
-            .clear()
-        arbeidsgiver.get<Arbeidsgiver, MutableList<Vedtaksperiode>>("perioder").forEach { vedtaksperiode ->
-            vedtaksperiode.get<Vedtaksperiode, MutableList<VedtaksperiodeObserver>>("observers").clear()
         }
+
+
+        internal val nySøknad
+            get() = ModelNySøknad(
+                hendelseId = UUID.randomUUID(),
+                fnr = fnr,
+                aktørId = aktørId,
+                orgnummer = orgnummer,
+                rapportertdato = LocalDateTime.now(),
+                sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
+                aktivitetslogger = Aktivitetslogger()
+            )
+
+        internal val sendtSøknad
+            get() = ModelSendtSøknad(
+                hendelseId = UUID.randomUUID(),
+                fnr = fnr,
+                aktørId = aktørId,
+                orgnummer = orgnummer,
+                sendtNav = LocalDateTime.now(),
+                perioder = listOf(
+                    ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
+                ),
+                aktivitetslogger = Aktivitetslogger(),
+                harAndreInntektskilder = false
+            )
+
+        internal val inntektsmelding
+            get() = ModelInntektsmelding(
+                hendelseId = UUID.randomUUID(),
+                refusjon = ModelInntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+                orgnummer = orgnummer,
+                fødselsnummer = fnr,
+                aktørId = aktørId,
+                mottattDato = 1.februar.atStartOfDay(),
+                førsteFraværsdag = 1.januar,
+                beregnetInntekt = 31000.00,
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                ferieperioder = emptyList(),
+                aktivitetslogger = Aktivitetslogger()
+            )
+
+        internal val vilkårsgrunnlag
+            get() = ModelVilkårsgrunnlag(
+                hendelseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                orgnummer = orgnummer,
+                rapportertDato = LocalDateTime.now(),
+                inntektsmåneder = (1.rangeTo(12)).map {
+                    ModelVilkårsgrunnlag.Måned(
+                        årMåned = YearMonth.of(2018, it),
+                        inntektsliste = listOf(
+                            ModelVilkårsgrunnlag.Inntekt(
+                                beløp = 31000.0
+                            )
+                        )
+                    )
+                },
+                arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
+                erEgenAnsatt = false,
+                aktivitetslogger = Aktivitetslogger()
+
+            )
+
+        internal val ytelser
+            get() = ModelYtelser(
+                hendelseId = UUID.randomUUID(),
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                organisasjonsnummer = orgnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                sykepengehistorikk = ModelSykepengehistorikk(
+                    utbetalinger = listOf(
+                        ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                            fom = 1.januar.minusYears(1),
+                            tom = 31.januar.minusYears(1),
+                            dagsats = 31000
+                        )
+                    ),
+                    inntektshistorikk = emptyList(),
+                    aktivitetslogger = Aktivitetslogger()
+                ),
+                foreldrepenger = ModelForeldrepenger(
+                    foreldrepengeytelse = Periode(
+                        fom = 1.januar.minusYears(2),
+                        tom = 31.januar.minusYears(2)
+                    ),
+                    svangerskapsytelse = Periode(
+                        fom = 1.juli.minusYears(2),
+                        tom = 31.juli.minusYears(2)
+                    ),
+                    aktivitetslogger = Aktivitetslogger()
+                ),
+                rapportertdato = LocalDateTime.now(),
+                aktivitetslogger = Aktivitetslogger()
+            )
+
+        internal val manuellSaksbehandling
+            get() = ModelManuellSaksbehandling(
+                hendelseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                organisasjonsnummer = orgnummer,
+                utbetalingGodkjent = true,
+                saksbehandler = "en_saksbehandler_ident",
+                rapportertdato = LocalDateTime.now(),
+                aktivitetslogger = Aktivitetslogger()
+            )
     }
 }
 
-private val nySøknad
-    get() = ModelNySøknad(
-        hendelseId = UUID.randomUUID(),
-        fnr = fnr,
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
-        sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-        aktivitetslogger = Aktivitetslogger()
-    )
-
-private val sendtSøknad
-    get() = ModelSendtSøknad(
-        hendelseId = UUID.randomUUID(),
-        fnr = fnr,
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        sendtNav = LocalDateTime.now(),
-        perioder = listOf(
-            ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
-        ),
-        aktivitetslogger = Aktivitetslogger(),
-        harAndreInntektskilder = false
-    )
-
-private val inntektsmelding
-    get() = ModelInntektsmelding(
-        hendelseId = UUID.randomUUID(),
-        refusjon = ModelInntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
-        orgnummer = orgnummer,
-        fødselsnummer = fnr,
-        aktørId = aktørId,
-        mottattDato = 1.februar.atStartOfDay(),
-        førsteFraværsdag = 1.januar,
-        beregnetInntekt = 31000.00,
-        arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-        ferieperioder = emptyList(),
-        aktivitetslogger = Aktivitetslogger()
-    )
-
-private val vilkårsgrunnlag
-    get() = ModelVilkårsgrunnlag(
-        hendelseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = aktørId,
-        fødselsnummer = fnr,
-        orgnummer = orgnummer,
-        rapportertDato = LocalDateTime.now(),
-        inntektsmåneder = (1.rangeTo(12)).map {
-            ModelVilkårsgrunnlag.Måned(
-                årMåned = YearMonth.of(2018, it),
-                inntektsliste = listOf(
-                    ModelVilkårsgrunnlag.Inntekt(
-                        beløp = 31000.0
-                    )
-                )
-            )
-        },
-        arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
-        erEgenAnsatt = false,
-        aktivitetslogger = Aktivitetslogger()
-
-    )
-
-private val ytelser
-    get() = ModelYtelser(
-        hendelseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = fnr,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        sykepengehistorikk = ModelSykepengehistorikk(
-            utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
-                    fom = 1.januar.minusYears(1),
-                    tom = 31.januar.minusYears(1),
-                    dagsats = 31000
-                )
-            ),
-            inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
-        ),
-        foreldrepenger = ModelForeldrepenger(
-            foreldrepengeytelse = Periode(
-                fom = 1.januar.minusYears(2),
-                tom = 31.januar.minusYears(2)
-            ),
-            svangerskapsytelse = Periode(
-                fom = 1.juli.minusYears(2),
-                tom = 31.juli.minusYears(2)
-            ),
-            aktivitetslogger = Aktivitetslogger()
-        ),
-        rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
-    )
-
-private val manuellSaksbehandling
-    get() = ModelManuellSaksbehandling(
-        hendelseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = aktørId,
-        fødselsnummer = fnr,
-        organisasjonsnummer = orgnummer,
-        utbetalingGodkjent = true,
-        saksbehandler = "en_saksbehandler_ident",
-        rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
-    )
