@@ -15,9 +15,11 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
 
     private val oldTilstander = mapOf(
         "NY_SØKNAD_MOTTATT" to TilstandType.MOTTATT_NY_SØKNAD,
-        "SENDT_SØKNAD_MOTTATT" to TilstandType.AVVENTER_INNTEKTSMELDING,
-        "INNTEKTSMELDING_MOTTATT" to TilstandType.AVVENTER_SENDT_SØKNAD,
-        "KOMPLETT_SYKDOMSTIDSLINJE" to TilstandType.AVVENTER_HISTORIKK
+        "MOTTATT_SENDT_SØKNAD" to TilstandType.AVVENTER_INNTEKTSMELDING,
+        "MOTTATT_INNTEKTSMELDING" to TilstandType.AVVENTER_SENDT_SØKNAD,
+        "BEREGN_UTBETALING" to TilstandType.AVVENTER_HISTORIKK,
+        "VILKÅRSPRØVING" to TilstandType.AVVENTER_VILKÅRSPRØVING,
+        "TIL_GODKJENNING" to TilstandType.AVVENTER_GODKJENNING
     )
 
     init {

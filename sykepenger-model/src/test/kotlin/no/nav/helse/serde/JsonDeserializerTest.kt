@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.TilstandTypeGammelOgNy
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -30,7 +32,7 @@ internal class JsonDeserializerTest {
         }.call(this) as T
 
     @Test
-    fun test1() {
+    internal fun test1() {
         val result = parsePerson(enkelPersonJson())
 
         assertEquals(aktørId, result.privatProp("aktørId"))
@@ -46,9 +48,24 @@ internal class JsonDeserializerTest {
         assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
     }
 
+    @Test
+    internal fun `Håndterer eldre tilstandstyper`(){
+        val result = parsePerson(enkelPersonJson(tilstand = TilstandTypeGammelOgNy.BEREGN_UTBETALING))
+
+        val arbeidsgivere = result.privatProp<MutableList<Arbeidsgiver>>("arbeidsgivere")
+        assertEquals(1, arbeidsgivere.size)
+        val arbeidsgiver = arbeidsgivere.find { it.organisasjonsnummer() == organisasjonsnummer }
+        val vedtaksperioder = arbeidsgiver!!.privatProp<MutableList<Vedtaksperiode>>("perioder")
+        assertNotNull(vedtaksperioder)
+        val vedtaksperiode = vedtaksperioder.first()
+        assertNotNull(vedtaksperiode)
+        val tilstand = vedtaksperiode.privatProp<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand")
+        assertEquals(Vedtaksperiode.AvventerHistorikk, tilstand)
+    }
+
     private val førsteFraværsdag = LocalDate.now().minusDays(18)
 
-    private fun enkelPersonJson(): String {
+    private fun enkelPersonJson(tilstand: TilstandTypeGammelOgNy = TilstandTypeGammelOgNy.TIL_INFOTRYGD): String {
 
         val tidslinje = førsteFraværsdag.datesUntil(LocalDate.now().minusDays(2))
             .map {
@@ -107,7 +124,7 @@ internal class JsonDeserializerTest {
 
                                         )
                                     ),
-                                    "tilstand" to "TIL_INFOTRYGD",
+                                    "tilstand" to tilstand.toString(),
                                     "utbetalingslinjer" to emptyList<Map<String, Any>>(),
                                     "aktivitetslogger" to mapOf(
                                         "aktiviteter" to emptyList<Any>()

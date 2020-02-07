@@ -162,17 +162,22 @@ private fun parseDag(
     }
 }
 
-private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
-    TilstandType.START -> Vedtaksperiode.StartTilstand
-    TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
-    TilstandType.AVVENTER_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
-    TilstandType.AVVENTER_INNTEKTSMELDING-> Vedtaksperiode.AvventerInntektsmelding
-    TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
-    TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk
-    TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
-    TilstandType.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
-    TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
-    TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
+private fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
+    TilstandTypeGammelOgNy.START -> Vedtaksperiode.StartTilstand
+    TilstandTypeGammelOgNy.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
+    TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
+    TilstandTypeGammelOgNy.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
+    TilstandTypeGammelOgNy.AVVENTER_INNTEKTSMELDING,
+    TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING-> Vedtaksperiode.AvventerInntektsmelding
+    TilstandTypeGammelOgNy.AVVENTER_VILKÅRSPRØVING,
+    TilstandTypeGammelOgNy.VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
+    TilstandTypeGammelOgNy.AVVENTER_HISTORIKK,
+    TilstandTypeGammelOgNy.BEREGN_UTBETALING -> Vedtaksperiode.AvventerHistorikk
+    TilstandTypeGammelOgNy.AVVENTER_GODKJENNING,
+    TilstandTypeGammelOgNy.TIL_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
+    TilstandTypeGammelOgNy.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
+    TilstandTypeGammelOgNy.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
+    TilstandTypeGammelOgNy.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
 }
 
 private fun parseUtbetalingslinje(
@@ -419,7 +424,7 @@ internal data class PersonData(
             val inntektFraInntektsmelding: BigDecimal?,
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
-            val tilstand: TilstandType,
+            val tilstand: TilstandTypeGammelOgNy,
             val utbetalingslinjer: List<UtbetalingslinjeData>?,
             val aktivitetslogger: AktivitetsloggerData
         ) {
