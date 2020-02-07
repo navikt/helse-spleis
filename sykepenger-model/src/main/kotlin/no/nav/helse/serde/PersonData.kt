@@ -186,7 +186,8 @@ private fun parseDataForVilkårsvurdering(
         erEgenAnsatt = data.erEgenAnsatt,
         beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
         avviksprosent = data.avviksprosent,
-        harOpptjening = data.harOpptjening
+        harOpptjening = data.harOpptjening,
+        antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst
     )
 
 private fun parseSykdomshistorikk(
@@ -447,7 +448,8 @@ internal data class PersonData(
                 val erEgenAnsatt: Boolean,
                 val beregnetÅrsinntektFraInntektskomponenten: Double,
                 val avviksprosent: Double,
-                val harOpptjening: Boolean
+                val harOpptjening: Boolean,
+                val antallOpptjeningsdagerErMinst: Int
             )
 
             data class UtbetalingslinjeData(

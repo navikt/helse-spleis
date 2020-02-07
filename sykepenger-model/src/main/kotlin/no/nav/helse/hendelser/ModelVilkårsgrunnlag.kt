@@ -52,11 +52,13 @@ class ModelVilkårsgrunnlag(
         månedsinntektFraInntektsmelding: Double,
         førsteFraværsdag: LocalDate
     ): Resultat {
+        val antallOpptjeningsdager = antallOpptjeningsdager(førsteFraværsdag)
         val grunnlag = Grunnlagsdata(
-            erEgenAnsatt,
-            beregnetÅrsInntekt(),
-            avviksprosentInntekt(månedsinntektFraInntektsmelding),
-            antallOpptjeningsdager(førsteFraværsdag) >= 28
+            erEgenAnsatt = erEgenAnsatt,
+            beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsInntekt(),
+            avviksprosent = avviksprosentInntekt(månedsinntektFraInntektsmelding),
+            antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
+            harOpptjening = antallOpptjeningsdager >= 28
         )
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
@@ -67,7 +69,7 @@ class ModelVilkårsgrunnlag(
         if (harAvvikIOppgittInntekt) aktivitetslogger.warn("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
         else aktivitetslogger.info("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
 
-        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt, grunnlag)
+        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
@@ -102,6 +104,7 @@ class ModelVilkårsgrunnlag(
         internal val erEgenAnsatt: Boolean,
         internal val beregnetÅrsinntektFraInntektskomponenten: Double,
         internal val avviksprosent: Double,
+        internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean
     )
 }

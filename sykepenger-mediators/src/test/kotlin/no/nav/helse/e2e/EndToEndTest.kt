@@ -24,7 +24,6 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -65,6 +64,8 @@ import java.util.concurrent.TimeUnit.SECONDS
 internal class EndToEndTest {
 
     private companion object {
+
+        private val timeoutSecondsPerStep = 5L
 
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
@@ -444,15 +445,22 @@ internal class EndToEndTest {
                 mapOf(
                     "EgenAnsatt" to egenAnsatt,
                     "Inntektsberegning" to (1.rangeTo(12)).map {
-                        ModelVilkårsgrunnlag.Måned(
-                            årMåned = YearMonth.of(2018, it),
-                            inntektsliste = listOf(
-                                ModelVilkårsgrunnlag.Inntekt(
-                                    beløp = 31000.0
+                        mapOf(
+                            "årMåned" to YearMonth.of(2018, it).toString(),
+                            "inntektsliste" to listOf(
+                                mapOf(
+                                    "beløp" to 31000.0
                                 )
                             )
                         )
-                    }
+                    },
+                    "Opptjening" to listOf(
+                        mapOf(
+                            "orgnummer" to "123456789",
+                            "ansattSiden" to LocalDate.of(2010, 1, 1),
+                            "ansattTil" to null
+                        )
+                    )
                 )
             )
         )
@@ -529,7 +537,7 @@ internal class EndToEndTest {
     private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovstype): ObjectNode {
         var behov: ObjectNode? = null
         await()
-            .atMost(5, SECONDS)
+            .atMost(timeoutSecondsPerStep, SECONDS)
             .until {
                 behov = TestConsumer.records(rapidTopic)
                     .map { objectMapper.readValue<ObjectNode>(it.value()) }
@@ -552,7 +560,7 @@ internal class EndToEndTest {
         timeout: Duration
     ) {
         await()
-            .atMost(5, SECONDS)
+            .atMost(timeoutSecondsPerStep, SECONDS)
             .untilAsserted {
                 val meldingerPåTopic = TestConsumer.records(rapidTopic)
                 val vedtaksperiodeEndretHendelser = meldingerPåTopic
@@ -573,7 +581,7 @@ internal class EndToEndTest {
 
     private fun assertBehov(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
         await()
-            .atMost(5, SECONDS)
+            .atMost(timeoutSecondsPerStep, SECONDS)
             .untilAsserted {
                 val meldingerPåTopic =
                     TestConsumer.records(rapidTopic)
@@ -616,7 +624,7 @@ internal class EndToEndTest {
      */
     private fun RecordMetadata.assertMessageIsConsumed(recordMetadata: RecordMetadata = this) {
         await()
-            .atMost(5, SECONDS)
+            .atMost(timeoutSecondsPerStep, SECONDS)
             .untilAsserted {
                 val offsetAndMetadataMap =
                     adminClient.listConsumerGroupOffsets(
