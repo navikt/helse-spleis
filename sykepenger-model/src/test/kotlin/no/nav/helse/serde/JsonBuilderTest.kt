@@ -145,7 +145,7 @@ private val vilkårsgrunnlag
                 )
             )
         },
-        arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold("999888777", 1.januar(2017))),
+        arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
         erEgenAnsatt = false,
         aktivitetslogger = Aktivitetslogger()
 
