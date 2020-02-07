@@ -216,7 +216,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.MOTTATT_NY_SØKNAD,
-            currentState = TilstandType.AVVENTER_INNTEKTSMELDING,
+            currentState = TilstandType.UNDERSØKER_HISTORIKK,
             timeout = Duration.ofDays(30)
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
@@ -224,7 +224,7 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.AVVENTER_INNTEKTSMELDING,
+            previousState = TilstandType.UNDERSØKER_HISTORIKK,
             currentState = TilstandType.AVVENTER_VILKÅRSPRØVING,
             timeout = Duration.ofHours(1)
         )

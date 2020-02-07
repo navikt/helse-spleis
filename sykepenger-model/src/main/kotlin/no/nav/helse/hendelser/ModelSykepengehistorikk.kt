@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
 
@@ -16,11 +17,10 @@ class ModelSykepengehistorikk(
         utbetalinger.map { it.utbetalingslinjer(aktivitetslogger) }
 
     internal fun sisteFraværsdag() = sisteFraværsdag
-    internal fun inntektsopplysninger() = inntektshistorikk
 
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
-        inntektshistorikk.forEach { it.valider(this, aktivitetslogger) }
+        inntektshistorikk.forEach { it.valider(aktivitetslogger) }
         return aktivitetslogger
     }
 
@@ -28,15 +28,25 @@ class ModelSykepengehistorikk(
         aktivitetslogger.addAll(this.aktivitetslogger, "Sykepengehistorikk")
     }
 
+    internal fun addInntekter(ytelser: ModelYtelser, inntekthistorikk: Inntekthistorikk) {
+        this.inntektshistorikk.forEach { it.addInntekter(ytelser, inntekthistorikk) }
+
+    }
+
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Int,
         private val orgnummer: String
     ) {
-        fun valider(modelSykepengehistorikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
+
+        internal fun valider(aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
                 aktivitetslogger.error("Orgnummer må være satt: $orgnummer")
             }
+        }
+
+        internal fun addInntekter(ytelser: ModelYtelser, inntekthistorikk: Inntekthistorikk) {
+            inntekthistorikk.add(sykepengerFom, ytelser, inntektPerMåned.toBigDecimal())
         }
     }
 

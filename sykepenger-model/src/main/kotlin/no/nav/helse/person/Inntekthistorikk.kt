@@ -1,15 +1,16 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.ModelYtelser
 import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class Inntekthistorikk {
     internal class Inntekt(
         private val fom: LocalDate,
-        internal val hendelse: ModelInntektsmelding,
+        internal val hendelse: ArbeidstakerHendelse,
         val beløp: BigDecimal
-    ) {
+    ) : Comparable<Inntekt> {
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
                 inntekter.lastOrNull { it.fom <= dato }?.beløp
@@ -18,6 +19,10 @@ internal class Inntekthistorikk {
         fun accept(visitor: ArbeidsgiverVisitor) {
             visitor.visitInntekt(this)
         }
+
+        override fun compareTo(other: Inntekt) = this.fom.compareTo(other.fom)
+
+        override fun hashCode() = fom.hashCode() * 37 + beløp.hashCode()
     }
 
     private val inntekter = mutableListOf<Inntekt>()
@@ -38,8 +43,9 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelse: ModelInntektsmelding, beløp: BigDecimal) {
+    internal fun add(fom: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
         inntekter.add(Inntekt(fom, hendelse, beløp))
+        inntekter.sort()
     }
 
     internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)

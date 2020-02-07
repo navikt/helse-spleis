@@ -76,6 +76,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(person: Person, ytelser: ModelYtelser) {
+        ytelser.addInntekter(inntekthistorikk)
         perioder.forEach { it.håndter(person, this, ytelser) }
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }

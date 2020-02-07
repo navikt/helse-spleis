@@ -5,6 +5,7 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.ModelSykepengehistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -77,7 +78,7 @@ internal class KunEnArbeidsgiverTest {
             assertNoErrors(it)
             assertNoWarnings(it)
             assertMessages(it)
-//            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(21000.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -370,7 +371,7 @@ internal class KunEnArbeidsgiverTest {
                         it.third
                     )
                 },
-                inntektshistorikk = emptyList(),
+                inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
                 aktivitetslogger = hendelselogger
             ),
             foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
