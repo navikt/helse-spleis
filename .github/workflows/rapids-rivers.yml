@@ -22,4 +22,4 @@ jobs:
       run: ./gradlew -PrapidVersion="1.$(echo $GITHUB_SHA | cut -c1-7)" :rapids-rivers:build :rapids-rivers:publish
       env:
         ORG_GRADLE_PROJECT_githubUser: x-access-token
-        ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+        ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GHPKG_WORKAROUND }}
