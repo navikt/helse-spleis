@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Inntekt
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag.Måned
+import no.nav.helse.hendelser.ModelVilkårsgrunnlag.*
 import no.nav.helse.person.*
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -57,20 +57,28 @@ internal class ModelVilkårsgrunnlagTest {
         assertEquals(0.20, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
         assertEquals(15000.00, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.erEgenAnsatt)
+        assertTrue(dataForVilkårsvurdering(vedtaksperiode)!!.harOpptjening)
     }
 
-    private fun dataForVilkårsvurdering(vedtaksperiode: Vedtaksperiode): ModelVilkårsgrunnlag.Grunnlagsdata? {
-        var _dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata? = null
+    private fun dataForVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Grunnlagsdata? {
+        var _dataForVilkårsvurdering: Grunnlagsdata? = null
         vedtaksperiode.accept(object : VedtaksperiodeVisitor {
-            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?) {
+            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Grunnlagsdata?) {
                 _dataForVilkårsvurdering = dataForVilkårsvurdering
             }
         })
         return _dataForVilkårsvurdering
     }
 
-
-    private fun vilkårsgrunnlag(inntektsmåneder: List<Måned>) = ModelVilkårsgrunnlag(
+    private fun vilkårsgrunnlag(
+        inntektsmåneder: List<Måned>,
+        arbeidsforhold: List<Arbeidsforhold> = listOf(
+            Arbeidsforhold(
+                "orgnummer",
+                4.desember(2017)
+            )
+        )
+    ) = ModelVilkårsgrunnlag(
         hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         aktørId = "987654321",
@@ -78,6 +86,7 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = "orgnummer",
         rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
+        arbeidsforhold = arbeidsforhold,
         erEgenAnsatt = false,
         aktivitetslogger = aktivitetslogger
     )

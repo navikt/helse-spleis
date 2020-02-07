@@ -23,7 +23,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         mapOf(
             "erEgenAnsatt" to it.erEgenAnsatt,
             "beregnetÅrsinntektFraInntektskomponenten" to it.beregnetÅrsinntektFraInntektskomponenten,
-            "avviksprosent" to it.avviksprosent
+            "avviksprosent" to it.avviksprosent,
+            "antallOpptjeningsdagerErMinst" to it.antallOpptjeningsdagerErMinst,
+            "harOpptjening" to it.harOpptjening
         )
     }
 

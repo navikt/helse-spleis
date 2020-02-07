@@ -1,19 +1,20 @@
 package no.nav.helse.serde
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import java.math.BigDecimal
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
 internal fun assertDeepEquals(one: Any?, other: Any?) {
-    ModelDeepEquals().assertDeepEquals(one, other)
+    ModelDeepEquals().assertDeepEquals(one, other, "ROOT")
 }
 
 private class ModelDeepEquals {
     val checkLog = mutableListOf<Pair<Any, Any>>()
-    fun assertDeepEquals(one: Any?, other: Any?) {
+    fun assertDeepEquals(one: Any?, other: Any?, fieldName: String) {
         if (one == null && other == null) return
-        Assertions.assertFalse(one == null || other == null)
+        assertFalse(one == null || other == null, "For field $fieldName: $one or $other is null")
         requireNotNull(one)
         if (one::class.qualifiedName == null) return
         checkLog.forEach {
@@ -22,26 +23,26 @@ private class ModelDeepEquals {
         checkLog.add(one to other!!)
 
         if (one is Collection<*> && other is Collection<*>) {
-            assertCollectionEquals(one, other)
+            assertCollectionEquals(one, other, fieldName)
         } else if (one is Map<*, *> && other is Map<*, *>) {
-            assertMapEquals(one, other)
+            assertMapEquals(one, other, fieldName)
         } else {
             assertObjectEquals(one, other)
         }
     }
 
     private fun assertObjectEquals(one: Any, other: Any) {
-        Assertions.assertEquals(one::class, other::class)
+        assertEquals(one::class, other::class)
         if (one is Enum<*> && other is Enum<*>) {
-            Assertions.assertEquals(one, other)
+            assertEquals(one, other)
         }
         if (one::class.qualifiedName!!.startsWith("no.nav.helse.")) {
             assertHelseObjectEquals(one, other)
         } else {
             if (one is BigDecimal && other is BigDecimal) {
-                Assertions.assertEquals(one.toLong(), other.toLong())
+                assertEquals(one.toLong(), other.toLong())
             } else {
-                Assertions.assertEquals(one, other, {
+                assertEquals(one, other, {
                     "TODO"
                 })
             }
@@ -51,21 +52,23 @@ private class ModelDeepEquals {
     private fun assertHelseObjectEquals(one: Any, other: Any) {
         one::class.memberProperties.map { it.apply { isAccessible = true } }.forEach { prop ->
             if (!prop.name.toLowerCase().endsWith("observers")) {
-                assertDeepEquals(prop.call(one), prop.call(other))
+                assertDeepEquals(prop.call(one), prop.call(other), prop.name)
             }
         }
     }
 
-    private fun assertMapEquals(one: Map<*, *>, other: Map<*, *>) {
-        Assertions.assertEquals(one.size, other.size)
+    private fun assertMapEquals(one: Map<*, *>, other: Map<*, *>, fieldName: String) {
+        assertEquals(one.size, other.size)
         one.keys.forEach {
-            assertDeepEquals(one[it], other[it])
+            assertDeepEquals(one[it], other[it], fieldName)
         }
     }
 
-    private fun assertCollectionEquals(one: Collection<*>, other: Collection<*>) {
-        Assertions.assertEquals(one.size, other.size)
-        (one.toTypedArray() to other.toTypedArray()).forEach(this::assertDeepEquals)
+    private fun assertCollectionEquals(one: Collection<*>, other: Collection<*>, fieldName: String) {
+        assertEquals(one.size, other.size)
+        (one.toTypedArray() to other.toTypedArray()).forEach { i1, i2 ->
+            this.assertDeepEquals(i1, i2, fieldName)
+        }
     }
 
     private fun Pair<Array<*>, Array<*>>.forEach(block: (Any?, Any?) -> Unit) {

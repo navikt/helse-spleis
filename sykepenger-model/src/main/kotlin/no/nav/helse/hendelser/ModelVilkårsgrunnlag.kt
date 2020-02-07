@@ -4,10 +4,12 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.VedtaksperiodeHendelse
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import kotlin.math.absoluteValue
+import kotlin.streams.toList
 
 class ModelVilkårsgrunnlag(
     hendelseId: UUID,
@@ -17,6 +19,7 @@ class ModelVilkårsgrunnlag(
     private val orgnummer: String,
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
+    private val arbeidsforhold: List<Arbeidsforhold>,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
@@ -26,7 +29,14 @@ class ModelVilkårsgrunnlag(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
+    private fun antallOpptjeningsdager(førsteFraværsdag: LocalDate) = arbeidsforhold
+            .filter { it.orgnummer == orgnummer }
+            .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
+            .map { it.fom }
+            .min()?.datesUntil(førsteFraværsdag)?.toList()?.size ?: 0
+
     private fun beregnetÅrsInntekt(): Double {
+        assert(inntektsmåneder.size <= 12)
         return inntektsmåneder
             .flatMap { it.inntektsliste }
             .sumByDouble { it.beløp }
@@ -38,11 +48,17 @@ class ModelVilkårsgrunnlag(
     internal fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
         avviksprosentInntekt(månedsinntektFraInntektsmelding) > 0.25
 
-    internal fun måHåndteresManuelt(månedsinntektFraInntektsmelding: Double): Resultat {
+    internal fun måHåndteresManuelt(
+        månedsinntektFraInntektsmelding: Double,
+        førsteFraværsdag: LocalDate
+    ): Resultat {
+        val antallOpptjeningsdager = antallOpptjeningsdager(førsteFraværsdag)
         val grunnlag = Grunnlagsdata(
-            erEgenAnsatt,
-            beregnetÅrsInntekt(),
-            avviksprosentInntekt(månedsinntektFraInntektsmelding)
+            erEgenAnsatt = erEgenAnsatt,
+            beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsInntekt(),
+            avviksprosent = avviksprosentInntekt(månedsinntektFraInntektsmelding),
+            antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
+            harOpptjening = antallOpptjeningsdager >= 28
         )
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
@@ -53,7 +69,7 @@ class ModelVilkårsgrunnlag(
         if (harAvvikIOppgittInntekt) aktivitetslogger.warn("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
         else aktivitetslogger.info("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
 
-        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt, grunnlag)
+        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
@@ -65,23 +81,31 @@ class ModelVilkårsgrunnlag(
     }
 
     data class Måned(
-        val årMåned: YearMonth,
-        val inntektsliste: List<Inntekt>
+        internal val årMåned: YearMonth,
+        internal val inntektsliste: List<Inntekt>
     )
 
     data class Inntekt(
-        val beløp: Double
+        internal val beløp: Double
+    )
+
+    data class Arbeidsforhold (
+        internal val orgnummer: String,
+        internal val fom: LocalDate,
+        internal val tom: LocalDate? = null
     )
 
     data class Resultat(
-        val resultat: Boolean,
-        val grunnlagsdata: Grunnlagsdata
+        internal val måBehandlesManuelt: Boolean,
+        internal val grunnlagsdata: Grunnlagsdata
     )
 
     data class Grunnlagsdata(
-        val erEgenAnsatt: Boolean,
-        val beregnetÅrsinntektFraInntektskomponenten: Double,
-        val avviksprosent: Double
+        internal val erEgenAnsatt: Boolean,
+        internal val beregnetÅrsinntektFraInntektskomponenten: Double,
+        internal val avviksprosent: Double,
+        internal val antallOpptjeningsdagerErMinst: Int,
+        internal val harOpptjening: Boolean
     )
 }
 

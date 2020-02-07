@@ -299,14 +299,15 @@ internal class HendelseMediatorTest {
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt)
+                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
             )
 
             sendBehov(
                 behov.løsBehov(
                     mapOf(
                         "EgenAnsatt" to egenAnsatt,
-                        "Inntektsberegning" to emptyMap<String, String>()
+                        "Inntektsberegning" to emptyMap<String, String>(),
+                        "Opptjening" to emptyList<Any>()
                     )
                 )
             )
