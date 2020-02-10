@@ -151,10 +151,6 @@ internal class Arbeidsgiver private constructor(
         override fun organisasjonsnummer(): String {
             kotlin.error("Uventet kall")
         }
-
-        override fun accept(visitor: PersonVisitor) {
-            kotlin.error("Uventet kall")
-        }
     }
 
 }

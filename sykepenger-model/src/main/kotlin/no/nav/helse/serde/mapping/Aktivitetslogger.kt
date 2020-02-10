@@ -9,17 +9,32 @@ internal fun konverterTilAktivitetslogger(aktivitetsloggerData: Aktivitetslogger
     val aktivitetslogger = Aktivitetslogger(aktivitetsloggerData.originalMessage)
 
     val aktivitetClass: ReflectClass = ReflectClass.getNestedClass<Aktivitetslogger>("Aktivitet")
-    val alvorlighetsgradClass: ReflectClass = ReflectClass.getNestedClass<Aktivitetslogger>("Alvorlighetsgrad")
 
     val aktiviteter = aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter")
     aktivitetsloggerData.aktiviteter.forEach {
-        aktiviteter.add(
-            aktivitetClass.getInstance(
-                alvorlighetsgradClass.getEnumValue(it.alvorlighetsgrad.name),
+        aktiviteter.add(when (it.alvorlighetsgrad) {
+            AktivitetsloggerData.Alvorlighetsgrad.INFO -> aktivitetClass.getNestedClass("Info").getInstance(
                 it.melding,
                 it.tidsstempel
             )
-        )
+            AktivitetsloggerData.Alvorlighetsgrad.WARN -> aktivitetClass.getNestedClass("Warn").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.NEED -> aktivitetClass.getNestedClass("Need").getInstance(
+                Aktivitetslogger.Aktivitet.Need.NeedType.valueOf(requireNotNull(it.needType)),
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.ERROR -> aktivitetClass.getNestedClass("Error").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.SEVERE -> aktivitetClass.getNestedClass("Severe").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+        })
     }
 
     return aktivitetslogger

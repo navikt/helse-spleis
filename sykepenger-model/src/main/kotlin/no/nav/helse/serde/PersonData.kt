@@ -74,7 +74,7 @@ private fun konverterTilArbeidsgiver(
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 
-    vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it, hendelser) })
+    vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it) })
 
     return arbeidsgiver
 }
