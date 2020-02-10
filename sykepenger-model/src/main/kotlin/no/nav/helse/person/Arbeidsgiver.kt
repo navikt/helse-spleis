@@ -1,10 +1,12 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.GjennopptaBehandling
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -81,8 +83,8 @@ internal class Arbeidsgiver private constructor(
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
-        perioder.forEach { it.håndter(manuellSaksbehandling) }
+    internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling, person: Person) {
+        perioder.forEach { it.håndter(manuellSaksbehandling, this, person) }
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -120,7 +122,37 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harTilstøtendePeriode(vedtaksperiode: Vedtaksperiode): Boolean {
-        return perioder.any{ it.harTilstøtende(vedtaksperiode) }
+        return perioder.any { it.harTilstøtende(vedtaksperiode) }
+    }
+
+    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
+        perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
+
+    internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode) {
+        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling()) }
+    }
+
+    internal class GjennoptaBehandling :
+        ArbeidstakerHendelse(UUID.randomUUID(), GjennopptaBehandling, Aktivitetslogger()) {
+        override fun rapportertdato(): LocalDateTime {
+            kotlin.error("Uventet kall")
+        }
+
+        override fun aktørId(): String {
+            kotlin.error("Uventet kall")
+        }
+
+        override fun fødselsnummer(): String {
+            kotlin.error("Uventet kall")
+        }
+
+        override fun organisasjonsnummer(): String {
+            kotlin.error("Uventet kall")
+        }
+
+        override fun accept(visitor: PersonVisitor) {
+            kotlin.error("Uventet kall")
+        }
     }
 
 }

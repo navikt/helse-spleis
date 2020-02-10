@@ -110,7 +110,7 @@ internal class SendtSøknadHendelseTest {
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
-        assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.tilstand(1))
+        assertEquals(TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, inspektør.tilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
     }
 

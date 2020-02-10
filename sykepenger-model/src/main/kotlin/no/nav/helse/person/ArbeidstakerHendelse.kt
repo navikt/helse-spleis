@@ -17,7 +17,8 @@ abstract class ArbeidstakerHendelse protected constructor(
         Inntektsmelding,
         NySøknad,
         SendtSøknad,
-        Påminnelse
+        Påminnelse,
+        GjennopptaBehandling
     }
 
     fun hendelseId() = hendelseId

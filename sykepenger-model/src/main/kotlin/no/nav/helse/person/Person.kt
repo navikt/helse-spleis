@@ -46,7 +46,7 @@ class Person private constructor(
 
     fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
         registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
-        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
+        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling, this)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 

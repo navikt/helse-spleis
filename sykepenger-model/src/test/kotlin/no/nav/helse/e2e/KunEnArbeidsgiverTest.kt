@@ -181,6 +181,7 @@ internal class KunEnArbeidsgiverTest {
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
@@ -202,7 +203,7 @@ internal class KunEnArbeidsgiverTest {
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_TIDLIGERE_PERIODE,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -216,6 +217,7 @@ internal class KunEnArbeidsgiverTest {
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterYtelser(1)   // No history
@@ -236,7 +238,8 @@ internal class KunEnArbeidsgiverTest {
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
 
@@ -441,11 +444,8 @@ internal class KunEnArbeidsgiverTest {
 
         internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
 
-        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-            endreTeller += 1
-        }
-
         override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
+            endreTeller += 1
             val indeks = periodeIndeks(event.id.toString())
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }
