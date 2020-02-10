@@ -59,11 +59,14 @@ internal class HendelseMediator(
             sikkerLogg.info("melding er utenfor omfang: ${err.message}", err)
         } catch (err: PersonskjemaForGammelt) {
             sikkerLogg.info("person har gammelt skjema: ${err.message}", err)
+        } finally {
+            AktivitetsloggerProbe.inspiser(aktivitetslogger)
         }
     }
 
     override fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException) {
         sikkerLogg.info("feil på melding: ${aktivitetException.message}", aktivitetException)
+        AktivitetsloggerProbe.inspiser(aktivitetException)
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {

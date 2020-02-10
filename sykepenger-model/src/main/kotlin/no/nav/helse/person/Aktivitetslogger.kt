@@ -84,7 +84,11 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     private fun error() = Aktivitet.filter(ERROR, aktiviteter)
     private fun severe() = Aktivitet.filter(SEVERE, aktiviteter)
 
-    class AktivitetException internal constructor(aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString())
+    class AktivitetException internal constructor(private val aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString()) {
+        fun accept(visitor: AktivitetsloggerVisitor) {
+            aktivitetslogger.accept(visitor)
+        }
+    }
 
     class Aktivitet(
         private val alvorlighetsgrad: Alvorlighetsgrad,
