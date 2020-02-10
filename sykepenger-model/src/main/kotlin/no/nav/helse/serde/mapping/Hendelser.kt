@@ -134,7 +134,7 @@ private fun parseVilkårsgrunnlag(objectMapper: ObjectMapper, personData: Person
         rapportertDato = data.rapportertDato,
         inntektsmåneder = data.inntektsmåneder.map(::parseInntektsmåneder),
         erEgenAnsatt = data.erEgenAnsatt,
-        arbeidsforhold = data.arbeidsforhold.map(::parseArbeidsforhold),
+        arbeidsforhold = data.arbeidsforhold?.let { ModelVilkårsgrunnlag.ModelArbeidsforhold(it.map(::parseArbeidsforhold)) },
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }

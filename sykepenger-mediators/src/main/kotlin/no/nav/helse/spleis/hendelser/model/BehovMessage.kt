@@ -53,18 +53,40 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
                 val tom = utbetaling["fom"].asLocalDate()
                 val typekode = utbetaling["typeKode"].asText()
                 val dagsats = utbetaling["dagsats"].asInt()
-                when(typekode) {
-                    "1" -> { ReduksjonMedlem(fom, tom, dagsats) }
-                    in listOf("2", "3") -> { Etterbetaling(fom, tom, dagsats) }
-                    "4" -> { KontertRegnskap(fom, tom, dagsats) }
-                    "5" -> { RefusjonTilArbeidsgiver(fom, tom, dagsats) }
-                    "6" -> { ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats) }
-                    "7" -> { Tilbakeført(fom, tom, dagsats) }
-                    "8" -> { Konvertert(fom, tom, dagsats) }
-                    "9" -> { Ferie(fom, tom, dagsats) }
-                    "O" -> { Opphold(fom, tom, dagsats) }
-                    "S" -> { Sanksjon(fom, tom, dagsats) }
-                    "" -> { Ukjent(fom, tom, dagsats) }
+                when (typekode) {
+                    "1" -> {
+                        ReduksjonMedlem(fom, tom, dagsats)
+                    }
+                    in listOf("2", "3") -> {
+                        Etterbetaling(fom, tom, dagsats)
+                    }
+                    "4" -> {
+                        KontertRegnskap(fom, tom, dagsats)
+                    }
+                    "5" -> {
+                        RefusjonTilArbeidsgiver(fom, tom, dagsats)
+                    }
+                    "6" -> {
+                        ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats)
+                    }
+                    "7" -> {
+                        Tilbakeført(fom, tom, dagsats)
+                    }
+                    "8" -> {
+                        Konvertert(fom, tom, dagsats)
+                    }
+                    "9" -> {
+                        Ferie(fom, tom, dagsats)
+                    }
+                    "O" -> {
+                        Opphold(fom, tom, dagsats)
+                    }
+                    "S" -> {
+                        Sanksjon(fom, tom, dagsats)
+                    }
+                    "" -> {
+                        Ukjent(fom, tom, dagsats)
+                    }
                     else -> aktivitetslogger.severe("Fikk en ukjent typekode:$typekode")
                 }
             },
@@ -129,13 +151,15 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
                     inntektsliste = it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
                 )
             },
-            arbeidsforhold = this["@løsning.${Behovstype.Opptjening.name}"].map {
-                ModelVilkårsgrunnlag.Arbeidsforhold(
-                    orgnummer = it["orgnummer"].asText(),
-                    fom = it["ansattSiden"].asLocalDate(),
-                    tom = it["ansattTil"].asOptionalLocalDate()
-                )
-            },
+            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(this["@løsning.${Behovstype.Opptjening.name}"]
+                .map {
+                    ModelVilkårsgrunnlag.Arbeidsforhold(
+                        orgnummer = it["orgnummer"].asText(),
+                        fom = it["ansattSiden"].asLocalDate(),
+                        tom = it["ansattTil"].asOptionalLocalDate()
+                    )
+                }
+            ),
             erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
             aktivitetslogger = aktivitetslogger
         )

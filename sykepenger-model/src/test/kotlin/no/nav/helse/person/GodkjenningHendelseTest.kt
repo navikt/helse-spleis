@@ -175,7 +175,7 @@ internal class GodkjenningHendelseTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
-            arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
+            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

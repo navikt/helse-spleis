@@ -376,7 +376,7 @@ internal class KunEnArbeidsgiverTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = hendelselogger,
-            arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
+            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         )
     }
 

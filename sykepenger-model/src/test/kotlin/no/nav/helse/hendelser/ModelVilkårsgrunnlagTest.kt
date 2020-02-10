@@ -165,7 +165,7 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = "orgnummer",
         rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
-        arbeidsforhold = arbeidsforhold,
+        arbeidsforhold = ModelArbeidsforhold(arbeidsforhold),
         erEgenAnsatt = false,
         aktivitetslogger = aktivitetslogger
     )

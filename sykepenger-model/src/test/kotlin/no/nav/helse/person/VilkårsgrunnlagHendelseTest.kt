@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -194,7 +193,7 @@ internal class VilkårsgrunnlagHendelseTest {
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
             aktivitetslogger = aktivitetslogger,
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(arbeidsforhold)
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

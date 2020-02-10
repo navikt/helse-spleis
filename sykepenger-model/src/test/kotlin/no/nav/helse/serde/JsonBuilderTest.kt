@@ -173,7 +173,7 @@ internal class JsonBuilderTest {
                         )
                     )
                 },
-                arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
+                arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
                 erEgenAnsatt = false,
                 aktivitetslogger = Aktivitetslogger()
 

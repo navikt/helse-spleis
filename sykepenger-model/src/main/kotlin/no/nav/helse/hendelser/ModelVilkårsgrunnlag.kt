@@ -19,7 +19,7 @@ class ModelVilkårsgrunnlag(
     private val orgnummer: String,
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
-    private val arbeidsforhold: List<Arbeidsforhold>,
+    private val arbeidsforhold: ModelArbeidsforhold?,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
@@ -28,12 +28,6 @@ class ModelVilkårsgrunnlag(
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
-
-    private fun antallOpptjeningsdager(førsteFraværsdag: LocalDate) = arbeidsforhold
-            .filter { it.orgnummer == orgnummer }
-            .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
-            .map { it.fom }
-            .min()?.datesUntil(førsteFraværsdag)?.toList()?.size ?: 0
 
     private fun beregnetÅrsInntekt(): Double {
         assert(inntektsmåneder.size <= 12)
@@ -52,7 +46,8 @@ class ModelVilkårsgrunnlag(
         månedsinntektFraInntektsmelding: Double,
         førsteFraværsdag: LocalDate
     ): Resultat {
-        val antallOpptjeningsdager = antallOpptjeningsdager(førsteFraværsdag)
+        requireNotNull(arbeidsforhold)
+        val antallOpptjeningsdager =  arbeidsforhold.antallOpptjeningsdager(førsteFraværsdag, orgnummer)
         val grunnlag = Grunnlagsdata(
             erEgenAnsatt = erEgenAnsatt,
             beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsInntekt(),
@@ -110,5 +105,15 @@ class ModelVilkårsgrunnlag(
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean
     )
+
+    class ModelArbeidsforhold(
+        private val arbeidsforhold: List<Arbeidsforhold>
+    ) {
+        internal fun antallOpptjeningsdager(førsteFraværsdag: LocalDate, orgnummer: String) = arbeidsforhold
+            .filter { it.orgnummer == orgnummer }
+            .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
+            .map { it.fom }
+            .min()?.datesUntil(førsteFraværsdag)?.toList()?.size ?: 0
+    }
 }
 

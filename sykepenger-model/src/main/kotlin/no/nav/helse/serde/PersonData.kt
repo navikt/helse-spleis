@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
@@ -65,7 +64,7 @@ private fun konverterTilArbeidsgiver(
     data.inntekter.forEach { inntektData ->
         inntekthistorikk.add(
             fom = inntektData.fom,
-            hendelse = hendelser.find { it.hendelseId() == inntektData.hendelse } as ModelInntektsmelding,
+            hendelse = requireNotNull(hendelser.find { it.hendelseId() == inntektData.hendelse }),
             beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
         )
     }
@@ -382,7 +381,7 @@ internal data class PersonData(
             val rapportertDato: LocalDateTime,
             val inntektsmåneder: List<Måned>,
             val erEgenAnsatt: Boolean,
-            val arbeidsforhold: List<ArbeidsforholdData>,
+            val arbeidsforhold: List<ArbeidsforholdData>?,
             val aktivitetslogger: AktivitetsloggerData
         ) {
             data class Måned(
