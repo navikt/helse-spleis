@@ -39,7 +39,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(Behovstype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovstype.Utbetaling, "utbetalingsreferanse")
         assertNotNull(utbetalingsreferanse)
     }
 
@@ -57,7 +57,7 @@ internal class GodkjenningHendelseTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
         person.håndter(ytelser())
         assertTilstand(TilstandType.TIL_UTBETALING)
-        assertEquals(1, personObserver.vedtaksperiodeIder.size)
+        assertEquals(1, inspektør.vedtaksperiodeteller)
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class GodkjenningHendelseTest {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         rapportertdato = LocalDateTime.now(),
@@ -96,7 +96,7 @@ internal class GodkjenningHendelseTest {
     )
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = personObserver.vedtaksperiodeId(0),
+        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -161,7 +161,7 @@ internal class GodkjenningHendelseTest {
     private fun vilkårsgrunnlag() =
         ModelVilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
-            vedtaksperiodeId = personObserver.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
@@ -182,6 +182,7 @@ internal class GodkjenningHendelseTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        private val vedtaksperiodeIder = mutableSetOf<UUID>()
 
         init {
             person.accept(this)
@@ -190,6 +191,7 @@ internal class GodkjenningHendelseTest {
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
             tilstander[vedtaksperiodeindeks] = TilstandType.START
+            vedtaksperiodeIder.add(id)
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -204,25 +206,22 @@ internal class GodkjenningHendelseTest {
             this@GodkjenningHendelseTest.aktivitetslogger = aktivitetslogger
         }
 
+        internal val vedtaksperiodeteller get() = vedtaksperiodeindeks + 1
+
+        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
+
         internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 
     private inner class TestPersonObserver : PersonObserver {
-        val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
 
-        fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
+        fun etterspurteBehov(id: UUID) =
+            etterspurteBehov.getValue(id).toList()
 
-        fun etterspurteBehov() =
-            etterspurteBehov.getValue(vedtaksperiodeIder.elementAt(0)).toList()
-
-        fun <T> etterspurtBehov(behov: Behovstype, felt: String): T? {
-            return personObserver.etterspurteBehov()
+        fun <T> etterspurtBehov(id: UUID, behov: Behovstype, felt: String): T? {
+            return personObserver.etterspurteBehov(id)
                 .first { behov.name in it.behovType() }[felt]
-        }
-
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
-            vedtaksperiodeIder.add(event.id)
         }
 
         override fun vedtaksperiodeTrengerLøsning(behov: Behov) {

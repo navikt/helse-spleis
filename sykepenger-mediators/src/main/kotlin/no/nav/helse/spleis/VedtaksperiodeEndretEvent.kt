@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
-import no.nav.helse.person.VedtaksperiodeObserver
+import no.nav.helse.person.VedtaksperiodeMediator
 import org.apache.kafka.clients.producer.ProducerRecord
 
-internal fun VedtaksperiodeObserver.StateChangeEvent.producerRecord() =
+internal fun VedtaksperiodeMediator.StateChangeEvent.producerRecord() =
     ProducerRecord<String, String>(
         Topics.rapidTopic,
         fødselsnummer,
@@ -18,7 +18,7 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun toJson(event: VedtaksperiodeObserver.StateChangeEvent) = objectMapper.writeValueAsString(
+private fun toJson(event: VedtaksperiodeMediator.StateChangeEvent) = objectMapper.writeValueAsString(
     mapOf(
         "@event_name" to "vedtaksperiode_endret",
         "aktørId" to event.aktørId,

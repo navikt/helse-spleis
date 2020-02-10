@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-interface VedtaksperiodeObserver {
+interface VedtaksperiodeMediator {
     data class StateChangeEvent(
         val id: UUID,
         val aktørId: String,

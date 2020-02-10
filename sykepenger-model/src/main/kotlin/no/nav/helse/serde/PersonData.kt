@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelSendtSøknad
 import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
@@ -38,30 +37,30 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 fun parsePerson(json: String): Person {
     val personData: PersonData = objectMapper.readValue(json)
     val hendelser = personData.hendelser.map { konverterTilHendelse(objectMapper, personData, it) }
-    val arbeidsgivere = personData.arbeidsgivere.map { konverterTilArbeidsgiver(personData, it, hendelser) }
+    val arbeidsgivere = mutableListOf<Arbeidsgiver>()
     val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
 
     val person = createPerson(
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
-        arbeidsgivere = arbeidsgivere.toMutableList(),
+        arbeidsgivere = arbeidsgivere,
         hendelser = hendelser.toMutableList(),
         aktivitetslogger = aktivitetslogger
     )
 
-    arbeidsgivere.forEach {
-        it.addObserver(person)
-    }
+    arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it, hendelser) })
+
     return person
 }
 
 private fun konverterTilArbeidsgiver(
+    person: Person,
     personData: PersonData,
     data: ArbeidsgiverData,
     hendelser: List<ArbeidstakerHendelse>
 ): Arbeidsgiver {
     val inntekthistorikk = Inntekthistorikk()
-    val vedtaksperioder = data.vedtaksperioder.map { parseVedtaksperiode(personData, data, it, hendelser) }
+    val vedtaksperioder = data.vedtaksperioder.map { parseVedtaksperiode(person, personData, data, it, hendelser) }
 
     data.inntekter.forEach { inntektData ->
         inntekthistorikk.add(
@@ -72,12 +71,12 @@ private fun konverterTilArbeidsgiver(
     }
 
     return createArbeidsgiver(
+        director = person,
         organisasjonsnummer = data.organisasjonsnummer,
         id = data.id,
         inntekthistorikk = inntekthistorikk,
         tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
         perioder = vedtaksperioder.toMutableList(),
-        vedtaksperiodeObservers = mutableListOf(),
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }
@@ -118,12 +117,14 @@ private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.Utbetalingst
 }
 
 private fun parseVedtaksperiode(
+    person: Person,
     personData: PersonData,
     arbeidsgiverData: ArbeidsgiverData,
     data: ArbeidsgiverData.VedtaksperiodeData,
     hendelser: List<ArbeidstakerHendelse>
 ): Vedtaksperiode {
     return createVedtaksperiode(
+        director = person,
         id = data.id,
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,

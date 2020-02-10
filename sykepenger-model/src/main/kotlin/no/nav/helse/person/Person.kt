@@ -1,20 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ArbeidsgiverHåndterHendelse
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
-import no.nav.helse.hendelser.ModelYtelser
-import no.nav.helse.hendelser.Validation
-import no.nav.helse.hendelser.ValiderKunEnArbeidsgiver
-import no.nav.helse.hendelser.ValiderSykdomshendelse
-import java.util.UUID
+import no.nav.helse.behov.Behov
+import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-
-private const val CURRENT_SKJEMA_VERSJON = 3
+import java.util.*
 
 class Person private constructor(
     private val aktørId: String,
@@ -22,7 +11,7 @@ class Person private constructor(
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val hendelser: MutableList<ArbeidstakerHendelse>,
     private val aktivitetslogger: Aktivitetslogger
-) : VedtaksperiodeObserver {
+) : VedtaksperiodeMediator {
 
     constructor(
         aktørId: String,
@@ -84,8 +73,23 @@ class Person private constructor(
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+    override fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
+        observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
+    }
+
+    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeMediator.UtbetalingEvent) {
+        observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
+    }
+
+    override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
         observers.forEach {
+            it.vedtaksperiodeTrengerLøsning(behov)
+        }
+    }
+
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
+        observers.forEach {
+            it.vedtaksperiodeEndret(event)
             it.personEndret(
                 PersonObserver.PersonEndretEvent(
                     aktørId = aktørId,
@@ -98,7 +102,6 @@ class Person private constructor(
 
     fun addObserver(observer: PersonObserver) {
         observers.add(observer)
-        arbeidsgivere.forEach { it.addObserver(observer) }
     }
 
     internal fun accept(visitor: PersonVisitor) {
@@ -150,10 +153,5 @@ class Person private constructor(
         }
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
-        Arbeidsgiver(organisasjonsnummer).also {
-            it.addObserver(this)
-            observers.forEach { observer ->
-                it.addObserver(observer)
-            }
-        }
+        Arbeidsgiver(this, organisasjonsnummer)
 }

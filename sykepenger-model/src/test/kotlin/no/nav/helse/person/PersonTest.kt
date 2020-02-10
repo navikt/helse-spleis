@@ -380,7 +380,7 @@ internal class PersonTest {
     )
 
     private class TestPersonObserver : PersonObserver {
-        internal val tilstandsendringer: MutableMap<UUID, VedtaksperiodeObserver.StateChangeEvent> = mutableMapOf()
+        internal val tilstandsendringer: MutableMap<UUID, VedtaksperiodeMediator.StateChangeEvent> = mutableMapOf()
         internal val behovsliste: MutableList<Behov> = mutableListOf()
         internal var vedtaksperiodeEndret = false
         internal var personEndret = false
@@ -398,7 +398,7 @@ internal class PersonTest {
             forrigeVedtaksperiodeIkkeFunnetEvent = vedtaksperiodeEvent
         }
 
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
             vedtaksperiodeEndret = true
             forrigeVedtaksperiodetilstand = event.forrigeTilstand
             gjeldendeVedtaksperiodetilstand = event.gjeldendeTilstand

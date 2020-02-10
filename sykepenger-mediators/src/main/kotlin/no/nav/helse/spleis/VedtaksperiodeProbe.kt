@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonskjemaForGammelt
-import no.nav.helse.person.VedtaksperiodeObserver.StateChangeEvent
+import no.nav.helse.person.VedtaksperiodeMediator.StateChangeEvent
 import org.slf4j.LoggerFactory
 
 object VedtaksperiodeProbe : PersonObserver {

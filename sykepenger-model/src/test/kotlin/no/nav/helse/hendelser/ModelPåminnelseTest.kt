@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeMediator
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -55,6 +56,7 @@ internal class ModelPåminnelseTest {
 
     private fun vedtaksperiode() =
         Vedtaksperiode(
+            director = object : VedtaksperiodeMediator {},
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

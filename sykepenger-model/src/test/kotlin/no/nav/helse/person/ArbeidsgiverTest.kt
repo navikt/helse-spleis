@@ -31,7 +31,7 @@ internal class ArbeidsgiverTest {
             ferieperioder = emptyList()
         )
         val person = Person("aktørId", "fnr")
-        val arbeidsgiver = Arbeidsgiver("12345678")
+        val arbeidsgiver = Arbeidsgiver(object : VedtaksperiodeMediator {}, "12345678")
         arbeidsgiver.håndter(inntektsmelding, person)
         assertTrue(inntektsmelding.hasErrors())
 

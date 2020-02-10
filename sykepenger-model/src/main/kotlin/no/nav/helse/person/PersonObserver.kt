@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
-import java.util.UUID
+import java.util.*
 
-interface PersonObserver : VedtaksperiodeObserver {
+interface PersonObserver : VedtaksperiodeMediator {
     data class PersonEndretEvent(
         val aktørId: String,
         val person: Person,

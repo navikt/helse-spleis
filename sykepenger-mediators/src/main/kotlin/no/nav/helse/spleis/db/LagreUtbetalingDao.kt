@@ -4,7 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.VedtaksperiodeObserver
+import no.nav.helse.person.VedtaksperiodeMediator
 import no.nav.helse.spleis.PostgresProbe
 import java.util.*
 import javax.sql.DataSource
@@ -16,7 +16,7 @@ class LagreUtbetalingDao(private val dataSource: DataSource,
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
     }
 
-    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
+    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeMediator.UtbetalingEvent) {
         lagreUtbetaling(event.utbetalingsreferanse, event.aktørId, event.organisasjonsnummer, event.vedtaksperiodeId)
     }
 

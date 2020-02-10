@@ -43,12 +43,14 @@ internal class KunEnArbeidsgiverTest {
     private lateinit var hendelselogger: Aktivitetslogger
     private var forventetEndringTeller = 0
 
-    @BeforeEach internal fun setup() {
+    @BeforeEach
+    internal fun setup() {
         person = Person(UNG_PERSON_FNR_2018, AKTØRID)
-        observatør = TestObservatør().also {person.addObserver(it)}
+        observatør = TestObservatør().also { person.addObserver(it) }
     }
 
-    @Test internal fun `ingen historie med SendtSøknad først`() {
+    @Test
+    internal fun `ingen historie med SendtSøknad først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
@@ -64,12 +66,15 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
     }
 
-    @Test internal fun `Har tilstøtende perioder i historikk`() {
+    @Test
+    internal fun `Har tilstøtende perioder i historikk`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
@@ -86,13 +91,14 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(0, START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
-    @Test internal fun `ingen historie med Inntektsmelding først`() {
+    @Test
+    internal fun `ingen historie med Inntektsmelding først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterManuellSaksbehandling(0,true)
+        håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -100,12 +106,15 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
         }
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
     }
 
-    @Test internal fun `ingen nav utbetaling kreves`() {
+    @Test
+    internal fun `ingen nav utbetaling kreves`() {
         håndterNySøknad(Triple(3.januar, 5.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 5.januar)))
         håndterSendtSøknad(0, Sykdom(3.januar, 5.januar, 100))
@@ -118,12 +127,15 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         assertTrue(hendelselogger.hasErrors())
         println(hendelselogger)
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD
+        )
     }
 
-    @Test internal fun `To perioder med opphold`() {
+    @Test
+    internal fun `To perioder med opphold`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
@@ -147,15 +159,20 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(8, it.dagTeller(NavHelgDag::class))
             assertEquals(3, it.dagTeller(Arbeidsdag::class))
         }
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
-        assertTilstander(1,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
             START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
     }
 
-    @Test internal fun `Sammenblandede hendelser fra forskjellige perioder`() {
+    @Test
+    internal fun `Sammenblandede hendelser fra forskjellige perioder`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterNySøknad(Triple(1.februar, 23.februar, 100))
         håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
@@ -178,15 +195,20 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(8, it.dagTeller(NavHelgDag::class))
             assertEquals(3, it.dagTeller(Arbeidsdag::class))
         }
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
-        assertTilstander(1,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
             START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
     }
 
-    @Test internal fun `To tilstøtende perioder`() {
+    @Test
+    internal fun `To tilstøtende perioder`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterNySøknad(Triple(29.januar, 23.februar, 100))
         håndterSendtSøknad(1, Sykdom(29.januar, 23.februar, 100))
@@ -207,11 +229,15 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(8, it.dagTeller(NavHelgDag::class))
             assertEquals(0, it.dagTeller(Arbeidsdag::class))
         }
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
-        assertTilstander(1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
     }
 
     private fun assertEndringTeller() {
@@ -342,9 +368,12 @@ internal class KunEnArbeidsgiverTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             rapportertDato = rapportertdato,
-            inntektsmåneder = (1..12).map { ModelVilkårsgrunnlag.Måned(
-                YearMonth.of(2017, it),
-                listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))) },
+            inntektsmåneder = (1..12).map {
+                ModelVilkårsgrunnlag.Måned(
+                    YearMonth.of(2017, it),
+                    listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))
+                )
+            },
             erEgenAnsatt = false,
             aktivitetslogger = hendelselogger,
             arbeidsforhold = listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
@@ -381,7 +410,10 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private fun manuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean): ModelManuellSaksbehandling {
+    private fun manuellSaksbehandling(
+        vedtaksperiodeIndex: Int,
+        utbetalingGodkjent: Boolean
+    ): ModelManuellSaksbehandling {
         hendelselogger = Aktivitetslogger()
         return ModelManuellSaksbehandling(
             hendelseId = UUID.randomUUID(),
@@ -396,7 +428,7 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private inner class TestObservatør: PersonObserver {
+    private inner class TestObservatør : PersonObserver {
         internal var endreTeller = 0
         private val etterspurteBehov = mutableMapOf<Int, MutableMap<String, Boolean>>()
         private var periodeIndek = -1
@@ -413,7 +445,7 @@ internal class KunEnArbeidsgiverTest {
             endreTeller += 1
         }
 
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
             val indeks = periodeIndeks(event.id.toString())
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }

@@ -8,24 +8,24 @@ import java.time.LocalDate
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
+    private val director: VedtaksperiodeMediator,
     private val organisasjonsnummer: String,
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
     private val perioder: MutableList<Vedtaksperiode>,
-    private val vedtaksperiodeObservers: MutableList<VedtaksperiodeObserver>,
     private val aktivitetslogger: Aktivitetslogger
 ) {
 
     internal fun inntektshistorikk() = inntekthistorikk.clone()
 
-    internal constructor(organisasjonsnummer: String) : this(
+    internal constructor(director: VedtaksperiodeMediator, organisasjonsnummer: String) : this(
+        director = director,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
         perioder = mutableListOf(),
-        vedtaksperiodeObservers = mutableListOf(),
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -106,19 +106,14 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    fun addObserver(observer: VedtaksperiodeObserver) {
-        vedtaksperiodeObservers.add(observer)
-        perioder.forEach { it.addVedtaksperiodeObserver(observer) }
-    }
-
     private fun nyVedtaksperiode(nySøknad: ModelNySøknad): Vedtaksperiode {
         return Vedtaksperiode(
+            director = director,
             id = UUID.randomUUID(),
             aktørId = nySøknad.aktørId(),
             fødselsnummer = nySøknad.fødselsnummer(),
             organisasjonsnummer = nySøknad.organisasjonsnummer()
         ).also {
-            vedtaksperiodeObservers.forEach(it::addVedtaksperiodeObserver)
             perioder.add(it)
         }
     }

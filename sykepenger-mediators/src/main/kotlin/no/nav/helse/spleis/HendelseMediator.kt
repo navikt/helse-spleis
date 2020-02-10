@@ -143,11 +143,11 @@ internal class HendelseMediator(
             }
         }
 
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeObserver.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
             producer.send(event.producerRecord()).get()
         }
 
-        override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeObserver.UtbetalingEvent) {
+        override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeMediator.UtbetalingEvent) {
             producer.send(event.producerRecord()).get().also {
                 log.info(
                     "legger vedtatt vedtak: {} på topic med {} og {}",

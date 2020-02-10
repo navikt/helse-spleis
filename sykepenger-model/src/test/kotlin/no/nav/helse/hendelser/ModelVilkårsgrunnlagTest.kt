@@ -17,7 +17,8 @@ internal class ModelVilkårsgrunnlagTest {
     private val aktørId = "123"
     private val fødselsnummer = "234"
     private val orgnummer = "345"
-    private val arbeidsgiver = Arbeidsgiver(orgnummer)
+    private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
+    private val arbeidsgiver = Arbeidsgiver(vedtaksperiodeMediator, orgnummer)
     private val person = Person(aktørId, fødselsnummer)
 
     @Test
@@ -171,6 +172,7 @@ internal class ModelVilkårsgrunnlagTest {
 
     private fun vedtaksperiode() =
         Vedtaksperiode(
+            director = vedtaksperiodeMediator,
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

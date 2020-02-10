@@ -1,8 +1,5 @@
 package no.nav.helse.person
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
@@ -19,16 +16,9 @@ internal class VedtaksperiodeTest {
     private val aktør = "1234"
     private val fødselsnummer = "5678"
     private val organisasjonsnummer = "123456789"
-    private val arbeidsgiver = Arbeidsgiver(organisasjonsnummer)
+    private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
+    private val arbeidsgiver = Arbeidsgiver(vedtaksperiodeMediator, organisasjonsnummer)
     private val person = Person(aktør, fødselsnummer)
-
-    private companion object {
-
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
 
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
@@ -157,6 +147,7 @@ internal class VedtaksperiodeTest {
     )
 
     private fun periodeFor(nySøknad: ModelNySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
+        director = vedtaksperiodeMediator,
         id = id,
         aktørId = nySøknad.aktørId(),
         fødselsnummer = nySøknad.fødselsnummer(),
