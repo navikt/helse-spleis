@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import java.time.LocalDate
 
 // Understands beginning and end of a time interval

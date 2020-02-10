@@ -4,13 +4,12 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.Ytelser
 import no.nav.helse.person.IAktivitetslogger
-import no.nav.helse.person.PersonVisitor
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class ValidationTest {
 
@@ -84,10 +83,6 @@ internal class ValidationTest {
         }
 
         override fun organisasjonsnummer(): String {
-            fail("Uventet kall")
-        }
-
-        override fun accept(visitor: PersonVisitor) {
             fail("Uventet kall")
         }
     }

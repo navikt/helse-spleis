@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDateTime
+import java.util.*
 
 internal class Sykdomshistorikk private constructor(
     private val elementer: MutableList<Element>
@@ -39,11 +40,10 @@ internal class Sykdomshistorikk private constructor(
         internal val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
         internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
-        private val hendelse: SykdomstidslinjeHendelse
+        internal val hendelseId: UUID
     ) {
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this)
-            visitor.visitHendelse(hendelse)
             visitor.preVisitHendelseSykdomstidslinje()
             hendelseSykdomstidslinje.accept(visitor)
             visitor.postVisitHendelseSykdomstidslinje()
@@ -66,7 +66,7 @@ internal class Sykdomshistorikk private constructor(
                         hendelse,
                         hendelseSykdomstidslinje
                     ),
-                    hendelse = hendelse
+                    hendelseId = hendelse.hendelseId()
                 )
             }
         }

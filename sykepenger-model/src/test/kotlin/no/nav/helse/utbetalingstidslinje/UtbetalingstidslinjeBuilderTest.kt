@@ -19,7 +19,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 internal class UtbetalingstidslinjeBuilderTest {
-
+    private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)
 
@@ -386,9 +386,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private val inntekthistorikk = Inntekthistorikk().apply {
-        add(1.januar.minusDays(1), inntektsmelding(beregnetInntekt = 31000.0), 31000.toBigDecimal())
-        add(1.februar.minusDays(1), inntektsmelding(beregnetInntekt = 25000.0), 25000.toBigDecimal())
-        add(1.mars.minusDays(1), inntektsmelding(beregnetInntekt = 50000.0), 50000.toBigDecimal())
+        add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal())
+        add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal())
+        add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal())
     }
 
     @Test

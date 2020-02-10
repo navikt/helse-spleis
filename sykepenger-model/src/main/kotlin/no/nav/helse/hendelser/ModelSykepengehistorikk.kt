@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
+import java.util.*
 
 class ModelSykepengehistorikk(
     private val utbetalinger: List<Periode>,
@@ -28,8 +29,8 @@ class ModelSykepengehistorikk(
         aktivitetslogger.addAll(this.aktivitetslogger, "Sykepengehistorikk")
     }
 
-    internal fun addInntekter(ytelser: ModelYtelser, inntekthistorikk: Inntekthistorikk) {
-        this.inntektshistorikk.forEach { it.addInntekter(ytelser, inntekthistorikk) }
+    internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
+        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, inntekthistorikk) }
 
     }
 
@@ -45,8 +46,8 @@ class ModelSykepengehistorikk(
             }
         }
 
-        internal fun addInntekter(ytelser: ModelYtelser, inntekthistorikk: Inntekthistorikk) {
-            inntekthistorikk.add(sykepengerFom, ytelser, inntektPerMåned.toBigDecimal())
+        internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
+            inntekthistorikk.add(sykepengerFom, hendelseId, inntektPerMåned.toBigDecimal())
         }
     }
 

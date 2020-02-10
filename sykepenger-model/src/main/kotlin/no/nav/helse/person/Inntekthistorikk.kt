@@ -1,14 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelYtelser
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 internal class Inntekthistorikk {
     internal class Inntekt(
         private val fom: LocalDate,
-        internal val hendelse: ArbeidstakerHendelse,
+        internal val hendelseId: UUID,
         val beløp: BigDecimal
     ) : Comparable<Inntekt> {
         companion object {
@@ -43,8 +42,8 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelse: ArbeidstakerHendelse, beløp: BigDecimal) {
-        inntekter.add(Inntekt(fom, hendelse, beløp))
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal) {
+        inntekter.add(Inntekt(fom, hendelseId, beløp))
         inntekter.sort()
     }
 

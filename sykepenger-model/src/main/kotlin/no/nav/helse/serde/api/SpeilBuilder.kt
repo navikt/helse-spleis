@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.serde.reflection.*
+import no.nav.helse.serde.reflection.ArbeidsgiverReflect
+import no.nav.helse.serde.reflection.PersonReflect
+import no.nav.helse.serde.reflection.VedtaksperiodeReflect
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -110,8 +110,8 @@ internal class SpeilBuilder : PersonVisitor {
         currentState.visitUkjentDag(dag)
 
 
-    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
-        currentState.postVisitUtbetalingstidslinje(tidslinje)
+    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) =
+        currentState.postVisitUtbetalingstidslinje(utbetalingstidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
@@ -122,8 +122,6 @@ internal class SpeilBuilder : PersonVisitor {
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
         currentState.preVisitSykdomshistorikkElement(element)
-
-    override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) = currentState.visitHendelse(hendelse)
 
     override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje()
     override fun postVisitHendelseSykdomstidslinje() = currentState.postVisitHendelseSykdomstidslinje()
@@ -161,25 +159,6 @@ internal class SpeilBuilder : PersonVisitor {
         currentState.visitUtbetalingslinje(utbetalingslinje)
 
     override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer()
-    override fun preVisitHendelser() = currentState.preVisitHendelser()
-    override fun postVisitHendelser() = currentState.postVisitHendelser()
-    override fun visitInntektsmeldingHendelse(inntektsmelding: ModelInntektsmelding) =
-        currentState.visitInntektsmeldingHendelse(inntektsmelding)
-
-    override fun visitManuellSaksbehandlingHendelse(manuellSaksbehandling: ModelManuellSaksbehandling) =
-        currentState.visitManuellSaksbehandlingHendelse(manuellSaksbehandling)
-
-    override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) = currentState.visitNySøknadHendelse(nySøknad)
-    override fun visitPåminnelseHendelse(påminnelse: ModelPåminnelse) =
-        currentState.visitPåminnelseHendelse(påminnelse)
-
-    override fun visitSendtSøknadHendelse(sendtSøknad: ModelSendtSøknad) =
-        currentState.visitSendtSøknadHendelse(sendtSøknad)
-
-    override fun visitVilkårsgrunnlagHendelse(vilkårsgrunnlag: ModelVilkårsgrunnlag) =
-        currentState.visitVilkårsgrunnlagHendelse(vilkårsgrunnlag)
-
-    override fun visitYtelserHendelse(ytelser: ModelYtelser) = currentState.visitYtelserHendelse(ytelser)
 
     private interface JsonState : PersonVisitor {
         fun entering() {}
@@ -213,12 +192,6 @@ internal class SpeilBuilder : PersonVisitor {
             personMap.putAll(PersonReflect(person).toSpeilMap())
         }
 
-        override fun preVisitHendelser() {
-            val hendelser = mutableListOf<MutableMap<String, Any?>>()
-            personMap["hendelser"] = hendelser // TODO ?
-            pushState(HendelseState(hendelser))
-        }
-
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitArbeidsgivere() {
@@ -240,37 +213,6 @@ internal class SpeilBuilder : PersonVisitor {
             aktørId: String,
             fødselsnummer: String
         ) {
-            popState()
-        }
-    }
-
-    private inner class HendelseState(private val hendelser: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntektsmeldingHendelse(inntektsmelding: ModelInntektsmelding) {
-            hendelser.add(InntektsmeldingReflect(inntektsmelding).toSpeilMap())
-
-            // (private val (.+): .+),
-            // $1 = inntektsmelding.getProp("$2")
-        }
-
-        override fun visitManuellSaksbehandlingHendelse(
-            manuellSaksbehandling: ModelManuellSaksbehandling
-        ) {
-            hendelser.add(ManuellSaksbehandlingReflect(manuellSaksbehandling).toSpeilMap())
-        }
-
-        override fun visitNySøknadHendelse(nySøknad: ModelNySøknad) {
-            hendelser.add(NySøknadReflect(nySøknad).toSpeilMap())
-        }
-
-        override fun visitSendtSøknadHendelse(sendtSøknad: ModelSendtSøknad) {
-            hendelser.add(SendtSøknadReflect(sendtSøknad).toSpeilMap())
-        }
-
-        override fun visitVilkårsgrunnlagHendelse(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
-            hendelser.add(VilkårsgrunnlagReflect(vilkårsgrunnlag).toSpeilMap())
-        }
-
-        override fun postVisitHendelser() {
             popState()
         }
     }
@@ -345,35 +287,6 @@ internal class SpeilBuilder : PersonVisitor {
         }
 
         override fun postVisitUtbetalingslinjer() {
-            popState()
-        }
-    }
-
-    private inner class SykdomshistorikkElementState(
-        element: Sykdomshistorikk.Element,
-        private val elementMap: MutableMap<String, Any?>
-    ) : JsonState {
-        init {
-            elementMap["tidsstempel"] = element.tidsstempel
-        }
-
-        override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) {
-            elementMap["hendelseId"] = hendelse.hendelseId()
-        }
-
-        override fun preVisitHendelseSykdomstidslinje() {
-            val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
-            elementMap["hendelseSykdomstidslinje"] = sykdomstidslinjeListe
-            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
-        }
-
-        override fun preVisitBeregnetSykdomstidslinje() {
-            val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
-            elementMap["beregnetSykdomstidslinje"] = sykdomstidslinjeListe
-            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
-        }
-
-        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
             popState()
         }
     }

@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.util.*
 
@@ -37,10 +40,6 @@ class ModelPåminnelse(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
-
-    override fun accept(visitor: PersonVisitor) {
-        visitor.visitPåminnelseHendelse(this)
-    }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Påminnelse")

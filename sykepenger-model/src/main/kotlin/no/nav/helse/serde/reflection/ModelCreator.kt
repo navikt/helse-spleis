@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -17,11 +16,10 @@ internal fun createPerson(
     aktørId: String,
     fødselsnummer: String,
     arbeidsgivere: MutableList<Arbeidsgiver>,
-    hendelser: MutableList<ArbeidstakerHendelse>,
     aktivitetslogger: Aktivitetslogger
 ) = Person::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(aktørId, fødselsnummer, arbeidsgivere, hendelser, aktivitetslogger)
+    .call(aktørId, fødselsnummer, arbeidsgivere, aktivitetslogger)
 
 internal fun createArbeidsgiver(
     person: Person,
@@ -71,10 +69,10 @@ internal fun createSykdomshistorikkElement(
     timestamp: LocalDateTime,
     hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
     beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
-    hendelse: SykdomstidslinjeHendelse
+    hendelseId: UUID
 ) = Sykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje, hendelse)
+    .call(timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje, hendelseId)
 
 internal fun createUtbetalingstidslinje(
     utbetalingsdager: MutableList<Utbetalingstidslinje.Utbetalingsdag>

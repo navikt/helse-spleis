@@ -70,7 +70,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
-            inntektsmelding,
+            inntektsmelding.hendelseId(),
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {

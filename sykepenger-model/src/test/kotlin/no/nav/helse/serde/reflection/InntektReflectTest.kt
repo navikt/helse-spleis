@@ -4,12 +4,14 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class InntektReflectTest {
+    val hendelseId = UUID.randomUUID()
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<Inntekthistorikk.Inntekt, InntektReflect>(
-            skalMappes = listOf("fom", "hendelse", "beløp")
+            skalMappes = listOf("fom", "hendelseId", "beløp")
         )
     }
 
@@ -20,10 +22,10 @@ internal class InntektReflectTest {
 
         assertEquals(3, map.size)
         assertEquals(1.januar, map["fom"])
-        assertEquals(InntektsmeldingReflectTest.inntektsmelding.hendelseId(), map["hendelse"])
+        assertEquals(hendelseId, map["hendelseId"])
         assertEquals(1000.0.toBigDecimal(), map["beløp"])
     }
 
     internal val inntekt =
-        Inntekthistorikk.Inntekt(1.januar, InntektsmeldingReflectTest.inntektsmelding, 1000.0.toBigDecimal())
+        Inntekthistorikk.Inntekt(1.januar, hendelseId, 1000.0.toBigDecimal())
 }

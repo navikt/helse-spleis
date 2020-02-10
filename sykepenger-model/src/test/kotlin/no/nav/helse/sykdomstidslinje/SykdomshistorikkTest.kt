@@ -53,8 +53,6 @@ internal class SykdomshistorikkTest {
         assertEquals(5, inspektør.beregnetSykdomstidslinjer[1].length())
         assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
-        assertTrue(inspektør.hendelser[0] is ModelSendtSøknad)
-        assertTrue(inspektør.hendelser[1] is ModelNySøknad)
     }
 
     @Test
@@ -95,18 +93,18 @@ internal class SykdomshistorikkTest {
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[1].length())
         assertEquals(12, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(12, inspektør.beregnetSykdomstidslinjer[0].length())
-        assertTrue(inspektør.hendelser[0] is ModelInntektsmelding)
-        assertTrue(inspektør.hendelser[1] is ModelSendtSøknad)
-        assertTrue(inspektør.hendelser[2] is ModelNySøknad)
     }
 
     @Test
     internal fun `JSON`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        val sendtSøknadId = UUID.randomUUID()
+        val nySøknadId = UUID.randomUUID()
+        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
         historikk.håndter(
             sendtSøknad(
                 ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar),
+                hendelseId = sendtSøknadId
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -116,12 +114,15 @@ internal class SykdomshistorikkTest {
         assertEquals(5, inspektør.beregnetSykdomstidslinjer[1].length())
         assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
-        assertTrue(inspektør.hendelser[0] is ModelSendtSøknad)
-        assertTrue(inspektør.hendelser[1] is ModelNySøknad)
+        assertEquals(inspektør.hendelser[0], sendtSøknadId)
+        assertEquals(inspektør.hendelser[1], nySøknadId)
     }
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) = ModelNySøknad(
-        hendelseId = UUID.randomUUID(),
+    private fun nySøknad(
+        vararg sykeperioder: Triple<LocalDate, LocalDate, Int>,
+        hendelseId: UUID = UUID.randomUUID()
+    ) = ModelNySøknad(
+        hendelseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
@@ -130,8 +131,11 @@ internal class SykdomshistorikkTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode) = ModelSendtSøknad(
-        hendelseId = UUID.randomUUID(),
+    private fun sendtSøknad(
+        vararg perioder: ModelSendtSøknad.Periode,
+        hendelseId: UUID = UUID.randomUUID()
+    ) = ModelSendtSøknad(
+        hendelseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
@@ -166,7 +170,7 @@ internal class SykdomshistorikkTest {
     private class HistorikkInspektør(sykdomshistorikk: Sykdomshistorikk) : SykdomshistorikkVisitor {
         internal val hendelseSykdomstidslinje = mutableListOf<ConcreteSykdomstidslinje>()
         internal val beregnetSykdomstidslinjer = mutableListOf<ConcreteSykdomstidslinje>()
-        internal val hendelser = mutableListOf<SykdomstidslinjeHendelse>()
+        internal val hendelser = mutableListOf<UUID>()
 
         init {
             sykdomshistorikk.accept(this)
@@ -180,9 +184,8 @@ internal class SykdomshistorikkTest {
             }
         }
 
-        override fun visitHendelse(hendelse: SykdomstidslinjeHendelse) {
-            hendelser.add(hendelse)
+        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            hendelser.add(element.hendelseId)
         }
     }
-
 }

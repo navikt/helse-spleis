@@ -36,5 +36,4 @@ abstract class ArbeidstakerHendelse protected constructor(
         other is ArbeidstakerHendelse && other.hendelseId == this.hendelseId
 
     override fun hashCode() = hendelseId.hashCode()
-    internal abstract fun accept(visitor: PersonVisitor)
 }

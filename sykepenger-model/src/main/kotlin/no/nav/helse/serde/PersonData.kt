@@ -8,11 +8,9 @@ import no.nav.helse.hendelser.ModelVilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
-import no.nav.helse.serde.mapping.konverterTilHendelse
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
@@ -22,7 +20,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 private val objectMapper = jacksonObjectMapper()
@@ -35,7 +32,6 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 
 fun parsePerson(json: String): Person {
     val personData: PersonData = objectMapper.readValue(json)
-    val hendelser = personData.hendelser.map { konverterTilHendelse(objectMapper, personData, it) }
     val arbeidsgivere = mutableListOf<Arbeidsgiver>()
     val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
 
@@ -43,11 +39,10 @@ fun parsePerson(json: String): Person {
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
         arbeidsgivere = arbeidsgivere,
-        hendelser = hendelser.toMutableList(),
         aktivitetslogger = aktivitetslogger
     )
 
-    arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it, hendelser) })
+    arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it) })
 
     return person
 }
@@ -55,8 +50,7 @@ fun parsePerson(json: String): Person {
 private fun konverterTilArbeidsgiver(
     person: Person,
     personData: PersonData,
-    data: ArbeidsgiverData,
-    hendelser: List<ArbeidstakerHendelse>
+    data: ArbeidsgiverData
 ): Arbeidsgiver {
     val inntekthistorikk = Inntekthistorikk()
     val vedtaksperioder = mutableListOf<Vedtaksperiode>()
@@ -64,7 +58,7 @@ private fun konverterTilArbeidsgiver(
     data.inntekter.forEach { inntektData ->
         inntekthistorikk.add(
             fom = inntektData.fom,
-            hendelse = requireNotNull(hendelser.find { it.hendelseId() == inntektData.hendelse }),
+            hendelseId = inntektData.hendelseId,
             beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
         )
     }
@@ -125,8 +119,7 @@ private fun parseVedtaksperiode(
     arbeidsgiver: Arbeidsgiver,
     personData: PersonData,
     arbeidsgiverData: ArbeidsgiverData,
-    data: ArbeidsgiverData.VedtaksperiodeData,
-    hendelser: List<ArbeidstakerHendelse>
+    data: ArbeidsgiverData.VedtaksperiodeData
 ): Vedtaksperiode {
     return createVedtaksperiode(
         person = person,
@@ -143,7 +136,7 @@ private fun parseVedtaksperiode(
         førsteFraværsdag = data.førsteFraværsdag,
         inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
         dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
-        sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk, hendelser),
+        sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
 }
@@ -175,7 +168,7 @@ private fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
     TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
     TilstandTypeGammelOgNy.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
     TilstandTypeGammelOgNy.AVVENTER_INNTEKTSMELDING,
-    TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING-> Vedtaksperiode.AvventerInntektsmelding
+    TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
     TilstandTypeGammelOgNy.AVVENTER_VILKÅRSPRØVING,
     TilstandTypeGammelOgNy.VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
     TilstandTypeGammelOgNy.AVVENTER_HISTORIKK,
@@ -203,15 +196,15 @@ private fun parseDataForVilkårsvurdering(
     )
 
 private fun parseSykdomshistorikk(
-    data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>,
-    hendelser: List<ArbeidstakerHendelse>
+    data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>
 ): Sykdomshistorikk {
     return createSykdomshistorikk(data.map { sykdomshistorikkData ->
         createSykdomshistorikkElement(
             timestamp = sykdomshistorikkData.tidsstempel,
             hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
             beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
-            hendelse = hendelser.find { it.hendelseId() == sykdomshistorikkData.hendelseId } as SykdomstidslinjeHendelse)
+            hendelseId = sykdomshistorikkData.hendelseId
+        )
     }
     )
 }
@@ -239,182 +232,11 @@ internal data class AktivitetsloggerData(
 internal data class PersonData(
     val aktørId: String,
     val fødselsnummer: String,
-    val hendelser: List<HendelseWrapperData>,
     val arbeidsgivere: List<ArbeidsgiverData>,
     val aktivitetslogger: AktivitetsloggerData
 ) {
     companion object {
         const val skjemaVersjon: Int = 4
-    }
-
-    data class HendelseWrapperData(
-        val type: Hendelsestype,
-        //val tidspunkt: LocalDateTime,
-        val data: Map<String, Any?>
-    ) {
-        data class InntektsmeldingData(
-            val hendelseId: UUID,
-            val fødselsnummer: String,
-            val aktørId: String,
-            val orgnummer: String,
-            val refusjon: RefusjonData,
-            val mottattDato: LocalDateTime,
-            val førsteFraværsdag: LocalDate,
-            val beregnetInntekt: Double,
-            val arbeidsgiverperioder: List<PeriodeData>,
-            val ferieperioder: List<PeriodeData>,
-            val aktivitetslogger: AktivitetsloggerData
-        ) {
-            data class RefusjonData(
-                val opphørsdato: LocalDate?,
-                val beløpPrMåned: Double,
-                val endringerIRefusjon: List<EndringIRefusjonData>
-            ) {
-                data class EndringIRefusjonData(
-                    val endringsdato: LocalDate
-                )
-            }
-        }
-
-        data class YtelserData(
-            val hendelseId: UUID,
-            val vedtaksperiodeId: UUID,
-            val organisasjonsnummer: String,
-            val rapportertdato: LocalDateTime,
-            val sykepengehistorikk: SykepengehistorikkData,
-            val foreldrepenger: ForeldrepengerData,
-            val aktivitetslogger: AktivitetsloggerData
-        ) {
-
-            data class SykepengehistorikkData(
-                val utbetalinger: List<UtbetalingPeriodeData>,
-                val inntektshistorikk: List<InntektsopplysningData>,
-                val aktivitetslogger: AktivitetsloggerData
-            ) {
-                data class UtbetalingPeriodeData(
-                    val fom: LocalDate,
-                    val tom: LocalDate,
-                    val dagsats: Int,
-                    val type: TypeData
-                ) {
-                    enum class TypeData {
-                        RefusjonTilArbeidsgiver,
-                        ReduksjonMedlem,
-                        Etterbetaling,
-                        KontertRegnskap,
-                        ReduksjonArbeidsgiverRefusjon,
-                        Tilbakeført,
-                        Konvertert,
-                        Ferie,
-                        Opphold,
-                        Sanksjon,
-                        Ukjent
-                    }
-                }
-
-                data class InntektsopplysningData(
-                    val orgnummer: String,
-                    val sykepengerFom: LocalDate,
-                    val inntektPerMåned: Int
-                )
-            }
-
-            data class ForeldrepengerData(
-                val foreldrepengeytelse: PeriodeData?,
-                val svangerskapsytelse: PeriodeData?
-            ) {
-            }
-        }
-
-
-        data class ManuellSaksbehandlingData(
-            val hendelseId: UUID,
-            val vedtaksperiodeId: UUID,
-            val organisasjonsnummer: String,
-            val saksbehandler: String,
-            val utbetalingGodkjent: Boolean,
-            val rapportertdato: LocalDateTime,
-            val aktivitetslogger: AktivitetsloggerData
-        ) {
-        }
-
-        data class NySøknadData(
-            val fnr: String,
-            val aktørId: String,
-            val hendelseId: UUID,
-            val orgnummer: String,
-            val rapportertdato: LocalDateTime,
-            val sykeperioder: List<SykeperiodeData>,
-            val aktivitetslogger: AktivitetsloggerData
-        ) {
-            data class SykeperiodeData(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val sykdomsgrad: Int
-            )
-        }
-
-        data class SendtSøknadData(
-            val fnr: String,
-            val aktørId: String,
-            val hendelseId: UUID,
-            val orgnummer: String,
-            val sendtNav: LocalDateTime,
-            val perioder: List<SykeperiodeData>,
-            val aktivitetslogger: AktivitetsloggerData,
-            val harAndreInntektskilder: Boolean
-        ) {
-            data class SykeperiodeData(
-                val type: TypeData,
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val grad: Int?,
-                val faktiskGrad: Double?
-            ) {
-                enum class TypeData {
-                    Ferie,
-                    Sykdom,
-                    Utdanning,
-                    Permisjon,
-                    Egenmelding,
-                    Arbeid
-                }
-            }
-        }
-
-        data class VilkårsgrunnlagData(
-            val hendelseId: UUID,
-            val vedtaksperiodeId: UUID,
-            val orgnummer: String,
-            val rapportertDato: LocalDateTime,
-            val inntektsmåneder: List<Måned>,
-            val erEgenAnsatt: Boolean,
-            val arbeidsforhold: List<ArbeidsforholdData>?,
-            val aktivitetslogger: AktivitetsloggerData
-        ) {
-            data class Måned(
-                val årMåned: YearMonth,
-                val inntektsliste: List<Inntekt>
-            ) {
-                data class Inntekt(
-                    val beløp: Double
-                )
-            }
-            data class ArbeidsforholdData(
-                val orgnummer: String,
-                val fom: LocalDate,
-                val tom: LocalDate?
-            )
-        }
-
-        enum class Hendelsestype {
-            Ytelser,
-            Vilkårsgrunnlag,
-            ManuellSaksbehandling,
-            Inntektsmelding,
-            NySøknad,
-            SendtSøknad
-        }
     }
 
     data class ArbeidsgiverData(
@@ -428,7 +250,7 @@ internal data class PersonData(
     ) {
         data class InntektData(
             val fom: LocalDate,
-            val hendelse: UUID,
+            val hendelseId: UUID,
             val beløp: BigDecimal
         )
 

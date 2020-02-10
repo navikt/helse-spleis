@@ -9,14 +9,13 @@ class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    private val hendelser: MutableList<ArbeidstakerHendelse>,
     private val aktivitetslogger: Aktivitetslogger
 ) : VedtaksperiodeMediator {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), mutableListOf(), Aktivitetslogger())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogger())
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -106,9 +105,6 @@ class Person private constructor(
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, aktørId, fødselsnummer)
-        visitor.preVisitHendelser()
-        hendelser.forEach { it.accept(visitor) }
-        visitor.postVisitHendelser()
         visitor.visitPersonAktivitetslogger(aktivitetslogger)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
@@ -117,7 +113,6 @@ class Person private constructor(
     }
 
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
-        hendelser.add(hendelse)
         hendelse.info(melding)
     }
 

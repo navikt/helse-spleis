@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Aktivitetslogger.Aktivitet.Need.NeedType
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Person
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag

@@ -113,7 +113,7 @@ internal class Utbetalingstidslinje private constructor(
         fun visitFridag(dag: Utbetalingsdag.Fridag) {}
         fun visitAvvistDag(dag: AvvistDag) {}
         fun visitUkjentDag(dag: Utbetalingsdag.UkjentDag) {}
-        fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
+        fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :

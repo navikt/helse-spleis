@@ -45,7 +45,7 @@ internal class JsonDeserializerTest {
         val inntekter = arbeidsgiver.privatProp<Inntekthistorikk>("inntekthistorikk")
             .privatProp<MutableList<Inntekthistorikk.Inntekt>>("inntekter")
         assertEquals(1, inntekter.size)
-        assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelse.hendelseId().toString())
+        assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelseId.toString())
     }
 
     @Test
@@ -102,7 +102,7 @@ internal class JsonDeserializerTest {
                             "inntekter" to listOf(
                                 mapOf(
                                     "fom" to "2020-01-01",
-                                    "hendelse" to inntektsmeldingHendelseId,
+                                    "hendelseId" to inntektsmeldingHendelseId,
                                     "beløp" to 30000.0
                                 )
                             ),
@@ -133,34 +133,6 @@ internal class JsonDeserializerTest {
                             ),
                             "aktivitetslogger" to mapOf(
                                 "aktiviteter" to emptyList<Any>()
-                            )
-                        )
-                    ),
-                    "hendelser" to listOf(
-                        mapOf(
-                            "type" to "Inntektsmelding",
-                            "data" to mapOf(
-                                "fødselsnummer" to fødselsnummer,
-                                "aktørId" to aktørId,
-                                "hendelseId" to inntektsmeldingHendelseId,
-                                "refusjon" to mapOf(
-                                    "beløpPrMåned" to 30000.00,
-                                    "endringerIRefusjon" to emptyList<Any>()
-                                ),
-                                "orgnummer" to organisasjonsnummer,
-                                "mottattDato" to "2020-01-09T14:02:28",
-                                "førsteFraværsdag" to førsteFraværsdag,
-                                "beregnetInntekt" to 30000.00,
-                                "arbeidsgiverperioder" to listOf(
-                                    mapOf(
-                                        "fom" to førsteFraværsdag,
-                                        "tom" to LocalDate.now().minusDays(2)
-                                    )
-                                ),
-                                "ferieperioder" to emptyList<Map<String, Any>>(),
-                                "aktivitetslogger" to mapOf(
-                                    "aktiviteter" to emptyList<Any>()
-                                )
                             )
                         )
                     )
