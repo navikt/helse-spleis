@@ -70,7 +70,7 @@ internal class HendelseMediator(
     }
 
     override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
-        sikkerLogg.info("ukjent melding: ${aktivitetslogger.toReport()}")
+        sikkerLogg.debug("ukjent melding: ${aktivitetslogger.toReport()}")
     }
 
     private inner class Processor : MessageProcessor {
