@@ -24,7 +24,7 @@ internal fun createPerson(
     .call(aktørId, fødselsnummer, arbeidsgivere, hendelser, aktivitetslogger)
 
 internal fun createArbeidsgiver(
-    director: VedtaksperiodeMediator,
+    person: Person,
     organisasjonsnummer: String,
     id: UUID,
     inntekthistorikk: Inntekthistorikk,
@@ -33,10 +33,11 @@ internal fun createArbeidsgiver(
     aktivitetslogger: Aktivitetslogger
 ) = Arbeidsgiver::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(director, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, aktivitetslogger)
+    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, aktivitetslogger)
 
 internal fun createVedtaksperiode(
-    director: VedtaksperiodeMediator,
+    person: Person,
+    arbeidsgiver: Arbeidsgiver,
     id: UUID,
     aktørId: String,
     fødselsnummer: String,
@@ -54,7 +55,7 @@ internal fun createVedtaksperiode(
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
-        director, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, utbetalingslinjer, godkjentAv,
+        person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, utbetalingslinjer, godkjentAv,
         utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk,
         aktivitetslogger
     )

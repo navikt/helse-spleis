@@ -33,7 +33,7 @@ class Person private constructor(
             it.valider { ValiderSykdomshendelse(hendelse) }
             val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { ArbeidsgiverHåndterHendelse(hendelse, arbeidsgiver, this) }
+            it.valider { ArbeidsgiverHåndterHendelse(hendelse, arbeidsgiver) }
         }
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -73,21 +73,21 @@ class Person private constructor(
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    override fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
+    fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
-    override fun vedtaksperiodeTilUtbetaling(event: VedtaksperiodeMediator.UtbetalingEvent) {
+    fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
         observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
     }
 
-    override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+    fun vedtaksperiodeTrengerLøsning(behov: Behov) {
         observers.forEach {
             it.vedtaksperiodeTrengerLøsning(behov)
         }
     }
 
-    override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
+    fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         observers.forEach {
             it.vedtaksperiodeEndret(event)
             it.personEndret(

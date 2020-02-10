@@ -17,9 +17,8 @@ internal class ModelVilkårsgrunnlagTest {
     private val aktørId = "123"
     private val fødselsnummer = "234"
     private val orgnummer = "345"
-    private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
-    private val arbeidsgiver = Arbeidsgiver(vedtaksperiodeMediator, orgnummer)
     private val person = Person(aktørId, fødselsnummer)
+    private val arbeidsgiver = Arbeidsgiver(person, orgnummer)
 
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
@@ -172,14 +171,15 @@ internal class ModelVilkårsgrunnlagTest {
 
     private fun vedtaksperiode() =
         Vedtaksperiode(
-            director = vedtaksperiodeMediator,
+            person = person,
+            arbeidsgiver = arbeidsgiver,
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer
         ).also {
             it.håndter(nySøknad())
-            it.håndter(sendtSøknad(), arbeidsgiver, person)
+            it.håndter(sendtSøknad())
             it.håndter(inntektsmelding())
         }
 

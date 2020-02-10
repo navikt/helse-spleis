@@ -59,7 +59,7 @@ private fun konverterTilArbeidsgiver(
     hendelser: List<ArbeidstakerHendelse>
 ): Arbeidsgiver {
     val inntekthistorikk = Inntekthistorikk()
-    val vedtaksperioder = data.vedtaksperioder.map { parseVedtaksperiode(person, personData, data, it, hendelser) }
+    val vedtaksperioder = mutableListOf<Vedtaksperiode>()
 
     data.inntekter.forEach { inntektData ->
         inntekthistorikk.add(
@@ -69,15 +69,19 @@ private fun konverterTilArbeidsgiver(
         )
     }
 
-    return createArbeidsgiver(
-        director = person,
+    val arbeidsgiver = createArbeidsgiver(
+        person = person,
         organisasjonsnummer = data.organisasjonsnummer,
         id = data.id,
         inntekthistorikk = inntekthistorikk,
         tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
-        perioder = vedtaksperioder.toMutableList(),
+        perioder = vedtaksperioder,
         aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
     )
+
+    vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it, hendelser) })
+
+    return arbeidsgiver
 }
 
 private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.UtbetalingstidslinjeData): Utbetalingstidslinje {
@@ -117,13 +121,15 @@ private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.Utbetalingst
 
 private fun parseVedtaksperiode(
     person: Person,
+    arbeidsgiver: Arbeidsgiver,
     personData: PersonData,
     arbeidsgiverData: ArbeidsgiverData,
     data: ArbeidsgiverData.VedtaksperiodeData,
     hendelser: List<ArbeidstakerHendelse>
 ): Vedtaksperiode {
     return createVedtaksperiode(
-        director = person,
+        person = person,
+        arbeidsgiver = arbeidsgiver,
         id = data.id,
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,

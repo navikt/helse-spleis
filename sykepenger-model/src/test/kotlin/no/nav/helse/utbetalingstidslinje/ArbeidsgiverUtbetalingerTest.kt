@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
 import no.nav.helse.person.VedtaksperiodeMediator
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -296,7 +297,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     private fun undersøke(fnr: String,
                           arbeidsgiverTidslinje: Utbetalingstidslinje,
                           historiskTidslinje: Utbetalingstidslinje) {
-        val arbeidsgiver = Arbeidsgiver(vedtaksperiodeMediator, "88888888")
+        val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
         aktivitetslogger = Aktivitetslogger()
         ArbeidsgiverUtbetalinger(
             mapOf(arbeidsgiver to arbeidsgiverTidslinje),

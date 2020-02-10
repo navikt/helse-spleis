@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
-    private val director: VedtaksperiodeMediator,
+    private val person: Person,
     private val organisasjonsnummer: String,
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
@@ -19,8 +19,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun inntektshistorikk() = inntekthistorikk.clone()
 
-    internal constructor(director: VedtaksperiodeMediator, organisasjonsnummer: String) : this(
-        director = director,
+    internal constructor(person: Person, organisasjonsnummer: String) : this(
+        person = person,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
@@ -48,7 +48,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: ModelNySøknad, person: Person) {
+    internal fun håndter(nySøknad: ModelNySøknad) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
             aktivitetslogger.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
@@ -56,14 +56,14 @@ internal class Arbeidsgiver private constructor(
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: ModelSendtSøknad, person: Person) {
-        if (perioder.none { it.håndter(sendtSøknad, this, person) }) {
+    internal fun håndter(sendtSøknad: ModelSendtSøknad) {
+        if (perioder.none { it.håndter(sendtSøknad) }) {
             sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding, person: Person) {
+    internal fun håndter(inntektsmelding: ModelInntektsmelding) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             inntektsmelding,
@@ -77,7 +77,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(person: Person, ytelser: ModelYtelser) {
         ytelser.addInntekter(inntekthistorikk)
-        perioder.forEach { it.håndter(person, this, ytelser) }
+        perioder.forEach { it.håndter(ytelser) }
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
@@ -108,7 +108,8 @@ internal class Arbeidsgiver private constructor(
 
     private fun nyVedtaksperiode(nySøknad: ModelNySøknad): Vedtaksperiode {
         return Vedtaksperiode(
-            director = director,
+            person = person,
+            arbeidsgiver = this,
             id = UUID.randomUUID(),
             aktørId = nySøknad.aktørId(),
             fødselsnummer = nySøknad.fødselsnummer(),

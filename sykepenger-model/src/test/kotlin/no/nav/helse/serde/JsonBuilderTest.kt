@@ -1,7 +1,7 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.JsonIgnoreType
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -22,11 +22,17 @@ internal class JsonBuilderTest {
     private val objectMapper = jacksonObjectMapper()
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .addMixIn(VedtaksperiodeMediator::class.java, MixInForIgnoreType::class.java)
+        .setMixIns(mutableMapOf(
+            Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
+            Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
+        ))
         .registerModule(JavaTimeModule())
 
-    @JsonIgnoreType
-    private class MixInForIgnoreType
+    @JsonIgnoreProperties("person")
+    private class ArbeidsgiverMixin
+
+    @JsonIgnoreProperties("person", "arbeidsgiver")
+    private class VedtaksperiodeMixin
 
     @Test
     internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {

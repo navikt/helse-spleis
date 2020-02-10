@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -61,8 +60,8 @@ class ModelSendtSøknad constructor(
         visitor.visitSendtSøknadHendelse(this)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person) {
-        arbeidsgiver.håndter(this, person)
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
+        arbeidsgiver.håndter(this)
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {

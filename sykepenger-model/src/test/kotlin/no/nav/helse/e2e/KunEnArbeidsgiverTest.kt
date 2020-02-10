@@ -445,7 +445,7 @@ internal class KunEnArbeidsgiverTest {
             endreTeller += 1
         }
 
-        override fun vedtaksperiodeEndret(event: VedtaksperiodeMediator.StateChangeEvent) {
+        override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
             val indeks = periodeIndeks(event.id.toString())
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }

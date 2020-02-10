@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeid
 import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -111,8 +110,8 @@ class ModelInntektsmelding(
         visitor.visitInntektsmeldingHendelse(this)
     }
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver, person: Person) {
-        arbeidsgiver.håndter(this, person)
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
+        arbeidsgiver.håndter(this)
     }
 
     fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {

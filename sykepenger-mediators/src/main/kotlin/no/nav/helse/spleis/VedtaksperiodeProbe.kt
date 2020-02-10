@@ -6,7 +6,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelPåminnelse
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.VedtaksperiodeMediator.StateChangeEvent
 import org.slf4j.LoggerFactory
 
 object VedtaksperiodeProbe : PersonObserver {
@@ -42,7 +41,7 @@ object VedtaksperiodeProbe : PersonObserver {
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
-    override fun vedtaksperiodeEndret(event: StateChangeEvent) {
+    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         tilstandGauge.labels(event.forrigeTilstand.name).dec()
         tilstandGauge.labels(event.gjeldendeTilstand.name).inc()
 

@@ -17,8 +17,8 @@ internal class VedtaksperiodeTest {
     private val fødselsnummer = "5678"
     private val organisasjonsnummer = "123456789"
     private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
-    private val arbeidsgiver = Arbeidsgiver(vedtaksperiodeMediator, organisasjonsnummer)
     private val person = Person(aktør, fødselsnummer)
+    private val arbeidsgiver = Arbeidsgiver(person, organisasjonsnummer)
 
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
@@ -36,7 +36,7 @@ internal class VedtaksperiodeTest {
                             grad = 100
                         )
                     )
-                ), arbeidsgiver, person
+                )
             )
         )
 
@@ -147,7 +147,8 @@ internal class VedtaksperiodeTest {
     )
 
     private fun periodeFor(nySøknad: ModelNySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
-        director = vedtaksperiodeMediator,
+        person = person,
+        arbeidsgiver = arbeidsgiver,
         id = id,
         aktørId = nySøknad.aktørId(),
         fødselsnummer = nySøknad.fødselsnummer(),

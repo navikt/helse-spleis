@@ -1,7 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.VedtaksperiodeMediator
+import no.nav.helse.person.Person
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -14,7 +14,7 @@ internal class ArbeidsgiverReflectTest {
                 "inntekthistorikk",
                 "perioder",
                 "tidslinjer",
-                "director",
+                "person",
                 "aktivitetslogger"
             )
         )
@@ -29,5 +29,5 @@ internal class ArbeidsgiverReflectTest {
         assertEquals(orgnummer, map["organisasjonsnummer"])
     }
 
-    internal val arbeidsgiver = Arbeidsgiver(object : VedtaksperiodeMediator {}, orgnummer)
+    internal val arbeidsgiver = Arbeidsgiver(Person("1", "2"), orgnummer)
 }

@@ -1,9 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeMediator
+import no.nav.helse.person.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -54,15 +51,17 @@ internal class ModelPåminnelseTest {
         assertFalse(aktivitetslogger.hasMessages())
     }
 
-    private fun vedtaksperiode() =
-        Vedtaksperiode(
-            director = object : VedtaksperiodeMediator {},
+    private fun vedtaksperiode(): Vedtaksperiode {
+        val person = Person(aktørId, fødselsnummer)
+        return Vedtaksperiode(
+            person = person,
+            arbeidsgiver = Arbeidsgiver(person, orgnummer),
             id = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer
         )
-
+    }
 
     private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId:UUID = vedtaksperiodeId) =
         ModelPåminnelse(

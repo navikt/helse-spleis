@@ -1,15 +1,12 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.*
-import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import java.time.LocalDate
 
 internal class Validation(private val hendelse: ArbeidstakerHendelse) {
@@ -58,11 +55,10 @@ internal class ValiderKunEnArbeidsgiver(
 // Continue processing Hendelse with appropriate Arbeidsgiver
 internal class ArbeidsgiverHåndterHendelse(
     private val hendelse: SykdomstidslinjeHendelse,
-    private val arbeidsgiver: Arbeidsgiver,
-    private val person: Person
+    private val arbeidsgiver: Arbeidsgiver
 ) : Valideringssteg {
     override fun isValid(): Boolean {
-        hendelse.fortsettÅBehandle(arbeidsgiver, person)  // Double dispatch to invoke correct method
+        hendelse.fortsettÅBehandle(arbeidsgiver)  // Double dispatch to invoke correct method
         return !hendelse.hasErrors()
     }
 
