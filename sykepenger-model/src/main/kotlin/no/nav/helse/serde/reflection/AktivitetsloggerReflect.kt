@@ -29,6 +29,15 @@ internal class AktivitetsloggerReflect(aktivitetslogger: Aktivitetslogger) {
             ))
         }
 
+        private fun leggTilMelding(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, tidsstempel: String) {
+            aktiviteter.add(mutableMapOf<String, Any>(
+                "alvorlighetsgrad" to AktivitetsloggerData.Alvorlighetsgrad.NEED.name,
+                "needType" to type.name,
+                "melding" to melding,
+                "tidsstempel" to tidsstempel
+            ))
+        }
+
         override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet.Info, melding: String, tidsstempel: String) {
             leggTilMelding(AktivitetsloggerData.Alvorlighetsgrad.INFO, melding, tidsstempel)
         }
@@ -37,8 +46,13 @@ internal class AktivitetsloggerReflect(aktivitetslogger: Aktivitetslogger) {
             leggTilMelding(AktivitetsloggerData.Alvorlighetsgrad.WARN, melding, tidsstempel)
         }
 
-        override fun visitNeed(aktivitet: Aktivitetslogger.Aktivitet.Need, melding: String, tidsstempel: String) {
-            leggTilMelding(AktivitetsloggerData.Alvorlighetsgrad.NEED, melding, tidsstempel)
+        override fun visitNeed(
+            aktivitet: Aktivitetslogger.Aktivitet.Need,
+            type: Aktivitetslogger.Aktivitet.Need.NeedType,
+            tidsstempel: String,
+            melding: String
+        ) {
+            leggTilMelding(type, melding, tidsstempel)
         }
 
         override fun visitError(aktivitet: Aktivitetslogger.Aktivitet.Error, melding: String, tidsstempel: String) {

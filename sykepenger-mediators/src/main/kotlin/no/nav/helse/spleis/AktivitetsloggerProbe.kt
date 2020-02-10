@@ -25,7 +25,12 @@ internal object AktivitetsloggerProbe {
             aktivitetscounter.labels("warn", melding).inc()
         }
 
-        override fun visitNeed(aktivitet: Aktivitetslogger.Aktivitet.Need, melding: String, tidsstempel: String) {
+        override fun visitNeed(
+            aktivitet: Aktivitetslogger.Aktivitet.Need,
+            type: Aktivitetslogger.Aktivitet.Need.NeedType,
+            tidsstempel: String,
+            melding: String
+        ) {
             aktivitetscounter.labels("need", melding).inc()
         }
 

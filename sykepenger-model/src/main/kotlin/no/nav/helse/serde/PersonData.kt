@@ -221,6 +221,7 @@ internal data class AktivitetsloggerData(
 ) {
     data class AktivitetData(
         val alvorlighetsgrad: Alvorlighetsgrad,
+        val needType: String?,
         val melding: String,
         val tidsstempel: String
     )

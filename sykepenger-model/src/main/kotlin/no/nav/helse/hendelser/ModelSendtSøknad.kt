@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogger.Aktivitet.Need.NeedType
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -102,7 +103,7 @@ class ModelSendtSøknad constructor(
                 ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.need("Utdanning foreløpig ikke støttet")
+                aktivitetslogger.need(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -110,7 +111,7 @@ class ModelSendtSøknad constructor(
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.need("Permisjon foreløpig ikke støttet")
+                aktivitetslogger.need(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {

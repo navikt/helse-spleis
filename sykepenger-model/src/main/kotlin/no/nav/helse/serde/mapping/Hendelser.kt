@@ -19,16 +19,29 @@ internal fun konverterTilAktivitetslogger(aktivitetsloggerData: Aktivitetslogger
 
     val aktiviteter = aktivitetslogger.get<Aktivitetslogger, MutableList<Any>>("aktiviteter")
     aktivitetsloggerData.aktiviteter.forEach {
-        aktiviteter.add((when (it.alvorlighetsgrad) {
-            AktivitetsloggerData.Alvorlighetsgrad.INFO -> aktivitetClass.getNestedClass("Info")
-            AktivitetsloggerData.Alvorlighetsgrad.WARN -> aktivitetClass.getNestedClass("Warn")
-            AktivitetsloggerData.Alvorlighetsgrad.NEED -> aktivitetClass.getNestedClass("Need")
-            AktivitetsloggerData.Alvorlighetsgrad.ERROR -> aktivitetClass.getNestedClass("Error")
-            AktivitetsloggerData.Alvorlighetsgrad.SEVERE -> aktivitetClass.getNestedClass("Severe")
-        }).getInstance(
-            it.melding,
-            it.tidsstempel
-        ))
+        aktiviteter.add(when (it.alvorlighetsgrad) {
+            AktivitetsloggerData.Alvorlighetsgrad.INFO -> aktivitetClass.getNestedClass("Info").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.WARN -> aktivitetClass.getNestedClass("Warn").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.NEED -> aktivitetClass.getNestedClass("Need").getInstance(
+                Aktivitetslogger.Aktivitet.Need.NeedType.valueOf(requireNotNull(it.needType)),
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.ERROR -> aktivitetClass.getNestedClass("Error").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+            AktivitetsloggerData.Alvorlighetsgrad.SEVERE -> aktivitetClass.getNestedClass("Severe").getInstance(
+                it.melding,
+                it.tidsstempel
+            )
+        })
     }
 
     return aktivitetslogger

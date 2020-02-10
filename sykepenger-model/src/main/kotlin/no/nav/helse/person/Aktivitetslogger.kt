@@ -23,8 +23,8 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         aktiviteter.add(Aktivitet.Warn(String.format(melding, *params)))
     }
 
-    override fun need(melding: String, vararg params: Any) {
-        aktiviteter.add(Aktivitet.Need(String.format(melding, *params)))
+    override fun need(type: Aktivitet.Need.NeedType, melding: String, vararg params: Any) {
+        aktiviteter.add(Aktivitet.Need(type, String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
@@ -149,9 +149,14 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         }
 
         class Need(
+            private val type: NeedType,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, melding, tidsstempel) {
+            enum class NeedType {
+                GjennomgåTidslinje
+            }
+
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Need> {
                     return aktiviteter.filterIsInstance<Need>()
@@ -160,10 +165,10 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
             override fun label() = 'N'
 
-            override fun cloneWith(label: String) = Need("$melding ($label)", tidsstempel)
+            override fun cloneWith(label: String) = Need(type, "$melding ($label)", tidsstempel)
 
             override fun accept(visitor: AktivitetsloggerVisitor) {
-                visitor.visitNeed(this, melding, tidsstempel)
+                visitor.visitNeed(this, type, melding, tidsstempel)
             }
 
         }
@@ -211,7 +216,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 interface IAktivitetslogger {
     fun info(melding: String, vararg params: Any)
     fun warn(melding: String, vararg params: Any)
-    fun need(melding: String, vararg params: Any)
+    fun need(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, vararg params: Any)
     fun error(melding: String, vararg params: Any)
     fun severe(melding: String, vararg params: Any): Nothing
 
