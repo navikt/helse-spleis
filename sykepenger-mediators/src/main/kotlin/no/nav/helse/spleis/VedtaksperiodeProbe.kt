@@ -5,9 +5,7 @@ import io.prometheus.client.Gauge
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.ModelPåminnelse
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonskjemaForGammelt
 import no.nav.helse.person.VedtaksperiodeMediator.StateChangeEvent
 import org.slf4j.LoggerFactory
 
@@ -33,19 +31,9 @@ object VedtaksperiodeProbe : PersonObserver {
         .labelNames("tilstand")
         .register()
 
-    private val utenforOmfangCounter =
-        Counter.build("utenfor_omfang_totals", "Antall ganger en hendelse er utenfor omfang")
-            .labelNames("hendelse")
-            .register()
-
     private val vedtaksperiodePåminnetCounter =
         Counter.build("vedtaksperiode_paminnet_totals", "Antall ganger en vedtaksperiode er blitt påminnet")
             .labelNames("tilstand")
-            .register()
-
-    private val personskjemaForGammeltCounter =
-        Counter.build("personskjema_for_gammelt_totals", "fordelinger av for gamle versjoner av person")
-            .labelNames("skjemaVersjon")
             .register()
 
     override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
@@ -53,12 +41,6 @@ object VedtaksperiodeProbe : PersonObserver {
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
-
-    fun forGammelSkjemaversjon(err: PersonskjemaForGammelt) {
-        personskjemaForGammeltCounter
-            .labels("${err.skjemaVersjon}")
-            .inc()
-    }
 
     override fun vedtaksperiodeEndret(event: StateChangeEvent) {
         tilstandGauge.labels(event.forrigeTilstand.name).dec()
@@ -93,9 +75,5 @@ object VedtaksperiodeProbe : PersonObserver {
         vedtaksperiodePåminnetCounter
             .labels(påminnelse.tilstand().toString())
             .inc()
-    }
-
-    fun utenforOmfang(hendelse: ArbeidstakerHendelse) {
-        utenforOmfangCounter.labels(hendelse.hendelsestype().name).inc()
     }
 }

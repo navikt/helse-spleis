@@ -57,8 +57,6 @@ internal class HendelseMediator(
             sikkerLogg.info("feil på melding: $err")
         } catch (err: UtenforOmfangException) {
             sikkerLogg.info("melding er utenfor omfang: ${err.message}", err)
-        } catch (err: PersonskjemaForGammelt) {
-            sikkerLogg.info("person har gammelt skjema: ${err.message}", err)
         } finally {
             AktivitetsloggerProbe.inspiser(aktivitetslogger)
         }
