@@ -172,7 +172,7 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `Sammenblandede hendelser fra forskjellige perioder`() {
+    internal fun `Sammenblandede hendelser fra forskjellige perioder med sendt søknad først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterNySøknad(Triple(1.februar, 23.februar, 100))
         håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
@@ -240,6 +240,80 @@ internal class KunEnArbeidsgiverTest {
             1,
             START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+    }
+
+    @Test
+    internal fun `Sammenblandede hendelser fra forskjellige perioder med inntektsmelding først`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterNySøknad(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        forventetEndringTeller++
+        håndterManuellSaksbehandling(0, true)
+        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(23, it.dagTeller(NavDag::class))
+            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
+            assertEquals(8, it.dagTeller(NavHelgDag::class))
+            assertEquals(3, it.dagTeller(Arbeidsdag::class))
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD, AVVENTER_TIDLIGERE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+    }
+
+    @Test
+    internal fun `Sammenblandede hendelser fra forskjellige perioder med inntektsmelding etter forrige periode`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterNySøknad(Triple(1.februar, 23.februar, 100))
+        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        forventetEndringTeller++
+        håndterManuellSaksbehandling(0, true)
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(23, it.dagTeller(NavDag::class))
+            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
+            assertEquals(8, it.dagTeller(NavHelgDag::class))
+            assertEquals(3, it.dagTeller(Arbeidsdag::class))
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
 
