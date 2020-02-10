@@ -3,7 +3,6 @@ package no.nav.helse.spleis.hendelser.model
 import no.nav.helse.hendelser.ModelInntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
-import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
@@ -26,7 +25,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
     }
 
     internal fun asModelInntektsmelding() = ModelInntektsmelding(
-        hendelseId = UUID.randomUUID(),
+        hendelseId = this.id,
         refusjon = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
             ModelInntektsmelding.Refusjon(
                 this["refusjon.opphoersdato"].asOptionalLocalDate(),

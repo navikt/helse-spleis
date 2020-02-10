@@ -1,14 +1,13 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.*
+import no.nav.helse.hendelser.ModelSendtSøknad.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.hendelser.asOptionalLocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 // Understands a JSON message representing a Søknad
 internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
@@ -28,7 +27,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         val søknadFom = this["fom"].asLocalDate()
         val søknadTom = this["tom"].asLocalDate()
         return ModelSendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            hendelseId = this.id,
             fnr = this["fnr"].asText(),
             aktørId = this["aktorId"].asText(),
             orgnummer = this["arbeidsgiver.orgnummer"].asText(),

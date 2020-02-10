@@ -47,7 +47,7 @@ internal class HendelseMediator(
 
     override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger) {
         try {
-            hendelseRecorder.lagreMelding(message)
+            message.accept(hendelseRecorder)
             message.accept(messageProcessor)
 
             if (aktivitetslogger.hasMessages()) {

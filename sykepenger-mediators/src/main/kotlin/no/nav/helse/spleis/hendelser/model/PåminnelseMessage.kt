@@ -7,7 +7,6 @@ import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDateTime
-import java.util.*
 
 // Understands a JSON message representing a Påminnelse
 internal class PåminnelseMessage(originalMessage: String, private val problems: Aktivitetslogger) :
@@ -39,17 +38,17 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
 
     internal fun asModelPåminnelse(): ModelPåminnelse {
         return ModelPåminnelse(
-            UUID.randomUUID(),
-            this["aktørId"].asText(),
-            this["fødselsnummer"].asText(),
-            this["organisasjonsnummer"].asText(),
-            this["vedtaksperiodeId"].asText(),
-            this["antallGangerPåminnet"].asInt(),
-            this["tilstand"].asText().let { oldTilstander[it] ?: TilstandType.valueOf(it) },
-            this["tilstandsendringstidspunkt"].asLocalDateTime(),
-            this["påminnelsestidspunkt"].asLocalDateTime(),
-            this["nestePåminnelsestidspunkt"].asLocalDateTime(),
-            problems
+            hendelseId = this.id,
+            aktørId = this["aktørId"].asText(),
+            fødselsnummer = this["fødselsnummer"].asText(),
+            organisasjonsnummer = this["organisasjonsnummer"].asText(),
+            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            antallGangerPåminnet = this["antallGangerPåminnet"].asInt(),
+            tilstand = this["tilstand"].asText().let { oldTilstander[it] ?: TilstandType.valueOf(it) },
+            tilstandsendringstidspunkt = this["tilstandsendringstidspunkt"].asLocalDateTime(),
+            påminnelsestidspunkt = this["påminnelsestidspunkt"].asLocalDateTime(),
+            nestePåminnelsestidspunkt = this["nestePåminnelsestidspunkt"].asLocalDateTime(),
+            aktivitetslogger = problems
         )
     }
 

@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.Meldingstype
 import no.nav.helse.spleis.hendelser.JsonMessage
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
@@ -62,7 +63,7 @@ class HendelsePersisteringPostgresTest {
         val dao = HendelseRecorder(dataSource)
 
         JsonMessage("{}", Aktivitetslogger()).also {
-            dao.lagreMelding(it)
+            dao.lagreMelding(Meldingstype.UKJENT, it.id, it.toJson())
             assertEquals(1, meldinger(dataSource).size)
         }
     }

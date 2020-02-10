@@ -21,6 +21,7 @@ internal abstract class BehovMessage(originalMessage: String, aktivitetslogger: 
         )
         requiredValue("@final", true)
     }
+    override val id: UUID get() = UUID.fromString(this["@id"].asText())
 }
 
 // Understands a JSON message representing an Ytelserbehov
@@ -103,7 +104,7 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
         )
 
         return ModelYtelser(
-            hendelseId = UUID.randomUUID(),
+            hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
@@ -139,7 +140,7 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
 
     internal fun asModelVilkårsgrunnlag(): ModelVilkårsgrunnlag {
         return ModelVilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
+            hendelseId = this.id,
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
@@ -188,7 +189,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
 
     internal fun asModelManuellSaksbehandling() =
         ModelManuellSaksbehandling(
-            hendelseId = UUID.randomUUID(),
+            hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),

@@ -12,10 +12,14 @@ import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.*
 
 // Understands a specific JSON-formatted message
 // Implements GoF visitor pattern to enable working on the specific types
-internal open class JsonMessage(private val originalMessage: String, private val problems: Aktivitetslogger) {
+internal open class JsonMessage(
+    private val originalMessage: String,
+    private val problems: Aktivitetslogger
+) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -25,6 +29,7 @@ internal open class JsonMessage(private val originalMessage: String, private val
     private val recognizedKeys = mutableMapOf<String, JsonNode>()
 
     private val nestedKeySeparator = '.'
+    internal open val id: UUID = UUID.randomUUID()
 
     init {
         json = try {
