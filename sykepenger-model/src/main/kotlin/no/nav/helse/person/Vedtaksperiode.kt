@@ -396,7 +396,7 @@ internal class Vedtaksperiode private constructor(
 
         override val type = UNDERSØKER_HISTORIKK
 
-        override val timeout: Duration = Duration.ofDays(30)
+        override val timeout: Duration = Duration.ofHours(1)
     }
 
     internal object AvventerSendtSøknad : Vedtaksperiodetilstand {

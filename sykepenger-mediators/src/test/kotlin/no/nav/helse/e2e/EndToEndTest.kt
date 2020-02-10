@@ -53,7 +53,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.Duration
 import java.time.Duration.ofMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -208,8 +207,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.START,
-            currentState = TilstandType.MOTTATT_NY_SØKNAD,
-            timeout = Duration.ofDays(30)
+            currentState = TilstandType.MOTTATT_NY_SØKNAD
         )
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         assertVedtaksperiodeEndretEvent(
@@ -217,8 +215,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.MOTTATT_NY_SØKNAD,
-            currentState = TilstandType.UNDERSØKER_HISTORIKK,
-            timeout = Duration.ofDays(30)
+            currentState = TilstandType.UNDERSØKER_HISTORIKK
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
         assertVedtaksperiodeEndretEvent(
@@ -226,8 +223,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.UNDERSØKER_HISTORIKK,
-            currentState = TilstandType.AVVENTER_VILKÅRSPRØVING,
-            timeout = Duration.ofHours(1)
+            currentState = TilstandType.AVVENTER_VILKÅRSPRØVING
         )
 
         sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
@@ -237,8 +233,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.AVVENTER_VILKÅRSPRØVING,
-            currentState = TilstandType.AVVENTER_HISTORIKK,
-            timeout = Duration.ofHours(1)
+            currentState = TilstandType.AVVENTER_HISTORIKK
         )
 
         val sykehistorikk = listOf(
@@ -255,8 +250,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.AVVENTER_HISTORIKK,
-            currentState = TilstandType.AVVENTER_GODKJENNING,
-            timeout = Duration.ofDays(7)
+            currentState = TilstandType.AVVENTER_GODKJENNING
         )
         assertBehov(
             aktørId = aktørID,
@@ -299,8 +293,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.AVVENTER_GODKJENNING,
-            currentState = TilstandType.TIL_UTBETALING,
-            timeout = Duration.ZERO
+            currentState = TilstandType.TIL_UTBETALING
         )
 
         val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)
@@ -556,8 +549,7 @@ internal class EndToEndTest {
         virksomhetsnummer: String,
         aktørId: String,
         previousState: TilstandType,
-        currentState: TilstandType,
-        timeout: Duration
+        currentState: TilstandType
     ) {
         await()
             .atMost(timeoutSecondsPerStep, SECONDS)
@@ -569,7 +561,6 @@ internal class EndToEndTest {
                     .filter { aktørId == it["aktørId"].textValue() }
                     .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                     .filter { virksomhetsnummer == it["organisasjonsnummer"].textValue() }
-                    .filter { timeout == Duration.ofSeconds(it["timeout"].longValue()) }
                     .filter {
                         previousState == TilstandType.valueOf(it["forrigeTilstand"].textValue())
                             && currentState == TilstandType.valueOf(it["gjeldendeTilstand"].textValue())
