@@ -11,10 +11,6 @@ internal class AktivitetsloggerReflectTest {
         assertMembers<Aktivitetslogger, AktivitetsloggerReflect>(
             skalMappes = listOf("aktiviteter", "originalMessage")
         )
-        assertMembers<Aktivitetslogger, AktivitetsloggerReflect>(
-            subClasses = "Aktivitet" to "AktivitetReflect",
-            skalMappes = listOf("alvorlighetsgrad", "melding", "tidsstempel")
-        )
     }
 
     @Test

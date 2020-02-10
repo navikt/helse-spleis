@@ -60,7 +60,7 @@ internal class AktivitetsloggerTest {
     private fun assertInfo(message: String) {
         var visitorCalled = false
         aktivitetslogger.accept(object : AktivitetsloggerVisitor {
-            override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+            override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet.Info, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -71,7 +71,7 @@ internal class AktivitetsloggerTest {
     private fun assertWarn(message: String) {
         var visitorCalled = false
         aktivitetslogger.accept(object : AktivitetsloggerVisitor {
-            override fun visitWarn(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+            override fun visitWarn(aktivitet: Aktivitetslogger.Aktivitet.Warn, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -82,7 +82,7 @@ internal class AktivitetsloggerTest {
     private fun assertError(message: String) {
         var visitorCalled = false
         aktivitetslogger.accept(object : AktivitetsloggerVisitor {
-            override fun visitError(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+            override fun visitError(aktivitet: Aktivitetslogger.Aktivitet.Error, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -93,7 +93,7 @@ internal class AktivitetsloggerTest {
     private fun assertSevere(message: String) {
         var visitorCalled = false
         aktivitetslogger.accept(object : AktivitetsloggerVisitor {
-            override fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+            override fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet.Severe, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }

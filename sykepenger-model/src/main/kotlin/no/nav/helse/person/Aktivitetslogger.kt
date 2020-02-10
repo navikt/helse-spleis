@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.Aktivitetslogger.Alvorlighetsgrad.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,23 +16,23 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     }
 
     override fun info(melding: String, vararg params: Any) {
-        aktiviteter.add(Aktivitet(INFO, String.format(melding, *params)))
+        aktiviteter.add(Aktivitet.Info(String.format(melding, *params)))
     }
 
     override fun warn(melding: String, vararg params: Any) {
-        aktiviteter.add(Aktivitet(WARN, String.format(melding, *params)))
+        aktiviteter.add(Aktivitet.Warn(String.format(melding, *params)))
     }
 
     override fun need(melding: String, vararg params: Any) {
-        aktiviteter.add(Aktivitet(NEED, String.format(melding, *params)))
+        aktiviteter.add(Aktivitet.Need(String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
-        aktiviteter.add(Aktivitet(ERROR, String.format(melding, *params)))
+        aktiviteter.add(Aktivitet.Error(String.format(melding, *params)))
     }
 
     override fun severe(melding: String, vararg params: Any): Nothing {
-        aktiviteter.add(Aktivitet(SEVERE, String.format(melding, *params)))
+        aktiviteter.add(Aktivitet.Severe(String.format(melding, *params)))
         throw AktivitetException(this)
     }
 
@@ -53,7 +52,8 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     fun toReport(): String {
         if (!hasMessages()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
-        results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }?: ""} \n\t")
+        results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }
+            ?: ""} \n\t")
         append("Severe errors", severe(), results)
         append("Errors", error(), results)
         append("Needs", need(), results)
@@ -75,69 +75,136 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         }
     }
 
-    override fun toString() = this.aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s}
+    override fun toString() = this.aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s }
 
+    private fun info() = Aktivitet.Info.filter(aktiviteter)
+    private fun warn() = Aktivitet.Warn.filter(aktiviteter)
+    private fun need() = Aktivitet.Need.filter(aktiviteter)
+    private fun error() = Aktivitet.Error.filter(aktiviteter)
+    private fun severe() = Aktivitet.Severe.filter(aktiviteter)
 
-    private fun info() = Aktivitet.filter(INFO, aktiviteter)
-    private fun warn() = Aktivitet.filter(WARN, aktiviteter)
-    private fun need() = Aktivitet.filter(NEED, aktiviteter)
-    private fun error() = Aktivitet.filter(ERROR, aktiviteter)
-    private fun severe() = Aktivitet.filter(SEVERE, aktiviteter)
-
-    class AktivitetException internal constructor(private val aktivitetslogger: Aktivitetslogger) : RuntimeException(aktivitetslogger.toString()) {
+    class AktivitetException internal constructor(private val aktivitetslogger: Aktivitetslogger) :
+        RuntimeException(aktivitetslogger.toString()) {
         fun accept(visitor: AktivitetsloggerVisitor) {
             aktivitetslogger.accept(visitor)
         }
     }
 
-    class Aktivitet(
-        private val alvorlighetsgrad: Alvorlighetsgrad,
+    sealed class Aktivitet(
+        private val alvorlighetsgrad: Int,
         private var melding: String,
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-    ): Comparable<Aktivitet> {
+        private val tidsstempel: String
+    ) : Comparable<Aktivitet> {
         companion object {
-            internal fun filter(
-                alvorlighetsgrad: Alvorlighetsgrad,
-                aktiviteter: MutableList<Aktivitet>
-            ): List<Aktivitet> {
-                return aktiviteter.filter { it.alvorlighetsgrad == alvorlighetsgrad }
-            }
-
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        internal fun cloneWith(label: String) = Aktivitet(
-                alvorlighetsgrad,
-            "$melding ($label)",
-                tidsstempel
-            )
+        protected abstract fun label(): Char
+        internal abstract fun cloneWith(label: String): Aktivitet
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
             .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
 
         override fun toString() = tidsstempel + "\t" + melding
-        internal fun inOrder() = alvorlighetsgrad
-            .toString() + "\t" + tidsstempel + "\t" + melding
+        internal fun inOrder() = label() + "\t" + tidsstempel + "\t" + melding
 
-        fun accept(visitor: AktivitetsloggerVisitor) {
-            when (alvorlighetsgrad) {
-                INFO -> visitor.visitInfo(this, melding, tidsstempel)
-                WARN -> visitor.visitWarn(this, melding, tidsstempel)
-                NEED -> visitor.visitNeed(this, melding, tidsstempel)
-                ERROR -> visitor.visitError(this, melding, tidsstempel)
-                SEVERE -> visitor.visitSevere(this, melding, tidsstempel)
+        abstract fun accept(visitor: AktivitetsloggerVisitor)
+
+        class Info(
+            private val melding: String,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(0, melding, tidsstempel) {
+            companion object {
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Info> {
+                    return aktiviteter.filterIsInstance<Info>()
+                }
+            }
+
+            override fun label() = 'I'
+
+            override fun cloneWith(label: String) = Info("$melding ($label)", tidsstempel)
+
+            override fun accept(visitor: AktivitetsloggerVisitor) {
+                visitor.visitInfo(this, melding, tidsstempel)
             }
         }
-    }
 
-    enum class Alvorlighetsgrad(private val label: String): Comparable<Alvorlighetsgrad> {
-        INFO("I"),
-        WARN("W"),
-        NEED("N"),
-        ERROR("E"),
-        SEVERE("S");
+        class Warn(
+            private val melding: String,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(25, melding, tidsstempel) {
+            companion object {
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Warn> {
+                    return aktiviteter.filterIsInstance<Warn>()
+                }
+            }
 
-        override fun toString() = label
+            override fun label() = 'W'
+
+            override fun cloneWith(label: String) = Warn("$melding ($label)", tidsstempel)
+
+            override fun accept(visitor: AktivitetsloggerVisitor) {
+                visitor.visitWarn(this, melding, tidsstempel)
+            }
+        }
+
+        class Need(
+            private val melding: String,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(50, melding, tidsstempel) {
+            companion object {
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Need> {
+                    return aktiviteter.filterIsInstance<Need>()
+                }
+            }
+
+            override fun label() = 'N'
+
+            override fun cloneWith(label: String) = Need("$melding ($label)", tidsstempel)
+
+            override fun accept(visitor: AktivitetsloggerVisitor) {
+                visitor.visitNeed(this, melding, tidsstempel)
+            }
+
+        }
+
+        class Error(
+            private val melding: String,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(75, melding, tidsstempel) {
+            companion object {
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Error> {
+                    return aktiviteter.filterIsInstance<Error>()
+                }
+            }
+
+            override fun label() = 'E'
+
+            override fun cloneWith(label: String) = Error("$melding ($label)", tidsstempel)
+
+            override fun accept(visitor: AktivitetsloggerVisitor) {
+                visitor.visitError(this, melding, tidsstempel)
+            }
+        }
+
+        class Severe(
+            private val melding: String,
+            private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        ) : Aktivitet(100, melding, tidsstempel) {
+            companion object {
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Severe> {
+                    return aktiviteter.filterIsInstance<Severe>()
+                }
+            }
+
+            override fun label() = 'S'
+
+            override fun cloneWith(label: String) = Severe("$melding ($label)", tidsstempel)
+
+            override fun accept(visitor: AktivitetsloggerVisitor) {
+                visitor.visitSevere(this, melding, tidsstempel)
+            }
+        }
     }
 }
 

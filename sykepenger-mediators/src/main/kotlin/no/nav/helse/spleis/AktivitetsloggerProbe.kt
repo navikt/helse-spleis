@@ -17,23 +17,23 @@ internal object AktivitetsloggerProbe {
     fun inspiser(aktivitetException: Aktivitetslogger.AktivitetException) = aktivitetException.accept(inspektør)
 
     private class AktivitetsloggerCounter : AktivitetsloggerVisitor {
-        override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+        override fun visitInfo(aktivitet: Aktivitetslogger.Aktivitet.Info, melding: String, tidsstempel: String) {
             aktivitetscounter.labels("info", melding).inc()
         }
 
-        override fun visitWarn(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+        override fun visitWarn(aktivitet: Aktivitetslogger.Aktivitet.Warn, melding: String, tidsstempel: String) {
             aktivitetscounter.labels("warn", melding).inc()
         }
 
-        override fun visitNeed(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+        override fun visitNeed(aktivitet: Aktivitetslogger.Aktivitet.Need, melding: String, tidsstempel: String) {
             aktivitetscounter.labels("need", melding).inc()
         }
 
-        override fun visitError(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+        override fun visitError(aktivitet: Aktivitetslogger.Aktivitet.Error, melding: String, tidsstempel: String) {
             aktivitetscounter.labels("error", melding).inc()
         }
 
-        override fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet, melding: String, tidsstempel: String) {
+        override fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet.Severe, melding: String, tidsstempel: String) {
             aktivitetscounter.labels("severe", melding).inc()
         }
     }
