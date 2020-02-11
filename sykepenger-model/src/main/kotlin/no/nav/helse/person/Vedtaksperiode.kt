@@ -183,6 +183,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     private fun trengerYtelser() {
         person.vedtaksperiodeTrengerLøsning(
             ModelYtelser.lagBehov(
@@ -195,6 +196,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     internal fun trengerVilkårsgrunnlag() {
         val beregningSlutt = YearMonth.from(førsteFraværsdag())
         val beregningStart = beregningSlutt.minusMonths(11)

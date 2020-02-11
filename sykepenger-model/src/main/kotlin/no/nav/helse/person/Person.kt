@@ -76,10 +76,12 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
         observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
     }
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTrengerLøsning(behov: Behov) {
         observers.forEach {
             it.vedtaksperiodeTrengerLøsning(behov)
