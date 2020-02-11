@@ -641,12 +641,13 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
-                    vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler()
-                    vedtaksperiode.aktivitetslogger.info("Utbetaling markert som godkjent av saksbehandler")
+                    vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
+                        vedtaksperiode.aktivitetslogger.info("Utbetaling markert som godkjent av saksbehandler (%s)", it)
+                    }
                 }
                 arbeidsgiver.gjennoptaBehandling(vedtaksperiode)
             } else {
-                vedtaksperiode.aktivitetslogger.error("Utbetaling markert som ikke godkjent av saksbehandler")
+                vedtaksperiode.aktivitetslogger.error("Utbetaling markert som ikke godkjent av saksbehandler (%s)", manuellSaksbehandling.saksbehandler())
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
