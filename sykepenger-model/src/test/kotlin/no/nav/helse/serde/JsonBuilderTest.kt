@@ -172,11 +172,7 @@ internal class JsonBuilderTest {
                 inntektsmåneder = (1.rangeTo(12)).map {
                     ModelVilkårsgrunnlag.Måned(
                         årMåned = YearMonth.of(2018, it),
-                        inntektsliste = listOf(
-                            ModelVilkårsgrunnlag.Inntekt(
-                                beløp = 31000.0
-                            )
-                        )
+                        inntektsliste = listOf(31000.0)
                     )
                 },
                 arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),

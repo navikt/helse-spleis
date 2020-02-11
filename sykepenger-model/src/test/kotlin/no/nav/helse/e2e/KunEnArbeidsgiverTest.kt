@@ -452,7 +452,7 @@ internal class KunEnArbeidsgiverTest {
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it),
-                    listOf(ModelVilkårsgrunnlag.Inntekt(inntekt))
+                    listOf(inntekt)
                 )
             },
             erEgenAnsatt = false,

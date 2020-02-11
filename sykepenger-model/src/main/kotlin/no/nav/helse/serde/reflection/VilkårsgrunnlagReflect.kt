@@ -49,6 +49,6 @@ internal class VilkårsgrunnlagReflect(vilkårsgrunnlag: ModelVilkårsgrunnlag) 
 
     private fun Måned.toMap(): MutableMap<String, Any> = mutableMapOf(
         "årMåned" to this.årMåned,
-        "inntektsliste" to this.inntektsliste.map { mutableMapOf("beløp" to it.beløp) }
+        "inntektsliste" to this.inntektsliste.map { it.toString() }
     )
 }

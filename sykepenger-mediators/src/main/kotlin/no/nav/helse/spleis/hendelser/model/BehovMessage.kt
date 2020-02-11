@@ -149,7 +149,7 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
             inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
                 ModelVilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
-                    inntektsliste = it["inntektsliste"].map { ModelVilkårsgrunnlag.Inntekt(it["beløp"].asDouble()) }
+                    inntektsliste = it["inntektsliste"].map { it["beløp"].asDouble() }
                 )
             },
             arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(this["@løsning.${Behovstype.Opptjening.name}"]

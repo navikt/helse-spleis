@@ -23,7 +23,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1000.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(1000.0)) })
 
         assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1000.00))
         assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.01))
@@ -36,7 +36,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1000.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(1000.0)) })
 
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
@@ -48,7 +48,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) })
+            .map { Måned(YearMonth.of(2017, it), listOf(1250.0)) })
 
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
@@ -65,7 +65,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `27 dager opptjening fører til manuell saksbehandling`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) },
+            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
             listOf(Arbeidsforhold("orgnummer", 5.desember(2017)))
         )
 
@@ -82,7 +82,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) },
+            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
             listOf(Arbeidsforhold("orgnummer", 4.desember(2017)))
         )
 
@@ -99,7 +99,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) },
+            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
             listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         val vedtaksperiode = vedtaksperiode()
@@ -115,7 +115,7 @@ internal class ModelVilkårsgrunnlagTest {
     @Test
     internal fun `ingen arbeidsforhold gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(Inntekt(1250.0))) },
+            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
             emptyList()
         )
         val vedtaksperiode = vedtaksperiode()

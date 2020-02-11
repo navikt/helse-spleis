@@ -168,9 +168,7 @@ internal class GodkjenningHendelseTest {
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 ModelVilkårsgrunnlag.Måned(
-                    YearMonth.of(2018, it), listOf(
-                        ModelVilkårsgrunnlag.Inntekt(31000.0)
-                    )
+                    YearMonth.of(2018, it), listOf(31000.0)
                 )
             },
             erEgenAnsatt = false,

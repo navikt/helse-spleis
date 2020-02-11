@@ -114,9 +114,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun tolvMånederMedInntekt(beregnetInntekt: Double): List<ModelVilkårsgrunnlag.Måned> {
         return (1..12).map {
             ModelVilkårsgrunnlag.Måned(
-                YearMonth.of(2018, it), listOf(
-                    ModelVilkårsgrunnlag.Inntekt(beregnetInntekt)
-                )
+                YearMonth.of(2018, it), listOf(beregnetInntekt)
             )
         }
     }

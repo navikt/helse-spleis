@@ -18,7 +18,7 @@ class ModelVilkårsgrunnlag(
     private val orgnummer: String,
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
-    private val arbeidsforhold: ModelArbeidsforhold?,
+    private val arbeidsforhold: ModelArbeidsforhold,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
@@ -29,10 +29,10 @@ class ModelVilkårsgrunnlag(
     override fun organisasjonsnummer() = orgnummer
 
     private fun beregnetÅrsInntekt(): Double {
-        assert(inntektsmåneder.size <= 12)
+        if (inntektsmåneder.size > 12) severe("Forventer 12 eller færre inntektsmåneder")
         return inntektsmåneder
             .flatMap { it.inntektsliste }
-            .sumByDouble { it.beløp }
+            .sumByDouble { it }
     }
 
     private fun avviksprosentInntekt(månedsinntektFraInntektsmelding: Double) =
@@ -45,7 +45,6 @@ class ModelVilkårsgrunnlag(
         månedsinntektFraInntektsmelding: Double,
         førsteFraværsdag: LocalDate
     ): Resultat {
-        requireNotNull(arbeidsforhold)
         val antallOpptjeningsdager =  arbeidsforhold.antallOpptjeningsdager(førsteFraværsdag, orgnummer)
         val grunnlag = Grunnlagsdata(
             erEgenAnsatt = erEgenAnsatt,
@@ -73,27 +72,23 @@ class ModelVilkårsgrunnlag(
         aktivitetslogger.addAll(this.aktivitetslogger, "Vilkårsgrunnlag")
     }
 
-    data class Måned(
+    class Måned(
         internal val årMåned: YearMonth,
-        internal val inntektsliste: List<Inntekt>
+        internal val inntektsliste: List<Double>
     )
 
-    data class Inntekt(
-        internal val beløp: Double
-    )
-
-    data class Arbeidsforhold (
+    class Arbeidsforhold (
         internal val orgnummer: String,
         internal val fom: LocalDate,
         internal val tom: LocalDate? = null
     )
 
-    data class Resultat(
+    class Resultat(
         internal val måBehandlesManuelt: Boolean,
         internal val grunnlagsdata: Grunnlagsdata
     )
 
-    data class Grunnlagsdata(
+    class Grunnlagsdata(
         internal val erEgenAnsatt: Boolean,
         internal val beregnetÅrsinntektFraInntektskomponenten: Double,
         internal val avviksprosent: Double,
