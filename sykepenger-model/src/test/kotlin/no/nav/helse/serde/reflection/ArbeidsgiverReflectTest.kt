@@ -9,7 +9,7 @@ internal class ArbeidsgiverReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<Arbeidsgiver, ArbeidsgiverReflect>(
-            skalMappes = listOf("organisasjonsnummer", "id"),
+            skalMappes = listOf("organisasjonsnummer", "id", "utbetalingsreferanse"),
             skalIkkeMappes = listOf(
                 "inntekthistorikk",
                 "perioder",
@@ -25,7 +25,7 @@ internal class ArbeidsgiverReflectTest {
     internal fun `mapper Arbeidsgiver til map`() {
         val map = ArbeidsgiverReflect(arbeidsgiver).toMap()
 
-        assertEquals(2, map.size)
+        assertEquals(3, map.size)
         assertEquals(orgnummer, map["organisasjonsnummer"])
     }
 

@@ -219,9 +219,11 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
+        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
+        assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanse)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -291,11 +293,13 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
+        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
+        assertNotEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanse)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -512,6 +516,7 @@ internal class KunEnArbeidsgiverTest {
         private val periodeIndekser = mutableMapOf<String, Int>()
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
+        internal var utbetalingsreferanse: Long = 0
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
             etterspurteBehov[vedtaksperiodeIndex]?.getOrDefault(key.name, false) ?: false
@@ -527,6 +532,10 @@ internal class KunEnArbeidsgiverTest {
         override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
             val indeks = periodeIndeks(behov.vedtaksperiodeId())
             behov.behovType().forEach { etterspurteBehov[indeks]?.put(it, true) }
+        }
+
+        override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
+            utbetalingsreferanse = event.utbetalingsreferanse.toLong()
         }
 
         private fun periodeIndeks(vedtaksperiodeId: String): Int {

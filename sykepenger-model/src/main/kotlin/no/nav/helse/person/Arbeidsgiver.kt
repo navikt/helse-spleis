@@ -16,6 +16,7 @@ internal class Arbeidsgiver private constructor(
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
     private val perioder: MutableList<Vedtaksperiode>,
+    internal var utbetalingsreferanse: Long,
     private val aktivitetslogger: Aktivitetslogger
 ) {
 
@@ -28,6 +29,7 @@ internal class Arbeidsgiver private constructor(
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
         perioder = mutableListOf(),
+        utbetalingsreferanse = System.currentTimeMillis(),
         aktivitetslogger = Aktivitetslogger()
     )
 

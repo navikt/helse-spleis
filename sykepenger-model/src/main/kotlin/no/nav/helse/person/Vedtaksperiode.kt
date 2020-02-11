@@ -695,7 +695,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
 
-        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.id.base32Encode()
+        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode): String {
+            if (!vedtaksperiode.arbeidsgiver.harTilstøtendePeriode(vedtaksperiode))
+                vedtaksperiode.arbeidsgiver.utbetalingsreferanse++
+            return vedtaksperiode.arbeidsgiver.utbetalingsreferanse.toString()
+        }
 
         private fun UUID.base32Encode(): String {
             val pad = '='
