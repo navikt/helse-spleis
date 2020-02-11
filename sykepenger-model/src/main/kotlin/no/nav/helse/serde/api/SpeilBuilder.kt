@@ -1,7 +1,7 @@
 package no.nav.helse.serde.api
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.*
@@ -16,15 +16,16 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
 
-fun serializePersonForSpeil(person: Person): String {
+fun serializePersonForSpeil(person: Person): Pair<ObjectNode, Set<UUID>> {
     val jsonBuilder = SpeilBuilder()
     person.accept(jsonBuilder)
-    return jsonBuilder.toJson()
+    return jsonBuilder.toJson() to jsonBuilder.hendelseReferanser
 }
 
 internal class SpeilBuilder : PersonVisitor {
 
     private val stack: Stack<JsonState> = Stack()
+    internal val hendelseReferanser = mutableSetOf<UUID>()
 
     init {
         stack.push(Root())
@@ -36,7 +37,7 @@ internal class SpeilBuilder : PersonVisitor {
         get() = stack.peek()
 
 
-    override fun toString() = currentState.toJson()
+    override fun toString() = currentState.toJson().toPrettyString()
 
     private fun pushState(state: JsonState) {
         currentState.leaving()
@@ -55,12 +56,16 @@ internal class SpeilBuilder : PersonVisitor {
         aktørId: String,
         fødselsnummer: String
     ) = currentState.preVisitPerson(person, aktørId, fødselsnummer)
+
     override fun postVisitPerson(
         person: Person,
         aktørId: String,
         fødselsnummer: String
     ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
+    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) =
+        currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -89,23 +94,32 @@ internal class SpeilBuilder : PersonVisitor {
     }
 
     override fun preVisitInntekter() = currentState.preVisitInntekter()
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(inntekt)
+    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
+        hendelseReferanser.add(inntekt.hendelseId)
+        currentState.visitInntekt(inntekt)
+    }
     override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
         currentState.visitArbeidsdag(dag)
+
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
         currentState.visitArbeidsgiverperiodeDag(dag)
+
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
         currentState.visitNavDag(dag)
+
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
         currentState.visitNavHelgDag(dag)
+
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
         currentState.visitFridag(dag)
+
     override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
         currentState.visitAvvistDag(dag)
+
     override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
         currentState.visitUkjentDag(dag)
 
@@ -114,14 +128,17 @@ internal class SpeilBuilder : PersonVisitor {
         currentState.postVisitUtbetalingstidslinje(utbetalingstidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
-    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
+    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
         currentState.preVisitVedtaksperiode(vedtaksperiode, id)
+    }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
 
-    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
+    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+        hendelseReferanser.add(element.hendelseId)
         currentState.preVisitSykdomshistorikkElement(element)
+    }
 
     override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje()
     override fun postVisitHendelseSykdomstidslinje() = currentState.postVisitHendelseSykdomstidslinje()
@@ -163,7 +180,9 @@ internal class SpeilBuilder : PersonVisitor {
     private interface JsonState : PersonVisitor {
         fun entering() {}
         fun leaving() {}
-        fun toJson(): String = throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
+        fun toJson(): ObjectNode =
+            throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
+
         fun visitDag(dag: Dag) {}
     }
 
@@ -180,11 +199,10 @@ internal class SpeilBuilder : PersonVisitor {
 
         override fun toString() = personMap.toString()
 
-        override fun toJson(): String = jacksonObjectMapper()
+        override fun toJson() = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-            .valueToTree<JsonNode>(personMap)
-            .toPrettyString()
+            .valueToTree<ObjectNode>(personMap)
     }
 
     private inner class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
@@ -217,7 +235,10 @@ internal class SpeilBuilder : PersonVisitor {
         }
     }
 
-    private inner class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
+    private inner class ArbeidsgiverState(
+        arbeidsgiver: Arbeidsgiver,
+        private val arbeidsgiverMap: MutableMap<String, Any?>
+    ) :
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
@@ -295,11 +316,13 @@ internal class SpeilBuilder : PersonVisitor {
         JsonState {
 
         override fun visitDag(dag: Dag) {
-            sykdomstidslinjeListe.add(mutableMapOf(
-                "dagen" to dag.dagen,
-                "hendelseType" to dag.hendelseType,
-                "type" to dag.dagType().name
-            ))
+            sykdomstidslinjeListe.add(
+                mutableMapOf(
+                    "dagen" to dag.dagen,
+                    "hendelseType" to dag.hendelseType,
+                    "type" to dag.dagType().name
+                )
+            )
         }
 
         override fun postVisitHendelseSykdomstidslinje() {

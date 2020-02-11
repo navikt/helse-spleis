@@ -1,7 +1,10 @@
 package no.nav.helse
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.application.install
 import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.jackson.jackson
 import io.ktor.request.path
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
@@ -64,11 +67,17 @@ class ApplicationBuilder(env: Map<String, String>) {
                 level = Level.INFO
                 filter { call -> call.request.path().startsWith("/api/") }
             }
+            install(ContentNegotiation) {
+                jackson {
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                }
+            }
 
             val clientId = "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID")
 
             restInterface(
                 personRestInterface = helseBuilder.personRestInterface,
+                hendelseRecorder = helseBuilder.hendelseRecorder,
                 configurationUrl = requireNotNull(env["AZURE_CONFIG_URL"]),
                 clientId = clientId,
                 requiredGroup = requireNotNull(env["AZURE_REQUIRED_GROUP"])

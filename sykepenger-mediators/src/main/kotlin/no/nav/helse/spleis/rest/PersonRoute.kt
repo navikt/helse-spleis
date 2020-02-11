@@ -1,27 +1,24 @@
 package no.nav.helse.spleis.rest
 
-import io.ktor.application.ApplicationCall
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.spleis.db.HendelseRecorder
 
-internal fun Route.person(personRestInterface: PersonRestInterface) {
+internal fun Route.person(personRestInterface: PersonRestInterface, hendelseRecorder: HendelseRecorder) {
+    val objectMapper = jacksonObjectMapper()
     get("/api/person/{aktørId}") {
-        finnPerson(personRestInterface)
+        personRestInterface.hentSak(call.parameters["aktørId"]!!)
+            ?.let {
+                val (serialisertPerson, hendelseReferanser) = serializePersonForSpeil(it)
+                val hendelser = hendelseRecorder.hentHendelser(hendelseReferanser)
+                call.respond(serialisertPerson.apply {
+                    putArray("hendelser").addAll(hendelser.map { objectMapper.readTree(it.second) })
+                })
+            } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
     }
-    // TODO: fjern route når speil er oppdatert med ny url
-    get("/api/sak/{aktørId}") {
-        finnPerson(personRestInterface)
-    }
-}
-
-private suspend fun PipelineContext<Unit, ApplicationCall>.finnPerson(personRestInterface: PersonRestInterface) {
-    personRestInterface.hentSak(call.parameters["aktørId"]!!)
-        ?.let {
-            call.respond(serializePersonForSpeil(it))
-        } ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
 }

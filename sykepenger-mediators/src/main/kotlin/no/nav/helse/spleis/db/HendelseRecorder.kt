@@ -43,6 +43,16 @@ internal class HendelseRecorder(
         lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message.id, message.toJson())
     }
 
+    fun hentHendelser(hendelseIder: Set<UUID>) =
+        using(sessionOf(dataSource)) { session ->
+            session.run(queryOf(
+                "SELECT * FROM melding WHERE melding_id in (${hendelseIder.joinToString(",") { "?" }})",
+                *hendelseIder.map { it.toString() }.toTypedArray()
+            ).map {
+                it.string("melding_type") to it.string("data")
+            }.asList)
+        }
+
     fun lagreMelding(meldingstype: Meldingstype, meldingsId: UUID, orginalmelding: String) {
         using(sessionOf(dataSource)) { session ->
             session.run(

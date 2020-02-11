@@ -18,6 +18,7 @@ import io.ktor.response.ApplicationSendPipeline
 import io.ktor.routing.routing
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
+import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.rest.PersonRestInterface
 import no.nav.helse.spleis.rest.person
 import no.nav.helse.spleis.rest.utbetaling
@@ -40,7 +41,8 @@ internal fun Application.restInterface(
     personRestInterface: PersonRestInterface,
     configurationUrl: String,
     clientId: String,
-    requiredGroup: String
+    requiredGroup: String,
+    hendelseRecorder: HendelseRecorder
 ) {
     val idProvider = configurationUrl.getJson()
     val jwkProvider = JwkProviderBuilder(URL(idProvider["jwks_uri"].textValue())).build()
@@ -78,7 +80,7 @@ internal fun Application.restInterface(
     routing {
         authenticate {
             utbetaling(personRestInterface)
-            person(personRestInterface)
+            person(personRestInterface, hendelseRecorder)
         }
     }
 

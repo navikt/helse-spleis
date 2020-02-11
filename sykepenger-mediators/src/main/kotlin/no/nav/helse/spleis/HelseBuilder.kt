@@ -1,13 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.spleis.db.HendelseRecorder
-import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.LagreUtbetalingDao
-import no.nav.helse.spleis.db.PersonPostgresRepository
-import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.db.UtbetalingsreferansePostgresRepository
-import no.nav.helse.spleis.db.UtbetalingsreferanseRepository
+import no.nav.helse.spleis.db.*
 import no.nav.helse.spleis.rest.PersonRestInterface
 import org.apache.kafka.clients.producer.KafkaProducer
 import javax.sql.DataSource
@@ -21,7 +15,7 @@ internal class HelseBuilder(
 
     private val hendelseDirector: HendelseMediator
     private val hendelseProbe: HendelseProbe = HendelseProbe()
-    private val hendelseRecorder: HendelseRecorder = HendelseRecorder(dataSource)
+    internal val hendelseRecorder: HendelseRecorder = HendelseRecorder(dataSource)
 
     internal val personRestInterface: PersonRestInterface
     private val personRepository: PersonRepository = PersonPostgresRepository(dataSource)
