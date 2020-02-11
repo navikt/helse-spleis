@@ -1,7 +1,6 @@
 package no.nav.helse
 
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -16,7 +15,7 @@ internal class SykdomManagerTest {
     }
 
     @Test
-    internal fun `Makskapasitet`() {
+    internal fun `makskapasitet`() {
         repeat(kapasitet) {
             assertTrue(manager.registrer(it.toString()))
         }
@@ -24,25 +23,54 @@ internal class SykdomManagerTest {
     }
 
     @Test
-    internal fun `Makskapasitet med duplikat`() {
+    internal fun `makskapasitet med duplikat`() {
         repeat(kapasitet - 1) {
             assertTrue(manager.registrer(it.toString()))
         }
-        assertTrue(manager.registrer("2011"))
-        assertTrue(manager.registrer("2011"))
+        assertPersonRegistrert("2011")
+        assertDuplikat("2011")
         assertFalse(manager.registrer("2012"))
     }
 
     @Test
-    internal fun `Duplikat`() {
-        assertTrue(manager.registrer("1"))
-        assertTrue(manager.registrer("1"))
+    internal fun `duplikat`() {
+        assertPersonRegistrert("1")
+        assertDuplikat("1")
     }
 
     @Test
-    internal fun `Registrerer`() {
+    internal fun `gjennopprett`() {
         manager = SykdomManager.gjennopprett(listOf("1", "2", "3", "4"), 4)
         assertFalse(manager.registrer("5"))
+    }
+
+    @Test
+    internal fun `gjenværende kapasitet`() {
+        assertPersonRegistrert("1", kapasitet-1)
+    }
+
+    private fun assertPersonRegistrert(fnr: String, gjenværendekapasitet: Int? = null) {
+        var observerKalt = false
+        manager.addObserver(object : SykdomManager.Observer {
+            override fun personRegistrert(fødselsnummer: String, kapasitet: Int) {
+                observerKalt = true
+                assertEquals(fnr, fødselsnummer)
+                gjenværendekapasitet?.also { assertEquals(it, kapasitet) }
+            }
+        })
+        assertTrue(manager.registrer(fnr))
+        assertTrue(observerKalt)
+    }
+
+    private fun assertDuplikat(fnr: String) {
+        var observerKalt = false
+        manager.addObserver(object : SykdomManager.Observer {
+            override fun personRegistrert(fødselsnummer: String, kapasitet: Int) {
+                observerKalt = true
+            }
+        })
+        assertTrue(manager.registrer(fnr))
+        assertFalse(observerKalt)
     }
 
 }
