@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDate
+import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
 
 // Understands a JSON message representing a Ny Søknad
@@ -12,6 +13,21 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
     SøknadMessage(originalMessage, aktivitetslogger) {
     init {
         requiredValue("status", "NY")
+        requiredKey("fom", "tom")
+    }
+
+    private val fnr get() = this["fnr"].asText()
+    private val aktørId get() = this["aktorId"].asText()
+    private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
+    val søknadFom get() = this["fom"].asLocalDate()
+    val søknadTom get() = this["tom"].asLocalDate()
+    private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
+    private val sykeperioder get() = this["soknadsperioder"].map {
+        Triple(
+            first = it.path("fom").asLocalDate(),
+            second = it.path("tom").asLocalDate(),
+            third = it.path("sykmeldingsgrad").asInt()
+        )
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -20,18 +36,18 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
 
     internal fun asModelNySøknad() = ModelNySøknad(
         hendelseId = this.id,
-        fnr = this["fnr"].asText(),
-        aktørId = this["aktorId"].asText(),
-        orgnummer = this["arbeidsgiver.orgnummer"].asText(),
-        rapportertdato = this["opprettet"].asText().let { LocalDateTime.parse(it) },
-        sykeperioder = this["soknadsperioder"].map {
-            Triple(
-                first = it.path("fom").asLocalDate(),
-                second = it.path("tom").asLocalDate(),
-                third = it.path("sykmeldingsgrad").asInt()
-            )
-        },
+        fnr = fnr,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        rapportertdato = rapportertdato,
+        sykeperioder = sykeperioder,
         aktivitetslogger = aktivitetslogger
+    )
+
+    internal fun asSpeilDTO() = NySøknadDTO(
+        rapportertdato = rapportertdato,
+        fom = søknadFom,
+        tom = søknadTom
     )
 
     object Factory : MessageFactory {

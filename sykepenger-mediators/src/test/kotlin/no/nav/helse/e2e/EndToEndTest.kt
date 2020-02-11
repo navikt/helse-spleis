@@ -306,14 +306,18 @@ internal class EndToEndTest {
 
     @Test
     fun `gitt en ny søknad, så skal den kunne hentes ut på personen`() {
-        val enAktørId = "1211109876543"
-        val fødselsnummer = "01019000000"
+        val enAktørId = "1211109876233"
+        val fødselsnummer = "01019000123"
         val virksomhetsnummer = "123456789"
 
         sendNySøknad(enAktørId, fødselsnummer, virksomhetsnummer)
+        sendSøknad(enAktørId, fødselsnummer, virksomhetsnummer)
+        sendInnteksmelding(enAktørId, fødselsnummer, virksomhetsnummer)
+        sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
+        sendSykepengehistorikkløsning(enAktørId, fødselsnummer, emptyList())
 
         enAktørId.hentPerson {
-            assertEquals(1, objectMapper.readTree(this)["hendelser"].size())
+            assertEquals(3, objectMapper.readTree(this)["hendelser"].size())
         }
     }
 

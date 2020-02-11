@@ -49,7 +49,7 @@ internal class HendelseRecorder(
                 "SELECT * FROM melding WHERE melding_id in (${hendelseIder.joinToString(",") { "?" }})",
                 *hendelseIder.map { it.toString() }.toTypedArray()
             ).map {
-                it.string("melding_type") to it.string("data")
+                Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
             }.asList)
         }
 
