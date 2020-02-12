@@ -39,13 +39,13 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
+        finnArbeidsgiver(ytelser)?.håndter(ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
         registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
-        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling, this)
+        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 

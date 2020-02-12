@@ -79,14 +79,14 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(person: Person, ytelser: Ytelser) {
+    internal fun håndter(ytelser: Ytelser) {
         ytelser.addInntekter(inntekthistorikk)
         perioder.forEach { it.håndter(ytelser) }
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling, person: Person) {
-        perioder.forEach { it.håndter(manuellSaksbehandling, this, person) }
+    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
+        perioder.forEach { it.håndter(manuellSaksbehandling) }
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
