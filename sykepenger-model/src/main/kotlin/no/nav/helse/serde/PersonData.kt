@@ -162,7 +162,7 @@ private fun parseDag(
     }
 }
 
-private fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
+internal fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
     TilstandTypeGammelOgNy.START -> Vedtaksperiode.StartTilstand
     TilstandTypeGammelOgNy.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
     TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
@@ -178,6 +178,8 @@ private fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
     TilstandTypeGammelOgNy.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
     TilstandTypeGammelOgNy.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
     TilstandTypeGammelOgNy.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
+    TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
+    TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
 }
 
 private fun parseUtbetalingslinje(
