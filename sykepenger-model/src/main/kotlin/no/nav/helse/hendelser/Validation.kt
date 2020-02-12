@@ -44,6 +44,11 @@ internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHend
         !hendelse.valider().let { it.hasErrors() || it.hasNeeds() }
 }
 
+internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
+    override fun isValid() =
+        !ytelser.valider().let { it.hasErrors() || it.hasNeeds() }
+}
+
 // Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
 internal class ValiderKunEnArbeidsgiver(
     private val arbeidsgivere: List<Arbeidsgiver>

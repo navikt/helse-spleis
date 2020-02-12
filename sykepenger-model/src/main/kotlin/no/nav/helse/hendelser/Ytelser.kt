@@ -51,7 +51,7 @@ class Ytelser(
 
     internal fun foreldrepenger() = foreldrepermisjon
 
-
+    fun valider() = utbetalingshistorikk.valider()
 
     internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
         sykepengehistorikk().addInntekter(this.hendelseId(), inntekthistorikk)

@@ -412,6 +412,7 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(ytelser, AvventerInntektsmelding)
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                it.valider { ValiderYtelser(ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 it.valider {
                     HarInntektshistorikk(
@@ -570,6 +571,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                it.valider { ValiderYtelser(ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
                 it.valider { GapPå26Uker(vedtaksperiode.sykdomshistorikk.sykdomstidslinje(), sisteHistoriskeSykedag) }
