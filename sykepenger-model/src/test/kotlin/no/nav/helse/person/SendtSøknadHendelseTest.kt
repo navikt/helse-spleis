@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.hendelser.SendtSøknad.Periode.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -136,7 +136,7 @@ internal class SendtSøknadHendelseTest {
     }
 
     private fun sendtSøknad(vararg perioder: Periode, orgnummer: String = "987654321") =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
@@ -148,7 +148,7 @@ internal class SendtSøknadHendelseTest {
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
-        ModelNySøknad(
+        NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",

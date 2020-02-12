@@ -3,8 +3,8 @@ package no.nav.helse.spleis.hendelser.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.ModelSykepengehistorikk.Inntektsopplysning
-import no.nav.helse.hendelser.ModelSykepengehistorikk.Periode.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
 import java.util.*
@@ -39,14 +39,14 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asModelYtelser(): ModelYtelser {
-        val foreldrepenger = ModelForeldrepenger(
+    internal fun asYtelser(): Ytelser {
+        val foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = this["@løsning.Foreldrepenger.Foreldrepengeytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
             svangerskapsytelse = this["@løsning.Foreldrepenger.Svangerskapsytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
             aktivitetslogger = aktivitetslogger
         )
 
-        val sykepengehistorikk = ModelSykepengehistorikk(
+        val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = this["@løsning.Sykepengehistorikk"].flatMap {
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->
@@ -103,14 +103,14 @@ internal class YtelserMessage(originalMessage: String, private val aktivitetslog
             aktivitetslogger = aktivitetslogger
         )
 
-        return ModelYtelser(
+        return Ytelser(
             hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
-            sykepengehistorikk = sykepengehistorikk,
-            foreldrepenger = foreldrepenger,
+            utbetalingshistorikk = utbetalingshistorikk,
+            foreldrepermisjon = foreldrepermisjon,
             rapportertdato = this["@besvart"].asLocalDateTime(),
             aktivitetslogger = aktivitetslogger
         )
@@ -138,8 +138,8 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asModelVilkårsgrunnlag(): ModelVilkårsgrunnlag {
-        return ModelVilkårsgrunnlag(
+    internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
+        return Vilkårsgrunnlag(
             hendelseId = this.id,
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
@@ -147,14 +147,14 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, private val akti
             orgnummer = this["organisasjonsnummer"].asText(),
             rapportertDato = this["@besvart"].asLocalDateTime(),
             inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
-                ModelVilkårsgrunnlag.Måned(
+                Vilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
                     inntektsliste = it["inntektsliste"].map { it["beløp"].asDouble() }
                 )
             },
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(this["@løsning.${Behovstype.Opptjening.name}"]
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(this["@løsning.${Behovstype.Opptjening.name}"]
                 .map {
-                    ModelVilkårsgrunnlag.Arbeidsforhold(
+                    Vilkårsgrunnlag.Arbeidsforhold(
                         orgnummer = it["orgnummer"].asText(),
                         fom = it["ansattSiden"].asLocalDate(),
                         tom = it["ansattTil"].asOptionalLocalDate()
@@ -187,8 +187,8 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, private val
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asModelManuellSaksbehandling() =
-        ModelManuellSaksbehandling(
+    internal fun asManuellSaksbehandling() =
+        ManuellSaksbehandling(
             hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),

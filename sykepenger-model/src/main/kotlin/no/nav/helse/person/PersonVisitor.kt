@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
@@ -46,7 +46,7 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
     fun visitGodkjentAv(godkjentAv: String?) {}
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitInntektFraInntektsmelding(inntektFraInntektsmelding: Double?) {}
-    fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?) {}
+    fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}

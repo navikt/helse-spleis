@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ModelPåminnelseTest {
+internal class PåminnelseTest {
 
     companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
@@ -64,7 +64,7 @@ internal class ModelPåminnelseTest {
     }
 
     private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId:UUID = vedtaksperiodeId) =
-        ModelPåminnelse(
+        Påminnelse(
             hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

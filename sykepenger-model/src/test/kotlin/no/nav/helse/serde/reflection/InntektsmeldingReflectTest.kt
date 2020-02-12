@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
@@ -14,7 +14,7 @@ import java.util.*
 internal class InntektsmeldingReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
-        assertMembers<ModelInntektsmelding, InntektsmeldingReflect>(
+        assertMembers<Inntektsmelding, InntektsmeldingReflect>(
             skalMappes = listOf(
                 "hendelseId",
                 "hendelsestype",
@@ -43,9 +43,9 @@ internal class InntektsmeldingReflectTest {
     }
 
     internal companion object {
-        internal val inntektsmelding = ModelInntektsmelding(
+        internal val inntektsmelding = Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(
+            refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 120.0
             ),

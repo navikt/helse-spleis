@@ -11,7 +11,7 @@ class YtelserMessageTest {
     @Test
     fun `Kan mappe om message til modell uten feil`() {
         val aktivitetslogger = Aktivitetslogger()
-        YtelserMessage(json, aktivitetslogger).asModelYtelser()
+        YtelserMessage(json, aktivitetslogger).asYtelser()
 
         assertFalse(aktivitetslogger.hasErrors())
     }

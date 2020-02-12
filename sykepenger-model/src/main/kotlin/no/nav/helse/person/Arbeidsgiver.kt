@@ -52,7 +52,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: ModelNySøknad) {
+    internal fun håndter(nySøknad: NySøknad) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
             aktivitetslogger.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
@@ -60,14 +60,14 @@ internal class Arbeidsgiver private constructor(
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: ModelSendtSøknad) {
+    internal fun håndter(sendtSøknad: SendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
             sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding) {
+    internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             inntektsmelding.hendelseId(),
@@ -79,23 +79,23 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(person: Person, ytelser: ModelYtelser) {
+    internal fun håndter(person: Person, ytelser: Ytelser) {
         ytelser.addInntekter(inntekthistorikk)
         perioder.forEach { it.håndter(ytelser) }
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling, person: Person) {
+    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling, person: Person) {
         perioder.forEach { it.håndter(manuellSaksbehandling, this, person) }
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+    internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         perioder.forEach { it.håndter(vilkårsgrunnlag) }
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(påminnelse: ModelPåminnelse) =
+    internal fun håndter(påminnelse: Påminnelse) =
         perioder.any { it.håndter(påminnelse) }.also {
             påminnelse.kopierAktiviteterTil(aktivitetslogger)
         }
@@ -110,7 +110,7 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    private fun nyVedtaksperiode(nySøknad: ModelNySøknad): Vedtaksperiode {
+    private fun nyVedtaksperiode(nySøknad: NySøknad): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,

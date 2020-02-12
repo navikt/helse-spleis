@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag.*
+import no.nav.helse.hendelser.Vilkårsgrunnlag.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.desember
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class ModelVilkårsgrunnlagTest {
+internal class VilkårsgrunnlagTest {
     private val aktivitetslogger = Aktivitetslogger()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val aktørId = "123"
@@ -156,7 +156,7 @@ internal class ModelVilkårsgrunnlagTest {
                 4.desember(2017)
             )
         )
-    ) = ModelVilkårsgrunnlag(
+    ) = Vilkårsgrunnlag(
         hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         aktørId = "987654321",
@@ -164,7 +164,7 @@ internal class ModelVilkårsgrunnlagTest {
         orgnummer = "orgnummer",
         rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
-        arbeidsforhold = ModelArbeidsforhold(arbeidsforhold),
+        arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
         erEgenAnsatt = false,
         aktivitetslogger = aktivitetslogger
     )
@@ -183,7 +183,7 @@ internal class ModelVilkårsgrunnlagTest {
             it.håndter(inntektsmelding())
         }
 
-    private fun nySøknad() = ModelNySøknad(
+    private fun nySøknad() = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
@@ -193,21 +193,21 @@ internal class ModelVilkårsgrunnlagTest {
         aktivitetslogger = aktivitetslogger
     )
 
-    private fun sendtSøknad() = ModelSendtSøknad(
+    private fun sendtSøknad() = SendtSøknad(
         hendelseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
         sendtNav = LocalDateTime.now(),
-        perioder = listOf(ModelSendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
+        perioder = listOf(SendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger,
         harAndreInntektskilder = false
     )
 
     private fun inntektsmelding() =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(16.januar, 1000.0),
+            refusjon = Inntektsmelding.Refusjon(16.januar, 1000.0),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

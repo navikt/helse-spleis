@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -8,14 +8,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
+internal class SendtSøknadReflect(sendtSøknad: SendtSøknad) {
     private val hendelseId: UUID = sendtSøknad.hendelseId()
     private val hendelsestype: Hendelsestype = sendtSøknad.hendelsestype()
     private val fnr: String = sendtSøknad["fnr"]
     private val aktørId: String = sendtSøknad["aktørId"]
     private val orgnummer: String = sendtSøknad["orgnummer"]
     private val sendtNav: LocalDateTime = sendtSøknad["sendtNav"]
-    private val perioder: List<ModelSendtSøknad.Periode> = sendtSøknad["perioder"]
+    private val perioder: List<SendtSøknad.Periode> = sendtSøknad["perioder"]
     private val aktivitetslogger: Aktivitetslogger = sendtSøknad["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
@@ -41,7 +41,7 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
         "perioder" to perioder.map { PeriodeReflect(it).toMap() }
     )
 
-    private class PeriodeReflect(private val periode: ModelSendtSøknad.Periode) {
+    private class PeriodeReflect(private val periode: SendtSøknad.Periode) {
         private val fom: LocalDate = periode.fom
         private val tom: LocalDate = periode.tom
 
@@ -50,19 +50,19 @@ internal class SendtSøknadReflect(sendtSøknad: ModelSendtSøknad) {
             "tom" to tom
         ).also {
             when (periode) {
-                is ModelSendtSøknad.Periode.Ferie -> it["type"] = "Ferie"
-                is ModelSendtSøknad.Periode.Sykdom -> {
+                is SendtSøknad.Periode.Ferie -> it["type"] = "Ferie"
+                is SendtSøknad.Periode.Sykdom -> {
                     it["type"] = "Sykdom"
-                    it["grad"] = periode.get<ModelSendtSøknad.Periode.Sykdom, Int>("grad")
-                    it["faktiskGrad"] = periode.get<ModelSendtSøknad.Periode.Sykdom, Double>("faktiskGrad")
+                    it["grad"] = periode.get<SendtSøknad.Periode.Sykdom, Int>("grad")
+                    it["faktiskGrad"] = periode.get<SendtSøknad.Periode.Sykdom, Double>("faktiskGrad")
                 }
-                is ModelSendtSøknad.Periode.Utdanning -> {
+                is SendtSøknad.Periode.Utdanning -> {
                     it["type"] = "Utdanning"
-                    it["fom"] = periode.get<ModelSendtSøknad.Periode.Utdanning, LocalDate?>("fom")
+                    it["fom"] = periode.get<SendtSøknad.Periode.Utdanning, LocalDate?>("fom")
                 }
-                is ModelSendtSøknad.Periode.Permisjon -> it["type"] = "Permisjon"
-                is ModelSendtSøknad.Periode.Egenmelding -> it["type"] = "Egenmelding"
-                is ModelSendtSøknad.Periode.Arbeid -> it["type"] = "Arbeid"
+                is SendtSøknad.Periode.Permisjon -> it["type"] = "Permisjon"
+                is SendtSøknad.Periode.Egenmelding -> it["type"] = "Egenmelding"
+                is SendtSøknad.Periode.Arbeid -> it["type"] = "Arbeid"
             }
         }
     }

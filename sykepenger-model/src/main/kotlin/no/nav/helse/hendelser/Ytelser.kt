@@ -11,14 +11,14 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
-class ModelYtelser(
+class Ytelser(
     hendelseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
-    private val sykepengehistorikk: ModelSykepengehistorikk,
-    private val foreldrepenger: ModelForeldrepenger,
+    private val utbetalingshistorikk: Utbetalingshistorikk,
+    private val foreldrepermisjon: Foreldrepermisjon,
     private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger), VedtaksperiodeHendelse {
@@ -47,9 +47,9 @@ class ModelYtelser(
 
     }
 
-    internal fun sykepengehistorikk() = sykepengehistorikk
+    internal fun sykepengehistorikk() = utbetalingshistorikk
 
-    internal fun foreldrepenger() = foreldrepenger
+    internal fun foreldrepenger() = foreldrepermisjon
 
 
 

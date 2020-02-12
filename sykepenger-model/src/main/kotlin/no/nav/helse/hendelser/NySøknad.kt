@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class ModelNySøknad(
+class NySøknad(
     hendelseId: UUID,
     private val fnr: String,
     private val aktørId: String,

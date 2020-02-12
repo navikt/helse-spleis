@@ -6,7 +6,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
 import java.util.*
 
-class ModelSykepengehistorikk(
+class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val aktivitetslogger: Aktivitetslogger
@@ -56,7 +56,7 @@ class ModelSykepengehistorikk(
             aktivitetslogger.severe("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
         }
 
-        open fun valider(historikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
+        open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
             aktivitetslogger.error("Perioden er ikke støttet")
         }
 
@@ -69,7 +69,7 @@ class ModelSykepengehistorikk(
                 return Utbetalingslinje(fom, tom, dagsats)
             }
 
-            override fun valider(historikk: ModelSykepengehistorikk, aktivitetslogger: Aktivitetslogger) {
+            override fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
                 if (fom > tom) aktivitetslogger.error("Utbetalingsperioder kan ikke ha en FOM etter TOM")
             }
         }

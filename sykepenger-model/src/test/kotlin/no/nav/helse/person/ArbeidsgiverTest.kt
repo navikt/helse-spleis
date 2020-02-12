@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
@@ -14,9 +14,9 @@ import java.util.*
 internal class ArbeidsgiverTest {
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
-        val inntektsmelding = ModelInntektsmelding(
+        val inntektsmelding = Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(
+            refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 120.0
             ),

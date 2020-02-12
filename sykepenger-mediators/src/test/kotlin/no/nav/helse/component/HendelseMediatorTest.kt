@@ -110,43 +110,43 @@ internal class HendelseMediatorTest {
             return mockk<Person>(relaxed = true) {
 
                 every {
-                    håndter(any<ModelNySøknad>())
+                    håndter(any<NySøknad>())
                 } answers {
                     lestNySøknad.set(true)
                 }
 
                 every {
-                    håndter(any<ModelSendtSøknad>())
+                    håndter(any<SendtSøknad>())
                 } answers {
                     lestSendtSøknad.set(true)
                 }
 
                 every {
-                    håndter(any<ModelInntektsmelding>())
+                    håndter(any<Inntektsmelding>())
                 } answers {
                     lestInntektsmelding.set(true)
                 }
 
                 every {
-                    håndter(any<ModelYtelser>())
+                    håndter(any<Ytelser>())
                 } answers {
                     lestYtelser.set(true)
                 }
 
                 every {
-                    håndter(any<ModelPåminnelse>())
+                    håndter(any<Påminnelse>())
                 } answers {
                     lestPåminnelse.set(true)
                 }
 
                 every {
-                    håndter(any<ModelVilkårsgrunnlag>())
+                    håndter(any<Vilkårsgrunnlag>())
                 } answers {
                     lestVilkårsgrunnlag.set(true)
                 }
 
                 every {
-                    håndter(any<ModelManuellSaksbehandling>())
+                    håndter(any<ManuellSaksbehandling>())
                 } answers {
                     lestManuellSaksbehandling.set(true)
                 }

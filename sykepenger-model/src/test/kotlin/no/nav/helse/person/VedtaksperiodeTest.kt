@@ -30,7 +30,7 @@ internal class VedtaksperiodeTest {
             vedtaksperiode.håndter(
                 sendtSøknad(
                     perioder = listOf(
-                        ModelSendtSøknad.Periode.Sykdom(
+                        SendtSøknad.Periode.Sykdom(
                             fom = 21.juli,
                             tom = 25.juli,
                             grad = 100
@@ -80,9 +80,9 @@ internal class VedtaksperiodeTest {
     }
 
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(
+            refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0
             ),
@@ -102,7 +102,7 @@ internal class VedtaksperiodeTest {
         aktørId: String = aktør,
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
-    ) = ModelNySøknad(
+    ) = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
@@ -113,15 +113,15 @@ internal class VedtaksperiodeTest {
     )
 
     private fun sendtSøknad(
-        perioder: List<ModelSendtSøknad.Periode> = listOf(
-            ModelSendtSøknad.Periode.Sykdom(
+        perioder: List<SendtSøknad.Periode> = listOf(
+            SendtSøknad.Periode.Sykdom(
                 16.september,
                 5.oktober,
                 100
             )
         ), rapportertDato: LocalDateTime = LocalDateTime.now()
     ) =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktør,
@@ -132,7 +132,7 @@ internal class VedtaksperiodeTest {
             harAndreInntektskilder = false
         )
 
-    private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = ModelPåminnelse(
+    private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(
         hendelseId = UUID.randomUUID(),
         aktørId = "",
         fødselsnummer = "",
@@ -146,7 +146,7 @@ internal class VedtaksperiodeTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun periodeFor(nySøknad: ModelNySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
+    private fun periodeFor(nySøknad: NySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
         person = person,
         arbeidsgiver = arbeidsgiver,
         id = id,

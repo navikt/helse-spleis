@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
@@ -476,9 +476,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     private fun inntektsmelding(
         beregnetInntekt: Double = 1000.00
     ) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = "virksomhetsnummer",
             fødselsnummer = "fnr",
             aktørId = "aktørId",

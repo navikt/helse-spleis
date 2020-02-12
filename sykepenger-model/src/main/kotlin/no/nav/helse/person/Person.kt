@@ -19,11 +19,11 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(nySøknad: ModelNySøknad) = håndter(nySøknad, "ny søknad")
+    fun håndter(nySøknad: NySøknad) = håndter(nySøknad, "ny søknad")
 
-    fun håndter(sendtSøknad: ModelSendtSøknad) = håndter(sendtSøknad, "sendt søknad")
+    fun håndter(sendtSøknad: SendtSøknad) = håndter(sendtSøknad, "sendt søknad")
 
-    fun håndter(inntektsmelding: ModelInntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
+    fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, hendelsesmelding: String) {
         registrer(hendelse, "Behandler $hendelsesmelding")
@@ -37,25 +37,25 @@ class Person private constructor(
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun håndter(ytelser: ModelYtelser) {
+    fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         finnArbeidsgiver(ytelser)?.håndter(this, ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun håndter(manuellSaksbehandling: ModelManuellSaksbehandling) {
+    fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
         registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
         finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling, this)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+    fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
         finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun håndter(påminnelse: ModelPåminnelse) {
+    fun håndter(påminnelse: Påminnelse) {
         påminnelse.info("Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
         påminnelse.warn("Fant ikke arbeidsgiver eller vedtaksperiode")
@@ -72,7 +72,7 @@ class Person private constructor(
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    fun vedtaksperiodePåminnet(påminnelse: ModelPåminnelse) {
+    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 

@@ -57,15 +57,15 @@ internal class YtelserTest {
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
-    ) = ModelYtelser(
+    ) = Ytelser(
         hendelseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        sykepengehistorikk = ModelSykepengehistorikk(
+        utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger.map {
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     it.first,
                     it.second,
                     it.third
@@ -74,7 +74,7 @@ internal class YtelserTest {
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger()
         ),
-        foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
+        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
         rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger()
     )

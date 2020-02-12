@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogger
 
-class ModelForeldrepenger(
+class Foreldrepermisjon(
     private val foreldrepengeytelse: Periode?,
     private val svangerskapsytelse: Periode?,
     private val aktivitetslogger: Aktivitetslogger

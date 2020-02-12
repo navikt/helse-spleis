@@ -23,7 +23,7 @@ import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
-import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
@@ -344,7 +344,7 @@ internal class EndToEndTest {
             }
     }
 
-    private fun sendNyPåminnelse(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): ModelPåminnelse {
+    private fun sendNyPåminnelse(aktørId: String, fødselsnummer: String, organisasjonsnummer: String): Påminnelse {
         val vedtaksperiodeId = UUID.randomUUID().toString()
         objectMapper.writeValueAsString(
             mapOf(
@@ -360,7 +360,7 @@ internal class EndToEndTest {
                 "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
             )
         ).also { sendKafkaMessage(rapidTopic, fødselsnummer, it) }
-        return ModelPåminnelse(
+        return Påminnelse(
             hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

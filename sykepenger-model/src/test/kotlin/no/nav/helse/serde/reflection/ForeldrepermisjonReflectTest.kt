@@ -1,18 +1,18 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
-import no.nav.helse.hendelser.ModelForeldrepenger
+import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juli
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ForeldrepengerReflectTest {
+internal class ForeldrepermisjonReflectTest {
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
-        assertMembers<ModelForeldrepenger, ForeldrepengerReflect>(
+        assertMembers<Foreldrepermisjon, ForeldrepengerReflect>(
             skalMappes = listOf("foreldrepengeytelse", "svangerskapsytelse"),
             skalIkkeMappes = listOf("aktivitetslogger")
         )
@@ -30,7 +30,7 @@ internal class ForeldrepengerReflectTest {
         assertEquals(31.juli.minusYears(2), (map["svangerskapsytelse"] as Map<String, LocalDate>)["tom"])
     }
 
-    internal val foreldrepenger = ModelForeldrepenger(
+    internal val foreldrepenger = Foreldrepermisjon(
         foreldrepengeytelse = Periode(
             fom = 1.januar.minusYears(2),
             tom = 31.januar.minusYears(2)

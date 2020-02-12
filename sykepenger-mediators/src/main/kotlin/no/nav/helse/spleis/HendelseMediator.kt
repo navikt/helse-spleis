@@ -73,45 +73,45 @@ internal class HendelseMediator(
 
     private inner class Processor : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            val modelNySøknad = message.asModelNySøknad()
+            val modelNySøknad = message.asNySøknad()
 
             hendelseProbe.onNySøknad(modelNySøknad)
             person(modelNySøknad).håndter(modelNySøknad)
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            val modelSendtSøknad = message.asModelSendtSøknad()
+            val modelSendtSøknad = message.asSendtSøknad()
             hendelseProbe.onSendtSøknad(modelSendtSøknad)
             person(modelSendtSøknad).håndter(modelSendtSøknad)
         }
 
         override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
-            val inntektsmelding = message.asModelInntektsmelding()
+            val inntektsmelding = message.asInntektsmelding()
             hendelseProbe.onInntektsmelding(inntektsmelding)
             person(inntektsmelding).håndter(inntektsmelding)
         }
 
         override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
-            val ytelser = message.asModelYtelser()
+            val ytelser = message.asYtelser()
 
             hendelseProbe.onYtelser(ytelser)
             person(ytelser).håndter(ytelser)
         }
 
         override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
-            val vilkårsgrunnlag = message.asModelVilkårsgrunnlag()
+            val vilkårsgrunnlag = message.asVilkårsgrunnlag()
             hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
             person(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
         }
 
         override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {
-            val manuellSaksbehandling = message.asModelManuellSaksbehandling()
+            val manuellSaksbehandling = message.asManuellSaksbehandling()
             hendelseProbe.onManuellSaksbehandling(manuellSaksbehandling)
             person(manuellSaksbehandling).håndter(manuellSaksbehandling)
         }
 
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
-            val påminnelse = message.asModelPåminnelse()
+            val påminnelse = message.asPåminnelse()
                 hendelseProbe.onPåminnelse(påminnelse)
                 person(påminnelse).håndter(påminnelse)
         }

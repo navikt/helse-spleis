@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -53,7 +53,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding etter sendt søknad`() {
         person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
-        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        person.håndter(sendtSøknad(SendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertFalse(aktivitetslogger.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -64,7 +64,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `sendt søknad etter inntektsmelding`() {
         person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(sendtSøknad(ModelSendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        person.håndter(sendtSøknad(SendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         assertFalse(aktivitetslogger.hasErrors(), aktivitetslogger.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
@@ -116,9 +116,9 @@ internal class InntektsmeldingHendelseTest {
         endringerIRefusjon: List<LocalDate> = emptyList(),
         virksomhetsnummer: String = ORGNR
     ) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = virksomhetsnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
@@ -130,7 +130,7 @@ internal class InntektsmeldingHendelseTest {
             aktivitetslogger = aktivitetslogger
         )
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = ModelNySøknad(
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
@@ -140,8 +140,8 @@ internal class InntektsmeldingHendelseTest {
         aktivitetslogger = aktivitetslogger
     )
 
-    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode, orgnummer: String = ORGNR) =
-        ModelSendtSøknad(
+    private fun sendtSøknad(vararg perioder: SendtSøknad.Periode, orgnummer: String = ORGNR) =
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",

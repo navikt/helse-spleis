@@ -1,13 +1,13 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.ModelSykepengehistorikk.Periode.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.juni
 import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class ModelSykepengehistorikkTest {
+internal class UtbetalingshistorikkTest {
 
     @Test
     fun `utbetalingslinjer med refusjon til arbeidsgiver`() {
@@ -39,14 +39,14 @@ internal class ModelSykepengehistorikkTest {
 
     }
 
-    private fun assertInvalid(periode: ModelSykepengehistorikk.Periode) {
+    private fun assertInvalid(periode: Utbetalingshistorikk.Periode) {
         val sykepengehistorikk = sykepengehistorikk(periode)
         assertTrue(sykepengehistorikk.valider().hasErrors())
         assertThrows<Aktivitetslogger.AktivitetException> { sykepengehistorikk.utbetalingslinjer() }
     }
 
-    private fun sykepengehistorikk(periode: ModelSykepengehistorikk.Periode): ModelSykepengehistorikk {
-        return ModelSykepengehistorikk(
+    private fun sykepengehistorikk(periode: Utbetalingshistorikk.Periode): Utbetalingshistorikk {
+        return Utbetalingshistorikk(
             utbetalinger = listOf(periode),
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger()

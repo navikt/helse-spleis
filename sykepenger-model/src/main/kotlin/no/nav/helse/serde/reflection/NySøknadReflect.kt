@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class NySøknadReflect(nySøknad: ModelNySøknad) {
+internal class NySøknadReflect(nySøknad: NySøknad) {
     private val hendelseId: UUID = nySøknad.hendelseId()
     private val hendelsestype: Hendelsestype = nySøknad.hendelsestype()
     private val fnr: String = nySøknad["fnr"]

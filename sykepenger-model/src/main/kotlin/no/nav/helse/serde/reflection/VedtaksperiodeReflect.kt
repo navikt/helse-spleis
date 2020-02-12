@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -18,7 +18,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     private val inntektFraInntektsmelding: Double? = vedtaksperiode["inntektFraInntektsmelding"]
     private val aktivitetslogger: Aktivitetslogger = vedtaksperiode["aktivitetslogger"]
-    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, ModelVilkårsgrunnlag
+    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, Vilkårsgrunnlag
         .Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
             "erEgenAnsatt" to it.erEgenAnsatt,

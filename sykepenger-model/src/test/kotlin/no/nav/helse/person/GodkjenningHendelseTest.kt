@@ -83,7 +83,7 @@ internal class GodkjenningHendelseTest {
         person.håndter(ytelser())
     }
 
-    private fun manuellSaksbehandling(godkjent: Boolean) = ModelManuellSaksbehandling(
+    private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
@@ -97,21 +97,21 @@ internal class GodkjenningHendelseTest {
 
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
-        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
+        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
-    ) = ModelYtelser(
+    ) = Ytelser(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        sykepengehistorikk = ModelSykepengehistorikk(
+        utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger()
         ),
-        foreldrepenger = ModelForeldrepenger(
+        foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
             aktivitetslogger = Aktivitetslogger()
@@ -121,7 +121,7 @@ internal class GodkjenningHendelseTest {
     )
 
     private fun nySøknad() =
-        ModelNySøknad(
+        NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -132,21 +132,21 @@ internal class GodkjenningHendelseTest {
         )
 
     private fun sendtSøknad() =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
             sendtNav = LocalDateTime.now(),
-            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             harAndreInntektskilder = false
         )
 
     private fun inntektsmelding() =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 31000.0, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -159,7 +159,7 @@ internal class GodkjenningHendelseTest {
         )
 
     private fun vilkårsgrunnlag() =
-        ModelVilkårsgrunnlag(
+        Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
@@ -167,13 +167,13 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(
+                Vilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(31000.0)
                 )
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

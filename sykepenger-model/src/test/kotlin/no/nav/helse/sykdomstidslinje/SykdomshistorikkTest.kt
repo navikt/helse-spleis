@@ -1,9 +1,9 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.ModelInntektsmelding
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.testhelpers.februar
@@ -42,8 +42,8 @@ internal class SykdomshistorikkTest {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
             sendtSøknad(
-                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -59,8 +59,8 @@ internal class SykdomshistorikkTest {
     internal fun `Håndterer Ubestemt dag`() {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
         sendtSøknad(
-            ModelSendtSøknad.Periode.Utdanning(9.januar, 12.januar),
-            ModelSendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
+            SendtSøknad.Periode.Utdanning(9.januar, 12.januar),
+            SendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)
             assertTrue(it.hasErrors())
@@ -74,8 +74,8 @@ internal class SykdomshistorikkTest {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
             sendtSøknad(
-                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         historikk.håndter(
@@ -102,8 +102,8 @@ internal class SykdomshistorikkTest {
         historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
         historikk.håndter(
             sendtSøknad(
-                ModelSendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                ModelSendtSøknad.Periode.Egenmelding(2.januar, 3.januar),
+                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar),
                 hendelseId = sendtSøknadId
             )
         )
@@ -121,7 +121,7 @@ internal class SykdomshistorikkTest {
     private fun nySøknad(
         vararg sykeperioder: Triple<LocalDate, LocalDate, Int>,
         hendelseId: UUID = UUID.randomUUID()
-    ) = ModelNySøknad(
+    ) = NySøknad(
         hendelseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
@@ -132,9 +132,9 @@ internal class SykdomshistorikkTest {
     )
 
     private fun sendtSøknad(
-        vararg perioder: ModelSendtSøknad.Periode,
+        vararg perioder: SendtSøknad.Periode,
         hendelseId: UUID = UUID.randomUUID()
-    ) = ModelSendtSøknad(
+    ) = SendtSøknad(
         hendelseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
@@ -153,9 +153,9 @@ internal class SykdomshistorikkTest {
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
-    ) = ModelInntektsmelding(
+    ) = Inntektsmelding(
         hendelseId = UUID.randomUUID(),
-        refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+        refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
         orgnummer = "88888888",
         fødselsnummer = "12020052345",
         aktørId = "100010101010",

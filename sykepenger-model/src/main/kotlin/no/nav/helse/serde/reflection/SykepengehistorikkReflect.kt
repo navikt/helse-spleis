@@ -1,15 +1,15 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelSykepengehistorikk
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Aktivitetslogger
-import java.time.LocalDate
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import java.time.LocalDate
 
-internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehistorikk) {
-    private val utbetalinger: List<ModelSykepengehistorikk.Periode> = sykepengehistorikk["utbetalinger"]
-    private val inntektshistorikk: List<ModelSykepengehistorikk.Inntektsopplysning> =
-        sykepengehistorikk["inntektshistorikk"]
-    private val aktivitetslogger: Aktivitetslogger = sykepengehistorikk["aktivitetslogger"]
+internal class SykepengehistorikkReflect(utbetalingshistorikk: Utbetalingshistorikk) {
+    private val utbetalinger: List<Utbetalingshistorikk.Periode> = utbetalingshistorikk["utbetalinger"]
+    private val inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> =
+        utbetalingshistorikk["inntektshistorikk"]
+    private val aktivitetslogger: Aktivitetslogger = utbetalingshistorikk["aktivitetslogger"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "utbetalinger" to utbetalinger.map {
@@ -18,17 +18,17 @@ internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehisto
                 "tom" to it.tom,
                 "dagsats" to it.dagsats,
                 "type" to when (it) {
-                    is ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver -> "RefusjonTilArbeidsgiver"
-                    is ModelSykepengehistorikk.Periode.ReduksjonMedlem -> "ReduksjonMedlem"
-                    is ModelSykepengehistorikk.Periode.Etterbetaling -> "Etterbetaling"
-                    is ModelSykepengehistorikk.Periode.KontertRegnskap -> "KontertRegnskap"
-                    is ModelSykepengehistorikk.Periode.ReduksjonArbeidsgiverRefusjon -> "ReduksjonArbeidsgiverRefusjon"
-                    is ModelSykepengehistorikk.Periode.Tilbakeført -> "Tilbakeført"
-                    is ModelSykepengehistorikk.Periode.Konvertert -> "Konvertert"
-                    is ModelSykepengehistorikk.Periode.Ferie -> "Ferie"
-                    is ModelSykepengehistorikk.Periode.Opphold -> "Opphold"
-                    is ModelSykepengehistorikk.Periode.Sanksjon -> "Sanksjon"
-                    is ModelSykepengehistorikk.Periode.Ukjent -> "Ukjent"
+                    is Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver -> "RefusjonTilArbeidsgiver"
+                    is Utbetalingshistorikk.Periode.ReduksjonMedlem -> "ReduksjonMedlem"
+                    is Utbetalingshistorikk.Periode.Etterbetaling -> "Etterbetaling"
+                    is Utbetalingshistorikk.Periode.KontertRegnskap -> "KontertRegnskap"
+                    is Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon -> "ReduksjonArbeidsgiverRefusjon"
+                    is Utbetalingshistorikk.Periode.Tilbakeført -> "Tilbakeført"
+                    is Utbetalingshistorikk.Periode.Konvertert -> "Konvertert"
+                    is Utbetalingshistorikk.Periode.Ferie -> "Ferie"
+                    is Utbetalingshistorikk.Periode.Opphold -> "Opphold"
+                    is Utbetalingshistorikk.Periode.Sanksjon -> "Sanksjon"
+                    is Utbetalingshistorikk.Periode.Ukjent -> "Ukjent"
                 }
             )
         },
@@ -36,7 +36,7 @@ internal class SykepengehistorikkReflect(sykepengehistorikk: ModelSykepengehisto
         "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap()
     )
 
-    private class InntektsopplysningReflect(inntektsopplysning: ModelSykepengehistorikk.Inntektsopplysning) {
+    private class InntektsopplysningReflect(inntektsopplysning: Utbetalingshistorikk.Inntektsopplysning) {
         private val sykepengerFom: LocalDate = inntektsopplysning["sykepengerFom"]
         private val inntektPerMåned: Int = inntektsopplysning["inntektPerMåned"]
         private val orgnummer: String = inntektsopplysning["orgnummer"]

@@ -4,8 +4,8 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode.Sykdom
-import no.nav.helse.hendelser.ModelSykepengehistorikk.Inntektsopplysning
+import no.nav.helse.hendelser.SendtSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -353,7 +353,7 @@ internal class KunEnArbeidsgiverTest {
         assertEndringTeller()
     }
 
-    private fun håndterSendtSøknad(vedtaksperiodeIndex: Int, vararg perioder: ModelSendtSøknad.Periode) {
+    private fun håndterSendtSøknad(vedtaksperiodeIndex: Int, vararg perioder: SendtSøknad.Periode) {
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(sendtSøknad(*perioder))
@@ -376,7 +376,7 @@ internal class KunEnArbeidsgiverTest {
 
     private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
         assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
-        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Behovstype.Foreldrepenger))
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
         person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
         assertEndringTeller()
@@ -388,9 +388,9 @@ internal class KunEnArbeidsgiverTest {
         assertEndringTeller()
     }
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): ModelNySøknad {
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): NySøknad {
         hendelselogger = Aktivitetslogger()
-        return ModelNySøknad(
+        return NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
@@ -401,11 +401,11 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private fun sendtSøknad(vararg perioder: ModelSendtSøknad.Periode): ModelSendtSøknad {
+    private fun sendtSøknad(vararg perioder: SendtSøknad.Periode): SendtSøknad {
         hendelselogger = Aktivitetslogger()
-        return ModelSendtSøknad(
+        return SendtSøknad(
             hendelseId = UUID.randomUUID(),
-            fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
+            fnr = NySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             sendtNav = rapportertdato,
@@ -423,11 +423,11 @@ internal class KunEnArbeidsgiverTest {
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
         endringerIRefusjon: List<LocalDate> = emptyList()
-    ): ModelInntektsmelding {
+    ): Inntektsmelding {
         hendelselogger = Aktivitetslogger()
-        return ModelInntektsmelding(
+        return Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
@@ -440,9 +440,9 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): ModelVilkårsgrunnlag {
+    private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
         hendelselogger = Aktivitetslogger()
-        return ModelVilkårsgrunnlag(
+        return Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             aktørId = AKTØRID,
@@ -450,14 +450,14 @@ internal class KunEnArbeidsgiverTest {
             orgnummer = ORGNUMMER,
             rapportertDato = rapportertdato,
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(
+                Vilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it),
                     listOf(inntekt)
                 )
             },
             erEgenAnsatt = false,
             aktivitetslogger = hendelselogger,
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         )
     }
 
@@ -466,17 +466,17 @@ internal class KunEnArbeidsgiverTest {
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
-    ): ModelYtelser {
+    ): Ytelser {
         hendelselogger = Aktivitetslogger()
-        return ModelYtelser(
+        return Ytelser(
             hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            sykepengehistorikk = ModelSykepengehistorikk(
+            utbetalingshistorikk = Utbetalingshistorikk(
                 utbetalinger = utbetalinger.map {
-                    ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                         it.first,
                         it.second,
                         it.third
@@ -485,7 +485,7 @@ internal class KunEnArbeidsgiverTest {
                 inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
                 aktivitetslogger = hendelselogger
             ),
-            foreldrepenger = ModelForeldrepenger(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
+            foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
             rapportertdato = rapportertdato,
             aktivitetslogger = hendelselogger
         )
@@ -494,9 +494,9 @@ internal class KunEnArbeidsgiverTest {
     private fun manuellSaksbehandling(
         vedtaksperiodeIndex: Int,
         utbetalingGodkjent: Boolean
-    ): ModelManuellSaksbehandling {
+    ): ManuellSaksbehandling {
         hendelselogger = Aktivitetslogger()
-        return ModelManuellSaksbehandling(
+        return ManuellSaksbehandling(
             hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,

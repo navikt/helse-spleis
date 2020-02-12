@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.ModelNySøknad
+import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -34,7 +34,7 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asModelNySøknad() = ModelNySøknad(
+    internal fun asNySøknad() = NySøknad(
         hendelseId = this.id,
         fnr = fnr,
         aktørId = aktørId,

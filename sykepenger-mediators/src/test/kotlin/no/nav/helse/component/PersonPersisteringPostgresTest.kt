@@ -6,9 +6,9 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.hendelser.ModelNySøknad
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
@@ -92,7 +92,7 @@ class PersonPersisteringPostgresTest {
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknad(aktørId))
         person.håndter(
-            ModelSendtSøknad(
+            SendtSøknad(
                 hendelseId = UUID.randomUUID(),
                 fnr = "fnr",
                 aktørId = aktørId,
@@ -134,7 +134,7 @@ class PersonPersisteringPostgresTest {
         assertNull(personRepository.hentPerson(aktørId))
     }
 
-    private fun nySøknad(aktørId: String) = ModelNySøknad(
+    private fun nySøknad(aktørId: String) = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = aktørId,

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.ModelInntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
 import no.nav.helse.spleis.rest.HendelseDTO
@@ -26,7 +26,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
     }
 
     val refusjon get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
-        ModelInntektsmelding.Refusjon(
+        Inntektsmelding.Refusjon(
             this["refusjon.opphoersdato"].asOptionalLocalDate(),
             beløpPerMåned.asDouble(),
             this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
@@ -41,7 +41,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
     val arbeidsgiverperioder get() = this["arbeidsgiverperioder"].map(::asPeriode)
     val ferieperioder get() = this["ferieperioder"].map(::asPeriode)
 
-    internal fun asModelInntektsmelding() = ModelInntektsmelding(
+    internal fun asInntektsmelding() = Inntektsmelding(
         hendelseId = this.id,
         refusjon = refusjon,
         orgnummer = orgnummer,

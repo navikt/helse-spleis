@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class ModelInntektsmeldingTest {
+internal class InntektsmeldingTest {
 
-    private lateinit var inntektsmelding: ModelInntektsmelding
+    private lateinit var inntektsmelding: Inntektsmelding
     private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
@@ -110,9 +110,9 @@ internal class ModelInntektsmeldingTest {
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
-        inntektsmelding = ModelInntektsmelding(
+        inntektsmelding = Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = "88888888",
             fødselsnummer = "12020052345",
             aktørId = "100010101010",

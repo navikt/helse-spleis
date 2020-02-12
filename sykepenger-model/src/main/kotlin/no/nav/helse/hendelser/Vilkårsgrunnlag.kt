@@ -11,7 +11,7 @@ import kotlin.math.absoluteValue
 import kotlin.streams.toList
 
 @Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
-class ModelVilkårsgrunnlag(
+class Vilkårsgrunnlag(
     hendelseId: UUID,
     private val vedtaksperiodeId: String,
     private val aktørId: String,
@@ -19,7 +19,7 @@ class ModelVilkårsgrunnlag(
     private val orgnummer: String,
     private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
-    private val arbeidsforhold: ModelArbeidsforhold,
+    private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger
 ) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
@@ -97,7 +97,7 @@ class ModelVilkårsgrunnlag(
         internal val harOpptjening: Boolean
     )
 
-    class ModelArbeidsforhold(
+    class MangeArbeidsforhold(
         private val arbeidsforhold: List<Arbeidsforhold>
     ) {
         internal fun antallOpptjeningsdager(førsteFraværsdag: LocalDate, orgnummer: String) = arbeidsforhold

@@ -7,7 +7,7 @@ import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.util.*
 
-class ModelPåminnelse(
+class Påminnelse(
     hendelseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,

@@ -54,7 +54,7 @@ internal class YtelserHendelseTest {
         val sisteHistoriskeSykedag = førsteSykedag.minusDays(180)
         håndterYtelser(
             utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     sisteHistoriskeSykedag.minusDays(14),
                     sisteHistoriskeSykedag,
                     1000
@@ -70,7 +70,7 @@ internal class YtelserHendelseTest {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
         håndterYtelser(
             utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     sisteHistoriskeSykedag.minusDays(14),
                     sisteHistoriskeSykedag,
                     1000
@@ -123,7 +123,7 @@ internal class YtelserHendelseTest {
     }
 
     private fun håndterYtelser(
-        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
+        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null
     ) {
@@ -142,21 +142,21 @@ internal class YtelserHendelseTest {
 
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
-        utbetalinger: List<ModelSykepengehistorikk.Periode> = emptyList(),
+        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
-    ) = ModelYtelser(
+    ) = Ytelser(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNR,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        sykepengehistorikk = ModelSykepengehistorikk(
+        utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger()
         ),
-        foreldrepenger = ModelForeldrepenger(
+        foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
             aktivitetslogger = Aktivitetslogger()
@@ -166,7 +166,7 @@ internal class YtelserHendelseTest {
     )
 
     private fun nySøknad() =
-        ModelNySøknad(
+        NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -177,25 +177,25 @@ internal class YtelserHendelseTest {
         )
 
     private fun sendtSøknad() =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
             sendtNav = LocalDateTime.now(),
-            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             harAndreInntektskilder = false
         )
 
     private fun inntektsmelding(
-        refusjon: ModelInntektsmelding.Refusjon = ModelInntektsmelding.Refusjon(
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
             null,
             31000.0,
             emptyList()
         )
     ) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
             refusjon = refusjon,
             orgnummer = ORGNR,
@@ -210,7 +210,7 @@ internal class YtelserHendelseTest {
         )
 
     private fun vilkårsgrunnlag() =
-        ModelVilkårsgrunnlag(
+        Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
@@ -218,13 +218,13 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(
+                Vilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(31000.0)
                 )
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

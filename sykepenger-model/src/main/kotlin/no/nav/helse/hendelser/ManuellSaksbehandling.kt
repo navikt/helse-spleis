@@ -8,7 +8,7 @@ import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDateTime
 import java.util.*
 
-class ModelManuellSaksbehandling(
+class ManuellSaksbehandling(
     hendelseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,

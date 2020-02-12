@@ -1,13 +1,13 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelManuellSaksbehandling
+import no.nav.helse.hendelser.ManuellSaksbehandling
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ModelManuellSaksbehandling) {
+internal class ManuellSaksbehandlingReflect(manuellSaksbehandling: ManuellSaksbehandling) {
     private val hendelseId: UUID = manuellSaksbehandling.hendelseId()
     private val hendelsestype: Hendelsestype = manuellSaksbehandling.hendelsestype()
     private val aktørId: String = manuellSaksbehandling["aktørId"]

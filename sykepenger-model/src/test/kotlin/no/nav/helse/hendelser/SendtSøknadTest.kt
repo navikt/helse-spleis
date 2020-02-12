@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode.*
+import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.hendelser.SendtSøknad.Periode.*
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -11,13 +11,13 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ModelSendtSøknadTest {
+internal class SendtSøknadTest {
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
-    private lateinit var sendtSøknad: ModelSendtSøknad
+    private lateinit var sendtSøknad: SendtSøknad
     private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
@@ -118,9 +118,9 @@ internal class ModelSendtSøknadTest {
     }
 
     private fun sendtSøknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
-        sendtSøknad = ModelSendtSøknad(
+        sendtSøknad = SendtSøknad(
             hendelseId = UUID.randomUUID(),
-            fnr = ModelNySøknadTest.UNG_PERSON_FNR_2018,
+            fnr = NySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
             sendtNav = LocalDateTime.now(),

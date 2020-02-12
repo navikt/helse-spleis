@@ -1,12 +1,12 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.hendelser.ModelForeldrepenger
+import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
-internal class ForeldrepengerReflect(foreldrepenger: ModelForeldrepenger) {
-    private val foreldrepengeytelse: Periode? = foreldrepenger["foreldrepengeytelse"]
-    private val svangerskapsytelse: Periode? = foreldrepenger["svangerskapsytelse"]
+internal class ForeldrepengerReflect(foreldrepermisjon: Foreldrepermisjon) {
+    private val foreldrepengeytelse: Periode? = foreldrepermisjon["foreldrepengeytelse"]
+    private val svangerskapsytelse: Periode? = foreldrepermisjon["svangerskapsytelse"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "foreldrepengeytelse" to foreldrepengeytelse?.let(::periode),

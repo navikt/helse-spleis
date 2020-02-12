@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Uke
 import no.nav.helse.get
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
@@ -98,7 +98,7 @@ internal class SykepengesøknadTidslinjeTest {
 
     private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                             sendtNav: LocalDateTime = LocalDateTime.now()) =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
@@ -109,7 +109,7 @@ internal class SykepengesøknadTidslinjeTest {
             harAndreInntektskilder = false
         )
 
-    private fun nySøknad() = ModelNySøknad(
+    private fun nySøknad() = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = "aktørId",

@@ -67,9 +67,9 @@ internal class ArbeidsgiverHåndterHendelse(
 
 internal class Overlappende(
     private val sykdomsperiode: Periode,
-    private val foreldrepenger: ModelForeldrepenger
+    private val foreldrepermisjon: Foreldrepermisjon
 ) : Valideringssteg {
-    override fun isValid() = !foreldrepenger.overlapper(sykdomsperiode)
+    override fun isValid() = !foreldrepermisjon.overlapper(sykdomsperiode)
     override fun feilmelding() = "Har overlappende foreldrepengeperioder med syketilfelle"
 }
 
@@ -99,7 +99,7 @@ internal class HarArbeidsgivertidslinje(private val arbeidsgiver: Arbeidsgiver) 
 internal class ByggUtbetalingstidlinjer(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val periode: Periode,
-    private val ytelser: ModelYtelser,
+    private val ytelser: Ytelser,
     private val alder: Alder
 ) : Valideringssteg {
     private lateinit var engine: ArbeidsgiverUtbetalinger
@@ -124,7 +124,7 @@ internal class ByggUtbetalingstidlinjer(
     override fun feilmelding() = "Feil ved kalkulering av utbetalingstidslinjer"
 }
 
-internal class ByggUtbetalingslinjer(private val ytelser: ModelYtelser,
+internal class ByggUtbetalingslinjer(private val ytelser: Ytelser,
                                      private val utbetalingstidslinje: Utbetalingstidslinje
 ) : Valideringssteg {
     private lateinit var utbetalingslinjer: List<Utbetalingslinje>

@@ -108,12 +108,12 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun ansattSidenStart2017() =
-        listOf(ModelVilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
+        listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Double): List<ModelVilkårsgrunnlag.Måned> {
+    private fun tolvMånederMedInntekt(beregnetInntekt: Double): List<Vilkårsgrunnlag.Måned> {
         return (1..12).map {
-            ModelVilkårsgrunnlag.Måned(
+            Vilkårsgrunnlag.Måned(
                 YearMonth.of(2018, it), listOf(beregnetInntekt)
             )
         }
@@ -129,8 +129,8 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
-        inntekter: List<ModelVilkårsgrunnlag.Måned>,
-        arbeidsforhold: List<ModelVilkårsgrunnlag.Arbeidsforhold>
+        inntekter: List<Vilkårsgrunnlag.Måned>,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
@@ -139,7 +139,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun nySøknad() =
-        ModelNySøknad(
+        NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -150,21 +150,21 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
     private fun sendtSøknad() =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
             sendtNav = LocalDateTime.now(),
-            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
+            perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             harAndreInntektskilder = false
         )
 
     private fun inntektsmelding(beregnetInntekt: Double) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -178,10 +178,10 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: List<ModelVilkårsgrunnlag.Måned>,
-        arbeidsforhold: List<ModelVilkårsgrunnlag.Arbeidsforhold>
+        inntekter: List<Vilkårsgrunnlag.Måned>,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) =
-        ModelVilkårsgrunnlag(
+        Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
@@ -191,7 +191,7 @@ internal class VilkårsgrunnlagHendelseTest {
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
             aktivitetslogger = aktivitetslogger,
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(arbeidsforhold)
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

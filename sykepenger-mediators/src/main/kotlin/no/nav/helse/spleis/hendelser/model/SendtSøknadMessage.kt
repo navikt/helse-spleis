@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.ModelSendtSøknad
-import no.nav.helse.hendelser.ModelSendtSøknad.Periode
+import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -57,8 +57,8 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asModelSendtSøknad(): ModelSendtSøknad {
-        return ModelSendtSøknad(
+    internal fun asSendtSøknad(): SendtSøknad {
+        return SendtSøknad(
             hendelseId = this.id,
             fnr = fnr,
             aktørId = aktørId,

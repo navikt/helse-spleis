@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class ModelSendtSøknad constructor(
+class SendtSøknad constructor(
     hendelseId: UUID,
     private val fnr: String,
     private val aktørId: String,
@@ -64,9 +64,9 @@ class ModelSendtSøknad constructor(
 
         internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
-        internal open fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {}
+        internal open fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {}
 
-        internal fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
+        internal fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
             if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.error(beskjed)
         }
 
@@ -74,7 +74,7 @@ class ModelSendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
         }
 
@@ -87,7 +87,7 @@ class ModelSendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) {
+            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
                 if (grad != 100) aktivitetslogger.error("grad i søknaden er ikke 100%%")
                 if (faktiskGrad != 100.0) aktivitetslogger.error("faktisk grad i søknaden er ikke 100%%")
             }
@@ -97,7 +97,7 @@ class ModelSendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.need(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
         }
 
@@ -105,7 +105,7 @@ class ModelSendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.need(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
         }
 
@@ -118,7 +118,7 @@ class ModelSendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
-            override fun valider(sendtSøknad: ModelSendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")
         }
     }

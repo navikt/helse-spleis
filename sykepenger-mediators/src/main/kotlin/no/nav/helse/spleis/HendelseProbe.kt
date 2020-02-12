@@ -20,34 +20,34 @@ class HendelseProbe {
                 .register()
     }
 
-    fun onPåminnelse(påminnelse: ModelPåminnelse) {
+    fun onPåminnelse(påminnelse: Påminnelse) {
         påminnetCounter
             .labels(påminnelse.tilstand().toString())
             .inc()
         påminnelse.tell()
     }
 
-    fun onYtelser(ytelser: ModelYtelser) {
+    fun onYtelser(ytelser: Ytelser) {
         ytelser.tell()
     }
 
-    fun onManuellSaksbehandling(manuellSaksbehandling: ModelManuellSaksbehandling) {
+    fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
         manuellSaksbehandling.tell()
     }
 
-    fun onVilkårsgrunnlag(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+    fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.tell()
     }
 
-    fun onInntektsmelding(inntektsmelding: ModelInntektsmelding) {
+    fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
         inntektsmelding.tell()
     }
 
-    fun onNySøknad(søknad: ModelNySøknad) {
+    fun onNySøknad(søknad: NySøknad) {
         søknad.tell()
     }
 
-    fun onSendtSøknad(søknad: ModelSendtSøknad) {
+    fun onSendtSøknad(søknad: SendtSøknad) {
         søknad.tell()
     }
 

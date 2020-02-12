@@ -120,7 +120,7 @@ internal class PersonTest {
             it.håndter(
                 sendtSøknad(
                     perioder = listOf(
-                        ModelSendtSøknad.Periode.Sykdom(
+                        SendtSøknad.Periode.Sykdom(
                             fom = 1.juli,
                             tom = 20.juli,
                             grad = 100
@@ -131,7 +131,7 @@ internal class PersonTest {
         }
         sendtSøknad(
             perioder = listOf(
-                ModelSendtSøknad.Periode.Sykdom(
+                SendtSøknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -155,7 +155,7 @@ internal class PersonTest {
         assertFalse(inspektør.personLogger.hasErrors())
         sendtSøknad(
             perioder = listOf(
-                ModelSendtSøknad.Periode.Sykdom(
+                SendtSøknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -216,7 +216,7 @@ internal class PersonTest {
     internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         sendtSøknad(
             perioder = listOf(
-                ModelSendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
+                SendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
             ),
             sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
         ).also {
@@ -229,8 +229,8 @@ internal class PersonTest {
     internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
         sendtSøknad(
             perioder = listOf(
-                ModelSendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
-                ModelSendtSøknad.Periode.Sykdom(
+                SendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
+                SendtSøknad.Periode.Sykdom(
                     fom = Uke(1).fredag,
                     tom = Uke(1).fredag,
                     grad = 100,
@@ -257,14 +257,14 @@ internal class PersonTest {
     @Test
     internal fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         testPerson.also {
-            it.håndter(ModelYtelser(
+            it.håndter(Ytelser(
                 hendelseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
-                sykepengehistorikk = ModelSykepengehistorikk(emptyList(), emptyList(), Aktivitetslogger()),
-                foreldrepenger = ModelForeldrepenger(null, null, Aktivitetslogger()),
+                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), Aktivitetslogger()),
+                foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger()),
                 rapportertdato = LocalDateTime.now(),
                 aktivitetslogger = Aktivitetslogger()
             ))
@@ -322,9 +322,9 @@ internal class PersonTest {
         arbeidsgiverperioder: List<Periode> = listOf(Periode(10.september, 10.september.plusDays(16))),
         førsteFraværsdag: LocalDate = LocalDate.now()
     ) =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(
+            refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0
             ),
@@ -342,7 +342,7 @@ internal class PersonTest {
     private fun nySøknad(
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
-    ) = ModelNySøknad(
+    ) = NySøknad(
         hendelseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
@@ -352,8 +352,8 @@ internal class PersonTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun sendtSøknad(perioder: List<ModelSendtSøknad.Periode> = listOf(ModelSendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
-        ModelSendtSøknad(
+    private fun sendtSøknad(perioder: List<SendtSøknad.Periode> = listOf(SendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktørId,
@@ -365,7 +365,7 @@ internal class PersonTest {
         )
 
 
-    private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) = ModelPåminnelse(
+    private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) = Påminnelse(
         hendelseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

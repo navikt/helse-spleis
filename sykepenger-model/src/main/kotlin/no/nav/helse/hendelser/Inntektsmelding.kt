@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
-import no.nav.helse.hendelser.ModelInntektsmelding.InntektsmeldingPeriode.Ferieperiode
+import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
+import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class ModelInntektsmelding(
+class Inntektsmelding(
     hendelseId: UUID,
     private val refusjon: Refusjon?,
     private val orgnummer: String,
@@ -46,18 +46,18 @@ class ModelInntektsmelding(
         internal val fom: LocalDate,
         internal val tom: LocalDate
     ) {
-        internal abstract fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding): ConcreteSykdomstidslinje
+        internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): ConcreteSykdomstidslinje
 
         internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun sykdomstidslinje(inntektsmelding: ModelInntektsmelding) =
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
                 ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
         }
     }

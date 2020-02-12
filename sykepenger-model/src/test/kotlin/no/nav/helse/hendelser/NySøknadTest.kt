@@ -10,13 +10,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ModelNySøknadTest {
+internal class NySøknadTest {
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
-    private lateinit var nySøknad: ModelNySøknad
+    private lateinit var nySøknad: NySøknad
     private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
@@ -50,7 +50,7 @@ internal class ModelNySøknadTest {
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
-        nySøknad = ModelNySøknad(
+        nySøknad = NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",

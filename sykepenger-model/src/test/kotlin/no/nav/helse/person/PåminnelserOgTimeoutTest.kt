@@ -174,19 +174,19 @@ class PåminnelserOgTimeoutTest {
     }
 
     private fun sendtSøknad() =
-        ModelSendtSøknad(
+        SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
             sendtNav = rapportertdato,
-            perioder = listOf(ModelSendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
+            perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
             harAndreInntektskilder = false
         )
 
     private fun nySøknad() =
-        ModelNySøknad(
+        NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
@@ -197,9 +197,9 @@ class PåminnelserOgTimeoutTest {
         )
 
     private fun inntektsmelding() =
-        ModelInntektsmelding(
+        Inntektsmelding(
             hendelseId = UUID.randomUUID(),
-            refusjon = ModelInntektsmelding.Refusjon(null, 31000.0, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
@@ -212,7 +212,7 @@ class PåminnelserOgTimeoutTest {
         )
 
     private fun vilkårsgrunnlag() =
-        ModelVilkårsgrunnlag(
+        Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
@@ -220,24 +220,24 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
-                ModelVilkårsgrunnlag.Måned(
+                Vilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it), listOf(31000.0)
                 )
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
-            arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         )
 
-    private fun ytelser() = ModelYtelser(
+    private fun ytelser() = Ytelser(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
-        sykepengehistorikk = ModelSykepengehistorikk(
+        utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = listOf(
-                ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     17.januar(2017),
                     20.januar(2017),
                     1000
@@ -246,7 +246,7 @@ class PåminnelserOgTimeoutTest {
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger()
         ),
-        foreldrepenger = ModelForeldrepenger(
+        foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = null,
             svangerskapsytelse = null,
             aktivitetslogger = Aktivitetslogger()
@@ -255,7 +255,7 @@ class PåminnelserOgTimeoutTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun manuellSaksbehandling() = ModelManuellSaksbehandling(
+    private fun manuellSaksbehandling() = ManuellSaksbehandling(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
@@ -267,7 +267,7 @@ class PåminnelserOgTimeoutTest {
         aktivitetslogger = Aktivitetslogger()
     )
 
-    private fun påminnelse(tilstandType: TilstandType) = ModelPåminnelse(
+    private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
         hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,

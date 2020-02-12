@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.ModelPåminnelse
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.hendelser.JsonMessage
@@ -36,8 +36,8 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
         processor.process(this, problems)
     }
 
-    internal fun asModelPåminnelse(): ModelPåminnelse {
-        return ModelPåminnelse(
+    internal fun asPåminnelse(): Påminnelse {
+        return Påminnelse(
             hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),

@@ -1,6 +1,6 @@
 package no.nav.helse.serde
 
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -152,7 +152,7 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitInntektFraInntektsmelding(inntektFraInntektsmelding)
     }
 
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?) {
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
         target.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
     }
 

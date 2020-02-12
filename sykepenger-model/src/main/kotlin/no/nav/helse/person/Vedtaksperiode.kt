@@ -34,7 +34,7 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingsreferanse: String?,
     private var førsteFraværsdag: LocalDate?,
     private var inntektFraInntektsmelding: Double?,
-    private var dataForVilkårsvurdering: ModelVilkårsgrunnlag.Grunnlagsdata?,
+    private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val aktivitetslogger: Aktivitetslogger
 ) {
@@ -94,26 +94,26 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
 
-    internal fun håndter(nySøknad: ModelNySøknad) = overlapperMed(nySøknad).also {
+    internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
         if (!it) return it
         tilstand.håndter(this, nySøknad)
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: ModelSendtSøknad) =
+    internal fun håndter(sendtSøknad: SendtSøknad) =
         overlapperMed(sendtSøknad).also {
             if (!it) return it
             tilstand.håndter(this, arbeidsgiver, person, sendtSøknad)
             sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
         }
 
-    internal fun håndter(inntektsmelding: ModelInntektsmelding) = overlapperMed(inntektsmelding).also {
+    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         tilstand.håndter(this, inntektsmelding)
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(ytelser: ModelYtelser) {
+    internal fun håndter(ytelser: Ytelser) {
         if (id.toString() != ytelser.vedtaksperiodeId()) return
         tilstand.håndter(person, arbeidsgiver, this, ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
@@ -121,7 +121,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(
-        manuellSaksbehandling: ModelManuellSaksbehandling,
+        manuellSaksbehandling: ManuellSaksbehandling,
         arbeidsgiver: Arbeidsgiver,
         person: Person
     ) {
@@ -130,13 +130,13 @@ internal class Vedtaksperiode private constructor(
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+    internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         if (id.toString() != vilkårsgrunnlag.vedtaksperiodeId()) return
         tilstand.håndter(this, vilkårsgrunnlag)
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(påminnelse: ModelPåminnelse): Boolean {
+    internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId()) return false
         tilstand.håndter(this, påminnelse)
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
@@ -186,7 +186,7 @@ internal class Vedtaksperiode private constructor(
     @Deprecated("Skal bruke aktivitetslogger.need()")
     private fun trengerYtelser() {
         person.vedtaksperiodeTrengerLøsning(
-            ModelYtelser.lagBehov(
+            Ytelser.lagBehov(
                 vedtaksperiodeId = id,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -253,7 +253,7 @@ internal class Vedtaksperiode private constructor(
 
         val timeout: Duration
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
             nySøknad.error("uventet NySøknad")
             vedtaksperiode.tilstand(nySøknad, TilInfotrygd)
         }
@@ -262,21 +262,21 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: ModelSendtSøknad
+            sendtSøknad: SendtSøknad
         ) {
             sendtSøknad.error("uventet SendtSøknad")
             vedtaksperiode.tilstand(sendtSøknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.warn("uventet Inntektsmelding")
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.error("uventet vilkårsgrunnlag")
         }
 
-        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: ModelYtelser) {
+        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             ytelser.error("uventet sykdom- og inntektshistorikk")
         }
 
@@ -284,12 +284,12 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandling: ModelManuellSaksbehandling
+            manuellSaksbehandling: ManuellSaksbehandling
         ) {
             manuellSaksbehandling.error("uventet manuell saksbehandling")
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
@@ -310,7 +310,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object StartTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: ModelNySøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
             vedtaksperiode.tilstand(nySøknad, MottattNySøknad) {
                 vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
             }
@@ -327,7 +327,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: ModelSendtSøknad
+            sendtSøknad: SendtSøknad
         ) {
             val nesteTilstand =
                 when {
@@ -339,7 +339,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.aktivitetslogger.info("Fullført behandling av sendt søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerSendtSøknad)
@@ -359,7 +359,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogger.info("Avventer ferdigbehandlig av tidligere periode eller inntektsmelding før videre behandling")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerTidligerePeriode)
@@ -409,7 +409,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            ytelser: ModelYtelser
+            ytelser: Ytelser
         ) {
             val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
             if (sisteHistoriskeSykedag == null || !sisteHistoriskeSykedag.harTilstøtende(vedtaksperiode.periode().start))
@@ -446,13 +446,13 @@ internal class Vedtaksperiode private constructor(
 
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.gjelderTilstand(AvventerHistorikk.type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
@@ -485,7 +485,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: ModelSendtSøknad
+            sendtSøknad: SendtSøknad
         ) {
             val nesteTilstand =
                 if (arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) AvventerVilkårsprøving
@@ -505,7 +505,7 @@ internal class Vedtaksperiode private constructor(
 
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: ModelInntektsmelding) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
@@ -523,13 +523,13 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogger.info("Forespør vilkårsgrunnlag")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             emitTrengerVilkårsgrunnlag(vedtaksperiode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: ModelVilkårsgrunnlag) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             val førsteFraværsdag = vedtaksperiode.førsteFraværsdag
                 ?: vedtaksperiode.aktivitetslogger.severe("Første fraværsdag mangler i Vilkårsprøving tilstand")
             val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding()
@@ -560,7 +560,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogger.info("Forespør sykdoms- og inntektshistorikk")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
@@ -570,7 +570,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            ytelser: ModelYtelser
+            ytelser: Ytelser
         ) {
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
@@ -625,7 +625,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             vedtaksperiode.person.vedtaksperiodeTrengerLøsning(
-                ModelManuellSaksbehandling.lagBehov(
+                ManuellSaksbehandling.lagBehov(
                     vedtaksperiode.id,
                     vedtaksperiode.aktørId,
                     vedtaksperiode.fødselsnummer,
@@ -639,7 +639,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandling: ModelManuellSaksbehandling
+            manuellSaksbehandling: ManuellSaksbehandling
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
@@ -659,7 +659,7 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_UTBETALING
         override val timeout: Duration = Duration.ZERO
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
@@ -723,7 +723,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogger.warn("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: ModelPåminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
     companion object {

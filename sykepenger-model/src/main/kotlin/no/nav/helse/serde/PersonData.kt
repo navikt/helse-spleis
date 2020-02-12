@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.hendelser.ModelVilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
@@ -186,8 +186,8 @@ private fun parseUtbetalingslinje(
 
 private fun parseDataForVilkårsvurdering(
     data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData
-): ModelVilkårsgrunnlag.Grunnlagsdata =
-    ModelVilkårsgrunnlag.Grunnlagsdata(
+): Vilkårsgrunnlag.Grunnlagsdata =
+    Vilkårsgrunnlag.Grunnlagsdata(
         erEgenAnsatt = data.erEgenAnsatt,
         beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
         avviksprosent = data.avviksprosent,

@@ -122,7 +122,7 @@ internal class JsonBuilderTest {
 
 
         private val nySøknad
-            get() = ModelNySøknad(
+            get() = NySøknad(
                 hendelseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
@@ -133,23 +133,23 @@ internal class JsonBuilderTest {
             )
 
         private val sendtSøknad
-            get() = ModelSendtSøknad(
+            get() = SendtSøknad(
                 hendelseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
                 sendtNav = LocalDateTime.now(),
                 perioder = listOf(
-                    ModelSendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
+                    SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
                 aktivitetslogger = Aktivitetslogger(),
                 harAndreInntektskilder = false
             )
 
         private val inntektsmelding
-            get() = ModelInntektsmelding(
+            get() = Inntektsmelding(
                 hendelseId = UUID.randomUUID(),
-                refusjon = ModelInntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+                refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
                 orgnummer = orgnummer,
                 fødselsnummer = fnr,
                 aktørId = aktørId,
@@ -162,7 +162,7 @@ internal class JsonBuilderTest {
             )
 
         private val vilkårsgrunnlag
-            get() = ModelVilkårsgrunnlag(
+            get() = Vilkårsgrunnlag(
                 hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
@@ -170,27 +170,27 @@ internal class JsonBuilderTest {
                 orgnummer = orgnummer,
                 rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = (1.rangeTo(12)).map {
-                    ModelVilkårsgrunnlag.Måned(
+                    Vilkårsgrunnlag.Måned(
                         årMåned = YearMonth.of(2018, it),
                         inntektsliste = listOf(31000.0)
                     )
                 },
-                arbeidsforhold = ModelVilkårsgrunnlag.ModelArbeidsforhold(listOf(ModelVilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
+                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
                 erEgenAnsatt = false,
                 aktivitetslogger = Aktivitetslogger()
 
             )
 
         private val ytelser
-            get() = ModelYtelser(
+            get() = Ytelser(
                 hendelseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                sykepengehistorikk = ModelSykepengehistorikk(
+                utbetalingshistorikk = Utbetalingshistorikk(
                     utbetalinger = listOf(
-                        ModelSykepengehistorikk.Periode.RefusjonTilArbeidsgiver(
+                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),
                             tom = 31.januar.minusYears(1),
                             dagsats = 31000
@@ -199,7 +199,7 @@ internal class JsonBuilderTest {
                     inntektshistorikk = emptyList(),
                     aktivitetslogger = Aktivitetslogger()
                 ),
-                foreldrepenger = ModelForeldrepenger(
+                foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(
                         fom = 1.januar.minusYears(2),
                         tom = 31.januar.minusYears(2)
@@ -215,7 +215,7 @@ internal class JsonBuilderTest {
             )
 
         private val manuellSaksbehandling
-            get() = ModelManuellSaksbehandling(
+            get() = ManuellSaksbehandling(
                 hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
