@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+@Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
 class ModelYtelser(
     hendelseId: UUID,
     private val aktørId: String,

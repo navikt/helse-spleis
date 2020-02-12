@@ -10,6 +10,7 @@ import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.streams.toList
 
+@Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
 class ModelVilkårsgrunnlag(
     hendelseId: UUID,
     private val vedtaksperiodeId: String,

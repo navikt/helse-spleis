@@ -4,6 +4,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 import java.util.*
 
+@Deprecated("Skal bruke aktivitetslogger.need()")
 class Behov internal constructor(private val pakke: Pakke) {
 
     companion object {

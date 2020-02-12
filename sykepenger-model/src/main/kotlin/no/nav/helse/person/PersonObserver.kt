@@ -49,8 +49,10 @@ interface PersonObserver {
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
 
+    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTrengerLøsning(behov: Behov) {}
 
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
