@@ -13,5 +13,4 @@ interface AktivitetsloggerVisitor {
     fun visitError(aktivitet: Aktivitetslogger.Aktivitet.Error, melding: String, tidsstempel: String) {}
     fun visitSevere(aktivitet: Aktivitetslogger.Aktivitet.Severe, melding: String, tidsstempel: String) {}
     fun postVisitAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
-
 }
