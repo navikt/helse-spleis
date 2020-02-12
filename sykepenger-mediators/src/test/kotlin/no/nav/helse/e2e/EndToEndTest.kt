@@ -316,6 +316,8 @@ internal class EndToEndTest {
         sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
         sendSykepengehistorikkløsning(enAktørId, fødselsnummer, emptyList())
 
+        assertVedtaksperiodeEndretEvent(fødselsnummer, virksomhetsnummer, enAktørId, TilstandType.AVVENTER_HISTORIKK, TilstandType.AVVENTER_GODKJENNING)
+
         enAktørId.hentPerson {
             assertEquals(3, objectMapper.readTree(this)["hendelser"].size())
         }

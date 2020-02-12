@@ -91,7 +91,7 @@ internal class Utbetalingstidslinje private constructor(
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.utbetalingsdager.last().dato, other.utbetalingsdager.last().dato)
 
-    private fun subset(
+    internal fun subset(
         fom: LocalDate,
         tom: LocalDate,
         others: List<Utbetalingstidslinje> = emptyList()

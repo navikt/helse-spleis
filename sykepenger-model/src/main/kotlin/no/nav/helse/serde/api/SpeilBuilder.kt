@@ -97,6 +97,7 @@ internal class SpeilBuilder : PersonVisitor {
         hendelseReferanser.add(inntekt.hendelseId)
         currentState.visitInntekt(inntekt)
     }
+
     override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
@@ -272,17 +273,15 @@ internal class SpeilBuilder : PersonVisitor {
             id: UUID,
             organisasjonsnummer: String
         ) {
-            if (utbetalingstidslinjer.size > 0) {
-                vedtaksperioder.forEach { periodeMap ->
-                    val førsteFraværsdag = periodeMap["førsteFraværsdag"] as LocalDate
-                    val sisteSykedag = (periodeMap["sykdomstidslinje"] as List<Map<String,Any?>>).map { it["dagen"] as LocalDate }.max()
-                    periodeMap["utbetalingstidslinje"] =
-                        (utbetalingstidslinjer.last()["dager"] as List<Map<String,Any?>>).mapNotNull {
-                            val dato = it["dato"] as LocalDate
-                            if (dato.isBefore(førsteFraværsdag) || dato.isAfter(sisteSykedag))
-                                null else it
-                        }
-                }
+            vedtaksperioder.forEach { periodeMap ->
+                val førsteFraværsdag = periodeMap["førsteFraværsdag"] as LocalDate
+                val sisteSykedag =
+                    (periodeMap["sykdomstidslinje"] as List<Map<String, Any?>>).map { it["dagen"] as LocalDate }.max()!!
+                periodeMap["utbetalingstidslinje"] =
+                    (utbetalingstidslinjer.last()["dager"] as List<MutableMap<String, Any?>>).filterNot {
+                        (it["dato"] as LocalDate)
+                            .isBefore(førsteFraværsdag) || (it["dato"] as LocalDate).isAfter(sisteSykedag)
+                    }
             }
             popState()
         }
@@ -303,15 +302,19 @@ internal class SpeilBuilder : PersonVisitor {
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
+
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             dager.add(NavDagReflect(dag, "NavDag").toMap())
         }
+
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
         }
+
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
         }
+
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
         }
