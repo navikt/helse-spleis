@@ -3,3 +3,5 @@
 build
 out
 !/.idea/codeStyles/*.xml
+.DS_Store
+

@@ -1,5 +1,8 @@
 package no.nav.helse.person
 
+import no.nav.helse.behov.Pakke
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -153,8 +156,72 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, melding, tidsstempel) {
-            enum class NeedType {
-                GjennomgåTidslinje
+            sealed class NeedType(private val transportpakke: Pakke.Transportpakke) {
+                fun pakke(): Pakke = transportpakke + pakke()
+                protected abstract fun tilPakke(): Pakke
+
+                class GjennomgåTidslinje internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("GjennomgåTidslinje"))
+                }
+
+                class Sykepengehistorikk internal constructor(
+                    transportpakke: Pakke.Transportpakke,
+                    private val utgangspunktForBeregningAvYtelse: LocalDate
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(
+                        listOf("Sykepengehistorikk"),
+                        mapOf("utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse)
+                    )
+                }
+
+                class Foreldrepenger internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("Foreldrepenger"))
+                }
+
+                class Inntektsberegning internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("Inntektsberegning"))
+                }
+
+                class EgenAnsatt internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("EgenAnsatt"))
+                }
+
+                class Opptjening internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("Opptjening"))
+                }
+
+                class Godkjenning internal constructor(
+                    transportpakke: Pakke.Transportpakke
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(listOf("Godkjenning"))
+                }
+
+                class Utbetaling internal constructor(
+                    transportpakke: Pakke.Transportpakke,
+                    private val utbetalingsreferanse: String,
+                    private val utbetalingslinjer: List<Utbetalingslinje>,
+                    private val maksdato: LocalDate,
+                    private val saksbehandler: String
+                ) : NeedType(transportpakke) {
+                    override fun tilPakke() = Pakke(
+                        listOf("Utbetaling"), mapOf(
+                            "utbetalingsreferanse" to utbetalingsreferanse,
+                            "utbetalingslinjer" to utbetalingslinjer,
+                            "maksdato" to maksdato,
+                            "saksbehandler" to saksbehandler
+                        )
+                    )
+                }
             }
 
             companion object {
