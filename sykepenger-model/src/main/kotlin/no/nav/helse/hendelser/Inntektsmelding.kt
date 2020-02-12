@@ -95,8 +95,6 @@ class Inntektsmelding(
         return aktivitetslogger
     }
 
-    override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Inntektsmelding
-
     override fun rapportertdato() = mottattDato
 
     override fun aktørId() = aktørId

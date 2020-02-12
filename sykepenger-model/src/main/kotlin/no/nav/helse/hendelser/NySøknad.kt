@@ -45,8 +45,6 @@ class NySøknad(
     override fun sykdomstidslinje() =
         sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)}
 
-    override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Sykmelding
-
     override fun fødselsnummer() = fnr
 
     override fun organisasjonsnummer() = orgnummer

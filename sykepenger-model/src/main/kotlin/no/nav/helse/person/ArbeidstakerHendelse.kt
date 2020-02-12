@@ -9,6 +9,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     protected val aktivitetslogger: Aktivitetslogger
 ) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger {
 
+    @Deprecated("Enum brukes til (de)serialisering og bør ikke ligge i modell-objektene")
     enum class Hendelsestype {
         Ytelser,
         Vilkårsgrunnlag,
@@ -22,6 +23,8 @@ abstract class ArbeidstakerHendelse protected constructor(
     }
 
     fun hendelseId() = hendelseId
+
+    @Deprecated("Henger igjen fra Epic-1")
     fun hendelsestype() = hendelsestype
 
     abstract fun rapportertdato(): LocalDateTime
@@ -30,10 +33,13 @@ abstract class ArbeidstakerHendelse protected constructor(
     abstract fun fødselsnummer(): String
     abstract fun organisasjonsnummer(): String
 
+    @Deprecated("Henger igjen fra Epic-1")
     override fun compareTo(other: ArbeidstakerHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
 
+    @Deprecated("Henger igjen fra Epic-1")
     override fun equals(other: Any?) =
         other is ArbeidstakerHendelse && other.hendelseId == this.hendelseId
 
+    @Deprecated("Henger igjen fra Epic-1")
     override fun hashCode() = hendelseId.hashCode()
 }

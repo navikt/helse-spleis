@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
+@Deprecated("Need-aktivitetene i aktivitetslogger gjør seg selv til json." +
+    "Behov og Pakke stammer fra Epic 1 og skal ikke videreføres")
 internal class Pakke(map: Map<String, Any> = emptyMap()) {
 
     companion object {

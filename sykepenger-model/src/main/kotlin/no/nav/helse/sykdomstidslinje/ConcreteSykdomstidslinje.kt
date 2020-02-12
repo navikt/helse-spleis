@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
-import java.time.DayOfWeek.*
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -48,6 +47,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
 
+    @Deprecated("Skal bruke Aktivitetslogger.error()")
     fun erUtenforOmfang(): Boolean {
         return flatten().any { it::class in arrayOf(Permisjonsdag::class, Ubestemtdag::class) }
     }

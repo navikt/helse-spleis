@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.VedtaksperiodeMediator
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
@@ -16,7 +15,6 @@ internal class ArbeidsgiverUtbetalingerTest {
     private var maksdato: LocalDate? = null
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogger: Aktivitetslogger
-    private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
 
     companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"

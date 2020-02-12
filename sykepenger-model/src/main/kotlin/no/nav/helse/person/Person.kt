@@ -10,7 +10,7 @@ class Person private constructor(
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val aktivitetslogger: Aktivitetslogger
-) : VedtaksperiodeMediator {
+) {
 
     constructor(
         aktørId: String,

@@ -40,8 +40,6 @@ class SendtSøknad constructor(
         .map { it.sykdomstidslinje() }
         .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, sendtSøknadDagturnering) }
 
-    override fun nøkkelHendelseType() = Dag.NøkkelHendelseType.Søknad
-
     override fun fødselsnummer() = fnr
 
     override fun organisasjonsnummer() = orgnummer

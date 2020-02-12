@@ -16,7 +16,6 @@ internal class VedtaksperiodeTest {
     private val aktør = "1234"
     private val fødselsnummer = "5678"
     private val organisasjonsnummer = "123456789"
-    private val vedtaksperiodeMediator = object : VedtaksperiodeMediator {}
     private val person = Person(aktør, fødselsnummer)
     private val arbeidsgiver = Arbeidsgiver(person, organisasjonsnummer)
 

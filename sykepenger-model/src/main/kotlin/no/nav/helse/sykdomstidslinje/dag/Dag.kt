@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
-import java.time.DayOfWeek
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,6 +12,7 @@ internal abstract class Dag internal constructor(
 ) :
     ConcreteSykdomstidslinje() {
 
+    @Deprecated("Brukes ifm. (de)serialisering, og bør ligge i lag med jsonbuilder/parser")
     internal abstract fun dagType(): JsonDagType
 
     internal fun erHelg() = this.dagen.erHelg()
