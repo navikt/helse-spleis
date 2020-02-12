@@ -130,8 +130,8 @@
                     "role": "PRODUCER"
                 }
             ],
-            "numPartitions": 6,
-            "topicName": "privat-helse-sykepenger-rapid-v1"
+            "numPartitions": 1,
+            "topicName": "helse-rapid-v1"
         }
     ]
 }
