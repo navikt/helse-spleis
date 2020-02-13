@@ -4,7 +4,6 @@ import io.prometheus.client.Counter
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.AktivitetsloggerVisitor
 
-
 internal object AktivitetsloggerProbe {
     private val aktivitetscounter = Counter.build(
         "aktivitetslogger_meldinger_totals",
