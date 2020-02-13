@@ -444,7 +444,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.gjelderTilstand(AvventerHistorikk.type)) return
+            if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
         }

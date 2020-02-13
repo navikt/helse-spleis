@@ -58,8 +58,19 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i sendt søknad`() {
         person.håndter(nySøknad())
         person.håndter(sendtSøknad())
+        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+        assertBehov(
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
+            antall = 1,
+            inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+        )
         person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+        assertBehov(
+            behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
+            antall = 2,
+            inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+        )
     }
 
     @Test
