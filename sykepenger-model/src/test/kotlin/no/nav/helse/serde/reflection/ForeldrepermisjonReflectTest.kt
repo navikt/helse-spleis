@@ -2,6 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
@@ -14,7 +15,7 @@ internal class ForeldrepermisjonReflectTest {
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<Foreldrepermisjon, ForeldrepengerReflect>(
             skalMappes = listOf("foreldrepengeytelse", "svangerskapsytelse"),
-            skalIkkeMappes = listOf("aktivitetslogger")
+            skalIkkeMappes = listOf("aktivitetslogger", "aktivitetslogg")
         )
     }
 
@@ -39,6 +40,7 @@ internal class ForeldrepermisjonReflectTest {
             fom = 1.juli.minusYears(2),
             tom = 31.juli.minusYears(2)
         ),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 }

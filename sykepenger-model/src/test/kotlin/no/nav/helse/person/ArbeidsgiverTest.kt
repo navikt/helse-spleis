@@ -27,13 +27,14 @@ internal class ArbeidsgiverTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
         val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver(person, "12345678")
         arbeidsgiver.håndter(inntektsmelding)
-        assertTrue(inntektsmelding.hasErrors())
+        assertTrue(inntektsmelding.hasErrorsOld())
 
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(

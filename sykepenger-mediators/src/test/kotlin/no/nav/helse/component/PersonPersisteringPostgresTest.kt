@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import no.nav.helse.september
@@ -100,6 +101,7 @@ class PersonPersisteringPostgresTest {
                 sendtNav = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                 aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
         )
@@ -141,7 +143,8 @@ class PersonPersisteringPostgresTest {
         orgnummer = "123456789",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
 }

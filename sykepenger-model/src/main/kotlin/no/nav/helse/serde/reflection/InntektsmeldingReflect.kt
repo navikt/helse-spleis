@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -19,6 +20,7 @@ internal class InntektsmeldingReflect(inntektsmelding: Inntektsmelding) {
     private val førsteFraværsdag: LocalDate = inntektsmelding["førsteFraværsdag"]
     private val beregnetInntekt: Double = inntektsmelding["beregnetInntekt"]
     private val aktivitetslogger: Aktivitetslogger = inntektsmelding["aktivitetslogger"]
+    private val aktivitetslogg: Aktivitetslogg = inntektsmelding["aktivitetslogg"]
     private val arbeidsgiverperioder: List<Inntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode> =
         inntektsmelding["arbeidsgiverperioder"]
     private val ferieperioder: List<Inntektsmelding.InntektsmeldingPeriode.Ferieperiode> =
@@ -36,6 +38,7 @@ internal class InntektsmeldingReflect(inntektsmelding: Inntektsmelding) {
             "førsteFraværsdag" to førsteFraværsdag,
             "beregnetInntekt" to beregnetInntekt,
             "aktivitetslogger" to AktivitetsloggerReflect(aktivitetslogger).toMap(),
+            "aktivitetslogg" to "TODO need json for aktivitetslogg",
             "arbeidsgiverperioder" to arbeidsgiverperioder.map(::periodeToMap),
             "ferieperioder" to ferieperioder.map(::periodeToMap)
         )

@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -25,8 +26,9 @@ class Inntektsmelding(
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
-    aktivitetslogger: Aktivitetslogger
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger) {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger, aktivitetslogg) {
     class Refusjon(
         val opphørsdato: LocalDate?,
         val beløpPrMåned: Double,
@@ -89,9 +91,9 @@ class Inntektsmelding(
         )
 
     override fun valider(): Aktivitetslogger {
-        if (!ingenOverlappende()) aktivitetslogger.error("Inntektsmelding har overlapp i arbeidsgiverperioder")
-        if (refusjon == null) aktivitetslogger.error("Arbeidsgiver forskutterer ikke")
-        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.error("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
+        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder")
+        if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke")
+        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
         return aktivitetslogger
     }
 

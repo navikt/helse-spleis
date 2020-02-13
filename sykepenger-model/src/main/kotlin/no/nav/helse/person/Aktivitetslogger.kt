@@ -15,34 +15,34 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         visitor.postVisitAktivitetslogger(this)
     }
 
-    override fun info(melding: String, vararg params: Any) {
+    override fun infoOld(melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet.Info(String.format(melding, *params)))
     }
 
-    override fun warn(melding: String, vararg params: Any) {
+    override fun warnOld(melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet.Warn(String.format(melding, *params)))
     }
 
-    override fun need(type: Aktivitet.Need.NeedType, melding: String, vararg params: Any) {
+    override fun needOld(type: Aktivitet.Need.NeedType, melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet.Need(type, String.format(melding, *params)))
     }
 
-    override fun error(melding: String, vararg params: Any) {
+    override fun errorOld(melding: String, vararg params: Any) {
         aktiviteter.add(Aktivitet.Error(String.format(melding, *params)))
     }
 
-    override fun severe(melding: String, vararg params: Any): Nothing {
+    override fun severeOld(melding: String, vararg params: Any): Nothing {
         aktiviteter.add(Aktivitet.Severe(String.format(melding, *params)))
         throw AktivitetException(this)
     }
 
-    override fun hasMessages() = info().isNotEmpty() || hasWarnings()
+    override fun hasMessagesOld() = info().isNotEmpty() || hasWarningsOld()
 
-    override fun hasWarnings() = warn().isNotEmpty() || hasNeeds()
+    override fun hasWarningsOld() = warn().isNotEmpty() || hasNeedsOld()
 
-    override fun hasNeeds() = need().isNotEmpty() || hasErrors()
+    override fun hasNeedsOld() = need().isNotEmpty() || hasErrorsOld()
 
-    override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
+    override fun hasErrorsOld() = error().isNotEmpty() || severe().isNotEmpty()
 
     override fun addAll(other: Aktivitetslogger, label: String) {
         this.aktiviteter.addAll(other.aktiviteter.map { it.cloneWith(label) })
@@ -50,7 +50,7 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     }
 
     fun toReport(): String {
-        if (!hasMessages()) return "Ingen meldinger eller problemer\n"
+        if (!hasMessagesOld()) return "Ingen meldinger eller problemer\n"
         val results = StringBuffer()
         results.append("Meldinger eller problemer finnes. ${originalMessage?.let { "Original melding: $it" }
             ?: ""} \n\t")
@@ -213,17 +213,18 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
     }
 }
 
+@Deprecated("Being replaced with IAktivitetslogg")
 interface IAktivitetslogger {
-    fun info(melding: String, vararg params: Any)
-    fun warn(melding: String, vararg params: Any)
-    fun need(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, vararg params: Any)
-    fun error(melding: String, vararg params: Any)
-    fun severe(melding: String, vararg params: Any): Nothing
+    fun infoOld(melding: String, vararg params: Any)
+    fun warnOld(melding: String, vararg params: Any)
+    fun needOld(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, vararg params: Any)
+    fun errorOld(melding: String, vararg params: Any)
+    fun severeOld(melding: String, vararg params: Any): Nothing
 
-    fun hasMessages(): Boolean
-    fun hasWarnings(): Boolean
-    fun hasNeeds(): Boolean
-    fun hasErrors(): Boolean
+    fun hasMessagesOld(): Boolean
+    fun hasWarningsOld(): Boolean
+    fun hasNeedsOld(): Boolean
+    fun hasErrorsOld(): Boolean
 
     fun addAll(other: Aktivitetslogger, label: String)
 }

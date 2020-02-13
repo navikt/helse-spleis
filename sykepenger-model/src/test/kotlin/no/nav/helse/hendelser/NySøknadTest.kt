@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -18,23 +19,25 @@ internal class NySøknadTest {
 
     private lateinit var nySøknad: NySøknad
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
         nySøknad(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
-        assertFalse(nySøknad.valider().hasErrors())
+        assertFalse(nySøknad.valider().hasErrorsOld())
         assertEquals(16, nySøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         nySøknad(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
-        assertTrue(nySøknad.valider().hasErrors())
+        assertTrue(nySøknad.valider().hasErrorsOld())
     }
 
     @Test
@@ -57,7 +60,8 @@ internal class NySøknadTest {
             orgnummer = "987654321",
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
     }
 

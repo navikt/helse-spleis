@@ -1,13 +1,18 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.*
 import no.nav.helse.spleis.rest.HendelseDTO
 
 // Understands a JSON message representing an Inntektsmelding
-internal class InntektsmeldingMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
-    JsonMessage(originalMessage, aktivitetslogger) {
+internal class InntektsmeldingMessage(
+    originalMessage: String,
+    private val aktivitetslogger: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
+) :
+    JsonMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredKey(
             "inntektsmeldingId", "arbeidstakerFnr",
@@ -25,13 +30,14 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
         processor.process(this, aktivitetslogger)
     }
 
-    val refusjon get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
-        Inntektsmelding.Refusjon(
-            this["refusjon.opphoersdato"].asOptionalLocalDate(),
-            beløpPerMåned.asDouble(),
-            this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
-        )
-    }
+    val refusjon
+        get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
+            Inntektsmelding.Refusjon(
+                this["refusjon.opphoersdato"].asOptionalLocalDate(),
+                beløpPerMåned.asDouble(),
+                this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
+            )
+        }
     val orgnummer get() = this["virksomhetsnummer"].asText()
     val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     val aktørId get() = this["arbeidstakerAktorId"].asText()
@@ -51,6 +57,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder
     )
@@ -62,7 +69,7 @@ internal class InntektsmeldingMessage(originalMessage: String, private val aktiv
 
     object Factory : MessageFactory {
 
-        override fun createMessage(message: String, problems: Aktivitetslogger) =
-            InntektsmeldingMessage(message, problems)
+        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+            InntektsmeldingMessage(message, problems, aktivitetslogg)
     }
 }

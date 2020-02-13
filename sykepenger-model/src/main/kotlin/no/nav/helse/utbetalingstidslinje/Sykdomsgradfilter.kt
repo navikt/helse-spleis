@@ -10,6 +10,6 @@ internal class Sykdomsgradfilter(sykdomsgrader: Sykdomsgrader,
 
     internal fun filter() {
         // Avvis dager når man er mindre enn 20% syk totalt
-        aktivitetslogger.info("Avviste ikke noen dager på grunn av 20%% samlet sykdomsgrad regel")
+        aktivitetslogger.infoOld("Avviste ikke noen dager på grunn av 20%% samlet sykdomsgrad regel")
     }
 }

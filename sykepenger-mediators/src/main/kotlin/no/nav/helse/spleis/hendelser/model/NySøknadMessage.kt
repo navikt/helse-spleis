@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -9,8 +10,12 @@ import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
 
 // Understands a JSON message representing a Ny Søknad
-internal class NySøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
-    SøknadMessage(originalMessage, aktivitetslogger) {
+internal class NySøknadMessage(
+    originalMessage: String,
+    private val aktivitetslogger: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
+) :
+    SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "NY")
         requiredKey("fom", "tom")
@@ -22,13 +27,14 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
     val søknadFom get() = this["fom"].asLocalDate()
     val søknadTom get() = this["tom"].asLocalDate()
     private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
-    private val sykeperioder get() = this["soknadsperioder"].map {
-        Triple(
-            first = it.path("fom").asLocalDate(),
-            second = it.path("tom").asLocalDate(),
-            third = it.path("sykmeldingsgrad").asInt()
-        )
-    }
+    private val sykeperioder
+        get() = this["soknadsperioder"].map {
+            Triple(
+                first = it.path("fom").asLocalDate(),
+                second = it.path("tom").asLocalDate(),
+                third = it.path("sykmeldingsgrad").asInt()
+            )
+        }
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this, aktivitetslogger)
@@ -41,7 +47,8 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
         orgnummer = orgnummer,
         rapportertdato = rapportertdato,
         sykeperioder = sykeperioder,
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg
     )
 
     internal fun asSpeilDTO() = NySøknadDTO(
@@ -52,7 +59,7 @@ internal class NySøknadMessage(originalMessage: String, private val aktivitetsl
 
     object Factory : MessageFactory {
 
-        override fun createMessage(message: String, problems: Aktivitetslogger) =
-            NySøknadMessage(message, problems)
+        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+            NySøknadMessage(message, problems, aktivitetslogg)
     }
 }

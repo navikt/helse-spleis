@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
-class Aktivitetslogg internal constructor(private val forelder: Aktivitetslogg? = null) : IAktivitetslogg {
+class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitetslogg {
     private val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()
 
@@ -39,7 +39,7 @@ class Aktivitetslogg internal constructor(private val forelder: Aktivitetslogg? 
 
     private fun add(aktivitet: Aktivitet) {
         this.aktiviteter.add(aktivitet)
-        forelder?.let { forelder.add(aktivitet) }
+        forelder?.let { forelder?.add(aktivitet) }
     }
 
     override fun hasMessages() = info().isNotEmpty() || hasWarnings()
@@ -57,6 +57,11 @@ class Aktivitetslogg internal constructor(private val forelder: Aktivitetslogg? 
     override fun aktivitetsteller() = aktiviteter.size
 
     internal fun kontekst(kontekst: Aktivitetskontekst) { kontekster.add(kontekst) }
+
+    internal fun kontekst(person: Person) {
+        forelder = person.aktivitetslogg
+        kontekst(person as Aktivitetskontekst)
+    }
 
     internal fun logg(kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {

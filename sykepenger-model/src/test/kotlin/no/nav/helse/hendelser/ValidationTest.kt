@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.Ytelser
@@ -14,16 +15,18 @@ import java.util.*
 internal class ValidationTest {
 
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun success() {
         var success = false
-        Validation(TestHendelse(aktivitetslogger)).also {
+        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
             it.onError { fail("Uventet kall") }
             it.onSuccess { success = true }
         }
@@ -33,7 +36,7 @@ internal class ValidationTest {
     @Test
     internal fun failure() {
         var failure = false
-        Validation(TestHendelse(aktivitetslogger)).also {
+        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
             it.onError { failure = true }
             it.valider { FailureBlock() }
             it.onSuccess { fail("Uventet kall") }
@@ -43,7 +46,7 @@ internal class ValidationTest {
 
     @Test internal fun `when does constructor run`() {
         var variableChanged = false
-        Validation(TestHendelse(aktivitetslogger)).also {
+        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
             it.onError { fail("we failed") }
             it.valider { ReturnValues().also { variableChanged = it.variable()}}
         }
@@ -67,8 +70,8 @@ internal class ValidationTest {
         override fun feilmelding() = "feilmelding"
     }
 
-    private inner class TestHendelse(aktivitetslogger: Aktivitetslogger) :
-        ArbeidstakerHendelse(UUID.randomUUID(), Ytelser, aktivitetslogger),
+    private inner class TestHendelse(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) :
+        ArbeidstakerHendelse(UUID.randomUUID(), Ytelser, aktivitetslogger, aktivitetslogg),
         IAktivitetslogger by aktivitetslogger {
         override fun rapportertdato(): LocalDateTime {
             fail("Uventet kall")

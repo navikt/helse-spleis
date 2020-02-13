@@ -2,13 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.AktivitetsloggerVisitor
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UTELATE
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
-import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,8 +47,8 @@ internal class MinimumInntektsfilterTest {
         assertEquals(15, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
         assertEquals(10, inspektør.avvistDagTeller)
-        assertTrue(aktivitetslogger.hasMessages())
-        assertFalse(aktivitetslogger.hasWarnings()) // Even though days rejected, the days were not in the periode
+        assertTrue(aktivitetslogger.hasMessagesOld())
+        assertFalse(aktivitetslogger.hasWarningsOld()) // Even though days rejected, the days were not in the periode
     }
 
     @Test internal fun `dager under minstelønnskravet blir avvist i flere tidslinjer`() {

@@ -2,10 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.VedtaksperiodeHendelse
+import no.nav.helse.person.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -20,8 +17,9 @@ class Ytelser(
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val rapportertdato: LocalDateTime,
-    aktivitetslogger: Aktivitetslogger
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger), VedtaksperiodeHendelse {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
     internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,

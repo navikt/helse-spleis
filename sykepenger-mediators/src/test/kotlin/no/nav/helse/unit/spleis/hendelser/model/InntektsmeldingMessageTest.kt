@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
 import no.nav.helse.toJsonNode
@@ -88,22 +89,24 @@ internal class InntektsmeldingMessageTest {
 
     private fun assertValidInntektsmeldingMessage(message: String) {
         val problems = Aktivitetslogger(message)
-        InntektsmeldingMessage(message, problems)
-        assertFalse(problems.hasErrors())
+        val aktivitetslogg = Aktivitetslogg()
+        InntektsmeldingMessage(message, problems, aktivitetslogg)
+        assertFalse(problems.hasErrorsOld())
     }
 
     private fun assertInvalidMessage(message: String) {
         val problems = Aktivitetslogger(message)
-        InntektsmeldingMessage(message, problems)
-        assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
+        val aktivitetslogg = Aktivitetslogg()
+        InntektsmeldingMessage(message, problems, aktivitetslogg)
+        assertTrue(problems.hasErrorsOld()) { "was not supposes to recognize $message" }
     }
 
     private fun assertThrows(message: String) {
         Aktivitetslogger(message).also {
             assertThrows<Aktivitetslogger.AktivitetException> {
-                InntektsmeldingMessage(message, it)
+                InntektsmeldingMessage(message, it, Aktivitetslogg())
             }
-            assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
+            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $message" }
         }
     }
 

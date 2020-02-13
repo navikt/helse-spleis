@@ -45,12 +45,12 @@ internal class HendelseMediator(
         parser.register(PåminnelseMessage.Factory)
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
 
-            if (aktivitetslogger.hasMessages()) {
+            if (aktivitetslogger.hasMessagesOld()) {
                 sikkerLogg.info("meldinger om melding: ${aktivitetslogger.toReport()}")
             }
         } catch (err: Aktivitetslogger.AktivitetException) {
@@ -67,7 +67,13 @@ internal class HendelseMediator(
         AktivitetsloggerProbe.inspiser(aktivitetException)
     }
 
-    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
+    override fun onMessageError(aktivitetException: Aktivitetslogg.AktivitetException) {
+        sikkerLogg.info("feil på melding: ${aktivitetException.message}", aktivitetException)
+        // TODO: pull message counts from Aktivitetslogg for statistics
+//        AktivitetsloggerProbe.inspiser(aktivitetException)
+    }
+
+    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
         sikkerLogg.debug("ukjent melding: ${aktivitetslogger.toReport()}")
     }
 

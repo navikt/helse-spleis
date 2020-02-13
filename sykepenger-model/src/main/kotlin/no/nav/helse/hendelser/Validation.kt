@@ -17,15 +17,15 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse) {
     }
 
     internal fun valider(block: ValiderBlock) {
-        if (hendelse.hasErrors() || hendelse.hasNeeds()) return
+        if (hendelse.hasErrorsOld() || hendelse.hasNeedsOld()) return
         val steg = block()
         if (steg.isValid()) return
-        steg.feilmelding()?.also { hendelse.error(it) }
+        steg.feilmelding()?.also { hendelse.errorOld(it) }
         errorBlock()
     }
 
     internal fun onSuccess(successBlock: SuccessBlock) {
-        if (!hendelse.hasErrors() && !hendelse.hasNeeds()) successBlock()
+        if (!hendelse.hasErrorsOld() && !hendelse.hasNeedsOld()) successBlock()
     }
 }
 
@@ -41,12 +41,12 @@ internal interface Valideringssteg {
 // Invoke internal validation of a Hendelse
 internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHendelse) : Valideringssteg {
     override fun isValid() =
-        !hendelse.valider().let { it.hasErrors() || it.hasNeeds() }
+        !hendelse.valider().let { it.hasErrorsOld() || it.hasNeedsOld() }
 }
 
 internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid() =
-        !ytelser.valider().let { it.hasErrors() || it.hasNeeds() }
+        !ytelser.valider().let { it.hasErrorsOld() || it.hasNeedsOld() }
 }
 
 // Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
@@ -64,7 +64,7 @@ internal class ArbeidsgiverHåndterHendelse(
 ) : Valideringssteg {
     override fun isValid(): Boolean {
         hendelse.fortsettÅBehandle(arbeidsgiver)  // Double dispatch to invoke correct method
-        return !hendelse.hasErrors()
+        return !hendelse.hasErrorsOld()
     }
 
     override fun feilmelding() = "Feil under hendelseshåndtering"
@@ -121,7 +121,7 @@ internal class ByggUtbetalingstidlinjer(
             engine.beregn()
         }
         ytelser.addAll(aktivitetslogger, "utbetalingstidslinje validering")
-        return !ytelser.hasErrors()
+        return !ytelser.hasErrorsOld()
     }
 
     internal fun maksdato() = engine.maksdato()
@@ -139,10 +139,10 @@ internal class ByggUtbetalingslinjer(private val ytelser: Ytelser,
     override fun isValid(): Boolean {
         utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje).result()
         if (utbetalingslinjer.isEmpty())
-            ytelser.error("Ingen utbetalingslinjer bygget")
+            ytelser.errorOld("Ingen utbetalingslinjer bygget")
         else
-            ytelser.info("Utbetalingslinjer bygget vellykket")
-        return !ytelser.hasErrors() && utbetalingslinjer.isNotEmpty()
+            ytelser.infoOld("Utbetalingslinjer bygget vellykket")
+        return !ytelser.hasErrorsOld() && utbetalingslinjer.isNotEmpty()
     }
 
     override fun feilmelding()   = "Feil ved kalkulering av utbetalingslinjer"

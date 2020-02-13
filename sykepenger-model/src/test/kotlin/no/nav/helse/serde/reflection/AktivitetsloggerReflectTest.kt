@@ -17,7 +17,7 @@ internal class AktivitetsloggerReflectTest {
     @Suppress("UNCHECKED_CAST")
     internal fun `mapper Aktivitetslogger til map`() {
         val aktivitetslogger = Aktivitetslogger().apply {
-            info("Test")
+            infoOld("Test")
         }
         val map = AktivitetsloggerReflect(aktivitetslogger).toMap()
 

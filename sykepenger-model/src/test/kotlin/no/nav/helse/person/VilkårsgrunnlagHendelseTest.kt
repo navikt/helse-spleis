@@ -23,6 +23,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var personObserver: TestPersonObserver
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -30,6 +31,7 @@ internal class VilkårsgrunnlagHendelseTest {
         person = Person("12345", UNG_PERSON_FNR_2018)
         person.addObserver(personObserver)
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -146,7 +148,8 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
 
     private fun sendtSøknad() =
@@ -158,6 +161,7 @@ internal class VilkårsgrunnlagHendelseTest {
             sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = false
         )
 
@@ -173,7 +177,8 @@ internal class VilkårsgrunnlagHendelseTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
 
     private fun vilkårsgrunnlag(
@@ -191,6 +196,7 @@ internal class VilkårsgrunnlagHendelseTest {
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
             aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
         )
 

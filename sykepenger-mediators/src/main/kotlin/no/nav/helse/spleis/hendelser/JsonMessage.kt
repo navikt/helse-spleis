@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,7 +19,8 @@ import java.util.*
 // Implements GoF visitor pattern to enable working on the specific types
 internal open class JsonMessage(
     private val originalMessage: String,
-    private val problems: Aktivitetslogger
+    private val problems: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
 ) {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
@@ -35,7 +37,7 @@ internal open class JsonMessage(
         json = try {
             objectMapper.readTree(originalMessage)
         } catch (err: JsonParseException) {
-            problems.severe("Invalid JSON per Jackson library: ${err.message}")
+            problems.severeOld("Invalid JSON per Jackson library: ${err.message}")
             objectMapper.nullNode()
         }
     }
@@ -47,35 +49,35 @@ internal open class JsonMessage(
     }
 
     fun requiredKey(key: String) {
-        if (isKeyMissing(key)) return problems.error("Missing required key $key")
-        if (node(key).isNull) return problems.error("Missing required key $key; value is null")
+        if (isKeyMissing(key)) return problems.errorOld("Missing required key $key")
+        if (node(key).isNull) return problems.errorOld("Missing required key $key; value is null")
         accessor(key)
     }
 
     fun requiredValue(key: String, value: Boolean) {
         if (isKeyMissing(key) || !node(key).isBoolean || node(key).booleanValue() != value) {
-            return problems.error("Required $key is not boolean $value")
+            return problems.errorOld("Required $key is not boolean $value")
         }
         accessor(key)
     }
 
     fun requiredValue(key: String, value: String) {
         if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() != value) {
-            return problems.error("Required $key is not string $value")
+            return problems.errorOld("Required $key is not string $value")
         }
         accessor(key)
     }
 
     fun requiredValueOneOf(key: String, values: List<String>) {
         if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() !in values) {
-            return problems.error("Required $key must be one of $values")
+            return problems.errorOld("Required $key must be one of $values")
         }
         accessor(key)
     }
 
     fun requiredValues(key: String, values: List<String>) {
         if (isKeyMissing(key) || !node(key).isArray || !node(key).map(JsonNode::asText).containsAll(values)) {
-            return problems.error("Required $key does not contains $values")
+            return problems.errorOld("Required $key does not contains $values")
         }
         accessor(key)
     }

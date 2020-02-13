@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
@@ -9,7 +10,8 @@ import java.util.*
 class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
-    private val aktivitetslogger: Aktivitetslogger
+    private val aktivitetslogger: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
 ) {
 
     private val sisteFraværsdag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
@@ -42,7 +44,7 @@ class Utbetalingshistorikk(
 
         internal fun valider(aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
-                aktivitetslogger.error("Orgnummer må være satt: $orgnummer")
+                aktivitetslogger.errorOld("Orgnummer må være satt: $orgnummer")
             }
         }
 
@@ -53,11 +55,11 @@ class Utbetalingshistorikk(
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
         open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
-            aktivitetslogger.severe("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
+            aktivitetslogger.severeOld("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
         }
 
         open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.error("Perioden er ikke støttet")
+            aktivitetslogger.errorOld("Perioden er ikke støttet")
         }
 
         class RefusjonTilArbeidsgiver(
@@ -70,7 +72,7 @@ class Utbetalingshistorikk(
             }
 
             override fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-                if (fom > tom) aktivitetslogger.error("Utbetalingsperioder kan ikke ha en FOM etter TOM")
+                if (fom > tom) aktivitetslogger.errorOld("Utbetalingsperioder kan ikke ha en FOM etter TOM")
             }
         }
 

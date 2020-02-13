@@ -18,10 +18,12 @@ internal class PåminnelseTest {
     }
 
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     fun setup() {
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -30,7 +32,7 @@ internal class PåminnelseTest {
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertTrue(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasWarningsOld())
     }
 
     @Test
@@ -39,8 +41,8 @@ internal class PåminnelseTest {
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertFalse(aktivitetslogger.hasWarnings())
-        assertTrue(aktivitetslogger.hasMessages())
+        assertFalse(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogger.hasMessagesOld())
     }
 
     @Test
@@ -48,7 +50,7 @@ internal class PåminnelseTest {
         val tilstand = Vedtaksperiode.StartTilstand
         val vedtaksperiode = vedtaksperiode()
         assertFalse(vedtaksperiode.håndter(påminnelse(tilstand.type, UUID.randomUUID())))
-        assertFalse(aktivitetslogger.hasMessages())
+        assertFalse(aktivitetslogger.hasMessagesOld())
     }
 
     private fun vedtaksperiode(): Vedtaksperiode {
@@ -75,6 +77,7 @@ internal class PåminnelseTest {
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now(),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
 }

@@ -129,7 +129,8 @@ internal class JsonBuilderTest {
                 orgnummer = orgnummer,
                 rapportertdato = LocalDateTime.now(),
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val sendtSøknad
@@ -143,6 +144,7 @@ internal class JsonBuilderTest {
                     SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
                 aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
 
@@ -158,7 +160,8 @@ internal class JsonBuilderTest {
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 ferieperioder = emptyList(),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val vilkårsgrunnlag
@@ -177,8 +180,8 @@ internal class JsonBuilderTest {
                 },
                 arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
                 erEgenAnsatt = false,
-                aktivitetslogger = Aktivitetslogger()
-
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val ytelser
@@ -197,7 +200,8 @@ internal class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
-                    aktivitetslogger = Aktivitetslogger()
+                    aktivitetslogger = Aktivitetslogger(),
+                    aktivitetslogg = Aktivitetslogg()
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(
@@ -208,10 +212,12 @@ internal class JsonBuilderTest {
                         fom = 1.juli.minusYears(2),
                         tom = 31.juli.minusYears(2)
                     ),
-                    aktivitetslogger = Aktivitetslogger()
+                    aktivitetslogger = Aktivitetslogger(),
+                    aktivitetslogg = Aktivitetslogg()
                 ),
                 rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val manuellSaksbehandling
@@ -224,7 +230,8 @@ internal class JsonBuilderTest {
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
                 rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             )
     }
 }

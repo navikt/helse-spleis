@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.hendelser.JsonMessage
@@ -9,8 +10,12 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDateTime
 
 // Understands a JSON message representing a Påminnelse
-internal class PåminnelseMessage(originalMessage: String, private val problems: Aktivitetslogger) :
-    JsonMessage(originalMessage, problems) {
+internal class PåminnelseMessage(
+    originalMessage: String,
+    private val problems: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
+) :
+    JsonMessage(originalMessage, problems, aktivitetslogg) {
 
     private val oldTilstander = mapOf(
         "NY_SØKNAD_MOTTATT" to TilstandType.MOTTATT_NY_SØKNAD,
@@ -48,13 +53,14 @@ internal class PåminnelseMessage(originalMessage: String, private val problems:
             tilstandsendringstidspunkt = this["tilstandsendringstidspunkt"].asLocalDateTime(),
             påminnelsestidspunkt = this["påminnelsestidspunkt"].asLocalDateTime(),
             nestePåminnelsestidspunkt = this["nestePåminnelsestidspunkt"].asLocalDateTime(),
-            aktivitetslogger = problems
+            aktivitetslogger = problems,
+            aktivitetslogg = aktivitetslogg
         )
     }
 
     object Factory : MessageFactory {
 
-        override fun createMessage(message: String, problems: Aktivitetslogger) =
-            PåminnelseMessage(message, problems)
+        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+            PåminnelseMessage(message, problems, aktivitetslogg)
     }
 }

@@ -193,6 +193,7 @@ class PåminnelserOgTimeoutTest {
             sendtNav = rapportertdato,
             perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -204,7 +205,8 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             rapportertdato = rapportertdato,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun inntektsmelding() =
@@ -219,7 +221,8 @@ class PåminnelserOgTimeoutTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun vilkårsgrunnlag() =
@@ -237,6 +240,7 @@ class PåminnelserOgTimeoutTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         )
 
@@ -255,15 +259,18 @@ class PåminnelserOgTimeoutTest {
                 )
             ),
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = null,
             svangerskapsytelse = null,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         rapportertdato = rapportertdato,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun manuellSaksbehandling() = ManuellSaksbehandling(
@@ -275,7 +282,8 @@ class PåminnelserOgTimeoutTest {
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
         rapportertdato = rapportertdato,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
@@ -289,7 +297,8 @@ class PåminnelserOgTimeoutTest {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun assertTilstand(expectedTilstand: TilstandType) {

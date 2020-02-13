@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.Meldingstype
@@ -62,7 +63,7 @@ class HendelsePersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
         val dao = HendelseRecorder(dataSource)
 
-        JsonMessage("{}", Aktivitetslogger()).also {
+        JsonMessage("{}", Aktivitetslogger(), Aktivitetslogg()).also {
             dao.lagreMelding(Meldingstype.UKJENT, it.id, it.toJson())
             assertEquals(1, meldinger(dataSource).size)
         }
@@ -72,7 +73,7 @@ class HendelsePersisteringPostgresTest {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf("SELECT data FROM melding ORDER BY id").map {
-                    JsonMessage(it.string("data"), Aktivitetslogger())
+                    JsonMessage(it.string("data"), Aktivitetslogger(), Aktivitetslogg())
                 }.asList
             )
         }

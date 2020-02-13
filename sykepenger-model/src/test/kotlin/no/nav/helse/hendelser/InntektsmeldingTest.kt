@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
@@ -15,10 +16,12 @@ internal class InntektsmeldingTest {
 
     private lateinit var inntektsmelding: Inntektsmelding
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -47,7 +50,7 @@ internal class InntektsmeldingTest {
             ), emptyList()
         )
         inntektsmelding.valider()
-        assertTrue(aktivitetslogger.hasErrors())
+        assertTrue(aktivitetslogger.hasErrorsOld())
     }
 
     @Test
@@ -74,7 +77,7 @@ internal class InntektsmeldingTest {
             refusjonBeløp = 100000.00,
             beregnetInntekt = 10000.00
         )
-        assertTrue(inntektsmelding.valider().hasErrors())
+        assertTrue(inntektsmelding.valider().hasErrorsOld())
     }
 
     @Test
@@ -121,7 +124,8 @@ internal class InntektsmeldingTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
     }
 }

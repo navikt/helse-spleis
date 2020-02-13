@@ -2,6 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
@@ -27,7 +28,8 @@ internal class InntektsmeldingReflectTest {
                 "beregnetInntekt",
                 "arbeidsgiverperioder",
                 "ferieperioder",
-                "aktivitetslogger"
+                "aktivitetslogger",
+                "aktivitetslogg"
             )
         )
     }
@@ -56,6 +58,7 @@ internal class InntektsmeldingReflectTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )

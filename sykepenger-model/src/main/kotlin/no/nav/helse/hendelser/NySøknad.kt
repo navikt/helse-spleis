@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje.Companion.implisittDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.tournament.KonfliktskyDagturnering
@@ -18,19 +18,20 @@ class NySøknad(
     private val orgnummer: String,
     private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    aktivitetslogger: Aktivitetslogger
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad, aktivitetslogger) {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad, aktivitetslogger, aktivitetslogg) {
 
     private val sykeperioder: List<Sykeperiode>
 
     init {
-        if (sykeperioder.isEmpty()) aktivitetslogger.severe("Ingen sykeperioder")
+        if (sykeperioder.isEmpty()) aktivitetslogger.severeOld("Ingen sykeperioder")
         this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
-        if (!ingenOverlappende()) aktivitetslogger.severe("Sykeperioder overlapper")
+        if (!ingenOverlappende()) aktivitetslogger.severeOld("Sykeperioder overlapper")
     }
 
     override fun valider(): Aktivitetslogger {
-        if (!hundreProsentSykmeldt()) aktivitetslogger.error("Støtter bare 100%% sykmeldt")
+        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Støtter bare 100%% sykmeldt")
         return aktivitetslogger
     }
 

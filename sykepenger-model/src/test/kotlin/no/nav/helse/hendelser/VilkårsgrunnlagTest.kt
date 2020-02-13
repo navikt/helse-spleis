@@ -13,6 +13,7 @@ import java.util.*
 
 internal class VilkårsgrunnlagTest {
     private val aktivitetslogger = Aktivitetslogger()
+    private val aktivitetslogg = Aktivitetslogg()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val aktørId = "123"
     private val fødselsnummer = "234"
@@ -166,7 +167,8 @@ internal class VilkårsgrunnlagTest {
         inntektsmåneder = inntektsmåneder,
         arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
         erEgenAnsatt = false,
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg
     )
 
     private fun vedtaksperiode() =
@@ -190,7 +192,8 @@ internal class VilkårsgrunnlagTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg
     )
 
     private fun sendtSøknad() = SendtSøknad(
@@ -201,6 +204,7 @@ internal class VilkårsgrunnlagTest {
         sendtNav = LocalDateTime.now(),
         perioder = listOf(SendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false
     )
 
@@ -215,6 +219,7 @@ internal class VilkårsgrunnlagTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf()
         )

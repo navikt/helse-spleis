@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -487,7 +488,8 @@ internal class UtbetalingstidslinjeBuilderTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar.minusDays(1), 16.januar.minusDays(1))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =

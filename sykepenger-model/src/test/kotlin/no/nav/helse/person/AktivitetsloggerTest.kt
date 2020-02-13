@@ -20,21 +20,21 @@ internal class AktivitetsloggerTest {
     internal fun `inneholder original melding`() {
         assertFalse(aktivitetslogger.toString().contains(Message))
         val infomelding = "info message"
-        aktivitetslogger.info(infomelding)
+        aktivitetslogger.infoOld(infomelding)
         assertTrue(aktivitetslogger.toReport().contains(Message))
         assertInfo(infomelding)
     }
 
     @Test
     internal fun `har ingen feil ved default`() {
-        assertFalse(aktivitetslogger.hasErrors())
+        assertFalse(aktivitetslogger.hasErrorsOld())
     }
 
     @Test
     internal fun `severe oppdaget og kaster exception`() {
         val melding = "Severe error"
-        assertThrows<Aktivitetslogger.AktivitetException> { aktivitetslogger.severe(melding) }
-        assertTrue(aktivitetslogger.hasErrors())
+        assertThrows<Aktivitetslogger.AktivitetException> { aktivitetslogger.severeOld(melding) }
+        assertTrue(aktivitetslogger.hasErrorsOld())
         assertTrue(aktivitetslogger.toString().contains(melding))
         assertSevere(melding)
     }
@@ -42,8 +42,8 @@ internal class AktivitetsloggerTest {
     @Test
     internal fun `error oppdaget`() {
         val melding = "Error"
-        aktivitetslogger.error(melding)
-        assertTrue(aktivitetslogger.hasErrors())
+        aktivitetslogger.errorOld(melding)
+        assertTrue(aktivitetslogger.hasErrorsOld())
         assertTrue(aktivitetslogger.toString().contains(melding))
         assertError(melding)
     }
@@ -51,8 +51,8 @@ internal class AktivitetsloggerTest {
     @Test
     internal fun `warning oppdaget`() {
         val melding = "Warning explanation"
-        aktivitetslogger.warn(melding)
-        assertFalse(aktivitetslogger.hasErrors())
+        aktivitetslogger.warnOld(melding)
+        assertFalse(aktivitetslogger.hasErrorsOld())
         assertTrue(aktivitetslogger.toString().contains(melding))
         assertWarn(melding)
     }

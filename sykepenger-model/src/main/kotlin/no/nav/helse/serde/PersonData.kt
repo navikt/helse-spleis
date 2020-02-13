@@ -34,12 +34,14 @@ fun parsePerson(json: String): Person {
     val personData: PersonData = objectMapper.readValue(json)
     val arbeidsgivere = mutableListOf<Arbeidsgiver>()
     val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
+    val aktivitetslogg = Aktivitetslogg()
 
     val person = createPerson(
         aktørId = personData.aktørId,
         fødselsnummer = personData.fødselsnummer,
         arbeidsgivere = arbeidsgivere,
-        aktivitetslogger = aktivitetslogger
+        aktivitetslogger = aktivitetslogger,
+        aktivitetslogg = aktivitetslogg
     )
 
     arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it) })

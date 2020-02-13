@@ -16,10 +16,11 @@ internal fun createPerson(
     aktørId: String,
     fødselsnummer: String,
     arbeidsgivere: MutableList<Arbeidsgiver>,
-    aktivitetslogger: Aktivitetslogger
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
 ) = Person::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(aktørId, fødselsnummer, arbeidsgivere, aktivitetslogger)
+    .call(aktørId, fødselsnummer, arbeidsgivere, aktivitetslogger, aktivitetslogg)
 
 internal fun createArbeidsgiver(
     person: Person,

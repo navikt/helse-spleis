@@ -2,6 +2,7 @@ package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -11,8 +12,8 @@ import no.nav.helse.spleis.rest.HendelseDTO
 import java.time.LocalDateTime
 
 // Understands a JSON message representing a Søknad
-internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger) :
-    SøknadMessage(originalMessage, aktivitetslogger) {
+internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger, private val aktivitetslogg: Aktivitetslogg) :
+    SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "SENDT")
         requiredKey("sendtNav", "fom", "tom", "egenmeldinger", "fravar")
@@ -46,7 +47,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
             else -> {
-                aktivitetslogger.warn("Ukjent fraværstype $fraværstype")
+                aktivitetslogger.warnOld("Ukjent fraværstype $fraværstype")
                 null
             }
         }
@@ -66,7 +67,8 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             sendtNav = sendtNav,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder(),
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
         )
     }
 
@@ -82,7 +84,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
 
     object Factory : MessageFactory {
 
-        override fun createMessage(message: String, problems: Aktivitetslogger) =
-            SendtSøknadMessage(message, problems)
+        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+            SendtSøknadMessage(message, problems, aktivitetslogg)
     }
 }

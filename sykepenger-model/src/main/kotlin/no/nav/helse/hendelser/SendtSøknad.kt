@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Aktivitetslogger.Aktivitet.Need.NeedType
 import no.nav.helse.person.Arbeidsgiver
@@ -19,17 +20,18 @@ class SendtSøknad constructor(
     private val sendtNav: LocalDateTime,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
-    aktivitetslogger: Aktivitetslogger
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger) {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger, aktivitetslogg) {
 
     private val fom: LocalDate
     private val tom: LocalDate
 
     init {
-        if (perioder.isEmpty()) aktivitetslogger.severe("Søknad må inneholde perioder")
+        if (perioder.isEmpty()) aktivitetslogger.severeOld("Søknad må inneholde perioder")
         perioder.filterIsInstance<Periode.Sykdom>()
-            .also { fom = it.minBy { it.fom }?.fom ?: aktivitetslogger.severe("Søknad mangler fradato") }
-            .also { tom = it.maxBy { it.tom }?.tom ?: aktivitetslogger.severe("Søknad mangler tildato") }
+            .also { fom = it.minBy { it.fom }?.fom ?: aktivitetslogger.severeOld("Søknad mangler fradato") }
+            .also { tom = it.maxBy { it.tom }?.tom ?: aktivitetslogger.severeOld("Søknad mangler tildato") }
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
@@ -50,7 +52,7 @@ class SendtSøknad constructor(
 
     override fun valider(): Aktivitetslogger {
         perioder.forEach { it.valider(this, aktivitetslogger) }
-        if ( harAndreInntektskilder ) aktivitetslogger.error("Søknaden inneholder andre inntektskilder")
+        if ( harAndreInntektskilder ) aktivitetslogger.errorOld("Søknaden inneholder andre inntektskilder")
         return aktivitetslogger
     }
 
@@ -65,7 +67,7 @@ class SendtSøknad constructor(
         internal open fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {}
 
         internal fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
-            if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.error(beskjed)
+            if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.errorOld(beskjed)
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -86,8 +88,8 @@ class SendtSøknad constructor(
                 ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
-                if (grad != 100) aktivitetslogger.error("grad i søknaden er ikke 100%%")
-                if (faktiskGrad != 100.0) aktivitetslogger.error("faktisk grad i søknaden er ikke 100%%")
+                if (grad != 100) aktivitetslogger.errorOld("grad i søknaden er ikke 100%%")
+                if (faktiskGrad != 100.0) aktivitetslogger.errorOld("faktisk grad i søknaden er ikke 100%%")
             }
         }
 
@@ -96,7 +98,7 @@ class SendtSøknad constructor(
                 ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.need(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
+                aktivitetslogger.needOld(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -104,7 +106,7 @@ class SendtSøknad constructor(
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.need(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
+                aktivitetslogger.needOld(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {

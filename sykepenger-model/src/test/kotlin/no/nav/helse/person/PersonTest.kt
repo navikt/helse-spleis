@@ -41,7 +41,7 @@ internal class PersonTest {
         enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
             it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
         }
-        assertTrue(inspektør.personLogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasErrorsOld())
         assertAntallPersonerEndret(1)
         assertAlleVedtaksperiodetilstander(TIL_INFOTRYGD)
     }
@@ -109,7 +109,7 @@ internal class PersonTest {
         testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
         nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
     }
 
@@ -139,7 +139,7 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            it.hasErrors()
+            it.hasErrorsOld()
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -151,8 +151,8 @@ internal class PersonTest {
         testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
-        assertTrue(inspektør.personLogger.hasMessages())
-        assertFalse(inspektør.personLogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasMessagesOld())
+        assertFalse(inspektør.personLogger.hasErrorsOld())
         sendtSøknad(
             perioder = listOf(
                 SendtSøknad.Periode.Sykdom(
@@ -163,11 +163,11 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.tilstand(0))
-        assertTrue(inspektør.personLogger.hasErrors())
+        assertTrue(inspektør.personLogger.hasErrorsOld())
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -190,8 +190,8 @@ internal class PersonTest {
             arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasWarnings())
-            assertFalse(it.hasErrors())
+            assertTrue(it.hasWarningsOld())
+            assertFalse(it.hasErrorsOld())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -208,7 +208,7 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
     }
 
@@ -221,7 +221,7 @@ internal class PersonTest {
             sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
     }
 
@@ -239,7 +239,7 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
     }
 
@@ -263,10 +263,11 @@ internal class PersonTest {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
-                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), Aktivitetslogger()),
-                foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger()),
+                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), Aktivitetslogger(), Aktivitetslogg()),
+                foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger(), Aktivitetslogg()),
                 rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger()
+                aktivitetslogger = Aktivitetslogger(),
+                aktivitetslogg = Aktivitetslogg()
             ))
         }
 
@@ -335,6 +336,7 @@ internal class PersonTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
         )
@@ -349,7 +351,8 @@ internal class PersonTest {
         orgnummer = orgnummer,
         rapportertdato = LocalDateTime.now(),
         sykeperioder = perioder,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun sendtSøknad(perioder: List<SendtSøknad.Periode> = listOf(SendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
@@ -361,6 +364,7 @@ internal class PersonTest {
             sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -376,7 +380,8 @@ internal class PersonTest {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private class TestPersonObserver : PersonObserver {

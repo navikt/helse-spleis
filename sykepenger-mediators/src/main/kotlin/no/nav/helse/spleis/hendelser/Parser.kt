@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.KafkaRapid
 
@@ -15,25 +16,30 @@ internal class Parser(private val director: ParserDirector) : KafkaRapid.Message
 
     override fun onMessage(message: String) {
         val accumulatedProblems = Aktivitetslogger(message)
+        val summaryAktivitetslogg = Aktivitetslogg()
 
         try {
             for (factory in factories) {
                 val problems = Aktivitetslogger(message)
-                val newMessage = factory.createMessage(message, problems)
-                if (!problems.hasErrors()) return director.onRecognizedMessage(newMessage, problems)
+                val aktivitetslogg = Aktivitetslogg(summaryAktivitetslogg)
+                val newMessage = factory.createMessage(message, problems, aktivitetslogg)
+                if (!problems.hasErrorsOld()) return director.onRecognizedMessage(newMessage, problems, aktivitetslogg)
                 accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
             }
 
-            director.onUnrecognizedMessage(accumulatedProblems)
+            director.onUnrecognizedMessage(accumulatedProblems, summaryAktivitetslogg)
         } catch (err: Aktivitetslogger.AktivitetException) {
+            director.onMessageError(err)
+        } catch (err: Aktivitetslogg.AktivitetException) {
             director.onMessageError(err)
         }
     }
 
     // GoF Mediator
     internal interface ParserDirector {
-        fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger)
-        fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger)
+        fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg)
+        fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg)
         fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException)
+        fun onMessageError(aktivitetException: Aktivitetslogg.AktivitetException)
     }
 }

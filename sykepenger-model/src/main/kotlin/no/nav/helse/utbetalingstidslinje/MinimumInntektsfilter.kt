@@ -22,9 +22,9 @@ internal class MinimumInntektsfilter (
         tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
 
         if (inntekter.keys.toList() in periode)
-            aktivitetslogger.warn("Avvist minst en dag som faller under minimum inntekt")
+            aktivitetslogger.warnOld("Avvist minst en dag som faller under minimum inntekt")
         else
-            aktivitetslogger.info("Minimum inntekt har blitt sjekket uten problemer")
+            aktivitetslogger.infoOld("Minimum inntekt har blitt sjekket uten problemer")
     }
 
     override fun visitNavDag(dag: NavDag) {

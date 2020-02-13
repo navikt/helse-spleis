@@ -54,7 +54,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(nySøknad: NySøknad) {
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
-            aktivitetslogger.info("Lager ny vedtaksperiode")
+            aktivitetslogger.infoOld("Lager ny vedtaksperiode")
             nyVedtaksperiode(nySøknad).håndter(nySøknad)
         }
         nySøknad.kopierAktiviteterTil(aktivitetslogger)
@@ -62,7 +62,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sendtSøknad: SendtSøknad) {
         if (perioder.none { it.håndter(sendtSøknad) }) {
-            sendtSøknad.error("Uventet sendt søknad, mangler ny søknad")
+            sendtSøknad.errorOld("Uventet sendt søknad, mangler ny søknad")
         }
         sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -74,7 +74,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            inntektsmelding.error("Uventet inntektsmelding, mangler ny søknad")
+            inntektsmelding.errorOld("Uventet inntektsmelding, mangler ny søknad")
         }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -135,11 +135,11 @@ internal class Arbeidsgiver private constructor(
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
 
     internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode) {
-        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling()) }
+        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling(person.aktivitetslogg.barn())) }
     }
 
-    internal class GjennoptaBehandling :
-        ArbeidstakerHendelse(UUID.randomUUID(), GjennopptaBehandling, Aktivitetslogger()) {
+    internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
+        ArbeidstakerHendelse(UUID.randomUUID(), GjennopptaBehandling, Aktivitetslogger(), aktivitetslogg) {
         override fun rapportertdato(): LocalDateTime {
             kotlin.error("Uventet kall")
         }

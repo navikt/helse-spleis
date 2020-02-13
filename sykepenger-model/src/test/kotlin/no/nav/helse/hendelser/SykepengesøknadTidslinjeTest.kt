@@ -4,6 +4,7 @@ import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -106,6 +107,7 @@ internal class SykepengesøknadTidslinjeTest {
             sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -116,7 +118,8 @@ internal class SykepengesøknadTidslinjeTest {
         orgnummer = "123456789",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =

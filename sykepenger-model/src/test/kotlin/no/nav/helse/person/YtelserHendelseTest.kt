@@ -154,15 +154,18 @@ internal class YtelserHendelseTest {
         utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun nySøknad() =
@@ -173,7 +176,8 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun sendtSøknad() =
@@ -185,6 +189,7 @@ internal class YtelserHendelseTest {
             sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -206,7 +211,8 @@ internal class YtelserHendelseTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun vilkårsgrunnlag() =
@@ -224,6 +230,7 @@ internal class YtelserHendelseTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
         )
 

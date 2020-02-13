@@ -9,13 +9,14 @@ class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    private val aktivitetslogger: Aktivitetslogger
-) {
+    private val aktivitetslogger: Aktivitetslogger,
+    internal val aktivitetslogg: Aktivitetslogg
+) : Aktivitetskontekst {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogger())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogger(), Aktivitetslogg())
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -56,9 +57,9 @@ class Person private constructor(
     }
 
     fun håndter(påminnelse: Påminnelse) {
-        påminnelse.info("Behandler påminnelse")
+        påminnelse.infoOld("Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
-        påminnelse.warn("Fant ikke arbeidsgiver eller vedtaksperiode")
+        påminnelse.warnOld("Fant ikke arbeidsgiver eller vedtaksperiode")
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
@@ -114,12 +115,16 @@ class Person private constructor(
         visitor.postVisitPerson(this, aktørId, fødselsnummer)
     }
 
+    override fun melding(): String {
+        return "Person: ${fødselsnummer}"
+    }
+
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
-        hendelse.info(melding)
+        hendelse.infoOld(melding)
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        aktivitetslogger.info("Invaliderer alle perioder for alle arbeidsgivere")
+        aktivitetslogger.infoOld("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }
@@ -128,7 +133,7 @@ class Person private constructor(
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finnEllerOpprett(orgnr) {
-                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+                hendelse.infoOld("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 arbeidsgiver(orgnr)
             }
         }
@@ -136,7 +141,7 @@ class Person private constructor(
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finn(orgnr).also {
-                if (it == null) hendelse.error("Finner ikke arbeidsgiver")
+                if (it == null) hendelse.errorOld("Finner ikke arbeidsgiver")
             }
         }
 

@@ -1,9 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.VedtaksperiodeHendelse
+import no.nav.helse.person.*
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,8 +15,9 @@ class Påminnelse(
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
-    aktivitetslogger: Aktivitetslogger
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse, aktivitetslogger), VedtaksperiodeHendelse {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
@@ -29,9 +27,9 @@ class Påminnelse(
 
     fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
-            info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+            infoOld("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         } else {
-            warn("Vedtaksperiode blir påminnet")
+            warnOld("Vedtaksperiode blir påminnet")
         }
     }
 

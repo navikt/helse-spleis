@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.VedtaksperiodeHendelse
@@ -21,8 +22,9 @@ class Vilkårsgrunnlag(
     private val inntektsmåneder: List<Måned>,
     private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean,
-    aktivitetslogger: Aktivitetslogger
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger), VedtaksperiodeHendelse {
+    aktivitetslogger: Aktivitetslogger,
+    aktivitetslogg: Aktivitetslogg
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun rapportertdato() = rapportertDato
     override fun aktørId() = aktørId
@@ -30,7 +32,7 @@ class Vilkårsgrunnlag(
     override fun organisasjonsnummer() = orgnummer
 
     private fun beregnetÅrsInntekt(): Double {
-        if (inntektsmåneder.size > 12) severe("Forventer 12 eller færre inntektsmåneder")
+        if (inntektsmåneder.size > 12) severeOld("Forventer 12 eller færre inntektsmåneder")
         return inntektsmåneder
             .flatMap { it.inntektsliste }
             .sumByDouble { it }
@@ -57,14 +59,14 @@ class Vilkårsgrunnlag(
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
 
-        if (erEgenAnsatt) aktivitetslogger.warn("Er egen ansatt")
-        else aktivitetslogger.info("er ikke egen ansatt")
+        if (erEgenAnsatt) aktivitetslogger.warnOld("Er egen ansatt")
+        else aktivitetslogger.infoOld("er ikke egen ansatt")
 
-        if (harAvvikIOppgittInntekt) aktivitetslogger.warn("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
-        else aktivitetslogger.info("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
+        if (harAvvikIOppgittInntekt) aktivitetslogger.warnOld("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
+        else aktivitetslogger.infoOld("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
 
-        if(grunnlag.harOpptjening) aktivitetslogger.info("Har tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
-        else aktivitetslogger.warn("Har ikke tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
+        if(grunnlag.harOpptjening) aktivitetslogger.infoOld("Har tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
+        else aktivitetslogger.warnOld("Har ikke tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
 
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }

@@ -3,13 +3,9 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
-import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class MaksimumUtbetalingTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -41,7 +37,7 @@ internal class MaksimumUtbetalingTest {
         ).beregn()
         undersøke(tidslinje)
         assertEquals(21610, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasWarningsOld())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
@@ -55,8 +51,8 @@ internal class MaksimumUtbetalingTest {
         ).beregn()
         undersøke(tidslinje)
         assertEquals(21610 + 12000, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogger.hasMessages())
-        assertFalse(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasMessagesOld())
+        assertFalse(aktivitetslogger.hasWarningsOld())
     }
 
 

@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.hendelser.SendtSøknad.Periode.*
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -19,92 +20,94 @@ internal class SendtSøknadTest {
 
     private lateinit var sendtSøknad: SendtSøknad
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun `sendt søknad med bare sykdom`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100))
-        assertFalse(sendtSøknad.valider().hasErrors())
+        assertFalse(sendtSøknad.valider().hasErrorsOld())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `søknad med ferie`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 4.januar))
-        assertFalse(sendtSøknad.valider().hasErrors())
+        assertFalse(sendtSøknad.valider().hasErrorsOld())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med utdanning`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(5.januar, 10.januar))
-        assertTrue(sendtSøknad.valider().hasNeeds())
+        assertTrue(sendtSøknad.valider().hasNeedsOld())
         assertEquals(10, sendtSøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad ikke 100`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 50))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `sykdom faktiskgrad ikke 100`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100, 50.0))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Utdanning(16.januar, 10.januar))
-        assertTrue(sendtSøknad.valider().hasNeeds())
+        assertTrue(sendtSøknad.valider().hasNeedsOld())
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
-        assertTrue(sendtSøknad.valider().hasNeeds())
+        assertTrue(sendtSøknad.valider().hasNeedsOld())
     }
 
     @Test
     internal fun `arbeidag ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(1.januar, 10.januar, 100), Arbeid(2.januar, 16.januar))
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `egenmelding ligger utenfor sykdomsvindu`() {
         sendtSøknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
-        assertFalse(sendtSøknad.valider().hasErrors())
+        assertFalse(sendtSøknad.valider().hasErrorsOld())
         assertEquals(11, sendtSøknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med andre inntektskilder`() {
         sendtSøknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = true)
-        assertTrue(sendtSøknad.valider().hasErrors())
+        assertTrue(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
     internal fun `søknad uten andre inntektskilder`() {
         sendtSøknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = false)
-        assertFalse(sendtSøknad.valider().hasErrors())
+        assertFalse(sendtSøknad.valider().hasErrorsOld())
     }
 
     @Test
@@ -126,6 +129,7 @@ internal class SendtSøknadTest {
             sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = harAndreInntektskilder
         )
     }

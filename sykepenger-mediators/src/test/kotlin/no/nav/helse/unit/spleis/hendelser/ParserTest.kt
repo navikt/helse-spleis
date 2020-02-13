@@ -1,5 +1,6 @@
 package no.nav.helse.unit.spleis.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
@@ -13,8 +14,8 @@ internal class ParserTest : Parser.ParserDirector {
     @Test
     internal fun `invalid json`() {
         parser.register(object : MessageFactory {
-            override fun createMessage(message: String, problems: Aktivitetslogger) =
-                JsonMessage(message, problems)
+            override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+                JsonMessage(message, problems, aktivitetslogg)
         })
         parser.onMessage("foo")
 
@@ -25,9 +26,9 @@ internal class ParserTest : Parser.ParserDirector {
     @Test
     internal fun `severe errors are caught`() {
         parser.register(object : MessageFactory {
-            override fun createMessage(message: String, problems: Aktivitetslogger) =
-                JsonMessage(message, problems).apply {
-                    problems.severe("Severe error!")
+            override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
+                JsonMessage(message, problems, aktivitetslogg).apply {
+                    problems.severeOld("Severe error!")
                 }
         })
         parser.onMessage("{}")
@@ -43,7 +44,7 @@ internal class ParserTest : Parser.ParserDirector {
         parser.onMessage("{\"key\": \"value\"}")
 
         assertTrue(unrecognizedMessage)
-        assertTrue(Aktivitetslogger.hasErrors())
+        assertTrue(Aktivitetslogger.hasErrorsOld())
         assertContains("key1_not_set", Aktivitetslogger)
         assertContains("key2_not_set", Aktivitetslogger)
     }
@@ -59,7 +60,7 @@ internal class ParserTest : Parser.ParserDirector {
         parser.onMessage("{\"key\": \"value\"}")
 
         assertEquals(message2, recognizedMessage)
-        assertFalse(Aktivitetslogger.hasErrors())
+        assertFalse(Aktivitetslogger.hasErrorsOld())
         assertNotContains("key1_not_set", Aktivitetslogger)
     }
 
@@ -95,6 +96,7 @@ internal class ParserTest : Parser.ParserDirector {
     private var recognizedMessage: JsonMessage? = null
     private lateinit var Aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetException: Aktivitetslogger.AktivitetException
+    private lateinit var aktivitetsloggException: Aktivitetslogg.AktivitetException
 
     @BeforeEach
     internal fun setup() {
@@ -103,7 +105,7 @@ internal class ParserTest : Parser.ParserDirector {
         unrecognizedMessage = false
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
         recognizedMessage = message
         Aktivitetslogger = aktivitetslogger
     }
@@ -113,7 +115,12 @@ internal class ParserTest : Parser.ParserDirector {
         this.aktivitetException = aktivitetException
     }
 
-    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger) {
+    override fun onMessageError(aktivitetException: Aktivitetslogg.AktivitetException) {
+        messageWithError = true
+        this.aktivitetsloggException = aktivitetException
+    }
+
+    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
         unrecognizedMessage = true
         Aktivitetslogger = aktivitetslogger
     }
@@ -126,8 +133,8 @@ internal class ParserTest : Parser.ParserDirector {
 
     private fun messageFactory(block: JsonMessage.() -> Unit) {
         parser.register(object : MessageFactory {
-            override fun createMessage(message: String, problems: Aktivitetslogger): JsonMessage {
-                return JsonMessage(message, problems).apply {
+            override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): JsonMessage {
+                return JsonMessage(message, problems, aktivitetslogg).apply {
                     block(this)
                 }
             }

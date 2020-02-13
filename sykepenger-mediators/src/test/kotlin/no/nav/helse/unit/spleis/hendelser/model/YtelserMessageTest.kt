@@ -1,5 +1,6 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.model.YtelserMessage
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -11,9 +12,10 @@ class YtelserMessageTest {
     @Test
     fun `Kan mappe om message til modell uten feil`() {
         val aktivitetslogger = Aktivitetslogger()
-        YtelserMessage(json, aktivitetslogger).asYtelser()
+        val aktivitetslogg = Aktivitetslogg()
+        YtelserMessage(json, aktivitetslogger, aktivitetslogg).asYtelser()
 
-        assertFalse(aktivitetslogger.hasErrors())
+        assertFalse(aktivitetslogger.hasErrorsOld())
     }
 
 }

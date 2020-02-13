@@ -41,6 +41,7 @@ internal class KunEnArbeidsgiverTest {
     private lateinit var observatør: TestObservatør
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var hendelselogger: Aktivitetslogger
+    private lateinit var hendelselogg: Aktivitetslogg
     private var forventetEndringTeller = 0
 
     @BeforeEach
@@ -125,7 +126,7 @@ internal class KunEnArbeidsgiverTest {
             assertMessages(it)
         }
         håndterYtelser(0)   // No history
-        assertTrue(hendelselogger.hasErrors())
+        assertTrue(hendelselogger.hasErrorsOld())
         println(hendelselogger)
         assertTilstander(
             0,
@@ -143,7 +144,7 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
         håndterNySøknad(Triple(1.februar, 23.februar, 100))
-        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(1, INNTEKT)
@@ -183,7 +184,7 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
@@ -220,7 +221,7 @@ internal class KunEnArbeidsgiverTest {
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
         val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
-        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
         assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanse)
@@ -279,7 +280,7 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
@@ -317,7 +318,7 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(0, true)
         val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
-        assertTrue(hendelselogger.hasMessages(), hendelselogger.toString())
+        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
@@ -353,21 +354,21 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogger.hasErrors())
-        assertFalse(inspektør.arbeidsgiverLogger.hasErrors())
-        assertFalse(inspektør.periodeLogger.hasErrors())
+        assertFalse(inspektør.personLogger.hasErrorsOld())
+        assertFalse(inspektør.arbeidsgiverLogger.hasErrorsOld())
+        assertFalse(inspektør.periodeLogger.hasErrorsOld())
     }
 
     private fun assertNoWarnings(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogger.hasWarnings())
-        assertFalse(inspektør.arbeidsgiverLogger.hasWarnings())
-        assertFalse(inspektør.periodeLogger.hasWarnings())
+        assertFalse(inspektør.personLogger.hasWarningsOld())
+        assertFalse(inspektør.arbeidsgiverLogger.hasWarningsOld())
+        assertFalse(inspektør.periodeLogger.hasWarningsOld())
     }
 
     private fun assertMessages(inspektør: TestPersonInspektør) {
-        assertTrue(inspektør.personLogger.hasMessages())
-        assertTrue(inspektør.arbeidsgiverLogger.hasMessages())
-        assertTrue(inspektør.periodeLogger.hasMessages())
+        assertTrue(inspektør.personLogger.hasMessagesOld())
+        assertTrue(inspektør.arbeidsgiverLogger.hasMessagesOld())
+        assertTrue(inspektør.periodeLogger.hasMessagesOld())
     }
 
     private fun håndterNySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -412,6 +413,7 @@ internal class KunEnArbeidsgiverTest {
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): NySøknad {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return NySøknad(
             hendelseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -419,12 +421,14 @@ internal class KunEnArbeidsgiverTest {
             orgnummer = ORGNUMMER,
             rapportertdato = rapportertdato,
             sykeperioder = listOf(*sykeperioder),
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg
         )
     }
 
     private fun sendtSøknad(vararg perioder: SendtSøknad.Periode): SendtSøknad {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return SendtSøknad(
             hendelseId = UUID.randomUUID(),
             fnr = NySøknadTest.UNG_PERSON_FNR_2018,
@@ -433,6 +437,7 @@ internal class KunEnArbeidsgiverTest {
             sendtNav = rapportertdato,
             perioder = listOf(*perioder),
             aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg,
             harAndreInntektskilder = false
         )
     }
@@ -447,6 +452,7 @@ internal class KunEnArbeidsgiverTest {
         endringerIRefusjon: List<LocalDate> = emptyList()
     ): Inntektsmelding {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return Inntektsmelding(
             hendelseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
@@ -458,12 +464,14 @@ internal class KunEnArbeidsgiverTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg
         )
     }
 
     private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return Vilkårsgrunnlag(
             hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
@@ -479,6 +487,7 @@ internal class KunEnArbeidsgiverTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         )
     }
@@ -490,6 +499,7 @@ internal class KunEnArbeidsgiverTest {
         svangerskapspenger: Periode? = null
     ): Ytelser {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return Ytelser(
             hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
@@ -505,11 +515,13 @@ internal class KunEnArbeidsgiverTest {
                     )
                 },
                 inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
-                aktivitetslogger = hendelselogger
+                aktivitetslogger = hendelselogger,
+                aktivitetslogg = hendelselogg
             ),
-            foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
+            foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger(), Aktivitetslogg()),
             rapportertdato = rapportertdato,
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg
         )
     }
 
@@ -518,6 +530,7 @@ internal class KunEnArbeidsgiverTest {
         utbetalingGodkjent: Boolean
     ): ManuellSaksbehandling {
         hendelselogger = Aktivitetslogger()
+        hendelselogg = Aktivitetslogg()
         return ManuellSaksbehandling(
             hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
@@ -527,7 +540,8 @@ internal class KunEnArbeidsgiverTest {
             saksbehandler = "Ola Nordmann",
             utbetalingGodkjent = utbetalingGodkjent,
             rapportertdato = rapportertdato,
-            aktivitetslogger = hendelselogger
+            aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg
         )
     }
 

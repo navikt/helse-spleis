@@ -26,6 +26,7 @@ internal class GodkjenningHendelseTest {
     private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -92,7 +93,8 @@ internal class GodkjenningHendelseTest {
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun ytelser(
@@ -109,15 +111,18 @@ internal class GodkjenningHendelseTest {
         utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
         rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun nySøknad() =
@@ -128,7 +133,8 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun sendtSøknad() =
@@ -140,6 +146,7 @@ internal class GodkjenningHendelseTest {
             sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -155,7 +162,8 @@ internal class GodkjenningHendelseTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun vilkårsgrunnlag() =
@@ -173,6 +181,7 @@ internal class GodkjenningHendelseTest {
             },
             erEgenAnsatt = false,
             aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         )
 

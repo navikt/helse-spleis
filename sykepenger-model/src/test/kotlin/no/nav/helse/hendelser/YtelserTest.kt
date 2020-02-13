@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -72,11 +73,13 @@ internal class YtelserTest {
                 )
             },
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogger = Aktivitetslogger(),
+            aktivitetslogg = Aktivitetslogg()
         ),
-        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger()),
+        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger(), Aktivitetslogg()),
         rapportertdato = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private companion object {

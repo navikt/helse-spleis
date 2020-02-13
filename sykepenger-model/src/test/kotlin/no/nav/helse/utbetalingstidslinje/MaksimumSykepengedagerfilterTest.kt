@@ -3,10 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -35,14 +31,14 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test internal fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertTrue(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasWarningsOld())
     }
 
     @Test internal fun `stopper betaling etter 248 dager `() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 1.mars)))
-        assertTrue(aktivitetslogger.hasMessages())
-        assertFalse(aktivitetslogger.hasWarnings())
+        assertTrue(aktivitetslogger.hasMessagesOld())
+        assertFalse(aktivitetslogger.hasWarningsOld())
     }
 
     @Test internal fun `26 uker arbeid resetter utbetalingsgrense`() {

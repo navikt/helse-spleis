@@ -22,9 +22,9 @@ internal class MaksimumUtbetaling(
     internal fun beregn() {
         tidslinjer.forEach { it.accept(this) }
         if (harRedusertUtbetaling)
-            aktivitetslogger.warn("Redusert utbetaling minst en dag som faller under maksimum inntekt")
+            aktivitetslogger.warnOld("Redusert utbetaling minst en dag som faller under maksimum inntekt")
         else
-            aktivitetslogger.info("Utbetaling har ikke blitt redusert på grunn av 6G")
+            aktivitetslogger.infoOld("Utbetaling har ikke blitt redusert på grunn av 6G")
     }
 
     override fun visitNavDag(dag: NavDag) {

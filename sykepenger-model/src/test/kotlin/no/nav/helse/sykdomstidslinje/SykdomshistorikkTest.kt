@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.testhelpers.februar
@@ -63,7 +64,7 @@ internal class SykdomshistorikkTest {
             SendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasErrorsOld())
         }
         assertEquals(2, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
@@ -128,7 +129,8 @@ internal class SykdomshistorikkTest {
         orgnummer = "987654321",
         rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun sendtSøknad(
@@ -142,6 +144,7 @@ internal class SykdomshistorikkTest {
         sendtNav = LocalDateTime.now(),
         perioder = listOf(*perioder),
         aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg(),
         harAndreInntektskilder = false
     )
 
@@ -164,7 +167,8 @@ internal class SykdomshistorikkTest {
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder,
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogger = Aktivitetslogger(),
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private class HistorikkInspektør(sykdomshistorikk: Sykdomshistorikk) : SykdomshistorikkVisitor {
