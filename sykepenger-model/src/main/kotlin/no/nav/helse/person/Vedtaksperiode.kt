@@ -13,8 +13,6 @@ import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.tournament.historiskDagturnering
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.apache.commons.codec.binary.Base32
-import java.nio.ByteBuffer
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
@@ -700,18 +698,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.utbetalingsreferanse++
             return vedtaksperiode.arbeidsgiver.utbetalingsreferanse.toString()
         }
-
-        private fun UUID.base32Encode(): String {
-            val pad = '='
-            return Base32(pad.toByte())
-                .encodeAsString(this.byteArray())
-                .replace(pad.toString(), "")
-        }
-
-        private fun UUID.byteArray() = ByteBuffer.allocate(Long.SIZE_BYTES * 2).apply {
-            putLong(this@byteArray.mostSignificantBits)
-            putLong(this@byteArray.leastSignificantBits)
-        }.array()
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {
