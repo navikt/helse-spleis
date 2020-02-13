@@ -1,6 +1,5 @@
 package no.nav.helse.rapids_rivers
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -32,7 +31,6 @@ internal class RapidIntegrationTest {
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         private val consumerId = "test-app"
-
 
         private val testTopic = "a-test-topic"
 
@@ -154,13 +152,15 @@ internal class RapidIntegrationTest {
         val value = "{ \"@event\": \"$eventName\" }"
 
         River(rapid).apply {
-            validate { it.path("@event").asText() == eventName }
-            validate { it.path("service_id").let { it.isMissingNode || it.isNull } }
+            validate { it.requireValue("@event", eventName) }
+            validate { it.forbid("service_id") }
             register(object : River.PacketListener {
-                override fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
-                    packet.put("service_id", serviceId)
+                override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+                    packet["service_id"] = serviceId
                     context.send(packet.toJson())
                 }
+
+                override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {}
             })
         }
 

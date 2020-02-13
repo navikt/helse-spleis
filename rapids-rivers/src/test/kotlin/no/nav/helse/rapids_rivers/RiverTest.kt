@@ -1,6 +1,5 @@
 package no.nav.helse.rapids_rivers
 
-import com.fasterxml.jackson.databind.JsonNode
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -12,26 +11,30 @@ internal class RiverTest {
     internal fun `invalid json`() {
         river.onMessage("invalid json", context)
         assertFalse(gotMessage)
+        assertTrue(messageProblems.hasErrors())
     }
 
     @Test
     internal fun `no validations`() {
         river.onMessage("{}", context)
         assertTrue(gotMessage)
+        assertFalse(messageProblems.hasErrors())
     }
 
     @Test
     internal fun `failed validations`() {
-        river.validate { false }
+        river.validate { it.requireKey("key") }
         river.onMessage("{}", context)
         assertFalse(gotMessage)
+        assertTrue(messageProblems.hasErrors())
     }
 
     @Test
     internal fun `passing validations`() {
-        river.validate { it.path("hello").asText() == "world" }
+        river.validate { it.requireValue("hello", "world") }
         river.onMessage("{\"hello\": \"world\"}", context)
         assertTrue(gotMessage)
+        assertFalse(messageProblems.hasErrors())
     }
 
     private val context = object : RapidsConnection.MessageContext {
@@ -41,6 +44,7 @@ internal class RiverTest {
     }
 
     private var gotMessage = false
+    private lateinit var messageProblems: MessageProblems
     private lateinit var river: River
     private val rapid = object : RapidsConnection() {
         override fun publish(message: String) {}
@@ -54,10 +58,15 @@ internal class RiverTest {
 
     @BeforeEach
     internal fun setup() {
+        messageProblems = MessageProblems("{}")
         river = River(rapid).apply {
             register(object : River.PacketListener {
-                override fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
+                override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
                     gotMessage = true
+                }
+
+                override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+                    messageProblems = problems
                 }
             })
         }

@@ -1,22 +1,17 @@
 package no.nav.helse.rapids_rivers
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+typealias Validation = (JsonMessage) -> Unit
 
 class River(rapidsConnection: RapidsConnection) : RapidsConnection.MessageListener {
 
-    private val validations = mutableListOf<(JsonNode) -> Boolean>()
+    private val validations = mutableListOf<Validation>()
     private val listeners = mutableListOf<PacketListener>()
 
     init {
         rapidsConnection.register(this)
     }
 
-    fun validate(validation: (JsonNode) -> Boolean) {
+    fun validate(validation: Validation) {
         validations.add(validation)
     }
 
@@ -25,29 +20,27 @@ class River(rapidsConnection: RapidsConnection) : RapidsConnection.MessageListen
     }
 
     override fun onMessage(message: String, context: RapidsConnection.MessageContext) {
-        val packet = message.parseJson() ?: return
-        for (v in validations) if (!v(packet)) return
-        onPacket(packet, context)
+        val problems = MessageProblems(message)
+        try {
+            val packet = JsonMessage(message, problems)
+            validations.forEach { it(packet) }
+            if (problems.hasErrors()) return onError(problems, context)
+            onPacket(packet, context)
+        } catch (err: MessageProblems.MessageException) {
+            return onError(problems, context)
+        }
     }
 
-    private fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext) {
+    private fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
         listeners.forEach { it.onPacket(packet, context) }
     }
 
+    private fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        listeners.forEach { it.onError(problems, context) }
+    }
+
     interface PacketListener {
-        fun onPacket(packet: JsonNode, context: RapidsConnection.MessageContext)
+        fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext)
+        fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext)
     }
 }
-
-private val objectMapper = jacksonObjectMapper()
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    .registerModule(JavaTimeModule())
-
-private fun String.parseJson() = try {
-    objectMapper.readTree(this)
-} catch (err: JsonProcessingException) {
-    null
-}
-
-fun JsonNode.toJson() = objectMapper.writeValueAsString(this)
-fun JsonNode.put(key: String, value: String) = (this as ObjectNode).put(key, value)
