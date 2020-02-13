@@ -116,6 +116,10 @@ internal class AktivitetsloggTest {
         assertEquals(5, aktivitetslogg.aktivitetsteller())
         assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
         assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())
+        assertEquals(2, aktivitetslogg.tellerEtterMelding()["info" to "info message"], aktivitetslogg.toString())
+        assertEquals(1, aktivitetslogg.tellerEtterMelding()["warn" to "warn message"], aktivitetslogg.toString())
+        assertEquals(2, aktivitetslogg.tellerEtterMelding()["error" to "error message"], aktivitetslogg.toString())
+        assertEquals(1, hendelse1.logg.tellerEtterMelding()["info" to "info message"], aktivitetslogg.toString())
     }
 
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
