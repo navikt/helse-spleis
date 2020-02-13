@@ -1,32 +1,9 @@
 package no.nav.helse.rapids_rivers
 
 import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.metrics.micrometer.MicrometerMetrics
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.micrometer.core.instrument.Clock
-import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
-import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
@@ -72,6 +49,7 @@ class RapidApplication private constructor(
     companion object {
         private val log = LoggerFactory.getLogger(RapidApplication::class.java)
 
+        @KtorExperimentalAPI
         fun create(env: Map<String, String>) = Builder(env).build()
     }
 
@@ -89,84 +67,26 @@ class RapidApplication private constructor(
             truststorePassword = env["NAV_TRUSTSTORE_PASSWORD"]
         )
 
-        private val rapid = KafkaRapid(
-            consumerConfig = kafkaConfig.consumerConfig(),
-            producerConfig = kafkaConfig.producerConfig(),
-            topic = env.getValue("KAFKA_RAPID_TOPIC")
-        )
+        private val rapid = KafkaRapid.create(kafkaConfig, env.getValue("KAFKA_RAPID_TOPIC"))
 
-        private val ktor = ApplicationEngineEnvironmentBuilder().apply {
-            this.log = RapidApplication.log
-            connector { port = env["HTTP_PORT"]?.toInt() ?: 8080 }
-            liveness(rapid::isRunning)
-            readiness(rapid::isRunning)
-            metrics(CollectorRegistry.defaultRegistry)
-        }
+        private val ktor = KtorBuilder()
+            .log(log)
+            .port(env["HTTP_PORT"]?.toInt() ?: 8080)
+            .liveness(rapid::isRunning)
+            .readiness(rapid::isRunning)
+            .metrics(CollectorRegistry.defaultRegistry)
 
         fun withKtorModule(module: Application.() -> Unit) = apply {
             ktor.module(module)
         }
 
+        @KtorExperimentalAPI
         fun build(): RapidsConnection {
             return RapidApplication(ktor.build(), rapid)
         }
 
         private fun uncaughtExceptionHandler(thread: Thread, err: Throwable) {
             log.error("Uncaught exception in thread ${thread.name}: ${err.message}", err)
-        }
-
-        private fun ApplicationEngineEnvironmentBuilder.build() = embeddedServer(Netty, this.build {  })
-
-        private fun ApplicationEngineEnvironmentBuilder.liveness(isAliveCheck: () -> Boolean) = apply {
-            module {
-                routing {
-                    get("/isalive") {
-                        if (!isAliveCheck()) return@get call.respondText("NOT ALIVE", ContentType.Text.Plain, HttpStatusCode.ServiceUnavailable)
-                        call.respondText("ALIVE", ContentType.Text.Plain)
-                    }
-                }
-            }
-        }
-
-        private fun ApplicationEngineEnvironmentBuilder.readiness(isReadyCheck: () -> Boolean) = apply {
-            module {
-                routing {
-                    get("/isready") {
-                        if (!isReadyCheck()) return@get call.respondText("NOT READY", ContentType.Text.Plain, HttpStatusCode.ServiceUnavailable)
-                        call.respondText("READY", ContentType.Text.Plain)
-                    }
-                }
-            }
-        }
-
-        private fun ApplicationEngineEnvironmentBuilder.metrics(collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry) = apply {
-            module {
-                install(MicrometerMetrics) {
-                    registry = PrometheusMeterRegistry(
-                        PrometheusConfig.DEFAULT,
-                        collectorRegistry,
-                        Clock.SYSTEM
-                    )
-                    meterBinders = listOf(
-                        ClassLoaderMetrics(),
-                        JvmMemoryMetrics(),
-                        JvmGcMetrics(),
-                        ProcessorMetrics(),
-                        JvmThreadMetrics(),
-                        LogbackMetrics(),
-                        KafkaConsumerMetrics()
-                    )
-                }
-
-                routing {
-                    get("/metrics") {
-                        val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: emptySet()
-                        call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-                            TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
-                        }
-                    }
-                }
-            }
         }
     }
 }

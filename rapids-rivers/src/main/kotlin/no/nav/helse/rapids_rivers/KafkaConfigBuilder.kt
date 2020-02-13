@@ -10,22 +10,24 @@ import java.io.File
 import java.util.*
 
 // Understands how to configure kafka from environment variables
-internal class KafkaConfigBuilder(private val bootstrapServers: String,
-                                  private val consumerGroupId: String,
-                                  private val username: String? = null,
-                                  private val password: String? = null,
-                                  private val truststore: String? = null,
-                                  private val truststorePassword: String? = null) {
-    private val log = LoggerFactory.getLogger(KafkaConfigBuilder::class.java)
+class KafkaConfigBuilder(
+    private val bootstrapServers: String,
+    private val consumerGroupId: String,
+    private val username: String? = null,
+    private val password: String? = null,
+    private val truststore: String? = null,
+    private val truststorePassword: String? = null
+) {
+    private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun consumerConfig() = kafkaBaseConfig().apply {
+    internal fun consumerConfig() = kafkaBaseConfig().apply {
         put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId)
         put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true")
         put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000")
     }
 
-    fun producerConfig() = kafkaBaseConfig().apply {
+    internal fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")
         put(ProducerConfig.LINGER_MS_CONFIG, "0")
     }
@@ -36,7 +38,10 @@ internal class KafkaConfigBuilder(private val bootstrapServers: String,
         put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
 
         if (username != null) {
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";")
+            put(
+                SaslConfigs.SASL_JAAS_CONFIG,
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
+            )
         }
 
         if (truststore != null) {

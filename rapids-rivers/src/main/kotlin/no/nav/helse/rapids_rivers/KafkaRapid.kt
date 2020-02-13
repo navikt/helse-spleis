@@ -93,8 +93,14 @@ class KafkaRapid(
         }
     }
 
-    private companion object {
+    companion object {
         private const val Stopped = false
         private const val Started = true
+
+        fun create(kafkaConfig: KafkaConfigBuilder, topic: String) = KafkaRapid(
+            consumerConfig = kafkaConfig.consumerConfig(),
+            producerConfig = kafkaConfig.producerConfig(),
+            topic = topic
+        )
     }
 }
