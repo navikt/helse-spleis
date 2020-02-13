@@ -69,4 +69,3 @@ internal fun LocalDate.harTilstøtende(other: LocalDate) =
         SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
-

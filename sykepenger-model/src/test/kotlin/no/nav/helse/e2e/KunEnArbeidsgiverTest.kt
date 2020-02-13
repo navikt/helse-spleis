@@ -246,6 +246,28 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `tilstøtende periode arver første fraværsdag`() {
+        håndterNySøknad(Triple(3.januar, 26.januar, 100))
+        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+
+        håndterNySøknad(Triple(29.januar, 23.februar, 100))
+        håndterSendtSøknad(1, Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(1)   // No history
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(2, it.førsteFraværsdager.size)
+            assertEquals(it.førsteFraværsdager[0], it.førsteFraværsdager[1])
+        }
+    }
+
+    @Test
     internal fun `Sammenblandede hendelser fra forskjellige perioder med inntektsmelding først`() {
         håndterNySøknad(Triple(3.januar, 26.januar, 100))
         håndterNySøknad(Triple(1.februar, 23.februar, 100))
@@ -558,6 +580,7 @@ internal class KunEnArbeidsgiverTest {
         internal lateinit var periodeLogger: Aktivitetslogger
         internal lateinit var inntektshistorikk: Inntekthistorikk
         internal lateinit var sykdomshistorikk: Sykdomshistorikk
+        internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
         internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
 
         init {
@@ -566,6 +589,12 @@ internal class KunEnArbeidsgiverTest {
 
         override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
             personLogger = aktivitetslogger
+        }
+
+        override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
+            if (førsteFraværsdag != null) {
+                førsteFraværsdager.add(førsteFraværsdag)
+            }
         }
 
         override fun preVisitArbeidsgiver(

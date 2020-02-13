@@ -9,8 +9,9 @@ internal class DagTest {
 
     @Test
     internal fun sykedag() {
-        val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val sykedag = ConcreteSykdomstidslinje.sykedag(dagSykedagenDekker,
+        val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
+        val sykedag = ConcreteSykdomstidslinje.sykedag(
+            dagSykedagenDekker,
             Dag.NøkkelHendelseType.Søknad
         )
 
@@ -20,8 +21,9 @@ internal class DagTest {
 
     @Test
     internal fun feriedag() {
-        val dagFeriedagenDekker = LocalDate.of(2019,9,24)
-        val feriedag = ConcreteSykdomstidslinje.ferie(dagFeriedagenDekker,
+        val dagFeriedagenDekker = LocalDate.of(2019, 9, 24)
+        val feriedag = ConcreteSykdomstidslinje.ferie(
+            dagFeriedagenDekker,
             Dag.NøkkelHendelseType.Søknad
         )
 
@@ -31,8 +33,9 @@ internal class DagTest {
 
     @Test
     internal fun arbeidsdag() {
-        val arbeidsdagenGjelder = LocalDate.of(2019,9,25)
-        val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(arbeidsdagenGjelder,
+        val arbeidsdagenGjelder = LocalDate.of(2019, 9, 25)
+        val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(
+            arbeidsdagenGjelder,
             Dag.NøkkelHendelseType.Søknad
         )
 
@@ -42,8 +45,9 @@ internal class DagTest {
 
     @Test
     internal fun helgedag() {
-        val helgedagenGjelder = LocalDate.of(2019,9,28)
-        val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(helgedagenGjelder,
+        val helgedagenGjelder = LocalDate.of(2019, 9, 28)
+        val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(
+            helgedagenGjelder,
             Dag.NøkkelHendelseType.Søknad
         )
 
@@ -53,8 +57,9 @@ internal class DagTest {
 
     @Test
     internal fun studiedag() {
-        val dagSykedagenDekker = LocalDate.of(2019,9,23)
-        val studiedag = ConcreteSykdomstidslinje.studiedag(dagSykedagenDekker,
+        val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
+        val studiedag = ConcreteSykdomstidslinje.studiedag(
+            dagSykedagenDekker,
             Dag.NøkkelHendelseType.Søknad
         )
 
