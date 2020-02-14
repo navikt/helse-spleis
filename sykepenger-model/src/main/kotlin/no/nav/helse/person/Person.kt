@@ -57,9 +57,10 @@ class Person private constructor(
     }
 
     fun håndter(påminnelse: Påminnelse) {
-        påminnelse.infoOld("Behandler påminnelse")
+        registrer(påminnelse, "Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
         påminnelse.warnOld("Fant ikke arbeidsgiver eller vedtaksperiode")
+        påminnelse.warn("Fant ikke arbeidsgiver eller vedtaksperiode")
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
@@ -115,16 +116,19 @@ class Person private constructor(
         visitor.postVisitPerson(this, aktørId, fødselsnummer)
     }
 
-    override fun melding(): String {
-        return "Person: ${fødselsnummer}"
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return SpesifikkKontekst("Person", "Person: ${fødselsnummer}")
     }
 
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
+        hendelse.kontekst(this)
+        hendelse.info(melding)
         hendelse.infoOld(melding)
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
         aktivitetslogger.infoOld("Invaliderer alle perioder for alle arbeidsgivere")
+        arbeidstakerHendelse.warn("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }
@@ -134,6 +138,7 @@ class Person private constructor(
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finnEllerOpprett(orgnr) {
                 hendelse.infoOld("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+                hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 arbeidsgiver(orgnr)
             }
         }

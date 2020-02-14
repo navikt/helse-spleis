@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
+import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -34,7 +35,7 @@ fun parsePerson(json: String): Person {
     val personData: PersonData = objectMapper.readValue(json)
     val arbeidsgivere = mutableListOf<Arbeidsgiver>()
     val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
-    val aktivitetslogg = Aktivitetslogg()
+    val aktivitetslogg = konverterTilAktivitetslogg(personData.aktivitetslogg)
 
     val person = createPerson(
         aktørId = personData.aktørId,
@@ -237,10 +238,36 @@ internal data class PersonData(
     val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverData>,
-    val aktivitetslogger: AktivitetsloggerData
+    val aktivitetslogger: AktivitetsloggerData,
+    val aktivitetslogg: AktivitetsloggData
 ) {
     companion object {
         const val skjemaVersjon: Int = 4
+    }
+
+    internal data class AktivitetsloggData(
+        val aktiviteter: List<AktivitetData>
+    ) {
+        data class AktivitetData(
+            val alvorlighetsgrad: Alvorlighetsgrad,
+            val needType: String?,
+            val melding: String,
+            val tidsstempel: String,
+            val kontekster: List<SpesifikkKontekstData>
+        )
+
+        data class SpesifikkKontekstData(
+            val kontekstType: String,
+            val melding: String
+        )
+
+        enum class Alvorlighetsgrad {
+            INFO,
+            WARN,
+            NEED,
+            ERROR,
+            SEVERE
+        }
     }
 
     data class ArbeidsgiverData(

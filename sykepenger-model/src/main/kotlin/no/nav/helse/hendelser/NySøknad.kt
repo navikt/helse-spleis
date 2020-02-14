@@ -39,6 +39,8 @@ class NySøknad(
         aktivitetslogger.addAll(this.aktivitetslogger, "Ny søknad")
     }
 
+    override fun melding(ignore: String) = "Ny Søknad"
+
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }

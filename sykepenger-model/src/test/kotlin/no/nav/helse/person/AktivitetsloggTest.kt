@@ -96,7 +96,7 @@ internal class AktivitetsloggTest {
 
     @Test
     internal fun `Vis bare arbeidsgiveraktivitet`(){
-        val hendelse1 = TestHendelse("Hendelse", aktivitetslogg.barn())
+        val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
         hendelse1.kontekst(arbeidsgiver1)
@@ -105,7 +105,7 @@ internal class AktivitetsloggTest {
         hendelse1.info("info message")
         hendelse1.warn("warn message")
         hendelse1.error("error message")
-        val hendelse2 = TestHendelse("Hendelse", aktivitetslogg.barn())
+        val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
         hendelse2.kontekst(arbeidsgiver2)
@@ -125,7 +125,7 @@ internal class AktivitetsloggTest {
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -136,7 +136,7 @@ internal class AktivitetsloggTest {
     private fun assertWarn(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitWarn(aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
+            override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -147,7 +147,7 @@ internal class AktivitetsloggTest {
     private fun assertError(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitError(aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+            override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertTrue(message in aktivitet.toString(), aktivitetslogg.toString())
             }
@@ -158,7 +158,7 @@ internal class AktivitetsloggTest {
     private fun assertSevere(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitSevere(aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
+            override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -169,9 +169,7 @@ internal class AktivitetsloggTest {
     private class TestKontekst(
         private val melding: String
     ): Aktivitetskontekst {
-
-        override fun melding() = melding
-
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding)
     }
 
     private class TestHendelse(
@@ -181,9 +179,8 @@ internal class AktivitetsloggTest {
         init {
             logg.kontekst(this)
         }
-
-        override fun melding() = melding
-        internal fun kontekst(kontekst: Aktivitetskontekst) {
+        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse", melding)
+        override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)
         }
 

@@ -12,6 +12,7 @@ import java.util.*
 internal interface PersonVisitor : ArbeidsgiverVisitor {
     fun preVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
     fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
+    fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}

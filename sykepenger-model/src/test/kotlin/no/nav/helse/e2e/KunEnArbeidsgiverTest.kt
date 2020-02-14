@@ -154,7 +154,6 @@ internal class KunEnArbeidsgiverTest {
             assertNoErrors(it)
             assertNoWarnings(it)
             assertMessages(it)
-            println(it.personLogger)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
             assertEquals(8, it.dagTeller(NavHelgDag::class))

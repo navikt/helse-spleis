@@ -60,6 +60,8 @@ class SendtSøknad constructor(
         arbeidsgiver.håndter(this)
     }
 
+    override fun melding(klassName: String) = "Sendt Søknad"
+
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
 
         internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje

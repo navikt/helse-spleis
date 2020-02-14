@@ -94,6 +94,21 @@ internal class JsonDeserializerTest {
                             )
                         )
                     ),
+                    "aktivitetslogg" to mapOf(
+                        "aktiviteter" to listOf(
+                            mapOf(
+                                "kontekster" to listOf(
+                                    mapOf(
+                                        "kontekstType" to "NySøknad",
+                                        "melding" to "Ny søknad"
+                                    )
+                                ),
+                                "alvorlighetsgrad" to "INFO",
+                                "melding" to "Behandler ny søknad",
+                                "tidsstempel" to "2020-01-29 22:45:38.876"
+                            )
+                        )
+                    ),
                     "arbeidsgivere" to listOf(
                         mapOf(
                             "utbetalingstidslinjer" to emptyList<Map<String, Any>>(),

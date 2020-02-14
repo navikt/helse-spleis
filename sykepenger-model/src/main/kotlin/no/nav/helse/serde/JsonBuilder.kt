@@ -53,12 +53,19 @@ internal class JsonBuilder : PersonVisitor {
         aktørId: String,
         fødselsnummer: String
     ) = currentState.preVisitPerson(person, aktørId, fødselsnummer)
+
     override fun postVisitPerson(
         person: Person,
         aktørId: String,
         fødselsnummer: String
     ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
+    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) =
+        currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
+    override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) =
+        currentState.visitPersonAktivitetslogg(aktivitetslogg)
+
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -94,16 +101,22 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
         currentState.visitArbeidsdag(dag)
+
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
         currentState.visitArbeidsgiverperiodeDag(dag)
+
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
         currentState.visitNavDag(dag)
+
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
         currentState.visitNavHelgDag(dag)
+
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
         currentState.visitFridag(dag)
+
     override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
         currentState.visitAvvistDag(dag)
+
     override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
         currentState.visitUkjentDag(dag)
 
@@ -194,6 +207,10 @@ internal class JsonBuilder : PersonVisitor {
             personMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
         }
 
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personMap["aktivitetslogg"] = AktivitetsloggReflect(aktivitetslogg).toMap()
+        }
+
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitArbeidsgivere() {
@@ -219,7 +236,10 @@ internal class JsonBuilder : PersonVisitor {
         }
     }
 
-    private inner class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
+    private inner class ArbeidsgiverState(
+        arbeidsgiver: Arbeidsgiver,
+        private val arbeidsgiverMap: MutableMap<String, Any?>
+    ) :
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
@@ -298,15 +318,19 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
+
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             dager.add(NavDagReflect(dag, "NavDag").toMap())
         }
+
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
         }
+
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
         }
+
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
         }
@@ -408,11 +432,13 @@ internal class JsonBuilder : PersonVisitor {
         JsonState {
 
         override fun visitDag(dag: Dag) {
-            sykdomstidslinjeListe.add(mutableMapOf(
-                "dagen" to dag.dagen,
-                "hendelseType" to dag.hendelseType,
-                "type" to dag.dagType().name
-            ))
+            sykdomstidslinjeListe.add(
+                mutableMapOf(
+                    "dagen" to dag.dagen,
+                    "hendelseType" to dag.hendelseType,
+                    "type" to dag.dagType().name
+                )
+            )
         }
 
         override fun postVisitHendelseSykdomstidslinje() {

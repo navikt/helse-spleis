@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 // Implements Visitor pattern to traverse the messages
 class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitetslogg {
     private val aktiviteter = mutableListOf<Aktivitet>()
-    private val kontekster = mutableListOf<Aktivitetskontekst>()
+    private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
@@ -17,23 +17,23 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
     }
 
     override fun info(melding: String, vararg params: Any) {
-        add(Aktivitet.Info(kontekster.toList(), String.format(melding, *params)))
+        add(Aktivitet.Info(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun warn(melding: String, vararg params: Any) {
-        add(Aktivitet.Warn(kontekster.toList(), String.format(melding, *params)))
+        add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun need(type: NeedType, melding: String, vararg params: Any) {
-        add(Aktivitet.Need(kontekster.toList(), type, String.format(melding, *params)))
+        add(Aktivitet.Need(kontekster.toSpesifikk(), type, String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
-        add(Aktivitet.Error(kontekster.toList(), String.format(melding, *params)))
+        add(Aktivitet.Error(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun severe(melding: String, vararg params: Any): Nothing {
-        add(Aktivitet.Severe(kontekster.toList(), String.format(melding, *params)))
+        add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
         throw AktivitetException(this)
     }
 
@@ -41,6 +41,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         this.aktiviteter.add(aktivitet)
         forelder?.let { forelder?.add(aktivitet) }
     }
+
+    private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
     override fun hasMessages() = info().isNotEmpty() || hasWarnings()
 
@@ -56,9 +58,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun aktivitetsteller() = aktiviteter.size
 
-    internal fun kontekst(kontekst: Aktivitetskontekst) { kontekster.add(kontekst) }
+    override fun kontekst(kontekst: Aktivitetskontekst) { kontekster.add(kontekst) }
 
-    internal fun kontekst(person: Person) {
+    override fun kontekst(person: Person) {
         forelder = person.aktivitetslogg
         kontekst(person as Aktivitetskontekst)
     }
@@ -93,7 +95,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         private val alvorlighetsgrad: Int,
         private var melding: String,
         private val tidsstempel: String,
-        private val kontekster: List<Aktivitetskontekst>
+        internal val kontekster: List<SpesifikkKontekst>
     ) : Comparable<Aktivitet> {
         companion object {
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
@@ -116,10 +118,10 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         abstract fun accept(visitor: AktivitetsloggVisitor)
 
-        operator fun contains(kontekst: Aktivitetskontekst) = kontekst in kontekster
+        operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
 
         internal class Info(
-            kontekster: List<Aktivitetskontekst>,
+            kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(0, melding, tidsstempel, kontekster) {
@@ -132,12 +134,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'I'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitInfo(this, melding, tidsstempel)
+                visitor.visitInfo(kontekster, this, melding, tidsstempel)
             }
         }
 
         internal class Warn(
-            kontekster: List<Aktivitetskontekst>,
+            kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(25, melding, tidsstempel, kontekster) {
@@ -150,12 +152,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'W'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitWarn(this, melding, tidsstempel)
+                visitor.visitWarn(kontekster, this, melding, tidsstempel)
             }
         }
 
         internal class Need(
-            kontekster: List<Aktivitetskontekst>,
+            kontekster: List<SpesifikkKontekst>,
             private val type: NeedType,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
@@ -170,13 +172,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'N'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitNeed(this, type, melding, tidsstempel)
+                visitor.visitNeed(kontekster, this, type, melding, tidsstempel)
             }
 
         }
 
         internal class Error(
-            kontekster: List<Aktivitetskontekst>,
+            kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(75, melding, tidsstempel, kontekster) {
@@ -189,12 +191,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'E'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitError(this, melding, tidsstempel)
+                visitor.visitError(kontekster, this, melding, tidsstempel)
             }
         }
 
         internal class Severe(
-            kontekster: List<Aktivitetskontekst>,
+            kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(100, melding, tidsstempel, kontekster) {
@@ -207,7 +209,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'S'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitSevere(this, melding, tidsstempel)
+                visitor.visitSevere(kontekster, this, melding, tidsstempel)
             }
         }
     }
@@ -227,25 +229,66 @@ internal interface IAktivitetslogg {
     fun aktivitetsteller(): Int
 
     fun barn(): Aktivitetslogg
+    fun kontekst(kontekst: Aktivitetskontekst)
+    fun kontekst(person: Person)
 }
 
 internal interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
-    fun visitInfo(aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {}
-    fun visitWarn(aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {}
+    fun visitInfo(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Aktivitetslogg.Aktivitet.Info,
+        melding: String,
+        tidsstempel: String
+    ) {
+    }
+
+    fun visitWarn(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Aktivitetslogg.Aktivitet.Warn,
+        melding: String,
+        tidsstempel: String
+    ) {
+    }
+
     fun visitNeed(
+        kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Need,
         type: NeedType,
         tidsstempel: String,
         melding: String
-    ) {}
-    fun visitError(aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {}
-    fun visitSevere(aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {}
+    ) {
+    }
+
+    fun visitError(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Aktivitetslogg.Aktivitet.Error,
+        melding: String,
+        tidsstempel: String
+    ) {
+    }
+
+    fun visitSevere(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Aktivitetslogg.Aktivitet.Severe,
+        melding: String,
+        tidsstempel: String
+    ) {
+    }
+
     fun postVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
 }
 
-internal interface Aktivitetskontekst {
-    fun melding(): String
+interface Aktivitetskontekst {
+    fun toSpesifikkKontekst(): SpesifikkKontekst
+}
+
+class SpesifikkKontekst(private val konteskstType: String, private val melding: String = konteskstType) {
+    internal fun konteskstType() = konteskstType
+    internal fun melding() = melding
+    override fun equals(other: Any?) =
+        this === other || other is SpesifikkKontekst && this.konteskstType == other.konteskstType
+    override fun hashCode() = konteskstType.hashCode()
 }
 
 enum class NeedType {

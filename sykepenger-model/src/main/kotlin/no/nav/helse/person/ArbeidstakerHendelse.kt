@@ -8,8 +8,11 @@ abstract class ArbeidstakerHendelse protected constructor(
     private val hendelsestype: Hendelsestype,
     internal val aktivitetslogger: Aktivitetslogger,
     internal val aktivitetslogg: Aktivitetslogg
-) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg {
+) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
+    init {
+        aktivitetslogg.kontekst(this)
+    }
     @Deprecated("Enum brukes til (de)serialisering og bør ikke ligge i modell-objektene")
     enum class Hendelsestype {
         Ytelser,
@@ -33,6 +36,14 @@ abstract class ArbeidstakerHendelse protected constructor(
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String
     abstract fun organisasjonsnummer(): String
+
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return this.javaClass.canonicalName.split('.').last().let {
+            SpesifikkKontekst(it, melding(it))
+        }
+    }
+
+    internal open fun melding(klassName: String) = klassName
 
     @Deprecated("Henger igjen fra Epic-1")
     override fun compareTo(other: ArbeidstakerHendelse) = this.rapportertdato().compareTo(other.rapportertdato())

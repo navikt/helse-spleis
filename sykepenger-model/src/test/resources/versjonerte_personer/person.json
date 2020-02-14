@@ -85,6 +85,18 @@
     } ],
     "originalMessage" : null
   },
+   "aktivitetslogg" : {
+    "aktiviteter" : [ {
+      "kontekster" : [
+          {
+            "kontekstType": "NySøknad",
+            "melding" : "Ny søknad"
+          } ],
+      "alvorlighetsgrad" : "INFO",
+      "melding" : "Behandler ny søknad (Ny søknad)",
+      "tidsstempel" : "2020-02-07 15:43:10.343"
+    } ]
+  },
   "arbeidsgivere" : [ {
     "organisasjonsnummer" : "987654321",
     "id" : "1426a4b8-0b5a-455d-8389-6909ab94d56e",

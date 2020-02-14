@@ -20,7 +20,10 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse) {
         if (hendelse.hasErrorsOld() || hendelse.hasNeedsOld()) return
         val steg = block()
         if (steg.isValid()) return
-        steg.feilmelding()?.also { hendelse.errorOld(it) }
+        steg.feilmelding()?.also {
+            hendelse.errorOld(it)
+            hendelse.error(it)
+        }
         errorBlock()
     }
 
