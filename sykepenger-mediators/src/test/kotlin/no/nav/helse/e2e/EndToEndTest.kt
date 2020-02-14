@@ -328,7 +328,7 @@ internal class EndToEndTest {
                         .filter { enAktørId == it["aktørId"].textValue() }
                         .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                         .filter { organisasjonsnummer == it["organisasjonsnummer"].textValue() }
-                        .firstOrNull { påminnelse.vedtaksperiodeId() == it["vedtaksperiodeId"].textValue() }
+                        .firstOrNull { påminnelse.vedtaksperiodeId == it["vedtaksperiodeId"].textValue() }
                 )
             }
     }

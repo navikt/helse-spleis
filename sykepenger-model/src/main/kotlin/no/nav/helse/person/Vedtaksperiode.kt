@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovType
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.GjennoptaBehandling
@@ -36,7 +37,6 @@ internal class Vedtaksperiode private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private val aktivitetslogger: Aktivitetslogger
 ) {
-
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
@@ -111,26 +111,26 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(ytelser: Ytelser) {
-        if (id.toString() != ytelser.vedtaksperiodeId()) return
+        if (id.toString() != ytelser.vedtaksperiodeId) return
         tilstand.håndter(person, arbeidsgiver, this, ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
 
     }
 
     internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
-        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId()) return
+        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId) return
         tilstand.håndter(person, arbeidsgiver, this, manuellSaksbehandling)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (id.toString() != vilkårsgrunnlag.vedtaksperiodeId()) return
+        if (id.toString() != vilkårsgrunnlag.vedtaksperiodeId) return
         tilstand.håndter(this, vilkårsgrunnlag)
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
-        if (id.toString() != påminnelse.vedtaksperiodeId()) return false
+        if (id.toString() != påminnelse.vedtaksperiodeId) return false
         tilstand.håndter(this, påminnelse)
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
         return true
@@ -176,6 +176,15 @@ internal class Vedtaksperiode private constructor(
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    val kontekst = object : Vedtaksperiodekontekst{
+        override val vedtaksperiodeId = this@Vedtaksperiode.id
+        override val orgnummer = this@Vedtaksperiode.organisasjonsnummer
+        override val aktørId = this@Vedtaksperiode.aktørId
+        override val fødselsnummer = this@Vedtaksperiode.fødselsnummer
+
+        override fun melding() = "person"
+    }
+
     @Deprecated("Skal bruke aktivitetslogger.need()")
     private fun trengerYtelser() {
         person.vedtaksperiodeTrengerLøsning(
@@ -208,6 +217,14 @@ internal class Vedtaksperiode private constructor(
                 )
             )
         )
+    }
+
+    internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
+        val beregningSlutt = YearMonth.from(førsteFraværsdag)
+        val beregningStart = beregningSlutt.minusMonths(11)
+        hendelse.need(BehovType.Inntektsberegning(kontekst, beregningStart, beregningSlutt))
+        hendelse.need(BehovType.EgenAnsatt(kontekst))
+        hendelse.need(BehovType.Opptjening(kontekst))
     }
 
     private fun emitVedtaksperiodeEndret(

@@ -2,7 +2,10 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Inntekthistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -13,13 +16,13 @@ class Ytelser(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val vedtaksperiodeId: String,
+    internal val vedtaksperiodeId: String,
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
+) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger, aktivitetslogg) {
     internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,
@@ -69,10 +72,6 @@ class Ytelser(
 
     override fun organisasjonsnummer(): String {
         return organisasjonsnummer
-    }
-
-    override fun vedtaksperiodeId(): String {
-        return vedtaksperiodeId
     }
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {

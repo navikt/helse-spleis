@@ -63,7 +63,7 @@ class Person private constructor(
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId()),
+                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId),
                     aktørId = påminnelse.aktørId(),
                     fødselsnummer = påminnelse.fødselsnummer(),
                     organisasjonsnummer = påminnelse.organisasjonsnummer()

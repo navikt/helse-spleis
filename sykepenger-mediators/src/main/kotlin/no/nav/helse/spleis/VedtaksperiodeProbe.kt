@@ -62,10 +62,10 @@ object VedtaksperiodeProbe : PersonObserver {
 
     override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         log.info(
-            "mottok påminnelse for vedtaksperiode: ${påminnelse.vedtaksperiodeId()}",
+            "mottok påminnelse for vedtaksperiode: ${påminnelse.vedtaksperiodeId}",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
-            keyValue("vedtaksperiodeId", påminnelse.vedtaksperiodeId()),
+            keyValue("vedtaksperiodeId", påminnelse.vedtaksperiodeId),
             keyValue("tilstand", påminnelse.tilstand().name),
             keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())

@@ -82,7 +82,7 @@ internal class PersonTest {
         assertVedtaksperiodeIkkeEndret()
         assertTrue(testObserver.vedtaksperiodeIkkeFunnet)
         assertEquals(
-            påminnelse.vedtaksperiodeId(),
+            påminnelse.vedtaksperiodeId,
             testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.vedtaksperiodeId.toString()
         )
         assertEquals(påminnelse.aktørId(), testObserver.forrigeVedtaksperiodeIkkeFunnetEvent?.aktørId)

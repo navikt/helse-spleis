@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.behov.BehovType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -43,4 +44,8 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     @Deprecated("Henger igjen fra Epic-1")
     override fun hashCode() = hendelseId.hashCode()
+
+    internal fun need(behov: BehovType) {
+
+    }
 }

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -247,6 +248,20 @@ internal interface AktivitetsloggVisitor {
 internal interface Aktivitetskontekst {
     fun melding(): String
 }
+
+internal interface Personkontekst : Aktivitetskontekst {
+    val aktørId: String
+    val fødselsnummer: String
+}
+
+internal interface Arbeidsgiverkontekst : Personkontekst {
+    val orgnummer: String
+}
+
+internal interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
+    val vedtaksperiodeId: UUID
+}
+
 
 enum class NeedType {
     GjennomgåTidslinje
