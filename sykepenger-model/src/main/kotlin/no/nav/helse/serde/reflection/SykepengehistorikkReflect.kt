@@ -18,6 +18,7 @@ internal class SykepengehistorikkReflect(utbetalingshistorikk: Utbetalingshistor
                 "tom" to it.tom,
                 "dagsats" to it.dagsats,
                 "type" to when (it) {
+                    is Utbetalingshistorikk.Periode.Utbetaling -> "Utbetaling"
                     is Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver -> "RefusjonTilArbeidsgiver"
                     is Utbetalingshistorikk.Periode.ReduksjonMedlem -> "ReduksjonMedlem"
                     is Utbetalingshistorikk.Periode.Etterbetaling -> "Etterbetaling"

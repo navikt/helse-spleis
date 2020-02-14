@@ -17,7 +17,6 @@ class YtelserMessageTest {
 
         assertFalse(aktivitetslogger.hasErrorsOld())
     }
-
 }
 
 private val json = """
@@ -72,7 +71,7 @@ private val json = """
                 "oppgjorsType": "",
                 "utbetalt": "2019-04-11",
                 "dagsats": 1400.0,
-                "typeKode": "5",
+                "typeKode": "0",
                 "typeTekst": "ArbRef",
                 "orgnummer": "orgnummer",
                 "inntektPerMåned": 36000

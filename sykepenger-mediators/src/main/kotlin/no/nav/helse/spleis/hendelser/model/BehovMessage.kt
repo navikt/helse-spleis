@@ -66,6 +66,9 @@ internal class YtelserMessage(
                 val typekode = utbetaling["typeKode"].asText()
                 val dagsats = utbetaling["dagsats"].asInt()
                 when (typekode) {
+                    "0" -> {
+                        Utbetaling(fom, tom, dagsats)
+                    }
                     "1" -> {
                         ReduksjonMedlem(fom, tom, dagsats)
                     }
