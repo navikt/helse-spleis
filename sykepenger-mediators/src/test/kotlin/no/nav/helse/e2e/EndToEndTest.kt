@@ -237,14 +237,7 @@ internal class EndToEndTest {
             currentState = TilstandType.AVVENTER_HISTORIKK
         )
 
-        val sykehistorikk = listOf(
-            SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
-            )
-        )
-        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
 
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
@@ -279,14 +272,7 @@ internal class EndToEndTest {
 
         sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
 
-        val sykehistorikk = listOf(
-            SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
-            )
-        )
-        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
         sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
 
         assertVedtaksperiodeEndretEvent(
@@ -315,7 +301,7 @@ internal class EndToEndTest {
         sendSøknad(enAktørId, fødselsnummer, virksomhetsnummer)
         sendInnteksmelding(enAktørId, fødselsnummer, virksomhetsnummer)
         sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
-        sendSykepengehistorikkløsning(enAktørId, fødselsnummer, emptyList())
+        sendSykepengehistorikkløsningUtenHistorikk(enAktørId, fødselsnummer)
 
         assertVedtaksperiodeEndretEvent(fødselsnummer, virksomhetsnummer, enAktørId, TilstandType.AVVENTER_HISTORIKK, TilstandType.AVVENTER_GODKJENNING)
 
@@ -404,7 +390,7 @@ internal class EndToEndTest {
         ("/api/utbetaling/$this").httpGet(testBlock)
     }
 
-    private fun sendSykepengehistorikkløsning(aktørId: String, fødselsnummer: String, perioder: List<SpolePeriode>) {
+    private fun sendSykepengehistorikkløsningUtenHistorikk(aktørId: String, fødselsnummer: String) {
         val behov = ventPåBehov(aktørId, fødselsnummer, Sykepengehistorikk)
 
         assertNotNull(behov["utgangspunktForBeregningAvYtelse"])
@@ -412,7 +398,7 @@ internal class EndToEndTest {
         sendBehov(
             behov.løsBehov(
                 mapOf(
-                    "Sykepengehistorikk" to perioder,
+                    "Sykepengehistorikk" to emptyList<Any>(),
                     "Foreldrepenger" to emptyMap<String, String>()
                 )
             )
