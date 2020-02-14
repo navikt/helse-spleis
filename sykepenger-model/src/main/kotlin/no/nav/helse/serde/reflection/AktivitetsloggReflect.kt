@@ -30,6 +30,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
         ) {
             aktiviteter.add(
                 mutableMapOf<String, Any>(
+                    "kontekster" to map(kontekster),
                     "alvorlighetsgrad" to alvorlighetsgrad.name,
                     "melding" to melding,
                     "tidsstempel" to tidsstempel
