@@ -18,7 +18,6 @@ import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behovstype
@@ -137,8 +136,6 @@ internal class EndToEndTest {
             }
         }
 
-        var apiport: Int = -1
-
         @BeforeAll
         @JvmStatic
         internal fun `start embedded environment`() {
@@ -162,7 +159,6 @@ internal class EndToEndTest {
             stubFor(jwtStub.stubbedConfigProvider())
 
             val port = randomPort()
-            apiport = port
             appBaseUrl = "http://localhost:$port"
             app = ApplicationBuilder(
                 applicationConfig(
@@ -461,7 +457,7 @@ internal class EndToEndTest {
         )
     ) {
         synchronousSendKafkaMessage(
-            inntektsmeldingTopic,
+            rapidTopic,
             inntektsMelding.inntektsmeldingId,
             inntektsMelding.toJsonNode().toString()
         )
@@ -598,7 +594,7 @@ internal class EndToEndTest {
                 val currentPositionOfSentMessage = recordMetadata.offset()
                 val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
                     ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
-                assertEquals(currentConsumerGroupPosition, currentPositionOfSentMessage)
+                assertTrue(currentConsumerGroupPosition >= currentPositionOfSentMessage)
             }
     }
 
