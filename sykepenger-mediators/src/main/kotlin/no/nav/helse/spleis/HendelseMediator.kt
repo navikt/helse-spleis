@@ -1,6 +1,6 @@
 package no.nav.helse.spleis
 
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.person.*
@@ -12,6 +12,7 @@ import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -31,7 +32,7 @@ internal class HendelseMediator(
     private val messageProcessor = Processor()
     private val parser = Parser(this)
 
-    private val personObserver = PersonMediator(producer)
+    private val personObserver = PersonMediator(producer, sikkerLogg)
 
     init {
         rapid.addListener(parser)
@@ -45,7 +46,11 @@ internal class HendelseMediator(
         parser.register(PåminnelseMessage.Factory)
     }
 
-    override fun onRecognizedMessage(message: JsonMessage, aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
+    override fun onRecognizedMessage(
+        message: JsonMessage,
+        aktivitetslogger: Aktivitetslogger,
+        aktivitetslogg: Aktivitetslogg
+    ) {
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
@@ -118,8 +123,8 @@ internal class HendelseMediator(
 
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
             val påminnelse = message.asPåminnelse()
-                hendelseProbe.onPåminnelse(påminnelse)
-                person(påminnelse).håndter(påminnelse)
+            hendelseProbe.onPåminnelse(påminnelse)
+            person(påminnelse).håndter(påminnelse)
         }
 
         private fun person(arbeidstakerHendelse: ArbeidstakerHendelse) =
@@ -134,7 +139,10 @@ internal class HendelseMediator(
             }
     }
 
-    private class PersonMediator(private val producer: KafkaProducer<String, String>) : PersonObserver {
+    private class PersonMediator(
+        private val producer: KafkaProducer<String, String>,
+        private val sikkerLogg: Logger
+    ) : PersonObserver {
         private val log = LoggerFactory.getLogger(this::class.java)
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
@@ -143,9 +151,9 @@ internal class HendelseMediator(
             producer.send(behov.producerRecord()).get().also {
                 log.info(
                     "produserte behov=$behov, {}, {}, {}",
-                    StructuredArguments.keyValue("vedtaksperiodeId", behov.vedtaksperiodeId()),
-                    StructuredArguments.keyValue("partisjon", it.partition()),
-                    StructuredArguments.keyValue("offset", it.offset())
+                    keyValue("vedtaksperiodeId", behov.vedtaksperiodeId()),
+                    keyValue("partisjon", it.partition()),
+                    keyValue("offset", it.offset())
                 )
             }
         }
@@ -158,9 +166,9 @@ internal class HendelseMediator(
             producer.send(event.producerRecord()).get().also {
                 log.info(
                     "legger vedtatt vedtak: {} på topic med {} og {}",
-                    StructuredArguments.keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
-                    StructuredArguments.keyValue("partisjon", it.partition()),
-                    StructuredArguments.keyValue("offset", it.offset())
+                    keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
+                    keyValue("partisjon", it.partition()),
+                    keyValue("offset", it.offset())
                 )
             }
         }
@@ -170,7 +178,14 @@ internal class HendelseMediator(
         }
 
         private fun Behov.producerRecord() =
-            ProducerRecord<String, String>(Topics.rapidTopic, fødselsnummer(), toJson())
+            ProducerRecord<String, String>(Topics.rapidTopic, fødselsnummer(), toJson()).also {
+                sikkerLogg.info(
+                    "produserte behov {} med for {}",
+                    keyValue("id", this.id()),
+                    keyValue("behovtype", this.behovType()),
+                    keyValue("vedtaksperiodeId", this.vedtaksperiodeId())
+                )
+            }
 
     }
 }
