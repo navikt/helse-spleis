@@ -7,12 +7,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 sealed class BehovType(private val context: Personkontekst) {
+    val navn: String = this::class.simpleName!!
+    protected open fun toMapInternal() = emptyMap<String, Any>()
+    fun toMap() = toMapInternal() + context.toMap()
+
     class GjennomgåTidslinje internal constructor(context: Personkontekst) : BehovType(context)
 
     class Sykepengehistorikk internal constructor(
         context: Vedtaksperiodekontekst,
         private val utgangspunktForBeregningAvYtelse: LocalDate
-    ) : BehovType(context)
+    ) : BehovType(context) {
+        override fun toMapInternal() = mapOf(
+            "utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse
+        )
+    }
 
     class Foreldrepenger internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
 
@@ -20,12 +28,15 @@ sealed class BehovType(private val context: Personkontekst) {
         context: Vedtaksperiodekontekst,
         private val beregningStart: YearMonth,
         private val beregningSlutt: YearMonth
-    ) : BehovType(context)
+    ) : BehovType(context) {
+        override fun toMapInternal() = mapOf(
+            "beregningStart" to beregningStart,
+            "beregningSlutt" to beregningSlutt
+        )
+    }
 
     class EgenAnsatt internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
-
     class Opptjening internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
-
     class Godkjenning internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
 
     class Utbetaling internal constructor(
@@ -34,5 +45,18 @@ sealed class BehovType(private val context: Personkontekst) {
         private val utbetalingslinjer: List<Utbetalingslinje>,
         private val maksdato: LocalDate,
         private val saksbehandler: String
-    ) : BehovType(context)
+    ) : BehovType(context) {
+        override fun toMapInternal() = mapOf(
+            "utbetalingsreferanse" to utbetalingsreferanse,
+            "utbetalingslinjer" to utbetalingslinjer.map {
+                mapOf(
+                    "fom" to it.fom,
+                    "tom" to it.tom,
+                    "dagsats" to it.dagsats
+                )
+            },
+            "maksdato" to maksdato,
+            "saksbehandler" to saksbehandler
+        )
+    }
 }

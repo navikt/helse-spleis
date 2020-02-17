@@ -5,7 +5,7 @@ enum class Behovstype {
     Sykepengehistorikk,
     Foreldrepenger,
     EgenAnsatt,
-    GodkjenningFraSaksbehandler,
+    Godkjenning,
     Utbetaling,
     Inntektsberegning,
     Opptjening

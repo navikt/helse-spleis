@@ -211,8 +211,8 @@ internal class ManuellSaksbehandlingMessage(
 ) :
     BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
-        requiredValues("@behov", Behovstype.GodkjenningFraSaksbehandler)
-        requiredKey("@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent")
+        requiredValues("@behov", Behovstype.Godkjenning)
+        requiredKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
         requiredKey("saksbehandlerIdent")
     }
 
@@ -228,7 +228,7 @@ internal class ManuellSaksbehandlingMessage(
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
-            utbetalingGodkjent = this["@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent"].asBoolean(),
+            utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean(),
             rapportertdato = this["@besvart"].asLocalDateTime(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg

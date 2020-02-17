@@ -245,7 +245,7 @@ internal class HendelseMediatorTest {
         ) {
             val behov = Behov.nyttBehov(
                 hendelsestype = Hendelsestype.ManuellSaksbehandling,
-                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
+                behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -257,7 +257,7 @@ internal class HendelseMediatorTest {
             sendBehov(
                 behov.løsBehov(
                     mapOf(
-                        "GodkjenningFraSaksbehandler" to mapOf(
+                        "Godkjenning" to mapOf(
                             "godkjent" to true
                         )
                     )

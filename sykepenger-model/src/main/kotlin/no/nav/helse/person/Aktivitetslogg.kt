@@ -25,8 +25,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toList(), String.format(melding, *params)))
     }
 
-    override fun need(type: NeedType, melding: String, vararg params: Any) {
-        add(Aktivitet.Need(kontekster.toList(), type, String.format(melding, *params)))
+    override fun need(melding: String, vararg params: Any) {
+        add(Aktivitet.Need(kontekster.toList(), String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
@@ -57,7 +57,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun aktivitetsteller() = aktiviteter.size
 
-    internal fun kontekst(kontekst: Aktivitetskontekst) { kontekster.add(kontekst) }
+    internal fun kontekst(kontekst: Aktivitetskontekst) {
+        kontekster.add(kontekst)
+    }
 
     internal fun kontekst(person: Person) {
         forelder = person.aktivitetslogg
@@ -157,7 +159,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         internal class Need(
             kontekster: List<Aktivitetskontekst>,
-            private val type: NeedType,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, melding, tidsstempel, kontekster) {
@@ -171,7 +172,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'N'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitNeed(this, type, melding, tidsstempel)
+                visitor.visitNeed(this, melding, tidsstempel)
             }
 
         }
@@ -217,7 +218,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 internal interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any)
     fun warn(melding: String, vararg params: Any)
-    fun need(type: NeedType, melding: String, vararg params: Any)
+    fun need(melding: String, vararg params: Any)
     fun error(melding: String, vararg params: Any)
     fun severe(melding: String, vararg params: Any): Nothing
 
@@ -234,12 +235,7 @@ internal interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
     fun visitInfo(aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {}
     fun visitWarn(aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {}
-    fun visitNeed(
-        aktivitet: Aktivitetslogg.Aktivitet.Need,
-        type: NeedType,
-        tidsstempel: String,
-        melding: String
-    ) {}
+    fun visitNeed(aktivitet: Aktivitetslogg.Aktivitet.Need, melding: String, tidsstempel: String) {}
     fun visitError(aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {}
     fun visitSevere(aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {}
     fun postVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
@@ -252,17 +248,21 @@ internal interface Aktivitetskontekst {
 internal interface Personkontekst : Aktivitetskontekst {
     val aktørId: String
     val fødselsnummer: String
+
+    fun toMap() = mapOf<String, Any>(
+        "aktørId" to aktørId,
+        "fødselsnummer" to fødselsnummer
+    )
 }
 
 internal interface Arbeidsgiverkontekst : Personkontekst {
     val orgnummer: String
+
+    override fun toMap() = super.toMap() + ("orgnummer" to orgnummer)
 }
 
 internal interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
     val vedtaksperiodeId: UUID
-}
 
-
-enum class NeedType {
-    GjennomgåTidslinje
+    override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)
 }

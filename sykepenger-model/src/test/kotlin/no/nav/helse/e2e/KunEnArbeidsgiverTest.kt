@@ -400,13 +400,13 @@ internal class KunEnArbeidsgiverTest {
     private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
         assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
         assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Behovstype.Foreldrepenger))
-        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
+        assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
         assertEndringTeller()
     }
 
     private fun håndterManuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
-        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, GodkjenningFraSaksbehandler))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
         assertEndringTeller()
     }

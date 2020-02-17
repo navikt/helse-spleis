@@ -122,7 +122,7 @@ class PåminnelserOgTimeoutTest {
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 1,
-            inneholder = listOf(Behovstype.GodkjenningFraSaksbehandler)
+            inneholder = listOf(Behovstype.Godkjenning)
         )
     }
 

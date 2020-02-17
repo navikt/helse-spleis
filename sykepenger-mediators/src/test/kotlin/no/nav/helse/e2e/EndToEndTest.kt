@@ -244,7 +244,7 @@ internal class EndToEndTest {
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            typer = listOf(GodkjenningFraSaksbehandler.name)
+            typer = listOf(Godkjenning.name)
         )
 
         aktørID.hentPerson {
@@ -434,11 +434,11 @@ internal class EndToEndTest {
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ) {
-        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
+        val behov = ventPåBehov(aktørId, fødselsnummer, Godkjenning)
 
         val løstBehov = behov
             .apply { put("saksbehandlerIdent", saksbehandler) }
-            .løsBehov(mapOf(GodkjenningFraSaksbehandler.name to mapOf("godkjent" to utbetalingGodkjent)))
+            .løsBehov(mapOf(Godkjenning.name to mapOf("godkjent" to utbetalingGodkjent)))
         sendBehov(løstBehov)
     }
 

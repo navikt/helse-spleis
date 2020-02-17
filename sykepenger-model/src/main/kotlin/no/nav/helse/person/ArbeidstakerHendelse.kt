@@ -8,7 +8,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     private val hendelseId: UUID,
     private val hendelsestype: Hendelsestype,
     internal val aktivitetslogger: Aktivitetslogger,
-    internal val aktivitetslogg: Aktivitetslogg
+    private val aktivitetslogg: Aktivitetslogg
 ) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg {
 
     @Deprecated("Enum brukes til (de)serialisering og bør ikke ligge i modell-objektene")
@@ -46,6 +46,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     override fun hashCode() = hendelseId.hashCode()
 
     internal fun need(behov: BehovType) {
+        aktivitetslogg.need(melding = behov.navn)
 
     }
 }

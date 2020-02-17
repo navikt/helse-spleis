@@ -30,7 +30,7 @@ class ManuellSaksbehandling(
         ): Behov {
             return Behov.nyttBehov(
                 hendelsestype = Hendelsestype.ManuellSaksbehandling,
-                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
+                behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
