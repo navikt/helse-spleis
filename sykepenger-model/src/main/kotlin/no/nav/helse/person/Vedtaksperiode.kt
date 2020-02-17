@@ -37,6 +37,8 @@ internal class Vedtaksperiode private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private val aktivitetslogger: Aktivitetslogger
 ) {
+    private val påminnelseThreshold = 10
+
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
@@ -129,7 +131,17 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
-        tilstand.håndter(this, påminnelse)
+        if (!påminnelse.gjelderTilstand(tilstand.type)) return true
+
+        person.vedtaksperiodePåminnet(påminnelse)
+
+        if (påminnelse.antallGangerPåminnet() < påminnelseThreshold) {
+            tilstand.håndter(this, påminnelse)
+        } else {
+            påminnelse.errorOld("Invaliderer perioden fordi den har blitt påminnet $påminnelseThreshold ganger")
+            tilstand(påminnelse, TilInfotrygd)
+        }
+
         påminnelse.kopierAktiviteterTil(aktivitetslogger)
         return true
     }
@@ -297,8 +309,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.gjelderTilstand(type)) return
-            vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
         }
 
@@ -456,8 +466,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.gjelderTilstand(type)) return
-            vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
         }
 
@@ -533,8 +541,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.gjelderTilstand(type)) return
-            vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             emitTrengerVilkårsgrunnlag(vedtaksperiode, påminnelse)
         }
 
@@ -571,8 +577,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.gjelderTilstand(type)) return
-            vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
             vedtaksperiode.trengerYtelser()
         }
 
