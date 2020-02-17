@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
+import no.nav.helse.hendelser.HendelseObserver
 import java.time.LocalDateTime
 import java.util.*
 
@@ -10,6 +11,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     internal val aktivitetslogger: Aktivitetslogger,
     private val aktivitetslogg: Aktivitetslogg
 ) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg {
+    private val hendelseObservers = mutableListOf<HendelseObserver>()
 
     @Deprecated("Enum brukes til (de)serialisering og bør ikke ligge i modell-objektene")
     enum class Hendelsestype {
@@ -23,6 +25,8 @@ abstract class ArbeidstakerHendelse protected constructor(
         Påminnelse,
         GjennopptaBehandling
     }
+
+    fun addObserver(hendelseObserver: HendelseObserver) = hendelseObservers.add(hendelseObserver)
 
     fun hendelseId() = hendelseId
 
@@ -47,6 +51,6 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     internal fun need(behov: BehovType) {
         aktivitetslogg.need(melding = behov.navn)
-
+        hendelseObservers.forEach { it.onBehov(behov) }
     }
 }

@@ -3,6 +3,8 @@ package no.nav.helse.spleis
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovType
+import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.person.*
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.PersonRepository
@@ -29,10 +31,10 @@ internal class HendelseMediator(
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
-    private val messageProcessor = Processor()
     private val parser = Parser(this)
 
     private val personObserver = PersonMediator(producer, sikkerLogg)
+    private val behovMediator = BehovMediator(producer)
 
     init {
         rapid.addListener(parser)
@@ -51,9 +53,12 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
+        val messageProcessor = Processor(behovMediator)
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
+
+            behovMediator.finalize()
 
             if (aktivitetslogger.hasMessagesOld()) {
                 sikkerLogg.info("meldinger om melding: ${aktivitetslogger.toReport()}")
@@ -82,7 +87,7 @@ internal class HendelseMediator(
         sikkerLogg.debug("ukjent melding: ${aktivitetslogger.toReport()}")
     }
 
-    private inner class Processor : MessageProcessor {
+    private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
             val modelNySøknad = message.asNySøknad()
 
@@ -127,8 +132,13 @@ internal class HendelseMediator(
             person(påminnelse).håndter(påminnelse)
         }
 
-        private fun person(arbeidstakerHendelse: ArbeidstakerHendelse) =
-            (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
+        private fun ArbeidstakerHendelse.kontrollerNeeds() {
+            //Send needs
+        }
+
+        private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
+            arbeidstakerHendelse.addObserver(behovMediator)
+            return (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
                 aktørId = arbeidstakerHendelse.aktørId(),
                 fødselsnummer = arbeidstakerHendelse.fødselsnummer()
             )).also {
@@ -137,6 +147,7 @@ internal class HendelseMediator(
                 it.addObserver(lagreUtbetalingDao)
                 it.addObserver(vedtaksperiodeProbe)
             }
+        }
     }
 
     private class PersonMediator(
@@ -187,5 +198,16 @@ internal class HendelseMediator(
                 )
             }
 
+    }
+
+    private class BehovMediator(producer: KafkaProducer<String, String>) : HendelseObserver {
+        private val behov = mutableListOf<BehovType>()
+        override fun onBehov(behov: BehovType) {
+            this.behov.add(behov)
+        }
+
+        fun finalize() {
+
+        }
     }
 }
