@@ -126,10 +126,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harTilstøtendePeriode(vedtaksperiode: Vedtaksperiode) = perioder.any { it.harTilstøtende(vedtaksperiode) }
 
     internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
-        perioder
-            .mapNotNull { it.tilstøtende(vedtaksperiode) }
-            .sortedBy { it.førsteFraværsdag() }
-            .firstOrNull { it.førsteFraværsdag() != null }
+        Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }

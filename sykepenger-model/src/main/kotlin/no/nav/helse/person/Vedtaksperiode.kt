@@ -84,8 +84,6 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    internal fun førsteFraværsdag(): LocalDate? = førsteFraværsdag
-
     private fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
         sykdomshistorikk.sykdomstidslinje().sisteDag()
@@ -248,9 +246,6 @@ internal class Vedtaksperiode private constructor(
     }
     internal fun harTilstøtende(other: Vedtaksperiode) =
         this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
-
-    internal fun tilstøtende(other: Vedtaksperiode): Vedtaksperiode? =
-        if (this.harTilstøtende(other)) this else null
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode) =
         (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD)
@@ -736,6 +731,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     companion object {
+        internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
+            .filter { it.harTilstøtende(other) }
+            .sortedBy { it.førsteFraværsdag }
+            .firstOrNull { it.førsteFraværsdag != null }
+
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce { concreteSykdomstidslinje, other ->
