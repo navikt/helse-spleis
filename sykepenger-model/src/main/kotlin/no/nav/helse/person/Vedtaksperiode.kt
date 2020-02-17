@@ -312,7 +312,7 @@ internal class Vedtaksperiode private constructor(
 
         fun leaving(aktivitetslogger: IAktivitetslogger) {}
 
-        fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {}
+        fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
     }
 
     internal object StartTilstand : Vedtaksperiodetilstand {
@@ -361,7 +361,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
             aktivitetslogger.infoOld("Avventer ferdigbehandlig av tidligere periode eller inntektsmelding før videre behandling")
         }
 
@@ -392,7 +392,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_TIDLIGERE_PERIODE
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
             aktivitetslogger.infoOld("Avventer ferdigbehandlig av tidligere periode før videre behandling")
         }
 
@@ -408,7 +408,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object UndersøkerHistorikk : Vedtaksperiodetilstand {
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser()
             aktivitetslogger.infoOld("Forespør sykdoms- og inntektshistorikk")
         }
@@ -527,15 +527,15 @@ internal class Vedtaksperiode private constructor(
 
         override val timeout: Duration = Duration.ofHours(1)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
-            emitTrengerVilkårsgrunnlag(vedtaksperiode)
-            aktivitetslogger.infoOld("Forespør vilkårsgrunnlag")
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            emitTrengerVilkårsgrunnlag(vedtaksperiode, hendelse)
+            hendelse.infoOld("Forespør vilkårsgrunnlag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.gjelderTilstand(type)) return
             vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
-            emitTrengerVilkårsgrunnlag(vedtaksperiode)
+            emitTrengerVilkårsgrunnlag(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -553,8 +553,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)
         }
 
-        private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode) {
+        private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerVilkårsgrunnlag()
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
         }
 
     }
@@ -564,9 +565,9 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_HISTORIKK
         override val timeout: Duration = Duration.ofHours(1)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser()
-            aktivitetslogger.infoOld("Forespør sykdoms- og inntektshistorikk")
+            hendelse.infoOld("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -633,7 +634,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_GODKJENNING
         override val timeout: Duration = Duration.ofDays(7)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.person.vedtaksperiodeTrengerLøsning(
                 ManuellSaksbehandling.lagBehov(
                     vedtaksperiode.id,
@@ -642,7 +643,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.organisasjonsnummer
                 )
             )
-            aktivitetslogger.infoOld("Forespør godkjenning fra saksbehandler")
+            hendelse.infoOld("Forespør godkjenning fra saksbehandler")
         }
 
         override fun håndter(
@@ -677,7 +678,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
@@ -723,8 +724,8 @@ internal class Vedtaksperiode private constructor(
     internal object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: IAktivitetslogger) {
-            aktivitetslogger.warnOld("Sykdom for denne personen kan ikke behandles automatisk")
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.warnOld("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
