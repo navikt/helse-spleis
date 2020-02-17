@@ -75,9 +75,7 @@ internal class EndToEndTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics = Topics.hendelseKildeTopics + listOf(
-            rapidTopic
-        )
+        private val topics = listOf(rapidTopic, søknadTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 

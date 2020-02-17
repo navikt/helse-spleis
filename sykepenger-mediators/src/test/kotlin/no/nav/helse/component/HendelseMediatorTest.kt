@@ -91,7 +91,6 @@ internal class HendelseMediatorTest {
     }
 
     private companion object : PersonRepository {
-        private const val dummyTopic = "unused"
         private val defaultAktørId = UUID.randomUUID().toString()
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
@@ -104,7 +103,7 @@ internal class HendelseMediatorTest {
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
 
-        private val hendelseStream = KafkaRapid(listOf(dummyTopic))
+        private val hendelseStream = KafkaRapid()
 
         override fun hentPerson(aktørId: String): Person? {
             return mockk<Person>(relaxed = true) {
@@ -165,7 +164,7 @@ internal class HendelseMediatorTest {
                 hendelseRecorder = mockk(relaxed = true)
             )
         }
-        private val topicInfos = listOf(dummyTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
+        private val topicInfos = listOf(Topics.søknadTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
             autoStart = false,

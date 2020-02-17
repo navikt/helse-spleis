@@ -38,7 +38,7 @@ class ApplicationBuilder(env: Map<String, String>) {
     )
     private val dataSourceBuilder = DataSourceBuilder(env)
 
-    private val rapid = KafkaRapid(Topics.hendelseKildeTopics)
+    private val rapid = KafkaRapid()
 
     private val helseBuilder = HelseBuilder(
         dataSource = dataSourceBuilder.getDataSource(),
