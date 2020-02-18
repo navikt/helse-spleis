@@ -60,25 +60,27 @@ internal class HendelseMediator(
 
             behovMediator.finalize()
 
-            if (aktivitetslogger.hasMessagesOld()) {
-                sikkerLogg.info("meldinger om melding: ${aktivitetslogger.toReport()}")
+            if (aktivitetslogger.hasErrorsOld()) {
+                sikkerLogg.error("aktivitetslogger inneholder errors: ${aktivitetslogger.toReport()}")
+            } else if (aktivitetslogger.hasMessagesOld()) {
+                sikkerLogg.info("aktivitetslogger inneholder meldinger: ${aktivitetslogger.toReport()}")
             }
         } catch (err: Aktivitetslogger.AktivitetException) {
-            sikkerLogg.info("feil på melding: $err")
+            sikkerLogg.error("feil på melding: $err")
         } catch (err: UtenforOmfangException) {
-            sikkerLogg.info("melding er utenfor omfang: ${err.message}", err)
+            sikkerLogg.error("melding er utenfor omfang: ${err.message}", err)
         } finally {
             AktivitetsloggerProbe.inspiser(aktivitetslogger)
         }
     }
 
     override fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException) {
-        sikkerLogg.info("feil på melding: ${aktivitetException.message}", aktivitetException)
+        sikkerLogg.error("feil på melding: ${aktivitetException.message}", aktivitetException)
         AktivitetsloggerProbe.inspiser(aktivitetException)
     }
 
     override fun onMessageError(aktivitetException: Aktivitetslogg.AktivitetException) {
-        sikkerLogg.info("feil på melding: ${aktivitetException.message}", aktivitetException)
+        sikkerLogg.error("feil på melding: ${aktivitetException.message}", aktivitetException)
         // TODO: pull message counts from Aktivitetslogg for statistics
 //        AktivitetsloggerProbe.inspiser(aktivitetException)
     }
