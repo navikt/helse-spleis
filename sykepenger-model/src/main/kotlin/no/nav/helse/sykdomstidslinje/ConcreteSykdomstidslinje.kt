@@ -18,7 +18,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     fun plus(
         other: ConcreteSykdomstidslinje,
-        gapDayCreator: (LocalDate, Dag.NøkkelHendelseType) -> Dag,
+        gapDayCreator: (LocalDate, Dag.Kildehendelse) -> Dag,
         dagturnering: Dagturnering
     ): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
@@ -30,7 +30,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             førsteStartdato.datesUntil(this.sisteSluttdato(other).plusDays(1))
                 .map {
                     val firstOfOther = other.dag(other.førsteDag())
-                    beste(this.dag(it), other.dag(it), dagturnering) ?: gapDayCreator(it, firstOfOther!!.hendelseType)
+                    beste(this.dag(it), other.dag(it), dagturnering) ?: gapDayCreator(it, firstOfOther!!.kildehendelse)
                 }.toList()
         )
     }
@@ -64,22 +64,22 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal fun harTilstøtende(other: ConcreteSykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
 
     companion object {
-        fun sykedag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun sykedag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) Sykedag(gjelder, hendelseType) else SykHelgedag(gjelder, hendelseType)
 
-        fun egenmeldingsdag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun egenmeldingsdag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             Egenmeldingsdag(gjelder, hendelseType)
 
-        fun ferie(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun ferie(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             Feriedag(gjelder, hendelseType)
 
-        fun ikkeSykedag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun ikkeSykedag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) Arbeidsdag(gjelder, hendelseType) else ImplisittDag(gjelder, hendelseType)
 
-        fun utenlandsdag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun utenlandsdag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) Utenlandsdag(gjelder, hendelseType) else ImplisittDag(gjelder, hendelseType)
 
-        fun sykedager(fra: LocalDate, til: LocalDate, hendelseType: Dag.NøkkelHendelseType): ConcreteSykdomstidslinje {
+        fun sykedager(fra: LocalDate, til: LocalDate, hendelseType: Dag.Kildehendelse): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 sykedag(
@@ -91,7 +91,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun egenmeldingsdager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1))
@@ -99,7 +99,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                 .toList())
         }
 
-        fun ferie(fra: LocalDate, til: LocalDate, hendelseType: Dag.NøkkelHendelseType): ConcreteSykdomstidslinje {
+        fun ferie(fra: LocalDate, til: LocalDate, hendelseType: Dag.Kildehendelse): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1))
                 .map { ferie(it, hendelseType) }
@@ -109,7 +109,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun ikkeSykedager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1))
@@ -120,7 +120,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun utenlandsdager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
@@ -130,7 +130,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             }.toList())
         }
 
-        fun studiedag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun studiedag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) Studiedag(
                 gjelder, hendelseType
             ) else ImplisittDag(
@@ -140,7 +140,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun studiedager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
@@ -150,14 +150,14 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             }.toList())
         }
 
-        fun permisjonsdag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        fun permisjonsdag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) Permisjonsdag(
                 gjelder, hendelseType
             ) else ImplisittDag(
                 gjelder, hendelseType
             )
 
-        internal fun implisittDag(gjelder: LocalDate, hendelseType: Dag.NøkkelHendelseType) =
+        internal fun implisittDag(gjelder: LocalDate, hendelseType: Dag.Kildehendelse) =
             if (!gjelder.erHelg()) ImplisittDag(
                 gjelder, hendelseType
             ) else ImplisittDag(
@@ -167,7 +167,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun permisjonsdager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
@@ -179,7 +179,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun implisittdager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(
@@ -191,7 +191,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun ubestemtdager(
             fra: LocalDate,
             til: LocalDate,
-            hendelseType: Dag.NøkkelHendelseType
+            hendelseType: Dag.Kildehendelse
         ): ConcreteSykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return CompositeSykdomstidslinje(

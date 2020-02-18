@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.*
-import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Sykmelding
-import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
+import no.nav.helse.sykdomstidslinje.dag.Dag.Kildehendelse.Sykmelding
+import no.nav.helse.sykdomstidslinje.dag.Dag.Kildehendelse.Søknad
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

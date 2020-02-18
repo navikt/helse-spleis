@@ -31,8 +31,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
-        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
+        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Dag.Kildehendelse.Søknad)
+        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Dag.Kildehendelse.Søknad)
 
         val tidslinje = (sendtSøknadSykedager + sendtSøknadArbeidsdager)
         assertTrue(
@@ -73,8 +73,8 @@ internal class CsvDagturneringTest {
     }
 
     private class TestHendelseBuilder(private val dato: LocalDate) {
-        private var dagbuilder: ((LocalDate, Dag.NøkkelHendelseType) -> Dag)? = null
-        private var hendelsetype: Dag.NøkkelHendelseType? = null
+        private var dagbuilder: ((LocalDate, Dag.Kildehendelse) -> Dag)? = null
+        private var hendelsetype: Dag.Kildehendelse? = null
 
         val sykedag: TestHendelseBuilder
             get() {
@@ -96,28 +96,28 @@ internal class CsvDagturneringTest {
 
         val fraSykmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Sykmelding
+                hendelsetype = Dag.Kildehendelse.Sykmelding
                 return this
             }
 
         val fraSøknad
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Søknad
+                hendelsetype = Dag.Kildehendelse.Søknad
                 return this
             }
 
         val fraInntektsmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Inntektsmelding
+                hendelsetype = Dag.Kildehendelse.Inntektsmelding
                 return this
             }
         val rapportertTidlig
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
+                dato, hendelsetype ?: Dag.Kildehendelse.Søknad
             )
         val rapportertSent
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
+                dato, hendelsetype ?: Dag.Kildehendelse.Søknad
             )
 
     }

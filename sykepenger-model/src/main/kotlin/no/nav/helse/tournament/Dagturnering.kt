@@ -24,11 +24,11 @@ internal object KonfliktskyDagturnering : Dagturnering {
 
 private class CsvDagturnering(private val source: String): Dagturnering {
 
-    private val strategies: Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> = readStrategies()
+    private val strategies: Map<Dag.Turneringsnøkkel, Map<Dag.Turneringsnøkkel, Strategy>> = readStrategies()
 
     override fun beste(venstre: Dag, høyre: Dag): Dag {
-        val leftKey = venstre.nøkkel()
-        val rightKey = høyre.nøkkel()
+        val leftKey = venstre.turneringsnøkkel()
+        val rightKey = høyre.turneringsnøkkel()
 
         return strategies[leftKey]?.get(rightKey)?.decide(venstre, høyre)
             ?: strategies[rightKey]?.get(leftKey)?.decideInverse(venstre, høyre)
@@ -36,7 +36,7 @@ private class CsvDagturnering(private val source: String): Dagturnering {
 
     }
 
-    private fun readStrategies(): Map<Dag.Nøkkel, Map<Dag.Nøkkel, Strategy>> {
+    private fun readStrategies(): Map<Dag.Turneringsnøkkel, Map<Dag.Turneringsnøkkel, Strategy>> {
         val csv = this::class.java.getResourceAsStream(source)
             .bufferedReader(Charsets.UTF_8)
             .readLines()
@@ -48,10 +48,10 @@ private class CsvDagturnering(private val source: String): Dagturnering {
         return csv
             .drop(1)
             .map { (key, row) ->
-                enumValueOf<Dag.Nøkkel>(key) to row
+                enumValueOf<Dag.Turneringsnøkkel>(key) to row
                     .mapIndexed { index, cell -> columnHeaders[index] to cell }
                     .filter { (_, cell) -> cell.isNotBlank() }
-                    .map { (columnHeader, cell) -> enumValueOf<Dag.Nøkkel>(columnHeader) to strategyFor(cell) }
+                    .map { (columnHeader, cell) -> enumValueOf<Dag.Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
                     .toMap()
             }
             .toMap()
@@ -96,8 +96,8 @@ internal object Latest : Strategy() {
 
 internal object Impossible : Strategy() {
     override fun decide(row: Dag, column: Dag): Dag =
-        throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
+        throw RuntimeException("Nøklene ${row.turneringsnøkkel()} + ${column.turneringsnøkkel()} er en ugyldig sammenligning")
 
     override fun decideInverse(row: Dag, column: Dag) =
-        throw RuntimeException("Nøklene ${row.nøkkel()} + ${column.nøkkel()} er en ugyldig sammenligning")
+        throw RuntimeException("Nøklene ${row.turneringsnøkkel()} + ${column.turneringsnøkkel()} er en ugyldig sammenligning")
 }

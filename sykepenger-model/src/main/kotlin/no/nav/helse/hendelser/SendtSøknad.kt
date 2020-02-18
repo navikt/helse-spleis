@@ -72,7 +72,7 @@ class SendtSøknad constructor(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.Kildehendelse.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
@@ -85,7 +85,7 @@ class SendtSøknad constructor(
             private val faktiskGrad: Double = grad.toDouble()
         ) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.Kildehendelse.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
                 if (grad != 100) aktivitetslogger.errorOld("grad i søknaden er ikke 100%%")
@@ -95,7 +95,7 @@ class SendtSøknad constructor(
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.Kildehendelse.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
@@ -103,7 +103,7 @@ class SendtSøknad constructor(
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.Kildehendelse.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
@@ -111,12 +111,12 @@ class SendtSøknad constructor(
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.Kildehendelse.Søknad)
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, Dag.Kildehendelse.Søknad)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")

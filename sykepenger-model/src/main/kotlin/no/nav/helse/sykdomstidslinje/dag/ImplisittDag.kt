@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 internal class ImplisittDag internal constructor(
     gjelder: LocalDate,
-    hendelseType: NøkkelHendelseType
+    hendelseType: Kildehendelse
 ) : Dag(gjelder, hendelseType) {
     override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitImplisittDag(this)
@@ -13,5 +13,5 @@ internal class ImplisittDag internal constructor(
 
     override fun toString() = formatter.format(dagen) + "\tImplisitt dag"
 
-    override fun nøkkel(): Nøkkel = Nøkkel.I
+    override fun turneringsnøkkel(): Turneringsnøkkel = Turneringsnøkkel.I
 }

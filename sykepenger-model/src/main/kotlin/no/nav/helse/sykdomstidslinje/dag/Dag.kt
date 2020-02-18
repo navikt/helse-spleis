@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 internal abstract class Dag internal constructor(
     internal val dagen: LocalDate,
-    internal val hendelseType: NøkkelHendelseType
+    internal val kildehendelse: Kildehendelse
 ) :
     ConcreteSykdomstidslinje() {
 
@@ -21,13 +21,13 @@ internal abstract class Dag internal constructor(
 
     override fun length() = 1
 
-    enum class NøkkelHendelseType {
+    enum class Kildehendelse {
         Sykmelding,
         Søknad,
         Inntektsmelding
     }
 
-    internal enum class Nøkkel {
+    internal enum class Turneringsnøkkel {
         I,
         WD_A,
         WD_IM,
@@ -47,7 +47,7 @@ internal abstract class Dag internal constructor(
         Undecided,
     }
 
-    internal abstract fun nøkkel(): Nøkkel
+    internal abstract fun turneringsnøkkel(): Turneringsnøkkel
 
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")

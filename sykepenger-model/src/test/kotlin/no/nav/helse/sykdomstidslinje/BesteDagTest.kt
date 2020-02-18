@@ -10,13 +10,13 @@ import kotlin.reflect.KClass
 internal class BesteDagTest {
 
     companion object {
-        private val implisittDag get() = ImplisittDag(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
-        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
-        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
-        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Inntektsmelding)
-        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
-        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
-        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        private val implisittDag get() = ImplisittDag(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
+        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
+        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
+        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
+        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.Kildehendelse.Søknad)
+        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
+        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
     }
 
     @Test

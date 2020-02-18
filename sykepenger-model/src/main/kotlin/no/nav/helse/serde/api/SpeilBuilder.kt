@@ -394,7 +394,7 @@ internal class SpeilBuilder : PersonVisitor {
             sykdomstidslinjeListe.add(
                 mutableMapOf(
                     "dagen" to dag.dagen,
-                    "hendelseType" to dag.hendelseType,
+                    "hendelseType" to dag.kildehendelse,
                     "type" to jsonDagType.name
                 )
             )

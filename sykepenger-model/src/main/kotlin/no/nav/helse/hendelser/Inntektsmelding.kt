@@ -57,7 +57,7 @@ class Inntektsmelding(
         }
         ?: ConcreteSykdomstidslinje.egenmeldingsdag(
             førsteFraværsdag,
-            Dag.NøkkelHendelseType.Inntektsmelding
+            Dag.Kildehendelse.Inntektsmelding
         )
 
     override fun valider(): Aktivitetslogger {
@@ -112,13 +112,13 @@ class Inntektsmelding(
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.Kildehendelse.Inntektsmelding)
 
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
+                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.Kildehendelse.Inntektsmelding)
         }
 
     }

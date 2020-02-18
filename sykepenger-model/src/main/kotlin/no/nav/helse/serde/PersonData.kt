@@ -274,7 +274,7 @@ internal data class PersonData(
         ) {
             data class DagData(
                 val dagen: LocalDate,
-                val hendelseType: Dag.NøkkelHendelseType,
+                val hendelseType: Dag.Kildehendelse,
                 val type: JsonDagType
             )
 

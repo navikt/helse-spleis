@@ -66,7 +66,7 @@ class NySøknad(
         internal fun kanBehandles() = sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Sykmelding)
+            ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.Kildehendelse.Sykmelding)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)

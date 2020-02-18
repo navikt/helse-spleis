@@ -9,7 +9,7 @@ import java.time.Month
 internal class StudieTest {
     @Test
     fun `studiedager`() {
-        val studiedager = ConcreteSykdomstidslinje.studiedager(1.juli, 7.juli, Dag.NøkkelHendelseType.Søknad)
+        val studiedager = ConcreteSykdomstidslinje.studiedager(1.juli, 7.juli, Dag.Kildehendelse.Søknad)
         assertEquals(7, studiedager.length())
     }
 

@@ -53,11 +53,11 @@ internal fun perioder(
     (periode1 + periode2 + periode3 + periode4).test(periode1, periode2, periode3, periode4)
 }
 
-internal fun ConcreteSykdomstidslinje.fra(hendelseType: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad): ConcreteSykdomstidslinje {
+internal fun ConcreteSykdomstidslinje.fra(hendelseType: Dag.Kildehendelse = Dag.Kildehendelse.Søknad): ConcreteSykdomstidslinje {
     return this.fra(this.førsteDag())
 }
 
-internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelseType: Dag.NøkkelHendelseType = Dag.NøkkelHendelseType.Søknad): ConcreteSykdomstidslinje {
+internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, hendelseType: Dag.Kildehendelse = Dag.Kildehendelse.Søknad): ConcreteSykdomstidslinje {
     val builder = SykdomstidslinjeBuilder(fraOgMed)
         .antallDager(1)
 
@@ -84,7 +84,7 @@ internal fun fra(): SykdomstidslinjeBuilder {
 
 private fun lagTidslinje(
     antallDager: Int,
-    generator: (LocalDate, Dag.NøkkelHendelseType) -> Dag
+    generator: (LocalDate, Dag.Kildehendelse) -> Dag
 ): ConcreteSykdomstidslinje =
     SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator)
 
@@ -121,8 +121,8 @@ internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null) {
         internal val permisjonsdager get() = lagTidslinje(::Permisjonsdag)
         internal val ubestemtdag get() = lagTidslinje(::Ubestemtdag)
 
-        internal fun lagTidslinje(generator: (LocalDate, Dag.NøkkelHendelseType) -> Dag): ConcreteSykdomstidslinje {
-            return CompositeSykdomstidslinje(dager.map { generator(it, Dag.NøkkelHendelseType.Søknad) }.toList())
+        internal fun lagTidslinje(generator: (LocalDate, Dag.Kildehendelse) -> Dag): ConcreteSykdomstidslinje {
+            return CompositeSykdomstidslinje(dager.map { generator(it, Dag.Kildehendelse.Søknad) }.toList())
 
         }
     }

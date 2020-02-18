@@ -12,7 +12,7 @@ internal class DagTest {
         val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
         val sykedag = ConcreteSykdomstidslinje.sykedag(
             dagSykedagenDekker,
-            Dag.NøkkelHendelseType.Søknad
+            Dag.Kildehendelse.Søknad
         )
 
         assertEquals(dagSykedagenDekker, sykedag.førsteDag())
@@ -24,7 +24,7 @@ internal class DagTest {
         val dagFeriedagenDekker = LocalDate.of(2019, 9, 24)
         val feriedag = ConcreteSykdomstidslinje.ferie(
             dagFeriedagenDekker,
-            Dag.NøkkelHendelseType.Søknad
+            Dag.Kildehendelse.Søknad
         )
 
         assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
@@ -36,7 +36,7 @@ internal class DagTest {
         val arbeidsdagenGjelder = LocalDate.of(2019, 9, 25)
         val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(
             arbeidsdagenGjelder,
-            Dag.NøkkelHendelseType.Søknad
+            Dag.Kildehendelse.Søknad
         )
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
@@ -48,7 +48,7 @@ internal class DagTest {
         val helgedagenGjelder = LocalDate.of(2019, 9, 28)
         val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(
             helgedagenGjelder,
-            Dag.NøkkelHendelseType.Søknad
+            Dag.Kildehendelse.Søknad
         )
 
         assertEquals(helgedagenGjelder, helgedag.førsteDag())
@@ -60,7 +60,7 @@ internal class DagTest {
         val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
         val studiedag = ConcreteSykdomstidslinje.studiedag(
             dagSykedagenDekker,
-            Dag.NøkkelHendelseType.Søknad
+            Dag.Kildehendelse.Søknad
         )
 
         assertEquals(dagSykedagenDekker, studiedag.førsteDag())

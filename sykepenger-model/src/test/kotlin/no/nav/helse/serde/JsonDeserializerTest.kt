@@ -71,7 +71,7 @@ internal class JsonDeserializerTest {
             .map {
                 mapOf(
                     "dagen" to it.toString(),
-                    "hendelseType" to Dag.NøkkelHendelseType.Inntektsmelding,
+                    "hendelseType" to Dag.Kildehendelse.Inntektsmelding,
                     "type" to "SYKEDAG"
                 )
             }
