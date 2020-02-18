@@ -62,7 +62,7 @@ internal class YtelserMessage(
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->
                 val fom = utbetaling["fom"].asLocalDate()
-                val tom = utbetaling["fom"].asLocalDate()
+                val tom = utbetaling["tom"].asLocalDate()
                 val typekode = utbetaling["typeKode"].asText()
                 val dagsats = utbetaling["dagsats"].asInt()
                 when (typekode) {
