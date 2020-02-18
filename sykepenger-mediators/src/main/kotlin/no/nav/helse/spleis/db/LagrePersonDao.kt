@@ -13,12 +13,12 @@ class LagrePersonDao(
     private val probe: PostgresProbe = PostgresProbe
 ) : PersonObserver {
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        val (skjemaVersjon, personJson) = serializePerson(personEndretEvent.person)
+        val serialisering = serializePerson(personEndretEvent.person)
         lagrePerson(
             aktørId = personEndretEvent.aktørId,
             fødselsnummer = personEndretEvent.fødselsnummer,
-            skjemaVersjon = skjemaVersjon,
-            personJson = personJson
+            skjemaVersjon = serialisering.skjemaVersjon,
+            personJson = serialisering.personJson
         )
     }
 

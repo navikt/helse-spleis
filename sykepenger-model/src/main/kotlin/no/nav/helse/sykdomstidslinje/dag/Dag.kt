@@ -12,11 +12,6 @@ internal abstract class Dag internal constructor(
 ) :
     ConcreteSykdomstidslinje() {
 
-    @Deprecated("Brukes ifm. (de)serialisering, og bør ligge i lag med jsonbuilder/parser")
-    internal abstract fun dagType(): JsonDagType
-
-    internal fun erHelg() = this.dagen.erHelg()
-
     override fun førsteDag() = dagen
     override fun sisteDag() = dagen
     override fun flatten() = listOf(this)

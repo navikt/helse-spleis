@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
+import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje

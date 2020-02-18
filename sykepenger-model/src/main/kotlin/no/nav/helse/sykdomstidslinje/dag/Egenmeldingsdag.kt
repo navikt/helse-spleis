@@ -12,8 +12,6 @@ internal class Egenmeldingsdag internal constructor(gjelder: LocalDate, hendelse
 
     override fun toString() = formatter.format(dagen) + "\tEgenmeldingsdag"
 
-    override fun dagType() = JsonDagType.EGENMELDINGSDAG
-
     override fun nøkkel(): Nøkkel =
         when (hendelseType) {
             Søknad -> Nøkkel.SRD_A

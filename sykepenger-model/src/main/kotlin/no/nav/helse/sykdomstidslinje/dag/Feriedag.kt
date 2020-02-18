@@ -12,8 +12,6 @@ internal class Feriedag internal constructor(gjelder: LocalDate, hendelseType: N
 
     override fun toString() = formatter.format(dagen) + "\tFerie"
 
-    override fun dagType(): JsonDagType = JsonDagType.FERIEDAG
-
     override fun nøkkel(): Nøkkel =
         when (hendelseType) {
             Søknad -> Nøkkel.V_A

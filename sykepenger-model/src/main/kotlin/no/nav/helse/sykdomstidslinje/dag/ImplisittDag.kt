@@ -13,7 +13,5 @@ internal class ImplisittDag internal constructor(
 
     override fun toString() = formatter.format(dagen) + "\tImplisitt dag"
 
-    override fun dagType(): JsonDagType = JsonDagType.IMPLISITT_DAG
-
     override fun nøkkel(): Nøkkel = Nøkkel.I
 }

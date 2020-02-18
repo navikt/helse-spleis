@@ -12,7 +12,5 @@ internal class Ubestemtdag internal constructor(dato: LocalDate, hendelseType: N
 
     override fun toString() = formatter.format(dagen) + "\tUbestemtdag"
 
-    override fun dagType() = JsonDagType.UBESTEMTDAG
-
     override fun nøkkel(): Nøkkel = Nøkkel.Undecided
 }

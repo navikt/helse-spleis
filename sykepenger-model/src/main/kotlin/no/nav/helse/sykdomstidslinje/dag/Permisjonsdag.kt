@@ -10,8 +10,6 @@ internal class Permisjonsdag internal constructor(gjelder: LocalDate, hendelseTy
 
     override fun toString() = formatter.format(dagen) + "\tPermisjonsdag"
 
-    override fun dagType() = JsonDagType.PERMISJONSDAG
-
     override fun nøkkel(): Nøkkel =
         when(hendelseType){
             NøkkelHendelseType.Søknad -> Nøkkel.Le_A

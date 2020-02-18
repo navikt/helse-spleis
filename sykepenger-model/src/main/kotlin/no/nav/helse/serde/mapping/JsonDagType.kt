@@ -1,4 +1,4 @@
-package no.nav.helse.sykdomstidslinje.dag
+package no.nav.helse.serde.mapping
 
 internal enum class JsonDagType {
     ARBEIDSDAG,

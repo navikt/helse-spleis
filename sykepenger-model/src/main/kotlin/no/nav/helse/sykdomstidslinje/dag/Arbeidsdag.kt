@@ -15,8 +15,6 @@ internal class Arbeidsdag internal constructor(
 
     override fun toString() = formatter.format(dagen) + "\tArbeidsdag"
 
-    override fun dagType(): JsonDagType = JsonDagType.ARBEIDSDAG
-
     override fun nøkkel(): Nøkkel =
         when (hendelseType) {
             Søknad -> Nøkkel.WD_A
