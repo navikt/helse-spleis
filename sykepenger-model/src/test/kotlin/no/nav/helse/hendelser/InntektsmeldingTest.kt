@@ -54,6 +54,16 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    internal fun `arbeidgiverperioden kan ikke overlappe med ferieperioder`() {
+        inntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
+            ferieperioder = listOf(Periode(3.januar, 4.januar))
+        )
+        inntektsmelding.valider()
+        assertTrue(aktivitetslogger.hasErrorsOld())
+    }
+
+    @Test
     internal fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
         assertEquals(2.januar, inntektsmelding.sykdomstidslinje().førsteDag())
