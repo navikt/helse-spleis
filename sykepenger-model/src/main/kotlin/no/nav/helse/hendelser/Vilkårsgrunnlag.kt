@@ -23,7 +23,7 @@ class Vilkårsgrunnlag(
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
     override fun rapportertdato() = rapportertDato
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

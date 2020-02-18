@@ -22,7 +22,7 @@ class Ytelser(
     private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Ytelser, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
     internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,
@@ -36,7 +36,6 @@ class Ytelser(
             )
 
             return Behov.nyttBehov(
-                hendelsestype = Hendelsestype.Ytelser,
                 behov = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,

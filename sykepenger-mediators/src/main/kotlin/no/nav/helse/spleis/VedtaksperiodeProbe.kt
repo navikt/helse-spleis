@@ -5,6 +5,7 @@ import io.prometheus.client.Gauge
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
 
@@ -13,7 +14,7 @@ object VedtaksperiodeProbe : PersonObserver {
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
     private val behovCounter = Counter.build("behov_totals", "Antall behov opprettet")
-        .labelNames("behovType", "hendelsetype")
+        .labelNames("behovType")
         .register()
 
     private val tilstandCounter = Counter.build(
@@ -36,7 +37,7 @@ object VedtaksperiodeProbe : PersonObserver {
             .register()
 
     override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-        behov.behovType().forEach { behovCounter.labels(it, behov.hendelsetype().name).inc() }
+        behov.behovType().forEach { behovCounter.labels(it).inc() }
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
@@ -48,13 +49,13 @@ object VedtaksperiodeProbe : PersonObserver {
         tilstandCounter.labels(
             event.forrigeTilstand.name,
             event.gjeldendeTilstand.name,
-            event.sykdomshendelse.hendelsestype().name
+            event.sykdomshendelse.hendelsetype()
         ).inc()
 
         log.info(
             "vedtaksperiode endret {}, {}, {}, {}",
             keyValue("vedtaksperiodeId", "${event.id}"),
-            keyValue("hendelse", event.sykdomshendelse.hendelsestype().name),
+            keyValue("hendelse", event.sykdomshendelse.hendelsetype()),
             keyValue("tilstand", event.gjeldendeTilstand.name),
             keyValue("forrigeTilstand", event.forrigeTilstand.name)
         )
@@ -75,4 +76,6 @@ object VedtaksperiodeProbe : PersonObserver {
             .labels(påminnelse.tilstand().toString())
             .inc()
     }
+
+    private fun ArbeidstakerHendelse.hendelsetype() = this::class.simpleName ?: "UNKNOWN"
 }

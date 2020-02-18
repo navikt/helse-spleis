@@ -28,7 +28,7 @@ class Inntektsmelding(
     ferieperioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>

@@ -8,10 +8,9 @@ import java.util.*
 
 abstract class SykdomstidslinjeHendelse(
     hendelseId: UUID,
-    hendelsestype: Hendelsestype,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, hendelsestype, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun valider(): Aktivitetslogger

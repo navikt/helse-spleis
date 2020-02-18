@@ -19,7 +19,7 @@ class ManuellSaksbehandling(
     private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.ManuellSaksbehandling, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
 
     companion object {
         fun lagBehov(
@@ -29,7 +29,6 @@ class ManuellSaksbehandling(
             organisasjonsnummer: String
         ): Behov {
             return Behov.nyttBehov(
-                hendelsestype = Hendelsestype.ManuellSaksbehandling,
                 behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,

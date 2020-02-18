@@ -20,7 +20,7 @@ class NySøknad(
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
 
     private val sykeperioder: List<Sykeperiode>
 

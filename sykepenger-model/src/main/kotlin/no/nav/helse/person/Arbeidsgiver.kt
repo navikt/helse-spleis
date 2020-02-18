@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.GjennopptaBehandling
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
@@ -136,7 +135,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(UUID.randomUUID(), GjennopptaBehandling, Aktivitetslogger(), aktivitetslogg) {
+        ArbeidstakerHendelse(UUID.randomUUID(), Aktivitetslogger(), aktivitetslogg) {
         override fun rapportertdato(): LocalDateTime {
             kotlin.error("Uventet kall")
         }

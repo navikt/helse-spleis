@@ -20,7 +20,7 @@ class Påminnelse(
     private val nestePåminnelsestidspunkt: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Påminnelse, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

@@ -215,7 +215,6 @@ internal class Vedtaksperiode private constructor(
 
         person.vedtaksperiodeTrengerLøsning(
             Behov.nyttBehov(
-                hendelsestype = ArbeidstakerHendelse.Hendelsestype.Vilkårsgrunnlag,
                 behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -688,7 +687,6 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.person.vedtaksperiodeTrengerLøsning(
                 Behov.nyttBehov(
-                    hendelsestype = ArbeidstakerHendelse.Hendelsestype.Utbetaling,
                     behov = listOf(Behovstype.Utbetaling),
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,

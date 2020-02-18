@@ -22,7 +22,7 @@ class SendtSøknad constructor(
     private val harAndreInntektskilder: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
 
     private val fom: LocalDate
     private val tom: LocalDate

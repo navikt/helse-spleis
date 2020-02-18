@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.Ytelser
 import no.nav.helse.person.IAktivitetslogger
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +70,7 @@ internal class ValidationTest {
     }
 
     private inner class TestHendelse(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(UUID.randomUUID(), Ytelser, aktivitetslogger, aktivitetslogg),
+        ArbeidstakerHendelse(UUID.randomUUID(), aktivitetslogger, aktivitetslogg),
         IAktivitetslogger by aktivitetslogger {
         override fun rapportertdato(): LocalDateTime {
             fail("Uventet kall")

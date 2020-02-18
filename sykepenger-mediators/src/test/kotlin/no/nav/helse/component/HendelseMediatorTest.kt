@@ -11,7 +11,6 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
-import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseMediator
@@ -177,13 +176,11 @@ internal class HendelseMediatorTest {
         private lateinit var producer: KafkaProducer<String, String>
 
         private fun generiskBehov(
-            hendelsetype: Hendelsestype,
             aktørId: String,
             fødselsnummer: String,
             organisasjonsnummer: String,
             behov: List<Behovstype> = listOf()
         ) = Behov.nyttBehov(
-            hendelsestype = hendelsetype,
             behov = behov,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -244,7 +241,6 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
             val behov = Behov.nyttBehov(
-                hendelsestype = Hendelsestype.ManuellSaksbehandling,
                 behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -271,7 +267,6 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
             val behov = generiskBehov(
-                hendelsetype = Hendelsestype.Ytelser,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -294,7 +289,6 @@ internal class HendelseMediatorTest {
             egenAnsatt: Boolean = false
         ) {
             val behov = generiskBehov(
-                hendelsetype = Hendelsestype.Vilkårsgrunnlag,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,

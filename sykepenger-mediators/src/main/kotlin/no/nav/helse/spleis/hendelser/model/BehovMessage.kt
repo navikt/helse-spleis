@@ -21,7 +21,7 @@ internal abstract class BehovMessage(
         requiredKey(
             "@behov", "@id", "@opprettet",
             "@final", "@løsning", "@besvart",
-            "hendelse", "aktørId", "fødselsnummer",
+            "aktørId", "fødselsnummer",
             "organisasjonsnummer", "vedtaksperiodeId"
         )
         requiredValue("@final", true)
