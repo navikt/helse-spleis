@@ -131,7 +131,7 @@
                 },
                 {
                     "member": "S149030",
-                    "role": "PRODUCER"
+                    "role": "MANAGER"
                 }
             ],
             "numPartitions": 1,
