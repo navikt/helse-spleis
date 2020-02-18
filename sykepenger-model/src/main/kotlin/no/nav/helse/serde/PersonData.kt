@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.JsonKildehendelse
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -26,8 +27,6 @@ import java.util.*
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-internal fun parseJson(json: String): PersonData = objectMapper.readValue(json)
 
 private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeData.DagData>
 
@@ -152,16 +151,51 @@ private fun parseDag(
     data: ArbeidsgiverData.VedtaksperiodeData.DagData
 ): Dag {
     return when (data.type) {
-        JsonDagType.ARBEIDSDAG -> Arbeidsdag(data.dagen, data.hendelseType)
-        JsonDagType.EGENMELDINGSDAG -> Egenmeldingsdag(data.dagen, data.hendelseType)
-        JsonDagType.FERIEDAG -> Feriedag(data.dagen, data.hendelseType)
-        JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen, data.hendelseType)
-        JsonDagType.PERMISJONSDAG -> Permisjonsdag(data.dagen, data.hendelseType)
-        JsonDagType.STUDIEDAG -> Studiedag(data.dagen, data.hendelseType)
-        JsonDagType.SYKEDAG -> Sykedag(data.dagen, data.hendelseType)
-        JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, data.hendelseType)
-        JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen, data.hendelseType)
-        JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen, data.hendelseType)
+        JsonDagType.ARBEIDSDAG -> {
+            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                Arbeidsdag.Inntektsmelding(data.dagen)
+            else
+                Arbeidsdag.Søknad(data.dagen)
+        }
+        JsonDagType.ARBEIDSDAG_INNTEKTSMELDING -> Arbeidsdag.Inntektsmelding(data.dagen)
+        JsonDagType.ARBEIDSDAG_SØKNAD -> Arbeidsdag.Søknad(data.dagen)
+        JsonDagType.EGENMELDINGSDAG -> {
+            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                Egenmeldingsdag.Inntektsmelding(data.dagen)
+            else
+                Egenmeldingsdag.Søknad(data.dagen)
+        }
+        JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING -> Egenmeldingsdag.Inntektsmelding(data.dagen)
+        JsonDagType.EGENMELDINGSDAG_SØKNAD -> Egenmeldingsdag.Søknad(data.dagen)
+        JsonDagType.FERIEDAG -> {
+            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                Feriedag.Inntektsmelding(data.dagen)
+            else
+                Feriedag.Søknad(data.dagen)
+        }
+        JsonDagType.FERIEDAG_INNTEKTSMELDING -> Feriedag.Inntektsmelding(data.dagen)
+        JsonDagType.FERIEDAG_SØKNAD -> Feriedag.Søknad(data.dagen)
+        JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
+        JsonDagType.PERMISJONSDAG -> {
+            if (data.hendelseType == JsonKildehendelse.Søknad)
+                Permisjonsdag.Søknad(data.dagen)
+            else
+                Permisjonsdag.Aareg(data.dagen)
+        }
+        JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
+        JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
+        JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
+        JsonDagType.SYKEDAG -> {
+            if (data.hendelseType == JsonKildehendelse.Sykmelding)
+                Sykedag.Sykmelding(data.dagen)
+            else
+                Sykedag.Søknad(data.dagen)
+        }
+        JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen)
+        JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen)
+        JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen)
+        JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
+        JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
     }
 }
 
@@ -274,7 +308,7 @@ internal data class PersonData(
         ) {
             data class DagData(
                 val dagen: LocalDate,
-                val hendelseType: Dag.Kildehendelse,
+                val hendelseType: JsonKildehendelse?,
                 val type: JsonDagType
             )
 

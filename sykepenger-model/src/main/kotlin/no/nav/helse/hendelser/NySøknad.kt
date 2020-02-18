@@ -5,7 +5,7 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -44,7 +44,7 @@ class NySøknad(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)}
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, SykmeldingDagFactory::implisittDag, KonfliktskyDagturnering)}
 
     override fun fødselsnummer() = fnr
 
@@ -66,9 +66,16 @@ class NySøknad(
         internal fun kanBehandles() = sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.Kildehendelse.Sykmelding)
+            ConcreteSykdomstidslinje.sykedager(fom, tom, SykmeldingDagFactory)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+    }
+
+    internal object SykmeldingDagFactory : DagFactory {
+        override fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
+        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Sykmelding(dato)
+        override fun ubestemtdag(dato: LocalDate): Ubestemtdag { error("Ubestemtdag ikke støttet") }
+        override fun utenlandsdag(dato: LocalDate): Utenlandsdag { error("Utenlandsdag ikke støttet") }
     }
 }

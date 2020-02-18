@@ -1,9 +1,10 @@
 package no.nav.helse.tournament
 
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,8 +32,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Dag.Kildehendelse.Søknad)
-        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Dag.Kildehendelse.Søknad)
+        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, SendtSøknad.SøknadDagFactory)
+        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, SendtSøknad.SøknadDagFactory)
 
         val tidslinje = (sendtSøknadSykedager + sendtSøknadArbeidsdager)
         assertTrue(
@@ -73,56 +74,55 @@ internal class CsvDagturneringTest {
     }
 
     private class TestHendelseBuilder(private val dato: LocalDate) {
-        private var dagbuilder: ((LocalDate, Dag.Kildehendelse) -> Dag)? = null
-        private var hendelsetype: Dag.Kildehendelse? = null
+        private var dagbuilder: ((LocalDate, DagFactory) -> Dag)? = null
+        private var dagFactory: DagFactory? = null
 
         val sykedag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.sykedag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::sykedag
                 return this
             }
 
         val arbeidsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.ikkeSykedag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::ikkeSykedag
                 return this
             }
 
         val egenmeldingsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.egenmeldingsdag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::egenmeldingsdag
                 return this
             }
 
         val fraSykmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.Kildehendelse.Sykmelding
+                dagFactory = NySøknad.SykmeldingDagFactory
                 return this
             }
 
         val fraSøknad
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.Kildehendelse.Søknad
+                dagFactory = SendtSøknad.SøknadDagFactory
                 return this
             }
 
         val fraInntektsmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.Kildehendelse.Inntektsmelding
+                dagFactory = Inntektsmelding.InntektsmeldingDagFactory
                 return this
             }
         val rapportertTidlig
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.Kildehendelse.Søknad
+                dato, dagFactory ?: SendtSøknad.SøknadDagFactory
             )
         val rapportertSent
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.Kildehendelse.Søknad
+                dato, dagFactory ?: SendtSøknad.SøknadDagFactory
             )
 
     }
 
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }
 

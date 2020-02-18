@@ -36,15 +36,20 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         return tidslinje
     }
 
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = fridag(permisjonsdag.dagen)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) = fridag(permisjonsdag.dagen)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = fridag(permisjonsdag.dagen)
     override fun visitStudiedag(studiedag: Studiedag) = implisittDag(studiedag.dagen)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = implisittDag(ubestemtdag.dagen)
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = implisittDag(utenlandsdag.dagen)
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = arbeidsdag(arbeidsdag.dagen)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = arbeidsdag(arbeidsdag.dagen)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = arbeidsdag(arbeidsdag.dagen)
     override fun visitImplisittDag(implisittDag: ImplisittDag) = implisittDag(implisittDag.dagen)
-    override fun visitFeriedag(feriedag: Feriedag) = fridag(feriedag.dagen)
-    override fun visitSykedag(sykedag: Sykedag) = sykedag(sykedag.dagen)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = egenmeldingsdag(egenmeldingsdag.dagen)
+    override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = fridag(feriedag.dagen)
+    override fun visitFeriedag(feriedag: Feriedag.Søknad) = fridag(feriedag.dagen)
+    override fun visitSykedag(sykedag: Sykedag.Sykmelding) = sykedag(sykedag.dagen)
+    override fun visitSykedag(sykedag: Sykedag.Søknad) = sykedag(sykedag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = egenmeldingsdag(egenmeldingsdag.dagen)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = egenmeldingsdag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykHelgedag(sykHelgedag.dagen)
 
     private fun egenmeldingsdag(dagen: LocalDate) = if (dagen.erHelg()) sykHelgedag(dagen) else sykedag(dagen)

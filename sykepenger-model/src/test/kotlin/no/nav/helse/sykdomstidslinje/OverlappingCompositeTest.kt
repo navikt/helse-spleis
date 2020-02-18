@@ -1,13 +1,16 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.*
-import no.nav.helse.sykdomstidslinje.dag.Dag.Kildehendelse.Sykmelding
-import no.nav.helse.sykdomstidslinje.dag.Dag.Kildehendelse.Søknad
+import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.SendtSøknad
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class OverlappingCompositeTest {
+    private val Sykmelding = NySøknad.SykmeldingDagFactory
+    private val Søknad = SendtSøknad.SøknadDagFactory
+
     @Test
     internal fun sykedagerOgFerie() {
         perioder(2.sykedager.fra(mandag, Sykmelding), 2.feriedager.fra(mandag, Søknad)) { sykedager, _ ->
@@ -52,7 +55,7 @@ internal class OverlappingCompositeTest {
 
     @Test
     internal fun sykHelgMedLedendeHelg() {
-        perioder(2.sykedager.fra(torsdag, Sykmelding), 2.sykHelgdager.fra(), 1.sykedager, 2.feriedager.fra(onsdag, Søknad)) { _, _, sykedagerEtterHelg, ferie ->
+        perioder(2.sykedager.fra(torsdag, Sykmelding), 2.sykHelgdager, 1.sykedager, 2.feriedager.fra(onsdag, Søknad)) { _, _, sykedagerEtterHelg, ferie ->
             assertInterval(ferie.førsteDag(), sykedagerEtterHelg.sisteDag(), 6)
         }
     }

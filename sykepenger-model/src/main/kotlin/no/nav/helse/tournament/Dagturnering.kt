@@ -8,7 +8,6 @@ internal interface Dagturnering {
     fun beste(venstre: Dag, høyre: Dag): Dag
 }
 
-
 internal val sendtSøknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
 internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
@@ -24,11 +23,11 @@ internal object KonfliktskyDagturnering : Dagturnering {
 
 private class CsvDagturnering(private val source: String): Dagturnering {
 
-    private val strategies: Map<Dag.Turneringsnøkkel, Map<Dag.Turneringsnøkkel, Strategy>> = readStrategies()
+    private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
 
     override fun beste(venstre: Dag, høyre: Dag): Dag {
-        val leftKey = venstre.turneringsnøkkel()
-        val rightKey = høyre.turneringsnøkkel()
+        val leftKey = Turneringsnøkkel.fraDag(venstre)
+        val rightKey = Turneringsnøkkel.fraDag(høyre)
 
         return strategies[leftKey]?.get(rightKey)?.decide(venstre, høyre)
             ?: strategies[rightKey]?.get(leftKey)?.decideInverse(venstre, høyre)
@@ -36,7 +35,7 @@ private class CsvDagturnering(private val source: String): Dagturnering {
 
     }
 
-    private fun readStrategies(): Map<Dag.Turneringsnøkkel, Map<Dag.Turneringsnøkkel, Strategy>> {
+    private fun readStrategies(): Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> {
         val csv = this::class.java.getResourceAsStream(source)
             .bufferedReader(Charsets.UTF_8)
             .readLines()
@@ -48,15 +47,14 @@ private class CsvDagturnering(private val source: String): Dagturnering {
         return csv
             .drop(1)
             .map { (key, row) ->
-                enumValueOf<Dag.Turneringsnøkkel>(key) to row
+                enumValueOf<Turneringsnøkkel>(key) to row
                     .mapIndexed { index, cell -> columnHeaders[index] to cell }
                     .filter { (_, cell) -> cell.isNotBlank() }
-                    .map { (columnHeader, cell) -> enumValueOf<Dag.Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
+                    .map { (columnHeader, cell) -> enumValueOf<Turneringsnøkkel>(columnHeader) to strategyFor(cell) }
                     .toMap()
             }
             .toMap()
     }
-
 
     private fun strategyFor(cellValue: String) =
         when (cellValue) {
@@ -67,37 +65,39 @@ private class CsvDagturnering(private val source: String): Dagturnering {
             "L" -> Latest
             else -> throw RuntimeException("$cellValue is not a known strategy for deciding between days")
         }
-}
 
+
+}
 internal sealed class Strategy {
+
     abstract fun decide(row: Dag, column: Dag): Dag
     abstract fun decideInverse(row: Dag, column: Dag): Dag
 }
-
 internal object Undecided : Strategy() {
+
     override fun decide(row: Dag, column: Dag): Dag = Ubestemtdag(row, column)
     override fun decideInverse(row: Dag, column: Dag) = Ubestemtdag(row, column)
 }
-
 internal object Row : Strategy() {
+
     override fun decide(row: Dag, column: Dag): Dag = row
     override fun decideInverse(row: Dag, column: Dag) = column
 }
-
 internal object Column : Strategy() {
+
     override fun decide(row: Dag, column: Dag): Dag = column
     override fun decideInverse(row: Dag, column: Dag) = row
 }
-
 internal object Latest : Strategy() {
+
     override fun decide(row: Dag, column: Dag): Dag = column
     override fun decideInverse(row: Dag, column: Dag) = column
 }
-
 internal object Impossible : Strategy() {
-    override fun decide(row: Dag, column: Dag): Dag =
-        throw RuntimeException("Nøklene ${row.turneringsnøkkel()} + ${column.turneringsnøkkel()} er en ugyldig sammenligning")
 
+    override fun decide(row: Dag, column: Dag): Dag =
+        throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
     override fun decideInverse(row: Dag, column: Dag) =
-        throw RuntimeException("Nøklene ${row.turneringsnøkkel()} + ${column.turneringsnøkkel()} er en ugyldig sammenligning")
+        throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
+
 }

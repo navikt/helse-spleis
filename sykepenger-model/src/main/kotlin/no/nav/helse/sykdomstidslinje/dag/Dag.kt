@@ -6,11 +6,7 @@ import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-internal abstract class Dag internal constructor(
-    internal val dagen: LocalDate,
-    internal val kildehendelse: Kildehendelse
-) :
-    ConcreteSykdomstidslinje() {
+internal abstract class Dag internal constructor(internal val dagen: LocalDate) : ConcreteSykdomstidslinje() {
 
     override fun førsteDag() = dagen
     override fun sisteDag() = dagen
@@ -20,34 +16,6 @@ internal abstract class Dag internal constructor(
     internal open fun beste(other: Dag, turnering: Dagturnering): Dag = turnering.beste(this, other)
 
     override fun length() = 1
-
-    enum class Kildehendelse {
-        Sykmelding,
-        Søknad,
-        Inntektsmelding
-    }
-
-    internal enum class Turneringsnøkkel {
-        I,
-        WD_A,
-        WD_IM,
-        S_SM,
-        S_A,
-        V_A,
-        V_IM,
-        Le_Areg,
-        Le_A,
-        SW,
-        SRD_IM,
-        SRD_A,
-        EDU,
-        OI_Int,
-        OI_A,
-        DA,
-        Undecided,
-    }
-
-    internal abstract fun turneringsnøkkel(): Turneringsnøkkel
 
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")

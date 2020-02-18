@@ -8,7 +8,10 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.DagFactory
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.lang.Double.min
 import java.time.LocalDate
@@ -53,12 +56,8 @@ class Inntektsmelding(
         .sortedBy { it.førsteDag() }
         .takeUnless { it.isEmpty() }
         ?.reduce { acc, tidslinje ->
-            acc.plus(tidslinje, ConcreteSykdomstidslinje.Companion::ikkeSykedag, KonfliktskyDagturnering)
-        }
-        ?: ConcreteSykdomstidslinje.egenmeldingsdag(
-            førsteFraværsdag,
-            Dag.Kildehendelse.Inntektsmelding
-        )
+            acc.plus(tidslinje, { gjelder -> ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory) }, KonfliktskyDagturnering)
+        } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
 
     override fun valider(): Aktivitetslogger {
         if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder eller ferieperioder")
@@ -112,14 +111,19 @@ class Inntektsmelding(
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.Kildehendelse.Inntektsmelding)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, InntektsmeldingDagFactory)
 
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.Kildehendelse.Inntektsmelding)
+                ConcreteSykdomstidslinje.ferie(fom, tom, InntektsmeldingDagFactory)
         }
+    }
 
+    internal object InntektsmeldingDagFactory : DagFactory {
+        override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Inntektsmelding(dato)
+        override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Inntektsmelding(dato)
+        override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Inntektsmelding(dato)
     }
 }

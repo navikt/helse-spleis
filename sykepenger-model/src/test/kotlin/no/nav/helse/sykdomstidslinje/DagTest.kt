@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.hendelser.SendtSøknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -12,7 +12,7 @@ internal class DagTest {
         val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
         val sykedag = ConcreteSykdomstidslinje.sykedag(
             dagSykedagenDekker,
-            Dag.Kildehendelse.Søknad
+            SendtSøknad.SøknadDagFactory
         )
 
         assertEquals(dagSykedagenDekker, sykedag.førsteDag())
@@ -24,7 +24,7 @@ internal class DagTest {
         val dagFeriedagenDekker = LocalDate.of(2019, 9, 24)
         val feriedag = ConcreteSykdomstidslinje.ferie(
             dagFeriedagenDekker,
-            Dag.Kildehendelse.Søknad
+            SendtSøknad.SøknadDagFactory
         )
 
         assertEquals(dagFeriedagenDekker, feriedag.førsteDag())
@@ -36,7 +36,7 @@ internal class DagTest {
         val arbeidsdagenGjelder = LocalDate.of(2019, 9, 25)
         val arbeidsdag = ConcreteSykdomstidslinje.ikkeSykedag(
             arbeidsdagenGjelder,
-            Dag.Kildehendelse.Søknad
+            SendtSøknad.SøknadDagFactory
         )
 
         assertEquals(arbeidsdagenGjelder, arbeidsdag.førsteDag())
@@ -48,7 +48,7 @@ internal class DagTest {
         val helgedagenGjelder = LocalDate.of(2019, 9, 28)
         val helgedag = ConcreteSykdomstidslinje.ikkeSykedag(
             helgedagenGjelder,
-            Dag.Kildehendelse.Søknad
+            SendtSøknad.SøknadDagFactory
         )
 
         assertEquals(helgedagenGjelder, helgedag.førsteDag())
@@ -60,7 +60,7 @@ internal class DagTest {
         val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
         val studiedag = ConcreteSykdomstidslinje.studiedag(
             dagSykedagenDekker,
-            Dag.Kildehendelse.Søknad
+            SendtSøknad.SøknadDagFactory
         )
 
         assertEquals(dagSykedagenDekker, studiedag.førsteDag())

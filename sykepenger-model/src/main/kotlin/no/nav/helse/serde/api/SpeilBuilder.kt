@@ -157,14 +157,19 @@ internal class SpeilBuilder : PersonVisitor {
     override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
         currentState.postVisitVedtaksperiode(vedtaksperiode, id)
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = currentState.visitArbeidsdag(arbeidsdag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = currentState.visitEgenmeldingsdag(egenmeldingsdag)
-    override fun visitFeriedag(feriedag: Feriedag) = currentState.visitFeriedag(feriedag)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(arbeidsdag)
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(arbeidsdag)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = currentState.visitEgenmeldingsdag(egenmeldingsdag)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = currentState.visitEgenmeldingsdag(egenmeldingsdag)
+    override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(feriedag)
+    override fun visitFeriedag(feriedag: Feriedag.Søknad) = currentState.visitFeriedag(feriedag)
     override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitImplisittDag(implisittDag)
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = currentState.visitPermisjonsdag(permisjonsdag)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) = currentState.visitPermisjonsdag(permisjonsdag)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = currentState.visitPermisjonsdag(permisjonsdag)
     override fun visitStudiedag(studiedag: Studiedag) = currentState.visitStudiedag(studiedag)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = currentState.visitSykHelgedag(sykHelgedag)
-    override fun visitSykedag(sykedag: Sykedag) = currentState.visitSykedag(sykedag)
+    override fun visitSykedag(sykedag: Sykedag.Sykmelding) = currentState.visitSykedag(sykedag)
+    override fun visitSykedag(sykedag: Sykedag.Søknad) = currentState.visitSykedag(sykedag)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitUbestemt(ubestemtdag)
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitUtenlandsdag(utenlandsdag)
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
@@ -379,14 +384,19 @@ internal class SpeilBuilder : PersonVisitor {
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) = leggTilDag(JsonDagType.ARBEIDSDAG, arbeidsdag)
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) = leggTilDag(JsonDagType.EGENMELDINGSDAG, egenmeldingsdag)
-        override fun visitFeriedag(feriedag: Feriedag) = leggTilDag(JsonDagType.FERIEDAG, feriedag)
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, arbeidsdag)
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = leggTilDag(JsonDagType.ARBEIDSDAG_SØKNAD, arbeidsdag)
+        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, egenmeldingsdag)
+        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, egenmeldingsdag)
+        override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
+        override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
         override fun visitImplisittDag(implisittDag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
-        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) = leggTilDag(JsonDagType.PERMISJONSDAG, permisjonsdag)
+        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) = leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)
+        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
         override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = leggTilDag(JsonDagType.SYK_HELGEDAG, sykHelgedag)
-        override fun visitSykedag(sykedag: Sykedag) = leggTilDag(JsonDagType.SYKEDAG, sykedag)
+        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilDag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
+        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilDag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
 
@@ -394,7 +404,6 @@ internal class SpeilBuilder : PersonVisitor {
             sykdomstidslinjeListe.add(
                 mutableMapOf(
                     "dagen" to dag.dagen,
-                    "hendelseType" to dag.kildehendelse,
                     "type" to jsonDagType.name
                 )
             )

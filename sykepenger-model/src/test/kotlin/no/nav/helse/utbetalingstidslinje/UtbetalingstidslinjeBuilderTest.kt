@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -492,6 +493,5 @@ internal class UtbetalingstidslinjeBuilderTest {
             aktivitetslogg = Aktivitetslogg()
         )
 
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

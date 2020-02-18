@@ -7,9 +7,9 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.GjennoptaBehandling
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.tournament.historiskDagturnering
 import no.nav.helse.utbetalingstidslinje.*
@@ -186,7 +186,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    val kontekst = object : Vedtaksperiodekontekst{
+    val kontekst = object : Vedtaksperiodekontekst {
         override val vedtaksperiodeId = this@Vedtaksperiode.id
         override val orgnummer = this@Vedtaksperiode.organisasjonsnummer
         override val aktørId = this@Vedtaksperiode.aktørId
@@ -255,6 +255,7 @@ internal class Vedtaksperiode private constructor(
 
         person.vedtaksperiodeEndret(event)
     }
+
     internal fun harTilstøtende(other: Vedtaksperiode) =
         this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
 
@@ -348,7 +349,9 @@ internal class Vedtaksperiode private constructor(
             val nesteTilstand =
                 when {
                     !arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) -> AvventerTidligerePeriodeEllerInntektsmelding
-                    else -> arbeidsgiver.tilstøtende(vedtaksperiode)?.also { vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag }?.let { AvventerHistorikk } ?: UndersøkerHistorikk
+                    else -> arbeidsgiver.tilstøtende(vedtaksperiode)?.also {
+                        vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
+                    }?.let { AvventerHistorikk } ?: UndersøkerHistorikk
                 }
             vedtaksperiode.håndter(sendtSøknad, nesteTilstand)
             vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av sendt søknad")
@@ -742,11 +745,7 @@ internal class Vedtaksperiode private constructor(
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce { concreteSykdomstidslinje, other ->
-                concreteSykdomstidslinje.plus(
-                    other,
-                    ConcreteSykdomstidslinje.Companion::implisittDag,
-                    historiskDagturnering
-                )
+                concreteSykdomstidslinje.plus(other, ::ImplisittDag, historiskDagturnering)
             }
     }
 }

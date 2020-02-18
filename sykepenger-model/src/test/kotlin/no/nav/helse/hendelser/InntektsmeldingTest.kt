@@ -28,11 +28,11 @@ internal class InntektsmeldingTest {
     internal fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
         val tidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsdag::class, tidslinje.dag(3.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(1.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(2.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(4.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(5.januar)!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, tidslinje.dag(3.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(1.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(2.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(4.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(5.januar)!!::class)
     }
 
     @Test

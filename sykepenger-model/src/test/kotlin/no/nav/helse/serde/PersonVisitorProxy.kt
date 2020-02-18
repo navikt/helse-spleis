@@ -100,7 +100,11 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitArbeidsdag(dag)
     }
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) {
+        target.visitArbeidsdag(arbeidsdag)
+    }
+
+    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) {
         target.visitArbeidsdag(arbeidsdag)
     }
 
@@ -188,11 +192,19 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.postVisitVedtaksperiodeSykdomstidslinje()
     }
 
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag) {
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) {
         target.visitEgenmeldingsdag(egenmeldingsdag)
     }
 
-    override fun visitFeriedag(feriedag: Feriedag) {
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) {
+        target.visitEgenmeldingsdag(egenmeldingsdag)
+    }
+
+    override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) {
+        target.visitFeriedag(feriedag)
+    }
+
+    override fun visitFeriedag(feriedag: Feriedag.Søknad) {
         target.visitFeriedag(feriedag)
     }
 
@@ -200,7 +212,11 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitImplisittDag(implisittDag)
     }
 
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag) {
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) {
+        target.visitPermisjonsdag(permisjonsdag)
+    }
+
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) {
         target.visitPermisjonsdag(permisjonsdag)
     }
 
@@ -212,7 +228,11 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitSykHelgedag(sykHelgedag)
     }
 
-    override fun visitSykedag(sykedag: Sykedag) {
+    override fun visitSykedag(sykedag: Sykedag.Sykmelding) {
+        target.visitSykedag(sykedag)
+    }
+
+    override fun visitSykedag(sykedag: Sykedag.Søknad) {
         target.visitSykedag(sykedag)
     }
 

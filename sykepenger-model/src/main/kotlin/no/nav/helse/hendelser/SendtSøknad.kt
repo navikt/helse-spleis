@@ -6,7 +6,7 @@ import no.nav.helse.person.Aktivitetslogger.Aktivitet.Need.NeedType
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.sendtSøknadDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -40,7 +40,7 @@ class SendtSøknad constructor(
 
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje() }
-        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, sendtSøknadDagturnering) }
+        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, SøknadDagFactory::implisittDag, sendtSøknadDagturnering) }
 
     override fun fødselsnummer() = fnr
 
@@ -72,7 +72,7 @@ class SendtSøknad constructor(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.ferie(fom, tom, SøknadDagFactory)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
@@ -85,7 +85,7 @@ class SendtSøknad constructor(
             private val faktiskGrad: Double = grad.toDouble()
         ) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.sykedager(fom, tom, SøknadDagFactory)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
                 if (grad != 100) aktivitetslogger.errorOld("grad i søknaden er ikke 100%%")
@@ -95,7 +95,7 @@ class SendtSøknad constructor(
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.studiedager(fom, tom, SøknadDagFactory)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
@@ -103,7 +103,7 @@ class SendtSøknad constructor(
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, SøknadDagFactory)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
@@ -111,15 +111,23 @@ class SendtSøknad constructor(
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, Dag.Kildehendelse.Søknad)
+                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, SøknadDagFactory)
 
             override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
                 valider(sendtSøknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")
         }
+    }
+
+    internal object SøknadDagFactory : DagFactory {
+        override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Søknad(dato)
+        override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Søknad(dato)
+        override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Søknad(dato)
+        override fun permisjonsdag(dato: LocalDate): Permisjonsdag = Permisjonsdag.Søknad(dato)
+        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Søknad(dato)
     }
 }

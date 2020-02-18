@@ -638,7 +638,8 @@ internal class KunEnArbeidsgiverTest {
         }
 
         private inner class Dagteller : SykdomstidslinjeVisitor {
-            override fun visitSykedag(sykedag: Sykedag) = inkrementer(Sykedag::class)
+            override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(Sykedag::class)
+            override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(Sykedag::class)
 
             override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = inkrementer(SykHelgedag::class)
 

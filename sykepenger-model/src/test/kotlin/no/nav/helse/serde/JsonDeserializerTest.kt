@@ -7,7 +7,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.TilstandTypeGammelOgNy
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.serde.mapping.JsonKildehendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -71,7 +71,7 @@ internal class JsonDeserializerTest {
             .map {
                 mapOf(
                     "dagen" to it.toString(),
-                    "hendelseType" to Dag.Kildehendelse.Inntektsmelding,
+                    "hendelseType" to JsonKildehendelse.Inntektsmelding,
                     "type" to "SYKEDAG"
                 )
             }

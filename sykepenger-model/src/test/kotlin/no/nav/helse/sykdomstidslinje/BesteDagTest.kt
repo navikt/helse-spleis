@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.tournament.historiskDagturnering
@@ -10,35 +12,35 @@ import kotlin.reflect.KClass
 internal class BesteDagTest {
 
     companion object {
-        private val implisittDag get() = ImplisittDag(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
-        private val arbeidsdag get() = Arbeidsdag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
-        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
-        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Dag.Kildehendelse.Inntektsmelding)
-        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Dag.Kildehendelse.Søknad)
-        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
-        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Dag.Kildehendelse.Søknad)
+        private val implisittDag get() = ImplisittDag(Uke(2).mandag)
+        private val arbeidsdag get() = Arbeidsdag.Søknad(Uke(2).mandag)
+        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
+        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
+        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
+        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
+        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
     }
 
     @Test
     fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
-        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Feriedag::class)
-        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Feriedag::class)
+        assertWinner(sykdomFraSendtSøknad, ferieFraInntektsmelding, Feriedag.Inntektsmelding::class)
+        assertWinner(ferieFraInntektsmelding, sykdomFraSendtSøknad, Feriedag.Inntektsmelding::class)
     }
 
     @Test
     fun `nulldag taper mot en gitt dag`() {
-        assertWinner(implisittDag, sykdomFraSendtSøknad, Sykedag::class)
-        assertWinner(sykdomFraSendtSøknad, implisittDag, Sykedag::class)
+        assertWinner(implisittDag, sykdomFraSendtSøknad, Sykedag.Søknad::class)
+        assertWinner(sykdomFraSendtSøknad, implisittDag, Sykedag.Søknad::class)
     }
 
     @Test
     fun `ferie vinner over sykdom`() {
-        assertWinner(sykdomFraSendtSøknad, ferieFraSøknad, Feriedag::class)
+        assertWinner(sykdomFraSendtSøknad, ferieFraSøknad, Feriedag.Søknad::class)
     }
 
     @Test
     fun `søknad med egenmelding vinner over en gitt dag`() {
-        assertWinnerBidirectional(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag::class)
+        assertWinnerBidirectional(ferieFraSøknad, egenmeldingFraInntektsmelding, Egenmeldingsdag.Inntektsmelding::class)
     }
 
     @Test
@@ -53,13 +55,13 @@ internal class BesteDagTest {
 
     @Test
     fun `arbeidsdag vinner over sykedag`() {
-        assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag::class)
+        assertWinner(sykdomFraSendtSøknad, arbeidsdag, Arbeidsdag.Søknad::class)
     }
 
     @Test
     fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
-        assertWinner(sykdomFraSendtSøknad, egenmeldingFraInntektsmelding, Sykedag::class)
-        assertWinner(egenmeldingFraInntektsmelding, sykdomFraSendtSøknad, Sykedag::class)
+        assertWinner(sykdomFraSendtSøknad, egenmeldingFraInntektsmelding, Sykedag.Søknad::class)
+        assertWinner(egenmeldingFraInntektsmelding, sykdomFraSendtSøknad, Sykedag.Søknad::class)
     }
 
     private fun <T : Dag> assertWinner(
@@ -80,7 +82,3 @@ internal class BesteDagTest {
         assertWinner(dag2, dag1, expectedWinnerClass)
     }
 }
-
-fun String.readResource() =
-    object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8)
-        ?: throw RuntimeException("did not find resource <$this>")

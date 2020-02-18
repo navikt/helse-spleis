@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.hendelser.SendtSøknad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -9,7 +9,7 @@ import java.time.Month
 internal class StudieTest {
     @Test
     fun `studiedager`() {
-        val studiedager = ConcreteSykdomstidslinje.studiedager(1.juli, 7.juli, Dag.Kildehendelse.Søknad)
+        val studiedager = ConcreteSykdomstidslinje.studiedager(1.juli, 7.juli, SendtSøknad.SøknadDagFactory)
         assertEquals(7, studiedager.length())
     }
 
