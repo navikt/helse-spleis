@@ -29,11 +29,6 @@ class Inntektsmelding(
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.Inntektsmelding, aktivitetslogger, aktivitetslogg) {
-    class Refusjon(
-        val opphørsdato: LocalDate?,
-        val beløpPrMåned: Double,
-        val endringerIRefusjon: List<LocalDate> = emptyList()
-    )
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
@@ -44,26 +39,6 @@ class Inntektsmelding(
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
     }
 
-    sealed class InntektsmeldingPeriode(
-        internal val fom: LocalDate,
-        internal val tom: LocalDate
-    ) {
-        internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): ConcreteSykdomstidslinje
-
-        internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
-            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
-
-        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
-        }
-
-        class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
-        }
-    }
-
     internal fun dagsats(dato: LocalDate, grunnbeløp: Grunnbeløp): Int {
         val årssats = min(beregnetInntekt * 12, grunnbeløp.beløp(dato))
         return (årssats / 260).toInt()
@@ -72,11 +47,6 @@ class Inntektsmelding(
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Inntektsmelding")
     }
-
-    private fun ingenOverlappende() = if (arbeidsgiverperioder.isEmpty()) true else arbeidsgiverperioder
-        .sortedBy { it.fom }
-        .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
-        .all { it }
 
     override fun sykdomstidslinje() = (ferieperioder + arbeidsgiverperioder)
         .map { it.sykdomstidslinje(this) }
@@ -91,7 +61,7 @@ class Inntektsmelding(
         )
 
     override fun valider(): Aktivitetslogger {
-        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder")
+        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder eller ferieperioder")
         if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke")
         else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
         return aktivitetslogger
@@ -117,5 +87,39 @@ class Inntektsmelding(
             }
         }
         return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
+    }
+
+    private fun ingenOverlappende() = (arbeidsgiverperioder + ferieperioder)
+        .sortedBy { it.fom }
+        .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
+        .all { it }
+
+    class Refusjon(
+        val opphørsdato: LocalDate?,
+        val beløpPrMåned: Double,
+        val endringerIRefusjon: List<LocalDate> = emptyList()
+    )
+
+    sealed class InntektsmeldingPeriode(
+        internal val fom: LocalDate,
+        internal val tom: LocalDate
+    ) {
+
+        internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): ConcreteSykdomstidslinje
+
+        internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
+            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+
+        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
+
+        }
+
+        class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
+                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Inntektsmelding)
+        }
+
     }
 }

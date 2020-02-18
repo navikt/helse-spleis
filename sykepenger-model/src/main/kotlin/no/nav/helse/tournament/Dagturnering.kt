@@ -17,7 +17,7 @@ internal object KonfliktskyDagturnering : Dagturnering {
         return when {
             venstre is ImplisittDag -> høyre
             høyre is ImplisittDag -> venstre
-            else -> error("Strategien ${this::class.simpleName} kan ikke bestemme beste dag siden ingen er ImplisittDag")
+            else -> error("Strategien ${this::class.simpleName} kan ikke bestemme beste dag siden ingen er ImplisittDag. Venstre=${venstre::class.simpleName}, høyre=${høyre::class.simpleName}")
         }
     }
 }
