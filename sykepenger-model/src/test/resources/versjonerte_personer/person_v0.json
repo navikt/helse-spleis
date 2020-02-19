@@ -4,19 +4,19 @@
     "aktivitetslogger" : {
         "aktiviteter" : [ {
             "alvorlighetsgrad" : "INFO",
-            "melding" : "Behandler ny søknad (Ny søknad)",
+            "melding" : "Behandler sykmelding (Sykmelding)",
             "tidsstempel" : "2020-02-07 15:43:10.343"
         }, {
             "alvorlighetsgrad" : "INFO",
-            "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+            "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Sykmelding)",
             "tidsstempel" : "2020-02-07 15:43:10.343"
         }, {
             "alvorlighetsgrad" : "INFO",
-            "melding" : "Behandler sendt søknad (Sendt søknad)",
+            "melding" : "Behandler søknad (Søknad)",
             "tidsstempel" : "2020-02-07 15:43:10.346"
         }, {
             "alvorlighetsgrad" : "INFO",
-            "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+            "melding" : "Forespør sykdoms- og inntektshistorikk (Søknad)",
             "tidsstempel" : "2020-02-07 15:43:10.348"
         }, {
             "alvorlighetsgrad" : "INFO",
@@ -91,11 +91,11 @@
         "aktivitetslogger" : {
             "aktiviteter" : [ {
                 "alvorlighetsgrad" : "INFO",
-                "melding" : "Behandler ny søknad (Ny søknad)",
+                "melding" : "Behandler sykmelding (Sykmelding)",
                 "tidsstempel" : "2020-02-07 15:43:10.343"
             }, {
                 "alvorlighetsgrad" : "INFO",
-                "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+                "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Sykmelding)",
                 "tidsstempel" : "2020-02-07 15:43:10.343"
             }, {
                 "alvorlighetsgrad" : "INFO",
@@ -103,11 +103,11 @@
                 "tidsstempel" : "2020-02-07 15:43:10.344"
             }, {
                 "alvorlighetsgrad" : "INFO",
-                "melding" : "Behandler sendt søknad (Sendt søknad)",
+                "melding" : "Behandler søknad (Søknad)",
                 "tidsstempel" : "2020-02-07 15:43:10.346"
             }, {
                 "alvorlighetsgrad" : "INFO",
-                "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                "melding" : "Forespør sykdoms- og inntektshistorikk (Søknad)",
                 "tidsstempel" : "2020-02-07 15:43:10.348"
             }, {
                 "alvorlighetsgrad" : "INFO",
@@ -307,35 +307,35 @@
             "aktivitetslogger" : {
                 "aktiviteter" : [ {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Behandler ny søknad (Ny søknad)",
+                    "melding" : "Behandler sykmelding (Sykmelding)",
                     "tidsstempel" : "2020-02-07 15:43:10.343"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+                    "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Sykmelding)",
                     "tidsstempel" : "2020-02-07 15:43:10.343"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Fullført behandling av ny søknad",
+                    "melding" : "Fullført behandling av sykmelding",
                     "tidsstempel" : "2020-02-07 15:43:10.345"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Behandler sendt søknad (Sendt søknad)",
+                    "melding" : "Behandler søknad (Søknad)",
                     "tidsstempel" : "2020-02-07 15:43:10.346"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Behandler sendt søknad (Sendt søknad)",
+                    "melding" : "Behandler søknad (Søknad)",
                     "tidsstempel" : "2020-02-07 15:43:10.346"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                    "melding" : "Forespør sykdoms- og inntektshistorikk (Søknad)",
                     "tidsstempel" : "2020-02-07 15:43:10.348"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                    "melding" : "Forespør sykdoms- og inntektshistorikk (Søknad)",
                     "tidsstempel" : "2020-02-07 15:43:10.348"
                 }, {
                     "alvorlighetsgrad" : "INFO",
-                    "melding" : "Fullført behandling av sendt søknad",
+                    "melding" : "Fullført behandling av søknad",
                     "tidsstempel" : "2020-02-07 15:43:10.349"
                 }, {
                     "alvorlighetsgrad" : "INFO",

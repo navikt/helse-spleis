@@ -34,7 +34,7 @@ class Sykmelding(
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Ny søknad")
+        aktivitetslogger.addAll(this.aktivitetslogger, "Sykmelding")
     }
 
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }

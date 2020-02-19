@@ -1,8 +1,8 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
@@ -32,17 +32,17 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, SendtSøknad.SøknadDagFactory)
-        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, SendtSøknad.SøknadDagFactory)
+        val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Søknad.SøknadDagFactory)
+        val søknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Søknad.SøknadDagFactory)
 
-        val tidslinje = (sendtSøknadSykedager + sendtSøknadArbeidsdager)
+        val tidslinje = (søknadSykedager + søknadArbeidsdager)
         assertTrue(
             tidslinje[Uke(1).onsdag] is Sykedag,
-            "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad"
+            "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
         )
         assertTrue(
             tidslinje[Uke(1).torsdag] is Arbeidsdag,
-            "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad"
+            "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
         )
     }
 
@@ -103,7 +103,7 @@ internal class CsvDagturneringTest {
 
         val fraSøknad
             get(): TestHendelseBuilder {
-                dagFactory = SendtSøknad.SøknadDagFactory
+                dagFactory = Søknad.SøknadDagFactory
                 return this
             }
 
@@ -114,11 +114,11 @@ internal class CsvDagturneringTest {
             }
         val rapportertTidlig
             get() = dagbuilder!!(
-                dato, dagFactory ?: SendtSøknad.SøknadDagFactory
+                dato, dagFactory ?: Søknad.SøknadDagFactory
             )
         val rapportertSent
             get() = dagbuilder!!(
-                dato, dagFactory ?: SendtSøknad.SøknadDagFactory
+                dato, dagFactory ?: Søknad.SøknadDagFactory
             )
 
     }

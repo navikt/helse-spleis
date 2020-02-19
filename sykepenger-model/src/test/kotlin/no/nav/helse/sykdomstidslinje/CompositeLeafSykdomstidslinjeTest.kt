@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.tournament.historiskDagturnering
@@ -11,23 +11,23 @@ internal class CompositeLeafSykdomstidslinjeTest {
     companion object {
         private val førsteMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).mandag,
-            factory = SendtSøknad.SøknadDagFactory
+            factory = Søknad.SøknadDagFactory
         )
         private val førsteTirsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).tirsdag,
-            factory = SendtSøknad.SøknadDagFactory
+            factory = Søknad.SøknadDagFactory
         )
         private val førsteOnsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).onsdag,
-            factory = SendtSøknad.SøknadDagFactory
+            factory = Søknad.SøknadDagFactory
         )
         private val førsteTorsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).torsdag,
-            factory = SendtSøknad.SøknadDagFactory
+            factory = Søknad.SøknadDagFactory
         )
         private val andreMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(2).mandag,
-            factory = SendtSøknad.SøknadDagFactory
+            factory = Søknad.SøknadDagFactory
         )
 
     }

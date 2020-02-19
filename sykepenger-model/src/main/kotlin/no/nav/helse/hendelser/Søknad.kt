@@ -7,11 +7,11 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.tournament.sendtSøknadDagturnering
+import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.util.*
 
-class SendtSøknad constructor(
+class Søknad constructor(
     meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
@@ -33,12 +33,12 @@ class SendtSøknad constructor(
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Sendt søknad")
+        aktivitetslogger.addAll(this.aktivitetslogger, "Søknad")
     }
 
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje() }
-        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, SøknadDagFactory::implisittDag, sendtSøknadDagturnering) }
+        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, SøknadDagFactory::implisittDag, søknadDagturnering) }
 
     override fun fødselsnummer() = fnr
 
@@ -60,18 +60,18 @@ class SendtSøknad constructor(
 
         internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
-        internal open fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {}
+        internal open fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {}
 
-        internal fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
-            if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.errorOld(beskjed)
+        internal fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
+            if (fom < søknad.fom || tom > søknad.tom) aktivitetslogger.errorOld(beskjed)
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ferie(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                valider(søknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
         }
 
         class Sykdom(
@@ -83,7 +83,7 @@ class SendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.sykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {
                 if (grad != 100) aktivitetslogger.errorOld("grad i søknaden er ikke 100%%")
                 if (faktiskGrad != 100.0) aktivitetslogger.errorOld("faktisk grad i søknaden er ikke 100%%")
             }
@@ -93,7 +93,7 @@ class SendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.studiedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
         }
 
@@ -101,7 +101,7 @@ class SendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
                 aktivitetslogger.needOld(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
         }
 
@@ -114,8 +114,8 @@ class SendtSøknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                valider(sendtSøknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                valider(søknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")
         }
     }
 

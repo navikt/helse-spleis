@@ -20,16 +20,16 @@ internal class VedtaksperiodeTest {
     private val arbeidsgiver = Arbeidsgiver(person, organisasjonsnummer)
 
     @Test
-    fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sendt søknad`() {
+    fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sykmelding`() {
         val vedtaksperiode = periodeFor(
-            nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
         assertFalse(
             vedtaksperiode.håndter(
-                sendtSøknad(
+                søknad(
                     perioder = listOf(
-                        SendtSøknad.Periode.Sykdom(
+                        Søknad.Periode.Sykdom(
                             fom = 21.juli,
                             tom = 25.juli,
                             grad = 100
@@ -44,7 +44,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `påminnelse returnerer true basert på om påminnelsen ble håndtert eller ikke`() {
         val id = UUID.randomUUID()
-        val vedtaksperiode = periodeFor(sykmelding = nySøknad(), id = id)
+        val vedtaksperiode = periodeFor(sykmelding = sykmelding(), id = id)
 
         assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.MOTTATT_NY_SØKNAD)))
         assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.MOTTATT_NY_SØKNAD)))
@@ -53,7 +53,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
         val førsteFraværsdag = 20.april
-        val vedtaksperiode = periodeFor(nySøknad())
+        val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 
         assertEquals(førsteFraværsdag, førsteFraværsdag(vedtaksperiode))
@@ -62,7 +62,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
         val vedtaksperiode = periodeFor(
-            nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100)))
         )
 
         assertNull(førsteFraværsdag(vedtaksperiode))
@@ -96,7 +96,7 @@ internal class VedtaksperiodeTest {
             ferieperioder = emptyList()
         )
 
-    private fun nySøknad(
+    private fun sykmelding(
         fnr: String = fødselsnummer,
         aktørId: String = aktør,
         orgnummer: String = organisasjonsnummer,
@@ -111,16 +111,16 @@ internal class VedtaksperiodeTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun sendtSøknad(
-        perioder: List<SendtSøknad.Periode> = listOf(
-            SendtSøknad.Periode.Sykdom(
+    private fun søknad(
+        perioder: List<Søknad.Periode> = listOf(
+            Søknad.Periode.Sykdom(
                 16.september,
                 5.oktober,
                 100
             )
         ), rapportertDato: LocalDateTime = LocalDateTime.now()
     ) =
-        SendtSøknad(
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktør,

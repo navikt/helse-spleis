@@ -22,7 +22,7 @@ class Person private constructor(
 
     fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
 
-    fun håndter(sendtSøknad: SendtSøknad) = håndter(sendtSøknad, "sendt søknad")
+    fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
 
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 

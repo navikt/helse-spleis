@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -31,7 +31,7 @@ internal class DagFactoryTest {
 
     @Test
     internal fun søknadFactory() {
-        val factory =  SendtSøknad.SøknadDagFactory
+        val factory =  Søknad.SøknadDagFactory
         assertDag(enDag, factory.arbeidsdag(enDag))
         assertDag(enDag, factory.egenmeldingsdag(enDag))
         assertDag(enDag, factory.feriedag(enDag))

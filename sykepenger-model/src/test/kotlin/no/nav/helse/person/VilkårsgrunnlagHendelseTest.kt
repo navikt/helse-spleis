@@ -132,13 +132,13 @@ internal class VilkårsgrunnlagHendelseTest {
         inntekter: List<Vilkårsgrunnlag.Måned>,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
-    private fun nySøknad() =
+    private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -149,13 +149,13 @@ internal class VilkårsgrunnlagHendelseTest {
             aktivitetslogg = aktivitetslogg
         )
 
-    private fun sendtSøknad() =
-        SendtSøknad(
+    private fun søknad() =
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = false

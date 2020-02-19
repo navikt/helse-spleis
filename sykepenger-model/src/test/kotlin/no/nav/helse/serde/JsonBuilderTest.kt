@@ -93,7 +93,7 @@ internal class JsonBuilderTest {
             aktivitetslogg = Aktivitetslogg()
 
             val person = Person(aktørId, fnr).apply {
-                håndter(nySøknad)
+                håndter(sykmelding)
 
                 accept(object : PersonVisitor {
                     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
@@ -103,7 +103,7 @@ internal class JsonBuilderTest {
 
                 assertEquals(TilstandType.MOTTATT_NY_SØKNAD, hentTilstand(this).type)
                 if (stopState == TilstandType.MOTTATT_NY_SØKNAD) return@apply
-                håndter(sendtSøknad)
+                håndter(søknad)
                 assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this).type)
                 if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply
                 håndter(inntektsmelding)
@@ -137,7 +137,7 @@ internal class JsonBuilderTest {
         }
 
 
-        private val nySøknad
+        private val sykmelding
             get() = Sykmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
@@ -148,14 +148,14 @@ internal class JsonBuilderTest {
                 aktivitetslogg = aktivitetslogg
             )
 
-        private val sendtSøknad
-            get() = SendtSøknad(
+        private val søknad
+            get() = Søknad(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
                 perioder = listOf(
-                    SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
+                    Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
                 aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = aktivitetslogg,

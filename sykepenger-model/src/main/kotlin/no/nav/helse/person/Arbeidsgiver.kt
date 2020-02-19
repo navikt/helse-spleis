@@ -58,11 +58,11 @@ internal class Arbeidsgiver private constructor(
         sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: SendtSøknad) {
-        if (perioder.none { it.håndter(sendtSøknad) }) {
-            sendtSøknad.errorOld("Uventet sendt søknad, mangler ny søknad")
+    internal fun håndter(søknad: Søknad) {
+        if (perioder.none { it.håndter(søknad) }) {
+            søknad.errorOld("Uventet søknad, mangler sykmelding")
         }
-        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
+        søknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
@@ -72,7 +72,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            inntektsmelding.errorOld("Uventet inntektsmelding, mangler ny søknad")
+            inntektsmelding.errorOld("Uventet inntektsmelding, mangler sykmelding")
         }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }

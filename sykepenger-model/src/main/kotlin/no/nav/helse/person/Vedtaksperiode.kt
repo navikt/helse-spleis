@@ -97,11 +97,11 @@ internal class Vedtaksperiode private constructor(
         sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: SendtSøknad) =
-        overlapperMed(sendtSøknad).also {
+    internal fun håndter(søknad: Søknad) =
+        overlapperMed(søknad).also {
             if (!it) return it
-            tilstand.håndter(this, arbeidsgiver, person, sendtSøknad)
-            sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
+            tilstand.håndter(this, arbeidsgiver, person, søknad)
+            søknad.kopierAktiviteterTil(aktivitetslogger)
         }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
@@ -281,10 +281,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: SendtSøknad
+            søknad: Søknad
         ) {
-            sendtSøknad.errorOld("uventet SendtSøknad")
-            vedtaksperiode.tilstand(sendtSøknad, TilInfotrygd)
+            søknad.errorOld("uventet SendtSøknad")
+            vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -331,7 +331,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(sykmelding, MottattSykmelding) {
                 vedtaksperiode.sykdomshistorikk.håndter(sykmelding)
             }
-            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av ny søknad")
+            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av sykmelding")
         }
 
         override val type = START
@@ -344,7 +344,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: SendtSøknad
+            søknad: Søknad
         ) {
             val nesteTilstand =
                 when {
@@ -353,8 +353,8 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
                     }?.let { AvventerHistorikk } ?: UndersøkerHistorikk
                 }
-            vedtaksperiode.håndter(sendtSøknad, nesteTilstand)
-            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av sendt søknad")
+            vedtaksperiode.håndter(søknad, nesteTilstand)
+            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -504,13 +504,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
-            sendtSøknad: SendtSøknad
+            søknad: Søknad
         ) {
             val nesteTilstand =
                 if (arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) AvventerVilkårsprøving
                 else AvventerTidligerePeriode
-            vedtaksperiode.håndter(sendtSøknad, nesteTilstand)
-            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av sendt søknad")
+            vedtaksperiode.håndter(søknad, nesteTilstand)
+            vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av søknad")
         }
 
         override val type = AVVENTER_SENDT_SØKNAD

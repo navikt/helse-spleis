@@ -4,7 +4,7 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.SendtSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
@@ -51,9 +51,9 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `ingen historie med SendtSøknad først`() {
+    internal fun `ingen historie med Søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -77,7 +77,7 @@ internal class KunEnArbeidsgiverTest {
     @Test
     internal fun `Har tilstøtende perioder i historikk`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
@@ -96,7 +96,7 @@ internal class KunEnArbeidsgiverTest {
     internal fun `ingen historie med Inntektsmelding først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
@@ -118,7 +118,7 @@ internal class KunEnArbeidsgiverTest {
     internal fun `ingen nav utbetaling kreves`() {
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 5.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 5.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 5.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
@@ -138,14 +138,14 @@ internal class KunEnArbeidsgiverTest {
     @Test
     internal fun `To perioder med opphold`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
-        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
@@ -173,13 +173,13 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `Sammenblandede hendelser fra forskjellige perioder med sendt søknad først`() {
+    internal fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
-        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         forventetEndringTeller++
@@ -213,9 +213,9 @@ internal class KunEnArbeidsgiverTest {
     internal fun `To tilstøtende perioder`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
-        håndterSendtSøknad(1, Sykdom(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         forventetEndringTeller++
@@ -249,14 +249,14 @@ internal class KunEnArbeidsgiverTest {
     @Test
     internal fun `tilstøtende periode arver første fraværsdag`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
-        håndterSendtSøknad(1, Sykdom(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(1)   // No history
 
         inspektør.also {
@@ -273,9 +273,9 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         forventetEndringTeller++
@@ -309,9 +309,9 @@ internal class KunEnArbeidsgiverTest {
     internal fun `Sammenblandede hendelser fra forskjellige perioder med inntektsmelding etter forrige periode`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
-        håndterSendtSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSendtSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         forventetEndringTeller++
@@ -376,10 +376,10 @@ internal class KunEnArbeidsgiverTest {
         assertEndringTeller()
     }
 
-    private fun håndterSendtSøknad(vedtaksperiodeIndex: Int, vararg perioder: SendtSøknad.Periode) {
+    private fun håndterSøknad(vedtaksperiodeIndex: Int, vararg perioder: Søknad.Periode) {
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        person.håndter(sendtSøknad(*perioder))
+        person.håndter(søknad(*perioder))
         assertEndringTeller()
     }
 
@@ -425,10 +425,10 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private fun sendtSøknad(vararg perioder: SendtSøknad.Periode): SendtSøknad {
+    private fun søknad(vararg perioder: Søknad.Periode): Søknad {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
-        return SendtSøknad(
+        return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,

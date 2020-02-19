@@ -1,14 +1,13 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.*
-import no.nav.helse.hendelser.SendtSøknad
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class OverlappingCompositeTest {
     private val Sykmelding = no.nav.helse.hendelser.Sykmelding.SykmeldingDagFactory
-    private val Søknad = SendtSøknad.SøknadDagFactory
+    private val Søknad = no.nav.helse.hendelser.Søknad.SøknadDagFactory
 
     @Test
     internal fun sykedagerOgFerie() {

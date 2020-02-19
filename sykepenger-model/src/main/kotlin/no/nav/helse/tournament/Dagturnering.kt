@@ -8,7 +8,7 @@ internal interface Dagturnering {
     fun beste(venstre: Dag, høyre: Dag): Dag
 }
 
-internal val sendtSøknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
+internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
 internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
 internal object KonfliktskyDagturnering : Dagturnering {

@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.tournament.historiskDagturnering
@@ -16,9 +16,9 @@ internal class BesteDagTest {
         private val arbeidsdag get() = Arbeidsdag.Søknad(Uke(2).mandag)
         private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
         private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
-        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
-        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
-        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, SendtSøknad.SøknadDagFactory)
+        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Søknad.SøknadDagFactory)
+        private val sykdomFraSendtSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Søknad.SøknadDagFactory)
+        private val utenlandsFraSendtSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Søknad.SøknadDagFactory)
     }
 
     @Test

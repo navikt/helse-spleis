@@ -31,12 +31,12 @@ internal class YtelserHendelseTest {
         person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID()))
         assertEquals(0, inspektør.vedtaksperiodeTeller)
 
-        person.håndter(nySøknad())
+        person.håndter(sykmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstand(TilstandType.MOTTATT_NY_SØKNAD)
 
-        person.håndter(sendtSøknad())
+        person.håndter(søknad())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING)
@@ -125,8 +125,8 @@ internal class YtelserHendelseTest {
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null
     ) {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(
@@ -166,7 +166,7 @@ internal class YtelserHendelseTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun nySøknad() =
+    private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -177,13 +177,13 @@ internal class YtelserHendelseTest {
             aktivitetslogg = Aktivitetslogg()
         )
 
-    private fun sendtSøknad() =
-        SendtSøknad(
+    private fun søknad() =
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false

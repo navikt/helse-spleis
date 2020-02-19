@@ -2,8 +2,8 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
@@ -37,12 +37,12 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    internal fun `SendtSøknad mottatt`() {
+    internal fun `Søknad mottatt`() {
         historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -57,9 +57,9 @@ internal class SykdomshistorikkTest {
     @Test
     internal fun `Håndterer Ubestemt dag`() {
         historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
-        sendtSøknad(
-            SendtSøknad.Periode.Utdanning(9.januar, 12.januar),
-            SendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
+        søknad(
+            Søknad.Periode.Utdanning(9.januar, 12.januar),
+            Søknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)
             assertTrue(it.hasErrorsOld())
@@ -72,9 +72,9 @@ internal class SykdomshistorikkTest {
     internal fun `Inntektsmelding mottatt`() {
         historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         historikk.håndter(
@@ -96,14 +96,14 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `JSON`() {
-        val sendtSøknadId = UUID.randomUUID()
-        val nySøknadId = UUID.randomUUID()
-        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
+        val søknadId = UUID.randomUUID()
+        val sykmeldingId = UUID.randomUUID()
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100), hendelseId = sykmeldingId))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar),
-                hendelseId = sendtSøknadId
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar),
+                hendelseId = søknadId
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -113,8 +113,8 @@ internal class SykdomshistorikkTest {
         assertEquals(5, inspektør.beregnetSykdomstidslinjer[1].length())
         assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
-        assertEquals(inspektør.hendelser[0], sendtSøknadId)
-        assertEquals(inspektør.hendelser[1], nySøknadId)
+        assertEquals(inspektør.hendelser[0], søknadId)
+        assertEquals(inspektør.hendelser[1], sykmeldingId)
     }
 
     private fun sykmelding(
@@ -130,10 +130,10 @@ internal class SykdomshistorikkTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun sendtSøknad(
-        vararg perioder: SendtSøknad.Periode,
+    private fun søknad(
+        vararg perioder: Søknad.Periode,
         hendelseId: UUID = UUID.randomUUID()
-    ) = SendtSøknad(
+    ) = Søknad(
         meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",

@@ -39,7 +39,7 @@ internal class PersonTest {
     @Test
     fun `flere arbeidsgivere`() {
         enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
-            it.håndter(nySøknad(orgnummer = virksomhetsnummer_b))
+            it.håndter(sykmelding(orgnummer = virksomhetsnummer_b))
         }
         assertTrue(inspektør.personLogger.hasErrorsOld())
         assertAntallPersonerEndret(1)
@@ -47,9 +47,9 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ny søknad fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
+    internal fun `sykmelding fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         testPerson.also {
-            it.håndter(nySøknad())
+            it.håndter(sykmelding())
         }
         assertTrue(inspektør.personLogger.toString().contains("Ny arbeidsgiver"))
         assertPersonEndret()
@@ -60,7 +60,7 @@ internal class PersonTest {
     @Test
     internal fun `påminnelse blir delegert til perioden`() {
         testPerson.also {
-            it.håndter(nySøknad())
+            it.håndter(sykmelding())
             it.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
         }
 
@@ -96,7 +96,7 @@ internal class PersonTest {
     @Test
     internal fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
-            it.håndter(nySøknad())
+            it.håndter(sykmelding())
             it.håndter(inntektsmelding())
         }
         assertPersonEndret()
@@ -105,22 +105,22 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `eksisterende periode må behandles i infotrygd når en ny søknad overlapper sykdomstidslinjen i den eksisterende perioden`() {
-        testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
-        nySøknad(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
+    internal fun `eksisterende periode må behandles i infotrygd når en sykmelding overlapper sykdomstidslinjen i den eksisterende perioden`() {
+        testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
+        sykmelding(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
             testPerson.håndter(it)
             assertTrue(it.hasErrorsOld())
         }
     }
 
     @Test
-    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre sendte søknaden`() {
+    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre søknaden`() {
         testPerson.also {
-            it.håndter(nySøknad(perioder = listOf(Triple(1.juli, 20.juli, 100))))
+            it.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
             it.håndter(
-                sendtSøknad(
+                søknad(
                     perioder = listOf(
-                        SendtSøknad.Periode.Sykdom(
+                        Søknad.Periode.Sykdom(
                             fom = 1.juli,
                             tom = 20.juli,
                             grad = 100
@@ -129,9 +129,9 @@ internal class PersonTest {
                 )
             )
         }
-        sendtSøknad(
+        søknad(
             perioder = listOf(
-                SendtSøknad.Periode.Sykdom(
+                Søknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -147,15 +147,15 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ny periode må behandles i infotrygd når vi mottar den sendte søknaden først`() {
-        testPerson.håndter(nySøknad(perioder = listOf(Triple(1.juli, 9.juli, 100))))
+    internal fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
+        testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
-        sendtSøknad(
+        søknad(
             perioder = listOf(
-                SendtSøknad.Periode.Sykdom(
+                Søknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     grad = 100
@@ -176,7 +176,7 @@ internal class PersonTest {
 
     @Test
     internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldingen`() {
-        testPerson.håndter(nySøknad(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
+        testPerson.håndter(sykmelding(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
             testPerson.håndter(
                 inntektsmelding(
                     virksomhetsnummer = "12",
@@ -200,8 +200,8 @@ internal class PersonTest {
 
 
     @Test
-    internal fun `ny søknad med periode som ikke er 100 %`() {
-        nySøknad(
+    internal fun `sykmelding med periode som ikke er 100 %`() {
+        sykmelding(
             perioder = listOf(
                 Triple(Uke(1).mandag, Uke(1).torsdag, 60),
                 Triple(Uke(1).fredag, Uke(1).fredag, 100)
@@ -213,10 +213,10 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sendt søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
-        sendtSøknad(
+    internal fun `søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
+        søknad(
             perioder = listOf(
-                SendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
+                Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
             ),
             sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
         ).also {
@@ -226,11 +226,11 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sendt søknad med periode som ikke er 100 % kaster exception`() {
-        sendtSøknad(
+    internal fun `søknad med periode som ikke er 100 % kaster exception`() {
+        søknad(
             perioder = listOf(
-                SendtSøknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
-                SendtSøknad.Periode.Sykdom(
+                Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
+                Søknad.Periode.Sykdom(
                     fom = Uke(1).fredag,
                     tom = Uke(1).fredag,
                     grad = 100,
@@ -244,10 +244,10 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sendt søknad trigger vedtaksperiode endret-hendelse`() {
+    internal fun `søknad trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
-            it.håndter(nySøknad())
-            it.håndter(sendtSøknad())
+            it.håndter(sykmelding())
+            it.håndter(søknad())
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -278,7 +278,7 @@ internal class PersonTest {
         testObserver.tilstandsendringer.keys.first()
 
     private fun enPersonMedÉnArbeidsgiver(virksomhetsnummer: String) = testPerson.also {
-        it.håndter(nySøknad(orgnummer = virksomhetsnummer))
+        it.håndter(sykmelding(orgnummer = virksomhetsnummer))
     }
 
     private fun assertAntallPersonerEndret(antall: Int) {
@@ -339,7 +339,7 @@ internal class PersonTest {
             ferieperioder = emptyList()
         )
 
-    private fun nySøknad(
+    private fun sykmelding(
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
     ) = Sykmelding(
@@ -352,8 +352,8 @@ internal class PersonTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun sendtSøknad(perioder: List<SendtSøknad.Periode> = listOf(SendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
-        SendtSøknad(
+    private fun søknad(perioder: List<Søknad.Periode> = listOf(Søknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktørId,

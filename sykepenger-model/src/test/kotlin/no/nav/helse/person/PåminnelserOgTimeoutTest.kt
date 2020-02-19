@@ -4,7 +4,6 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +24,6 @@ class PåminnelserOgTimeoutTest {
     private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var aktivitetslogger: Aktivitetslogger
-    private val rapportertdato = 1.februar.atStartOfDay()
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -48,16 +46,16 @@ class PåminnelserOgTimeoutTest {
     }
 
     @Test
-    fun `påminnelse i ny søknad`() {
-        person.håndter(nySøknad())
+    fun `påminnelse i mottatt sykmelding`() {
+        person.håndter(sykmelding())
         person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
     @Test
-    fun `påminnelse i sendt søknad`() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+    fun `påminnelse i mottatt søknad`() {
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
@@ -75,7 +73,7 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i mottatt inntektsmelding`() {
-        person.håndter(nySøknad())
+        person.håndter(sykmelding())
         person.håndter(inntektsmelding())
         person.håndter(påminnelse(TilstandType.AVVENTER_SENDT_SØKNAD))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
@@ -83,8 +81,8 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i vilkårsprøving`() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
         assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
@@ -97,8 +95,8 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i ytelser`() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
@@ -112,8 +110,8 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i til godkjenning`() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -128,8 +126,8 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i til utbetaling`() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -153,11 +151,11 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `ignorerer påminnelser på tidligere tilstander`() {
-        person.håndter(nySøknad())
+        person.håndter(sykmelding())
         person.håndter(påminnelse(TilstandType.TIL_INFOTRYGD))
         assertTilstand(TilstandType.MOTTATT_NY_SØKNAD)
 
-        person.håndter(sendtSøknad())
+        person.håndter(søknad())
         person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
 
@@ -184,19 +182,19 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
-    private fun sendtSøknad() =
-        SendtSøknad(
+    private fun søknad() =
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
-    private fun nySøknad() =
+    private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

@@ -177,12 +177,12 @@ internal class VilkårsgrunnlagTest {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer
         ).also {
-            it.håndter(nySøknad())
-            it.håndter(sendtSøknad())
+            it.håndter(sykmelding())
+            it.håndter(søknad())
             it.håndter(inntektsmelding())
         }
 
-    private fun nySøknad() = Sykmelding(
+    private fun sykmelding() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
@@ -192,12 +192,12 @@ internal class VilkårsgrunnlagTest {
         aktivitetslogg = aktivitetslogg
     )
 
-    private fun sendtSøknad() = SendtSøknad(
+    private fun søknad() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        perioder = listOf(SendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
+        perioder = listOf(Søknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false

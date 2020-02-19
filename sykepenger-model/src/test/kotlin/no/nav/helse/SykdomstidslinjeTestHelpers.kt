@@ -1,6 +1,6 @@
 package no.nav.helse
 
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -58,7 +58,7 @@ internal fun ConcreteSykdomstidslinje.fra(): ConcreteSykdomstidslinje {
     return this.fra(this.førsteDag())
 }
 
-internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, factory: DagFactory = SendtSøknad.SøknadDagFactory): ConcreteSykdomstidslinje {
+internal fun ConcreteSykdomstidslinje.fra(fraOgMed: LocalDate, factory: DagFactory = Søknad.SøknadDagFactory): ConcreteSykdomstidslinje {
     val builder = SykdomstidslinjeBuilder(fraOgMed, factory)
         .antallDager(1)
 
@@ -89,7 +89,7 @@ private fun lagTidslinje(
 ): ConcreteSykdomstidslinje =
     SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator)
 
-internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val factory: DagFactory = SendtSøknad.SøknadDagFactory) {
+internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val factory: DagFactory = Søknad.SøknadDagFactory) {
 
     private companion object {
         private var dato = LocalDate.of(2019, 1, 1)

@@ -72,7 +72,7 @@ internal class JsonDeserializerTest {
                         "aktiviteter" to listOf(
                             mapOf(
                                 "alvorlighetsgrad" to "INFO",
-                                "melding" to "Behandler ny søknad",
+                                "melding" to "Behandler sykmelding",
                                 "tidsstempel" to "2020-01-29 22:45:38.876"
                             )
                         )

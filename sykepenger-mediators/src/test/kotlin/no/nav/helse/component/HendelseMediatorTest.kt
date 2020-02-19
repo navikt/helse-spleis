@@ -114,7 +114,7 @@ internal class HendelseMediatorTest {
                 }
 
                 every {
-                    håndter(any<SendtSøknad>())
+                    håndter(any<Søknad>())
                 } answers {
                     lestSendtSøknad.set(true)
                 }

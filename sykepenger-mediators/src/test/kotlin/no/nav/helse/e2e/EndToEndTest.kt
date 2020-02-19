@@ -286,7 +286,7 @@ internal class EndToEndTest {
     }
 
     @Test
-    fun `gitt en ny søknad, så skal den kunne hentes ut på personen`() {
+    fun `gitt en sykmelding, så skal den kunne hentes ut på personen`() {
         val enAktørId = "1211109876233"
         val fødselsnummer = "01019000123"
         val virksomhetsnummer = "123456789"

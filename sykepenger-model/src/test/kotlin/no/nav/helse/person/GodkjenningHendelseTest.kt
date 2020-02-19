@@ -75,8 +75,8 @@ internal class GodkjenningHendelseTest {
     }
 
     private fun håndterYtelser() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
@@ -121,7 +121,7 @@ internal class GodkjenningHendelseTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun nySøknad() =
+    private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -132,13 +132,13 @@ internal class GodkjenningHendelseTest {
             aktivitetslogg = Aktivitetslogg()
         )
 
-    private fun sendtSøknad() =
-        SendtSøknad(
+    private fun søknad() =
+        Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
