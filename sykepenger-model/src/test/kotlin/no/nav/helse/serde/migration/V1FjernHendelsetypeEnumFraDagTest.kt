@@ -11,7 +11,7 @@ internal class V1FjernHendelsetypeEnumFraDagTest {
     @Test
     internal fun `oversetter til nye dagtyper`() {
         val json = objectMapper.readTree(personJson)
-        V1FjernHendelsetypeEnumFraDag().migrate(json)
+        listOf(V1FjernHendelsetypeEnumFraDag()).migrate(json)
         val migratedJson = json.toString()
 
         assertNotContains(migratedJson, "\"hendelseType\"")

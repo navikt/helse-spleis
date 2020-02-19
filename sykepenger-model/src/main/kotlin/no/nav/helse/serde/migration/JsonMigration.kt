@@ -15,8 +15,12 @@ internal abstract class JsonMigration(private val version: Int) {
         private const val SkjemaversjonKey = "skjemaVersjon"
         private const val InitialVersion = 0
 
-        internal fun migrate(migrations: List<JsonMigration>, jsonNode: JsonNode) =
-            migrations.sortedBy { it.version }.forEach { it.migrate(jsonNode) }
+        internal fun migrate(migrations: List<JsonMigration>, jsonNode: JsonNode) = jsonNode.apply {
+            migrations.sortedBy { it.version }.also {
+                require(it.groupBy { it.version }.filterValues { it.size > 1 }.isEmpty()) { "Versjoner må være unike" }
+                it.forEach { it.migrate(this) }
+            }
+        }
 
         internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode) = jsonNode.apply {
             (jsonNode as ObjectNode).put(
@@ -40,7 +44,7 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected abstract val description: String
 
-    fun migrate(jsonNode: JsonNode) {
+    private fun migrate(jsonNode: JsonNode) {
         if (jsonNode !is ObjectNode) return
         if (!shouldMigrate(jsonNode)) return
         doMigration(jsonNode)
