@@ -415,11 +415,10 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            rapportertdato = rapportertdato,
             sykeperioder = listOf(*sykeperioder),
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
@@ -430,11 +429,10 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = NySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sendtNav = rapportertdato,
             perioder = listOf(*perioder),
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg,
@@ -454,12 +452,11 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
-            mottattDato = rapportertdato,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -473,12 +470,10 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            rapportertDato = rapportertdato,
             inntektsmåneder = (1..12).map {
                 Vilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it),
@@ -501,7 +496,7 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Ytelser(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
@@ -525,7 +520,6 @@ internal class KunEnArbeidsgiverTest {
                 Aktivitetslogger(),
                 Aktivitetslogg()
             ),
-            rapportertdato = rapportertdato,
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         )
@@ -538,14 +532,12 @@ internal class KunEnArbeidsgiverTest {
         hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return ManuellSaksbehandling(
-            hendelseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             saksbehandler = "Ola Nordmann",
             utbetalingGodkjent = utbetalingGodkjent,
-            rapportertdato = rapportertdato,
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         )

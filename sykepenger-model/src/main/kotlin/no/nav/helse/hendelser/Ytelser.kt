@@ -7,22 +7,20 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
 class Ytelser(
-    hendelseId: UUID,
+    private val meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     internal val vedtaksperiodeId: String,
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
-    private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
     internal companion object {
         fun lagBehov(
             vedtaksperiodeId: UUID,
@@ -54,7 +52,7 @@ class Ytelser(
     fun valider() = utbetalingshistorikk.valider()
 
     internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
-        sykepengehistorikk().addInntekter(this.hendelseId(), inntekthistorikk)
+        sykepengehistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)
     }
 
     override fun aktørId(): String {

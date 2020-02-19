@@ -258,14 +258,13 @@ internal class PersonTest {
     internal fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         testPerson.also {
             it.håndter(Ytelser(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), emptyList(), Aktivitetslogger(), Aktivitetslogg()),
                 foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger(), Aktivitetslogg()),
-                rapportertdato = LocalDateTime.now(),
                 aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg()
             ))
@@ -324,7 +323,7 @@ internal class PersonTest {
         førsteFraværsdag: LocalDate = LocalDate.now()
     ) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0
@@ -332,7 +331,6 @@ internal class PersonTest {
             orgnummer = virksomhetsnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            mottattDato = LocalDateTime.now(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
@@ -345,11 +343,10 @@ internal class PersonTest {
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
     ) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = perioder,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
@@ -357,11 +354,10 @@ internal class PersonTest {
 
     private fun sendtSøknad(perioder: List<SendtSøknad.Periode> = listOf(SendtSøknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
-            sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -370,7 +366,6 @@ internal class PersonTest {
 
 
     private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) = Påminnelse(
-        hendelseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

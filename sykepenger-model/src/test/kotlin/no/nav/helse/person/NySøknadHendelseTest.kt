@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class NySøknadHendelseTest {
@@ -93,11 +92,10 @@ internal class NySøknadHendelseTest {
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = NySøknadTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg

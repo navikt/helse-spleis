@@ -24,8 +24,8 @@ internal class NySøknadMessage(
     private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
-    val søknadFom get() = this["fom"].asLocalDate()
-    val søknadTom get() = this["tom"].asLocalDate()
+    private val søknadFom get() = this["fom"].asLocalDate()
+    private val søknadTom get() = this["tom"].asLocalDate()
     private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
     private val sykeperioder
         get() = this["soknadsperioder"].map {
@@ -41,11 +41,10 @@ internal class NySøknadMessage(
     }
 
     internal fun asNySøknad() = NySøknad(
-        hendelseId = this.id,
+        meldingsreferanseId = this.id,
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = rapportertdato,
         sykeperioder = sykeperioder,
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg

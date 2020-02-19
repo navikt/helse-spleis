@@ -5,13 +5,11 @@ import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.set
 
@@ -119,12 +117,11 @@ internal class InntektsmeldingHendelseTest {
         virksomhetsnummer: String = ORGNR
     ) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = virksomhetsnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -134,11 +131,10 @@ internal class InntektsmeldingHendelseTest {
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
         orgnummer = orgnr,
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
@@ -146,11 +142,10 @@ internal class InntektsmeldingHendelseTest {
 
     private fun sendtSøknad(vararg perioder: SendtSøknad.Periode, orgnummer: String = ORGNR) =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,

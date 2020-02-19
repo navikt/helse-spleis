@@ -15,23 +15,21 @@ import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.lang.Double.min
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class Inntektsmelding(
-    hendelseId: UUID,
+    meldingsreferanseId: UUID,
     private val refusjon: Refusjon?,
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
-    private val mottattDato: LocalDateTime,
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>

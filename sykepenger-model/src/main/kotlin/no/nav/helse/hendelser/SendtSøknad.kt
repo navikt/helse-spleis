@@ -9,20 +9,18 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.sendtSøknadDagturnering
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class SendtSøknad constructor(
-    hendelseId: UUID,
+    meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val sendtNav: LocalDateTime,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
 
     private val fom: LocalDate
     private val tom: LocalDate

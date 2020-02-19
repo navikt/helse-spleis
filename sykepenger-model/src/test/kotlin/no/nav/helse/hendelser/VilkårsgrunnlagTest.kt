@@ -7,7 +7,6 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -158,12 +157,10 @@ internal class VilkårsgrunnlagTest {
             )
         )
     ) = Vilkårsgrunnlag(
-        hendelseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         aktørId = "987654321",
         fødselsnummer = "12345678901",
         orgnummer = "orgnummer",
-        rapportertDato = LocalDateTime.now(),
         inntektsmåneder = inntektsmåneder,
         arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
         erEgenAnsatt = false,
@@ -186,22 +183,20 @@ internal class VilkårsgrunnlagTest {
         }
 
     private fun nySøknad() = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
     private fun sendtSøknad() = SendtSøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sendtNav = LocalDateTime.now(),
         perioder = listOf(SendtSøknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg,
@@ -210,12 +205,11 @@ internal class VilkårsgrunnlagTest {
 
     private fun inntektsmelding() =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(16.januar, 1000.0),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            mottattDato = 20.januar.atTime(12, 30),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
             aktivitetslogger = aktivitetslogger,

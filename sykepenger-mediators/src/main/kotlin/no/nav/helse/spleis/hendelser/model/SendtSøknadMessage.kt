@@ -20,14 +20,14 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
-    val søknadFom get() = this["fom"].asLocalDate()
-    val søknadTom get() = this["tom"].asLocalDate()
-    val fnr get() = this["fnr"].asText()
-    val aktørId get() = this["aktorId"].asText()
-    val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
+    private val søknadFom get() = this["fom"].asLocalDate()
+    private val søknadTom get() = this["tom"].asLocalDate()
+    private val fnr get() = this["fnr"].asText()
+    private val aktørId get() = this["aktorId"].asText()
+    private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
     private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
-    val sendtNav get() = this["sendtNav"].asText().let { LocalDateTime.parse(it) }
-    val perioder get() = this["soknadsperioder"].map {
+    private val sendtNav get() = this["sendtNav"].asText().let { LocalDateTime.parse(it) }
+    private val perioder get() = this["soknadsperioder"].map {
         Periode.Sykdom(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
@@ -60,11 +60,10 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
 
     internal fun asSendtSøknad(): SendtSøknad {
         return SendtSøknad(
-            hendelseId = this.id,
+            meldingsreferanseId = this.id,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            sendtNav = sendtNav,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder(),
             aktivitetslogger = aktivitetslogger,

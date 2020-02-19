@@ -7,14 +7,12 @@ import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomshistorikkTest {
@@ -123,11 +121,10 @@ internal class SykdomshistorikkTest {
         vararg sykeperioder: Triple<LocalDate, LocalDate, Int>,
         hendelseId: UUID = UUID.randomUUID()
     ) = NySøknad(
-        hendelseId = hendelseId,
+        meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
@@ -137,11 +134,10 @@ internal class SykdomshistorikkTest {
         vararg perioder: SendtSøknad.Periode,
         hendelseId: UUID = UUID.randomUUID()
     ) = SendtSøknad(
-        hendelseId = hendelseId,
+        meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
-        sendtNav = LocalDateTime.now(),
         perioder = listOf(*perioder),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg(),
@@ -157,12 +153,11 @@ internal class SykdomshistorikkTest {
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) = Inntektsmelding(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
         orgnummer = "88888888",
         fødselsnummer = "12020052345",
         aktørId = "100010101010",
-        mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,

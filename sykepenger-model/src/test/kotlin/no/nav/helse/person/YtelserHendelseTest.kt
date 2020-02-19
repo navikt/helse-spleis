@@ -2,12 +2,10 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -146,7 +144,7 @@ internal class YtelserHendelseTest {
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Ytelser(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNR,
@@ -164,18 +162,16 @@ internal class YtelserHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
     private fun nySøknad() =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
@@ -183,11 +179,10 @@ internal class YtelserHendelseTest {
 
     private fun sendtSøknad() =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -202,12 +197,11 @@ internal class YtelserHendelseTest {
         )
     ) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = refusjon,
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
@@ -218,12 +212,10 @@ internal class YtelserHendelseTest {
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 Vilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(31000.0)

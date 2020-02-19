@@ -8,12 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -141,11 +139,10 @@ internal class JsonBuilderTest {
 
         private val nySøknad
             get() = NySøknad(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
-                rapportertdato = LocalDateTime.now(),
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
                 aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = aktivitetslogg
@@ -153,11 +150,10 @@ internal class JsonBuilderTest {
 
         private val sendtSøknad
             get() = SendtSøknad(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
-                sendtNav = LocalDateTime.now(),
                 perioder = listOf(
                     SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
@@ -168,12 +164,11 @@ internal class JsonBuilderTest {
 
         private val inntektsmelding
             get() = Inntektsmelding(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
                 orgnummer = orgnummer,
                 fødselsnummer = fnr,
                 aktørId = aktørId,
-                mottattDato = 1.februar.atStartOfDay(),
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -184,12 +179,10 @@ internal class JsonBuilderTest {
 
         private val vilkårsgrunnlag
             get() = Vilkårsgrunnlag(
-                hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 orgnummer = orgnummer,
-                rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = (1.rangeTo(12)).map {
                     Vilkårsgrunnlag.Måned(
                         årMåned = YearMonth.of(2018, it),
@@ -211,7 +204,7 @@ internal class JsonBuilderTest {
 
         private val ytelser
             get() = Ytelser(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
@@ -241,21 +234,18 @@ internal class JsonBuilderTest {
                     aktivitetslogger = aktivitetslogger,
                     aktivitetslogg = aktivitetslogg
                 ),
-                rapportertdato = LocalDateTime.now(),
                 aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = aktivitetslogg
             )
 
         private val manuellSaksbehandling
             get() = ManuellSaksbehandling(
-                hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
-                rapportertdato = LocalDateTime.now(),
                 aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = aktivitetslogg
             )

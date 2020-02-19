@@ -5,21 +5,18 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import java.time.LocalDateTime
 import java.util.*
 
 class ManuellSaksbehandling(
-    hendelseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     internal val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val utbetalingGodkjent: Boolean,
-    private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
 
     companion object {
         fun lagBehov(

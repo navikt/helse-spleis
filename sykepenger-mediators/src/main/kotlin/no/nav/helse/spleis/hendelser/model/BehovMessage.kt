@@ -122,14 +122,13 @@ internal class YtelserMessage(
         )
 
         return Ytelser(
-            hendelseId = this.id,
+            meldingsreferanseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
-            rapportertdato = this["@besvart"].asLocalDateTime(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
@@ -167,12 +166,10 @@ internal class VilkårsgrunnlagMessage(
 
     internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
-            hendelseId = this.id,
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
-            rapportertDato = this["@besvart"].asLocalDateTime(),
             inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
                 Vilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
@@ -225,14 +222,12 @@ internal class ManuellSaksbehandlingMessage(
 
     internal fun asManuellSaksbehandling() =
         ManuellSaksbehandling(
-            hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
             utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean(),
-            rapportertdato = this["@besvart"].asLocalDateTime(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )

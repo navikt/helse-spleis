@@ -4,13 +4,11 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -85,14 +83,12 @@ internal class GodkjenningHendelseTest {
     }
 
     private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
-        hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
@@ -103,7 +99,7 @@ internal class GodkjenningHendelseTest {
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Ytelser(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
@@ -121,18 +117,16 @@ internal class GodkjenningHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
     private fun nySøknad() =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
@@ -140,11 +134,10 @@ internal class GodkjenningHendelseTest {
 
     private fun sendtSøknad() =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -153,12 +146,11 @@ internal class GodkjenningHendelseTest {
 
     private fun inntektsmelding() =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
@@ -169,12 +161,10 @@ internal class GodkjenningHendelseTest {
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 Vilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(31000.0)

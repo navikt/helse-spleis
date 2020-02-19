@@ -104,7 +104,7 @@ internal object TestConstants {
         beregnetInntekt: BigDecimal? = 31000.toBigDecimal()
     ) =
         Inntektsmeldingkontrakt(
-            inntektsmeldingId = "",
+            inntektsmeldingId = UUID.randomUUID().toString(),
             arbeidstakerFnr = fødselsnummer,
             arbeidstakerAktorId = aktørId,
             virksomhetsnummer = virksomhetsnummer,

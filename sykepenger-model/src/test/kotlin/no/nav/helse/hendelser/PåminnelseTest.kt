@@ -67,7 +67,6 @@ internal class PåminnelseTest {
 
     private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId:UUID = vedtaksperiodeId) =
         Påminnelse(
-            hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,

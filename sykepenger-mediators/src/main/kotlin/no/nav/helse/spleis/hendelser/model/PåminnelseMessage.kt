@@ -43,7 +43,6 @@ internal class PåminnelseMessage(
 
     internal fun asPåminnelse(): Påminnelse {
         return Påminnelse(
-            hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),

@@ -13,7 +13,6 @@ import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -97,14 +96,12 @@ internal class SykepengesøknadTidslinjeTest {
     private fun assertType(expected: KClass<*>, actual: Any?) =
         assertEquals(expected, actual?.let { it::class })
 
-    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                            sendtNav: LocalDateTime = LocalDateTime.now()) =
+    private fun sendtSøknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100))) =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
             orgnummer = "orgnr",
-            sendtNav = sendtNav,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -112,11 +109,10 @@ internal class SykepengesøknadTidslinjeTest {
         )
 
     private fun nySøknad() = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = "aktørId",
         orgnummer = "123456789",
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()

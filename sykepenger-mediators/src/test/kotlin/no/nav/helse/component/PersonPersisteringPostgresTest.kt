@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.LocalDateTime
 import java.util.*
 
 class PersonPersisteringPostgresTest {
@@ -94,11 +93,10 @@ class PersonPersisteringPostgresTest {
         person.håndter(nySøknad(aktørId))
         person.håndter(
             SendtSøknad(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = "fnr",
                 aktørId = aktørId,
                 orgnummer = "123456789",
-                sendtNav = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                 aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg(),
@@ -120,11 +118,10 @@ class PersonPersisteringPostgresTest {
     }
 
     private fun nySøknad(aktørId: String) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = aktørId,
         orgnummer = "123456789",
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()

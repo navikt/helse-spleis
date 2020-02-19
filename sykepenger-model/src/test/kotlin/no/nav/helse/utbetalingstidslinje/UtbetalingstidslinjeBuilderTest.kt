@@ -1,9 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
@@ -474,24 +470,6 @@ internal class UtbetalingstidslinjeBuilderTest {
             dagtelling.compute(klasse) { _, value -> 1 + (value ?: 0) }
         }
     }
-
-    private fun inntektsmelding(
-        beregnetInntekt: Double = 1000.00
-    ) =
-        Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
-            orgnummer = "virksomhetsnummer",
-            fødselsnummer = "fnr",
-            aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
-            førsteFraværsdag = 1.januar,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = listOf(Periode(1.januar.minusDays(1), 16.januar.minusDays(1))),
-            ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
-            aktivitetslogg = Aktivitetslogg()
-        )
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

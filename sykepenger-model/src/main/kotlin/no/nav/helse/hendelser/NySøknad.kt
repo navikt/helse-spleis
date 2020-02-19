@@ -8,19 +8,17 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class NySøknad(
-    hendelseId: UUID,
+    meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
 
     private val sykeperioder: List<Sykeperiode>
 

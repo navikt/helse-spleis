@@ -4,12 +4,10 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -142,11 +140,10 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun nySøknad() =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
@@ -154,11 +151,10 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun sendtSøknad() =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
@@ -167,12 +163,11 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun inntektsmelding(beregnetInntekt: Double) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -187,12 +182,10 @@ internal class VilkårsgrunnlagHendelseTest {
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
             aktivitetslogger = aktivitetslogger,

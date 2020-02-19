@@ -68,7 +68,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
-            inntektsmelding.hendelseId(),
+            inntektsmelding.meldingsreferanseId(),
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
@@ -134,7 +134,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(UUID.randomUUID(), Aktivitetslogger(), aktivitetslogg) {
+        ArbeidstakerHendelse(Aktivitetslogger(), aktivitetslogg) {
 
         override fun aktørId(): String {
             kotlin.error("Uventet kall")

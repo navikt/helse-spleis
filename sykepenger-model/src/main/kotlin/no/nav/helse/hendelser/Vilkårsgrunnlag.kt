@@ -4,26 +4,22 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.streams.toList
 
 @Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
 class Vilkårsgrunnlag(
-    hendelseId: UUID,
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
-    private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
     private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

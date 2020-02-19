@@ -80,7 +80,7 @@ internal class VedtaksperiodeTest {
 
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 1000.0
@@ -88,7 +88,6 @@ internal class VedtaksperiodeTest {
             orgnummer = organisasjonsnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktør,
-            mottattDato = LocalDateTime.now(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             aktivitetslogger = Aktivitetslogger(),
@@ -103,11 +102,10 @@ internal class VedtaksperiodeTest {
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
     ) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = perioder,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
@@ -123,11 +121,10 @@ internal class VedtaksperiodeTest {
         ), rapportertDato: LocalDateTime = LocalDateTime.now()
     ) =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = fødselsnummer,
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
-            sendtNav = rapportertDato,
             perioder = perioder,
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -135,7 +132,6 @@ internal class VedtaksperiodeTest {
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(
-        hendelseId = UUID.randomUUID(),
         aktørId = "",
         fødselsnummer = "",
         organisasjonsnummer = "",

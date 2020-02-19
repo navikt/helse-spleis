@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class SendtSøknadHendelseTest {
@@ -139,11 +138,10 @@ internal class SendtSøknadHendelseTest {
 
     private fun sendtSøknad(vararg perioder: Periode, orgnummer: String = "987654321") =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
@@ -152,11 +150,10 @@ internal class SendtSøknadHendelseTest {
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg

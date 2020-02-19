@@ -4,7 +4,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -124,12 +123,11 @@ internal class InntektsmeldingTest {
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
         inntektsmelding = Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = "88888888",
             fødselsnummer = "12020052345",
             aktørId = "100010101010",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,

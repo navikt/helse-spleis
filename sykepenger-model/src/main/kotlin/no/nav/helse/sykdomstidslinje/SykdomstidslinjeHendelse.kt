@@ -7,15 +7,16 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import java.util.*
 
 abstract class SykdomstidslinjeHendelse(
-    hendelseId: UUID,
+    private val meldingsreferanseId: UUID,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
+    internal fun meldingsreferanseId() = meldingsreferanseId
+
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun valider(): Aktivitetslogger
 
     internal abstract fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger)
-
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 }

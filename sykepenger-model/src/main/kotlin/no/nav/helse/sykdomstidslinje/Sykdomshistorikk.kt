@@ -67,7 +67,7 @@ internal class Sykdomshistorikk private constructor(
                         hendelse,
                         hendelseSykdomstidslinje
                     ),
-                    hendelseId = hendelse.hendelseId()
+                    hendelseId = hendelse.meldingsreferanseId()
                 )
             }
         }

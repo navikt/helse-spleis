@@ -344,7 +344,6 @@ internal class EndToEndTest {
             )
         ).also { sendKafkaMessage(rapidTopic, fødselsnummer, it) }
         return Påminnelse(
-            hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

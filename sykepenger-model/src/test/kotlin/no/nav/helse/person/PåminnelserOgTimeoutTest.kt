@@ -186,11 +186,10 @@ class PåminnelserOgTimeoutTest {
 
     private fun sendtSøknad() =
         SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sendtNav = rapportertdato,
             perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
@@ -199,11 +198,10 @@ class PåminnelserOgTimeoutTest {
 
     private fun nySøknad() =
         NySøknad(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = rapportertdato,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
@@ -211,12 +209,11 @@ class PåminnelserOgTimeoutTest {
 
     private fun inntektsmelding() =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
@@ -227,12 +224,10 @@ class PåminnelserOgTimeoutTest {
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 Vilkårsgrunnlag.Måned(
                     YearMonth.of(2017, it), listOf(31000.0)
@@ -245,7 +240,7 @@ class PåminnelserOgTimeoutTest {
         )
 
     private fun ytelser() = Ytelser(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
@@ -269,26 +264,22 @@ class PåminnelserOgTimeoutTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        rapportertdato = rapportertdato,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
     private fun manuellSaksbehandling() = ManuellSaksbehandling(
-        hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
-        rapportertdato = rapportertdato,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
     private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
-        hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
