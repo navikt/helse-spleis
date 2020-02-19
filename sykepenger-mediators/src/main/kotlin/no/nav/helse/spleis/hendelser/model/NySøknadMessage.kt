@@ -8,6 +8,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
+import java.util.*
 
 // Understands a JSON message representing a Ny Søknad
 internal class NySøknadMessage(
@@ -18,8 +19,11 @@ internal class NySøknadMessage(
     SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "NY")
-        requiredKey("fom", "tom")
+        requiredKey("sykmeldingId", "fom", "tom")
     }
+
+    override val id: UUID
+        get() = UUID.fromString(this["sykmeldingId"].asText())
 
     private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()

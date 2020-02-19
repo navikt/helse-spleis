@@ -8,6 +8,7 @@ import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDateTime
+import java.util.*
 
 // Understands a JSON message representing a Påminnelse
 internal class PåminnelseMessage(
@@ -17,15 +18,6 @@ internal class PåminnelseMessage(
 ) :
     JsonMessage(originalMessage, problems, aktivitetslogg) {
 
-    private val oldTilstander = mapOf(
-        "NY_SØKNAD_MOTTATT" to TilstandType.MOTTATT_NY_SØKNAD,
-        "MOTTATT_SENDT_SØKNAD" to TilstandType.AVVENTER_INNTEKTSMELDING,
-        "MOTTATT_INNTEKTSMELDING" to TilstandType.AVVENTER_SENDT_SØKNAD,
-        "BEREGN_UTBETALING" to TilstandType.AVVENTER_HISTORIKK,
-        "VILKÅRSPRØVING" to TilstandType.AVVENTER_VILKÅRSPRØVING,
-        "TIL_GODKJENNING" to TilstandType.AVVENTER_GODKJENNING
-    )
-
     init {
         requiredKey(
             "antallGangerPåminnet",
@@ -34,8 +26,10 @@ internal class PåminnelseMessage(
             "organisasjonsnummer", "fødselsnummer", "aktørId"
         )
 
-        requiredValueOneOf("tilstand", TilstandType.values().map(Enum<*>::name) + oldTilstander.keys)
+        requiredValueOneOf("tilstand", TilstandType.values().map(Enum<*>::name))
     }
+
+    override val id: UUID = UUID.randomUUID()
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this, problems)
@@ -48,7 +42,7 @@ internal class PåminnelseMessage(
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             antallGangerPåminnet = this["antallGangerPåminnet"].asInt(),
-            tilstand = this["tilstand"].asText().let { oldTilstander[it] ?: TilstandType.valueOf(it) },
+            tilstand = TilstandType.valueOf(this["tilstand"].asText()),
             tilstandsendringstidspunkt = this["tilstandsendringstidspunkt"].asLocalDateTime(),
             påminnelsestidspunkt = this["påminnelsestidspunkt"].asLocalDateTime(),
             nestePåminnelsestidspunkt = this["nestePåminnelsestidspunkt"].asLocalDateTime(),

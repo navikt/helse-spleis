@@ -10,16 +10,21 @@ import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.hendelser.asOptionalLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO
 import java.time.LocalDateTime
+import java.util.*
 
 // Understands a JSON message representing a Søknad
 internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger, private val aktivitetslogg: Aktivitetslogg) :
     SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "SENDT")
-        requiredKey("sendtNav", "fom", "tom", "egenmeldinger", "fravar")
+        requiredKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
+
+    override val id: UUID
+        get() = UUID.fromString(this["id"].asText())
+
     private val søknadFom get() = this["fom"].asLocalDate()
     private val søknadTom get() = this["tom"].asLocalDate()
     private val fnr get() = this["fnr"].asText()

@@ -373,6 +373,7 @@ internal class HendelseMediatorTest {
             val nySøknad = SykepengesoknadDTO(
                 status = SoknadsstatusDTO.NY,
                 id = id.toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
                 aktorId = aktørId,
                 fnr = fødselsnummer,
                 arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
