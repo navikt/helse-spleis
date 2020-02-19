@@ -63,7 +63,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asSendtSøknad(): Søknad {
+    internal fun asSøknad(): Søknad {
         return Søknad(
             meldingsreferanseId = this.id,
             fnr = fnr,

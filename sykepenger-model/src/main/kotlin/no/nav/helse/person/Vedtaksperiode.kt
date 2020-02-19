@@ -283,7 +283,7 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             søknad: Søknad
         ) {
-            søknad.errorOld("uventet SendtSøknad")
+            søknad.errorOld("uventet Søknad")
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
@@ -360,7 +360,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
-            vedtaksperiode.håndter(inntektsmelding, AvventerSendtSøknad)
+            vedtaksperiode.håndter(inntektsmelding, AvventerSøknad)
             vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av inntektsmelding")
         }
 
@@ -498,7 +498,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
     }
 
-    internal object AvventerSendtSøknad : Vedtaksperiodetilstand {
+    internal object AvventerSøknad : Vedtaksperiodetilstand {
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,

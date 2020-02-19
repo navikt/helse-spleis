@@ -98,9 +98,9 @@ internal class HendelseMediator(
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            val modelSendtSøknad = message.asSendtSøknad()
-            hendelseProbe.onSendtSøknad(modelSendtSøknad)
-            person(modelSendtSøknad).håndter(modelSendtSøknad)
+            val søknad = message.asSøknad()
+            hendelseProbe.onSøknad(søknad)
+            person(søknad).håndter(søknad)
         }
 
         override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {

@@ -37,7 +37,7 @@ class PåminnelserOgTimeoutTest {
         assertEquals(Duration.ofDays(30), Vedtaksperiode.StartTilstand.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmelding.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmelding.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSendtSøknad.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknad.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøving.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
         assertEquals(Duration.ofDays(7), Vedtaksperiode.AvventerGodkjenning.timeout)
