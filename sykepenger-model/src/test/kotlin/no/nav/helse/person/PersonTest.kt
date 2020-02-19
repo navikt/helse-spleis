@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Uke
-import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
@@ -379,9 +379,9 @@ internal class PersonTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private class TestPersonObserver : PersonObserver {
+    private class TestPersonObserver : PersonObserver, HendelseObserver {
         internal val tilstandsendringer: MutableMap<UUID, PersonObserver.VedtaksperiodeEndretTilstandEvent> = mutableMapOf()
-        internal val behovsliste: MutableList<Behov> = mutableListOf()
+        internal val behovsliste: MutableList<BehovType> = mutableListOf()
         internal var vedtaksperiodeEndret = false
         internal var personEndret = false
         internal var forrigeVedtaksperiodetilstand: TilstandType? = null
@@ -406,7 +406,7 @@ internal class PersonTest {
             tilstandsendringer[event.id] = event
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
+        override fun onBehov(behov: BehovType) {
             behovsliste.add(behov)
         }
     }

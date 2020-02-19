@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.Duration
@@ -51,9 +50,6 @@ interface PersonObserver {
 
     @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
-
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    fun vedtaksperiodeTrengerLøsning(behov: Behov) {}
 
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
 

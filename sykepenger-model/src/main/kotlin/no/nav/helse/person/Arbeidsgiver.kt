@@ -129,24 +129,9 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
 
-    internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode) {
-        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling(person.aktivitetslogg.barn())) }
+    internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling(hendelse)) }
     }
 
-    internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(Aktivitetslogger(), aktivitetslogg) {
-
-        override fun aktørId(): String {
-            kotlin.error("Uventet kall")
-        }
-
-        override fun fødselsnummer(): String {
-            kotlin.error("Uventet kall")
-        }
-
-        override fun organisasjonsnummer(): String {
-            kotlin.error("Uventet kall")
-        }
-    }
-
+    internal class GjennoptaBehandling(val hendelse: ArbeidstakerHendelse)
 }

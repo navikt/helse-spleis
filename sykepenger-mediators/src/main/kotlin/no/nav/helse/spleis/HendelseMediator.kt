@@ -1,8 +1,12 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
-import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.person.*
@@ -16,6 +20,8 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -26,7 +32,7 @@ internal class HendelseMediator(
     private val lagrePersonDao: PersonObserver,
     private val lagreUtbetalingDao: PersonObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
-    producer: KafkaProducer<String, String>,
+    private val producer: KafkaProducer<String, String>,
     private val hendelseProbe: HendelseProbe,
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
@@ -34,7 +40,6 @@ internal class HendelseMediator(
     private val parser = Parser(this)
 
     private val personObserver = PersonMediator(producer, sikkerLogg)
-    private val behovMediator = BehovMediator(producer)
 
     init {
         rapid.addListener(parser)
@@ -53,6 +58,7 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
+        val behovMediator = BehovMediator(producer, aktivitetslogg)
         val messageProcessor = Processor(behovMediator)
         try {
             message.accept(hendelseRecorder)
@@ -134,12 +140,9 @@ internal class HendelseMediator(
             person(påminnelse).håndter(påminnelse)
         }
 
-        private fun ArbeidstakerHendelse.kontrollerNeeds() {
-            //Send needs
-        }
-
         private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
             arbeidstakerHendelse.addObserver(behovMediator)
+            arbeidstakerHendelse.addObserver(vedtaksperiodeProbe)
             return (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
                 aktørId = arbeidstakerHendelse.aktørId(),
                 fødselsnummer = arbeidstakerHendelse.fødselsnummer()
@@ -160,17 +163,6 @@ internal class HendelseMediator(
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            producer.send(behov.producerRecord()).get().also {
-                log.info(
-                    "produserte behov=$behov, {}, {}, {}",
-                    keyValue("vedtaksperiodeId", behov.vedtaksperiodeId()),
-                    keyValue("partisjon", it.partition()),
-                    keyValue("offset", it.offset())
-                )
-            }
-        }
-
         override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
             producer.send(event.producerRecord()).get()
         }
@@ -189,27 +181,47 @@ internal class HendelseMediator(
         override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
             producer.send(vedtaksperiodeEvent.producerRecord())
         }
-
-        private fun Behov.producerRecord() =
-            ProducerRecord<String, String>(Topics.rapidTopic, fødselsnummer(), toJson()).also {
-                sikkerLogg.info(
-                    "produserte behov {} med for {}",
-                    keyValue("id", this.id()),
-                    keyValue("behovtype", this.behovType()),
-                    keyValue("vedtaksperiodeId", this.vedtaksperiodeId())
-                )
-            }
-
     }
 
-    private class BehovMediator(producer: KafkaProducer<String, String>) : HendelseObserver {
+    private class BehovMediator(
+        private val producer: KafkaProducer<String, String>,
+        private val aktivitetslogg: Aktivitetslogg
+    ) : HendelseObserver {
+        private companion object {
+            private val objectMapper = jacksonObjectMapper()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
+        }
+
         private val behov = mutableListOf<BehovType>()
         override fun onBehov(behov: BehovType) {
             this.behov.add(behov)
         }
 
         fun finalize() {
-
+            log.info("Skal sende ${behov.size} needs")
+            if (behov.isEmpty()) return
+            producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg)))
         }
+
+        private fun List<BehovType>.toJson(aktivitetslogg: Aktivitetslogg) =
+            fold(objectMapper.createObjectNode()) { acc: ObjectNode, behovType: BehovType ->
+                val node = objectMapper.convertValue<ObjectNode>(behovType.toMap())
+                if (acc.harKonflikterMed(node))
+                    aktivitetslogg.severe("Prøvde å sette sammen behov med konfliktende verdier, $acc og $node")
+                acc.withArray("@behov").add(behovType.navn)
+                acc.setAll(node)
+            }
+                .set<ObjectNode>("@opprettet", objectMapper.convertValue(LocalDateTime.now()))
+                .set<ObjectNode>("@id", objectMapper.convertValue(UUID.randomUUID()))
+                .toString()
+
+        private fun ObjectNode.harKonflikterMed(other: ObjectNode) = fields()
+            .asSequence()
+            .filter { it.key in other.fieldNames().asSequence() }
+            .any { it.value != other[it.key] }
+
     }
 }
+
+private val log = LoggerFactory.getLogger("HendelseMediator")

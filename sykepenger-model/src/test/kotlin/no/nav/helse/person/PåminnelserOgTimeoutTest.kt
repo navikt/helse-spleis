@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -59,15 +58,15 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
-            antall = 1,
-            inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+            antall = 2,
+            inneholder = listOf("Sykepengehistorikk", "Foreldrepenger")
         )
         person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
-            antall = 2,
-            inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+            antall = 4,
+            inneholder = listOf("Sykepengehistorikk", "Foreldrepenger")
         )
     }
 
@@ -88,8 +87,8 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
-            antall = 2,
-            inneholder = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
+            antall = 6,
+            inneholder = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening")
         )
     }
 
@@ -103,8 +102,8 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
-            antall = 3,
-            inneholder = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+            antall = 6,
+            inneholder = listOf("Sykepengehistorikk", "Foreldrepenger")
         )
     }
 
@@ -120,7 +119,7 @@ class PåminnelserOgTimeoutTest {
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 1,
-            inneholder = listOf(Behovstype.Godkjenning)
+            inneholder = listOf("Godkjenning")
         )
     }
 
@@ -137,14 +136,13 @@ class PåminnelserOgTimeoutTest {
         assertBehov(
             behov = personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0)),
             antall = 1,
-            inneholder = listOf(Behovstype.Utbetaling)
+            inneholder = listOf("Utbetaling")
         )
     }
 
-    private fun assertBehov(behov: List<Behov>, antall: Int, inneholder: List<Behovstype>) {
-        val behovTyperAsString = inneholder.map { it.name }
+    private fun assertBehov(behov: List<BehovType>, antall: Int, inneholder: List<String>) {
         assertEquals(antall, behov
-            .filter { it.behovType() == behovTyperAsString }
+            .filter { it.navn in inneholder  }
             .count()
         )
     }
@@ -192,7 +190,9 @@ class PåminnelserOgTimeoutTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun sykmelding() =
         Sykmelding(
@@ -203,7 +203,9 @@ class PåminnelserOgTimeoutTest {
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun inntektsmelding() =
         Inntektsmelding(
@@ -218,7 +220,9 @@ class PåminnelserOgTimeoutTest {
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
@@ -235,7 +239,9 @@ class PåminnelserOgTimeoutTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),
@@ -264,7 +270,9 @@ class PåminnelserOgTimeoutTest {
         ),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun manuellSaksbehandling() = ManuellSaksbehandling(
         aktørId = "aktørId",
@@ -275,7 +283,9 @@ class PåminnelserOgTimeoutTest {
         utbetalingGodkjent = true,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
         aktørId = "aktørId",
@@ -289,7 +299,9 @@ class PåminnelserOgTimeoutTest {
         nestePåminnelsestidspunkt = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
         assertEquals(
@@ -329,15 +341,15 @@ class PåminnelserOgTimeoutTest {
         }
 
     }
-    private inner class TestPersonObserver : PersonObserver {
+    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
 
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
+        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
 
         fun etterspurteBehov(vedtaksperiodeId: UUID) =
             etterspurteBehov.getValue(vedtaksperiodeId).toList()
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }
                 .add(behov)
         }
     }

@@ -501,6 +501,7 @@ internal class EndToEndTest {
             .atMost(timeoutSecondsPerStep, SECONDS)
             .until {
                 behov = TestConsumer.records(rapidTopic)
+                    .also { println(it) }
                     .map { objectMapper.readValue<ObjectNode>(it.value()) }
                     .filter { it.hasNonNull("@behov") }
                     .filter { it["@behov"].map(JsonNode::asText).contains(behovType.name) }

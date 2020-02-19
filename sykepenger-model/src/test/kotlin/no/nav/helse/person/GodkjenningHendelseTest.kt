@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -38,7 +37,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovstype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), "Utbetaling", "utbetalingsreferanse")
         assertNotNull(utbetalingsreferanse)
     }
 
@@ -91,7 +90,9 @@ internal class GodkjenningHendelseTest {
         utbetalingGodkjent = godkjent,
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
@@ -119,7 +120,9 @@ internal class GodkjenningHendelseTest {
         ),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun sykmelding() =
         Sykmelding(
@@ -130,7 +133,9 @@ internal class GodkjenningHendelseTest {
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun søknad() =
         Søknad(
@@ -142,7 +147,9 @@ internal class GodkjenningHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun inntektsmelding() =
         Inntektsmelding(
@@ -157,7 +164,9 @@ internal class GodkjenningHendelseTest {
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
@@ -174,7 +183,9 @@ internal class GodkjenningHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
@@ -211,20 +222,20 @@ internal class GodkjenningHendelseTest {
         internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 
-    private inner class TestPersonObserver : PersonObserver {
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
+    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
+        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
 
         fun etterspurteBehov(id: UUID) =
             etterspurteBehov.getValue(id).toList()
 
-        fun <T> etterspurtBehov(id: UUID, behov: Behovstype, felt: String): T? {
+        fun <T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
             return personObserver.etterspurteBehov(id)
-                .first { behov.name in it.behovType() }[felt]
+                .first { behov == it.navn }.toMap()[felt] as T?
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
-                .add(behov)
+
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }.add(behov)
         }
     }
 }

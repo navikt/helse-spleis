@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
@@ -80,13 +79,6 @@ class Person private constructor(
     @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
         observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
-    }
-
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-        observers.forEach {
-            it.vedtaksperiodeTrengerLøsning(behov)
-        }
     }
 
     fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {

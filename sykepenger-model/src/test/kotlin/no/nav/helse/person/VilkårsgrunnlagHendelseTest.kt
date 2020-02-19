@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -69,7 +68,7 @@ internal class VilkårsgrunnlagHendelseTest {
             utgangspunktForBeregningAvYtelse.minusDays(1),
             personObserver.etterspurtBehov(
                 vedtaksperiodeId,
-                Behovstype.Sykepengehistorikk,
+                "Sykepengehistorikk",
                 "utgangspunktForBeregningAvYtelse"
             )
         )
@@ -147,7 +146,9 @@ internal class VilkårsgrunnlagHendelseTest {
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun søknad() =
         Søknad(
@@ -159,7 +160,9 @@ internal class VilkårsgrunnlagHendelseTest {
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun inntektsmelding(beregnetInntekt: Double) =
         Inntektsmelding(
@@ -174,7 +177,9 @@ internal class VilkårsgrunnlagHendelseTest {
             ferieperioder = emptyList(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
@@ -191,7 +196,9 @@ internal class VilkårsgrunnlagHendelseTest {
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
 
@@ -228,18 +235,18 @@ internal class VilkårsgrunnlagHendelseTest {
 
     }
 
-    private inner class TestPersonObserver : PersonObserver {
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
+    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
+        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
 
         fun etterspurteBehov(vedtaksperiodeId: UUID) = etterspurteBehov.getValue(vedtaksperiodeId).toList()
 
-        fun <T> etterspurtBehov(vedtaksperiodeId: UUID, behov: Behovstype, felt: String): T? {
-            return personObserver.etterspurteBehov(vedtaksperiodeId)
-                .first { behov.name in it.behovType() }[felt]
+        fun <T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
+            return personObserver.etterspurteBehov(id)
+                .first { behov == it.navn }.toMap()[felt] as T?
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }
                 .add(behov)
         }
     }

@@ -256,9 +256,9 @@ internal interface Personkontekst : Aktivitetskontekst {
 }
 
 internal interface Arbeidsgiverkontekst : Personkontekst {
-    val orgnummer: String
+    val organisasjonsnummer: String
 
-    override fun toMap() = super.toMap() + ("orgnummer" to orgnummer)
+    override fun toMap() = super.toMap() + ("organisasjonsnummer" to organisasjonsnummer)
 }
 
 internal interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {

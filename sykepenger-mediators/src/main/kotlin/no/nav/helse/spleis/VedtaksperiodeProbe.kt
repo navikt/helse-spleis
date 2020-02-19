@@ -3,13 +3,14 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovType
+import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
 
-object VedtaksperiodeProbe : PersonObserver {
+object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
@@ -36,8 +37,8 @@ object VedtaksperiodeProbe : PersonObserver {
             .labelNames("tilstand")
             .register()
 
-    override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-        behov.behovType().forEach { behovCounter.labels(it).inc() }
+    override fun onBehov(behov: BehovType) {
+        behovCounter.labels(behov.navn).inc()
     }
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}

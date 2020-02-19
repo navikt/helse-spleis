@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.behov.Behov
+import no.nav.helse.behov.BehovType
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.*
@@ -399,7 +399,7 @@ internal class KunEnArbeidsgiverTest {
 
     private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
         assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
-        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Behovstype.Foreldrepenger))
+        assertTrue(observatør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
         assertFalse(observatør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
         assertEndringTeller()
@@ -422,7 +422,9 @@ internal class KunEnArbeidsgiverTest {
             sykeperioder = listOf(*sykeperioder),
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
     private fun søknad(vararg perioder: Søknad.Periode): Søknad {
@@ -437,7 +439,9 @@ internal class KunEnArbeidsgiverTest {
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg,
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
     private fun inntektsmelding(
@@ -463,7 +467,9 @@ internal class KunEnArbeidsgiverTest {
             ferieperioder = ferieperioder,
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
     private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
@@ -484,7 +490,9 @@ internal class KunEnArbeidsgiverTest {
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
     private fun ytelser(
@@ -522,7 +530,9 @@ internal class KunEnArbeidsgiverTest {
             ),
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
     private fun manuellSaksbehandling(
@@ -540,12 +550,14 @@ internal class KunEnArbeidsgiverTest {
             utbetalingGodkjent = utbetalingGodkjent,
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
-        )
+        ).apply {
+            addObserver(observatør)
+        }
     }
 
-    private inner class TestObservatør : PersonObserver {
+    private inner class TestObservatør : PersonObserver, HendelseObserver {
         internal var endreTeller = 0
-        private val etterspurteBehov = mutableMapOf<Int, MutableMap<String, Boolean>>()
+        private val etterspurteBehov = mutableMapOf<Int, MutableList<String>>()
         private var periodeIndek = -1
         private val periodeIndekser = mutableMapOf<String, Int>()
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
@@ -553,7 +565,7 @@ internal class KunEnArbeidsgiverTest {
         internal var utbetalingsreferanse: Long = 0
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
-            etterspurteBehov[vedtaksperiodeIndex]?.getOrDefault(key.name, false) ?: false
+            etterspurteBehov[vedtaksperiodeIndex]?.contains(key.name) ?: false
 
         internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
 
@@ -563,9 +575,9 @@ internal class KunEnArbeidsgiverTest {
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            val indeks = periodeIndeks(behov.vedtaksperiodeId())
-            behov.behovType().forEach { etterspurteBehov[indeks]?.put(it, true) }
+        override fun onBehov(behov: BehovType) {
+            val indeks = periodeIndeks(behov.toMap()["vedtaksperiodeId"].toString())
+            etterspurteBehov.computeIfAbsent(indeks) { mutableListOf() }.add(behov.navn)
         }
 
         override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
@@ -575,9 +587,8 @@ internal class KunEnArbeidsgiverTest {
         private fun periodeIndeks(vedtaksperiodeId: String): Int {
             return periodeIndekser.getOrPut(vedtaksperiodeId, {
                 periodeIndek++
-                etterspurteBehov[periodeIndek] = mutableMapOf()
                 tilstander[periodeIndek] = mutableListOf(START)
-                vedtaksperiodeIder[periodeIndek] = vedtaksperiodeId.toString()
+                vedtaksperiodeIder[periodeIndek] = vedtaksperiodeId
                 periodeIndek
             })
         }

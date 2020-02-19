@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 sealed class BehovType(private val context: Personkontekst) {
+    val fødselsnummer = context.fødselsnummer
     val navn: String = this::class.simpleName!!
     protected open fun toMapInternal() = emptyMap<String, Any>()
     fun toMap() = toMapInternal() + context.toMap()

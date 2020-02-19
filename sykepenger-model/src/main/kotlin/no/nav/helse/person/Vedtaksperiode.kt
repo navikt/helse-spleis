@@ -1,9 +1,7 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.GjennoptaBehandling
 import no.nav.helse.person.TilstandType.*
@@ -188,44 +186,21 @@ internal class Vedtaksperiode private constructor(
 
     val kontekst = object : Vedtaksperiodekontekst {
         override val vedtaksperiodeId = this@Vedtaksperiode.id
-        override val orgnummer = this@Vedtaksperiode.organisasjonsnummer
+        override val organisasjonsnummer = this@Vedtaksperiode.organisasjonsnummer
         override val aktørId = this@Vedtaksperiode.aktørId
         override val fødselsnummer = this@Vedtaksperiode.fødselsnummer
 
         override fun melding() = "person"
     }
 
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    private fun trengerYtelser() {
-        person.vedtaksperiodeTrengerLøsning(
-            Ytelser.lagBehov(
-                vedtaksperiodeId = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                utgangspunktForBeregningAvYtelse = sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
+    private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
+        hendelse.need(
+            BehovType.Sykepengehistorikk(
+                kontekst,
+                sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
             )
         )
-    }
-
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    internal fun trengerVilkårsgrunnlag() {
-        val beregningSlutt = YearMonth.from(førsteFraværsdag)
-        val beregningStart = beregningSlutt.minusMonths(11)
-
-        person.vedtaksperiodeTrengerLøsning(
-            Behov.nyttBehov(
-                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                additionalParams = mapOf(
-                    "beregningStart" to beregningStart,
-                    "beregningSlutt" to beregningSlutt
-                )
-            )
-        )
+        hendelse.need(BehovType.Foreldrepenger(kontekst))
     }
 
     internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
@@ -317,7 +292,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjennoptaBehandling: GjennoptaBehandling
         ) {
-            gjennoptaBehandling.infoOld("Tidligere periode ferdig behandlet")
+            gjennoptaBehandling.hendelse.infoOld("Tidligere periode ferdig behandlet")
         }
 
         fun leaving(aktivitetslogger: IAktivitetslogger) {}
@@ -373,8 +348,8 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
-            aktivitetslogger.infoOld("Avventer ferdigbehandlig av tidligere periode eller inntektsmelding før videre behandling")
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.infoOld("Avventer ferdigbehandlig av tidligere periode eller inntektsmelding før videre behandling")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -391,7 +366,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (!arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
             vedtaksperiode.tilstand(
-                gjennoptaBehandling,
+                gjennoptaBehandling.hendelse,
                 arbeidsgiver.tilstøtende(vedtaksperiode)
                     ?.also { vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag }
                     ?.let { AvventerHistorikk }
@@ -404,8 +379,8 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_TIDLIGERE_PERIODE
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
-            aktivitetslogger.infoOld("Avventer ferdigbehandlig av tidligere periode før videre behandling")
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.infoOld("Avventer ferdigbehandlig av tidligere periode før videre behandling")
         }
 
         override fun håndter(
@@ -414,15 +389,15 @@ internal class Vedtaksperiode private constructor(
             gjennoptaBehandling: GjennoptaBehandling
         ) {
             if (!arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
-            vedtaksperiode.tilstand(gjennoptaBehandling, AvventerVilkårsprøving)
+            vedtaksperiode.tilstand(gjennoptaBehandling.hendelse, AvventerVilkårsprøving)
         }
     }
 
     internal object UndersøkerHistorikk : Vedtaksperiodetilstand {
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogger: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerYtelser()
-            aktivitetslogger.infoOld("Forespør sykdoms- og inntektshistorikk")
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.trengerYtelser(hendelse)
+            hendelse.infoOld("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(
@@ -468,7 +443,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerYtelser()
+            vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -562,7 +537,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun emitTrengerVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag()
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
         }
 
@@ -574,12 +548,13 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerYtelser()
+            vedtaksperiode.trengerYtelser(hendelse)
             hendelse.infoOld("Forespør sykdoms- og inntektshistorikk")
+            println("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerYtelser()
+            vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(
@@ -616,6 +591,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
                     ytelser.infoOld("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+                    println("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                     vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
                 }
             }
@@ -641,15 +617,9 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.person.vedtaksperiodeTrengerLøsning(
-                ManuellSaksbehandling.lagBehov(
-                    vedtaksperiode.id,
-                    vedtaksperiode.aktørId,
-                    vedtaksperiode.fødselsnummer,
-                    vedtaksperiode.organisasjonsnummer
-                )
-            )
+            hendelse.need(BehovType.Godkjenning(vedtaksperiode.kontekst))
             hendelse.infoOld("Forespør godkjenning fra saksbehandler")
+            println("Forespør godkjenning fra saksbehandler")
         }
 
         override fun håndter(
@@ -667,7 +637,7 @@ internal class Vedtaksperiode private constructor(
                         )
                     }
                 }
-                arbeidsgiver.gjennoptaBehandling(vedtaksperiode)
+                arbeidsgiver.gjennoptaBehandling(vedtaksperiode, manuellSaksbehandling)
             } else {
                 vedtaksperiode.aktivitetslogger.errorOld(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
@@ -688,29 +658,22 @@ internal class Vedtaksperiode private constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            vedtaksperiode.person.vedtaksperiodeTrengerLøsning(
-                Behov.nyttBehov(
-                    behov = listOf(Behovstype.Utbetaling),
-                    aktørId = vedtaksperiode.aktørId,
-                    fødselsnummer = vedtaksperiode.fødselsnummer,
-                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    additionalParams = mapOf(
-                        "utbetalingsreferanse" to utbetalingsreferanse,
-                        "utbetalingslinjer" to (vedtaksperiode.utbetalingslinjer?.joinForOppdrag() ?: emptyList()),
-                        "maksdato" to (vedtaksperiode.maksdato ?: ""),
-                        "saksbehandler" to (vedtaksperiode.godkjentAv ?: "")
-                    )
+            hendelse.need(
+                BehovType.Utbetaling(
+                    context = vedtaksperiode.kontekst,
+                    utbetalingsreferanse = utbetalingsreferanse,
+                    utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer).joinForOppdrag(),
+                    maksdato = requireNotNull(vedtaksperiode.maksdato),
+                    saksbehandler = requireNotNull(vedtaksperiode.godkjentAv)
                 )
             )
-
             val event = PersonObserver.UtbetalingEvent(
                 vedtaksperiodeId = vedtaksperiode.id,
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                 utbetalingsreferanse = utbetalingsreferanse,
-                utbetalingslinjer = vedtaksperiode.utbetalingslinjer ?: emptyList(),
+                utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
                 opprettet = LocalDate.now()
             )
 

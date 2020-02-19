@@ -9,11 +9,9 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class BehovTypeTest {
-    private val vedtaksperiodeId = UUID.randomUUID()
-
     private val vedtaksperiodekontekst = object : Vedtaksperiodekontekst {
-        override val vedtaksperiodeId = this@BehovTypeTest.vedtaksperiodeId
-        override val orgnummer = "orgnummer"
+        override val vedtaksperiodeId = UUID.randomUUID()
+        override val organisasjonsnummer = "orgnummer"
         override val aktørId = "aktørId"
         override val fødselsnummer = "fnr"
 
@@ -37,8 +35,8 @@ internal class BehovTypeTest {
             mapOf(
                 "aktørId" to "aktørId",
                 "fødselsnummer" to "fnr",
-                "orgnummer" to "orgnummer",
-                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to "orgnummer",
+                "vedtaksperiodeId" to vedtaksperiodekontekst.vedtaksperiodeId,
                 "utbetalingsreferanse" to "yes",
                 "utbetalingslinjer" to listOf(
                     mapOf(
