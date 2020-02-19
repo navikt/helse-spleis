@@ -36,8 +36,6 @@ internal class UtbetalingshistorikkTest {
         assertInvalid(Ferie(1.juni, 10.juni, 1200))
         assertInvalid(Opphold(1.juni, 10.juni, 1200))
         assertInvalid(Sanksjon(1.juni, 10.juni, 1200))
-        assertInvalid(Ukjent(1.juni, 10.juni, 1200))
-
     }
 
     private fun assertInvalid(periode: Utbetalingshistorikk.Periode) {
@@ -49,6 +47,7 @@ internal class UtbetalingshistorikkTest {
     private fun sykepengehistorikk(periode: Utbetalingshistorikk.Periode): Utbetalingshistorikk {
         return Utbetalingshistorikk(
             utbetalinger = listOf(periode),
+            ukjentePerioder = emptyList(),
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()

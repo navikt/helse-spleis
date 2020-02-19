@@ -507,6 +507,7 @@ internal class KunEnArbeidsgiverTest {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             utbetalingshistorikk = Utbetalingshistorikk(
+                ukjentePerioder = emptyList(),
                 utbetalinger = utbetalinger.map {
                     Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                         it.first,
@@ -518,7 +519,12 @@ internal class KunEnArbeidsgiverTest {
                 aktivitetslogger = hendelselogger,
                 aktivitetslogg = hendelselogg
             ),
-            foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger(), Aktivitetslogg()),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepenger,
+                svangerskapspenger,
+                Aktivitetslogger(),
+                Aktivitetslogg()
+            ),
             rapportertdato = rapportertdato,
             aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg

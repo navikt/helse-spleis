@@ -58,6 +58,9 @@ internal class YtelserMessage(
         )
 
         val utbetalingshistorikk = Utbetalingshistorikk(
+            ukjentePerioder = this["@løsning.Sykepengehistorikk"].flatMap {
+                it.path("ukjentePerioder")
+            },
             utbetalinger = this["@løsning.Sykepengehistorikk"].flatMap {
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->

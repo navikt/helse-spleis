@@ -152,6 +152,7 @@ internal class YtelserHendelseTest {
         organisasjonsnummer = ORGNR,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         utbetalingshistorikk = Utbetalingshistorikk(
+            ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger(),

@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
@@ -9,6 +10,7 @@ import java.util.*
 
 class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
+    private val ukjentePerioder: List<JsonNode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val aktivitetslogger: Aktivitetslogger,
     private val aktivitetslogg: Aktivitetslogg
@@ -24,6 +26,7 @@ class Utbetalingshistorikk(
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
         inntektshistorikk.forEach { it.valider(aktivitetslogger) }
+        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk inneholder ukjente perioder") }
         return aktivitetslogger
     }
 
