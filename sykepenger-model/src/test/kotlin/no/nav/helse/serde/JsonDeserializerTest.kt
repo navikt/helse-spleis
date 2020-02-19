@@ -5,9 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.TilstandTypeGammelOgNy
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.mapping.JsonKildehendelse
+import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.mapping.JsonDagType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -48,31 +47,15 @@ internal class JsonDeserializerTest {
         assertEquals(inntektsmeldingHendelseId, inntekter.first().hendelseId.toString())
     }
 
-    @Test
-    internal fun `Håndterer eldre tilstandstyper`(){
-        val result = SerialisertPerson(enkelPersonJson(tilstand = TilstandTypeGammelOgNy.BEREGN_UTBETALING)).deserialize()
-
-        val arbeidsgivere = result.privatProp<MutableList<Arbeidsgiver>>("arbeidsgivere")
-        assertEquals(1, arbeidsgivere.size)
-        val arbeidsgiver = arbeidsgivere.find { it.organisasjonsnummer() == organisasjonsnummer }
-        val vedtaksperioder = arbeidsgiver!!.privatProp<MutableList<Vedtaksperiode>>("perioder")
-        assertNotNull(vedtaksperioder)
-        val vedtaksperiode = vedtaksperioder.first()
-        assertNotNull(vedtaksperiode)
-        val tilstand = vedtaksperiode.privatProp<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand")
-        assertEquals(Vedtaksperiode.AvventerHistorikk, tilstand)
-    }
-
     private val førsteFraværsdag = LocalDate.now().minusDays(18)
 
-    private fun enkelPersonJson(tilstand: TilstandTypeGammelOgNy = TilstandTypeGammelOgNy.TIL_INFOTRYGD): String {
+    private fun enkelPersonJson(tilstand: TilstandType = TilstandType.TIL_INFOTRYGD): String {
 
         val tidslinje = førsteFraværsdag.datesUntil(LocalDate.now().minusDays(2))
             .map {
                 mapOf(
                     "dagen" to it.toString(),
-                    "hendelseType" to JsonKildehendelse.Inntektsmelding,
-                    "type" to "SYKEDAG"
+                    "type" to JsonDagType.SYKEDAG_SØKNAD
                 )
             }
             .toList()

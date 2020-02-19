@@ -1,983 +1,999 @@
 {
-  "aktørId" : "12020052345",
-  "fødselsnummer" : "42",
-  "aktivitetslogger" : {
-    "aktiviteter" : [ {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler ny søknad (Ny søknad)",
-      "tidsstempel" : "2020-02-07 15:43:10.343"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
-      "tidsstempel" : "2020-02-07 15:43:10.343"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler sendt søknad (Sendt søknad)",
-      "tidsstempel" : "2020-02-07 15:43:10.346"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
-      "tidsstempel" : "2020-02-07 15:43:10.348"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler inntektsmelding (Inntektsmelding)",
-      "tidsstempel" : "2020-02-07 15:43:10.349"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
-      "tidsstempel" : "2020-02-07 15:43:10.350"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
-      "tidsstempel" : "2020-02-07 15:43:10.351"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
-      "tidsstempel" : "2020-02-07 15:43:10.352"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
-      "tidsstempel" : "2020-02-07 15:43:10.352"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
-      "tidsstempel" : "2020-02-07 15:43:10.353"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
-      "tidsstempel" : "2020-02-07 15:43:10.354"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.355"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.356"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.357"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.358"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.359"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.359"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.359"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
-      "tidsstempel" : "2020-02-07 15:43:10.359"
-    }, {
-      "alvorlighetsgrad" : "INFO",
-      "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
-      "tidsstempel" : "2020-02-07 15:43:10.359"
-    } ],
-    "originalMessage" : null
-  },
-  "arbeidsgivere" : [ {
-    "organisasjonsnummer" : "987654321",
-    "id" : "1426a4b8-0b5a-455d-8389-6909ab94d56e",
+    "aktørId" : "12020052345",
+    "fødselsnummer" : "42",
     "aktivitetslogger" : {
-      "aktiviteter" : [ {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler ny søknad (Ny søknad)",
-        "tidsstempel" : "2020-02-07 15:43:10.343"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
-        "tidsstempel" : "2020-02-07 15:43:10.343"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Lager ny vedtaksperiode",
-        "tidsstempel" : "2020-02-07 15:43:10.344"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler sendt søknad (Sendt søknad)",
-        "tidsstempel" : "2020-02-07 15:43:10.346"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
-        "tidsstempel" : "2020-02-07 15:43:10.348"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler inntektsmelding (Inntektsmelding)",
-        "tidsstempel" : "2020-02-07 15:43:10.349"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
-        "tidsstempel" : "2020-02-07 15:43:10.350"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
-        "tidsstempel" : "2020-02-07 15:43:10.351"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
-        "tidsstempel" : "2020-02-07 15:43:10.352"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
-        "tidsstempel" : "2020-02-07 15:43:10.352"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
-        "tidsstempel" : "2020-02-07 15:43:10.353"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
-        "tidsstempel" : "2020-02-07 15:43:10.354"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.355"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.356"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.357"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.358"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.359"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.359"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.359"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
-        "tidsstempel" : "2020-02-07 15:43:10.359"
-      }, {
-        "alvorlighetsgrad" : "INFO",
-        "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
-        "tidsstempel" : "2020-02-07 15:43:10.359"
-      } ],
-      "originalMessage" : null
-    },
-    "inntekter" : [ {
-      "fom" : "2017-12-01",
-      "hendelseId" : "0d6389ac-5d3e-4602-9227-f7b99e91464a",
-      "beløp" : 2.1E+4
-    }, {
-      "fom" : "2017-12-31",
-      "hendelseId" : "483c7972-87c9-4f18-8628-489b93da6d3e",
-      "beløp" : 3.1E+4
-    } ],
-    "utbetalingstidslinjer" : [ {
-      "dager" : [ {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-03"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-04"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-05"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-06"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-07"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-08"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-09"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-10"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-11"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-12"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-13"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-14"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-15"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-16"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-17"
-      }, {
-        "type" : "ArbeidsgiverperiodeDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-18"
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-19",
-        "utbetaling" : 1431
-      }, {
-        "type" : "NavHelgDag",
-        "inntekt" : 0.0,
-        "dato" : "2018-01-20"
-      }, {
-        "type" : "NavHelgDag",
-        "inntekt" : 0.0,
-        "dato" : "2018-01-21"
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-22",
-        "utbetaling" : 1431
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-23",
-        "utbetaling" : 1431
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-24",
-        "utbetaling" : 1431
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-25",
-        "utbetaling" : 1431
-      }, {
-        "type" : "NavDag",
-        "inntekt" : 1430.77,
-        "dato" : "2018-01-26",
-        "utbetaling" : 1431
-      } ]
-    } ],
-    "vedtaksperioder" : [ {
-      "id" : "586d4d3a-e7da-4799-a47d-cd8d610f9bb5",
-      "maksdato" : "2019-01-01",
-      "godkjentAv" : "Ola Nordmann",
-      "utbetalingsreferanse" : "LBWU2OXH3JDZTJD5ZWGWCD43WU",
-      "førsteFraværsdag" : "2018-01-01",
-      "inntektFraInntektsmelding" : 31000.0,
-      "dataForVilkårsvurdering" : {
-        "erEgenAnsatt" : false,
-        "beregnetÅrsinntektFraInntektskomponenten" : 372000.0,
-        "avviksprosent" : 0.0,
-        "antallOpptjeningsdagerErMinst" : 365,
-        "harOpptjening" : true
-      },
-      "aktivitetslogger" : {
         "aktiviteter" : [ {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler ny søknad (Ny søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.343"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler ny søknad (Ny søknad)",
+            "tidsstempel" : "2020-02-07 15:43:10.343"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.343"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+            "tidsstempel" : "2020-02-07 15:43:10.343"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Fullført behandling av ny søknad",
-          "tidsstempel" : "2020-02-07 15:43:10.345"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler sendt søknad (Sendt søknad)",
+            "tidsstempel" : "2020-02-07 15:43:10.346"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler sendt søknad (Sendt søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.346"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+            "tidsstempel" : "2020-02-07 15:43:10.348"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler sendt søknad (Sendt søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.346"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler inntektsmelding (Inntektsmelding)",
+            "tidsstempel" : "2020-02-07 15:43:10.349"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.348"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
+            "tidsstempel" : "2020-02-07 15:43:10.350"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
-          "tidsstempel" : "2020-02-07 15:43:10.348"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
+            "tidsstempel" : "2020-02-07 15:43:10.351"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Fullført behandling av sendt søknad",
-          "tidsstempel" : "2020-02-07 15:43:10.349"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
+            "tidsstempel" : "2020-02-07 15:43:10.352"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler inntektsmelding (Inntektsmelding)",
-          "tidsstempel" : "2020-02-07 15:43:10.349"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
+            "tidsstempel" : "2020-02-07 15:43:10.352"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler inntektsmelding (Inntektsmelding)",
-          "tidsstempel" : "2020-02-07 15:43:10.349"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
+            "tidsstempel" : "2020-02-07 15:43:10.353"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
-          "tidsstempel" : "2020-02-07 15:43:10.350"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
+            "tidsstempel" : "2020-02-07 15:43:10.354"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
-          "tidsstempel" : "2020-02-07 15:43:10.350"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.355"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Fullført behandling av inntektsmelding",
-          "tidsstempel" : "2020-02-07 15:43:10.351"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.356"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
-          "tidsstempel" : "2020-02-07 15:43:10.351"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.357"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
-          "tidsstempel" : "2020-02-07 15:43:10.352"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.358"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
-          "tidsstempel" : "2020-02-07 15:43:10.352"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.359"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Vilkårsgrunnlag verifisert",
-          "tidsstempel" : "2020-02-07 15:43:10.353"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.359"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
-          "tidsstempel" : "2020-02-07 15:43:10.353"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.359"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
-          "tidsstempel" : "2020-02-07 15:43:10.354"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
+            "tidsstempel" : "2020-02-07 15:43:10.359"
         }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.355"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.356"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.357"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.358"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.359"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.359"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.359"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
-          "tidsstempel" : "2020-02-07 15:43:10.359"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
-          "tidsstempel" : "2020-02-07 15:43:10.359"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Utbetaling markert som godkjent av saksbehandler",
-          "tidsstempel" : "2020-02-07 15:43:10.360"
-        }, {
-          "alvorlighetsgrad" : "INFO",
-          "melding" : "Satt til utbetaling",
-          "tidsstempel" : "2020-02-07 15:43:10.360"
+            "alvorlighetsgrad" : "INFO",
+            "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
+            "tidsstempel" : "2020-02-07 15:43:10.359"
         } ],
         "originalMessage" : null
-      },
-      "sykdomshistorikk" : [ {
-        "tidsstempel" : "2020-02-07T15:43:10.350016",
-        "hendelseId" : "483c7972-87c9-4f18-8628-489b93da6d3e",
-        "hendelseSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
+    },
+    "arbeidsgivere" : [ {
+        "organisasjonsnummer" : "987654321",
+        "id" : "1426a4b8-0b5a-455d-8389-6909ab94d56e",
+        "aktivitetslogger" : {
+            "aktiviteter" : [ {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler ny søknad (Ny søknad)",
+                "tidsstempel" : "2020-02-07 15:43:10.343"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+                "tidsstempel" : "2020-02-07 15:43:10.343"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Lager ny vedtaksperiode",
+                "tidsstempel" : "2020-02-07 15:43:10.344"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler sendt søknad (Sendt søknad)",
+                "tidsstempel" : "2020-02-07 15:43:10.346"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                "tidsstempel" : "2020-02-07 15:43:10.348"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler inntektsmelding (Inntektsmelding)",
+                "tidsstempel" : "2020-02-07 15:43:10.349"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
+                "tidsstempel" : "2020-02-07 15:43:10.350"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
+                "tidsstempel" : "2020-02-07 15:43:10.351"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
+                "tidsstempel" : "2020-02-07 15:43:10.352"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
+                "tidsstempel" : "2020-02-07 15:43:10.352"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
+                "tidsstempel" : "2020-02-07 15:43:10.353"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
+                "tidsstempel" : "2020-02-07 15:43:10.354"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.355"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.356"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.357"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.358"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.359"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.359"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.359"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
+                "tidsstempel" : "2020-02-07 15:43:10.359"
+            }, {
+                "alvorlighetsgrad" : "INFO",
+                "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
+                "tidsstempel" : "2020-02-07 15:43:10.359"
+            } ],
+            "originalMessage" : null
+        },
+        "inntekter" : [ {
+            "fom" : "2017-12-01",
+            "hendelseId" : "0d6389ac-5d3e-4602-9227-f7b99e91464a",
+            "beløp" : 2.1E+4
         }, {
-          "dagen" : "2018-01-04",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-05",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-06",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-07",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-08",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-09",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-10",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-11",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-12",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-13",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-14",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-15",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-16",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-17",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
-        }, {
-          "dagen" : "2018-01-18",
-          "type" : "EGENMELDINGSDAG_INNTEKTSMELDING"
+            "fom" : "2017-12-31",
+            "hendelseId" : "483c7972-87c9-4f18-8628-489b93da6d3e",
+            "beløp" : 3.1E+4
         } ],
-        "beregnetSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-04",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-05",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-06",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-07",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-08",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-09",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-10",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-11",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-12",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-13",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-14",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-15",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-16",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-17",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-18",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-19",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-20",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-21",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-22",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-23",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-24",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-25",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-26",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        } ]
-      }, {
-        "tidsstempel" : "2020-02-07T15:43:10.346894",
-        "hendelseId" : "3bbc20fb-64d4-4aac-8e51-46ace187eae4",
-        "hendelseSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-04",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-05",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-06",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-07",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-08",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-09",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-10",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-11",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-12",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-13",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-14",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-15",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-16",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-17",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-18",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-19",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-20",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-21",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-22",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-23",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-24",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-25",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-26",
-          "hendelseType" : "Søknad",
-          "type" : "SYKEDAG"
+        "utbetalingstidslinjer" : [ {
+            "dager" : [ {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-03"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-04"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-05"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-06"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-07"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-08"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-09"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-10"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-11"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-12"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-13"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-14"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-15"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-16"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-17"
+            }, {
+                "type" : "ArbeidsgiverperiodeDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-18"
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-19",
+                "utbetaling" : 1431
+            }, {
+                "type" : "NavHelgDag",
+                "inntekt" : 0.0,
+                "dato" : "2018-01-20"
+            }, {
+                "type" : "NavHelgDag",
+                "inntekt" : 0.0,
+                "dato" : "2018-01-21"
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-22",
+                "utbetaling" : 1431
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-23",
+                "utbetaling" : 1431
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-24",
+                "utbetaling" : 1431
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-25",
+                "utbetaling" : 1431
+            }, {
+                "type" : "NavDag",
+                "inntekt" : 1430.77,
+                "dato" : "2018-01-26",
+                "utbetaling" : 1431
+            } ]
         } ],
-        "beregnetSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-04",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-05",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-06",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-07",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-08",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-09",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-10",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-11",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-12",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-13",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-14",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-15",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-16",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-17",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-18",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-19",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-20",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-21",
-          "hendelseType" : "Søknad",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-22",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-23",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-24",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-25",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-26",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
+        "vedtaksperioder" : [ {
+            "id" : "586d4d3a-e7da-4799-a47d-cd8d610f9bb5",
+            "maksdato" : "2019-01-01",
+            "godkjentAv" : "Ola Nordmann",
+            "utbetalingsreferanse" : "LBWU2OXH3JDZTJD5ZWGWCD43WU",
+            "førsteFraværsdag" : "2018-01-01",
+            "inntektFraInntektsmelding" : 31000.0,
+            "dataForVilkårsvurdering" : {
+                "erEgenAnsatt" : false,
+                "beregnetÅrsinntektFraInntektskomponenten" : 372000.0,
+                "avviksprosent" : 0.0,
+                "antallOpptjeningsdagerErMinst" : 365,
+                "harOpptjening" : true
+            },
+            "aktivitetslogger" : {
+                "aktiviteter" : [ {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler ny søknad (Ny søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.343"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Ny arbeidsgiver med organisasjonsnummer 987654321 for denne personen (Ny søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.343"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Fullført behandling av ny søknad",
+                    "tidsstempel" : "2020-02-07 15:43:10.345"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler sendt søknad (Sendt søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.346"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler sendt søknad (Sendt søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.346"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.348"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør sykdoms- og inntektshistorikk (Sendt søknad)",
+                    "tidsstempel" : "2020-02-07 15:43:10.348"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Fullført behandling av sendt søknad",
+                    "tidsstempel" : "2020-02-07 15:43:10.349"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler inntektsmelding (Inntektsmelding)",
+                    "tidsstempel" : "2020-02-07 15:43:10.349"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler inntektsmelding (Inntektsmelding)",
+                    "tidsstempel" : "2020-02-07 15:43:10.349"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
+                    "tidsstempel" : "2020-02-07 15:43:10.350"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør vilkårsgrunnlag (Inntektsmelding)",
+                    "tidsstempel" : "2020-02-07 15:43:10.350"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Fullført behandling av inntektsmelding",
+                    "tidsstempel" : "2020-02-07 15:43:10.351"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler vilkårsgrunnlag (Vilkårsgrunnlag)",
+                    "tidsstempel" : "2020-02-07 15:43:10.351"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "er ikke egen ansatt (Vilkårsgrunnlag)",
+                    "tidsstempel" : "2020-02-07 15:43:10.352"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "har 0.0 % avvik i inntekt (Vilkårsgrunnlag)",
+                    "tidsstempel" : "2020-02-07 15:43:10.352"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Vilkårsgrunnlag verifisert",
+                    "tidsstempel" : "2020-02-07 15:43:10.353"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Har tilstrekkelig opptjente dager, antall dager er 365 (Vilkårsgrunnlag)",
+                    "tidsstempel" : "2020-02-07 15:43:10.353"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør sykdoms- og inntektshistorikk (Vilkårsgrunnlag)",
+                    "tidsstempel" : "2020-02-07 15:43:10.354"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler historiske utbetalinger og inntekter (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.355"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Avviste ikke noen dager på grunn av 20% samlet sykdomsgrad regel (utbetalingstidslinje validering) (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.356"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Minimum inntekt har blitt sjekket uten problemer (utbetalingstidslinje validering) (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.357"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Maksimum sykdomsgrense ikke nådd (utbetalingstidslinje validering) (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.358"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Utbetaling har ikke blitt redusert på grunn av 6G (utbetalingstidslinje validering) (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.359"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Utbetalingslinjer bygget vellykket (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.359"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Saken oppfyller krav for behandling, settes til \"Til godkjenning\" (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.359"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Forespør godkjenning fra saksbehandler (Ytelser)",
+                    "tidsstempel" : "2020-02-07 15:43:10.359"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Behandler manuell saksbehandling (Manuell saksbehandling)",
+                    "tidsstempel" : "2020-02-07 15:43:10.359"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Utbetaling markert som godkjent av saksbehandler",
+                    "tidsstempel" : "2020-02-07 15:43:10.360"
+                }, {
+                    "alvorlighetsgrad" : "INFO",
+                    "melding" : "Satt til utbetaling",
+                    "tidsstempel" : "2020-02-07 15:43:10.360"
+                } ],
+                "originalMessage" : null
+            },
+            "sykdomshistorikk" : [ {
+                "tidsstempel" : "2020-02-07T15:43:10.350016",
+                "hendelseId" : "483c7972-87c9-4f18-8628-489b93da6d3e",
+                "hendelseSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Inntektsmelding",
+                    "type" : "EGENMELDINGSDAG"
+                } ],
+                "beregnetSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-19",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-20",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-21",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-22",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-23",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-24",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-25",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-26",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                } ]
+            }, {
+                "tidsstempel" : "2020-02-07T15:43:10.346894",
+                "hendelseId" : "3bbc20fb-64d4-4aac-8e51-46ace187eae4",
+                "hendelseSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-19",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-20",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-21",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-22",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-23",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-24",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-25",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-26",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYKEDAG"
+                } ],
+                "beregnetSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-19",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-20",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-21",
+                    "hendelseType" : "Søknad",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-22",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-23",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-24",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-25",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-26",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                } ]
+            }, {
+                "tidsstempel" : "2020-02-07T15:43:10.345275",
+                "hendelseId" : "e03ef661-11ab-464a-a0af-05656ad753cd",
+                "hendelseSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-19",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-20",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-21",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-22",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-23",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-24",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-25",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-26",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                } ],
+                "beregnetSykdomstidslinje" : [ {
+                    "dagen" : "2018-01-03",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-04",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-05",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-06",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-07",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-08",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-09",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-10",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-11",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-12",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-13",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-14",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-15",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-16",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-17",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-18",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-19",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-20",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-21",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYK_HELGEDAG"
+                }, {
+                    "dagen" : "2018-01-22",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-23",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-24",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-25",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                }, {
+                    "dagen" : "2018-01-26",
+                    "hendelseType" : "Sykmelding",
+                    "type" : "SYKEDAG"
+                } ]
+            } ],
+            "tilstand" : "TIL_UTBETALING",
+            "utbetalingslinjer" : [ {
+                "fom" : "2018-01-19",
+                "tom" : "2018-01-26",
+                "dagsats" : 1431
+            } ]
         } ]
-      }, {
-        "tidsstempel" : "2020-02-07T15:43:10.345275",
-        "hendelseId" : "e03ef661-11ab-464a-a0af-05656ad753cd",
-        "hendelseSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-04",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-05",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-06",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-07",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-08",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-09",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-10",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-11",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-12",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-13",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-14",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-15",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-16",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-17",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-18",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-19",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-20",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-21",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-22",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-23",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-24",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-25",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-26",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        } ],
-        "beregnetSykdomstidslinje" : [ {
-          "dagen" : "2018-01-03",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-04",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-05",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-06",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-07",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-08",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-09",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-10",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-11",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-12",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-13",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-14",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-15",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-16",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-17",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-18",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-19",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-20",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-21",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYK_HELGEDAG"
-        }, {
-          "dagen" : "2018-01-22",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-23",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-24",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-25",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        }, {
-          "dagen" : "2018-01-26",
-          "hendelseType" : "Sykmelding",
-          "type" : "SYKEDAG"
-        } ]
-      } ],
-      "tilstand" : "TIL_UTBETALING",
-      "utbetalingslinjer" : [ {
-        "fom" : "2018-01-19",
-        "tom" : "2018-01-26",
-        "dagsats" : 1431
-      } ]
     } ]
-  } ]
 }

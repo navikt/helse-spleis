@@ -10,8 +10,10 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
-import no.nav.helse.serde.mapping.JsonKildehendelse
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
+import no.nav.helse.serde.migration.JsonMigration
+import no.nav.helse.serde.migration.V1FjernHendelsetypeEnumFraDag
+import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -35,7 +37,9 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 
 class SerialisertPerson(val json: String) {
     internal companion object {
-        private val migrations = listOf<JsonMigration>()
+        private val migrations = listOf<JsonMigration>(
+            V1FjernHendelsetypeEnumFraDag()
+        )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
         fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)
@@ -172,46 +176,16 @@ class SerialisertPerson(val json: String) {
         data: ArbeidsgiverData.VedtaksperiodeData.DagData
     ): Dag {
         return when (data.type) {
-            JsonDagType.ARBEIDSDAG -> {
-                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                    Arbeidsdag.Inntektsmelding(data.dagen)
-                else
-                    Arbeidsdag.Søknad(data.dagen)
-            }
             JsonDagType.ARBEIDSDAG_INNTEKTSMELDING -> Arbeidsdag.Inntektsmelding(data.dagen)
             JsonDagType.ARBEIDSDAG_SØKNAD -> Arbeidsdag.Søknad(data.dagen)
-            JsonDagType.EGENMELDINGSDAG -> {
-                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                    Egenmeldingsdag.Inntektsmelding(data.dagen)
-                else
-                    Egenmeldingsdag.Søknad(data.dagen)
-            }
             JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING -> Egenmeldingsdag.Inntektsmelding(data.dagen)
             JsonDagType.EGENMELDINGSDAG_SØKNAD -> Egenmeldingsdag.Søknad(data.dagen)
-            JsonDagType.FERIEDAG -> {
-                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                    Feriedag.Inntektsmelding(data.dagen)
-                else
-                    Feriedag.Søknad(data.dagen)
-            }
             JsonDagType.FERIEDAG_INNTEKTSMELDING -> Feriedag.Inntektsmelding(data.dagen)
             JsonDagType.FERIEDAG_SØKNAD -> Feriedag.Søknad(data.dagen)
             JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
-            JsonDagType.PERMISJONSDAG -> {
-                if (data.hendelseType == JsonKildehendelse.Søknad)
-                    Permisjonsdag.Søknad(data.dagen)
-                else
-                    Permisjonsdag.Aareg(data.dagen)
-            }
             JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
             JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
             JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
-            JsonDagType.SYKEDAG -> {
-                if (data.hendelseType == JsonKildehendelse.Sykmelding)
-                    Sykedag.Sykmelding(data.dagen)
-                else
-                    Sykedag.Søknad(data.dagen)
-            }
             JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen)
             JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen)
             JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen)
@@ -220,24 +194,19 @@ class SerialisertPerson(val json: String) {
         }
     }
 
-    internal fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
-        TilstandTypeGammelOgNy.START -> Vedtaksperiode.StartTilstand
-        TilstandTypeGammelOgNy.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
-        TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
-        TilstandTypeGammelOgNy.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
-        TilstandTypeGammelOgNy.AVVENTER_INNTEKTSMELDING,
-        TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
-        TilstandTypeGammelOgNy.AVVENTER_VILKÅRSPRØVING,
-        TilstandTypeGammelOgNy.VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
-        TilstandTypeGammelOgNy.AVVENTER_HISTORIKK,
-        TilstandTypeGammelOgNy.BEREGN_UTBETALING -> Vedtaksperiode.AvventerHistorikk
-        TilstandTypeGammelOgNy.AVVENTER_GODKJENNING,
-        TilstandTypeGammelOgNy.TIL_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
-        TilstandTypeGammelOgNy.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
-        TilstandTypeGammelOgNy.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
-        TilstandTypeGammelOgNy.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
-        TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
-        TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
+    private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
+        TilstandType.START -> Vedtaksperiode.StartTilstand
+        TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
+        TilstandType.AVVENTER_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
+        TilstandType.AVVENTER_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
+        TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
+        TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk
+        TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
+        TilstandType.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
+        TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
+        TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
+        TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
+        TilstandType.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
     }
 
     private fun parseUtbetalingslinje(
@@ -325,13 +294,12 @@ internal data class PersonData(
             val inntektFraInntektsmelding: BigDecimal?,
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
-            val tilstand: TilstandTypeGammelOgNy,
+            val tilstand: TilstandType,
             val utbetalingslinjer: List<UtbetalingslinjeData>?,
             val aktivitetslogger: AktivitetsloggerData
         ) {
             data class DagData(
                 val dagen: LocalDate,
-                val hendelseType: JsonKildehendelse?,
                 val type: JsonDagType
             )
 

@@ -1,10 +1,11 @@
-package no.nav.helse.serde
+package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 
-internal fun List<JsonMigration>.migrate(jsonNode: JsonNode) = JsonMigration.migrate(this, jsonNode)
+internal fun List<JsonMigration>.migrate(jsonNode: JsonNode) =
+    JsonMigration.migrate(this, jsonNode)
 
 // Understands a specific version of a JSON message
 // Implements GoF Command Pattern to perform migration
@@ -18,11 +19,16 @@ internal abstract class JsonMigration(private val version: Int) {
             migrations.sortedBy { it.version }.forEach { it.migrate(jsonNode) }
 
         internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode) = jsonNode.apply {
-            (jsonNode as ObjectNode).put(SkjemaversjonKey, gjeldendeVersjon(migrations))
+            (jsonNode as ObjectNode).put(
+                SkjemaversjonKey,
+                gjeldendeVersjon(migrations)
+            )
         }
 
         internal fun skjemaVersjon(jsonNode: JsonNode) =
-            jsonNode.path(SkjemaversjonKey).asInt(InitialVersion)
+            jsonNode.path(SkjemaversjonKey).asInt(
+                InitialVersion
+            )
 
         internal fun gjeldendeVersjon(migrations: List<JsonMigration>) =
             migrations.maxBy { it.version }?.version ?: InitialVersion
@@ -31,6 +37,8 @@ internal abstract class JsonMigration(private val version: Int) {
     init {
         require(version > InitialVersion) { "Ugyldig versjon for migrering. Må være større enn $InitialVersion" }
     }
+
+    protected abstract val description: String
 
     fun migrate(jsonNode: JsonNode) {
         if (jsonNode !is ObjectNode) return
@@ -45,7 +53,7 @@ internal abstract class JsonMigration(private val version: Int) {
         skjemaVersjon(jsonNode) < version
 
     private fun after(jsonNode: ObjectNode) {
-        log.info("Successfully migrated json to $version")
+        log.info("Successfully migrated json to $version using ${this.javaClass.name}: ${this.description}")
         jsonNode.put(SkjemaversjonKey, version)
     }
 }

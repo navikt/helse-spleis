@@ -11,8 +11,7 @@ import no.nav.helse.person.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -88,9 +87,14 @@ internal class JsonBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
+        private lateinit var aktivitetslogger: Aktivitetslogger
+        private lateinit var aktivitetslogg: Aktivitetslogg
 
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING) =
-            Person(aktørId, fnr).apply {
+        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person {
+            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogg = Aktivitetslogg()
+
+            val person = Person(aktørId, fnr).apply {
                 håndter(nySøknad)
 
                 accept(object : PersonVisitor {
@@ -118,6 +122,12 @@ internal class JsonBuilderTest {
                 if (stopState == TilstandType.TIL_UTBETALING) return@apply
             }
 
+            assertFalse(aktivitetslogger.hasErrorsOld()) { "Aktivitetslogger contains errors: ${aktivitetslogger.toReport()}" }
+            assertFalse(aktivitetslogg.hasErrors()) { "Aktivitetslogg contains errors: $aktivitetslogg" }
+
+            return person
+        }
+
         private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
             lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
             person.accept(object : PersonVisitor {
@@ -137,8 +147,8 @@ internal class JsonBuilderTest {
                 orgnummer = orgnummer,
                 rapportertdato = LocalDateTime.now(),
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val sendtSøknad
@@ -151,8 +161,8 @@ internal class JsonBuilderTest {
                 perioder = listOf(
                     SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg(),
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg,
                 harAndreInntektskilder = false
             )
 
@@ -168,8 +178,8 @@ internal class JsonBuilderTest {
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 ferieperioder = emptyList(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val vilkårsgrunnlag
@@ -195,8 +205,8 @@ internal class JsonBuilderTest {
                     )
                 ),
                 erEgenAnsatt = false,
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val ytelser
@@ -216,8 +226,8 @@ internal class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
-                    aktivitetslogger = Aktivitetslogger(),
-                    aktivitetslogg = Aktivitetslogg()
+                    aktivitetslogger = aktivitetslogger,
+                    aktivitetslogg = aktivitetslogg
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(
@@ -228,12 +238,12 @@ internal class JsonBuilderTest {
                         fom = 1.juli.minusYears(2),
                         tom = 31.juli.minusYears(2)
                     ),
-                    aktivitetslogger = Aktivitetslogger(),
-                    aktivitetslogg = Aktivitetslogg()
+                    aktivitetslogger = aktivitetslogger,
+                    aktivitetslogg = aktivitetslogg
                 ),
                 rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val manuellSaksbehandling
@@ -246,8 +256,8 @@ internal class JsonBuilderTest {
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
                 rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
     }
 }
