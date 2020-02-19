@@ -42,7 +42,6 @@ class ManuellSaksbehandling(
     internal fun saksbehandler() = saksbehandler
     internal fun utbetalingGodkjent() = utbetalingGodkjent
 
-    override fun rapportertdato() = rapportertdato
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer

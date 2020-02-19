@@ -36,7 +36,6 @@ class Påminnelse(
         }
     }
 
-    override fun rapportertdato() = påminnelsestidspunkt
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer

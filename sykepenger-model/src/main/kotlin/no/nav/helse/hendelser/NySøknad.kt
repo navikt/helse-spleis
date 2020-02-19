@@ -50,8 +50,6 @@ class NySøknad(
 
     override fun organisasjonsnummer() = orgnummer
 
-    override fun rapportertdato() = rapportertdato
-
     override fun aktørId() = aktørId
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {

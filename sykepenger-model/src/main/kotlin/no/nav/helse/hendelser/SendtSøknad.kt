@@ -46,8 +46,6 @@ class SendtSøknad constructor(
 
     override fun organisasjonsnummer() = orgnummer
 
-    override fun rapportertdato() = sendtNav
-
     override fun aktørId() = aktørId
 
     override fun valider(): Aktivitetslogger {

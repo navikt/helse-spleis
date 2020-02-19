@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
-import java.time.LocalDateTime
 import java.util.*
 
 abstract class ArbeidstakerHendelse protected constructor(
@@ -15,8 +14,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     fun addObserver(hendelseObserver: HendelseObserver) = hendelseObservers.add(hendelseObserver)
 
     fun hendelseId() = hendelseId
-
-    abstract fun rapportertdato(): LocalDateTime
 
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String

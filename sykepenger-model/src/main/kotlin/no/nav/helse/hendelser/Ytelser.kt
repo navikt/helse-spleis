@@ -57,10 +57,6 @@ class Ytelser(
         sykepengehistorikk().addInntekter(this.hendelseId(), inntekthistorikk)
     }
 
-    override fun rapportertdato(): LocalDateTime {
-        return rapportertdato
-    }
-
     override fun aktørId(): String {
         return aktørId
     }

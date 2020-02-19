@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import java.time.LocalDateTime
 import java.util.*
 
 internal class ValidationTest {
@@ -72,9 +71,6 @@ internal class ValidationTest {
     private inner class TestHendelse(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) :
         ArbeidstakerHendelse(UUID.randomUUID(), aktivitetslogger, aktivitetslogg),
         IAktivitetslogger by aktivitetslogger {
-        override fun rapportertdato(): LocalDateTime {
-            fail("Uventet kall")
-        }
 
         override fun aktørId(): String {
             fail("Uventet kall")

@@ -24,7 +24,6 @@ class Vilkårsgrunnlag(
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(hendelseId, aktivitetslogger, aktivitetslogg) {
-    override fun rapportertdato() = rapportertDato
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

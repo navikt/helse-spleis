@@ -66,8 +66,6 @@ class Inntektsmelding(
         return aktivitetslogger
     }
 
-    override fun rapportertdato() = mottattDato
-
     override fun aktørId() = aktørId
 
     override fun fødselsnummer() = fødselsnummer

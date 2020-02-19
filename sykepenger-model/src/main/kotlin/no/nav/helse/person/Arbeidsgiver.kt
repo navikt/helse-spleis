@@ -5,7 +5,6 @@ import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -136,9 +135,6 @@ internal class Arbeidsgiver private constructor(
 
     internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
         ArbeidstakerHendelse(UUID.randomUUID(), Aktivitetslogger(), aktivitetslogg) {
-        override fun rapportertdato(): LocalDateTime {
-            kotlin.error("Uventet kall")
-        }
 
         override fun aktørId(): String {
             kotlin.error("Uventet kall")
