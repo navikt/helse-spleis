@@ -364,7 +364,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av inntektsmelding")
         }
 
-        override val type = MOTTATT_NY_SØKNAD
+        override val type = MOTTATT_SYKMELDING
 
         override val timeout: Duration = Duration.ofDays(30)
     }
@@ -513,7 +513,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av søknad")
         }
 
-        override val type = AVVENTER_SENDT_SØKNAD
+        override val type = AVVENTER_SØKNAD
 
         override val timeout: Duration = Duration.ofDays(30)
     }

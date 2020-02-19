@@ -69,7 +69,7 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -89,7 +89,7 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertTilstander(0, START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -130,7 +130,7 @@ internal class KunEnArbeidsgiverTest {
         println(hendelselogger)
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD
         )
     }
@@ -162,12 +162,12 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, UNDERSØKER_HISTORIKK,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -199,12 +199,12 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_TIDLIGERE_PERIODE,
+            START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_TIDLIGERE_PERIODE,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -236,12 +236,12 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_HISTORIKK,
+            START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -295,12 +295,12 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD, AVVENTER_TIDLIGERE_PERIODE,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD, AVVENTER_TIDLIGERE_PERIODE,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
@@ -334,12 +334,12 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD,
+            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
         assertTilstander(
             1,
-            START, MOTTATT_NY_SØKNAD, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_INNTEKTSMELDING,
+            START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_INNTEKTSMELDING,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }

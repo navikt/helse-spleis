@@ -47,7 +47,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class InntektsmeldingHendelseTest {
         assertTrue(aktivitetslogger.hasWarningsOld())
         assertFalse(aktivitetslogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test

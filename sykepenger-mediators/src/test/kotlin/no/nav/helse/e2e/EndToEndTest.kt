@@ -202,14 +202,14 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.START,
-            currentState = TilstandType.MOTTATT_NY_SØKNAD
+            currentState = TilstandType.MOTTATT_SYKMELDING
         )
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.MOTTATT_NY_SØKNAD,
+            previousState = TilstandType.MOTTATT_SYKMELDING,
             currentState = TilstandType.UNDERSØKER_HISTORIKK
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)

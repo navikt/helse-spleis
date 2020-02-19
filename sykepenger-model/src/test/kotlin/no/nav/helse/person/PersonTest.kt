@@ -54,14 +54,14 @@ internal class PersonTest {
         assertTrue(inspektør.personLogger.toString().contains("Ny arbeidsgiver"))
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD)
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING)
     }
 
     @Test
     internal fun `påminnelse blir delegert til perioden`() {
         testPerson.also {
             it.håndter(sykmelding())
-            it.håndter(påminnelse(tilstandType = MOTTATT_NY_SØKNAD))
+            it.håndter(påminnelse(tilstandType = MOTTATT_SYKMELDING))
         }
 
         assertPersonEndret()
@@ -74,7 +74,7 @@ internal class PersonTest {
     internal fun `påminnelse for periode som ikke finnes`() {
         val påminnelse = påminnelse(
             vedtaksperiodeId = UUID.randomUUID(),
-            tilstandType = MOTTATT_NY_SØKNAD
+            tilstandType = MOTTATT_SYKMELDING
         )
         testPerson.also { it.håndter(påminnelse) }
 
@@ -101,7 +101,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD)
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
     }
 
     @Test
@@ -150,7 +150,7 @@ internal class PersonTest {
     internal fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
+        assertEquals(MOTTATT_SYKMELDING, inspektør.tilstand(0))
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         søknad(
@@ -171,7 +171,7 @@ internal class PersonTest {
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, TIL_INFOTRYGD) // Invalidation of first period
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, TIL_INFOTRYGD) // Invalidation of first period
     }
 
     @Test
@@ -195,7 +195,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_NY_SØKNAD, AVVENTER_SENDT_SØKNAD)
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
     }
 
 

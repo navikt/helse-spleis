@@ -34,7 +34,7 @@ internal class YtelserHendelseTest {
         person.håndter(sykmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.MOTTATT_NY_SØKNAD)
+        assertTilstand(TilstandType.MOTTATT_SYKMELDING)
 
         person.håndter(søknad())
         person.håndter(ytelser())

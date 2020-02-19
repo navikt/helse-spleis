@@ -54,7 +54,7 @@ internal class JsonBuilderTest {
 
     @Test
     fun `serialisering og deserialisering skal funke for alle states`() {
-        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_NY_SØKNAD))
+        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_SYKMELDING))
         testSerialiseringAvPerson(lagPerson(TilstandType.UNDERSØKER_HISTORIKK))
         testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_VILKÅRSPRØVING))
         testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_HISTORIKK))
@@ -101,8 +101,8 @@ internal class JsonBuilderTest {
                     }
                 })
 
-                assertEquals(TilstandType.MOTTATT_NY_SØKNAD, hentTilstand(this).type)
-                if (stopState == TilstandType.MOTTATT_NY_SØKNAD) return@apply
+                assertEquals(TilstandType.MOTTATT_SYKMELDING, hentTilstand(this).type)
+                if (stopState == TilstandType.MOTTATT_SYKMELDING) return@apply
                 håndter(søknad)
                 assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this).type)
                 if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply

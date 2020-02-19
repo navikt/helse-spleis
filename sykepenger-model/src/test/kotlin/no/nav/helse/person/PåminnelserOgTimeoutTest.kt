@@ -48,7 +48,7 @@ class PåminnelserOgTimeoutTest {
     @Test
     fun `påminnelse i mottatt sykmelding`() {
         person.håndter(sykmelding())
-        person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
+        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -75,7 +75,7 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i mottatt inntektsmelding`() {
         person.håndter(sykmelding())
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.AVVENTER_SENDT_SØKNAD))
+        person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -153,10 +153,10 @@ class PåminnelserOgTimeoutTest {
     fun `ignorerer påminnelser på tidligere tilstander`() {
         person.håndter(sykmelding())
         person.håndter(påminnelse(TilstandType.TIL_INFOTRYGD))
-        assertTilstand(TilstandType.MOTTATT_NY_SØKNAD)
+        assertTilstand(TilstandType.MOTTATT_SYKMELDING)
 
         person.håndter(søknad())
-        person.håndter(påminnelse(TilstandType.MOTTATT_NY_SØKNAD))
+        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
 
         person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))

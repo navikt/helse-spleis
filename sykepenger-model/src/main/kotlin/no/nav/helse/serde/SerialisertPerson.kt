@@ -13,6 +13,7 @@ import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.V1FjernHendelsetypeEnumFraDag
+import no.nav.helse.serde.migration.V2EndreTilstandTyper
 import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -38,7 +39,8 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 class SerialisertPerson(val json: String) {
     internal companion object {
         private val migrations = listOf<JsonMigration>(
-            V1FjernHendelsetypeEnumFraDag()
+            V1FjernHendelsetypeEnumFraDag(),
+            V2EndreTilstandTyper()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -196,8 +198,8 @@ class SerialisertPerson(val json: String) {
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
         TilstandType.START -> Vedtaksperiode.StartTilstand
-        TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattSykmelding
-        TilstandType.AVVENTER_SENDT_SØKNAD -> Vedtaksperiode.AvventerSøknad
+        TilstandType.MOTTATT_SYKMELDING -> Vedtaksperiode.MottattSykmelding
+        TilstandType.AVVENTER_SØKNAD -> Vedtaksperiode.AvventerSøknad
         TilstandType.AVVENTER_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
         TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
         TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk

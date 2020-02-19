@@ -35,7 +35,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
     }
 
     @Test
@@ -66,8 +66,8 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(1))
     }
 
     @Test

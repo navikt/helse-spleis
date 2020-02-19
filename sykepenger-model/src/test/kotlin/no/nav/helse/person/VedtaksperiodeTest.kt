@@ -46,8 +46,8 @@ internal class VedtaksperiodeTest {
         val id = UUID.randomUUID()
         val vedtaksperiode = periodeFor(sykmelding = sykmelding(), id = id)
 
-        assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.MOTTATT_NY_SØKNAD)))
-        assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.MOTTATT_NY_SØKNAD)))
+        assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.MOTTATT_SYKMELDING)))
+        assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.MOTTATT_SYKMELDING)))
     }
 
     @Test
