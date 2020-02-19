@@ -33,7 +33,7 @@ internal class JsonDeserializerTest {
 
     @Test
     internal fun test1() {
-        val result = parsePerson(enkelPersonJson())
+        val result = SerialisertPerson(enkelPersonJson()).deserialize()
 
         assertEquals(aktørId, result.privatProp("aktørId"))
         assertEquals(fødselsnummer, result.privatProp("fødselsnummer"))
@@ -50,7 +50,7 @@ internal class JsonDeserializerTest {
 
     @Test
     internal fun `Håndterer eldre tilstandstyper`(){
-        val result = parsePerson(enkelPersonJson(tilstand = TilstandTypeGammelOgNy.BEREGN_UTBETALING))
+        val result = SerialisertPerson(enkelPersonJson(tilstand = TilstandTypeGammelOgNy.BEREGN_UTBETALING)).deserialize()
 
         val arbeidsgivere = result.privatProp<MutableList<Arbeidsgiver>>("arbeidsgivere")
         assertEquals(1, arbeidsgivere.size)

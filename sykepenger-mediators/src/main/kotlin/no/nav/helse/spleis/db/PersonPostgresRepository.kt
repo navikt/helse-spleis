@@ -4,11 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.Person
-import no.nav.helse.serde.parsePerson
+import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
-
-private const val REQUIRED_SCHEMA_VERSION: Int = 4
 
 class PersonPostgresRepository(
     private val dataSource: DataSource,
@@ -19,15 +17,14 @@ class PersonPostgresRepository(
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT data FROM person WHERE aktor_id = ? AND skjema_versjon >= ? ORDER BY id DESC LIMIT 1",
-                    aktørId,
-                    REQUIRED_SCHEMA_VERSION
+                    "SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1",
+                    aktørId
                 ).map {
-                    it.string("data")
+                    SerialisertPerson(it.string("data"))
                 }.asSingle
             )
         }?.let {
-            parsePerson(it)
+            it.deserialize()
         }?.also {
             probe.personLestFraDb()
         }

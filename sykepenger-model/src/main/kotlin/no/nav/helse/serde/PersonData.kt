@@ -1,9 +1,11 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
@@ -24,228 +26,249 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-private val objectMapper = jacksonObjectMapper()
+internal val serdeObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
+    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeData.DagData>
 
-fun parsePerson(json: String): Person {
-    val personData: PersonData = objectMapper.readValue(json)
-    val arbeidsgivere = mutableListOf<Arbeidsgiver>()
-    val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
-    val aktivitetslogg = Aktivitetslogg()
+class SerialisertPerson(val json: String) {
+    internal companion object {
+        private val migrations = listOf<JsonMigration>()
 
-    val person = createPerson(
-        aktørId = personData.aktørId,
-        fødselsnummer = personData.fødselsnummer,
-        arbeidsgivere = arbeidsgivere,
-        aktivitetslogger = aktivitetslogger,
-        aktivitetslogg = aktivitetslogg
-    )
+        fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
+        fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)
+    }
 
-    arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it) })
+    val skjemaVersjon = gjeldendeVersjon()
 
-    return person
-}
+    private fun migrate(jsonNode: JsonNode) {
+        migrations.migrate(jsonNode)
+    }
 
-private fun konverterTilArbeidsgiver(
-    person: Person,
-    personData: PersonData,
-    data: ArbeidsgiverData
-): Arbeidsgiver {
-    val inntekthistorikk = Inntekthistorikk()
-    val vedtaksperioder = mutableListOf<Vedtaksperiode>()
+    fun deserialize(): Person {
+        val jsonNode = serdeObjectMapper.readTree(json)
 
-    data.inntekter.forEach { inntektData ->
-        inntekthistorikk.add(
-            fom = inntektData.fom,
-            hendelseId = inntektData.hendelseId,
-            beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
+        migrate(jsonNode)
+
+        val personData: PersonData = serdeObjectMapper.treeToValue(jsonNode)
+        val arbeidsgivere = mutableListOf<Arbeidsgiver>()
+        val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
+        val aktivitetslogg = Aktivitetslogg()
+
+        val person = createPerson(
+            aktørId = personData.aktørId,
+            fødselsnummer = personData.fødselsnummer,
+            arbeidsgivere = arbeidsgivere,
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        arbeidsgivere.addAll(personData.arbeidsgivere.map { konverterTilArbeidsgiver(person, personData, it) })
+
+        return person
+    }
+
+    private fun konverterTilArbeidsgiver(
+        person: Person,
+        personData: PersonData,
+        data: ArbeidsgiverData
+    ): Arbeidsgiver {
+        val inntekthistorikk = Inntekthistorikk()
+        val vedtaksperioder = mutableListOf<Vedtaksperiode>()
+
+        data.inntekter.forEach { inntektData ->
+            inntekthistorikk.add(
+                fom = inntektData.fom,
+                hendelseId = inntektData.hendelseId,
+                beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
+            )
+        }
+
+        val arbeidsgiver = createArbeidsgiver(
+            person = person,
+            organisasjonsnummer = data.organisasjonsnummer,
+            id = data.id,
+            inntekthistorikk = inntekthistorikk,
+            tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
+            perioder = vedtaksperioder,
+            utbetalingsreferanse = data.utbetalingsreferanse,
+            aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
+        )
+
+        vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it) })
+
+        return arbeidsgiver
+    }
+
+    private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.UtbetalingstidslinjeData): Utbetalingstidslinje {
+        return createUtbetalingstidslinje(data.dager.map {
+            when (it.type) {
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
+                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
+                    createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!)
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
+                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
+                    Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Fridag -> {
+                    Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.AvvistDag -> {
+                    Utbetalingsdag.AvvistDag(
+                        inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
+                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
+                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
+                            null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
+                        }
+                    )
+                }
+                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
+                    Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
+                }
+            }
+        }
+            .toMutableList())
+    }
+
+    private fun parseVedtaksperiode(
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        personData: PersonData,
+        arbeidsgiverData: ArbeidsgiverData,
+        data: ArbeidsgiverData.VedtaksperiodeData
+    ): Vedtaksperiode {
+        return createVedtaksperiode(
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            id = data.id,
+            aktørId = personData.aktørId,
+            fødselsnummer = personData.fødselsnummer,
+            organisasjonsnummer = arbeidsgiverData.organisasjonsnummer,
+            tilstand = parseTilstand(data.tilstand),
+            maksdato = data.maksdato,
+            utbetalingslinjer = data.utbetalingslinjer?.map(::parseUtbetalingslinje),
+            godkjentAv = data.godkjentAv,
+            utbetalingsreferanse = data.utbetalingsreferanse,
+            førsteFraværsdag = data.førsteFraværsdag,
+            inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
+            dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
+            sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
+            aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
         )
     }
 
-    val arbeidsgiver = createArbeidsgiver(
-        person = person,
-        organisasjonsnummer = data.organisasjonsnummer,
-        id = data.id,
-        inntekthistorikk = inntekthistorikk,
-        tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
-        perioder = vedtaksperioder,
-        utbetalingsreferanse = data.utbetalingsreferanse,
-        aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
-    )
+    private fun parseSykdomstidslinje(
+        tidslinjeData: SykdomstidslinjeData
+    ): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map(::parseDag))
 
-    vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it) })
-
-    return arbeidsgiver
-}
-
-private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.UtbetalingstidslinjeData): Utbetalingstidslinje {
-    return createUtbetalingstidslinje(data.dager.map {
-        when (it.type) {
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
-                Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+    private fun parseDag(
+        data: ArbeidsgiverData.VedtaksperiodeData.DagData
+    ): Dag {
+        return when (data.type) {
+            JsonDagType.ARBEIDSDAG -> {
+                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                    Arbeidsdag.Inntektsmelding(data.dagen)
+                else
+                    Arbeidsdag.Søknad(data.dagen)
             }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
-                createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!)
+            JsonDagType.ARBEIDSDAG_INNTEKTSMELDING -> Arbeidsdag.Inntektsmelding(data.dagen)
+            JsonDagType.ARBEIDSDAG_SØKNAD -> Arbeidsdag.Søknad(data.dagen)
+            JsonDagType.EGENMELDINGSDAG -> {
+                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                    Egenmeldingsdag.Inntektsmelding(data.dagen)
+                else
+                    Egenmeldingsdag.Søknad(data.dagen)
             }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
-                Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato)
+            JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING -> Egenmeldingsdag.Inntektsmelding(data.dagen)
+            JsonDagType.EGENMELDINGSDAG_SØKNAD -> Egenmeldingsdag.Søknad(data.dagen)
+            JsonDagType.FERIEDAG -> {
+                if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
+                    Feriedag.Inntektsmelding(data.dagen)
+                else
+                    Feriedag.Søknad(data.dagen)
             }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
-                Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
+            JsonDagType.FERIEDAG_INNTEKTSMELDING -> Feriedag.Inntektsmelding(data.dagen)
+            JsonDagType.FERIEDAG_SØKNAD -> Feriedag.Søknad(data.dagen)
+            JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
+            JsonDagType.PERMISJONSDAG -> {
+                if (data.hendelseType == JsonKildehendelse.Søknad)
+                    Permisjonsdag.Søknad(data.dagen)
+                else
+                    Permisjonsdag.Aareg(data.dagen)
             }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Fridag -> {
-                Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
+            JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
+            JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
+            JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
+            JsonDagType.SYKEDAG -> {
+                if (data.hendelseType == JsonKildehendelse.Sykmelding)
+                    Sykedag.Sykmelding(data.dagen)
+                else
+                    Sykedag.Søknad(data.dagen)
             }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.AvvistDag -> {
-                Utbetalingsdag.AvvistDag(
-                    inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
-                        ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
-                        ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
-                        null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
-                    }
-                )
-            }
-            ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
-                Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
-            }
+            JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen)
+            JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen)
+            JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen)
+            JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
+            JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
         }
     }
-        .toMutableList())
-}
 
-private fun parseVedtaksperiode(
-    person: Person,
-    arbeidsgiver: Arbeidsgiver,
-    personData: PersonData,
-    arbeidsgiverData: ArbeidsgiverData,
-    data: ArbeidsgiverData.VedtaksperiodeData
-): Vedtaksperiode {
-    return createVedtaksperiode(
-        person = person,
-        arbeidsgiver = arbeidsgiver,
-        id = data.id,
-        aktørId = personData.aktørId,
-        fødselsnummer = personData.fødselsnummer,
-        organisasjonsnummer = arbeidsgiverData.organisasjonsnummer,
-        tilstand = parseTilstand(data.tilstand),
-        maksdato = data.maksdato,
-        utbetalingslinjer = data.utbetalingslinjer?.map(::parseUtbetalingslinje),
-        godkjentAv = data.godkjentAv,
-        utbetalingsreferanse = data.utbetalingsreferanse,
-        førsteFraværsdag = data.førsteFraværsdag,
-        inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
-        dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
-        sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
-        aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
-    )
-}
-
-private fun parseSykdomstidslinje(
-    tidslinjeData: SykdomstidslinjeData
-): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map(::parseDag))
-
-private fun parseDag(
-    data: ArbeidsgiverData.VedtaksperiodeData.DagData
-): Dag {
-    return when (data.type) {
-        JsonDagType.ARBEIDSDAG -> {
-            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                Arbeidsdag.Inntektsmelding(data.dagen)
-            else
-                Arbeidsdag.Søknad(data.dagen)
-        }
-        JsonDagType.ARBEIDSDAG_INNTEKTSMELDING -> Arbeidsdag.Inntektsmelding(data.dagen)
-        JsonDagType.ARBEIDSDAG_SØKNAD -> Arbeidsdag.Søknad(data.dagen)
-        JsonDagType.EGENMELDINGSDAG -> {
-            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                Egenmeldingsdag.Inntektsmelding(data.dagen)
-            else
-                Egenmeldingsdag.Søknad(data.dagen)
-        }
-        JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING -> Egenmeldingsdag.Inntektsmelding(data.dagen)
-        JsonDagType.EGENMELDINGSDAG_SØKNAD -> Egenmeldingsdag.Søknad(data.dagen)
-        JsonDagType.FERIEDAG -> {
-            if (data.hendelseType == JsonKildehendelse.Inntektsmelding)
-                Feriedag.Inntektsmelding(data.dagen)
-            else
-                Feriedag.Søknad(data.dagen)
-        }
-        JsonDagType.FERIEDAG_INNTEKTSMELDING -> Feriedag.Inntektsmelding(data.dagen)
-        JsonDagType.FERIEDAG_SØKNAD -> Feriedag.Søknad(data.dagen)
-        JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
-        JsonDagType.PERMISJONSDAG -> {
-            if (data.hendelseType == JsonKildehendelse.Søknad)
-                Permisjonsdag.Søknad(data.dagen)
-            else
-                Permisjonsdag.Aareg(data.dagen)
-        }
-        JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
-        JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
-        JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
-        JsonDagType.SYKEDAG -> {
-            if (data.hendelseType == JsonKildehendelse.Sykmelding)
-                Sykedag.Sykmelding(data.dagen)
-            else
-                Sykedag.Søknad(data.dagen)
-        }
-        JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen)
-        JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen)
-        JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen)
-        JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
-        JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
+    internal fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
+        TilstandTypeGammelOgNy.START -> Vedtaksperiode.StartTilstand
+        TilstandTypeGammelOgNy.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
+        TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
+        TilstandTypeGammelOgNy.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
+        TilstandTypeGammelOgNy.AVVENTER_INNTEKTSMELDING,
+        TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
+        TilstandTypeGammelOgNy.AVVENTER_VILKÅRSPRØVING,
+        TilstandTypeGammelOgNy.VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
+        TilstandTypeGammelOgNy.AVVENTER_HISTORIKK,
+        TilstandTypeGammelOgNy.BEREGN_UTBETALING -> Vedtaksperiode.AvventerHistorikk
+        TilstandTypeGammelOgNy.AVVENTER_GODKJENNING,
+        TilstandTypeGammelOgNy.TIL_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
+        TilstandTypeGammelOgNy.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
+        TilstandTypeGammelOgNy.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
+        TilstandTypeGammelOgNy.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
+        TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
+        TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
     }
-}
 
-internal fun parseTilstand(tilstand: TilstandTypeGammelOgNy) = when (tilstand) {
-    TilstandTypeGammelOgNy.START -> Vedtaksperiode.StartTilstand
-    TilstandTypeGammelOgNy.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
-    TilstandTypeGammelOgNy.AVVENTER_SENDT_SØKNAD,
-    TilstandTypeGammelOgNy.MOTTATT_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
-    TilstandTypeGammelOgNy.AVVENTER_INNTEKTSMELDING,
-    TilstandTypeGammelOgNy.MOTTATT_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
-    TilstandTypeGammelOgNy.AVVENTER_VILKÅRSPRØVING,
-    TilstandTypeGammelOgNy.VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
-    TilstandTypeGammelOgNy.AVVENTER_HISTORIKK,
-    TilstandTypeGammelOgNy.BEREGN_UTBETALING -> Vedtaksperiode.AvventerHistorikk
-    TilstandTypeGammelOgNy.AVVENTER_GODKJENNING,
-    TilstandTypeGammelOgNy.TIL_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
-    TilstandTypeGammelOgNy.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
-    TilstandTypeGammelOgNy.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
-    TilstandTypeGammelOgNy.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
-    TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
-    TilstandTypeGammelOgNy.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
-}
+    private fun parseUtbetalingslinje(
+        data: ArbeidsgiverData.VedtaksperiodeData.UtbetalingslinjeData
+    ): Utbetalingslinje = Utbetalingslinje(fom = data.fom, tom = data.tom, dagsats = data.dagsats)
 
-private fun parseUtbetalingslinje(
-    data: ArbeidsgiverData.VedtaksperiodeData.UtbetalingslinjeData
-): Utbetalingslinje = Utbetalingslinje(fom = data.fom, tom = data.tom, dagsats = data.dagsats)
+    private fun parseDataForVilkårsvurdering(
+        data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData
+    ): Vilkårsgrunnlag.Grunnlagsdata =
+        Vilkårsgrunnlag.Grunnlagsdata(
+            erEgenAnsatt = data.erEgenAnsatt,
+            beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
+            avviksprosent = data.avviksprosent,
+            harOpptjening = data.harOpptjening,
+            antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst
+        )
 
-private fun parseDataForVilkårsvurdering(
-    data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData
-): Vilkårsgrunnlag.Grunnlagsdata =
-    Vilkårsgrunnlag.Grunnlagsdata(
-        erEgenAnsatt = data.erEgenAnsatt,
-        beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
-        avviksprosent = data.avviksprosent,
-        harOpptjening = data.harOpptjening,
-        antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst
-    )
-
-private fun parseSykdomshistorikk(
-    data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>
-): Sykdomshistorikk {
-    return createSykdomshistorikk(data.map { sykdomshistorikkData ->
-        createSykdomshistorikkElement(
-            timestamp = sykdomshistorikkData.tidsstempel,
-            hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
-            beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
-            hendelseId = sykdomshistorikkData.hendelseId
+    private fun parseSykdomshistorikk(
+        data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>
+    ): Sykdomshistorikk {
+        return createSykdomshistorikk(data.map { sykdomshistorikkData ->
+            createSykdomshistorikkElement(
+                timestamp = sykdomshistorikkData.tidsstempel,
+                hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
+                beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
+                hendelseId = sykdomshistorikkData.hendelseId
+            )
+        }
         )
     }
-    )
+
 }
 
 internal data class AktivitetsloggerData(

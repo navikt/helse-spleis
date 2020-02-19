@@ -12,6 +12,7 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -22,10 +23,12 @@ internal class JsonBuilderTest {
     private val objectMapper = jacksonObjectMapper()
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .setMixIns(mutableMapOf(
-            Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
-            Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
-        ))
+        .setMixIns(
+            mutableMapOf(
+                Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
+                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
+            )
+        )
         .registerModule(JavaTimeModule())
 
     @JsonIgnoreProperties("person")
@@ -40,7 +43,8 @@ internal class JsonBuilderTest {
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
-        val personDeserialisert = parsePerson(jsonBuilder.toString())
+        val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
+            .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
         assertEquals(personPre, personPost)
@@ -66,11 +70,15 @@ internal class JsonBuilderTest {
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
-        val result = parsePerson(json)
+        val result = SerialisertPerson(json).deserialize()
         val jsonBuilder2 = JsonBuilder()
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
 
+        objectMapper.readTree(json).also {
+            assertTrue(it.hasNonNull("skjemaVersjon"))
+            assertEquals(SerialisertPerson.gjeldendeVersjon(), it["skjemaVersjon"].intValue())
+        }
         assertEquals(json, json2)
         assertDeepEquals(person, result)
     }
@@ -178,7 +186,14 @@ internal class JsonBuilderTest {
                         inntektsliste = listOf(31000.0)
                     )
                 },
-                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
+                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            orgnummer,
+                            1.januar(2017)
+                        )
+                    )
+                ),
                 erEgenAnsatt = false,
                 aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg()

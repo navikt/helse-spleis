@@ -1,9 +1,6 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.*
@@ -14,12 +11,10 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.util.*
 
-class SerialisertPerson(val skjemaVersjon: Int, val personJson: String)
-
-fun serializePerson(person: Person): SerialisertPerson {
+fun Person.serialize(): SerialisertPerson {
     val jsonBuilder = JsonBuilder()
-    person.accept(jsonBuilder)
-    return SerialisertPerson(PersonData.skjemaVersjon, jsonBuilder.toJson())
+    this.accept(jsonBuilder)
+    return SerialisertPerson(jsonBuilder.toString())
 }
 
 internal class JsonBuilder : PersonVisitor {
@@ -30,12 +25,12 @@ internal class JsonBuilder : PersonVisitor {
         stack.push(Root())
     }
 
-    internal fun toJson() = currentState.toJson()
+    internal fun toJson() = SerialisertPerson.medSkjemaversjon(currentState.toJson())
 
     private val currentState: JsonState
         get() = stack.peek()
 
-    override fun toString() = currentState.toJson()
+    override fun toString() = toJson().toString()
 
     private fun pushState(state: JsonState) {
         currentState.leaving()
@@ -54,12 +49,16 @@ internal class JsonBuilder : PersonVisitor {
         aktørId: String,
         fødselsnummer: String
     ) = currentState.preVisitPerson(person, aktørId, fødselsnummer)
+
     override fun postVisitPerson(
         person: Person,
         aktørId: String,
         fødselsnummer: String
     ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) = currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
+    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) =
+        currentState.visitPersonAktivitetslogger(aktivitetslogger)
+
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -95,16 +94,22 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
         currentState.visitArbeidsdag(dag)
+
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
         currentState.visitArbeidsgiverperiodeDag(dag)
+
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
         currentState.visitNavDag(dag)
+
     override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
         currentState.visitNavHelgDag(dag)
+
     override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
         currentState.visitFridag(dag)
+
     override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
         currentState.visitAvvistDag(dag)
+
     override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
         currentState.visitUkjentDag(dag)
 
@@ -140,12 +145,18 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(arbeidsdag)
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(arbeidsdag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = currentState.visitEgenmeldingsdag(egenmeldingsdag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = currentState.visitEgenmeldingsdag(egenmeldingsdag)
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) =
+        currentState.visitEgenmeldingsdag(egenmeldingsdag)
+
+    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) =
+        currentState.visitEgenmeldingsdag(egenmeldingsdag)
+
     override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(feriedag)
     override fun visitFeriedag(feriedag: Feriedag.Søknad) = currentState.visitFeriedag(feriedag)
     override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitImplisittDag(implisittDag)
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) = currentState.visitPermisjonsdag(permisjonsdag)
+    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
+        currentState.visitPermisjonsdag(permisjonsdag)
+
     override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = currentState.visitPermisjonsdag(permisjonsdag)
     override fun visitStudiedag(studiedag: Studiedag) = currentState.visitStudiedag(studiedag)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = currentState.visitSykHelgedag(sykHelgedag)
@@ -167,7 +178,8 @@ internal class JsonBuilder : PersonVisitor {
     private interface JsonState : PersonVisitor {
         fun entering() {}
         fun leaving() {}
-        fun toJson(): String = throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
+        fun toJson(): JsonNode =
+            throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
     }
 
     private inner class Root : JsonState {
@@ -183,11 +195,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun toString() = personMap.toString()
 
-        override fun toJson(): String = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
-            .valueToTree<JsonNode>(personMap)
-            .toPrettyString()
+        override fun toJson(): JsonNode = serdeObjectMapper.valueToTree<JsonNode>(personMap)
     }
 
     private inner class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
@@ -224,7 +232,10 @@ internal class JsonBuilder : PersonVisitor {
         }
     }
 
-    private inner class ArbeidsgiverState(arbeidsgiver: Arbeidsgiver, private val arbeidsgiverMap: MutableMap<String, Any?>) :
+    private inner class ArbeidsgiverState(
+        arbeidsgiver: Arbeidsgiver,
+        private val arbeidsgiverMap: MutableMap<String, Any?>
+    ) :
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
@@ -303,15 +314,19 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
+
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             dager.add(NavDagReflect(dag, "NavDag").toMap())
         }
+
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
         }
+
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
         }
+
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
         }
@@ -412,14 +427,26 @@ internal class JsonBuilder : PersonVisitor {
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, arbeidsdag)
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, egenmeldingsdag)
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, egenmeldingsdag)
-        override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) =
+            leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, arbeidsdag)
+
+        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) =
+            leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, egenmeldingsdag)
+
+        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) =
+            leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, egenmeldingsdag)
+
+        override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) =
+            leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
+
         override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
         override fun visitImplisittDag(implisittDag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
-        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) = leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)
-        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
+        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
+            leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)
+
+        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) =
+            leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
+
         override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = leggTilDag(JsonDagType.SYK_HELGEDAG, sykHelgedag)
         override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilDag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
