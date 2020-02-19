@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.NySøknadTest
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.SykmeldingTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class NySøknadHendelseTest {
+internal class SykmeldingTest {
 
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -29,7 +29,7 @@ internal class NySøknadHendelseTest {
     }
 
     @Test
-    internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
+    internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrorsOld())
         assertTrue(inspektør.personLogger.hasMessagesOld())
@@ -39,7 +39,7 @@ internal class NySøknadHendelseTest {
     }
 
     @Test
-    internal fun `En ny NySøknad er ugyldig`() {
+    internal fun `En ny Sykmelding er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrorsOld())
@@ -91,9 +91,9 @@ internal class NySøknadHendelseTest {
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
-        NySøknad(
+        Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = NySøknadTest.UNG_PERSON_FNR_2018,
+            fnr = SykmeldingTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),

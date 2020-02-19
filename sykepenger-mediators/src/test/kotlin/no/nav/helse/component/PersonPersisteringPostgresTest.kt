@@ -6,9 +6,9 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
@@ -117,7 +117,7 @@ class PersonPersisteringPostgresTest {
         assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }
 
-    private fun nySøknad(aktørId: String) = NySøknad(
+    private fun nySøknad(aktørId: String) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = aktørId,

@@ -37,7 +37,7 @@ class PåminnelserOgTimeoutTest {
     @Test
     fun `timeoutverdier`() {
         assertEquals(Duration.ofDays(30), Vedtaksperiode.StartTilstand.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattNySøknad.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmelding.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmelding.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSendtSøknad.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøving.timeout)
@@ -197,7 +197,7 @@ class PåminnelserOgTimeoutTest {
         )
 
     private fun nySøknad() =
-        NySøknad(
+        Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",

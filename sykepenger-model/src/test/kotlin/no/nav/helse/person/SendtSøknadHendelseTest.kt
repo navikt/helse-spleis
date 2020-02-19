@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.SendtSøknad
 import no.nav.helse.hendelser.SendtSøknad.Periode
 import no.nav.helse.hendelser.SendtSøknad.Periode.*
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -53,7 +53,7 @@ internal class SendtSøknadHendelseTest {
     }
 
     @Test
-    internal fun `mangler NySøknad`() {
+    internal fun `mangler Sykmelding`() {
         person.håndter(sendtSøknad(Sykdom(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrorsOld())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
@@ -149,7 +149,7 @@ internal class SendtSøknadHendelseTest {
         )
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
-        NySøknad(
+        Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",

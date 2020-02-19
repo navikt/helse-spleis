@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
@@ -44,7 +44,7 @@ internal class NySøknadMessage(
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asNySøknad() = NySøknad(
+    internal fun asSykmelding() = Sykmelding(
         meldingsreferanseId = this.id,
         fnr = fnr,
         aktørId = aktørId,

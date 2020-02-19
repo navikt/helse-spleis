@@ -342,7 +342,7 @@ internal class PersonTest {
     private fun nySøknad(
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
-    ) = NySøknad(
+    ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,

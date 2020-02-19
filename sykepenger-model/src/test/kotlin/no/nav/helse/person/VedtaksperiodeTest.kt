@@ -44,7 +44,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `påminnelse returnerer true basert på om påminnelsen ble håndtert eller ikke`() {
         val id = UUID.randomUUID()
-        val vedtaksperiode = periodeFor(nySøknad = nySøknad(), id = id)
+        val vedtaksperiode = periodeFor(sykmelding = nySøknad(), id = id)
 
         assertFalse(vedtaksperiode.håndter(påminnelse(UUID.randomUUID(), TilstandType.MOTTATT_NY_SØKNAD)))
         assertTrue(vedtaksperiode.håndter(påminnelse(id, TilstandType.MOTTATT_NY_SØKNAD)))
@@ -101,7 +101,7 @@ internal class VedtaksperiodeTest {
         aktørId: String = aktør,
         orgnummer: String = organisasjonsnummer,
         perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
-    ) = NySøknad(
+    ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
@@ -145,14 +145,14 @@ internal class VedtaksperiodeTest {
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun periodeFor(nySøknad: NySøknad, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
+    private fun periodeFor(sykmelding: Sykmelding, id: UUID = UUID.randomUUID()) = Vedtaksperiode(
         person = person,
         arbeidsgiver = arbeidsgiver,
         id = id,
-        aktørId = nySøknad.aktørId(),
-        fødselsnummer = nySøknad.fødselsnummer(),
-        organisasjonsnummer = nySøknad.organisasjonsnummer()
+        aktørId = sykmelding.aktørId(),
+        fødselsnummer = sykmelding.fødselsnummer(),
+        organisasjonsnummer = sykmelding.organisasjonsnummer()
     ).also {
-        it.håndter(nySøknad)
+        it.håndter(sykmelding)
     }
 }

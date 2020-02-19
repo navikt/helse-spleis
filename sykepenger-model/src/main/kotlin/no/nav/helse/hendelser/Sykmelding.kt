@@ -10,7 +10,7 @@ import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.util.*
 
-class NySøknad(
+class Sykmelding(
     meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,

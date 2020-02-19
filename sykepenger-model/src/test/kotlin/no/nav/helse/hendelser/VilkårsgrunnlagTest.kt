@@ -182,7 +182,7 @@ internal class VilkårsgrunnlagTest {
             it.håndter(inntektsmelding())
         }
 
-    private fun nySøknad() = NySøknad(
+    private fun nySøknad() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,

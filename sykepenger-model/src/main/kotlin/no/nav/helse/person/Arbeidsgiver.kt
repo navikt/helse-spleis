@@ -50,12 +50,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: NySøknad) {
-        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
+    internal fun håndter(sykmelding: Sykmelding) {
+        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(sykmelding) }) {
             aktivitetslogger.infoOld("Lager ny vedtaksperiode")
-            nyVedtaksperiode(nySøknad).håndter(nySøknad)
+            nyVedtaksperiode(sykmelding).håndter(sykmelding)
         }
-        nySøknad.kopierAktiviteterTil(aktivitetslogger)
+        sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(sendtSøknad: SendtSøknad) {
@@ -108,14 +108,14 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    private fun nyVedtaksperiode(nySøknad: NySøknad): Vedtaksperiode {
+    private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
             id = UUID.randomUUID(),
-            aktørId = nySøknad.aktørId(),
-            fødselsnummer = nySøknad.fødselsnummer(),
-            organisasjonsnummer = nySøknad.organisasjonsnummer()
+            aktørId = sykmelding.aktørId(),
+            fødselsnummer = sykmelding.fødselsnummer(),
+            organisasjonsnummer = sykmelding.organisasjonsnummer()
         ).also {
             perioder.add(it)
         }

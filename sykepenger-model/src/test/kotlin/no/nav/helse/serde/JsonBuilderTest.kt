@@ -138,7 +138,7 @@ internal class JsonBuilderTest {
 
 
         private val nySøknad
-            get() = NySøknad(
+            get() = Sykmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,

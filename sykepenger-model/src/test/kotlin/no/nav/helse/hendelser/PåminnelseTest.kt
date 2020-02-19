@@ -37,7 +37,7 @@ internal class PåminnelseTest {
 
     @Test
     fun `info ved påminnelse for annen tilstand`() {
-        val tilstand = Vedtaksperiode.MottattNySøknad
+        val tilstand = Vedtaksperiode.MottattSykmelding
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))

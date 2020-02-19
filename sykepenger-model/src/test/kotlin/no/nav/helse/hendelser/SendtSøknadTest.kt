@@ -122,7 +122,7 @@ internal class SendtSøknadTest {
     private fun sendtSøknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
         sendtSøknad = SendtSøknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = NySøknadTest.UNG_PERSON_FNR_2018,
+            fnr = SykmeldingTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),

@@ -42,8 +42,8 @@ class HendelseProbe {
         tell("Inntektsmelding")
     }
 
-    fun onNySøknad(søknad: NySøknad) {
-        tell("NySøknad")
+    fun onSykmelding(sykmelding: Sykmelding) {
+        tell("Sykmelding")
     }
 
     fun onSendtSøknad(søknad: SendtSøknad) {

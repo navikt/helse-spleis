@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -130,7 +130,7 @@ internal class InntektsmeldingHendelseTest {
             aktivitetslogg = aktivitetslogg
         )
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = NySøknad(
+    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,

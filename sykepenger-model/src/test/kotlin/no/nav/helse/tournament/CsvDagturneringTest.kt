@@ -1,8 +1,8 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
@@ -97,7 +97,7 @@ internal class CsvDagturneringTest {
 
         val fraSykmelding
             get(): TestHendelseBuilder {
-                dagFactory = NySøknad.SykmeldingDagFactory
+                dagFactory = Sykmelding.SykmeldingDagFactory
                 return this
             }
 

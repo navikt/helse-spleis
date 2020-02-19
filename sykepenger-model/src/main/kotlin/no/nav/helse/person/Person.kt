@@ -20,7 +20,7 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(nySøknad: NySøknad) = håndter(nySøknad, "ny søknad")
+    fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
 
     fun håndter(sendtSøknad: SendtSøknad) = håndter(sendtSøknad, "sendt søknad")
 

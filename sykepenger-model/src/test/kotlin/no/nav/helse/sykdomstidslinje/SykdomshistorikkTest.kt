@@ -1,9 +1,9 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
@@ -30,15 +30,15 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    internal fun `NySøknad mottatt`() {
-        historikk.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+    internal fun `Sykmelding mottatt`() {
+        historikk.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         assertEquals(1, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `SendtSøknad mottatt`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
             sendtSøknad(
                 SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
@@ -56,7 +56,7 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Håndterer Ubestemt dag`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         sendtSøknad(
             SendtSøknad.Periode.Utdanning(9.januar, 12.januar),
             SendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
@@ -70,7 +70,7 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Inntektsmelding mottatt`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
             sendtSøknad(
                 SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
@@ -98,7 +98,7 @@ internal class SykdomshistorikkTest {
     internal fun `JSON`() {
         val sendtSøknadId = UUID.randomUUID()
         val nySøknadId = UUID.randomUUID()
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
         historikk.håndter(
             sendtSøknad(
                 SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
@@ -117,10 +117,10 @@ internal class SykdomshistorikkTest {
         assertEquals(inspektør.hendelser[1], nySøknadId)
     }
 
-    private fun nySøknad(
+    private fun sykmelding(
         vararg sykeperioder: Triple<LocalDate, LocalDate, Int>,
         hendelseId: UUID = UUID.randomUUID()
-    ) = NySøknad(
+    ) = Sykmelding(
         meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",

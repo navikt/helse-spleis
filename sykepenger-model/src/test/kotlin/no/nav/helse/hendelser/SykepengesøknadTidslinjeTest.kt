@@ -108,7 +108,7 @@ internal class SykepengesøknadTidslinjeTest {
             harAndreInntektskilder = false
         )
 
-    private fun nySøknad() = NySøknad(
+    private fun nySøknad() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = "aktørId",

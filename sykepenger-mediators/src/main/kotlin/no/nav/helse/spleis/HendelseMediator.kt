@@ -91,10 +91,10 @@ internal class HendelseMediator(
 
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
-            val modelNySøknad = message.asNySøknad()
+            val sykmelding = message.asSykmelding()
 
-            hendelseProbe.onNySøknad(modelNySøknad)
-            person(modelNySøknad).håndter(modelNySøknad)
+            hendelseProbe.onSykmelding(sykmelding)
+            person(sykmelding).håndter(sykmelding)
         }
 
         override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {

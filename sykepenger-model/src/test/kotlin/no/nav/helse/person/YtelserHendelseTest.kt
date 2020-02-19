@@ -167,7 +167,7 @@ internal class YtelserHendelseTest {
     )
 
     private fun nySøknad() =
-        NySøknad(
+        Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",

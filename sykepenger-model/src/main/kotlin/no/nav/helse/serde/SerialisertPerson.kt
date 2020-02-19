@@ -196,7 +196,7 @@ class SerialisertPerson(val json: String) {
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
         TilstandType.START -> Vedtaksperiode.StartTilstand
-        TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattNySøknad
+        TilstandType.MOTTATT_NY_SØKNAD -> Vedtaksperiode.MottattSykmelding
         TilstandType.AVVENTER_SENDT_SØKNAD -> Vedtaksperiode.AvventerSendtSøknad
         TilstandType.AVVENTER_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
         TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving

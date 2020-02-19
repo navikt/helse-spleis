@@ -108,7 +108,7 @@ internal class HendelseMediatorTest {
             return mockk<Person>(relaxed = true) {
 
                 every {
-                    håndter(any<NySøknad>())
+                    håndter(any<Sykmelding>())
                 } answers {
                     lestNySøknad.set(true)
                 }

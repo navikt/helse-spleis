@@ -91,10 +91,10 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
 
-    internal fun håndter(nySøknad: NySøknad) = overlapperMed(nySøknad).also {
+    internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
-        tilstand.håndter(this, nySøknad)
-        nySøknad.kopierAktiviteterTil(aktivitetslogger)
+        tilstand.håndter(this, sykmelding)
+        sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(sendtSøknad: SendtSøknad) =
@@ -272,9 +272,9 @@ internal class Vedtaksperiode private constructor(
 
         val timeout: Duration
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
-            nySøknad.errorOld("uventet NySøknad")
-            vedtaksperiode.tilstand(nySøknad, TilInfotrygd)
+        fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            sykmelding.errorOld("uventet Sykmelding")
+            vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
         fun håndter(
@@ -327,9 +327,9 @@ internal class Vedtaksperiode private constructor(
 
     internal object StartTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, nySøknad: NySøknad) {
-            vedtaksperiode.tilstand(nySøknad, MottattNySøknad) {
-                vedtaksperiode.sykdomshistorikk.håndter(nySøknad)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            vedtaksperiode.tilstand(sykmelding, MottattSykmelding) {
+                vedtaksperiode.sykdomshistorikk.håndter(sykmelding)
             }
             vedtaksperiode.aktivitetslogger.infoOld("Fullført behandling av ny søknad")
         }
@@ -338,7 +338,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
     }
 
-    internal object MottattNySøknad : Vedtaksperiodetilstand {
+    internal object MottattSykmelding : Vedtaksperiodetilstand {
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
