@@ -9,7 +9,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
-class RapidApplication private constructor(
+class RapidApplication internal constructor(
     private val ktor: ApplicationEngine,
     private val rapid: RapidsConnection
 ) : RapidsConnection(), RapidsConnection.MessageListener {
