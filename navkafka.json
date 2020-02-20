@@ -136,6 +136,14 @@
                 {
                     "member": "S149030",
                     "role": "MANAGER"
+                },
+                {
+                    "member": "E156407",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "N143409",
+                    "role": "MANAGER"
                 }
             ],
             "numPartitions": 1,
