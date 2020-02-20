@@ -225,6 +225,8 @@ internal class Vedtaksperiode private constructor(
             gjeldendeTilstand = currentState,
             forrigeTilstand = previousState,
             sykdomshendelse = tidslinjeEvent,
+            aktivitetslogger = tidslinjeEvent.aktivitetslogger,
+            aktivitetslogg = tidslinjeEvent.aktivitetslogg,
             timeout = varighet
         )
 

@@ -60,7 +60,7 @@ class Inntektsmelding(
     override fun valider(): Aktivitetslogger {
         if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder eller ferieperioder")
         if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke")
-        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt ($beregnetInntekt) matcher ikke refusjon pr måned (${refusjon.beløpPrMåned})")
+        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt matcher ikke refusjon pr måned")
         return aktivitetslogger
     }
 

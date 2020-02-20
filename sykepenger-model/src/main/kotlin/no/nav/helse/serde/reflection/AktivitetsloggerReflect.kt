@@ -5,6 +5,8 @@ import no.nav.helse.person.AktivitetsloggerVisitor
 import no.nav.helse.serde.AktivitetsloggerData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 
+fun Aktivitetslogger.toMap() = AktivitetsloggerReflect(this).toMap()
+
 internal class AktivitetsloggerReflect(aktivitetslogger: Aktivitetslogger) {
     private val originalMessage: String? = aktivitetslogger["originalMessage"]
     private val aktiviteter = Aktivitetsloggerinspektør(aktivitetslogger).aktiviteter

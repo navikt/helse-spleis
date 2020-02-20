@@ -47,7 +47,7 @@ class Utbetalingshistorikk(
 
         internal fun valider(aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
-                aktivitetslogger.errorOld("Orgnummer må være satt: $orgnummer")
+                aktivitetslogger.errorOld("Organisasjonsnummer for inntektsopplysning mangler")
             }
         }
 

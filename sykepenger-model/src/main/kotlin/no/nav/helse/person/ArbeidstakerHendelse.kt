@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.HendelseObserver
 
 abstract class ArbeidstakerHendelse protected constructor(
     internal val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    internal val aktivitetslogg: Aktivitetslogg
 ) : IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg {
     private val hendelseObservers = mutableListOf<HendelseObserver>()
 
