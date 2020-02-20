@@ -3,7 +3,7 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Arbeidsgiver.GjennoptaBehandling
+import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -239,7 +239,7 @@ internal class Vedtaksperiode private constructor(
     internal fun erFerdigBehandlet(other: Vedtaksperiode) =
         (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD)
 
-    internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjennoptaBehandling) {
+    internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         if (this.periode().start > other.periode().start) tilstand.håndter(arbeidsgiver, this, hendelse)
     }
 
@@ -292,9 +292,9 @@ internal class Vedtaksperiode private constructor(
         fun håndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            gjennoptaBehandling: GjennoptaBehandling
+            gjenopptaBehandling: GjenopptaBehandling
         ) {
-            gjennoptaBehandling.hendelse.infoOld("Tidligere periode ferdig behandlet")
+            gjenopptaBehandling.hendelse.infoOld("Tidligere periode ferdig behandlet")
         }
 
         fun leaving(aktivitetslogger: IAktivitetslogger) {}
@@ -364,11 +364,11 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            gjennoptaBehandling: GjennoptaBehandling
+            gjenopptaBehandling: GjenopptaBehandling
         ) {
             if (!arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
             vedtaksperiode.tilstand(
-                gjennoptaBehandling.hendelse,
+                gjenopptaBehandling.hendelse,
                 arbeidsgiver.tilstøtende(vedtaksperiode)
                     ?.also { vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag }
                     ?.let { AvventerHistorikk }
@@ -388,10 +388,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            gjennoptaBehandling: GjennoptaBehandling
+            gjenopptaBehandling: GjenopptaBehandling
         ) {
             if (!arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return
-            vedtaksperiode.tilstand(gjennoptaBehandling.hendelse, AvventerVilkårsprøving)
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerVilkårsprøving)
         }
     }
 
@@ -552,7 +552,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.infoOld("Forespør sykdoms- og inntektshistorikk")
-            println("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -593,7 +592,6 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
                     ytelser.infoOld("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
-                    println("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                     vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
                 }
             }
@@ -621,7 +619,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.need(BehovType.Godkjenning(vedtaksperiode.kontekst))
             hendelse.infoOld("Forespør godkjenning fra saksbehandler")
-            println("Forespør godkjenning fra saksbehandler")
         }
 
         override fun håndter(
@@ -639,7 +636,7 @@ internal class Vedtaksperiode private constructor(
                         )
                     }
                 }
-                arbeidsgiver.gjennoptaBehandling(vedtaksperiode, manuellSaksbehandling)
+                arbeidsgiver.gjenopptaBehandling(vedtaksperiode, manuellSaksbehandling)
             } else {
                 vedtaksperiode.aktivitetslogger.errorOld(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
@@ -684,11 +681,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
 
-        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode): String {
-            if (!vedtaksperiode.arbeidsgiver.harTilstøtendePeriode(vedtaksperiode))
-                vedtaksperiode.arbeidsgiver.utbetalingsreferanse++
-            return vedtaksperiode.arbeidsgiver.utbetalingsreferanse.toString()
-        }
+        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
+                ?: genererUtbetalingsreferanse(vedtaksperiode.id)
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {

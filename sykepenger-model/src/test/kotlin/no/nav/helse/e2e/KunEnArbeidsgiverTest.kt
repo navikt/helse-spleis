@@ -562,7 +562,7 @@ internal class KunEnArbeidsgiverTest {
         private val periodeIndekser = mutableMapOf<String, Int>()
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        internal var utbetalingsreferanse: Long = 0
+        internal lateinit var utbetalingsreferanse: String
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
             etterspurteBehov[vedtaksperiodeIndex]?.contains(key.name) ?: false
@@ -581,7 +581,7 @@ internal class KunEnArbeidsgiverTest {
         }
 
         override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-            utbetalingsreferanse = event.utbetalingsreferanse.toLong()
+            utbetalingsreferanse = event.utbetalingsreferanse
         }
 
         private fun periodeIndeks(vedtaksperiodeId: String): Int {

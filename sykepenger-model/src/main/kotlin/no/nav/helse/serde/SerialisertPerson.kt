@@ -99,7 +99,6 @@ class SerialisertPerson(val json: String) {
             inntekthistorikk = inntekthistorikk,
             tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
             perioder = vedtaksperioder,
-            utbetalingsreferanse = data.utbetalingsreferanse,
             aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
         )
 
@@ -278,7 +277,6 @@ internal data class PersonData(
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
         val utbetalingstidslinjer: List<UtbetalingstidslinjeData>,
-        val utbetalingsreferanse: Long,
         val aktivitetslogger: AktivitetsloggerData
     ) {
         data class InntektData(

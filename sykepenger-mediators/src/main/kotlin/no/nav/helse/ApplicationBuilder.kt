@@ -55,9 +55,6 @@ class ApplicationBuilder(env: Map<String, String>) {
 
         connector {
             port = env["HTTP_PORT"]?.toInt() ?: 8080
-
-            println("HTTP_PORT = $port")
-
         }
 
         module {

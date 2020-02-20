@@ -14,7 +14,6 @@ internal class Arbeidsgiver private constructor(
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
     private val perioder: MutableList<Vedtaksperiode>,
-    internal var utbetalingsreferanse: Long,
     private val aktivitetslogger: Aktivitetslogger
 ) {
 
@@ -27,7 +26,6 @@ internal class Arbeidsgiver private constructor(
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
         perioder = mutableListOf(),
-        utbetalingsreferanse = System.currentTimeMillis(),
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -121,17 +119,15 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun harTilstøtendePeriode(vedtaksperiode: Vedtaksperiode) = perioder.any { it.harTilstøtende(vedtaksperiode) }
-
     internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
 
-    internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling(hendelse)) }
+    internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        perioder.forEach { it.håndter(this, vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
-    internal class GjennoptaBehandling(val hendelse: ArbeidstakerHendelse)
+    internal class GjenopptaBehandling(val hendelse: ArbeidstakerHendelse)
 }
