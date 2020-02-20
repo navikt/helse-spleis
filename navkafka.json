@@ -102,6 +102,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspurv",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvhelserisk",
                     "role": "PRODUCER"
                 },
