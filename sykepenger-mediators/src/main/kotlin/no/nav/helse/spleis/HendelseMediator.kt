@@ -217,6 +217,7 @@ internal class HendelseMediator(
                 acc.withArray("@behov").add(behovType.navn)
                 acc.setAll(node)
             }
+                .put("@event_name", "behov")
                 .set<ObjectNode>("@opprettet", objectMapper.convertValue(LocalDateTime.now()))
                 .set<ObjectNode>("@id", objectMapper.convertValue(UUID.randomUUID()))
                 .toString()

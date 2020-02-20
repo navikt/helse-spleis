@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import io.prometheus.client.Counter
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
@@ -13,13 +12,7 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
-    private val behovCounter = Counter.build("behov_totals", "Antall behov opprettet")
-        .labelNames("behovType")
-        .register()
-
-    override fun onBehov(behov: BehovType) {
-        behovCounter.labels(behov.navn).inc()
-    }
+    override fun onBehov(behov: BehovType) {}
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
