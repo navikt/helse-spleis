@@ -9,6 +9,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.PersonRepository
@@ -162,6 +163,10 @@ internal class HendelseMediator(
         private val log = LoggerFactory.getLogger(this::class.java)
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
+
+        override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+            producer.send(påminnelse.producerRecord()).get()
+        }
 
         override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
             producer.send(event.producerRecord()).get()
