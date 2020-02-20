@@ -55,6 +55,12 @@ class Person private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    fun håndter(utbetaling: Utbetaling) {
+        registrer(utbetaling, "Behandler vilkårsgrunnlag")
+        finnArbeidsgiver(utbetaling)?.håndter(utbetaling)
+        utbetaling.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     fun håndter(påminnelse: Påminnelse) {
         påminnelse.infoOld("Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return

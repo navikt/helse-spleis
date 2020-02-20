@@ -135,6 +135,12 @@ internal class HendelseMediator(
             person(manuellSaksbehandling).håndter(manuellSaksbehandling)
         }
 
+        override fun process(message: UtbetalingMessage, aktivitetslogger: Aktivitetslogger) {
+            val utbetaling = message.asUtbetaling()
+            hendelseProbe.onUtbetaling(utbetaling)
+            person(utbetaling).håndter(utbetaling)
+        }
+
         override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
             val påminnelse = message.asPåminnelse()
             hendelseProbe.onPåminnelse(påminnelse)

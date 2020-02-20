@@ -127,6 +127,12 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    internal fun håndter(utbetaling: Utbetaling) {
+        if (id.toString() != utbetaling.vedtaksperiodeId) return
+        tilstand.håndter(this, utbetaling)
+        utbetaling.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
         if (!påminnelse.gjelderTilstand(tilstand.type)) return true
@@ -287,6 +293,10 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+            utbetaling.errorOld("uventet utbetaling")
         }
 
         fun håndter(
@@ -681,6 +691,18 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+            if(utbetaling.isOK()) {
+                vedtaksperiode.tilstand(utbetaling, Utbetalt) {
+                    vedtaksperiode.aktivitetslogger.infoOld("OK fra Oppdragssystemet")
+                }
+            } else {
+                vedtaksperiode.aktivitetslogger.severeOld(
+                    "Utbetaling er tilsynelatende ikke OK fra Oppdragssystemet"
+                )
+            }
+        }
+
         private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
             vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
                 ?: genererUtbetalingsreferanse(vedtaksperiode.id)
@@ -691,6 +713,17 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.warnOld("Sykdom for denne personen kan ikke behandles automatisk")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+    }
+
+    internal object Utbetalt : Vedtaksperiodetilstand {
+        override val type = UTBETALT
+        override val timeout: Duration = Duration.ZERO
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.infoOld("Sendt til Oppdragssystemet for utbetaling")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

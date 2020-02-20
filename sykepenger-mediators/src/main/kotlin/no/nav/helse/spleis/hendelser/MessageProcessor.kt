@@ -12,4 +12,5 @@ internal interface MessageProcessor {
     fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger)
     fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger)
     fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger)
+    fun process(message: UtbetalingMessage, aktivitetslogger: Aktivitetslogger)
 }

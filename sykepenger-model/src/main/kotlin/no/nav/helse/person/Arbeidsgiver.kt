@@ -91,6 +91,11 @@ internal class Arbeidsgiver private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    internal fun håndter(utbetaling: Utbetaling) {
+        perioder.forEach { it.håndter(utbetaling) }
+        utbetaling.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     internal fun håndter(påminnelse: Påminnelse) =
         perioder.any { it.håndter(påminnelse) }.also {
             påminnelse.kopierAktiviteterTil(aktivitetslogger)

@@ -30,6 +30,10 @@ class HendelseProbe {
         tell("Ytelser")
     }
 
+    fun onUtbetaling(utbetaling: Utbetaling) {
+        tell("Utbetaling")
+    }
+
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
         tell("Godkjenning")
     }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.hendelser.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogg
@@ -70,7 +71,7 @@ internal class YtelserMessage(
                 val dagsats = utbetaling["dagsats"].asInt()
                 when (typekode) {
                     "0" -> {
-                        Utbetaling(fom, tom, dagsats)
+                        Utbetalingshistorikk.Periode.Utbetaling(fom, tom, dagsats)
                     }
                     "1" -> {
                         ReduksjonMedlem(fom, tom, dagsats)
@@ -236,6 +237,46 @@ internal class ManuellSaksbehandlingMessage(
 
         override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): ManuellSaksbehandlingMessage {
             return ManuellSaksbehandlingMessage(message, problems, aktivitetslogg)
+        }
+    }
+}
+
+internal class UtbetalingMessage(
+    originalMessage: String,
+    private val aktivitetslogger: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
+) :
+    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    init {
+        requiredValues("@behov", Behovstype.Utbetaling)
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}")
+    }
+
+    override fun accept(processor: MessageProcessor) {
+        processor.process(this, aktivitetslogger)
+    }
+
+    internal fun asUtbetaling(): Utbetaling {
+        return Utbetaling(
+            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            aktørId = this["aktørId"].asText(),
+            fødselsnummer = this["fødselsnummer"].asText(),
+            orgnummer = this["organisasjonsnummer"].asText(),
+            utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
+            status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
+        )
+    }
+
+    object Factory : MessageFactory {
+
+        override fun createMessage(
+            message: String,
+            problems: Aktivitetslogger,
+            aktivitetslogg: Aktivitetslogg
+        ): VilkårsgrunnlagMessage {
+            return VilkårsgrunnlagMessage(message, problems, aktivitetslogg)
         }
     }
 }
