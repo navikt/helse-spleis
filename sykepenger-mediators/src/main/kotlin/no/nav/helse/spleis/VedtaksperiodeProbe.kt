@@ -17,11 +17,6 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
         .labelNames("behovType")
         .register()
 
-    private val vedtaksperiodePåminnetCounter =
-        Counter.build("vedtaksperiode_paminnet_totals", "Antall ganger en vedtaksperiode er blitt påminnet")
-            .labelNames("tilstand")
-            .register()
-
     override fun onBehov(behov: BehovType) {
         behovCounter.labels(behov.navn).inc()
     }
@@ -48,10 +43,6 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
             keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
         )
-
-        vedtaksperiodePåminnetCounter
-            .labels(påminnelse.tilstand().toString())
-            .inc()
     }
 
     private fun ArbeidstakerHendelse.hendelsetype() = this::class.simpleName ?: "UNKNOWN"
