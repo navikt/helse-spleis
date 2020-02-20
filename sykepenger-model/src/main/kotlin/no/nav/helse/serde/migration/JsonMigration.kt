@@ -35,7 +35,7 @@ internal abstract class JsonMigration(private val version: Int) {
             )
 
         internal fun gjeldendeVersjon(migrations: List<JsonMigration>) =
-            migrations.maxBy { it.version }?.version ?: InitialVersion
+            migrations.map { it.version }.max() ?: InitialVersion
     }
 
     init {
