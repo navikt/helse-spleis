@@ -28,6 +28,7 @@ private fun toJson(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) = ob
         "gjeldendeTilstand" to event.gjeldendeTilstand,
         "forrigeTilstand" to event.forrigeTilstand,
         "endringstidspunkt" to event.endringstidspunkt,
+        "på_grunn_av" to (event.sykdomshendelse::class.simpleName ?: "UKJENT"),
         "timeout" to event.timeout.toSeconds()
     )
 )

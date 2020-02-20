@@ -1,7 +1,6 @@
 package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
-import io.prometheus.client.Gauge
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
@@ -18,20 +17,6 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
         .labelNames("behovType")
         .register()
 
-    private val tilstandCounter = Counter.build(
-        "vedtaksperiode_tilstander_totals",
-        "Fordeling av tilstandene periodene er i, og hvilken tilstand de kom fra"
-    )
-        .labelNames("forrigeTilstand", "tilstand", "hendelse")
-        .register()
-
-    private val tilstandGauge = Gauge.build(
-        "gjeldende_vedtaksperiode_tilstander",
-        "Gjeldende tilstander"
-    )
-        .labelNames("tilstand")
-        .register()
-
     private val vedtaksperiodePåminnetCounter =
         Counter.build("vedtaksperiode_paminnet_totals", "Antall ganger en vedtaksperiode er blitt påminnet")
             .labelNames("tilstand")
@@ -44,15 +29,6 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-        tilstandGauge.labels(event.forrigeTilstand.name).dec()
-        tilstandGauge.labels(event.gjeldendeTilstand.name).inc()
-
-        tilstandCounter.labels(
-            event.forrigeTilstand.name,
-            event.gjeldendeTilstand.name,
-            event.sykdomshendelse.hendelsetype()
-        ).inc()
-
         log.info(
             "vedtaksperiode endret {}, {}, {}, {}",
             keyValue("vedtaksperiodeId", "${event.id}"),
