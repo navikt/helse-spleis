@@ -59,7 +59,7 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
-        val behovMediator = BehovMediator(producer, aktivitetslogg)
+        val behovMediator = BehovMediator(producer, aktivitetslogg, sikkerLogg)
         val messageProcessor = Processor(behovMediator)
         try {
             message.accept(hendelseRecorder)
@@ -196,7 +196,8 @@ internal class HendelseMediator(
 
     private class BehovMediator(
         private val producer: KafkaProducer<String, String>,
-        private val aktivitetslogg: Aktivitetslogg
+        private val aktivitetslogg: Aktivitetslogg,
+        private val sikkerLogg: Logger
     ) : HendelseObserver {
         private companion object {
             private val objectMapper = jacksonObjectMapper()
@@ -211,7 +212,10 @@ internal class HendelseMediator(
 
         fun finalize() {
             if (behov.isEmpty()) return
-            producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg)))
+            sikkerLogg.info("sender ${behov.size} needs: ${behov.map { it.navn }}")
+            producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg).also {
+                sikkerLogg.info("sender $it")
+            }))
         }
 
         private fun List<BehovType>.toJson(aktivitetslogg: Aktivitetslogg) =
@@ -234,5 +238,3 @@ internal class HendelseMediator(
 
     }
 }
-
-private val log = LoggerFactory.getLogger("HendelseMediator")
