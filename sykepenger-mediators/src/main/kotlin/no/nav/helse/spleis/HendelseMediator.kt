@@ -210,7 +210,6 @@ internal class HendelseMediator(
         }
 
         fun finalize() {
-            log.info("Skal sende ${behov.size} needs")
             if (behov.isEmpty()) return
             producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg)))
         }
