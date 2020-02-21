@@ -58,9 +58,9 @@ class Inntektsmelding(
         } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
 
     override fun valider(): Aktivitetslogger {
-        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding har overlapp i arbeidsgiverperioder eller ferieperioder")
-        if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke")
-        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt matcher ikke refusjon pr måned")
+        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
+        if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Beregnet inntekt oppgitt i inntektsmelding er ulik refusjonsbeløpet")
         return aktivitetslogger
     }
 
