@@ -250,6 +250,9 @@ internal class UtbetalingMessage(
     init {
         requiredValues("@behov", Behovstype.Utbetaling)
         requiredKey("@løsning.${Behovstype.Utbetaling.name}")
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}.status")
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}.melding")
+        requiredKey("utbetalingsreferanse")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -264,6 +267,7 @@ internal class UtbetalingMessage(
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
             status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
+            melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
@@ -275,8 +279,8 @@ internal class UtbetalingMessage(
             message: String,
             problems: Aktivitetslogger,
             aktivitetslogg: Aktivitetslogg
-        ): VilkårsgrunnlagMessage {
-            return VilkårsgrunnlagMessage(message, problems, aktivitetslogg)
+        ): UtbetalingMessage {
+            return UtbetalingMessage(message, problems, aktivitetslogg)
         }
     }
 }

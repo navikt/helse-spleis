@@ -697,9 +697,9 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.aktivitetslogger.infoOld("OK fra Oppdragssystemet")
                 }
             } else {
-                vedtaksperiode.aktivitetslogger.severeOld(
-                    "Utbetaling er tilsynelatende ikke OK fra Oppdragssystemet"
-                )
+                vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+                    vedtaksperiode.aktivitetslogger.warnOld("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
+                }
             }
         }
 
@@ -724,6 +724,17 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.infoOld("Sendt til Oppdragssystemet for utbetaling")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+    }
+
+    internal object UtbetalingFeilet : Vedtaksperiodetilstand {
+        override val type = UTBETALING_FEILET
+        override val timeout: Duration = Duration.ZERO
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.severeOld("Feilrespons fra oppdrag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

@@ -11,6 +11,7 @@ class Utbetaling(
     private val orgnummer: String,
     internal val utbetalingsreferanse: String,
     private val status: String,
+    internal val melding: String,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(
@@ -22,7 +23,7 @@ class Utbetaling(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Vilkårsgrunnlag")
+        aktivitetslogger.addAll(this.aktivitetslogger, "Utbetaling")
     }
 
     internal fun isOK() = status == "FERDIG"

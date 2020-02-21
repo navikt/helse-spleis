@@ -51,6 +51,7 @@ internal class HendelseMediator(
         parser.register(YtelserMessage.Factory)
         parser.register(VilkårsgrunnlagMessage.Factory)
         parser.register(ManuellSaksbehandlingMessage.Factory)
+        parser.register(UtbetalingMessage.Factory)
         parser.register(PåminnelseMessage.Factory)
     }
 

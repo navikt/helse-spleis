@@ -240,11 +240,25 @@ internal class EndToEndTest {
             previousState = TilstandType.AVVENTER_HISTORIKK,
             currentState = TilstandType.AVVENTER_GODKJENNING
         )
-        assertBehov(
+
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
+
+        assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            typer = listOf(Godkjenning.name)
+            previousState = TilstandType.AVVENTER_GODKJENNING,
+            currentState = TilstandType.TIL_UTBETALING
+        )
+
+        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, true)
+
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.TIL_UTBETALING,
+            currentState = TilstandType.UTBETALT
         )
 
         aktørID.hentPerson {
@@ -286,6 +300,29 @@ internal class EndToEndTest {
     }
 
     @Test
+    fun `FEIL fra Spenn fører til UTBETALING_FEILET tilstand`() {
+        val aktørID = "876591234219622312"
+        val fødselsnummer = "01019000000"
+        val virksomhetsnummer = "123456789"
+
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
+        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
+        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, false)
+
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.TIL_UTBETALING,
+            currentState = TilstandType.UTBETALING_FEILET
+        )
+    }
+
+    @Test
     fun `gitt en sykmelding, så skal den kunne hentes ut på personen`() {
         val enAktørId = "1211109876233"
         val fødselsnummer = "01019000123"
@@ -297,7 +334,13 @@ internal class EndToEndTest {
         sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
         sendSykepengehistorikkløsningUtenHistorikk(enAktørId, fødselsnummer)
 
-        assertVedtaksperiodeEndretEvent(fødselsnummer, virksomhetsnummer, enAktørId, TilstandType.AVVENTER_HISTORIKK, TilstandType.AVVENTER_GODKJENNING)
+        assertVedtaksperiodeEndretEvent(
+            fødselsnummer,
+            virksomhetsnummer,
+            enAktørId,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_GODKJENNING
+        )
 
         enAktørId.hentPerson {
             assertEquals(3, objectMapper.readTree(this)["hendelser"].size())
@@ -438,6 +481,25 @@ internal class EndToEndTest {
         val løstBehov = behov
             .apply { put("saksbehandlerIdent", saksbehandler) }
             .løsBehov(mapOf(Godkjenning.name to mapOf("godkjent" to utbetalingGodkjent)))
+        sendBehov(løstBehov)
+    }
+
+    private fun sendUtbetalingSvarFraSpenn(
+        aktørId: String,
+        fødselsnummer: String,
+        utbetalingOK: Boolean
+    ) {
+        val behov = ventPåBehov(aktørId, fødselsnummer, Utbetaling)
+
+        val løstBehov = behov
+            .løsBehov(
+                mapOf(
+                    Utbetaling.name to mapOf(
+                        "status" to (if (utbetalingOK) "FERDIG" else "FEIL"),
+                        "melding" to (if (utbetalingOK) "" else "FEIL FRA SPENN")
+                    )
+                )
+            )
         sendBehov(løstBehov)
     }
 

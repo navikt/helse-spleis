@@ -72,6 +72,9 @@ internal class HendelseMediatorTest {
 
         sendManuellSaksbehandling()
         ventTilTrue(lestManuellSaksbehandling)
+
+        sendUtbetaling()
+        ventTilTrue(lestUtbetaling)
     }
 
     private fun ventTilTrue(atomicBoolean: AtomicBoolean) {
@@ -87,6 +90,7 @@ internal class HendelseMediatorTest {
         lestYtelser.set(false)
         lestVilkårsgrunnlag.set(false)
         lestManuellSaksbehandling.set(false)
+        lestUtbetaling.set(false)
     }
 
     private companion object : PersonRepository {
@@ -101,6 +105,7 @@ internal class HendelseMediatorTest {
         private val lestYtelser = AtomicBoolean(false)
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
+        private val lestUtbetaling = AtomicBoolean(false)
 
         private val hendelseStream = KafkaRapid()
 
@@ -147,6 +152,12 @@ internal class HendelseMediatorTest {
                     håndter(any<ManuellSaksbehandling>())
                 } answers {
                     lestManuellSaksbehandling.set(true)
+                }
+
+                every {
+                    håndter(any<Utbetaling>())
+                } answers {
+                    lestUtbetaling.set(true)
                 }
             }
         }
@@ -301,6 +312,34 @@ internal class HendelseMediatorTest {
                         "EgenAnsatt" to egenAnsatt,
                         "Inntektsberegning" to emptyMap<String, String>(),
                         "Opptjening" to emptyList<Any>()
+                    )
+                )
+            )
+        }
+
+        private fun sendUtbetaling(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer,
+            utbetalingOK: Boolean = true
+        ) {
+            val behov = Behov.nyttBehov(
+                behov = listOf(Behovstype.Utbetaling),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = UUID.randomUUID(),
+                additionalParams = mapOf(
+                    "utbetalingsreferanse" to "123456789"
+                )
+            )
+            sendBehov(
+                behov.løsBehov(
+                    mapOf(
+                        "Utbetaling" to mapOf(
+                            "status" to if(utbetalingOK) "FERDIG" else "FEIL",
+                            "melding" to if(utbetalingOK) "" else "FEIL fra Spenn"
+                        )
                     )
                 )
             )
