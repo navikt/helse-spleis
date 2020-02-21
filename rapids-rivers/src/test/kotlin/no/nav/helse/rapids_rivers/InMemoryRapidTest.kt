@@ -1,5 +1,6 @@
 package no.nav.helse.rapids_rivers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.util.KtorExperimentalAPI
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,7 +16,13 @@ internal class InMemoryRapidTest {
         rapid.sendToListeners("sldjjfnqaolsdjcb")
         rapid.sendToListeners("""{"@behov":"hei"}""")
 
-        assertEquals(listOf("""{"@behov":"hei"} ut"""), rapid.outgoingMessages.map { it.value })
+        rapid.outgoingMessages.map { it.value }.also {
+            assertEquals(1, it.size)
+            jacksonObjectMapper().readTree(it.first()).also {
+                assertEquals("hei", it["@behov"].asText())
+                assertEquals("ut", it["ut"].asText())
+            }
+        }
     }
 
     internal class InMemoryRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
@@ -26,7 +33,8 @@ internal class InMemoryRapidTest {
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            context.send("${packet.toJson()} ut")
+            packet.set("ut", "ut")
+            context.send(packet.toJson())
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {}
