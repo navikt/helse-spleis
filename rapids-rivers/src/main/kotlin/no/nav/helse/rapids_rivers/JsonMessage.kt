@@ -24,6 +24,7 @@ open class JsonMessage(
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
         private const val nestedKeySeparator = '.'
+        private const val ReadCountKey = "system_read_count"
     }
 
     private val json: JsonNode
@@ -36,6 +37,8 @@ open class JsonMessage(
         } catch (err: JsonParseException) {
             problems.severe("Invalid JSON per Jackson library: ${err.message}")
         }
+
+        set(ReadCountKey, json.path(ReadCountKey).asInt(-1) + 1)
     }
 
     fun requireKey(vararg keys: String) {
