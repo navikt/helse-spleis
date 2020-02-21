@@ -33,11 +33,12 @@ internal class RapidIntegrationTest {
         private val consumerId = "test-app"
 
         private val testTopic = "a-test-topic"
+        private val anotherTestTopic = "a-test-topic"
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
                 autoStart = false,
                 noOfBrokers = 1,
-                topicInfos = listOf(KafkaEnvironment.TopicInfo(testTopic, partitions = 1)),
+                topicInfos = listOf(testTopic, anotherTestTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) },
                 withSchemaRegistry = false,
                 withSecurity = false
         )
@@ -96,7 +97,7 @@ internal class RapidIntegrationTest {
 
     @BeforeEach
     internal fun start() {
-        rapid = KafkaRapid(config.consumerConfig(), config.producerConfig(), testTopic)
+        rapid = KafkaRapid(config.consumerConfig(), config.producerConfig(), testTopic, listOf(anotherTestTopic))
 
         GlobalScope.launch {
             try {
@@ -151,6 +152,21 @@ internal class RapidIntegrationTest {
         val eventName = "heartbeat"
         val value = "{ \"@event\": \"$eventName\" }"
 
+        testRiver(eventName, serviceId)
+        waitForReply(testTopic, serviceId, eventName, value)
+    }
+
+    @Test
+    fun `read from others topisc and produce to rapid topic`() {
+        val serviceId = "my-service"
+        val eventName = "heartbeat"
+        val value = "{ \"@event\": \"$eventName\" }"
+
+        testRiver(eventName, serviceId)
+        waitForReply(anotherTestTopic, serviceId, eventName, value)
+    }
+
+    private fun testRiver(eventName: String, serviceId: String) {
         River(rapid).apply {
             validate { it.requireValue("@event", eventName) }
             validate { it.forbid("service_id") }
@@ -163,23 +179,25 @@ internal class RapidIntegrationTest {
                 override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {}
             })
         }
+    }
 
+    private fun waitForReply(topic: String, serviceId: String, eventName: String, event: String) {
         val sentMessages = mutableListOf<String>()
         await("wait until we get a reply")
-                .atMost(10, SECONDS)
-                .until {
-                    val key = UUID.randomUUID().toString()
-                    kafkaProducer.send(ProducerRecord(testTopic, key, value))
-                    sentMessages.add(key)
+            .atMost(10, SECONDS)
+            .until {
+                val key = UUID.randomUUID().toString()
+                kafkaProducer.send(ProducerRecord(topic, key, event))
+                sentMessages.add(key)
 
-                    kafkaConsumer.poll(Duration.ZERO).forEach {
-                        if (!sentMessages.contains(it.key())) return@forEach
-                        val json = objectMapper.readTree(it.value())
-                        if (eventName != json.path("@event").asText()) return@forEach
-                        if (serviceId != json.path("service_id").asText()) return@forEach
-                        return@until true
-                    }
-                    return@until false
+                kafkaConsumer.poll(Duration.ZERO).forEach {
+                    if (!sentMessages.contains(it.key())) return@forEach
+                    val json = objectMapper.readTree(it.value())
+                    if (eventName != json.path("@event").asText()) return@forEach
+                    if (serviceId != json.path("service_id").asText()) return@forEach
+                    return@until true
                 }
+                return@until false
+            }
     }
 }

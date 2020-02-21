@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class KafkaRapid(
     consumerConfig: Properties,
     producerConfig: Properties,
-    private val topic: String
+    private val rapidTopic: String,
+    extraTopics: List<String> = emptyList()
 ) : RapidsConnection() {
 
     private val log = LoggerFactory.getLogger(KafkaRapid::class.java)
@@ -27,14 +28,16 @@ class KafkaRapid(
     private val consumer = KafkaConsumer(consumerConfig, stringDeserializer, stringDeserializer)
     private val producer = KafkaProducer(producerConfig, stringSerializer, stringSerializer)
 
+    private val topics = listOf(rapidTopic) + extraTopics
+
     fun isRunning() = running.get()
 
     override fun publish(message: String) {
-        producer.send(ProducerRecord(topic, message))
+        producer.send(ProducerRecord(rapidTopic, message))
     }
 
     override fun publish(key: String, message: String) {
-        producer.send(ProducerRecord(topic, key, message))
+        producer.send(ProducerRecord(rapidTopic, key, message))
     }
 
     override fun start() {
@@ -56,7 +59,7 @@ class KafkaRapid(
 
     private fun consumeMessages() {
         try {
-            consumer.subscribe(listOf(topic))
+            consumer.subscribe(topics)
             while (running.get()) {
                 consumer.poll(Duration.ofSeconds(1))
                     .forEach(::onRecord)
@@ -100,7 +103,7 @@ class KafkaRapid(
         fun create(kafkaConfig: KafkaConfigBuilder, topic: String) = KafkaRapid(
             consumerConfig = kafkaConfig.consumerConfig(),
             producerConfig = kafkaConfig.producerConfig(),
-            topic = topic
+            rapidTopic = topic
         )
     }
 }
