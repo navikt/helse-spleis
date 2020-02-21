@@ -19,6 +19,7 @@ internal class PåminnelseMessage(
     JsonMessage(originalMessage, problems, aktivitetslogg) {
 
     init {
+        requiredValue("@event_name", "påminnelse")
         requiredKey(
             "antallGangerPåminnet",
             "tilstandsendringstidspunkt", "påminnelsestidspunkt",
