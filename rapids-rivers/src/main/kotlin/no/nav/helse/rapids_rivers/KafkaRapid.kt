@@ -100,10 +100,11 @@ class KafkaRapid(
         private const val Stopped = false
         private const val Started = true
 
-        fun create(kafkaConfig: KafkaConfigBuilder, topic: String) = KafkaRapid(
+        fun create(kafkaConfig: KafkaConfig, topic: String, extraTopics: List<String> = emptyList()) = KafkaRapid(
             consumerConfig = kafkaConfig.consumerConfig(),
             producerConfig = kafkaConfig.producerConfig(),
-            rapidTopic = topic
+            rapidTopic = topic,
+            extraTopics = extraTopics
         )
     }
 }

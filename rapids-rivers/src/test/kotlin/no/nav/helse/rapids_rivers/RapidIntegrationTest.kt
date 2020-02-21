@@ -46,7 +46,7 @@ internal class RapidIntegrationTest {
         private lateinit var kafkaProducer: Producer<String, String>
         private lateinit var kafkaConsumer: Consumer<String, String>
 
-        private lateinit var config: KafkaConfigBuilder
+        private lateinit var config: KafkaConfig
         private lateinit var rapid: KafkaRapid
 
         private fun producerProperties() =
@@ -79,7 +79,7 @@ internal class RapidIntegrationTest {
             kafkaConsumer = KafkaConsumer(consumerProperties(), StringDeserializer(), StringDeserializer())
             kafkaConsumer.subscribe(listOf(testTopic))
 
-            config = KafkaConfigBuilder(
+            config = KafkaConfig(
                     bootstrapServers = embeddedKafkaEnvironment.brokersURL,
                     consumerGroupId = consumerId
             )
