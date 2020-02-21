@@ -15,14 +15,20 @@ class MessageProblems(private val originalMessage: String) {
 
     fun hasErrors() = severe.isNotEmpty() || errors.isNotEmpty()
 
-    override fun toString(): String {
-        if (!hasErrors()) return "No errors\n"
+    fun toExtendedReport(): String {
+        if (!hasErrors()) return "No errors in message\n"
         val results = StringBuffer()
-        results.append("Problems exist. Original message: $originalMessage\n\t")
+        results.append("Message has errors:\n\t")
         append("Severe errors", severe, results)
         append("Errors", errors, results)
         results.append("\n")
+        results.append("Original message: $originalMessage\n")
         return results.toString()
+    }
+
+    override fun toString(): String {
+        return (severe.map { "S: $it" } + errors.map { "E: $it" })
+            .joinToString(separator = "\n")
     }
 
     private fun append(label: String, messages: List<String>, results: StringBuffer) {

@@ -18,11 +18,19 @@ internal class MessageProblemsTest {
     }
 
     @Test
-    internal fun `contains original message`() {
+    internal fun `does not contain original message`() {
         assertFalse(problems.toString().contains(Message))
         val message = "a message"
         problems.error(message)
-        assertTrue(problems.toString().contains(Message))
+        assertFalse(problems.toString().contains(Message))
+    }
+
+    @Test
+    internal fun `contains original message in extended report`() {
+        assertFalse(problems.toExtendedReport().contains(Message))
+        val message = "a message"
+        problems.error(message)
+        assertTrue(problems.toExtendedReport().contains(Message))
     }
 
     @Test
