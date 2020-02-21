@@ -58,11 +58,11 @@ class Utbetalingshistorikk(
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
         open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
-            aktivitetslogger.severeOld("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
+            aktivitetslogger.severeOld("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
         }
 
         open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.errorOld("Perioden er ikke støttet")
+            aktivitetslogger.errorOld("Perioden %s er ikke støttet", this::class.simpleName)
         }
 
         class RefusjonTilArbeidsgiver(

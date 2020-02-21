@@ -15,23 +15,23 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
         visitor.postVisitAktivitetslogger(this)
     }
 
-    override fun infoOld(melding: String, vararg params: Any) {
+    override fun infoOld(melding: String, vararg params: Any?) {
         aktiviteter.add(Aktivitet.Info(String.format(melding, *params)))
     }
 
-    override fun warnOld(melding: String, vararg params: Any) {
+    override fun warnOld(melding: String, vararg params: Any?) {
         aktiviteter.add(Aktivitet.Warn(String.format(melding, *params)))
     }
 
-    override fun needOld(type: Aktivitet.Need.NeedType, melding: String, vararg params: Any) {
+    override fun needOld(type: Aktivitet.Need.NeedType, melding: String, vararg params: Any?) {
         aktiviteter.add(Aktivitet.Need(type, String.format(melding, *params)))
     }
 
-    override fun errorOld(melding: String, vararg params: Any) {
+    override fun errorOld(melding: String, vararg params: Any?) {
         aktiviteter.add(Aktivitet.Error(String.format(melding, *params)))
     }
 
-    override fun severeOld(melding: String, vararg params: Any): Nothing {
+    override fun severeOld(melding: String, vararg params: Any?): Nothing {
         aktiviteter.add(Aktivitet.Severe(String.format(melding, *params)))
         throw AktivitetException(this)
     }
@@ -215,11 +215,11 @@ class Aktivitetslogger(private val originalMessage: String? = null) : IAktivitet
 
 @Deprecated("Being replaced with IAktivitetslogg")
 interface IAktivitetslogger {
-    fun infoOld(melding: String, vararg params: Any)
-    fun warnOld(melding: String, vararg params: Any)
-    fun needOld(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, vararg params: Any)
-    fun errorOld(melding: String, vararg params: Any)
-    fun severeOld(melding: String, vararg params: Any): Nothing
+    fun infoOld(melding: String, vararg params: Any?)
+    fun warnOld(melding: String, vararg params: Any?)
+    fun needOld(type: Aktivitetslogger.Aktivitet.Need.NeedType, melding: String, vararg params: Any?)
+    fun errorOld(melding: String, vararg params: Any?)
+    fun severeOld(melding: String, vararg params: Any?): Nothing
 
     fun hasMessagesOld(): Boolean
     fun hasWarningsOld(): Boolean

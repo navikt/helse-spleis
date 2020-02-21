@@ -17,23 +17,23 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         visitor.postVisitAktivitetslogg(this)
     }
 
-    override fun info(melding: String, vararg params: Any) {
+    override fun info(melding: String, vararg params: Any?) {
         add(Aktivitet.Info(kontekster.toList(), String.format(melding, *params)))
     }
 
-    override fun warn(melding: String, vararg params: Any) {
+    override fun warn(melding: String, vararg params: Any?) {
         add(Aktivitet.Warn(kontekster.toList(), String.format(melding, *params)))
     }
 
-    override fun need(melding: String, vararg params: Any) {
+    override fun need(melding: String, vararg params: Any?) {
         add(Aktivitet.Need(kontekster.toList(), String.format(melding, *params)))
     }
 
-    override fun error(melding: String, vararg params: Any) {
+    override fun error(melding: String, vararg params: Any?) {
         add(Aktivitet.Error(kontekster.toList(), String.format(melding, *params)))
     }
 
-    override fun severe(melding: String, vararg params: Any): Nothing {
+    override fun severe(melding: String, vararg params: Any?): Nothing {
         add(Aktivitet.Severe(kontekster.toList(), String.format(melding, *params)))
         throw AktivitetException(this)
     }
@@ -216,11 +216,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 }
 
 internal interface IAktivitetslogg {
-    fun info(melding: String, vararg params: Any)
-    fun warn(melding: String, vararg params: Any)
-    fun need(melding: String, vararg params: Any)
-    fun error(melding: String, vararg params: Any)
-    fun severe(melding: String, vararg params: Any): Nothing
+    fun info(melding: String, vararg params: Any?)
+    fun warn(melding: String, vararg params: Any?)
+    fun need(melding: String, vararg params: Any?)
+    fun error(melding: String, vararg params: Any?)
+    fun severe(melding: String, vararg params: Any?): Nothing
 
     fun hasMessages(): Boolean
     fun hasWarnings(): Boolean
