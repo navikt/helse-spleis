@@ -74,8 +74,7 @@ internal class SøknadTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(aktivitetslogger.hasNeedsOld())
-        assertFalse(aktivitetslogger.hasErrorsOld(), aktivitetslogger.toString())
-        println(aktivitetslogger)
+        assertTrue(aktivitetslogger.hasErrorsOld(), aktivitetslogger.toString())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
