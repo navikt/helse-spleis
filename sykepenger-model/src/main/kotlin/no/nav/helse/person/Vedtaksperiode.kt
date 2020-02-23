@@ -256,7 +256,7 @@ internal class Vedtaksperiode private constructor(
         val timeout: Duration
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.errorOld("uventet Sykmelding")
+            sykmelding.errorOld("Forventet ikke sykmelding i %s", type.name)
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
@@ -266,20 +266,20 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             søknad: Søknad
         ) {
-            søknad.errorOld("uventet Søknad")
+            søknad.errorOld("Forventet ikke søknad i %s", type.name)
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.warnOld("uventet Inntektsmelding")
+            inntektsmelding.warnOld("Forventet ikke inntektsmelding i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vilkårsgrunnlag.errorOld("uventet vilkårsgrunnlag")
+            vilkårsgrunnlag.errorOld("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
-            ytelser.errorOld("uventet sykdom- og inntektshistorikk")
+            ytelser.errorOld("Forventet ikke ytelsehistorikk i %s", type.name)
         }
 
         fun håndter(
@@ -288,7 +288,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            manuellSaksbehandling.errorOld("uventet manuell saksbehandling")
+            manuellSaksbehandling.errorOld("Forventet ikke svar på manuell behandling i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -296,7 +296,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
-            utbetaling.errorOld("uventet utbetaling")
+            utbetaling.errorOld("Forventet ikke utbetaling i %s", type.name)
         }
 
         fun håndter(

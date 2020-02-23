@@ -58,7 +58,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         if (perioder.none { it.håndter(søknad) }) {
-            søknad.errorOld("Uventet søknad, mangler sykmelding")
+            søknad.errorOld("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
         søknad.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -70,7 +70,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            inntektsmelding.errorOld("Uventet inntektsmelding, mangler sykmelding")
+            inntektsmelding.errorOld("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }

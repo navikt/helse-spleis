@@ -29,7 +29,7 @@ class Sykmelding(
     }
 
     override fun valider(): Aktivitetslogger {
-        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Støtter bare 100%% sykmeldt")
+        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Sykmeldingen inneholder graderte sykeperioder")
         return aktivitetslogger
     }
 

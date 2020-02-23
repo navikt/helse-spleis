@@ -62,7 +62,7 @@ class Utbetalingshistorikk(
         }
 
         open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.errorOld("Perioden %s er ikke støttet", this::class.simpleName)
+            aktivitetslogger.errorOld("Utbetalingsperioden %s (fra Infotrygd) er ikke støttet", this::class.simpleName)
         }
 
         class RefusjonTilArbeidsgiver(
