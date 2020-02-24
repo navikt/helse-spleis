@@ -60,6 +60,7 @@ interface PersonObserver {
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
+
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
 
     fun personEndret(personEndretEvent: PersonEndretEvent) {}

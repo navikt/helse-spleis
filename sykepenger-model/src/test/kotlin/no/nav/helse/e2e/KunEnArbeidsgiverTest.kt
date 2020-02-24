@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.Dag
@@ -143,6 +144,9 @@ internal class KunEnArbeidsgiverTest {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
+        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
+        observatør.utbetalingsreferanseFraUtbetalingEvent = ""
+
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
@@ -150,6 +154,10 @@ internal class KunEnArbeidsgiverTest {
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
+        val andreUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
+
+        assertNotEquals(førsteUtbetalingsreferanse, andreUtbetalingsreferanse)
+
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -218,12 +226,24 @@ internal class KunEnArbeidsgiverTest {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         forventetEndringTeller++
+
+        val utbetalingsreferanseISpeilOppslagFørstePeriode = serializePersonForSpeil(person)
+            .first["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingsreferanse"].asText()
+
         håndterManuellSaksbehandling(0, true)
-        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
+        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
+        observatør.utbetalingsreferanseFraUtbetalingEvent = ""
+        assertEquals(utbetalingsreferanseISpeilOppslagFørstePeriode, førsteUtbetalingsreferanse)
         assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterYtelser(1)   // No history
+
+        val utbetalingsreferanseISpeilOppslagAndrePeriode = serializePersonForSpeil(person)
+            .first["arbeidsgivere"][0]["vedtaksperioder"][1]["utbetalingsreferanse"].asText()
+        assertEquals(førsteUtbetalingsreferanse, utbetalingsreferanseISpeilOppslagAndrePeriode)
+
         håndterManuellSaksbehandling(1, true)
-        assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanse)
+        println(serializePersonForSpeil(person))
+        assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanseFraUtbetalingEvent)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -315,13 +335,13 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanse
+        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
-        assertNotEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanse)
+        assertNotEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanseFraUtbetalingEvent)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -561,7 +581,7 @@ internal class KunEnArbeidsgiverTest {
         private val periodeIndekser = mutableMapOf<String, Int>()
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        internal lateinit var utbetalingsreferanse: String
+        internal lateinit var utbetalingsreferanseFraUtbetalingEvent: String
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
             etterspurteBehov[vedtaksperiodeIndex]?.contains(key.name) ?: false
@@ -580,7 +600,7 @@ internal class KunEnArbeidsgiverTest {
         }
 
         override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-            utbetalingsreferanse = event.utbetalingsreferanse
+            utbetalingsreferanseFraUtbetalingEvent = event.utbetalingsreferanse
         }
 
         private fun periodeIndeks(vedtaksperiodeId: String): Int {

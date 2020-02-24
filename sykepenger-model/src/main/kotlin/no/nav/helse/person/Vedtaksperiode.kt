@@ -629,6 +629,9 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
+            vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
+
             hendelse.need(BehovType.Godkjenning(vedtaksperiode.kontekst))
             hendelse.infoOld("Forespør godkjenning fra saksbehandler")
         }
@@ -657,6 +660,11 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
+
+        // TODO: Gjør private når TilUtbetaling ikke lenger trenger den
+        internal fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
+                ?: genererUtbetalingsreferanse(vedtaksperiode.id)
     }
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
@@ -666,8 +674,12 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
-            vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
+            if (vedtaksperiode.utbetalingsreferanse == null) {
+                // TODO: Kun for overgangsperiode nå som utbetalingsreferansegenerering er flyttet til AvventerGodkjenning
+                // Fjern dette når det ikke lenger finnes noen i AvventerGodkjenning-state uten utbetref
+               vedtaksperiode.utbetalingsreferanse = AvventerGodkjenning.lagUtbetalingsReferanse(vedtaksperiode)
+            }
+            val utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse)
 
             hendelse.need(
                 BehovType.Utbetaling(
@@ -704,10 +716,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-
-        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
-                ?: genererUtbetalingsreferanse(vedtaksperiode.id)
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {

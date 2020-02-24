@@ -56,7 +56,7 @@ class Person private constructor(
     }
 
     fun håndter(utbetaling: Utbetaling) {
-        registrer(utbetaling, "Behandler vilkårsgrunnlag")
+        registrer(utbetaling, "Behandler utbetaling")
         finnArbeidsgiver(utbetaling)?.håndter(utbetaling)
         utbetaling.kopierAktiviteterTil(aktivitetslogger)
     }
