@@ -406,7 +406,7 @@ internal class PersonTest {
             tilstandsendringer[event.id] = event
         }
 
-        override fun onBehov(behov: BehovType) {
+        override fun onBehov(kontekstId: UUID, behov: BehovType) {
             behovsliste.add(behov)
         }
     }

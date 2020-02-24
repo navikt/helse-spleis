@@ -600,25 +600,6 @@ internal class EndToEndTest {
             }
     }
 
-    private fun assertBehov(fødselsnummer: String, virksomhetsnummer: String, aktørId: String, typer: List<String>) {
-        await()
-            .atMost(timeoutSecondsPerStep, SECONDS)
-            .untilAsserted {
-                val meldingerPåTopic =
-                    TestConsumer.records(rapidTopic)
-                val behov = meldingerPåTopic
-                    .map { objectMapper.readTree(it.value()) }
-                    .filter { it.hasNonNull("@behov") }
-                    .filter { aktørId == it["aktørId"].asText() }
-                    .filter { fødselsnummer == it["fødselsnummer"].asText() }
-                    .filter { virksomhetsnummer == it["organisasjonsnummer"].asText() }
-                    .filter { it["@behov"].map(JsonNode::asText).containsAll(typer) }
-                    .distinct()
-
-                assertNotNull(behov, "Fant ingen behov med type $typer")
-            }
-    }
-
     private fun sendKafkaMessage(topic: String, key: String, message: String) =
         kafkaProducer.send(ProducerRecord(topic, key, message))
 

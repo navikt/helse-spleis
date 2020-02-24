@@ -597,7 +597,7 @@ internal class KunEnArbeidsgiverTest {
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }
 
-        override fun onBehov(behov: BehovType) {
+        override fun onBehov(kontekstId: UUID, behov: BehovType) {
             val indeks = periodeIndeks(behov.toMap()["vedtaksperiodeId"].toString())
             etterspurteBehov.computeIfAbsent(indeks) { mutableListOf() }.add(behov.navn)
         }

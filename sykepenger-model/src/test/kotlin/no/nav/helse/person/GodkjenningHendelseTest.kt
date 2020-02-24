@@ -234,7 +234,7 @@ internal class GodkjenningHendelseTest {
         }
 
 
-        override fun onBehov(behov: BehovType) {
+        override fun onBehov(kontekstId: UUID, behov: BehovType) {
             etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }.add(behov)
         }
     }

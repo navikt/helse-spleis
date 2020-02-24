@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
+import java.util.*
 
 abstract class ArbeidstakerHendelse protected constructor(
     internal val aktivitetslogger: Aktivitetslogger,
@@ -28,8 +29,8 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     internal open fun melding(klassName: String) = klassName
 
-    internal fun need(behov: BehovType) {
+    internal fun need(kontekstId: UUID, behov: BehovType) {
         aktivitetslogg.need(melding = behov.navn)
-        hendelseObservers.forEach { it.onBehov(behov) }
+        hendelseObservers.forEach { it.onBehov(kontekstId, behov) }
     }
 }

@@ -199,24 +199,26 @@ internal class Vedtaksperiode private constructor(
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
             return SpesifikkKontekst("Vedtaksperiode", "Vedtaksperiode: ${vedtaksperiodeId}")
         }
+
+        override val kontekstId = UUID.randomUUID()
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        hendelse.need(
+        hendelse.need(kontekst.kontekstId,
             BehovType.Sykepengehistorikk(
                 kontekst,
                 sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
             )
         )
-        hendelse.need(BehovType.Foreldrepenger(kontekst))
+        hendelse.need(kontekst.kontekstId, BehovType.Foreldrepenger(kontekst))
     }
 
     internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
         val beregningSlutt = YearMonth.from(førsteFraværsdag)
         val beregningStart = beregningSlutt.minusMonths(11)
-        hendelse.need(BehovType.Inntektsberegning(kontekst, beregningStart, beregningSlutt))
-        hendelse.need(BehovType.EgenAnsatt(kontekst))
-        hendelse.need(BehovType.Opptjening(kontekst))
+        hendelse.need(kontekst.kontekstId, BehovType.Inntektsberegning(kontekst, beregningStart, beregningSlutt))
+        hendelse.need(kontekst.kontekstId, BehovType.EgenAnsatt(kontekst))
+        hendelse.need(kontekst.kontekstId, BehovType.Opptjening(kontekst))
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -632,7 +634,7 @@ internal class Vedtaksperiode private constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            hendelse.need(BehovType.Godkjenning(vedtaksperiode.kontekst))
+            hendelse.need(vedtaksperiode.kontekst.kontekstId, BehovType.Godkjenning(vedtaksperiode.kontekst))
             hendelse.infoOld("Forespør godkjenning fra saksbehandler")
         }
 
@@ -681,7 +683,7 @@ internal class Vedtaksperiode private constructor(
             }
             val utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse)
 
-            hendelse.need(
+            hendelse.need(vedtaksperiode.kontekst.kontekstId,
                 BehovType.Utbetaling(
                     context = vedtaksperiode.kontekst,
                     utbetalingsreferanse = utbetalingsreferanse,

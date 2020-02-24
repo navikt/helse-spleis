@@ -12,7 +12,7 @@ sealed class BehovType(private val context: Personkontekst) {
     protected open fun toMapInternal() = emptyMap<String, Any>()
     fun toMap() = toMapInternal() + context.toMap()
 
-    class GjennomgåTidslinje internal constructor(context: Personkontekst) : BehovType(context)
+    class GjennomgåTidslinje constructor(context: Personkontekst) : BehovType(context)
 
     class Sykepengehistorikk internal constructor(
         context: Vedtaksperiodekontekst,
@@ -38,7 +38,7 @@ sealed class BehovType(private val context: Personkontekst) {
 
     class EgenAnsatt internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
     class Opptjening internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
-    class Godkjenning internal constructor(context: Vedtaksperiodekontekst) : BehovType(context)
+    class Godkjenning constructor(context: Vedtaksperiodekontekst) : BehovType(context)
 
     class Utbetaling internal constructor(
         context: Vedtaksperiodekontekst,

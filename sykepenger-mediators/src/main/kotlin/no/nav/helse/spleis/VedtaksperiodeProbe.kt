@@ -7,12 +7,13 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
+import java.util.*
 
 object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
-    override fun onBehov(behov: BehovType) {}
+    override fun onBehov(kontekstId: UUID, behov: BehovType) {}
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
@@ -39,4 +40,5 @@ object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
     }
 
     private fun ArbeidstakerHendelse.hendelsetype() = this::class.simpleName ?: "UNKNOWN"
+
 }

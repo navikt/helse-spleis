@@ -15,6 +15,7 @@ internal class BehovTypeTest {
         override val organisasjonsnummer = "orgnummer"
         override val aktørId = "aktørId"
         override val fødselsnummer = "fnr"
+        override val kontekstId = UUID.randomUUID()
 
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
             return SpesifikkKontekst("Vedtaksperiode", "Vedtaksperiode: ${vedtaksperiodeId}")

@@ -291,9 +291,10 @@ class SpesifikkKontekst(private val konteskstType: String, private val melding: 
     override fun hashCode() = konteskstType.hashCode()
 }
 
-internal interface Personkontekst : Aktivitetskontekst {
+interface Personkontekst : Aktivitetskontekst {
     val aktørId: String
     val fødselsnummer: String
+    val kontekstId: UUID
 
     fun toMap() = mapOf<String, Any>(
         "aktørId" to aktørId,
@@ -301,13 +302,13 @@ internal interface Personkontekst : Aktivitetskontekst {
     )
 }
 
-internal interface Arbeidsgiverkontekst : Personkontekst {
+interface Arbeidsgiverkontekst : Personkontekst {
     val organisasjonsnummer: String
 
     override fun toMap() = super.toMap() + ("organisasjonsnummer" to organisasjonsnummer)
 }
 
-internal interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
+interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
     val vedtaksperiodeId: UUID
 
     override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)

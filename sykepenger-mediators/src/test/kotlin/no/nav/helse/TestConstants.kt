@@ -135,20 +135,8 @@ internal fun Behov.løsBehov(løsning: Any): String {
     return pakke.toString()
 }
 
-internal data class SpolePeriode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val grad: String
-)
-
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 internal fun Inntektsmeldingkontrakt.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
-
-internal val Int.juni
-    get() = LocalDate.of(2019, Month.JUNE, this)
-
-internal val Int.juli
-    get() = LocalDate.of(2019, Month.JULY, this)
 
 internal val Int.august
     get() = LocalDate.of(2019, Month.AUGUST, this)

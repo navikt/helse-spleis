@@ -210,7 +210,7 @@ internal class UtbetalingsreferanseTest {
     private class UtbetalingObserver : HendelseObserver {
         internal val referanser = mutableMapOf<UUID, String>()
 
-        override fun onBehov(behov: BehovType) {
+        override fun onBehov(kontekstId: UUID, behov: BehovType) {
             (behov.toMap()["utbetalingsreferanse"] as? String)?.also {
                 referanser[behov.toMap().getValue("vedtaksperiodeId") as UUID] = it
             }

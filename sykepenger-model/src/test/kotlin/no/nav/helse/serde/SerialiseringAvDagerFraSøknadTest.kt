@@ -6,14 +6,13 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.*
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 import java.util.*
 
 internal class SerialiseringAvDagerFraSøknadTest {
@@ -32,7 +31,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     @JsonIgnoreProperties("person")
     private class ArbeidsgiverMixin
 
-    @JsonIgnoreProperties("person", "arbeidsgiver")
+    @JsonIgnoreProperties("person", "arbeidsgiver", "kontekst")
     private class VedtaksperiodeMixin
 
     @Test

@@ -31,7 +31,7 @@ internal class JsonBuilderTest {
     @JsonIgnoreProperties("person")
     private class ArbeidsgiverMixin
 
-    @JsonIgnoreProperties("person", "arbeidsgiver")
+    @JsonIgnoreProperties("person", "arbeidsgiver", "kontekst")
     private class VedtaksperiodeMixin
 
     @Test

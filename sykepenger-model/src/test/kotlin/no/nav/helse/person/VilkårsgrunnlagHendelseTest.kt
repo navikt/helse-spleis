@@ -245,7 +245,7 @@ internal class VilkårsgrunnlagHendelseTest {
                 .first { behov == it.navn }.toMap()[felt] as T?
         }
 
-        override fun onBehov(behov: BehovType) {
+        override fun onBehov(kontekstId: UUID, behov: BehovType) {
             etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }
                 .add(behov)
         }

@@ -1,14 +1,6 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Topics
-import no.nav.helse.behov.BehovType
-import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
 import no.nav.helse.spleis.db.HendelseRecorder
@@ -18,11 +10,8 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -60,7 +49,13 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
-        val messageProcessor = Processor(BehovMediator(producer, aktivitetslogg, sikkerLogg))
+        val messageProcessor = Processor(
+            BehovMediator(
+                producer,
+                aktivitetslogg,
+                sikkerLogg
+            )
+        )
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
@@ -199,47 +194,4 @@ internal class HendelseMediator(
         }
     }
 
-    private class BehovMediator(
-        private val producer: KafkaProducer<String, String>,
-        private val aktivitetslogg: Aktivitetslogg,
-        private val sikkerLogg: Logger
-    ) : HendelseObserver {
-        private companion object {
-            private val objectMapper = jacksonObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .registerModule(JavaTimeModule())
-        }
-
-        private val behov = mutableListOf<BehovType>()
-        override fun onBehov(behov: BehovType) {
-            this.behov.add(behov)
-        }
-
-        fun finalize(hendelse: ArbeidstakerHendelse) {
-            if (behov.isEmpty()) return
-            sikkerLogg.info("sender ${behov.size} needs: ${behov.map { it.navn }} pga. ${hendelse::class.simpleName}")
-            producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg).also {
-                sikkerLogg.info("sender $it pga. ${hendelse::class.simpleName}")
-            }))
-        }
-
-        private fun List<BehovType>.toJson(aktivitetslogg: Aktivitetslogg) =
-            fold(objectMapper.createObjectNode()) { acc: ObjectNode, behovType: BehovType ->
-                val node = objectMapper.convertValue<ObjectNode>(behovType.toMap())
-                if (acc.harKonflikterMed(node))
-                    aktivitetslogg.severe("Prøvde å sette sammen behov med konfliktende verdier, $acc og $node")
-                acc.withArray("@behov").add(behovType.navn)
-                acc.setAll(node)
-            }
-                .put("@event_name", "behov")
-                .set<ObjectNode>("@opprettet", objectMapper.convertValue(LocalDateTime.now()))
-                .set<ObjectNode>("@id", objectMapper.convertValue(UUID.randomUUID()))
-                .toString()
-
-        private fun ObjectNode.harKonflikterMed(other: ObjectNode) = fields()
-            .asSequence()
-            .filter { it.key in other.fieldNames().asSequence() }
-            .any { it.value != other[it.key] }
-
-    }
 }
