@@ -67,25 +67,33 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
-        dataSource?.also {
-            using(sessionOf(it)) { session ->
-                session.list(queryOf("select data from person where fnr in (select (data ->> 'fnr')::text from melding where lest_dato > ? AND melding_type=? AND (data -> 'arbeidGjenopptatt')::text != 'null') AND id in(select max(id) from person group by aktor_id)", LocalDateTime.parse("2020-02-18T17:48:00.000"), "SENDT_SØKNAD")) {
-                    SerialisertPerson(it.string("data"))
+        if ("prod-fss" == System.getenv("NAIS_CLUSTER_NAME")) {
+            dataSource?.also {
+                using(sessionOf(it)) { session ->
+                    session.list(
+                        queryOf(
+                            "select data from person where fnr in (select (data ->> 'fnr')::text from melding where lest_dato > ? AND melding_type=? AND (data -> 'arbeidGjenopptatt')::text != 'null') AND id in(select max(id) from person group by aktor_id)",
+                            LocalDateTime.parse("2020-02-18T17:48:00.000"),
+                            "SENDT_SØKNAD"
+                        )
+                    ) {
+                        SerialisertPerson(it.string("data"))
+                    }
                 }
+                    .also { sikkerLogg.info("Hentet {} personer som skal invalideres", it.size) }
+                    .map { it.deserialize() }
+                    .onEach {
+                        it.addObserver(personObserver)
+                        it.addObserver(lagrePersonDao)
+                        it.addObserver(lagreUtbetalingDao)
+                        it.addObserver(vedtaksperiodeProbe)
+                    }
+                    .forEach {
+                        sikkerLogg.info("Invaliderer alle perioder for person på grunn av produksjonsfeil som kan ha tatt bort arbeidsdager fra sykdomstidslinjene")
+                        it.invaliderPerioder()
+                    }
+                exitProcess(0)
             }
-                .also { sikkerLogg.info("Hentet {} personer som skal invalideres", it.size) }
-                .map { it.deserialize() }
-                .onEach {
-                    it.addObserver(personObserver)
-                    it.addObserver(lagrePersonDao)
-                    it.addObserver(lagreUtbetalingDao)
-                    it.addObserver(vedtaksperiodeProbe)
-                }
-                .forEach {
-                    sikkerLogg.info("Invaliderer alle perioder for person på grunn av produksjonsfeil som kan ha tatt bort arbeidsdager fra sykdomstidslinjene")
-                    it.invaliderPerioder()
-                }
-            exitProcess(0)
         }
 
         val messageProcessor = Processor(BehovMediator(producer, aktivitetslogg, sikkerLogg))
