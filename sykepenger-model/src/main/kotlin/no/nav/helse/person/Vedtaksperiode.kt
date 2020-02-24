@@ -724,6 +724,16 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.infoOld("Sendt til Oppdragssystemet for utbetaling")
+
+            val event = PersonObserver.UtbetaltEvent(
+                vedtaksperiodeId = vedtaksperiode.id,
+                aktørId = vedtaksperiode.aktørId,
+                fødselsnummer = vedtaksperiode.fødselsnummer,
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse ?: hendelse.severeOld("Utbetalt vedtaksperiode uten betalingsreferanse"),
+                utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                opprettet = LocalDate.now()
+            )
+            vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

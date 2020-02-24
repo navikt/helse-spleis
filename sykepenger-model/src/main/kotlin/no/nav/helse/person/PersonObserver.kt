@@ -46,12 +46,21 @@ interface PersonObserver {
         val opprettet: LocalDate
     )
 
+    data class UtbetaltEvent(
+        val vedtaksperiodeId: UUID,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val utbetalingsreferanse: String,
+        val utbetalingslinjer: List<Utbetalingslinje>,
+        val opprettet: LocalDate
+    )
+
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 
-    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
+    fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
 
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
 
