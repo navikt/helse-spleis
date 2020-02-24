@@ -7,7 +7,7 @@ internal class CompositeSykdomstidslinje internal constructor(
 ) : ConcreteSykdomstidslinje() {
 
     init {
-        assert(tidslinjer.isNotEmpty()) { "En tom tidslinje skal representeres med null og ikke en tom liste" }
+        require(tidslinjer.isNotEmpty()) { "En tom tidslinje skal representeres med null og ikke en tom liste" }
     }
 
     internal val tidslinje = tidslinjer.flatMap { it.flatten() }

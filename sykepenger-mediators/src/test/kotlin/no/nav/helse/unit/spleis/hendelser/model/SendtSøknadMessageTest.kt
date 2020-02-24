@@ -59,6 +59,9 @@ internal class SendtSøknadMessageTest {
         it as ObjectNode
         it.put(UUID.randomUUID().toString(), "foobar")
     }.toJson()
+    private val UkjentFraværskode = ValidSøknad.copy().asJsonNode().also {
+        (it.path("fravar").first() as ObjectNode).put("type", "INVALID_FRAVÆRSTYPE")
+    }.toJson()
 
     @Test
     internal fun `invalid messages`() {
@@ -70,6 +73,16 @@ internal class SendtSøknadMessageTest {
         }
         assertInvalidMessage(UnknownJson)
         assertInvalidMessage(ValidAvbruttSøknad)
+    }
+
+    @Test
+    internal fun `ukjent fraværskode`() {
+        Aktivitetslogger(UkjentFraværskode).also {
+            assertThrows<Aktivitetslogger.AktivitetException> {
+                SendtSøknadMessage(UkjentFraværskode, it, Aktivitetslogg()).asSøknad()
+            }
+            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $UkjentFraværskode" }
+        }
     }
 
     @Test

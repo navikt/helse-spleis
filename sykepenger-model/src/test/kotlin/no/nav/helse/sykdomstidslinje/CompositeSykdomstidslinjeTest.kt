@@ -11,8 +11,15 @@ import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class CompositeSykdomstidslinjeTest {
+
+    @Test
+    internal fun `tom tidslinje kaster exception`() {
+        assertThrows<IllegalArgumentException> { CompositeSykdomstidslinje(emptyList()) }
+    }
+
     @Test
     internal fun `kan bestemme hvilken type dager mellom to perioder skal ha`() {
         val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, Søknad.SøknadDagFactory)
