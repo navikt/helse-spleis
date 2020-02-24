@@ -430,6 +430,9 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) =
             leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, arbeidsdag)
 
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) =
+            leggTilDag(JsonDagType.ARBEIDSDAG_SØKNAD, arbeidsdag)
+
         override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) =
             leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, egenmeldingsdag)
 
