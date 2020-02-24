@@ -12,7 +12,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
     private val aktiviteter = Aktivitetslogginspektør(aktivitetslogg).aktiviteter
 
     internal fun toMap() = mutableMapOf(
-        "aktiviteter" to Aktivitetslogginspektør(aktivitetslogg).aktiviteter
+        "aktiviteter" to aktiviteter
     )
 
     private inner class Aktivitetslogginspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
@@ -58,7 +58,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
         private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
             return kontekster.map {
                 mutableMapOf(
-                    "konteskstType" to it.konteskstType(),
+                    "kontekstType" to it.konteskstType(),
                     "melding" to it.melding()
                 )
             }
