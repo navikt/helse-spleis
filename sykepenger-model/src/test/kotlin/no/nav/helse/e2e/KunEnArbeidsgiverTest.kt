@@ -156,6 +156,9 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(1, true)
         val andreUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
 
+        // TODO: Sjekk / Fiks at ikke "gamle" utbetalingslinjer blir med på utbetalinger for
+        //  ny periode/nytt sykdomsforløp slik at det ikke blir dobbelutbetalinger fra Spenn (!)
+
         assertNotEquals(førsteUtbetalingsreferanse, andreUtbetalingsreferanse)
 
         inspektør.also {
