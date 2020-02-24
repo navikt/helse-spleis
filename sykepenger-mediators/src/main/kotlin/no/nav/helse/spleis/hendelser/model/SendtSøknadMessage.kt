@@ -44,17 +44,14 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate()
         )
-    } + this["fravar"].mapNotNull {
+    } + this["fravar"].map {
         val fraværstype = it["type"].asText()
         val fom = it.path("fom").asLocalDate()
         when (fraværstype) {
             in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
-            else -> {
-                aktivitetslogger.warnOld("Ukjent fraværstype $fraværstype")
-                null
-            }
+            else -> aktivitetslogger.severeOld("Ukjent fraværstype $fraværstype")
         }
     } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
     ?: emptyList())
