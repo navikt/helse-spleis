@@ -60,7 +60,7 @@ class SerialisertPerson(val json: String) {
         val personData: PersonData = serdeObjectMapper.treeToValue(jsonNode)
         val arbeidsgivere = mutableListOf<Arbeidsgiver>()
         val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
-        val aktivitetslogg = konverterTilAktivitetslogg(personData.aktivitetslogg)
+        val aktivitetslogg = personData.aktivitetslogg?.let(::konverterTilAktivitetslogg) ?: Aktivitetslogg()
 
         val person = createPerson(
             aktørId = personData.aktørId,
@@ -267,7 +267,7 @@ internal data class PersonData(
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverData>,
     val aktivitetslogger: AktivitetsloggerData,
-    val aktivitetslogg: AktivitetsloggData
+    val aktivitetslogg: AktivitetsloggData?
 ) {
     companion object {
         const val skjemaVersjon: Int = 4
