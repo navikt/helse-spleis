@@ -145,7 +145,7 @@ internal class JsonBuilderTest {
                 orgnummer = orgnummer,
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val søknad
@@ -158,7 +158,7 @@ internal class JsonBuilderTest {
                     Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg,
+                aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
 
@@ -174,7 +174,7 @@ internal class JsonBuilderTest {
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 ferieperioder = emptyList(),
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val vilkårsgrunnlag
@@ -199,11 +199,11 @@ internal class JsonBuilderTest {
                 ),
                 erEgenAnsatt = false,
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = Aktivitetslogg()
             )
 
         private val ytelser
-            get() = Ytelser(
+            get() = Aktivitetslogg().let {Ytelser(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fnr,
@@ -220,7 +220,7 @@ internal class JsonBuilderTest {
                     ),
                     inntektshistorikk = emptyList(),
                     aktivitetslogger = aktivitetslogger,
-                    aktivitetslogg = aktivitetslogg
+                    aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(
@@ -232,11 +232,11 @@ internal class JsonBuilderTest {
                         tom = 31.juli.minusYears(2)
                     ),
                     aktivitetslogger = aktivitetslogger,
-                    aktivitetslogg = aktivitetslogg
+                    aktivitetslogg = it
                 ),
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg
-            )
+                aktivitetslogg = it
+            )}
 
         private val manuellSaksbehandling
             get() = ManuellSaksbehandling(
@@ -247,7 +247,7 @@ internal class JsonBuilderTest {
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
                 aktivitetslogger = aktivitetslogger,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = Aktivitetslogg()
             )
     }
 }

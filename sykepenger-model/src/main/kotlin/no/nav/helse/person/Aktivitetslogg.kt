@@ -95,6 +95,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     internal sealed class Aktivitet(
         private val alvorlighetsgrad: Int,
+        internal val label: Char,
         private var melding: String,
         private val tidsstempel: String,
         internal val kontekster: List<SpesifikkKontekst>
@@ -103,7 +104,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        internal abstract val label: Char
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
             .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
@@ -126,14 +126,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(0, melding, tidsstempel, kontekster) {
+        ) : Aktivitet(0, 'I', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Info> {
                     return aktiviteter.filterIsInstance<Info>()
                 }
             }
-
-            override val label = 'I'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitInfo(kontekster, this, melding, tidsstempel)
@@ -144,14 +142,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(25, melding, tidsstempel, kontekster) {
+        ) : Aktivitet(25, 'W', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Warn> {
                     return aktiviteter.filterIsInstance<Warn>()
                 }
             }
-
-            override val label = 'W'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitWarn(kontekster, this, melding, tidsstempel)
@@ -162,15 +158,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(50, melding, tidsstempel, kontekster) {
+        ) : Aktivitet(50, 'N', melding, tidsstempel, kontekster) {
 
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Need> {
                     return aktiviteter.filterIsInstance<Need>()
                 }
             }
-
-            override val label = 'N'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitNeed(kontekster, this, melding, tidsstempel)
@@ -182,14 +176,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(75, melding, tidsstempel, kontekster) {
+        ) : Aktivitet(75, 'E', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Error> {
                     return aktiviteter.filterIsInstance<Error>()
                 }
             }
-
-            override val label = 'E'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitError(kontekster, this, melding, tidsstempel)
@@ -200,14 +192,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(100, melding, tidsstempel, kontekster) {
+        ) : Aktivitet(100, 'S', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Severe> {
                     return aktiviteter.filterIsInstance<Severe>()
                 }
             }
-
-            override val label = 'S'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitSevere(kontekster, this, melding, tidsstempel)

@@ -37,21 +37,6 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             )
         }
 
-        private fun leggTilMelding(
-            kontekster: List<SpesifikkKontekst>,
-            melding: String,
-            tidsstempel: String
-        ) {
-            aktiviteter.add(
-                mutableMapOf<String, Any>(
-                    "kontekster" to map(kontekster),
-                    "alvorlighetsgrad" to NEED.name,
-                    "melding" to melding,
-                    "tidsstempel" to tidsstempel
-                )
-            )
-        }
-
         private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
             return kontekster.map {
                 mutableMapOf(
@@ -63,7 +48,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
 
         override fun visitInfo(
             kontekster: List<SpesifikkKontekst>,
-            aktivitet: Aktivitetslogg.Aktivitet.Info,
+            aktivitet: Info,
             melding: String,
             tidsstempel: String
         ) {
@@ -82,7 +67,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             melding: String,
             tidsstempel: String
         ) {
-            leggTilMelding(kontekster, melding, tidsstempel)
+            leggTilMelding(kontekster, NEED, melding, tidsstempel)
         }
 
         override fun visitError(

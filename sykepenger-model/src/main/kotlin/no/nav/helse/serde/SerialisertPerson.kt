@@ -39,7 +39,8 @@ class SerialisertPerson(val json: String) {
         private val migrations = listOf(
             V1FjernHendelsetypeEnumFraDag(),
             V2EndreTilstandTyper(),
-            V3FjerneUtbetalingsreferanseFraArbeidsgiver()
+            V3FjerneUtbetalingsreferanseFraArbeidsgiver(),
+            V4LagerAktivitetslogg()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -278,6 +279,7 @@ internal data class PersonData(
     ) {
         data class AktivitetData(
             val alvorlighetsgrad: Alvorlighetsgrad,
+            val label: Char,
             val needType: String?,
             val melding: String,
             val tidsstempel: String,
