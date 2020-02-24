@@ -37,7 +37,8 @@ internal class HelseBuilder(
             lagreUtbetalingDao = lagreUtbetalingDao,
             producer = hendelseProducer,
             hendelseProbe = hendelseProbe,
-            hendelseRecorder = hendelseRecorder
+            hendelseRecorder = hendelseRecorder,
+            dataSource = dataSource
         )
     }
 }
