@@ -5,16 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Topics
 import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
-import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.spleis.hendelser.JsonMessage
@@ -27,8 +23,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
-import javax.sql.DataSource
-import kotlin.system.exitProcess
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -41,8 +35,7 @@ internal class HendelseMediator(
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
     private val producer: KafkaProducer<String, String>,
     private val hendelseProbe: HendelseProbe,
-    private val hendelseRecorder: HendelseRecorder,
-    private val dataSource: DataSource? = null
+    private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
     private val parser = Parser(this)
@@ -67,35 +60,6 @@ internal class HendelseMediator(
         aktivitetslogger: Aktivitetslogger,
         aktivitetslogg: Aktivitetslogg
     ) {
-        if ("prod-fss" == System.getenv("NAIS_CLUSTER_NAME")) {
-            dataSource?.also {
-                using(sessionOf(it)) { session ->
-                    session.list(
-                        queryOf(
-                            "select data from person where fnr in (select (data ->> 'fnr')::text from melding where lest_dato > ? AND melding_type=? AND (data -> 'arbeidGjenopptatt')::text != 'null') AND id in(select max(id) from person group by aktor_id)",
-                            LocalDateTime.parse("2020-02-18T17:48:00.000"),
-                            "SENDT_SØKNAD"
-                        )
-                    ) {
-                        SerialisertPerson(it.string("data"))
-                    }
-                }
-                    .also { sikkerLogg.info("Hentet {} personer som skal invalideres", it.size) }
-                    .map { it.deserialize() }
-                    .onEach {
-                        it.addObserver(personObserver)
-                        it.addObserver(lagrePersonDao)
-                        it.addObserver(lagreUtbetalingDao)
-                        it.addObserver(vedtaksperiodeProbe)
-                    }
-                    .forEach {
-                        sikkerLogg.info("Invaliderer alle perioder for person på grunn av produksjonsfeil som kan ha tatt bort arbeidsdager fra sykdomstidslinjene")
-                        it.invaliderPerioder()
-                    }
-                exitProcess(0)
-            }
-        }
-
         val messageProcessor = Processor(BehovMediator(producer, aktivitetslogg, sikkerLogg))
         try {
             message.accept(hendelseRecorder)
@@ -254,14 +218,9 @@ internal class HendelseMediator(
         fun finalize(hendelse: ArbeidstakerHendelse) {
             if (behov.isEmpty()) return
             sikkerLogg.info("sender ${behov.size} needs: ${behov.map { it.navn }} pga. ${hendelse::class.simpleName}")
-            producer.send(
-                ProducerRecord(
-                    Topics.rapidTopic,
-                    behov.first().fødselsnummer,
-                    behov.toJson(aktivitetslogg).also {
-                        sikkerLogg.info("sender $it pga. ${hendelse::class.simpleName}")
-                    })
-            )
+            producer.send(ProducerRecord(Topics.rapidTopic, behov.first().fødselsnummer, behov.toJson(aktivitetslogg).also {
+                sikkerLogg.info("sender $it pga. ${hendelse::class.simpleName}")
+            }))
         }
 
         private fun List<BehovType>.toJson(aktivitetslogg: Aktivitetslogg) =

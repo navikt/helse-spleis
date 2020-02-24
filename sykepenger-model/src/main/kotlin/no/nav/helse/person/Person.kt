@@ -163,22 +163,4 @@ class Person private constructor(
 
     private fun arbeidsgiver(organisasjonsnummer: String) =
         Arbeidsgiver(this, organisasjonsnummer)
-
-    fun invaliderPerioder() {
-        arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.invaliderPerioder(object : ArbeidstakerHendelse(Aktivitetslogger(), Aktivitetslogg()) {
-                override fun aktørId(): String {
-                    return this@Person.aktørId
-                }
-
-                override fun fødselsnummer(): String {
-                    return this@Person.fødselsnummer
-                }
-
-                override fun organisasjonsnummer(): String {
-                    return arbeidsgiver.organisasjonsnummer()
-                }
-            })
-        }
-    }
 }
