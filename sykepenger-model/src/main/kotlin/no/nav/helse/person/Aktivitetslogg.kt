@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -24,8 +25,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun need(type: NeedType, melding: String, vararg params: Any) {
-        add(Aktivitet.Need(kontekster.toSpesifikk(), type, String.format(melding, *params)))
+    override fun need(melding: String, vararg params: Any) {
+        add(Aktivitet.Need(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any) {
@@ -34,6 +35,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun severe(melding: String, vararg params: Any): Nothing {
         add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
+
         throw AktivitetException(this)
     }
 
@@ -158,7 +160,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         internal class Need(
             kontekster: List<SpesifikkKontekst>,
-            private val type: NeedType,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, melding, tidsstempel, kontekster) {
@@ -172,7 +173,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override val label = 'N'
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitNeed(kontekster, this, type, melding, tidsstempel)
+                visitor.visitNeed(kontekster, this, melding, tidsstempel)
             }
 
         }
@@ -218,7 +219,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 internal interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any)
     fun warn(melding: String, vararg params: Any)
-    fun need(type: NeedType, melding: String, vararg params: Any)
+    fun need(melding: String, vararg params: Any)
     fun error(melding: String, vararg params: Any)
     fun severe(melding: String, vararg params: Any): Nothing
 
@@ -254,7 +255,6 @@ internal interface AktivitetsloggVisitor {
     fun visitNeed(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Need,
-        type: NeedType,
         tidsstempel: String,
         melding: String
     ) {
@@ -291,6 +291,24 @@ class SpesifikkKontekst(private val konteskstType: String, private val melding: 
     override fun hashCode() = konteskstType.hashCode()
 }
 
-enum class NeedType {
-    GjennomgåTidslinje
+internal interface Personkontekst : Aktivitetskontekst {
+    val aktørId: String
+    val fødselsnummer: String
+
+    fun toMap() = mapOf<String, Any>(
+        "aktørId" to aktørId,
+        "fødselsnummer" to fødselsnummer
+    )
+}
+
+internal interface Arbeidsgiverkontekst : Personkontekst {
+    val organisasjonsnummer: String
+
+    override fun toMap() = super.toMap() + ("organisasjonsnummer" to organisasjonsnummer)
+}
+
+internal interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
+    val vedtaksperiodeId: UUID
+
+    override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)
 }

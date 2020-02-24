@@ -2,27 +2,24 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.person.Aktivitetslogger.Aktivitet.Need.NeedType
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.tournament.sendtSøknadDagturnering
+import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
-class SendtSøknad constructor(
-    hendelseId: UUID,
+class Søknad constructor(
+    meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val sendtNav: LocalDateTime,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.SendtSøknad, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
 
     private val fom: LocalDate
     private val tom: LocalDate
@@ -35,18 +32,16 @@ class SendtSøknad constructor(
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Sendt søknad")
+        aktivitetslogger.addAll(this.aktivitetslogger, "Søknad")
     }
 
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje() }
-        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, sendtSøknadDagturnering) }
+        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, SøknadDagFactory::implisittDag, søknadDagturnering) }
 
     override fun fødselsnummer() = fnr
 
     override fun organisasjonsnummer() = orgnummer
-
-    override fun rapportertdato() = sendtNav
 
     override fun aktørId() = aktørId
 
@@ -66,18 +61,18 @@ class SendtSøknad constructor(
 
         internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
-        internal open fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {}
+        internal open fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {}
 
-        internal fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
-            if (fom < sendtSøknad.fom || tom > sendtSøknad.tom) aktivitetslogger.errorOld(beskjed)
+        internal fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
+            if (fom < søknad.fom || tom > søknad.tom) aktivitetslogger.errorOld(beskjed)
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ferie(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.ferie(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                valider(sendtSøknad, aktivitetslogger, "Ferie ligger utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                valider(søknad, aktivitetslogger, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
         }
 
         class Sykdom(
@@ -87,41 +82,49 @@ class SendtSøknad constructor(
             private val faktiskGrad: Double = grad.toDouble()
         ) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.sykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) {
-                if (grad != 100) aktivitetslogger.errorOld("grad i søknaden er ikke 100%%")
-                if (faktiskGrad != 100.0) aktivitetslogger.errorOld("faktisk grad i søknaden er ikke 100%%")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {
+                if (grad != 100) aktivitetslogger.errorOld("Søknaden inneholder gradert sykdomsperiode")
+                if (faktiskGrad != 100.0) aktivitetslogger.errorOld("Søknaden inneholder sykdomsperiode med faktisk grad under 100 %%")
             }
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.studiedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.studiedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.needOld(NeedType.GjennomgåTidslinje,"Utdanning foreløpig ikke støttet")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                aktivitetslogger.errorOld("Søknaden inneholder en Utdanningsperiode")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.permisjonsdager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.needOld(NeedType.GjennomgåTidslinje, "Permisjon foreløpig ikke støttet")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                aktivitetslogger.errorOld("Søknaden inneholder en Permisjonsperiode")
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, Dag.NøkkelHendelseType.Søknad)
+                ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(sendtSøknad: SendtSøknad, aktivitetslogger: Aktivitetslogger) =
-                valider(sendtSøknad, aktivitetslogger, "Arbeidsdag ligger utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
+                valider(søknad, aktivitetslogger, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         }
+    }
+
+    internal object SøknadDagFactory : DagFactory {
+        override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Søknad(dato)
+        override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Søknad(dato)
+        override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Søknad(dato)
+        override fun permisjonsdag(dato: LocalDate): Permisjonsdag = Permisjonsdag.Søknad(dato)
+        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Søknad(dato)
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
@@ -10,24 +10,29 @@ import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.hendelser.asOptionalLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO
 import java.time.LocalDateTime
+import java.util.*
 
 // Understands a JSON message representing a Søknad
 internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger, private val aktivitetslogg: Aktivitetslogg) :
     SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "SENDT")
-        requiredKey("sendtNav", "fom", "tom", "egenmeldinger", "fravar")
+        requiredKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
-    val søknadFom get() = this["fom"].asLocalDate()
-    val søknadTom get() = this["tom"].asLocalDate()
-    val fnr get() = this["fnr"].asText()
-    val aktørId get() = this["aktorId"].asText()
-    val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
+
+    override val id: UUID
+        get() = UUID.fromString(this["id"].asText())
+
+    private val søknadFom get() = this["fom"].asLocalDate()
+    private val søknadTom get() = this["tom"].asLocalDate()
+    private val fnr get() = this["fnr"].asText()
+    private val aktørId get() = this["aktorId"].asText()
+    private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
     private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
-    val sendtNav get() = this["sendtNav"].asText().let { LocalDateTime.parse(it) }
-    val perioder get() = this["soknadsperioder"].map {
+    private val sendtNav get() = this["sendtNav"].asText().let { LocalDateTime.parse(it) }
+    private val perioder get() = this["soknadsperioder"].map {
         Periode.Sykdom(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
@@ -58,13 +63,12 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asSendtSøknad(): SendtSøknad {
-        return SendtSøknad(
-            hendelseId = this.id,
+    internal fun asSøknad(): Søknad {
+        return Søknad(
+            meldingsreferanseId = this.id,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            sendtNav = sendtNav,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder(),
             aktivitetslogger = aktivitetslogger,

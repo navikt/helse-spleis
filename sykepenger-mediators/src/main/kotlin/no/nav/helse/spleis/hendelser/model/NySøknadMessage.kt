@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.NySøknad
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.hendelser.MessageFactory
@@ -8,6 +8,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
+import java.util.*
 
 // Understands a JSON message representing a Ny Søknad
 internal class NySøknadMessage(
@@ -18,14 +19,17 @@ internal class NySøknadMessage(
     SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
         requiredValue("status", "NY")
-        requiredKey("fom", "tom")
+        requiredKey("sykmeldingId", "fom", "tom")
     }
+
+    override val id: UUID
+        get() = UUID.fromString(this["sykmeldingId"].asText())
 
     private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
-    val søknadFom get() = this["fom"].asLocalDate()
-    val søknadTom get() = this["tom"].asLocalDate()
+    private val søknadFom get() = this["fom"].asLocalDate()
+    private val søknadTom get() = this["tom"].asLocalDate()
     private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
     private val sykeperioder
         get() = this["soknadsperioder"].map {
@@ -40,12 +44,11 @@ internal class NySøknadMessage(
         processor.process(this, aktivitetslogger)
     }
 
-    internal fun asNySøknad() = NySøknad(
-        hendelseId = this.id,
+    internal fun asSykmelding() = Sykmelding(
+        meldingsreferanseId = this.id,
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        rapportertdato = rapportertdato,
         sykeperioder = sykeperioder,
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg

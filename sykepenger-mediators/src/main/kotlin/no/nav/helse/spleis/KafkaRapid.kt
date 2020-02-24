@@ -11,7 +11,7 @@ import java.time.Duration
 import java.util.*
 
 // Understands how to a read stream of messages from Kafka
-internal class KafkaRapid(private val topics: List<String>) {
+internal class KafkaRapid {
 
     private val log = LoggerFactory.getLogger(KafkaRapid::class.java)
 
@@ -69,7 +69,7 @@ internal class KafkaRapid(private val topics: List<String>) {
 
     private fun build() =
         StreamsBuilder().apply {
-            stream<String, String>(topics, consumeStrings)
+            stream<String, String>(Topics.søknadTopic, consumeStrings)
                 .through(Topics.rapidTopic)
                 .foreach { _, message ->
                     notifyListeners(message)

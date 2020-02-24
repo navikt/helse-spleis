@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.testhelpers.Uke
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.assertThrows
 internal class DateRangeTest {
     @Test
     fun påfølgendeSykedager() {
-        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).onsdag, Dag.NøkkelHendelseType.Søknad)
+        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).onsdag, Søknad.SøknadDagFactory)
 
         assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
         assertEquals(Uke(1).onsdag, sykedager.sisteDag())
@@ -17,12 +17,12 @@ internal class DateRangeTest {
 
     @Test
     fun sluttForStartFeiler() {
-        assertThrows<IllegalArgumentException> { ConcreteSykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).tirsdag, Dag.NøkkelHendelseType.Søknad) }
+        assertThrows<IllegalArgumentException> { ConcreteSykdomstidslinje.sykedager(Uke(1).onsdag, Uke(1).tirsdag, Søknad.SøknadDagFactory) }
     }
 
     @Test
     fun sammeDagErEnDag() {
-        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).tirsdag, Dag.NøkkelHendelseType.Søknad)
+        val sykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).tirsdag, Uke(1).tirsdag, Søknad.SøknadDagFactory)
 
         assertEquals(Uke(1).tirsdag, sykedager.førsteDag())
         assertEquals(Uke(1).tirsdag, sykedager.sisteDag())
@@ -30,7 +30,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagIkkeSyk() {
-        val interval = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        val interval = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).mandag, Uke(2).mandag, Søknad.SøknadDagFactory)
 
         val dager = interval.flatten()
 
@@ -39,7 +39,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagSyk() {
-        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, Søknad.SøknadDagFactory)
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)
@@ -47,7 +47,7 @@ internal class DateRangeTest {
 
     @Test
     fun mandagTilMandagVirkedagerSyk() {
-        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, Dag.NøkkelHendelseType.Søknad)
+        val interval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(2).mandag, Søknad.SøknadDagFactory)
 
         val dager = interval.flatten()
         assertEquals(8, dager.size)

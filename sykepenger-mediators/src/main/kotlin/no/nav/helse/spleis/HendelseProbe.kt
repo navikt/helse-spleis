@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.ArbeidstakerHendelse
 import org.slf4j.LoggerFactory
 
 class HendelseProbe {
@@ -24,34 +23,38 @@ class HendelseProbe {
         påminnetCounter
             .labels(påminnelse.tilstand().toString())
             .inc()
-        påminnelse.tell()
+        tell("Påminnelse")
     }
 
     fun onYtelser(ytelser: Ytelser) {
-        ytelser.tell()
+        tell("Ytelser")
+    }
+
+    fun onUtbetaling(utbetaling: Utbetaling) {
+        tell("Utbetaling")
     }
 
     fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
-        manuellSaksbehandling.tell()
+        tell("Godkjenning")
     }
 
     fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        vilkårsgrunnlag.tell()
+        tell("Vilkårsgrunnlag")
     }
 
     fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.tell()
+        tell("Inntektsmelding")
     }
 
-    fun onNySøknad(søknad: NySøknad) {
-        søknad.tell()
+    fun onSykmelding(sykmelding: Sykmelding) {
+        tell("Sykmelding")
     }
 
-    fun onSendtSøknad(søknad: SendtSøknad) {
-        søknad.tell()
+    fun onSøknad(søknad: Søknad) {
+        tell("Søknad")
     }
 
-    private fun ArbeidstakerHendelse.tell() {
-        hendelseCounter.labels(this.hendelsestype().name).inc()
+    private fun tell(navn: String) {
+        hendelseCounter.labels(navn).inc()
     }
 }

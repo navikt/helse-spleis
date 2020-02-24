@@ -5,6 +5,7 @@ import io.ktor.http.ContentType
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
@@ -20,6 +21,7 @@ import java.net.ServerSocket
 import java.net.URL
 import java.util.concurrent.TimeUnit.SECONDS
 
+@KtorExperimentalAPI
 internal class RapidApplicationComponentTest {
     private companion object {
 
@@ -63,7 +65,7 @@ internal class RapidApplicationComponentTest {
     fun `custom endpoint`() {
         val expectedText = "Hello, World!"
         val endpoint = "/custom"
-        rapid = RapidApplication.Builder(createConfig())
+        rapid = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(createConfig()))
             .withKtorModule {
                 routing {
                     get(endpoint) {

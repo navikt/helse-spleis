@@ -13,7 +13,7 @@
     <logger name="org.flywaydb" level="WARN" />
     <logger name="com.zaxxer" level="WARN" />
 
-    <root level="info">
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

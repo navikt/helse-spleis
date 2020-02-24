@@ -41,6 +41,6 @@ class River(rapidsConnection: RapidsConnection) : RapidsConnection.MessageListen
 
     interface PacketListener {
         fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext)
-        fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext)
+        fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {}
     }
 }

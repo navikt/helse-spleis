@@ -1,20 +1,18 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomshistorikkTest {
@@ -32,19 +30,19 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
-    internal fun `NySøknad mottatt`() {
-        historikk.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+    internal fun `Sykmelding mottatt`() {
+        historikk.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         assertEquals(1, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
     }
 
     @Test
-    internal fun `SendtSøknad mottatt`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+    internal fun `Søknad mottatt`() {
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -58,10 +56,10 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Håndterer Ubestemt dag`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
-        sendtSøknad(
-            SendtSøknad.Periode.Utdanning(9.januar, 12.januar),
-            SendtSøknad.Periode.Sykdom(10.januar, 12.januar, 100)
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
+        søknad(
+            Søknad.Periode.Utdanning(9.januar, 12.januar),
+            Søknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)
             assertTrue(it.hasErrorsOld())
@@ -72,11 +70,11 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Inntektsmelding mottatt`() {
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100)))
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar)
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
         historikk.håndter(
@@ -98,14 +96,14 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `JSON`() {
-        val sendtSøknadId = UUID.randomUUID()
-        val nySøknadId = UUID.randomUUID()
-        historikk.håndter(nySøknad(Triple(8.januar, 12.januar, 100), hendelseId = nySøknadId))
+        val søknadId = UUID.randomUUID()
+        val sykmeldingId = UUID.randomUUID()
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100), hendelseId = sykmeldingId))
         historikk.håndter(
-            sendtSøknad(
-                SendtSøknad.Periode.Sykdom(8.januar, 10.januar, 100),
-                SendtSøknad.Periode.Egenmelding(2.januar, 3.januar),
-                hendelseId = sendtSøknadId
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 10.januar, 100),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar),
+                hendelseId = søknadId
             )
         )
         val inspektør = HistorikkInspektør(historikk)
@@ -115,33 +113,31 @@ internal class SykdomshistorikkTest {
         assertEquals(5, inspektør.beregnetSykdomstidslinjer[1].length())
         assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
-        assertEquals(inspektør.hendelser[0], sendtSøknadId)
-        assertEquals(inspektør.hendelser[1], nySøknadId)
+        assertEquals(inspektør.hendelser[0], søknadId)
+        assertEquals(inspektør.hendelser[1], sykmeldingId)
     }
 
-    private fun nySøknad(
+    private fun sykmelding(
         vararg sykeperioder: Triple<LocalDate, LocalDate, Int>,
         hendelseId: UUID = UUID.randomUUID()
-    ) = NySøknad(
-        hendelseId = hendelseId,
+    ) = Sykmelding(
+        meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
-    private fun sendtSøknad(
-        vararg perioder: SendtSøknad.Periode,
+    private fun søknad(
+        vararg perioder: Søknad.Periode,
         hendelseId: UUID = UUID.randomUUID()
-    ) = SendtSøknad(
-        hendelseId = hendelseId,
+    ) = Søknad(
+        meldingsreferanseId = hendelseId,
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "12345",
         orgnummer = "987654321",
-        sendtNav = LocalDateTime.now(),
         perioder = listOf(*perioder),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg(),
@@ -157,12 +153,11 @@ internal class SykdomshistorikkTest {
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) = Inntektsmelding(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
         orgnummer = "88888888",
         fødselsnummer = "12020052345",
         aktørId = "100010101010",
-        mottattDato = 1.februar.atStartOfDay(),
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,

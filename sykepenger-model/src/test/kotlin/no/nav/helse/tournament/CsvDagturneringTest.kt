@@ -1,9 +1,10 @@
 package no.nav.helse.tournament
 
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,17 +32,17 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val sendtSøknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
-        val sendtSøknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Dag.NøkkelHendelseType.Søknad)
+        val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Søknad.SøknadDagFactory)
+        val søknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Søknad.SøknadDagFactory)
 
-        val tidslinje = (sendtSøknadSykedager + sendtSøknadArbeidsdager)
+        val tidslinje = (søknadSykedager + søknadArbeidsdager)
         assertTrue(
             tidslinje[Uke(1).onsdag] is Sykedag,
-            "Onsdag er fortsatt en sykedag etter kombinering av ny og sendt søknad"
+            "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
         )
         assertTrue(
             tidslinje[Uke(1).torsdag] is Arbeidsdag,
-            "Torsdag er en arbeidsdag etter kombinering av ny og sendt søknad"
+            "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
         )
     }
 
@@ -73,56 +74,55 @@ internal class CsvDagturneringTest {
     }
 
     private class TestHendelseBuilder(private val dato: LocalDate) {
-        private var dagbuilder: ((LocalDate, Dag.NøkkelHendelseType) -> Dag)? = null
-        private var hendelsetype: Dag.NøkkelHendelseType? = null
+        private var dagbuilder: ((LocalDate, DagFactory) -> Dag)? = null
+        private var dagFactory: DagFactory? = null
 
         val sykedag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.sykedag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::sykedag
                 return this
             }
 
         val arbeidsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.ikkeSykedag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::ikkeSykedag
                 return this
             }
 
         val egenmeldingsdag: TestHendelseBuilder
             get() {
-                dagbuilder = { dato, hendelseType -> ConcreteSykdomstidslinje.egenmeldingsdag(dato, hendelseType) }
+                dagbuilder = ConcreteSykdomstidslinje.Companion::egenmeldingsdag
                 return this
             }
 
         val fraSykmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Sykmelding
+                dagFactory = Sykmelding.SykmeldingDagFactory
                 return this
             }
 
         val fraSøknad
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Søknad
+                dagFactory = Søknad.SøknadDagFactory
                 return this
             }
 
         val fraInntektsmelding
             get(): TestHendelseBuilder {
-                hendelsetype = Dag.NøkkelHendelseType.Inntektsmelding
+                dagFactory = Inntektsmelding.InntektsmeldingDagFactory
                 return this
             }
         val rapportertTidlig
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
+                dato, dagFactory ?: Søknad.SøknadDagFactory
             )
         val rapportertSent
             get() = dagbuilder!!(
-                dato, hendelsetype ?: Dag.NøkkelHendelseType.Søknad
+                dato, dagFactory ?: Søknad.SøknadDagFactory
             )
 
     }
 
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, historiskDagturnering)
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }
 

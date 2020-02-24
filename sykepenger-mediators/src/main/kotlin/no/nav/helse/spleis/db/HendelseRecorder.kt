@@ -43,6 +43,10 @@ internal class HendelseRecorder(
         lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message.id, message.toJson())
     }
 
+    override fun process(message: UtbetalingMessage, aktivitetslogger: Aktivitetslogger) {
+        lagreMelding(Meldingstype.UTBETALING, message.id, message.toJson())
+    }
+
     fun hentHendelser(hendelseIder: Set<UUID>) =
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf(
@@ -77,5 +81,6 @@ internal enum class Meldingstype {
     YTELSER,
     VILKÅRSGRUNNLAG,
     MANUELL_SAKSBEHANDLING,
+    UTBETALING,
     UKJENT
 }

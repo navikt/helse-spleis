@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class YtelserTest {
@@ -59,12 +58,13 @@ internal class YtelserTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
     ) = Ytelser(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         utbetalingshistorikk = Utbetalingshistorikk(
+            ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger.map {
                 Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     it.first,
@@ -77,7 +77,6 @@ internal class YtelserTest {
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger(), Aktivitetslogg()),
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )

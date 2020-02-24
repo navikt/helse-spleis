@@ -29,11 +29,10 @@ internal fun createArbeidsgiver(
     inntekthistorikk: Inntekthistorikk,
     tidslinjer: MutableList<Utbetalingstidslinje>,
     perioder: MutableList<Vedtaksperiode>,
-    utbetalingsreferanse: Long,
     aktivitetslogger: Aktivitetslogger
 ) = Arbeidsgiver::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, utbetalingsreferanse, aktivitetslogger)
+    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, aktivitetslogger)
 
 internal fun createVedtaksperiode(
     person: Person,

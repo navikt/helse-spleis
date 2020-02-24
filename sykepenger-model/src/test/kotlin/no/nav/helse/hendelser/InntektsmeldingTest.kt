@@ -4,7 +4,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -28,11 +27,11 @@ internal class InntektsmeldingTest {
     internal fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
         val tidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(Arbeidsdag::class, tidslinje.dag(3.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(1.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(2.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(4.januar)!!::class)
-        assertEquals(Egenmeldingsdag::class, tidslinje.dag(5.januar)!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, tidslinje.dag(3.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(1.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(2.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(4.januar)!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(5.januar)!!::class)
     }
 
     @Test
@@ -48,6 +47,16 @@ internal class InntektsmeldingTest {
             listOf(
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
             ), emptyList()
+        )
+        inntektsmelding.valider()
+        assertTrue(aktivitetslogger.hasErrorsOld())
+    }
+
+    @Test
+    internal fun `arbeidgiverperioden kan ikke overlappe med ferieperioder`() {
+        inntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
+            ferieperioder = listOf(Periode(3.januar, 4.januar))
         )
         inntektsmelding.valider()
         assertTrue(aktivitetslogger.hasErrorsOld())
@@ -114,12 +123,11 @@ internal class InntektsmeldingTest {
         endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
         inntektsmelding = Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = "88888888",
             fødselsnummer = "12020052345",
             aktørId = "100010101010",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,

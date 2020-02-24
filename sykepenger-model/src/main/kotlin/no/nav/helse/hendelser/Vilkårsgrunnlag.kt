@@ -3,30 +3,23 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.VedtaksperiodeHendelse
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.streams.toList
 
 @Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
 class Vilkårsgrunnlag(
-    hendelseId: UUID,
-    private val vedtaksperiodeId: String,
+    internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
-    private val rapportertDato: LocalDateTime,
     private val inntektsmåneder: List<Måned>,
     private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.Vilkårsgrunnlag, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
-    override fun vedtaksperiodeId() = vedtaksperiodeId
-    override fun rapportertdato() = rapportertDato
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

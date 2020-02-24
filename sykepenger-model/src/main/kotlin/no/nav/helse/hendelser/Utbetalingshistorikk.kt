@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
@@ -9,6 +10,7 @@ import java.util.*
 
 class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
+    private val ukjentePerioder: List<JsonNode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val aktivitetslogger: Aktivitetslogger,
     private val aktivitetslogg: Aktivitetslogg
@@ -24,6 +26,7 @@ class Utbetalingshistorikk(
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
         inntektshistorikk.forEach { it.valider(aktivitetslogger) }
+        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk inneholder ukjente perioder") }
         return aktivitetslogger
     }
 
@@ -44,7 +47,7 @@ class Utbetalingshistorikk(
 
         internal fun valider(aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
-                aktivitetslogger.errorOld("Orgnummer må være satt: $orgnummer")
+                aktivitetslogger.errorOld("Organisasjonsnummer for inntektsopplysning mangler")
             }
         }
 
@@ -55,11 +58,11 @@ class Utbetalingshistorikk(
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
         open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
-            aktivitetslogger.severeOld("Kan ikke hente ut utbetaligslinjer for denne periodetypen")
+            aktivitetslogger.severeOld("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
         }
 
         open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.errorOld("Perioden er ikke støttet")
+            aktivitetslogger.errorOld("Utbetalingsperioden %s (fra Infotrygd) er ikke støttet", this::class.simpleName)
         }
 
         class RefusjonTilArbeidsgiver(
@@ -76,6 +79,7 @@ class Utbetalingshistorikk(
             }
         }
 
+        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)

@@ -52,5 +52,6 @@ internal fun tilDTO(
         Meldingstype.YTELSER -> TODO()
         Meldingstype.VILKÅRSGRUNNLAG -> TODO()
         Meldingstype.MANUELL_SAKSBEHANDLING -> TODO()
+        Meldingstype.UTBETALING -> TODO()
         Meldingstype.UKJENT -> TODO()
     }

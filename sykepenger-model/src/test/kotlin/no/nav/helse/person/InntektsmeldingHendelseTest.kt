@@ -1,17 +1,15 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.NySøknad
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SendtSøknad
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.set
 
@@ -38,24 +36,24 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.førsteFraværsdag(0))
     }
 
     @Test
-    internal fun `inntektsmelding før sendt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+    internal fun `inntektsmelding før søknad`() {
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
-    internal fun `inntektsmelding etter sendt søknad`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
-        person.håndter(sendtSøknad(SendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+    internal fun `inntektsmelding etter søknad`() {
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertFalse(aktivitetslogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -63,20 +61,20 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `sendt søknad etter inntektsmelding`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+    internal fun `søknad etter inntektsmelding`() {
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(sendtSøknad(SendtSøknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         assertFalse(aktivitetslogger.hasErrorsOld(), aktivitetslogger.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
     }
 
     @Test
-    internal fun `Ny søknad med overlapp på en periode`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+    internal fun `Sykmelding med overlapp på en periode`() {
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(nySøknad(Triple(19.januar, 30.januar, 100)))
+        person.håndter(sykmelding(Triple(19.januar, 30.januar, 100)))
         assertTrue(aktivitetslogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -84,7 +82,7 @@ internal class InntektsmeldingHendelseTest {
 
 
     @Test
-    internal fun `mangler ny søknad`() {
+    internal fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
         assertTrue(aktivitetslogger.hasErrorsOld())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
@@ -92,18 +90,18 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `flere inntektsmeldinger`() {
-        person.håndter(nySøknad(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
         assertTrue(aktivitetslogger.hasWarningsOld())
         assertFalse(aktivitetslogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SENDT_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `annen arbeidsgiver`() {
-        person.håndter(nySøknad(Triple(6.januar,20.januar, 100), orgnr = "123"))
+        person.håndter(sykmelding(Triple(6.januar,20.januar, 100), orgnr = "123"))
         person.håndter(inntektsmelding(virksomhetsnummer = "456"))
         assertTrue(aktivitetslogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -119,12 +117,11 @@ internal class InntektsmeldingHendelseTest {
         virksomhetsnummer: String = ORGNR
     ) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = virksomhetsnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -133,24 +130,22 @@ internal class InntektsmeldingHendelseTest {
             aktivitetslogg = aktivitetslogg
         )
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
         orgnummer = orgnr,
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(*sykeperioder),
         aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
-    private fun sendtSøknad(vararg perioder: SendtSøknad.Periode, orgnummer: String = ORGNR) =
-        SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+    private fun søknad(vararg perioder: Søknad.Periode, orgnummer: String = ORGNR) =
+        Søknad(
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sendtNav = LocalDateTime.now(),
             perioder = listOf(*perioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,

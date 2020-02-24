@@ -5,22 +5,18 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.VedtaksperiodeHendelse
-import java.time.LocalDateTime
 import java.util.*
 
 class ManuellSaksbehandling(
-    hendelseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val vedtaksperiodeId: String,
+    internal val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val utbetalingGodkjent: Boolean,
-    private val rapportertdato: LocalDateTime,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(hendelseId, Hendelsestype.ManuellSaksbehandling, aktivitetslogger, aktivitetslogg), VedtaksperiodeHendelse {
+) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
 
     companion object {
         fun lagBehov(
@@ -30,8 +26,7 @@ class ManuellSaksbehandling(
             organisasjonsnummer: String
         ): Behov {
             return Behov.nyttBehov(
-                hendelsestype = Hendelsestype.ManuellSaksbehandling,
-                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
+                behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -44,13 +39,10 @@ class ManuellSaksbehandling(
     internal fun saksbehandler() = saksbehandler
     internal fun utbetalingGodkjent() = utbetalingGodkjent
 
-    override fun rapportertdato() = rapportertdato
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
-    override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun melding(klassName: String) = "Manuell Saksbehandling"
-
     internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
         aktivitetslogger.addAll(this.aktivitetslogger, "Manuell saksbehandling")
     }

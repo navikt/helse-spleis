@@ -2,7 +2,6 @@ package no.nav.helse.behov
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
-import no.nav.helse.person.ArbeidstakerHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -12,7 +11,6 @@ internal class BehovTest {
     @Test
     fun `Opprette ett nytt behov`() {
         val behov = Behov.nyttBehov(
-            ArbeidstakerHendelse.Hendelsestype.Ytelser,
             listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger),
             "aktørid",
             "fnr",

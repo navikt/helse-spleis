@@ -1,17 +1,16 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.NySøknadTest
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.SykmeldingTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
-internal class NySøknadHendelseTest {
+internal class SykmeldingTest {
 
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -30,17 +29,17 @@ internal class NySøknadHendelseTest {
     }
 
     @Test
-    internal fun `NySøknad skaper Arbeidsgiver og Vedtaksperiode`() {
+    internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertFalse(aktivitetslogger.hasErrorsOld())
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
     }
 
     @Test
-    internal fun `En ny NySøknad er ugyldig`() {
+    internal fun `En ny Sykmelding er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         assertTrue(aktivitetslogger.hasErrorsOld())
@@ -67,8 +66,8 @@ internal class NySøknadHendelseTest {
         assertTrue(inspektør.personLogger.hasMessagesOld())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(0))
-        assertEquals(TilstandType.MOTTATT_NY_SØKNAD, inspektør.tilstand(1))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(1))
     }
 
     @Test
@@ -92,12 +91,11 @@ internal class NySøknadHendelseTest {
     }
 
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
-        NySøknad(
-            hendelseId = UUID.randomUUID(),
-            fnr = NySøknadTest.UNG_PERSON_FNR_2018,
+        Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = SykmeldingTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(*sykeperioder),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg

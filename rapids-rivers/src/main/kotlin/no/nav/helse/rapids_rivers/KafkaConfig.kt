@@ -10,7 +10,7 @@ import java.io.File
 import java.util.*
 
 // Understands how to configure kafka from environment variables
-class KafkaConfigBuilder(
+class KafkaConfig(
     private val bootstrapServers: String,
     private val consumerGroupId: String,
     private val username: String? = null,

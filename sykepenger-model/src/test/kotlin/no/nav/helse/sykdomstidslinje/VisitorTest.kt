@@ -45,11 +45,19 @@ internal class VisitorTest {
             compositeCount += 1
         }
 
-        override fun visitSykedag(sykedag: Sykedag) {
+        override fun visitSykedag(sykedag: Sykedag.Sykmelding) {
             sykedagerCount += 1
         }
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag) {
+        override fun visitSykedag(sykedag: Sykedag.Søknad) {
+            sykedagerCount += 1
+        }
+
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) {
+            arbeidsdagerCount += 1
+        }
+
+        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) {
             arbeidsdagerCount += 1
         }
 
@@ -62,6 +70,5 @@ internal class VisitorTest {
         }
     }
 
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) =
-        this.plus(other, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

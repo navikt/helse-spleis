@@ -8,12 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -22,10 +20,12 @@ internal class JsonBuilderTest {
     private val objectMapper = jacksonObjectMapper()
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .setMixIns(mutableMapOf(
-            Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
-            Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
-        ))
+        .setMixIns(
+            mutableMapOf(
+                Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
+                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
+            )
+        )
         .registerModule(JavaTimeModule())
 
     @JsonIgnoreProperties("person")
@@ -40,7 +40,8 @@ internal class JsonBuilderTest {
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
-        val personDeserialisert = parsePerson(jsonBuilder.toString())
+        val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
+            .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
         assertEquals(personPre, personPost)
@@ -53,7 +54,7 @@ internal class JsonBuilderTest {
 
     @Test
     fun `serialisering og deserialisering skal funke for alle states`() {
-        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_NY_SØKNAD))
+        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_SYKMELDING))
         testSerialiseringAvPerson(lagPerson(TilstandType.UNDERSØKER_HISTORIKK))
         testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_VILKÅRSPRØVING))
         testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_HISTORIKK))
@@ -66,11 +67,15 @@ internal class JsonBuilderTest {
         person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
-        val result = parsePerson(json)
+        val result = SerialisertPerson(json).deserialize()
         val jsonBuilder2 = JsonBuilder()
         result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
 
+        objectMapper.readTree(json).also {
+            assertTrue(it.hasNonNull("skjemaVersjon"))
+            assertEquals(SerialisertPerson.gjeldendeVersjon(), it["skjemaVersjon"].intValue())
+        }
         assertEquals(json, json2)
         assertDeepEquals(person, result)
     }
@@ -80,10 +85,15 @@ internal class JsonBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
+        private lateinit var aktivitetslogger: Aktivitetslogger
+        private lateinit var aktivitetslogg: Aktivitetslogg
 
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING) =
-            Person(aktørId, fnr).apply {
-                håndter(nySøknad)
+        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person {
+            aktivitetslogger = Aktivitetslogger()
+            aktivitetslogg = Aktivitetslogg()
+
+            val person = Person(aktørId, fnr).apply {
+                håndter(sykmelding)
 
                 accept(object : PersonVisitor {
                     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
@@ -91,9 +101,9 @@ internal class JsonBuilderTest {
                     }
                 })
 
-                assertEquals(TilstandType.MOTTATT_NY_SØKNAD, hentTilstand(this).type)
-                if (stopState == TilstandType.MOTTATT_NY_SØKNAD) return@apply
-                håndter(sendtSøknad)
+                assertEquals(TilstandType.MOTTATT_SYKMELDING, hentTilstand(this).type)
+                if (stopState == TilstandType.MOTTATT_SYKMELDING) return@apply
+                håndter(søknad)
                 assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this).type)
                 if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply
                 håndter(inntektsmelding)
@@ -110,6 +120,12 @@ internal class JsonBuilderTest {
                 if (stopState == TilstandType.TIL_UTBETALING) return@apply
             }
 
+            assertFalse(aktivitetslogger.hasErrorsOld()) { "Aktivitetslogger contains errors: ${aktivitetslogger.toReport()}" }
+            assertFalse(aktivitetslogg.hasErrors()) { "Aktivitetslogg contains errors: $aktivitetslogg" }
+
+            return person
+        }
+
         private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
             lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
             person.accept(object : PersonVisitor {
@@ -121,77 +137,80 @@ internal class JsonBuilderTest {
         }
 
 
-        private val nySøknad
-            get() = NySøknad(
-                hendelseId = UUID.randomUUID(),
+        private val sykmelding
+            get() = Sykmelding(
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
-                rapportertdato = LocalDateTime.now(),
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
-        private val sendtSøknad
-            get() = SendtSøknad(
-                hendelseId = UUID.randomUUID(),
+        private val søknad
+            get() = Søknad(
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
-                sendtNav = LocalDateTime.now(),
                 perioder = listOf(
-                    SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)
+                    Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg(),
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg,
                 harAndreInntektskilder = false
             )
 
         private val inntektsmelding
             get() = Inntektsmelding(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
                 orgnummer = orgnummer,
                 fødselsnummer = fnr,
                 aktørId = aktørId,
-                mottattDato = 1.februar.atStartOfDay(),
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 ferieperioder = emptyList(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val vilkårsgrunnlag
             get() = Vilkårsgrunnlag(
-                hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 orgnummer = orgnummer,
-                rapportertDato = LocalDateTime.now(),
                 inntektsmåneder = (1.rangeTo(12)).map {
                     Vilkårsgrunnlag.Måned(
                         årMåned = YearMonth.of(2018, it),
                         inntektsliste = listOf(31000.0)
                     )
                 },
-                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))),
+                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            orgnummer,
+                            1.januar(2017)
+                        )
+                    )
+                ),
                 erEgenAnsatt = false,
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val ytelser
             get() = Ytelser(
-                hendelseId = UUID.randomUUID(),
+                meldingsreferanseId = UUID.randomUUID(),
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
+                    ukjentePerioder = emptyList(),
                     utbetalinger = listOf(
                         Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),
@@ -200,8 +219,8 @@ internal class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
-                    aktivitetslogger = Aktivitetslogger(),
-                    aktivitetslogg = Aktivitetslogg()
+                    aktivitetslogger = aktivitetslogger,
+                    aktivitetslogg = aktivitetslogg
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(
@@ -212,26 +231,23 @@ internal class JsonBuilderTest {
                         fom = 1.juli.minusYears(2),
                         tom = 31.juli.minusYears(2)
                     ),
-                    aktivitetslogger = Aktivitetslogger(),
-                    aktivitetslogg = Aktivitetslogg()
+                    aktivitetslogger = aktivitetslogger,
+                    aktivitetslogg = aktivitetslogg
                 ),
-                rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
 
         private val manuellSaksbehandling
             get() = ManuellSaksbehandling(
-                hendelseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
-                rapportertdato = LocalDateTime.now(),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogger = aktivitetslogger,
+                aktivitetslogg = aktivitetslogg
             )
     }
 }

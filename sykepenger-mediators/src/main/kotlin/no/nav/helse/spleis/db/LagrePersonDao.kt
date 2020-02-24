@@ -4,21 +4,18 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.serde.serializePerson
+import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
-class LagrePersonDao(
-    private val dataSource: DataSource,
-    private val probe: PostgresProbe = PostgresProbe
-) : PersonObserver {
+class LagrePersonDao(private val dataSource: DataSource) : PersonObserver {
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        val (skjemaVersjon, personJson) = serializePerson(personEndretEvent.person)
+        val serialisering = personEndretEvent.person.serialize()
         lagrePerson(
             aktørId = personEndretEvent.aktørId,
             fødselsnummer = personEndretEvent.fødselsnummer,
-            skjemaVersjon = skjemaVersjon,
-            personJson = personJson
+            skjemaVersjon = serialisering.skjemaVersjon,
+            personJson = serialisering.json
         )
     }
 

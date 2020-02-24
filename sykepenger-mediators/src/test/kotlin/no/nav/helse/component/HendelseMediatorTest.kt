@@ -11,7 +11,6 @@ import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
-import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseMediator
@@ -73,6 +72,9 @@ internal class HendelseMediatorTest {
 
         sendManuellSaksbehandling()
         ventTilTrue(lestManuellSaksbehandling)
+
+        sendUtbetaling()
+        ventTilTrue(lestUtbetaling)
     }
 
     private fun ventTilTrue(atomicBoolean: AtomicBoolean) {
@@ -88,10 +90,10 @@ internal class HendelseMediatorTest {
         lestYtelser.set(false)
         lestVilkårsgrunnlag.set(false)
         lestManuellSaksbehandling.set(false)
+        lestUtbetaling.set(false)
     }
 
     private companion object : PersonRepository {
-        private const val dummyTopic = "unused"
         private val defaultAktørId = UUID.randomUUID().toString()
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
@@ -103,20 +105,21 @@ internal class HendelseMediatorTest {
         private val lestYtelser = AtomicBoolean(false)
         private val lestVilkårsgrunnlag = AtomicBoolean(false)
         private val lestManuellSaksbehandling = AtomicBoolean(false)
+        private val lestUtbetaling = AtomicBoolean(false)
 
-        private val hendelseStream = KafkaRapid(listOf(dummyTopic))
+        private val hendelseStream = KafkaRapid()
 
         override fun hentPerson(aktørId: String): Person? {
             return mockk<Person>(relaxed = true) {
 
                 every {
-                    håndter(any<NySøknad>())
+                    håndter(any<Sykmelding>())
                 } answers {
                     lestNySøknad.set(true)
                 }
 
                 every {
-                    håndter(any<SendtSøknad>())
+                    håndter(any<Søknad>())
                 } answers {
                     lestSendtSøknad.set(true)
                 }
@@ -150,6 +153,12 @@ internal class HendelseMediatorTest {
                 } answers {
                     lestManuellSaksbehandling.set(true)
                 }
+
+                every {
+                    håndter(any<Utbetaling>())
+                } answers {
+                    lestUtbetaling.set(true)
+                }
             }
         }
 
@@ -165,7 +174,7 @@ internal class HendelseMediatorTest {
                 hendelseRecorder = mockk(relaxed = true)
             )
         }
-        private val topicInfos = listOf(dummyTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
+        private val topicInfos = listOf(Topics.søknadTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
         private val embeddedKafkaEnvironment = KafkaEnvironment(
             autoStart = false,
@@ -178,13 +187,11 @@ internal class HendelseMediatorTest {
         private lateinit var producer: KafkaProducer<String, String>
 
         private fun generiskBehov(
-            hendelsetype: Hendelsestype,
             aktørId: String,
             fødselsnummer: String,
             organisasjonsnummer: String,
             behov: List<Behovstype> = listOf()
         ) = Behov.nyttBehov(
-            hendelsestype = hendelsetype,
             behov = behov,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -245,8 +252,7 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
             val behov = Behov.nyttBehov(
-                hendelsestype = Hendelsestype.ManuellSaksbehandling,
-                behov = listOf(Behovstype.GodkjenningFraSaksbehandler),
+                behov = listOf(Behovstype.Godkjenning),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -258,7 +264,7 @@ internal class HendelseMediatorTest {
             sendBehov(
                 behov.løsBehov(
                     mapOf(
-                        "GodkjenningFraSaksbehandler" to mapOf(
+                        "Godkjenning" to mapOf(
                             "godkjent" to true
                         )
                     )
@@ -272,7 +278,6 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
             val behov = generiskBehov(
-                hendelsetype = Hendelsestype.Ytelser,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -295,7 +300,6 @@ internal class HendelseMediatorTest {
             egenAnsatt: Boolean = false
         ) {
             val behov = generiskBehov(
-                hendelsetype = Hendelsestype.Vilkårsgrunnlag,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
@@ -308,6 +312,34 @@ internal class HendelseMediatorTest {
                         "EgenAnsatt" to egenAnsatt,
                         "Inntektsberegning" to emptyMap<String, String>(),
                         "Opptjening" to emptyList<Any>()
+                    )
+                )
+            )
+        }
+
+        private fun sendUtbetaling(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer,
+            utbetalingOK: Boolean = true
+        ) {
+            val behov = Behov.nyttBehov(
+                behov = listOf(Behovstype.Utbetaling),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = UUID.randomUUID(),
+                additionalParams = mapOf(
+                    "utbetalingsreferanse" to "123456789"
+                )
+            )
+            sendBehov(
+                behov.løsBehov(
+                    mapOf(
+                        "Utbetaling" to mapOf(
+                            "status" to if(utbetalingOK) "FERDIG" else "FEIL",
+                            "melding" to if(utbetalingOK) "" else "FEIL fra Spenn"
+                        )
                     )
                 )
             )
@@ -380,6 +412,7 @@ internal class HendelseMediatorTest {
             val nySøknad = SykepengesoknadDTO(
                 status = SoknadsstatusDTO.NY,
                 id = id.toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
                 aktorId = aktørId,
                 fnr = fødselsnummer,
                 arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),

@@ -6,9 +6,9 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.hendelser.NySøknad
-import no.nav.helse.hendelser.SendtSøknad
-import no.nav.helse.hendelser.SendtSøknad.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
-import java.time.LocalDateTime
 import java.util.*
 
 class PersonPersisteringPostgresTest {
@@ -93,12 +92,11 @@ class PersonPersisteringPostgresTest {
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknad(aktørId))
         person.håndter(
-            SendtSøknad(
-                hendelseId = UUID.randomUUID(),
+            Søknad(
+                meldingsreferanseId = UUID.randomUUID(),
                 fnr = "fnr",
                 aktørId = aktørId,
                 orgnummer = "123456789",
-                sendtNav = LocalDateTime.now(),
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                 aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg(),
@@ -119,29 +117,11 @@ class PersonPersisteringPostgresTest {
         assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }
 
-    @Test
-    internal fun `ignorerer en skjema versjoner når man henter ut personer`() {
-        val dataSource = HikariDataSource(hikariConfig)
-        val personRepository = PersonPostgresRepository(dataSource)
-        val aktørId = "1234"
-        val fnr = "4567"
-
-        using(sessionOf(dataSource)) { session ->
-            session.run(queryOf(
-                "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, -1, '{}')",
-                aktørId, fnr
-            ).asExecute)
-        }
-
-        assertNull(personRepository.hentPerson(aktørId))
-    }
-
-    private fun nySøknad(aktørId: String) = NySøknad(
-        hendelseId = UUID.randomUUID(),
+    private fun nySøknad(aktørId: String) = Sykmelding(
+        meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
         aktørId = aktørId,
         orgnummer = "123456789",
-        rapportertdato = LocalDateTime.now(),
         sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()

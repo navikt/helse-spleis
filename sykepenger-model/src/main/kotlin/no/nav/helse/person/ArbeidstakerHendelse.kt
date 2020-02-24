@@ -1,37 +1,20 @@
 package no.nav.helse.person
 
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.behov.BehovType
+import no.nav.helse.hendelser.HendelseObserver
 
 abstract class ArbeidstakerHendelse protected constructor(
-    private val hendelseId: UUID,
-    private val hendelsestype: Hendelsestype,
     internal val aktivitetslogger: Aktivitetslogger,
     internal val aktivitetslogg: Aktivitetslogg
-) : Comparable<ArbeidstakerHendelse>, IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
+) : IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
     init {
         aktivitetslogg.kontekst(this)
     }
-    @Deprecated("Enum brukes til (de)serialisering og bør ikke ligge i modell-objektene")
-    enum class Hendelsestype {
-        Ytelser,
-        Vilkårsgrunnlag,
-        ManuellSaksbehandling,
-        Utbetaling,
-        Inntektsmelding,
-        NySøknad,
-        SendtSøknad,
-        Påminnelse,
-        GjennopptaBehandling
-    }
 
-    fun hendelseId() = hendelseId
+    private val hendelseObservers = mutableListOf<HendelseObserver>()
 
-    @Deprecated("Henger igjen fra Epic-1")
-    fun hendelsestype() = hendelsestype
-
-    abstract fun rapportertdato(): LocalDateTime
+    fun addObserver(hendelseObserver: HendelseObserver) = hendelseObservers.add(hendelseObserver)
 
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String
@@ -45,13 +28,8 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     internal open fun melding(klassName: String) = klassName
 
-    @Deprecated("Henger igjen fra Epic-1")
-    override fun compareTo(other: ArbeidstakerHendelse) = this.rapportertdato().compareTo(other.rapportertdato())
-
-    @Deprecated("Henger igjen fra Epic-1")
-    override fun equals(other: Any?) =
-        other is ArbeidstakerHendelse && other.hendelseId == this.hendelseId
-
-    @Deprecated("Henger igjen fra Epic-1")
-    override fun hashCode() = hendelseId.hashCode()
+    internal fun need(behov: BehovType) {
+        aktivitetslogg.need(melding = behov.navn)
+        hendelseObservers.forEach { it.onBehov(behov) }
+    }
 }

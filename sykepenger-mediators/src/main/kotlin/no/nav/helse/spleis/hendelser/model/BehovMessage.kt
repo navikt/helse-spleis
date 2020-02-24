@@ -3,6 +3,7 @@ package no.nav.helse.spleis.hendelser.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogg
@@ -21,7 +22,7 @@ internal abstract class BehovMessage(
         requiredKey(
             "@behov", "@id", "@opprettet",
             "@final", "@løsning", "@besvart",
-            "hendelse", "aktørId", "fødselsnummer",
+            "aktørId", "fødselsnummer",
             "organisasjonsnummer", "vedtaksperiodeId"
         )
         requiredValue("@final", true)
@@ -58,14 +59,20 @@ internal class YtelserMessage(
         )
 
         val utbetalingshistorikk = Utbetalingshistorikk(
+            ukjentePerioder = this["@løsning.Sykepengehistorikk"].flatMap {
+                it.path("ukjentePerioder")
+            },
             utbetalinger = this["@løsning.Sykepengehistorikk"].flatMap {
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->
                 val fom = utbetaling["fom"].asLocalDate()
-                val tom = utbetaling["fom"].asLocalDate()
+                val tom = utbetaling["tom"].asLocalDate()
                 val typekode = utbetaling["typeKode"].asText()
                 val dagsats = utbetaling["dagsats"].asInt()
                 when (typekode) {
+                    "0" -> {
+                        Utbetalingshistorikk.Periode.Utbetaling(fom, tom, dagsats)
+                    }
                     "1" -> {
                         ReduksjonMedlem(fom, tom, dagsats)
                     }
@@ -116,14 +123,13 @@ internal class YtelserMessage(
         )
 
         return Ytelser(
-            hendelseId = this.id,
+            meldingsreferanseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
-            rapportertdato = this["@besvart"].asLocalDateTime(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
@@ -161,12 +167,10 @@ internal class VilkårsgrunnlagMessage(
 
     internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
-            hendelseId = this.id,
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
-            rapportertDato = this["@besvart"].asLocalDateTime(),
             inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
                 Vilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
@@ -208,8 +212,8 @@ internal class ManuellSaksbehandlingMessage(
 ) :
     BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
     init {
-        requiredValues("@behov", Behovstype.GodkjenningFraSaksbehandler)
-        requiredKey("@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent")
+        requiredValues("@behov", Behovstype.Godkjenning)
+        requiredKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
         requiredKey("saksbehandlerIdent")
     }
 
@@ -219,14 +223,12 @@ internal class ManuellSaksbehandlingMessage(
 
     internal fun asManuellSaksbehandling() =
         ManuellSaksbehandling(
-            hendelseId = this.id,
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
-            utbetalingGodkjent = this["@løsning.${Behovstype.GodkjenningFraSaksbehandler.name}.godkjent"].asBoolean(),
-            rapportertdato = this["@besvart"].asLocalDateTime(),
+            utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
@@ -235,6 +237,50 @@ internal class ManuellSaksbehandlingMessage(
 
         override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): ManuellSaksbehandlingMessage {
             return ManuellSaksbehandlingMessage(message, problems, aktivitetslogg)
+        }
+    }
+}
+
+internal class UtbetalingMessage(
+    originalMessage: String,
+    private val aktivitetslogger: Aktivitetslogger,
+    private val aktivitetslogg: Aktivitetslogg
+) :
+    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    init {
+        requiredValues("@behov", Behovstype.Utbetaling)
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}")
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}.status")
+        requiredKey("@løsning.${Behovstype.Utbetaling.name}.melding")
+        requiredKey("utbetalingsreferanse")
+    }
+
+    override fun accept(processor: MessageProcessor) {
+        processor.process(this, aktivitetslogger)
+    }
+
+    internal fun asUtbetaling(): Utbetaling {
+        return Utbetaling(
+            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            aktørId = this["aktørId"].asText(),
+            fødselsnummer = this["fødselsnummer"].asText(),
+            orgnummer = this["organisasjonsnummer"].asText(),
+            utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
+            status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
+            melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText(),
+            aktivitetslogger = aktivitetslogger,
+            aktivitetslogg = aktivitetslogg
+        )
+    }
+
+    object Factory : MessageFactory {
+
+        override fun createMessage(
+            message: String,
+            problems: Aktivitetslogger,
+            aktivitetslogg: Aktivitetslogg
+        ): UtbetalingMessage {
+            return UtbetalingMessage(message, problems, aktivitetslogg)
         }
     }
 }

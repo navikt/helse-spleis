@@ -1,7 +1,6 @@
 package no.nav.helse.serde.mapping
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.NeedType
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData
 import no.nav.helse.serde.reflection.ReflectClass
@@ -28,7 +27,6 @@ internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData):
             )
             AktivitetsloggData.Alvorlighetsgrad.NEED -> aktivitetClass.getNestedClass("Need").getInstance(
                 kontekster,
-                NeedType.valueOf(requireNotNull(it.needType)),
                 it.melding,
                 it.tidsstempel
             )

@@ -1,16 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -40,7 +37,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovstype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), "Utbetaling", "utbetalingsreferanse")
         assertNotNull(utbetalingsreferanse)
     }
 
@@ -77,25 +74,25 @@ internal class GodkjenningHendelseTest {
     }
 
     private fun håndterYtelser() {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
     }
 
     private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
-        hendelseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
@@ -103,12 +100,13 @@ internal class GodkjenningHendelseTest {
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Ytelser(
-        hendelseId = UUID.randomUUID(),
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         utbetalingshistorikk = Utbetalingshistorikk(
+            ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
@@ -120,60 +118,62 @@ internal class GodkjenningHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        rapportertdato = LocalDateTime.now(),
         aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
-    )
+    ).apply {
+        addObserver(personObserver)
+    }
 
-    private fun nySøknad() =
-        NySøknad(
-            hendelseId = UUID.randomUUID(),
+    private fun sykmelding() =
+        Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
-    private fun sendtSøknad() =
-        SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+    private fun søknad() =
+        Søknad(
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            sendtNav = LocalDateTime.now(),
-            perioder = listOf(SendtSøknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun inntektsmelding() =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = (1..12).map {
                 Vilkårsgrunnlag.Måned(
                     YearMonth.of(2018, it), listOf(31000.0)
@@ -183,7 +183,9 @@ internal class GodkjenningHendelseTest {
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
@@ -220,20 +222,20 @@ internal class GodkjenningHendelseTest {
         internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 
-    private inner class TestPersonObserver : PersonObserver {
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
+    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
+        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
 
         fun etterspurteBehov(id: UUID) =
             etterspurteBehov.getValue(id).toList()
 
-        fun <T> etterspurtBehov(id: UUID, behov: Behovstype, felt: String): T? {
+        fun <T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
             return personObserver.etterspurteBehov(id)
-                .first { behov.name in it.behovType() }[felt]
+                .first { behov == it.navn }.toMap()[felt] as T?
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
-                .add(behov)
+
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }.add(behov)
         }
     }
 }

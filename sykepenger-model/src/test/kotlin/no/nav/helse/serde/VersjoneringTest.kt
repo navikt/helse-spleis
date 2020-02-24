@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test
 internal class VersjoneringTest {
 
     @Test
-    fun `kan lese person med skjemaversjon 4`() {
-        val person = parsePerson(lesPersonJson("person.json"))
+    fun `kan lese person med skjemaversjon 0`() {
+        val person = SerialisertPerson(lesPersonJson("person_v0.json")).deserialize()
         assertNotNull(person)
     }
 
-    fun lesPersonJson(filnavn: String) =
+    private fun lesPersonJson(filnavn: String) =
         VersjoneringTest::class.java.getResource("/versjonerte_personer/$filnavn").readText()
 }

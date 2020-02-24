@@ -1,15 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
+import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -71,7 +68,7 @@ internal class VilkårsgrunnlagHendelseTest {
             utgangspunktForBeregningAvYtelse.minusDays(1),
             personObserver.etterspurtBehov(
                 vedtaksperiodeId,
-                Behovstype.Sykepengehistorikk,
+                "Sykepengehistorikk",
                 "utgangspunktForBeregningAvYtelse"
             )
         )
@@ -134,52 +131,55 @@ internal class VilkårsgrunnlagHendelseTest {
         inntekter: List<Vilkårsgrunnlag.Måned>,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) {
-        person.håndter(nySøknad())
-        person.håndter(sendtSøknad())
+        person.håndter(sykmelding())
+        person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
-    private fun nySøknad() =
-        NySøknad(
-            hendelseId = UUID.randomUUID(),
+    private fun sykmelding() =
+        Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            rapportertdato = LocalDateTime.now(),
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
-    private fun sendtSøknad() =
-        SendtSøknad(
-            hendelseId = UUID.randomUUID(),
+    private fun søknad() =
+        Søknad(
+            meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            sendtNav = LocalDateTime.now(),
-            perioder = listOf(SendtSøknad.Periode.Sykdom(1.januar, 31.januar, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = false
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun inntektsmelding(beregnetInntekt: Double) =
         Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            mottattDato = 1.februar.atStartOfDay(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
@@ -187,18 +187,18 @@ internal class VilkårsgrunnlagHendelseTest {
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
-            hendelseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            rapportertDato = LocalDateTime.now(),
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
-        )
+        ).apply {
+            addObserver(personObserver)
+        }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
 
@@ -235,18 +235,18 @@ internal class VilkårsgrunnlagHendelseTest {
 
     }
 
-    private inner class TestPersonObserver : PersonObserver {
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<Behov>>()
+    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
+        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
 
         fun etterspurteBehov(vedtaksperiodeId: UUID) = etterspurteBehov.getValue(vedtaksperiodeId).toList()
 
-        fun <T> etterspurtBehov(vedtaksperiodeId: UUID, behov: Behovstype, felt: String): T? {
-            return personObserver.etterspurteBehov(vedtaksperiodeId)
-                .first { behov.name in it.behovType() }[felt]
+        fun <T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
+            return personObserver.etterspurteBehov(id)
+                .first { behov == it.navn }.toMap()[felt] as T?
         }
 
-        override fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-            etterspurteBehov.computeIfAbsent(UUID.fromString(behov.vedtaksperiodeId())) { mutableListOf() }
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }
                 .add(behov)
         }
     }

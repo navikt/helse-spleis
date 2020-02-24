@@ -1,12 +1,10 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.ArbeidstakerHendelse.Hendelsestype.GjennopptaBehandling
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -16,7 +14,6 @@ internal class Arbeidsgiver private constructor(
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
     private val perioder: MutableList<Vedtaksperiode>,
-    internal var utbetalingsreferanse: Long,
     private val aktivitetslogger: Aktivitetslogger
 ) {
 
@@ -29,7 +26,6 @@ internal class Arbeidsgiver private constructor(
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
         perioder = mutableListOf(),
-        utbetalingsreferanse = System.currentTimeMillis(),
         aktivitetslogger = Aktivitetslogger()
     )
 
@@ -52,29 +48,29 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
-    internal fun håndter(nySøknad: NySøknad) {
-        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(nySøknad) }) {
+    internal fun håndter(sykmelding: Sykmelding) {
+        if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(sykmelding) }) {
             aktivitetslogger.infoOld("Lager ny vedtaksperiode")
-            nyVedtaksperiode(nySøknad).håndter(nySøknad)
+            nyVedtaksperiode(sykmelding).håndter(sykmelding)
         }
-        nySøknad.kopierAktiviteterTil(aktivitetslogger)
+        sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    internal fun håndter(sendtSøknad: SendtSøknad) {
-        if (perioder.none { it.håndter(sendtSøknad) }) {
-            sendtSøknad.errorOld("Uventet sendt søknad, mangler ny søknad")
+    internal fun håndter(søknad: Søknad) {
+        if (perioder.none { it.håndter(søknad) }) {
+            søknad.errorOld("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
-        sendtSøknad.kopierAktiviteterTil(aktivitetslogger)
+        søknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntekthistorikk.add(
             inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
-            inntektsmelding.hendelseId(),
+            inntektsmelding.meldingsreferanseId(),
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            inntektsmelding.errorOld("Uventet inntektsmelding, mangler ny søknad")
+            inntektsmelding.errorOld("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
         inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
@@ -95,6 +91,11 @@ internal class Arbeidsgiver private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    internal fun håndter(utbetaling: Utbetaling) {
+        perioder.forEach { it.håndter(utbetaling) }
+        utbetaling.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     internal fun håndter(påminnelse: Påminnelse) =
         perioder.any { it.håndter(påminnelse) }.also {
             påminnelse.kopierAktiviteterTil(aktivitetslogger)
@@ -110,51 +111,28 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    private fun nyVedtaksperiode(nySøknad: NySøknad): Vedtaksperiode {
+    private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
             id = UUID.randomUUID(),
-            aktørId = nySøknad.aktørId(),
-            fødselsnummer = nySøknad.fødselsnummer(),
-            organisasjonsnummer = nySøknad.organisasjonsnummer()
+            aktørId = sykmelding.aktørId(),
+            fødselsnummer = sykmelding.fødselsnummer(),
+            organisasjonsnummer = sykmelding.organisasjonsnummer()
         ).also {
             perioder.add(it)
         }
     }
 
-    internal fun harTilstøtendePeriode(vedtaksperiode: Vedtaksperiode) = perioder.any { it.harTilstøtende(vedtaksperiode) }
-
     internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
-        perioder
-            .mapNotNull { it.tilstøtende(vedtaksperiode) }
-            .sortedBy { it.førsteFraværsdag() }
-            .firstOrNull { it.førsteFraværsdag() != null }
+        Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
 
-    internal fun gjennoptaBehandling(vedtaksperiode: Vedtaksperiode) {
-        perioder.forEach { it.håndter(this, vedtaksperiode, GjennoptaBehandling(person.aktivitetslogg.barn())) }
+    internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        perioder.forEach { it.håndter(this, vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
-    internal class GjennoptaBehandling(aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(UUID.randomUUID(), GjennopptaBehandling, Aktivitetslogger(), aktivitetslogg) {
-        override fun rapportertdato(): LocalDateTime {
-            kotlin.error("Uventet kall")
-        }
-
-        override fun aktørId(): String {
-            kotlin.error("Uventet kall")
-        }
-
-        override fun fødselsnummer(): String {
-            kotlin.error("Uventet kall")
-        }
-
-        override fun organisasjonsnummer(): String {
-            kotlin.error("Uventet kall")
-        }
-    }
-
+    internal class GjenopptaBehandling(val hendelse: ArbeidstakerHendelse)
 }

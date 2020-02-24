@@ -3,7 +3,6 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.*
 import no.nav.helse.person.AktivitetsloggVisitor
-import no.nav.helse.person.NeedType
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
@@ -40,7 +39,6 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
 
         private fun leggTilMelding(
             kontekster: List<SpesifikkKontekst>,
-            type: NeedType,
             melding: String,
             tidsstempel: String
         ) {
@@ -48,7 +46,6 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
                 mutableMapOf<String, Any>(
                     "kontekster" to map(kontekster),
                     "alvorlighetsgrad" to NEED.name,
-                    "needType" to type.name,
                     "melding" to melding,
                     "tidsstempel" to tidsstempel
                 )
@@ -82,11 +79,10 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
         override fun visitNeed(
             kontekster: List<SpesifikkKontekst>,
             aktivitet: Need,
-            type: NeedType,
-            tidsstempel: String,
-            melding: String
+            melding: String,
+            tidsstempel: String
         ) {
-            leggTilMelding(kontekster, type, melding, tidsstempel)
+            leggTilMelding(kontekster, melding, tidsstempel)
         }
 
         override fun visitError(

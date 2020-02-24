@@ -32,6 +32,20 @@ internal class JsonMessageTest {
     }
 
     @Test
+    internal fun `read count`() {
+        val problems = MessageProblems("{}")
+        val firstMessage = JsonMessage("{}", problems).apply {
+            interestedIn("system_read_count")
+        }
+        assertEquals(0, firstMessage["system_read_count"].intValue())
+
+        val secondMessage = JsonMessage(firstMessage.toJson(), problems).apply {
+            interestedIn("system_read_count")
+        }
+        assertEquals(1, secondMessage["system_read_count"].intValue())
+    }
+
+    @Test
     internal fun `extended message`() {
         "not_valid_json".also { json ->
             MessageProblems(json).also {

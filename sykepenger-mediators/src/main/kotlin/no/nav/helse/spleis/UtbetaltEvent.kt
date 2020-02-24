@@ -8,7 +8,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import org.apache.kafka.clients.producer.ProducerRecord
 
-internal fun PersonObserver.UtbetalingEvent.producerRecord() = ProducerRecord<String, String>(
+internal fun PersonObserver.UtbetaltEvent.producerRecord() = ProducerRecord<String, String>(
     Topics.rapidTopic, this.fødselsnummer, toJson(this)
 )
 
@@ -16,12 +16,11 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun toJson(event: PersonObserver.UtbetalingEvent) = objectMapper.writeValueAsString(
+private fun toJson(event: PersonObserver.UtbetaltEvent) = objectMapper.writeValueAsString(
     mapOf(
-        "@event_name" to "utbetaling",
+        "@event_name" to "utbetalt",
         "aktørId" to event.aktørId,
         "fødselsnummer" to event.fødselsnummer,
-        "organisasjonsnummer" to event.organisasjonsnummer,
         "utbetalingsreferanse" to event.utbetalingsreferanse,
         "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
         "utbetalingslinjer" to event.utbetalingslinjer.toJson(),

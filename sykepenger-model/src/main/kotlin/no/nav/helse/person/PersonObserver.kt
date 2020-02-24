@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.Duration
@@ -30,6 +29,8 @@ interface PersonObserver {
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val sykdomshendelse: ArbeidstakerHendelse,
+        val aktivitetslogger: Aktivitetslogger,
+        val aktivitetslogg: Aktivitetslogg,
         val timeout: Duration
     ) {
         val endringstidspunkt = LocalDateTime.now()
@@ -45,15 +46,21 @@ interface PersonObserver {
         val opprettet: LocalDate
     )
 
+    data class UtbetaltEvent(
+        val vedtaksperiodeId: UUID,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val utbetalingsreferanse: String,
+        val utbetalingslinjer: List<Utbetalingslinje>,
+        val opprettet: LocalDate
+    )
+
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 
-    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
-
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    fun vedtaksperiodeTrengerLøsning(behov: Behov) {}
+    fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
 
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
 

@@ -102,7 +102,15 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspurv",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvhelserisk",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsyfoinntektsmel",
                     "role": "PRODUCER"
                 },
                 {
@@ -127,7 +135,15 @@
                 },
                 {
                     "member": "S149030",
-                    "role": "PRODUCER"
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "E156407",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "N143409",
+                    "role": "MANAGER"
                 }
             ],
             "numPartitions": 1,

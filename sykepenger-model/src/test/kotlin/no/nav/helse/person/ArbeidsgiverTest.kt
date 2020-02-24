@@ -8,14 +8,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverTest {
     @Test
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
         val inntektsmelding = Inntektsmelding(
-            hendelseId = UUID.randomUUID(),
+            meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = LocalDate.now(),
                 beløpPrMåned = 120.0
@@ -23,7 +22,6 @@ internal class ArbeidsgiverTest {
             orgnummer = "orgnr",
             fødselsnummer = "fnr",
             aktørId = "aktørId",
-            mottattDato = LocalDateTime.now(),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             aktivitetslogger = Aktivitetslogger(),

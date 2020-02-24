@@ -70,7 +70,7 @@ internal class ArbeidsgiverHåndterHendelse(
         return !hendelse.hasErrorsOld()
     }
 
-    override fun feilmelding() = "Feil under hendelseshåndtering"
+    override fun feilmelding() = String.format("Feil under håndtering av %s", hendelse::class.simpleName)
 }
 
 internal class Overlappende(

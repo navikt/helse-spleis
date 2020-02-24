@@ -1,24 +1,23 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Sykmelding
-import no.nav.helse.sykdomstidslinje.dag.Dag.NøkkelHendelseType.Søknad
 import java.time.LocalDate
 
-internal class Sykedag internal constructor(gjelder: LocalDate, hendelseType: NøkkelHendelseType) : Dag(gjelder, hendelseType) {
-    override fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.visitSykedag(this)
-    }
+internal sealed class Sykedag(gjelder: LocalDate) : Dag(gjelder) {
 
     override fun toString() = formatter.format(dagen) + "\tSykedag"
 
-    override fun dagType(): JsonDagType = JsonDagType.SYKEDAG
+    class Sykmelding(gjelder: LocalDate) : Sykedag(gjelder) {
 
-    override fun nøkkel(): Nøkkel {
-        return when (hendelseType) {
-            Søknad -> Nøkkel.S_A
-            Sykmelding -> Nøkkel.S_SM
-            else -> throw RuntimeException("Hendelse $hendelseType er ikke støttet")
+        override fun accept(visitor: SykdomstidslinjeVisitor) {
+            visitor.visitSykedag(this)
+        }
+    }
+
+    class Søknad(gjelder: LocalDate) : Sykedag(gjelder) {
+
+        override fun accept(visitor: SykdomstidslinjeVisitor) {
+            visitor.visitSykedag(this)
         }
     }
 }

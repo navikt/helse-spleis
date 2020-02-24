@@ -5,22 +5,20 @@ import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
-class NySøknad(
-    hendelseId: UUID,
+class Sykmelding(
+    meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val rapportertdato: LocalDateTime,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(hendelseId, Hendelsestype.NySøknad, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
 
     private val sykeperioder: List<Sykeperiode>
 
@@ -31,12 +29,12 @@ class NySøknad(
     }
 
     override fun valider(): Aktivitetslogger {
-        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Støtter bare 100%% sykmeldt")
+        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Sykmeldingen inneholder graderte sykeperioder")
         return aktivitetslogger
     }
 
     override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Ny søknad")
+        aktivitetslogger.addAll(this.aktivitetslogger, "Sykmelding")
     }
 
     override fun melding(ignore: String) = "Ny Søknad"
@@ -46,13 +44,11 @@ class NySøknad(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, ConcreteSykdomstidslinje.Companion::implisittDag, KonfliktskyDagturnering)}
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, SykmeldingDagFactory::implisittDag, KonfliktskyDagturnering)}
 
     override fun fødselsnummer() = fnr
 
     override fun organisasjonsnummer() = orgnummer
-
-    override fun rapportertdato() = rapportertdato
 
     override fun aktørId() = aktørId
 
@@ -68,9 +64,16 @@ class NySøknad(
         internal fun kanBehandles() = sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, Dag.NøkkelHendelseType.Sykmelding)
+            ConcreteSykdomstidslinje.sykedager(fom, tom, SykmeldingDagFactory)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+    }
+
+    internal object SykmeldingDagFactory : DagFactory {
+        override fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
+        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Sykmelding(dato)
+        override fun ubestemtdag(dato: LocalDate): Ubestemtdag { error("Ubestemtdag ikke støttet") }
+        override fun utenlandsdag(dato: LocalDate): Utenlandsdag { error("Utenlandsdag ikke støttet") }
     }
 }

@@ -38,7 +38,7 @@ class ApplicationBuilder(env: Map<String, String>) {
     )
     private val dataSourceBuilder = DataSourceBuilder(env)
 
-    private val rapid = KafkaRapid(Topics.hendelseKildeTopics)
+    private val rapid = KafkaRapid()
 
     private val helseBuilder = HelseBuilder(
         dataSource = dataSourceBuilder.getDataSource(),
@@ -55,9 +55,6 @@ class ApplicationBuilder(env: Map<String, String>) {
 
         connector {
             port = env["HTTP_PORT"]?.toInt() ?: 8080
-
-            println("HTTP_PORT = $port")
-
         }
 
         module {

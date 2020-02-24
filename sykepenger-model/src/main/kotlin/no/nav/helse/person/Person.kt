@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.Behov
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
@@ -20,9 +19,9 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
-    fun håndter(nySøknad: NySøknad) = håndter(nySøknad, "ny søknad")
+    fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
 
-    fun håndter(sendtSøknad: SendtSøknad) = håndter(sendtSøknad, "sendt søknad")
+    fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
 
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
@@ -56,6 +55,12 @@ class Person private constructor(
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
+    fun håndter(utbetaling: Utbetaling) {
+        registrer(utbetaling, "Behandler vilkårsgrunnlag")
+        finnArbeidsgiver(utbetaling)?.håndter(utbetaling)
+        utbetaling.kopierAktiviteterTil(aktivitetslogger)
+    }
+
     fun håndter(påminnelse: Påminnelse) {
         registrer(påminnelse, "Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
@@ -64,7 +69,7 @@ class Person private constructor(
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId()),
+                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId),
                     aktørId = påminnelse.aktørId(),
                     fødselsnummer = påminnelse.fødselsnummer(),
                     organisasjonsnummer = påminnelse.organisasjonsnummer()
@@ -78,16 +83,12 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
-    @Deprecated("Skal bruke aktivitetslogger.need()")
     fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
         observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
     }
 
-    @Deprecated("Skal bruke aktivitetslogger.need()")
-    fun vedtaksperiodeTrengerLøsning(behov: Behov) {
-        observers.forEach {
-            it.vedtaksperiodeTrengerLøsning(behov)
-        }
+    fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
+        observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }
 
     fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {

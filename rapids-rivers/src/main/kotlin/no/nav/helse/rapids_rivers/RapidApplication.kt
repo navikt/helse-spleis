@@ -9,7 +9,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.TimeUnit
 
-class RapidApplication private constructor(
+class RapidApplication internal constructor(
     private val ktor: ApplicationEngine,
     private val rapid: RapidsConnection
 ) : RapidsConnection(), RapidsConnection.MessageListener {
@@ -50,28 +50,20 @@ class RapidApplication private constructor(
         private val log = LoggerFactory.getLogger(RapidApplication::class.java)
 
         @KtorExperimentalAPI
-        fun create(env: Map<String, String>) = Builder(env).build()
+        fun create(env: Map<String, String>) = Builder(RapidApplicationConfig.fromEnv(env)).build()
     }
 
-    class Builder(env: Map<String, String>) {
+    class Builder(config: RapidApplicationConfig) {
+
         init {
             Thread.currentThread().setUncaughtExceptionHandler(::uncaughtExceptionHandler)
         }
 
-        private val kafkaConfig = KafkaConfigBuilder(
-            bootstrapServers = env.getValue("KAFKA_BOOTSTRAP_SERVERS"),
-            consumerGroupId = env.getValue("KAFKA_CONSUMER_GROUP_ID"),
-            username = "/var/run/secrets/nais.io/service_user/username".readFile(),
-            password = "/var/run/secrets/nais.io/service_user/password".readFile(),
-            truststore = env["NAV_TRUSTSTORE_PATH"],
-            truststorePassword = env["NAV_TRUSTSTORE_PASSWORD"]
-        )
-
-        private val rapid = KafkaRapid.create(kafkaConfig, env.getValue("KAFKA_RAPID_TOPIC"))
+        private val rapid = KafkaRapid.create(config.kafkaConfig, config.rapidTopic, config.extraTopics)
 
         private val ktor = KtorBuilder()
             .log(log)
-            .port(env["HTTP_PORT"]?.toInt() ?: 8080)
+            .port(config.httpPort)
             .liveness(rapid::isRunning)
             .readiness(rapid::isRunning)
             .metrics(CollectorRegistry.defaultRegistry)
@@ -87,6 +79,30 @@ class RapidApplication private constructor(
 
         private fun uncaughtExceptionHandler(thread: Thread, err: Throwable) {
             log.error("Uncaught exception in thread ${thread.name}: ${err.message}", err)
+        }
+    }
+
+    class RapidApplicationConfig(
+        internal val rapidTopic: String,
+        internal val extraTopics: List<String> = emptyList(),
+        internal val kafkaConfig: KafkaConfig,
+        internal val httpPort: Int = 8080
+    ) {
+        companion object {
+            fun fromEnv(env: Map<String, String>) =
+                RapidApplicationConfig(
+                    rapidTopic = env.getValue("KAFKA_RAPID_TOPIC"),
+                    extraTopics = env["KAFKA_EXTRA_TOPIC"]?.split(',')?.map(String::trim) ?: emptyList(),
+                    kafkaConfig = KafkaConfig(
+                        bootstrapServers = env.getValue("KAFKA_BOOTSTRAP_SERVERS"),
+                        consumerGroupId = env.getValue("KAFKA_CONSUMER_GROUP_ID"),
+                        username = "/var/run/secrets/nais.io/service_user/username".readFile(),
+                        password = "/var/run/secrets/nais.io/service_user/password".readFile(),
+                        truststore = env["NAV_TRUSTSTORE_PATH"],
+                        truststorePassword = env["NAV_TRUSTSTORE_PASSWORD"]
+                    ),
+                    httpPort = env["HTTP_PORT"]?.toInt() ?: 8080
+                )
         }
     }
 }

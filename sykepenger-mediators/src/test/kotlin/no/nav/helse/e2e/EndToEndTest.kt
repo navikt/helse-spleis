@@ -18,7 +18,6 @@ import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.søknadDTO
-import no.nav.helse.Topics.inntektsmeldingTopic
 import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behovstype
@@ -75,9 +74,7 @@ internal class EndToEndTest {
         private const val password = "kafkaclient"
         private const val kafkaApplicationId = "spleis-v1"
 
-        private val topics = Topics.hendelseKildeTopics + listOf(
-            rapidTopic
-        )
+        private val topics = listOf(rapidTopic, søknadTopic)
         // Use one partition per topic to make message sending more predictable
         private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
@@ -139,8 +136,6 @@ internal class EndToEndTest {
             }
         }
 
-        var apiport: Int = -1
-
         @BeforeAll
         @JvmStatic
         internal fun `start embedded environment`() {
@@ -164,7 +159,6 @@ internal class EndToEndTest {
             stubFor(jwtStub.stubbedConfigProvider())
 
             val port = randomPort()
-            apiport = port
             appBaseUrl = "http://localhost:$port"
             app = ApplicationBuilder(
                 applicationConfig(
@@ -208,14 +202,14 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.START,
-            currentState = TilstandType.MOTTATT_NY_SØKNAD
+            currentState = TilstandType.MOTTATT_SYKMELDING
         )
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.MOTTATT_NY_SØKNAD,
+            previousState = TilstandType.MOTTATT_SYKMELDING,
             currentState = TilstandType.UNDERSØKER_HISTORIKK
         )
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
@@ -237,14 +231,7 @@ internal class EndToEndTest {
             currentState = TilstandType.AVVENTER_HISTORIKK
         )
 
-        val sykehistorikk = listOf(
-            SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
-            )
-        )
-        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
 
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
@@ -253,11 +240,25 @@ internal class EndToEndTest {
             previousState = TilstandType.AVVENTER_HISTORIKK,
             currentState = TilstandType.AVVENTER_GODKJENNING
         )
-        assertBehov(
+
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
+
+        assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
-            typer = listOf(GodkjenningFraSaksbehandler.name)
+            previousState = TilstandType.AVVENTER_GODKJENNING,
+            currentState = TilstandType.TIL_UTBETALING
+        )
+
+        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, true)
+
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.TIL_UTBETALING,
+            currentState = TilstandType.UTBETALT
         )
 
         aktørID.hentPerson {
@@ -279,14 +280,7 @@ internal class EndToEndTest {
 
         sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
 
-        val sykehistorikk = listOf(
-            SpolePeriode(
-                fom = søknad.fom!!.minusMonths(8),
-                tom = søknad.fom!!.minusMonths(7),
-                grad = "100"
-            )
-        )
-        sendSykepengehistorikkløsning(aktørID, fødselsnummer, sykehistorikk)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
         sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
 
         assertVedtaksperiodeEndretEvent(
@@ -306,7 +300,30 @@ internal class EndToEndTest {
     }
 
     @Test
-    fun `gitt en ny søknad, så skal den kunne hentes ut på personen`() {
+    fun `FEIL fra Spenn fører til UTBETALING_FEILET tilstand`() {
+        val aktørID = "876591234219622312"
+        val fødselsnummer = "01019000000"
+        val virksomhetsnummer = "123456789"
+
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
+        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
+        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
+        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
+        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, false)
+
+        assertVedtaksperiodeEndretEvent(
+            aktørId = aktørID,
+            fødselsnummer = fødselsnummer,
+            virksomhetsnummer = virksomhetsnummer,
+            previousState = TilstandType.TIL_UTBETALING,
+            currentState = TilstandType.UTBETALING_FEILET
+        )
+    }
+
+    @Test
+    fun `gitt en sykmelding, så skal den kunne hentes ut på personen`() {
         val enAktørId = "1211109876233"
         val fødselsnummer = "01019000123"
         val virksomhetsnummer = "123456789"
@@ -315,9 +332,15 @@ internal class EndToEndTest {
         sendSøknad(enAktørId, fødselsnummer, virksomhetsnummer)
         sendInnteksmelding(enAktørId, fødselsnummer, virksomhetsnummer)
         sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
-        sendSykepengehistorikkløsning(enAktørId, fødselsnummer, emptyList())
+        sendSykepengehistorikkløsningUtenHistorikk(enAktørId, fødselsnummer)
 
-        assertVedtaksperiodeEndretEvent(fødselsnummer, virksomhetsnummer, enAktørId, TilstandType.AVVENTER_HISTORIKK, TilstandType.AVVENTER_GODKJENNING)
+        assertVedtaksperiodeEndretEvent(
+            fødselsnummer,
+            virksomhetsnummer,
+            enAktørId,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_GODKJENNING
+        )
 
         enAktørId.hentPerson {
             assertEquals(3, objectMapper.readTree(this)["hendelser"].size())
@@ -342,7 +365,7 @@ internal class EndToEndTest {
                         .filter { enAktørId == it["aktørId"].textValue() }
                         .filter { fødselsnummer == it["fødselsnummer"].textValue() }
                         .filter { organisasjonsnummer == it["organisasjonsnummer"].textValue() }
-                        .firstOrNull { påminnelse.vedtaksperiodeId() == it["vedtaksperiodeId"].textValue() }
+                        .firstOrNull { påminnelse.vedtaksperiodeId == it["vedtaksperiodeId"].textValue() }
                 )
             }
     }
@@ -364,7 +387,6 @@ internal class EndToEndTest {
             )
         ).also { sendKafkaMessage(rapidTopic, fødselsnummer, it) }
         return Påminnelse(
-            hendelseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -404,7 +426,7 @@ internal class EndToEndTest {
         ("/api/utbetaling/$this").httpGet(testBlock)
     }
 
-    private fun sendSykepengehistorikkløsning(aktørId: String, fødselsnummer: String, perioder: List<SpolePeriode>) {
+    private fun sendSykepengehistorikkløsningUtenHistorikk(aktørId: String, fødselsnummer: String) {
         val behov = ventPåBehov(aktørId, fødselsnummer, Sykepengehistorikk)
 
         assertNotNull(behov["utgangspunktForBeregningAvYtelse"])
@@ -412,7 +434,7 @@ internal class EndToEndTest {
         sendBehov(
             behov.løsBehov(
                 mapOf(
-                    "Sykepengehistorikk" to perioder,
+                    "Sykepengehistorikk" to emptyList<Any>(),
                     "Foreldrepenger" to emptyMap<String, String>()
                 )
             )
@@ -454,11 +476,30 @@ internal class EndToEndTest {
         utbetalingGodkjent: Boolean,
         saksbehandler: String
     ) {
-        val behov = ventPåBehov(aktørId, fødselsnummer, GodkjenningFraSaksbehandler)
+        val behov = ventPåBehov(aktørId, fødselsnummer, Godkjenning)
 
         val løstBehov = behov
             .apply { put("saksbehandlerIdent", saksbehandler) }
-            .løsBehov(mapOf(GodkjenningFraSaksbehandler.name to mapOf("godkjent" to utbetalingGodkjent)))
+            .løsBehov(mapOf(Godkjenning.name to mapOf("godkjent" to utbetalingGodkjent)))
+        sendBehov(løstBehov)
+    }
+
+    private fun sendUtbetalingSvarFraSpenn(
+        aktørId: String,
+        fødselsnummer: String,
+        utbetalingOK: Boolean
+    ) {
+        val behov = ventPåBehov(aktørId, fødselsnummer, Utbetaling)
+
+        val løstBehov = behov
+            .løsBehov(
+                mapOf(
+                    Utbetaling.name to mapOf(
+                        "status" to (if (utbetalingOK) "FERDIG" else "FEIL"),
+                        "melding" to (if (utbetalingOK) "" else "FEIL FRA SPENN")
+                    )
+                )
+            )
         sendBehov(løstBehov)
     }
 
@@ -477,7 +518,7 @@ internal class EndToEndTest {
         )
     ) {
         synchronousSendKafkaMessage(
-            inntektsmeldingTopic,
+            rapidTopic,
             inntektsMelding.inntektsmeldingId,
             inntektsMelding.toJsonNode().toString()
         )
@@ -614,7 +655,7 @@ internal class EndToEndTest {
                 val currentPositionOfSentMessage = recordMetadata.offset()
                 val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
                     ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
-                assertEquals(currentConsumerGroupPosition, currentPositionOfSentMessage)
+                assertTrue(currentConsumerGroupPosition >= currentPositionOfSentMessage)
             }
     }
 
