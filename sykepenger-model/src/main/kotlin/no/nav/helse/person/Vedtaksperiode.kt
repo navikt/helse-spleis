@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -29,6 +30,7 @@ internal class Vedtaksperiode private constructor(
     private var forbrukteSykedager: Int?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
     private var godkjentAv: String?,
+    private var godkjenttidspunkt: LocalDateTime?,
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var inntektFraInntektsmelding: Double?,
@@ -57,6 +59,7 @@ internal class Vedtaksperiode private constructor(
         forbrukteSykedager = null,
         utbetalingslinjer = null,
         godkjentAv = null,
+        godkjenttidspunkt = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
         inntektFraInntektsmelding = null,
@@ -590,8 +593,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
+                    vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
                     vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
-                        manuellSaksbehandling.info("Utbetaling markert som godkjent av saksbehandler (%s)", it)
+                        manuellSaksbehandling.info("Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
+                        )
                     }
                 }
                 arbeidsgiver.gjenopptaBehandling(vedtaksperiode, manuellSaksbehandling)
@@ -638,7 +643,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
-            if(utbetaling.isOK()) {
+            if (utbetaling.isOK()) {
                 vedtaksperiode.tilstand(utbetaling, Utbetalt) {
                     utbetaling.info("OK fra Oppdragssystemet")
                 }

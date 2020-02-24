@@ -201,6 +201,7 @@ internal class ManuellSaksbehandlingMessage(
         requireAll("@behov", Behovstype.Godkjenning)
         requireKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
         requireKey("saksbehandlerIdent")
+        interestedIn("godkjenttidspunkt")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -214,6 +215,7 @@ internal class ManuellSaksbehandlingMessage(
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
+            godkjenttidspunkt = this["godkjenttidspunkt"].asOptionalLocalDateTime(),
             utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean()
         )
 

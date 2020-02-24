@@ -44,6 +44,7 @@ internal fun createVedtaksperiode(
     forbrukteSykedager: Int?,
     utbetalingslinjer: List<Utbetalingslinje>?,
     godkjentAv: String?,
+    godkjenttidspunkt: LocalDateTime?,
     utbetalingsreferanse: String?,
     førsteFraværsdag: LocalDate?,
     inntektFraInntektsmelding: Double?,
@@ -53,7 +54,7 @@ internal fun createVedtaksperiode(
     .apply { isAccessible = true }
     .call(
         person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, forbrukteSykedager, utbetalingslinjer, godkjentAv,
-        utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk
+        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk
     )
 
 internal fun createSykdomshistorikk(
