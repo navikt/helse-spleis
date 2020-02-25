@@ -10,7 +10,7 @@ class Utbetaling(
     private val fødselsnummer: String,
     private val orgnummer: String,
     internal val utbetalingsreferanse: String,
-    private val status: String,
+    private val status: Status,
     internal val melding: String,
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
@@ -26,5 +26,7 @@ class Utbetaling(
         aktivitetslogger.addAll(this.aktivitetslogger, "Utbetaling")
     }
 
-    internal fun isOK() = status == "FERDIG"
+    internal fun isOK() = status == Status.FERDIG
+
+    enum class Status { FERDIG, FEIL }
 }

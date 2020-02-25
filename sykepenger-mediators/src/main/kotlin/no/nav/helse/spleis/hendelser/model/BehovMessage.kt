@@ -269,7 +269,7 @@ internal class UtbetalingMessage(
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
-            status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
+            status = enumValueOf(this["@løsning.${Behovstype.Utbetaling.name}.status"].asText()),
             melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg

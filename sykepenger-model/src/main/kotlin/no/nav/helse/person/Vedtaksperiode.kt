@@ -249,7 +249,7 @@ internal class Vedtaksperiode private constructor(
         this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode) =
-        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD)
+        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD, UTBETALT, UTBETALING_FEILET)
 
     internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         if (this.periode().start > other.periode().start) tilstand.håndter(arbeidsgiver, this, hendelse)
@@ -781,7 +781,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.severeOld("Feilrespons fra oppdrag")
+            hendelse.errorOld("Feilrespons fra oppdrag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
