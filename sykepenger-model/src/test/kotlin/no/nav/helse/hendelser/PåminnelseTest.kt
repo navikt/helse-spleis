@@ -28,12 +28,13 @@ internal class PåminnelseTest {
     }
 
     @Test
-    fun `warning ved påminnelse for nåværende tilstand`() {
+    fun `info ved påminnelse for nåværende tilstand`() {
         val tilstand = Vedtaksperiode.MottattSykmelding
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertTrue(aktivitetslogger.hasWarningsOld(), aktivitetslogger.toString())
+        assertTrue(aktivitetslogger.hasMessagesOld(), aktivitetslogger.toString())
+        assertFalse(aktivitetslogger.hasWarningsOld(), aktivitetslogger.toString())
     }
 
     @Test
