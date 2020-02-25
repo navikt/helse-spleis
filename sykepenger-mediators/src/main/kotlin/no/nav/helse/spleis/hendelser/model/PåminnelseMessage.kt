@@ -33,7 +33,7 @@ internal class PåminnelseMessage(
     override val id: UUID = UUID.randomUUID()
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, problems)
+        processor.process(this)
     }
 
     internal fun asPåminnelse(): Påminnelse {

@@ -30,7 +30,7 @@ internal class InntektsmeldingMessage(
     override val id: UUID get() = UUID.fromString(this["inntektsmeldingId"].textValue())
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     private val refusjon

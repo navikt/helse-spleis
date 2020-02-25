@@ -3,7 +3,6 @@ package no.nav.helse.spleis.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.model.*
@@ -15,35 +14,35 @@ internal class HendelseRecorder(
     private val probe: PostgresProbe = PostgresProbe
 ): MessageProcessor {
 
-    override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: NySøknadMessage) {
         lagreMelding(Meldingstype.NY_SØKNAD, message.id, message.toJson())
     }
 
-    override fun process(message: SendtSøknadMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: SendtSøknadMessage) {
         lagreMelding(Meldingstype.SENDT_SØKNAD, message.id, message.toJson())
     }
 
-    override fun process(message: InntektsmeldingMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: InntektsmeldingMessage) {
         lagreMelding(Meldingstype.INNTEKTSMELDING, message.id, message.toJson())
     }
 
-    override fun process(message: PåminnelseMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: PåminnelseMessage) {
         lagreMelding(Meldingstype.PÅMINNELSE, message.id, message.toJson())
     }
 
-    override fun process(message: YtelserMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: YtelserMessage) {
         lagreMelding(Meldingstype.YTELSER, message.id, message.toJson())
     }
 
-    override fun process(message: VilkårsgrunnlagMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: VilkårsgrunnlagMessage) {
         lagreMelding(Meldingstype.VILKÅRSGRUNNLAG, message.id, message.toJson())
     }
 
-    override fun process(message: ManuellSaksbehandlingMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: ManuellSaksbehandlingMessage) {
         lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message.id, message.toJson())
     }
 
-    override fun process(message: UtbetalingMessage, aktivitetslogger: Aktivitetslogger) {
+    override fun process(message: UtbetalingMessage) {
         lagreMelding(Meldingstype.UTBETALING, message.id, message.toJson())
     }
 

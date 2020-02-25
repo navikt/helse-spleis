@@ -41,7 +41,7 @@ internal class NySøknadMessage(
         }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asSykmelding() = Sykmelding(

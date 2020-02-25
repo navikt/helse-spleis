@@ -47,7 +47,7 @@ internal class YtelserMessage(
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asYtelser(): Ytelser {
@@ -162,7 +162,7 @@ internal class VilkårsgrunnlagMessage(
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
@@ -218,7 +218,7 @@ internal class ManuellSaksbehandlingMessage(
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asManuellSaksbehandling() =
@@ -256,7 +256,7 @@ internal class UtbetalingMessage(
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asUtbetaling(): Utbetaling {

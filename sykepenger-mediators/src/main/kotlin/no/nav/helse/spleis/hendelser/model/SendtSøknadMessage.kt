@@ -57,7 +57,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
     ?: emptyList())
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     internal fun asSøknad(): Søknad {
