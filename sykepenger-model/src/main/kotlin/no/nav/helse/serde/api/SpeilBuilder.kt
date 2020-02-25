@@ -286,14 +286,15 @@ internal class SpeilBuilder : PersonVisitor {
         ) {
             vedtaksperioder.forEach { periodeMap ->
                 if (periodeMap["utbetalingsreferanse"] != null) {
-                    val førsteFraværsdag = periodeMap["førsteFraværsdag"] as LocalDate
-                    val sisteSykedag =
-                        (periodeMap["sykdomstidslinje"] as List<Map<String, Any?>>).map { it["dagen"] as LocalDate }.max()!!
-                    periodeMap["utbetalingstidslinje"] =
-                        (utbetalingstidslinjer.last()["dager"] as List<MutableMap<String, Any?>>).filterNot {
-                            (it["dato"] as LocalDate)
-                                .isBefore(førsteFraværsdag) || (it["dato"] as LocalDate).isAfter(sisteSykedag)
-                        }
+                    (periodeMap["førsteFraværsdag"] as LocalDate?)?.let { førsteFraværsdag ->
+                        val sisteSykedag =
+                            (periodeMap["sykdomstidslinje"] as List<Map<String, Any?>>).map { it["dagen"] as LocalDate }.max()!!
+                        periodeMap["utbetalingstidslinje"] =
+                            (utbetalingstidslinjer.last()["dager"] as List<MutableMap<String, Any?>>).filterNot {
+                                (it["dato"] as LocalDate)
+                                    .isBefore(førsteFraværsdag) || (it["dato"] as LocalDate).isAfter(sisteSykedag)
+                            }
+                    }
                 }
             }
             popState()
