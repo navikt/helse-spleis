@@ -746,6 +746,7 @@ internal class Vedtaksperiode private constructor(
             )
 
             vedtaksperiode.aktivitetslogger.infoOld("Satt til utbetaling")
+            hendelse.info("Satt til utbetaling")
 
             vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
