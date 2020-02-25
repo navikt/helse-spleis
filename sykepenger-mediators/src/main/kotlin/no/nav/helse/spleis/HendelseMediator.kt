@@ -91,7 +91,6 @@ internal class HendelseMediator(
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
         override fun process(message: NySøknadMessage, aktivitetslogger: Aktivitetslogger) {
             val sykmelding = message.asSykmelding()
-
             hendelseProbe.onSykmelding(sykmelding)
             person(sykmelding).håndter(sykmelding)
             behovMediator.finalize(sykmelding)

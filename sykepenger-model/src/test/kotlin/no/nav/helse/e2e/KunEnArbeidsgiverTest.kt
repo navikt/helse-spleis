@@ -377,6 +377,7 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
+        assertFalse(inspektør.personLogg.hasErrors())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertFalse(inspektør.arbeidsgiverLogger.hasErrorsOld())
         assertFalse(inspektør.periodeLogger.hasErrorsOld())
@@ -390,6 +391,7 @@ internal class KunEnArbeidsgiverTest {
 
     private fun assertMessages(inspektør: TestPersonInspektør) {
         assertTrue(inspektør.personLogger.hasMessagesOld())
+        assertTrue(inspektør.personLogg.hasMessages())
         assertTrue(inspektør.arbeidsgiverLogger.hasMessagesOld())
         assertTrue(inspektør.periodeLogger.hasMessagesOld())
     }
@@ -624,6 +626,7 @@ internal class KunEnArbeidsgiverTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
         internal lateinit var personLogger: Aktivitetslogger
+        internal lateinit var personLogg: Aktivitetslogg
         internal lateinit var arbeidsgiver: Arbeidsgiver
         internal lateinit var arbeidsgiverLogger: Aktivitetslogger
         internal lateinit var periodeLogger: Aktivitetslogger
@@ -638,6 +641,10 @@ internal class KunEnArbeidsgiverTest {
 
         override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
             personLogger = aktivitetslogger
+        }
+
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personLogg = aktivitetslogg
         }
 
         override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {

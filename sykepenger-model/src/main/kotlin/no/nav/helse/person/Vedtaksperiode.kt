@@ -90,7 +90,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Vedtaksperiode", "Arbeidsgiver ${organisasjonsnummer}")
+        return SpesifikkKontekst("Vedtaksperiode ${id}", "Vedtaksperiode ${periode()}")
     }
 
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
