@@ -38,6 +38,7 @@ internal open class JsonMessage(
             objectMapper.readTree(originalMessage)
         } catch (err: JsonParseException) {
             problems.severeOld("Invalid JSON per Jackson library: ${err.message}")
+            aktivitetslogg.severe("Invalid JSON per Jackson library: ${err.message}")
             objectMapper.nullNode()
         }
     }
@@ -49,35 +50,45 @@ internal open class JsonMessage(
     }
 
     fun requiredKey(key: String) {
-        if (isKeyMissing(key)) return problems.errorOld("Missing required key $key")
-        if (node(key).isNull) return problems.errorOld("Missing required key $key; value is null")
+        if (isKeyMissing(key)) {
+            problems.errorOld("Missing required key $key")
+            return aktivitetslogg.error("Missing required key $key")
+        }
+        if (node(key).isNull) {
+            problems.errorOld("Missing required key $key; value is null")
+            return aktivitetslogg.error("Missing required key $key; value is null")
+        }
         accessor(key)
     }
 
     fun requiredValue(key: String, value: Boolean) {
         if (isKeyMissing(key) || !node(key).isBoolean || node(key).booleanValue() != value) {
-            return problems.errorOld("Required $key is not boolean $value")
+            problems.errorOld("Required $key is not boolean $value")
+            return aktivitetslogg.error("Required $key is not boolean $value")
         }
         accessor(key)
     }
 
     fun requiredValue(key: String, value: String) {
         if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() != value) {
-            return problems.errorOld("Required $key is not string $value")
+            problems.errorOld("Required $key is not string $value")
+            return aktivitetslogg.error("Required $key is not string $value")
         }
         accessor(key)
     }
 
     fun requiredValueOneOf(key: String, values: List<String>) {
         if (isKeyMissing(key) || !node(key).isTextual || node(key).asText() !in values) {
-            return problems.errorOld("Required $key must be one of $values")
+            problems.errorOld("Required $key must be one of $values")
+            return aktivitetslogg.error("Required $key must be one of $values")
         }
         accessor(key)
     }
 
     fun requiredValues(key: String, values: List<String>) {
         if (isKeyMissing(key) || !node(key).isArray || !node(key).map(JsonNode::asText).containsAll(values)) {
-            return problems.errorOld("Required $key does not contains $values")
+            problems.errorOld("Required $key does not contains $values")
+            return aktivitetslogg.error("Required $key does not contains $values")
         }
         accessor(key)
     }

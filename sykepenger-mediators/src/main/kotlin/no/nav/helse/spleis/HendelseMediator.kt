@@ -59,12 +59,14 @@ internal class HendelseMediator(
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
 
-            if (aktivitetslogger.hasErrorsOld()) {
+            if (aktivitetslogger.hasErrorsOld() || aktivitetslogg.hasErrors()) {
                 sikkerLogg.error("aktivitetslogger inneholder errors: ${aktivitetslogger.toReport()}")
-            } else if (aktivitetslogger.hasMessagesOld()) {
+            } else if (aktivitetslogger.hasMessagesOld() || aktivitetslogg.hasMessages()) {
                 sikkerLogg.info("aktivitetslogger inneholder meldinger: ${aktivitetslogger.toReport()}")
             }
         } catch (err: Aktivitetslogger.AktivitetException) {
+            sikkerLogg.error("feil på melding: $err")
+        } catch (err: Aktivitetslogg.AktivitetException) {
             sikkerLogg.error("feil på melding: $err")
         } catch (err: UtenforOmfangException) {
             sikkerLogg.error("melding er utenfor omfang: ${err.message}", err)

@@ -21,12 +21,11 @@ internal class Parser(private val director: ParserDirector) : KafkaRapid.Message
         try {
             for (factory in factories) {
                 val problems = Aktivitetslogger(message)
-                val aktivitetslogg = Aktivitetslogg(summaryAktivitetslogg)
+                val aktivitetslogg = summaryAktivitetslogg.barn()
                 val newMessage = factory.createMessage(message, problems, aktivitetslogg)
-                if (!problems.hasErrorsOld()) return director.onRecognizedMessage(newMessage, problems, aktivitetslogg)
+                if (!problems.hasErrorsOld() && !aktivitetslogg.hasErrors()) return director.onRecognizedMessage(newMessage, problems, aktivitetslogg)
                 accumulatedProblems.addAll(problems, newMessage::class.java.simpleName)
             }
-
             director.onUnrecognizedMessage(accumulatedProblems, summaryAktivitetslogg)
         } catch (err: Aktivitetslogger.AktivitetException) {
             director.onMessageError(err)

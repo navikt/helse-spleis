@@ -106,7 +106,10 @@ internal class YtelserMessage(
                     "" -> {
                         Ukjent(fom, tom, dagsats)
                     }
-                    else -> aktivitetslogger.severeOld("Fikk en ukjent typekode:$typekode")
+                    else -> {
+                        aktivitetslogger.severeOld("Fikk en ukjent typekode:$typekode")
+                        aktivitetslogg.severe("Fikk en ukjent typekode:$typekode")
+                    }
                 }
             },
             inntektshistorikk = this["@løsning.Sykepengehistorikk"].flatMap {
