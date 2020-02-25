@@ -26,7 +26,7 @@ class Utbetalingshistorikk(
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
         inntektshistorikk.forEach { it.valider(aktivitetslogger) }
-        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk inneholder ukjente perioder") }
+        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk fra Infotrygd inneholder perioder vi ikke klarer å tolke") }
         return aktivitetslogger
     }
 

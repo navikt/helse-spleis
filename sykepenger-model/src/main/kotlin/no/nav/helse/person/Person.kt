@@ -64,8 +64,8 @@ class Person private constructor(
     fun håndter(påminnelse: Påminnelse) {
         registrer(påminnelse, "Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
-        påminnelse.warnOld("Fant ikke arbeidsgiver eller vedtaksperiode")
-        påminnelse.warn("Fant ikke arbeidsgiver eller vedtaksperiode")
+        påminnelse.warnOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+        påminnelse.warn("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
