@@ -39,44 +39,49 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser)?.håndter(ytelser)
+        finnArbeidsgiver(ytelser).håndter(ytelser)
         ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
         registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
-        finnArbeidsgiver(manuellSaksbehandling)?.håndter(manuellSaksbehandling)
+        finnArbeidsgiver(manuellSaksbehandling).håndter(manuellSaksbehandling)
         manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
-        finnArbeidsgiver(vilkårsgrunnlag)?.håndter(vilkårsgrunnlag)
+        finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
         vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(utbetaling: Utbetaling) {
         registrer(utbetaling, "Behandler utbetaling")
-        finnArbeidsgiver(utbetaling)?.håndter(utbetaling)
+        finnArbeidsgiver(utbetaling).håndter(utbetaling)
         utbetaling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(påminnelse: Påminnelse) {
         registrer(påminnelse, "Behandler påminnelse")
-        if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
-        påminnelse.infoOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
-        påminnelse.info("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
-        observers.forEach {
-            it.vedtaksperiodeIkkeFunnet(
-                PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                    vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId),
-                    aktørId = påminnelse.aktørId(),
-                    fødselsnummer = påminnelse.fødselsnummer(),
-                    organisasjonsnummer = påminnelse.organisasjonsnummer()
+        try {
+            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return
+        } catch (err: Aktivitetslogger.AktivitetException) {
+            påminnelse.infoOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+            påminnelse.info("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+            observers.forEach {
+                it.vedtaksperiodeIkkeFunnet(
+                    PersonObserver.VedtaksperiodeIkkeFunnetEvent(
+                        vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId),
+                        aktørId = påminnelse.aktørId(),
+                        fødselsnummer = påminnelse.fødselsnummer(),
+                        organisasjonsnummer = påminnelse.organisasjonsnummer()
+                    )
                 )
-            )
+            }
+            throw err
+        } finally {
+            påminnelse.kopierAktiviteterTil(aktivitetslogger)
         }
-        påminnelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
@@ -147,9 +152,7 @@ class Person private constructor(
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finn(orgnr).also {
-                if (it == null) hendelse.errorOld("Finner ikke arbeidsgiver")
-            }
+            arbeidsgivere.finn(orgnr) ?: hendelse.severeOld("Finner ikke arbeidsgiver")
         }
 
     private fun MutableList<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }

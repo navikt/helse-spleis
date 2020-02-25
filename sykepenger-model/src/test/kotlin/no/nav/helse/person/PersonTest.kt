@@ -10,6 +10,7 @@ import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -76,7 +77,8 @@ internal class PersonTest {
             vedtaksperiodeId = UUID.randomUUID(),
             tilstandType = MOTTATT_SYKMELDING
         )
-        testPerson.also { it.håndter(påminnelse) }
+
+        assertThrows<Aktivitetslogger.AktivitetException> { testPerson.also { it.håndter(påminnelse) } }
 
         assertPersonIkkeEndret()
         assertVedtaksperiodeIkkeEndret()
@@ -256,18 +258,28 @@ internal class PersonTest {
 
     @Test
     internal fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
-        testPerson.also {
-            it.håndter(Ytelser(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), emptyList(), Aktivitetslogger(), Aktivitetslogg()),
-                foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger(), Aktivitetslogg()),
-                aktivitetslogger = Aktivitetslogger(),
-                aktivitetslogg = Aktivitetslogg()
-            ))
+        assertThrows<Aktivitetslogger.AktivitetException> {
+            testPerson.also {
+                it.håndter(
+                    Ytelser(
+                        meldingsreferanseId = UUID.randomUUID(),
+                        aktørId = aktørId,
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        vedtaksperiodeId = UUID.randomUUID().toString(),
+                        utbetalingshistorikk = Utbetalingshistorikk(
+                            emptyList(),
+                            emptyList(),
+                            emptyList(),
+                            Aktivitetslogger(),
+                            Aktivitetslogg()
+                        ),
+                        foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger(), Aktivitetslogg()),
+                        aktivitetslogger = Aktivitetslogger(),
+                        aktivitetslogg = Aktivitetslogg()
+                    )
+                )
+            }
         }
 
         assertPersonIkkeEndret()

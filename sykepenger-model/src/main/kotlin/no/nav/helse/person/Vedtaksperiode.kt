@@ -154,7 +154,7 @@ internal class Vedtaksperiode private constructor(
         if (påminnelse.antallGangerPåminnet() < påminnelseThreshold) {
             tilstand.håndter(this, påminnelse)
         } else {
-            påminnelse.errorOld("Invaliderer perioden fordi den har blitt påminnet $påminnelseThreshold ganger")
+            påminnelse.errorOld("Invaliderer perioden fordi den har blitt påminnet %d ganger", påminnelseThreshold)
             tilstand(påminnelse, TilInfotrygd)
         }
 
