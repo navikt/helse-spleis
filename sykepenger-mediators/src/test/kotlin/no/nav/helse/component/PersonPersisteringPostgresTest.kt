@@ -117,6 +117,25 @@ class PersonPersisteringPostgresTest {
         assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }
 
+    @Test
+    internal fun `kan inserte utbetalingsreferanser på samme betalingsnøkkel`() {
+        val dataSource = HikariDataSource(hikariConfig)
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "INSERT INTO utbetalingsreferanse(id, aktor_id, orgnr, vedtaksperiode_id) VALUES(?, ?, ?, ?)",
+                    "utbetalref1", "aktor", "orgnummer", "vedtak1"
+                ).asExecute
+            )
+            session.run(
+                queryOf(
+                    "INSERT INTO utbetalingsreferanse(id, aktor_id, orgnr, vedtaksperiode_id) VALUES(?, ?, ?, ?)",
+                    "utbetalref1", "aktor", "orgnummer", "vedtak2"
+                ).asExecute
+            )
+        }
+    }
+
     private fun nySøknad(aktørId: String) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = "fnr",
