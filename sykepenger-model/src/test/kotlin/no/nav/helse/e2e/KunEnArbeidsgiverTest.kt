@@ -1,5 +1,6 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.FeatureToggle
 import no.nav.helse.behov.BehovType
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
@@ -21,6 +22,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,6 +52,11 @@ internal class KunEnArbeidsgiverTest {
     internal fun setup() {
         person = Person(UNG_PERSON_FNR_2018, AKTØRID)
         observatør = TestObservatør().also { person.addObserver(it) }
+    }
+
+    @AfterEach
+    internal fun reset() {
+        FeatureToggle.støtterGradertSykdom = false
     }
 
     @Test
@@ -363,6 +370,32 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_INNTEKTSMELDING,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+    }
+
+    @Test
+    internal fun `Sykmelding med gradering`() {
+        FeatureToggle.støtterGradertSykdom = true
+        håndterSykmelding(Triple(3.januar, 26.januar, 50))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 50, 50.00))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+            assertMessages(it)
+            assertEquals(6, it.dagTeller(NavDag::class))
+            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
+            assertEquals(2, it.dagTeller(NavHelgDag::class))
+            assertEquals(0, it.dagTeller(Arbeidsdag::class))
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }

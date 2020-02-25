@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,6 +27,11 @@ internal class SøknadTest {
     internal fun setup() {
         aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @AfterEach
+    internal fun reset() {
+        FeatureToggle.støtterGradertSykdom = false
     }
 
     @Test
@@ -64,6 +71,20 @@ internal class SøknadTest {
     internal fun `sykdom faktiskgrad ikke 100`() {
         søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
         assertTrue(søknad.valider().hasErrorsOld())
+    }
+
+    @Test
+    internal fun `sykdomsgrad ikke 100 støttes når støttes (epic 18)`() {
+        FeatureToggle.støtterGradertSykdom = true
+        søknad(Sykdom(1.januar, 10.januar, 50))
+        assertFalse(søknad.valider().hasErrorsOld())
+    }
+
+    @Test
+    internal fun `sykdom faktiskgrad ikke 100 støttes når støttes (epic 18)`() {
+        FeatureToggle.støtterGradertSykdom = true
+        søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
+        assertFalse(søknad.valider().hasErrorsOld())
     }
 
     @Test

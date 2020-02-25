@@ -12,7 +12,7 @@ internal interface DagFactory {
     fun permisjonsdag(dato: LocalDate): Permisjonsdag { error("Permisjonsdag ikke støttet") }
     fun studiedag(dato: LocalDate): Studiedag =
         Studiedag(dato)
-    fun sykedag(dato: LocalDate): Sykedag { error("Sykedag ikke støttet") }
+    fun sykedag(dato: LocalDate, grad: Double): Sykedag { error("Sykedag ikke støttet") }
     fun sykHelgedag(dato: LocalDate): SykHelgedag =
         SykHelgedag(dato)
     fun ubestemtdag(dato: LocalDate): Ubestemtdag =
