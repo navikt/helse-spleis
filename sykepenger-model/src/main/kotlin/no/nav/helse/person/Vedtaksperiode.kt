@@ -163,8 +163,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
-        hendelse.warnOld("Invaliderer vedtaksperiode: %s", this.id.toString())
-        hendelse.warn("Invaliderer vedtaksperiode: %s", this.id.toString())
+        hendelse.infoOld("Invaliderer vedtaksperiode: %s", this.id.toString())
+        hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
     }
 
@@ -744,8 +744,8 @@ internal class Vedtaksperiode private constructor(
                 }
             } else {
                 vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
-                    vedtaksperiode.aktivitetslogger.warnOld("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
-                    utbetaling.warn("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
+                    vedtaksperiode.aktivitetslogger.errorOld("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
+                    utbetaling.error("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
                 }
             }
         }
@@ -755,8 +755,8 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.warnOld("Sykdom for denne personen kan ikke behandles automatisk")
-            hendelse.warn("Sykdom for denne personen kan ikke behandles automatisk")
+            hendelse.infoOld("Sykdom for denne personen kan ikke behandles automatisk")
+            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

@@ -64,8 +64,8 @@ class Person private constructor(
     fun håndter(påminnelse: Påminnelse) {
         registrer(påminnelse, "Behandler påminnelse")
         if (true == finnArbeidsgiver(påminnelse)?.håndter(påminnelse)) return
-        påminnelse.warnOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
-        påminnelse.warn("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+        påminnelse.infoOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+        påminnelse.info("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
         observers.forEach {
             it.vedtaksperiodeIkkeFunnet(
                 PersonObserver.VedtaksperiodeIkkeFunnetEvent(
@@ -130,7 +130,7 @@ class Person private constructor(
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
         aktivitetslogger.infoOld("Invaliderer alle perioder for alle arbeidsgivere")
-        arbeidstakerHendelse.warn("Invaliderer alle perioder for alle arbeidsgivere")
+        arbeidstakerHendelse.info("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }
