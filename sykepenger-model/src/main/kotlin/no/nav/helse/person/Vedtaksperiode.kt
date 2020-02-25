@@ -204,35 +204,22 @@ internal class Vedtaksperiode private constructor(
         hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
-    val kontekst = object : Vedtaksperiodekontekst {
-        override val vedtaksperiodeId = this@Vedtaksperiode.id
-        override val organisasjonsnummer = this@Vedtaksperiode.organisasjonsnummer
-        override val aktørId = this@Vedtaksperiode.aktørId
-        override val fødselsnummer = this@Vedtaksperiode.fødselsnummer
-
-        override fun toSpesifikkKontekst(): SpesifikkKontekst {
-            return SpesifikkKontekst("Vedtaksperiode", "Vedtaksperiode: ${vedtaksperiodeId}")
-        }
-
-        override val kontekstId = UUID.randomUUID()
-    }
+    private val kontekst = Vedtaksperiodekontekst(aktørId, fødselsnummer, organisasjonsnummer, id)
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        hendelse.need(kontekst.kontekstId,
-            BehovType.Sykepengehistorikk(
-                kontekst,
-                sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
-            )
-        )
-        hendelse.need(kontekst.kontekstId, BehovType.Foreldrepenger(kontekst))
+        hendelse.need(BehovType.Sykepengehistorikk(
+            kontekst,
+            sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1)
+        ))
+        hendelse.need(BehovType.Foreldrepenger(kontekst))
     }
 
     internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
         val beregningSlutt = YearMonth.from(førsteFraværsdag)
         val beregningStart = beregningSlutt.minusMonths(11)
-        hendelse.need(kontekst.kontekstId, BehovType.Inntektsberegning(kontekst, beregningStart, beregningSlutt))
-        hendelse.need(kontekst.kontekstId, BehovType.EgenAnsatt(kontekst))
-        hendelse.need(kontekst.kontekstId, BehovType.Opptjening(kontekst))
+        hendelse.need(BehovType.Inntektsberegning(kontekst, beregningStart, beregningSlutt))
+        hendelse.need(BehovType.EgenAnsatt(kontekst))
+        hendelse.need(BehovType.Opptjening(kontekst))
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -671,7 +658,7 @@ internal class Vedtaksperiode private constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            hendelse.need(vedtaksperiode.kontekst.kontekstId, BehovType.Godkjenning(vedtaksperiode.kontekst))
+            hendelse.need(BehovType.Godkjenning(vedtaksperiode.kontekst))
             hendelse.infoOld("Forespør godkjenning fra saksbehandler")
             hendelse.info("Forespør godkjenning fra saksbehandler")
         }
@@ -726,15 +713,13 @@ internal class Vedtaksperiode private constructor(
             }
             val utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse)
 
-            hendelse.need(vedtaksperiode.kontekst.kontekstId,
-                BehovType.Utbetaling(
-                    context = vedtaksperiode.kontekst,
-                    utbetalingsreferanse = utbetalingsreferanse,
-                    utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer).joinForOppdrag(),
-                    maksdato = requireNotNull(vedtaksperiode.maksdato),
-                    saksbehandler = requireNotNull(vedtaksperiode.godkjentAv)
-                )
-            )
+            hendelse.need(BehovType.Utbetaling(
+                context = vedtaksperiode.kontekst,
+                utbetalingsreferanse = utbetalingsreferanse,
+                utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer).joinForOppdrag(),
+                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                saksbehandler = requireNotNull(vedtaksperiode.godkjentAv)
+            ))
             val event = PersonObserver.UtbetalingEvent(
                 vedtaksperiodeId = vedtaksperiode.id,
                 aktørId = vedtaksperiode.aktørId,

@@ -52,7 +52,6 @@ internal class HendelseMediator(
         val messageProcessor = Processor(
             BehovMediator(
                 producer,
-                aktivitetslogg,
                 sikkerLogg
             )
         )

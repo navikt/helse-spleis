@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.behov.BehovType
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
+import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
@@ -579,7 +580,7 @@ internal class KunEnArbeidsgiverTest {
 
     private inner class TestObservatør : PersonObserver, HendelseObserver {
         internal var endreTeller = 0
-        private val etterspurteBehov = mutableMapOf<Int, MutableList<String>>()
+        private val etterspurteBehov = mutableListOf<BehovType>()
         private var periodeIndek = -1
         private val periodeIndekser = mutableMapOf<String, Int>()
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
@@ -587,7 +588,11 @@ internal class KunEnArbeidsgiverTest {
         internal lateinit var utbetalingsreferanseFraUtbetalingEvent: String
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
-            etterspurteBehov[vedtaksperiodeIndex]?.contains(key.name) ?: false
+            etterspurteBehov.partisjoner().let {
+                it.filter { it["vedtaksperiodeId"] == UUID.fromString(vedtaksperiodeIder(vedtaksperiodeIndex)) }
+                    .filter { key.name in (it["@behov"] as List<*>) }
+                    .size == 1
+            }
 
         internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
 
@@ -597,9 +602,8 @@ internal class KunEnArbeidsgiverTest {
             tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
         }
 
-        override fun onBehov(kontekstId: UUID, behov: BehovType) {
-            val indeks = periodeIndeks(behov.toMap()["vedtaksperiodeId"].toString())
-            etterspurteBehov.computeIfAbsent(indeks) { mutableListOf() }.add(behov.navn)
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.add(behov)
         }
 
         override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {

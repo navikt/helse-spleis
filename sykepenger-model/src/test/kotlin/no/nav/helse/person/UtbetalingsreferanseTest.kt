@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
+import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -210,9 +211,10 @@ internal class UtbetalingsreferanseTest {
     private class UtbetalingObserver : HendelseObserver {
         internal val referanser = mutableMapOf<UUID, String>()
 
-        override fun onBehov(kontekstId: UUID, behov: BehovType) {
-            (behov.toMap()["utbetalingsreferanse"] as? String)?.also {
-                referanser[behov.toMap().getValue("vedtaksperiodeId") as UUID] = it
+        override fun onBehov(behov: BehovType) {
+            if (behov !is BehovType.Utbetaling) return
+            listOf(behov).partisjoner().first().also {
+                referanser[it.getValue("vedtaksperiodeId") as UUID] = it.getValue("utbetalingsreferanse") as String
             }
         }
     }

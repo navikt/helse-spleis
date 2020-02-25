@@ -273,33 +273,44 @@ interface Aktivitetskontekst {
     fun toSpesifikkKontekst(): SpesifikkKontekst
 }
 
-class SpesifikkKontekst(private val konteskstType: String, private val melding: String = konteskstType) {
-    internal fun konteskstType() = konteskstType
+class SpesifikkKontekst(private val kontektstype: String, private val melding: String = kontektstype) {
+    internal fun konteskstType() = kontektstype
     internal fun melding() = melding
     override fun equals(other: Any?) =
-        this === other || other is SpesifikkKontekst && this.konteskstType == other.konteskstType
-    override fun hashCode() = konteskstType.hashCode()
+        this === other || other is SpesifikkKontekst && this.kontektstype == other.kontektstype
+    override fun hashCode() = kontektstype.hashCode()
 }
 
-interface Personkontekst : Aktivitetskontekst {
-    val aktørId: String
-    val fødselsnummer: String
-    val kontekstId: UUID
+internal open class Personkontekst(private val aktørId: String, private val fødselsnummer: String) : Aktivitetskontekst {
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return SpesifikkKontekst("Person", "Person: $fødselsnummer")
+    }
 
-    fun toMap() = mapOf<String, Any>(
+    override fun equals(other: Any?): Boolean {
+        if (other !is Personkontekst) return false
+        return this.toMap() == other.toMap()
+    }
+
+    override fun hashCode() = toMap().hashCode()
+
+    open fun toMap() = mapOf<String, Any>(
         "aktørId" to aktørId,
         "fødselsnummer" to fødselsnummer
     )
 }
 
-interface Arbeidsgiverkontekst : Personkontekst {
-    val organisasjonsnummer: String
+internal open class Arbeidsgiverkontekst(aktørId: String, fødselsnummer: String, private val organisasjonsnummer: String) : Personkontekst(aktørId, fødselsnummer) {
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return SpesifikkKontekst("Arbeidsgiver", "Arbeidsgiver: $organisasjonsnummer")
+    }
 
     override fun toMap() = super.toMap() + ("organisasjonsnummer" to organisasjonsnummer)
 }
 
-interface Vedtaksperiodekontekst : Arbeidsgiverkontekst {
-    val vedtaksperiodeId: UUID
+internal class Vedtaksperiodekontekst(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, private val vedtaksperiodeId: UUID) : Arbeidsgiverkontekst(aktørId, fødselsnummer, organisasjonsnummer) {
+    override fun toSpesifikkKontekst(): SpesifikkKontekst {
+        return SpesifikkKontekst("Vedtaksperiode", "Vedtaksperiode: $vedtaksperiodeId")
+    }
 
     override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)
 }

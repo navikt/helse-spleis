@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
+import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -236,18 +237,18 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private inner class TestPersonObserver : PersonObserver, HendelseObserver {
-        private val etterspurteBehov = mutableMapOf<UUID, MutableList<BehovType>>()
+        private val etterspurteBehov = mutableListOf<BehovType>()
 
-        fun etterspurteBehov(vedtaksperiodeId: UUID) = etterspurteBehov.getValue(vedtaksperiodeId).toList()
-
-        fun <T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
-            return personObserver.etterspurteBehov(id)
-                .first { behov == it.navn }.toMap()[felt] as T?
+        inline fun <reified T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
+            return etterspurteBehov.partisjoner().let {
+                it.filter { it["vedtaksperiodeId"] == id }
+                    .filter { behov in (it["@behov"] as List<*>) }
+                    .first()[felt] as T?
+            }
         }
 
-        override fun onBehov(kontekstId: UUID, behov: BehovType) {
-            etterspurteBehov.computeIfAbsent(behov.toMap()["vedtaksperiodeId"] as UUID) { mutableListOf() }
-                .add(behov)
+        override fun onBehov(behov: BehovType) {
+            etterspurteBehov.add(behov)
         }
     }
 }
