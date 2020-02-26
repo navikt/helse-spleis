@@ -85,7 +85,7 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    private fun periode() = Periode(
+    internal fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
