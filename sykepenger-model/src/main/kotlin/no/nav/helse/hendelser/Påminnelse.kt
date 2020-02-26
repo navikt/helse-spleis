@@ -30,7 +30,7 @@ class Påminnelse(
         if (!it) {
             infoOld("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         } else {
-            warnOld("Vedtaksperiode blir påminnet")
+            infoOld("Vedtaksperiode blir påminnet")
         }
     }
 

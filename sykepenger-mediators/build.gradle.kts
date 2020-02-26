@@ -1,5 +1,4 @@
 val ktorVersion = "1.2.4"
-val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
@@ -10,17 +9,10 @@ val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
+    implementation(project(":rapids-rivers"))
     implementation(project(":sykepenger-model"))
-    implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("net.logstash.logback:logstash-logback-encoder:5.2")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
-
-    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
-
-    implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
-    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
@@ -38,8 +30,7 @@ dependencies {
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testImplementation("org.awaitility:awaitility:3.1.6")
-    testImplementation("no.nav:kafka-embedded-env:2.2.3")
-    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
+    testImplementation("no.nav:kafka-embedded-env:2.3.0")
 
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
@@ -53,7 +44,7 @@ repositories {
 }
 
 tasks.named<Jar>("jar") {
-    baseName = "app"
+    archiveBaseName.set("app")
 
     manifest {
         attributes["Main-Class"] = mainClass

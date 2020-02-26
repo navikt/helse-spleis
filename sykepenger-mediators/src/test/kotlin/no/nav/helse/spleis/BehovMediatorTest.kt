@@ -9,7 +9,10 @@ import no.nav.helse.behov.BehovType
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -17,7 +20,6 @@ import java.util.*
 internal class BehovMediatorTest {
 
     private companion object {
-        private lateinit var kafkaProducer: KafkaProducer<String, String>
         private lateinit var behovMediator: BehovMediator
 
         private val objectMapper = jacksonObjectMapper()
@@ -25,10 +27,25 @@ internal class BehovMediatorTest {
             .registerModule(JavaTimeModule())
     }
 
+    private val messages = mutableListOf<Pair<String?, String>>()
+
+    private val testRapid = object : RapidsConnection() {
+        override fun publish(message: String) {
+            messages.add(null to message)
+        }
+
+        override fun publish(key: String, message: String) {
+            messages.add(key to message)
+        }
+
+        override fun start() {}
+        override fun stop() {}
+    }
+
     @BeforeEach
     fun setup() {
-        kafkaProducer = mockk(relaxed = true)
-        behovMediator = BehovMediator(kafkaProducer, mockk(relaxed = true))
+        behovMediator = BehovMediator(testRapid, mockk(relaxed = true))
+        messages.clear()
     }
 
     @Test
@@ -42,15 +59,12 @@ internal class BehovMediatorTest {
         behovMediator.onBehov(BehovType.Godkjenning("aktørId", "fnr", "orgnr", vedtaksperiode2))
         behovMediator.finalize(hendelse)
 
-        verify(exactly = 2) {
-            kafkaProducer.send(match {
-                it.key() == hendelse.fødselsnummer()
-                    && objectMapper.readTree(it.value()).let {
-                    it["@event_name"].asText() == "behov"
-                        && it.has("@opprettet")
-                        && it.has("@id")
-                }
-            })
+        assertEquals(2, messages.size)
+        assertTrue(messages.all { it.first == hendelse.fødselsnummer() })
+        messages.map { objectMapper.readTree(it.second) }.let {
+            assertTrue(it.all { it["@event_name"].asText() == "behov" })
+            assertTrue(it.all { it.hasNonNull("@opprettet") })
+            assertTrue(it.all { it.hasNonNull("@id") })
         }
     }
 

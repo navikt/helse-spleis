@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 
 // Understands a JSON message representing a Søknad
-internal abstract class SøknadMessage(originalMessage: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) :
-    JsonMessage(originalMessage, problems, aktivitetslogg) {
+internal abstract class SøknadMessage(originalMessage: String, problems: MessageProblems) :
+    HendelseMessage(originalMessage, problems) {
+
     init {
-        requiredKey("fnr", "aktorId", "arbeidsgiver.orgnummer", "opprettet", "soknadsperioder")
+        requireKey("fnr", "aktorId", "arbeidsgiver.orgnummer", "opprettet", "soknadsperioder")
     }
 }

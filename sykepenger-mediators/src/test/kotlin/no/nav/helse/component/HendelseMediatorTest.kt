@@ -5,38 +5,27 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.common.KafkaEnvironment
-import no.nav.helse.Topics
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.løsBehov
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
-import no.nav.helse.spleis.KafkaRapid
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig.LINGER_MS_CONFIG
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
-import org.apache.kafka.streams.StreamsConfig
-import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicBoolean
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class HendelseMediatorTest {
@@ -44,53 +33,49 @@ internal class HendelseMediatorTest {
     @Test
     internal fun `leser søknader`() {
         sendNySøknad()
-        ventTilTrue(lestNySøknad)
+        assertTrue(lestNySøknad)
 
         sendSøknad()
-        ventTilTrue(lestSendtSøknad)
+        assertTrue(lestSendtSøknad)
     }
 
     @Test
     internal fun `leser inntektsmeldinger`() {
         sendInnteksmelding()
-        ventTilTrue(lestInntektsmelding)
+        assertTrue(lestInntektsmelding)
     }
 
     @Test
     internal fun `leser påminnelser`() {
         sendNyPåminnelse()
-        ventTilTrue(lestPåminnelse)
+        assertTrue(lestPåminnelse)
     }
 
     @Test
     internal fun `leser behov`() {
         sendVilkårsgrunnlag()
-        ventTilTrue(lestVilkårsgrunnlag)
+        assertTrue(lestVilkårsgrunnlag)
 
         sendYtelser()
-        ventTilTrue(lestYtelser)
+        assertTrue(lestYtelser)
 
         sendManuellSaksbehandling()
-        ventTilTrue(lestManuellSaksbehandling)
+        assertTrue(lestManuellSaksbehandling)
 
         sendUtbetaling()
-        ventTilTrue(lestUtbetaling)
-    }
-
-    private fun ventTilTrue(atomicBoolean: AtomicBoolean) {
-        await().atMost(10, SECONDS).untilTrue(atomicBoolean)
+        assertTrue(lestUtbetaling)
     }
 
     @BeforeEach
     internal fun reset() {
-        lestNySøknad.set(false)
-        lestSendtSøknad.set(false)
-        lestInntektsmelding.set(false)
-        lestPåminnelse.set(false)
-        lestYtelser.set(false)
-        lestVilkårsgrunnlag.set(false)
-        lestManuellSaksbehandling.set(false)
-        lestUtbetaling.set(false)
+        lestNySøknad = false
+        lestSendtSøknad = false
+        lestInntektsmelding = false
+        lestPåminnelse = false
+        lestYtelser = false
+        lestVilkårsgrunnlag = false
+        lestManuellSaksbehandling = false
+        lestUtbetaling = false
     }
 
     private companion object : PersonRepository {
@@ -98,16 +83,44 @@ internal class HendelseMediatorTest {
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
 
-        private val lestNySøknad = AtomicBoolean(false)
-        private val lestSendtSøknad = AtomicBoolean(false)
-        private val lestInntektsmelding = AtomicBoolean(false)
-        private val lestPåminnelse = AtomicBoolean(false)
-        private val lestYtelser = AtomicBoolean(false)
-        private val lestVilkårsgrunnlag = AtomicBoolean(false)
-        private val lestManuellSaksbehandling = AtomicBoolean(false)
-        private val lestUtbetaling = AtomicBoolean(false)
+        private var lestNySøknad = false
+        private var lestSendtSøknad = false
+        private var lestInntektsmelding = false
+        private var lestPåminnelse = false
+        private var lestYtelser = false
+        private var lestVilkårsgrunnlag = false
+        private var lestManuellSaksbehandling = false
+        private var lestUtbetaling = false
 
-        private val hendelseStream = KafkaRapid()
+        private val testRapid = object : RapidsConnection() {
+            val messages = mutableListOf<Pair<String?, String>>()
+
+            private val context = object : MessageContext {
+                override fun send(message: String) {
+                    publish(message)
+                }
+
+                override fun send(key: String, message: String) {
+                    publish(key, message)
+                }
+            }
+
+            fun sendTestMessage(message: String) {
+                listeners.forEach { it.onMessage(message, context) }
+            }
+
+            override fun publish(message: String) {
+                messages.add(null to message)
+            }
+
+            override fun publish(key: String, message: String) {
+                messages.add(key to message)
+            }
+
+            override fun start() {}
+
+            override fun stop() {}
+        }
 
         override fun hentPerson(aktørId: String): Person? {
             return mockk<Person>(relaxed = true) {
@@ -115,76 +128,64 @@ internal class HendelseMediatorTest {
                 every {
                     håndter(any<Sykmelding>())
                 } answers {
-                    lestNySøknad.set(true)
+                    lestNySøknad = true
                 }
 
                 every {
                     håndter(any<Søknad>())
                 } answers {
-                    lestSendtSøknad.set(true)
+                    lestSendtSøknad = true
                 }
 
                 every {
                     håndter(any<Inntektsmelding>())
                 } answers {
-                    lestInntektsmelding.set(true)
+                    lestInntektsmelding = true
                 }
 
                 every {
                     håndter(any<Ytelser>())
                 } answers {
-                    lestYtelser.set(true)
+                    lestYtelser = true
                 }
 
                 every {
                     håndter(any<Påminnelse>())
                 } answers {
-                    lestPåminnelse.set(true)
+                    lestPåminnelse = true
                 }
 
                 every {
                     håndter(any<Vilkårsgrunnlag>())
                 } answers {
-                    lestVilkårsgrunnlag.set(true)
+                    lestVilkårsgrunnlag = true
                 }
 
                 every {
                     håndter(any<ManuellSaksbehandling>())
                 } answers {
-                    lestManuellSaksbehandling.set(true)
+                    lestManuellSaksbehandling = true
                 }
 
                 every {
                     håndter(any<Utbetaling>())
                 } answers {
-                    lestUtbetaling.set(true)
+                    lestUtbetaling = true
                 }
             }
         }
 
         init {
             HendelseMediator(
-                rapid = hendelseStream,
+                rapidsConnection = testRapid,
                 personRepository = this,
                 lagrePersonDao = mockk(relaxed = true),
                 lagreUtbetalingDao = mockk(relaxed = true),
                 vedtaksperiodeProbe = mockk(relaxed = true),
-                producer = mockk(relaxed = true),
                 hendelseProbe = mockk(relaxed = true),
                 hendelseRecorder = mockk(relaxed = true)
             )
         }
-        private val topicInfos = listOf(Topics.søknadTopic, Topics.rapidTopic).map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
-
-        private val embeddedKafkaEnvironment = KafkaEnvironment(
-            autoStart = false,
-            noOfBrokers = 1,
-            topicInfos = topicInfos,
-            withSchemaRegistry = false,
-            withSecurity = false
-        )
-
-        private lateinit var producer: KafkaProducer<String, String>
 
         private fun generiskBehov(
             aktørId: String,
@@ -199,27 +200,6 @@ internal class HendelseMediatorTest {
             vedtaksperiodeId = UUID.randomUUID(),
             additionalParams = mapOf()
         )
-
-        @BeforeAll
-        @JvmStatic
-        internal fun `start embedded environment`() {
-            embeddedKafkaEnvironment.start()
-            hendelseStream.start(streamsConfig())
-
-            producer = KafkaProducer(producerConfig(), StringSerializer(), StringSerializer())
-        }
-
-        private fun streamsConfig() = kafkaBaseConfig().apply {
-            put(StreamsConfig.APPLICATION_ID_CONFIG, "hendelsebuilder-test")
-        }
-
-        private fun producerConfig() = kafkaBaseConfig().apply {
-            put(LINGER_MS_CONFIG, "0")
-        }
-
-        private fun kafkaBaseConfig() = Properties().apply {
-            put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
-        }
 
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
@@ -243,7 +223,7 @@ internal class HendelseMediatorTest {
                     "påminnelsestidspunkt" to LocalDateTime.now().toString(),
                     "nestePåminnelsestidspunkt" to LocalDateTime.now().toString()
                 )
-            ).also { sendKafkaMessage(aktørId, it) }
+            ).also { testRapid.sendTestMessage(it) }
         }
 
         private fun sendManuellSaksbehandling(
@@ -371,10 +351,7 @@ internal class HendelseMediatorTest {
                 foersteFravaersdag = LocalDate.now(),
                 mottattDato = LocalDateTime.now()
             )
-            sendKafkaMessage(
-                inntektsmelding.inntektsmeldingId,
-                inntektsmelding.toJsonNode().toString()
-            )
+            testRapid.sendTestMessage(inntektsmelding.toJsonNode().toString())
             return inntektsmelding
         }
 
@@ -400,7 +377,7 @@ internal class HendelseMediatorTest {
                 soknadsperioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100)),
                 opprettet = LocalDateTime.now()
             )
-            sendKafkaMessage(id.toString(), sendtSøknad.toJsonNode().toString())
+            testRapid.sendTestMessage(sendtSøknad.toJsonNode().toString())
         }
 
         private fun sendNySøknad(
@@ -432,15 +409,12 @@ internal class HendelseMediatorTest {
                 ),
                 opprettet = LocalDateTime.now()
             )
-            sendKafkaMessage(id.toString(), nySøknad.toJsonNode().toString())
+            testRapid.sendTestMessage(nySøknad.toJsonNode().toString())
             return nySøknad
         }
 
         private fun sendBehov(behov: String) {
-            sendKafkaMessage(UUID.randomUUID().toString(), behov)
+            testRapid.sendTestMessage(behov)
         }
-
-        private fun sendKafkaMessage(key: String, message: String) =
-            producer.send(ProducerRecord(Topics.rapidTopic, key, message))
     }
 }

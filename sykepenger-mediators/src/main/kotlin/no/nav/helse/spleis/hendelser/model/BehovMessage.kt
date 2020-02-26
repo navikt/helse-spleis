@@ -8,24 +8,28 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.hendelser.*
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.rapids_rivers.asYearMonth
+import no.nav.helse.spleis.hendelser.MessageFactory
+import no.nav.helse.spleis.hendelser.MessageProcessor
 import java.util.*
 
 // Understands a JSON message representing a Need with solution
 internal abstract class BehovMessage(
     originalMessage: String,
-    aktivitetslogger: Aktivitetslogger,
-    aktivitetslogg: Aktivitetslogg
+    problems: MessageProblems
 ) :
-    JsonMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    HendelseMessage(originalMessage, problems) {
     init {
-        requiredKey(
+        requireKey(
             "@behov", "@id", "@opprettet",
             "@final", "@løsning", "@besvart",
             "aktørId", "fødselsnummer",
             "organisasjonsnummer", "vedtaksperiodeId"
         )
-        requiredValue("@final", true)
+        requireValue("@final", true)
     }
 
     override val id: UUID get() = UUID.fromString(this["@id"].asText())
@@ -34,23 +38,22 @@ internal abstract class BehovMessage(
 // Understands a JSON message representing an Ytelserbehov
 internal class YtelserMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    private val problems: MessageProblems
 ) :
-    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    BehovMessage(originalMessage, problems) {
     init {
-        requiredValues("@behov", Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
-        requiredKey("@løsning.${Behovstype.Foreldrepenger.name}")
-        requiredKey("@løsning.${Behovstype.Sykepengehistorikk.name}")
+        requireAll("@behov", Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
+        requireKey("@løsning.${Behovstype.Foreldrepenger.name}")
+        requireKey("@løsning.${Behovstype.Sykepengehistorikk.name}")
         interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Foreldrepengeytelse")
         interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Svangerskapsytelse")
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
-    internal fun asYtelser(): Ytelser {
+    internal fun asYtelser(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): Ytelser {
         val foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = this["@løsning.Foreldrepenger.Foreldrepengeytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
             svangerskapsytelse = this["@løsning.Foreldrepenger.Svangerskapsytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
@@ -106,7 +109,7 @@ internal class YtelserMessage(
                     "" -> {
                         Ukjent(fom, tom, dagsats)
                     }
-                    else -> aktivitetslogger.severeOld("Fikk en ukjent typekode:$typekode")
+                    else -> problems.severe("Fikk en ukjent typekode:$typekode")
                 }
             },
             inntektshistorikk = this["@løsning.Sykepengehistorikk"].flatMap {
@@ -138,37 +141,29 @@ internal class YtelserMessage(
         )
     }
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(
-            message: String,
-            problems: Aktivitetslogger,
-            aktivitetslogg: Aktivitetslogg
-        ): YtelserMessage {
-            return YtelserMessage(message, problems, aktivitetslogg)
-        }
+    object Factory : MessageFactory<YtelserMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = YtelserMessage(message, problems)
     }
 }
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
 internal class VilkårsgrunnlagMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    private val problems: MessageProblems
 ) :
-    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    BehovMessage(originalMessage, problems) {
     init {
-        requiredValues("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
-        requiredKey("@løsning.${Behovstype.Inntektsberegning.name}")
-        requiredKey("@løsning.${Behovstype.EgenAnsatt.name}")
-        requiredKey("@løsning.${Behovstype.Opptjening.name}")
+        requireAll("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
+        requireKey("@løsning.${Behovstype.Inntektsberegning.name}")
+        requireKey("@løsning.${Behovstype.EgenAnsatt.name}")
+        requireKey("@løsning.${Behovstype.Opptjening.name}")
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
-    internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
+    internal fun asVilkårsgrunnlag(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
@@ -195,36 +190,29 @@ internal class VilkårsgrunnlagMessage(
         )
     }
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(
-            message: String,
-            problems: Aktivitetslogger,
-            aktivitetslogg: Aktivitetslogg
-        ): VilkårsgrunnlagMessage {
-            return VilkårsgrunnlagMessage(message, problems, aktivitetslogg)
-        }
+    object Factory : MessageFactory<VilkårsgrunnlagMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) =
+            VilkårsgrunnlagMessage(message, problems)
     }
 }
 
 // Understands a JSON message representing a Manuell saksbehandling-behov
 internal class ManuellSaksbehandlingMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    private val problems: MessageProblems
 ) :
-    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    BehovMessage(originalMessage, problems) {
     init {
-        requiredValues("@behov", Behovstype.Godkjenning)
-        requiredKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
-        requiredKey("saksbehandlerIdent")
+        requireAll("@behov", Behovstype.Godkjenning)
+        requireKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
+        requireKey("saksbehandlerIdent")
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
-    internal fun asManuellSaksbehandling() =
+    internal fun asManuellSaksbehandling(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
         ManuellSaksbehandling(
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
@@ -236,54 +224,44 @@ internal class ManuellSaksbehandlingMessage(
             aktivitetslogg = aktivitetslogg
         )
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): ManuellSaksbehandlingMessage {
-            return ManuellSaksbehandlingMessage(message, problems, aktivitetslogg)
-        }
+    object Factory : MessageFactory<ManuellSaksbehandlingMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) =
+            ManuellSaksbehandlingMessage(message, problems)
     }
 }
 
 internal class UtbetalingMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    problems: MessageProblems
 ) :
-    BehovMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    BehovMessage(originalMessage, problems) {
     init {
-        requiredValues("@behov", Behovstype.Utbetaling)
-        requiredKey("@løsning.${Behovstype.Utbetaling.name}")
-        requiredKey("@løsning.${Behovstype.Utbetaling.name}.status")
-        requiredKey("@løsning.${Behovstype.Utbetaling.name}.melding")
-        requiredKey("utbetalingsreferanse")
+        requireAll("@behov", Behovstype.Utbetaling)
+        requireKey("@løsning.${Behovstype.Utbetaling.name}")
+        requireKey("@løsning.${Behovstype.Utbetaling.name}.status")
+        requireKey("@løsning.${Behovstype.Utbetaling.name}.melding")
+        requireKey("utbetalingsreferanse")
     }
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
-    internal fun asUtbetaling(): Utbetaling {
+    internal fun asUtbetaling(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): Utbetaling {
         return Utbetaling(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
-            status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
+            status = enumValueOf(this["@løsning.${Behovstype.Utbetaling.name}.status"].asText()),
             melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText(),
             aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(
-            message: String,
-            problems: Aktivitetslogger,
-            aktivitetslogg: Aktivitetslogg
-        ): UtbetalingMessage {
-            return UtbetalingMessage(message, problems, aktivitetslogg)
-        }
+    object Factory : MessageFactory<UtbetalingMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = UtbetalingMessage(message, problems)
     }
 }

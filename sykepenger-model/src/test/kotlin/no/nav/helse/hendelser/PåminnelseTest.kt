@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -27,19 +28,19 @@ internal class PåminnelseTest {
     }
 
     @Test
-    fun `warning ved påminnelse for nåværende tilstand`() {
-        val tilstand = Vedtaksperiode.StartTilstand
+    fun `info ved påminnelse for nåværende tilstand`() {
+        val tilstand = Vedtaksperiode.MottattSykmelding
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertTrue(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogger.hasMessagesOld(), aktivitetslogger.toString())
+        assertFalse(aktivitetslogger.hasWarningsOld(), aktivitetslogger.toString())
     }
 
     @Test
     fun `info ved påminnelse for annen tilstand`() {
-        val tilstand = Vedtaksperiode.MottattSykmelding
+        val tilstand = Vedtaksperiode.StartTilstand
         val vedtaksperiode = vedtaksperiode()
-
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
         assertFalse(aktivitetslogger.hasWarningsOld())
         assertTrue(aktivitetslogger.hasMessagesOld())
@@ -63,9 +64,22 @@ internal class PåminnelseTest {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer
         )
+            .also { it.håndter(sykmelding()) }
     }
 
-    private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId:UUID = vedtaksperiodeId) =
+    private fun sykmelding(): Sykmelding {
+        return Sykmelding(
+            UUID.randomUUID(),
+            fødselsnummer,
+            aktørId,
+            orgnummer,
+            listOf(Triple(1.januar, 6.januar, 100)),
+            aktivitetslogger,
+            aktivitetslogg
+        )
+    }
+
+    private fun påminnelse(tilstandType: TilstandType, _vedtaksperiodeId: UUID = vedtaksperiodeId) =
         Påminnelse(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

@@ -8,6 +8,7 @@ import no.nav.helse.behov.BehovType
 import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.Logger
@@ -15,7 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class BehovMediator(
-    private val producer: KafkaProducer<String, String>,
+    private val rapidsConnection: RapidsConnection,
     private val sikkerLogg: Logger
 ) : HendelseObserver {
     private companion object {
@@ -45,7 +46,7 @@ internal class BehovMediator(
                 sikkerLogg.info("sender ${it.size} behovshendelser med id = {}", it.map { it.first })
             }.forEach { (id, event) ->
                 sikkerLogg.info("sender {} som {}", id, event)
-                producer.send(ProducerRecord(Topics.rapidTopic, hendelse.fødselsnummer(), event.toJson()))
+                rapidsConnection.publish(hendelse.fødselsnummer(), event.toJson())
             }
         }
     }

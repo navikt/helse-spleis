@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 
-// Acts as a GoF Abstract Factory
-// Uses Collecting parameter to collect errors/messages
-internal interface MessageFactory {
-    fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): JsonMessage
+interface MessageFactory<out Message: JsonMessage> {
+    fun createMessage(message: String, problems: MessageProblems): Message
 }

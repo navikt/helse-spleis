@@ -6,6 +6,7 @@ import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.*
 
@@ -28,7 +29,7 @@ internal class YtelserHendelseTest {
 
     @Test
     internal fun `ytelser på feil tidspunkt`() {
-        person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID()))
+        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
         assertEquals(0, inspektør.vedtaksperiodeTeller)
 
         person.håndter(sykmelding())

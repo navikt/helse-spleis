@@ -1,0 +1,1 @@
+ALTER TABLE utbetalingsreferanse DROP CONSTRAINT utbetalingsreferanse_pkey;

@@ -7,6 +7,7 @@ import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
@@ -277,6 +278,54 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `To tilstøtende perioder der den første er utbetalt`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK ,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALT
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
+    internal fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FEIL)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK ,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
     internal fun `tilstøtende periode arver første fraværsdag`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
@@ -410,6 +459,7 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
+        assertFalse(inspektør.personLogg.hasErrors())
         assertFalse(inspektør.personLogger.hasErrorsOld())
         assertFalse(inspektør.arbeidsgiverLogger.hasErrorsOld())
         assertFalse(inspektør.periodeLogger.hasErrorsOld())
@@ -423,6 +473,7 @@ internal class KunEnArbeidsgiverTest {
 
     private fun assertMessages(inspektør: TestPersonInspektør) {
         assertTrue(inspektør.personLogger.hasMessagesOld())
+        assertTrue(inspektør.personLogg.hasMessages())
         assertTrue(inspektør.arbeidsgiverLogger.hasMessagesOld())
         assertTrue(inspektør.periodeLogger.hasMessagesOld())
     }
@@ -466,6 +517,25 @@ internal class KunEnArbeidsgiverTest {
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
         assertEndringTeller()
     }
+
+    private fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Status) {
+        person.håndter(utbetaling(vedtaksperiodeIndex, status))
+        assertEndringTeller()
+    }
+
+    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
+        Utbetaling(
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER,
+            utbetalingsreferanse = "ref",
+            status = status,
+            melding = "hei",
+            aktivitetslogger = hendelselogger,
+            aktivitetslogg = hendelselogg)
+
+
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
         hendelselogger = Aktivitetslogger()
@@ -658,6 +728,7 @@ internal class KunEnArbeidsgiverTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
         internal lateinit var personLogger: Aktivitetslogger
+        internal lateinit var personLogg: Aktivitetslogg
         internal lateinit var arbeidsgiver: Arbeidsgiver
         internal lateinit var arbeidsgiverLogger: Aktivitetslogger
         internal lateinit var periodeLogger: Aktivitetslogger
@@ -672,6 +743,10 @@ internal class KunEnArbeidsgiverTest {
 
         override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
             personLogger = aktivitetslogger
+        }
+
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personLogg = aktivitetslogg
         }
 
         override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {

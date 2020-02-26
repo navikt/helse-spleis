@@ -3,19 +3,23 @@ package no.nav.helse.spleis.hendelser.model
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.hendelser.*
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.spleis.hendelser.MessageFactory
+import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
 import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    problems: MessageProblems
 ) :
-    JsonMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    HendelseMessage(originalMessage, problems) {
     init {
-        requiredKey(
+        requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
@@ -30,7 +34,7 @@ internal class InntektsmeldingMessage(
     override val id: UUID get() = UUID.fromString(this["inntektsmeldingId"].textValue())
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, aktivitetslogger)
+        processor.process(this)
     }
 
     private val refusjon
@@ -50,7 +54,7 @@ internal class InntektsmeldingMessage(
     private val arbeidsgiverperioder get() = this["arbeidsgiverperioder"].map(::asPeriode)
     private val ferieperioder get() = this["ferieperioder"].map(::asPeriode)
 
-    internal fun asInntektsmelding() = Inntektsmelding(
+    internal fun asInntektsmelding(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) = Inntektsmelding(
         meldingsreferanseId = this.id,
         refusjon = refusjon,
         orgnummer = orgnummer,
@@ -69,9 +73,7 @@ internal class InntektsmeldingMessage(
         førsteFraværsdag = førsteFraværsdag
     )
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
-            InntektsmeldingMessage(message, problems, aktivitetslogg)
+    object Factory : MessageFactory<InntektsmeldingMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = InntektsmeldingMessage(message, problems)
     }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.SendtSøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -65,11 +66,11 @@ internal class SendtSøknadMessageTest {
 
     @Test
     internal fun `invalid messages`() {
-        Aktivitetslogger(InvalidJson).also {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                SendtSøknadMessage(InvalidJson, it, Aktivitetslogg())
+        MessageProblems(InvalidJson).also {
+            assertThrows<MessageProblems.MessageException> {
+                SendtSøknadMessage(InvalidJson, it)
             }
-            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $InvalidJson" }
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }
         }
         assertInvalidMessage(UnknownJson)
         assertInvalidMessage(ValidAvbruttSøknad)
@@ -77,11 +78,11 @@ internal class SendtSøknadMessageTest {
 
     @Test
     internal fun `ukjent fraværskode`() {
-        Aktivitetslogger(UkjentFraværskode).also {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                SendtSøknadMessage(UkjentFraværskode, it, Aktivitetslogg()).asSøknad()
+        MessageProblems(UkjentFraværskode).also {
+            assertThrows<MessageProblems.MessageException> {
+                SendtSøknadMessage(UkjentFraværskode, it).asSøknad(Aktivitetslogger(), Aktivitetslogg())
             }
-            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $UkjentFraværskode" }
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $UkjentFraværskode" }
         }
     }
 
@@ -92,16 +93,15 @@ internal class SendtSøknadMessageTest {
     }
 
     private fun assertValidSøknadMessage(message: String) {
-        val problems = Aktivitetslogger(message)
-        val aktivitetslogg = Aktivitetslogg()
-        SendtSøknadMessage(message, problems, aktivitetslogg)
-        assertFalse(problems.hasErrorsOld()) { "was supposed to recognize $message: $problems" }
+        val problems = MessageProblems(message)
+        SendtSøknadMessage(message, problems)
+        assertFalse(problems.hasErrors()) { "was supposed to recognize $message: $problems" }
     }
 
     private fun assertInvalidMessage(message: String) {
-        Aktivitetslogger(message).also {
-            SendtSøknadMessage(message, it, Aktivitetslogg())
-            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $message" }
+        MessageProblems(message).also {
+            SendtSøknadMessage(message, it)
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
         }
     }
 

@@ -4,39 +4,37 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.hendelser.asLocalDateTime
 import java.util.*
 
 // Understands a JSON message representing a Påminnelse
 internal class PåminnelseMessage(
     originalMessage: String,
-    private val problems: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
-) :
-    JsonMessage(originalMessage, problems, aktivitetslogg) {
+    problems: MessageProblems) :
+    HendelseMessage(originalMessage, problems) {
 
     init {
-        requiredValue("@event_name", "påminnelse")
-        requiredKey(
+        requireValue("@event_name", "påminnelse")
+        requireKey(
             "antallGangerPåminnet",
             "tilstandsendringstidspunkt", "påminnelsestidspunkt",
             "nestePåminnelsestidspunkt", "vedtaksperiodeId",
             "organisasjonsnummer", "fødselsnummer", "aktørId"
         )
 
-        requiredValueOneOf("tilstand", TilstandType.values().map(Enum<*>::name))
+        requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 
     override val id: UUID = UUID.randomUUID()
 
     override fun accept(processor: MessageProcessor) {
-        processor.process(this, problems)
+        processor.process(this)
     }
 
-    internal fun asPåminnelse(): Påminnelse {
+    internal fun asPåminnelse(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg): Påminnelse {
         return Påminnelse(
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
@@ -47,14 +45,12 @@ internal class PåminnelseMessage(
             tilstandsendringstidspunkt = this["tilstandsendringstidspunkt"].asLocalDateTime(),
             påminnelsestidspunkt = this["påminnelsestidspunkt"].asLocalDateTime(),
             nestePåminnelsestidspunkt = this["nestePåminnelsestidspunkt"].asLocalDateTime(),
-            aktivitetslogger = problems,
+            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
-            PåminnelseMessage(message, problems, aktivitetslogg)
+    object Factory : MessageFactory<PåminnelseMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = PåminnelseMessage(message, problems)
     }
 }

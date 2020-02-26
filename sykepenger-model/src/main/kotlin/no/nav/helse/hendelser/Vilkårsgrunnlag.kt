@@ -52,14 +52,14 @@ class Vilkårsgrunnlag(
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
 
-        if (erEgenAnsatt) aktivitetslogger.warnOld("Er egen ansatt")
+        if (erEgenAnsatt) aktivitetslogger.errorOld("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else aktivitetslogger.infoOld("er ikke egen ansatt")
 
-        if (harAvvikIOppgittInntekt) aktivitetslogger.warnOld("Har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
-        else aktivitetslogger.infoOld("har ${grunnlag.avviksprosent*100} %% avvik i inntekt")
+        if (harAvvikIOppgittInntekt) aktivitetslogger.errorOld("Har mer enn 25 %% avvik")
+        else aktivitetslogger.infoOld("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent*100} %%)")
 
-        if(grunnlag.harOpptjening) aktivitetslogger.infoOld("Har tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
-        else aktivitetslogger.warnOld("Har ikke tilstrekkelig opptjente dager, antall dager er $antallOpptjeningsdager")
+        if(grunnlag.harOpptjening) aktivitetslogger.infoOld("Har minst 28 dager opptjening")
+        else aktivitetslogger.errorOld("Har mindre enn 28 dager opptjening")
 
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }

@@ -41,6 +41,7 @@ class SerialisertPerson(val json: String) {
             V2EndreTilstandTyper(),
             V3FjerneUtbetalingsreferanseFraArbeidsgiver(),
             V4LagerAktivitetslogg(),
+            V5LagerUtbetalingsreferanse(),
             V6LeggerTilGrad()
         )
 
@@ -280,9 +281,6 @@ internal data class PersonData(
     val aktivitetslogger: AktivitetsloggerData,
     val aktivitetslogg: AktivitetsloggData?
 ) {
-    companion object {
-        const val skjemaVersjon: Int = 4
-    }
 
     internal data class AktivitetsloggData(
         val aktiviteter: List<AktivitetData>
@@ -328,7 +326,7 @@ internal data class PersonData(
             val id: UUID,
             val maksdato: LocalDate?,
             val godkjentAv: String?,
-            val utbetalingsreferanse: String?,
+            val utbetalingsreferanse: String,
             val førsteFraværsdag: LocalDate?,
             val inntektFraInntektsmelding: BigDecimal?,
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,

@@ -32,7 +32,7 @@ class Utbetalingshistorikk(
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
         inntektshistorikk.forEach { it.valider(aktivitetslogger) }
         if (ukjentePerioder.isNotEmpty()) {
-            aktivitetslogger.errorOld("Utbetalingshistorikk inneholder ukjente perioder")
+            aktivitetslogger.errorOld("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
         }
         return aktivitetslogger
     }
@@ -54,7 +54,7 @@ class Utbetalingshistorikk(
 
         internal fun valider(aktivitetslogger: Aktivitetslogger) {
             if (orgnummer.isBlank()) {
-                aktivitetslogger.errorOld("Organisasjonsnummer for inntektsopplysning mangler")
+                aktivitetslogger.errorOld("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             }
         }
 
@@ -97,7 +97,7 @@ class Utbetalingshistorikk(
             }
 
             override fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-                if (fom > tom) aktivitetslogger.errorOld("Utbetalingsperioder kan ikke ha en FOM etter TOM")
+                if (fom > tom) aktivitetslogger.errorOld("Utbetalingsperiode fra Infotrygd har en FOM etter TOM")
             }
         }
 

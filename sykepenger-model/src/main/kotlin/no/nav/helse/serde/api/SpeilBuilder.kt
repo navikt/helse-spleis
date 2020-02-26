@@ -12,8 +12,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.joinForOppdrag
-import java.time.LocalDate
 import java.util.*
 
 
@@ -256,7 +256,7 @@ internal class SpeilBuilder : PersonVisitor {
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
-        private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
+        private val utbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
 
         override fun preVisitPerioder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
@@ -264,19 +264,19 @@ internal class SpeilBuilder : PersonVisitor {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
-            vedtaksperioder.add(vedtaksperiodeMap)
+            val avgrensetUtbetalingstidslinje = mutableListOf<MutableMap<String, Any?>>()
+
+            vedtaksperiodeMap["utbetalingstidslinje"] = avgrensetUtbetalingstidslinje
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
+            vedtaksperioder.add(vedtaksperiodeMap)
 
-        }
-
-        override fun preVisitTidslinjer() {
-            //arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
+            val utbetalingstidslinje = utbetalingstidslinjer.last()
+                .subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
+            utbetalingstidslinje.accept(UtbetalingstidslinjeVisitor(avgrensetUtbetalingstidslinje))
         }
 
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-            val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
-            utbetalingstidslinjer.add(utbetalingstidslinjeMap)
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
+            utbetalingstidslinjer.add(tidslinje)
         }
 
         override fun postVisitArbeidsgiver(
@@ -284,63 +284,41 @@ internal class SpeilBuilder : PersonVisitor {
             id: UUID,
             organisasjonsnummer: String
         ) {
-            vedtaksperioder.forEach { periodeMap ->
-                if (periodeMap["utbetalingsreferanse"] != null) {
-                    val førsteFraværsdag = periodeMap["førsteFraværsdag"] as LocalDate
-                    val sisteSykedag =
-                        (periodeMap["sykdomstidslinje"] as List<Map<String, Any?>>).map { it["dagen"] as LocalDate }.max()!!
-                    periodeMap["utbetalingstidslinje"] =
-                        (utbetalingstidslinjer.last()["dager"] as List<MutableMap<String, Any?>>).filterNot {
-                            (it["dato"] as LocalDate)
-                                .isBefore(førsteFraværsdag) || (it["dato"] as LocalDate).isAfter(sisteSykedag)
-                        }
-                }
-            }
             popState()
         }
     }
 
-    private inner class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) : JsonState {
-
-        private val dager = mutableListOf<MutableMap<String, Any?>>()
-
-        init {
-            utbetalingstidslinjeMap["dager"] = dager
-        }
+    private class UtbetalingstidslinjeVisitor(private val utbetalingstidslinjeMap: MutableList<MutableMap<String, Any?>>) : UtbetalingsdagVisitor {
 
         override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
-            dager.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
         }
 
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-            dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
 
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            dager.add(NavDagReflect(dag, "NavDag").toMap())
+            utbetalingstidslinjeMap.add(NavDagReflect(dag, "NavDag").toMap())
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
-            dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
         }
 
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
-            dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
         }
 
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
-            dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
         }
 
         override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
             val avvistDagMap = mutableMapOf<String, Any?>()
-            dager.add(avvistDagMap)
+            utbetalingstidslinjeMap.add(avvistDagMap)
 
             avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
-        }
-
-        override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
-            popState()
         }
     }
 
