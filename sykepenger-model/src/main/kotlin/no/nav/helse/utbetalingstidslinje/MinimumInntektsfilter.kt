@@ -12,16 +12,15 @@ internal class MinimumInntektsfilter (
     private val aktivitetslogger: Aktivitetslogger
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {
 
-    private var inntekter = mutableMapOf<LocalDate, Double>()
+    private val inntekter = mutableMapOf<LocalDate, Double>()
 
     internal fun filter() {
         tidslinjer.forEach { it.accept(this) }
-        inntekter = inntekter
-            .filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMutableMap()
+        val inntekterUnderMinimum = inntekter.filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMap()
 
-        tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
+        tidslinjer.forEach { it.avvis(inntekterUnderMinimum.keys.toList(), Begrunnelse.MinimumInntekt) }
 
-        if (inntekter.keys.toList() in periode)
+        if (inntekterUnderMinimum.keys.toList() in periode)
             aktivitetslogger.warnOld("Avvist minst en dag som faller under minimum inntekt")
         else
             aktivitetslogger.infoOld("Minimum inntekt har blitt sjekket uten problemer")
@@ -44,7 +43,7 @@ internal class MinimumInntektsfilter (
     }
 
     private fun addInntekt(dag: Utbetalingstidslinje.Utbetalingsdag) {
-        inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.inntekt) ?: dag.inntekt
+        inntekter.merge(dag.dato, dag.inntekt) { _, inntekt -> inntekt.plus(dag.inntekt) }
     }
 
 }
