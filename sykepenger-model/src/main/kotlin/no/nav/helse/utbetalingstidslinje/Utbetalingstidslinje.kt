@@ -27,6 +27,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun maksdato() = visitor.maksdato()
+    internal fun brukteSykedager() = visitor.brukteSykedager()
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 

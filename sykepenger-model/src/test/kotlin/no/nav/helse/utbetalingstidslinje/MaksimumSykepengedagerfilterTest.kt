@@ -144,6 +144,43 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(listOf(17.juli(2022)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
+    @Test internal fun `teller sykedager med opphold i sykdom`() {
+        val gjeldendePerioder = listOf(tidslinjeOf(10.NAV, startDato = 1.mars))
+        val historikk = tidslinjeOf(31.NAV, startDato = 1.januar(2018))
+        val filter = maksimumSykepengedagerfilter()
+            .also { it.filter(gjeldendePerioder, historikk) }
+        assertEquals(41, filter.brukteSykedager())
+    }
+
+    @Test internal fun `teller sykedager med overlapp`() {
+        val gjeldendePerioder = listOf(tidslinjeOf(10.NAV, startDato = 1.februar))
+        val historikk = tidslinjeOf(16.ARB, 31.NAV, startDato = 1.januar(2018))
+        val filter = maksimumSykepengedagerfilter()
+            .also { it.filter(gjeldendePerioder, historikk) }
+        assertEquals(31, filter.brukteSykedager())
+    }
+
+    @Test internal fun `teller sykedager med konflikt`() {
+        val gjeldendePerioder = listOf(tidslinjeOf(10.NAV, startDato = 1.januar))
+        val historikk = tidslinjeOf(16.ARB, 31.NAV, startDato = 1.januar)
+        val filter = maksimumSykepengedagerfilter()
+            .also { it.filter(gjeldendePerioder, historikk) }
+        assertEquals(41, filter.brukteSykedager())
+    }
+
+    @Test internal fun `teller sykedager med 26 uker`() {
+        val filter = maksimumSykepengedagerfilter()
+            .also { it.filter(listOf(enAnnenSykdom()), tidslinjeOf()) }
+        assertEquals(54, filter.brukteSykedager())
+    }
+
+    private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
+        Alder(UNG_PERSON_FNR_2018),
+        NormalArbeidstaker,
+        Periode(1.januar, 10.januar),
+        Aktivitetslogger()
+    )
+
     // No 26 week gap with base of 246 NAV days
     private fun tilbakevendendeSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>): Utbetalingstidslinje {
         return tidslinjeOf(
@@ -164,7 +201,7 @@ internal class MaksimumSykepengedagerfilterTest {
         )
     }
 
-    // 26 week gap inside 3 year window of 246 days with 54 NAV days days after the gap
+    // 26 week gap inside 3 year window of 246 days with 54 NAV days after the gap
     private fun enAnnenSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>): Utbetalingstidslinje {
         return tidslinjeOf(
             365.ARB,
