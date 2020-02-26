@@ -6,11 +6,8 @@ import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.util.*
 
 internal class SøknadTest {
@@ -81,11 +78,20 @@ internal class SøknadTest {
     }
 
     @Test
-    internal fun `sykdom faktiskgrad ikke 100 støttes når støttes (epic 18)`() {
+    @Disabled
+    internal fun `sykdom faktiskgrad ikke 100 støttes når støttes (epic 18+)`() {
         FeatureToggle.støtterGradertSykdom = true
         søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
         assertFalse(søknad.valider().hasErrorsOld())
     }
+
+    @Test
+    internal fun `re-graderte søknader støttes ikke ennå (epic 18)`() {
+        FeatureToggle.støtterGradertSykdom = true
+        søknad(Sykdom(1.januar, 10.januar, 50, 40.0))
+        assertTrue(søknad.valider().hasErrorsOld())
+    }
+
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {

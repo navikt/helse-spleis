@@ -87,7 +87,7 @@ class Søknad constructor(
 
             override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {
                 if (grad != 100 && (!FeatureToggle.støtterGradertSykdom)) aktivitetslogger.errorOld("Søknaden inneholder gradert sykdomsperiode")
-                if (faktiskGrad < grad && (!FeatureToggle.støtterGradertSykdom)) aktivitetslogger.errorOld("Søker oppgir gradert sykdomsperiode")
+                if (faktiskGrad != grad.toDouble()/* && (!FeatureToggle.støtterGradertSykdom)*/) aktivitetslogger.errorOld("Søker oppgir gradert sykdomsperiode")
             }
         }
 
