@@ -249,6 +249,7 @@ class PåminnelserOgTimeoutTest {
                 )
             ),
             inntektshistorikk = emptyList(),
+            graderingsliste = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),

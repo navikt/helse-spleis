@@ -575,6 +575,7 @@ internal class KunEnArbeidsgiverTest {
                     )
                 },
                 inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
+                graderingsliste = emptyList<Utbetalingshistorikk.Graderingsperiode>(),
                 aktivitetslogger = hendelselogger,
                 aktivitetslogg = hendelselogg
             ),

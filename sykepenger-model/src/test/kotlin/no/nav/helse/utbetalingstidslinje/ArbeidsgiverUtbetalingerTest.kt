@@ -287,7 +287,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertFalse(aktivitetslogger.hasErrorsOld())
     }
 
-    private fun undersøke(fnr: String, vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
+    private fun undersøke(fnr: String, vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
         undersøke(fnr, tidslinje, tidslinjeOf())
     }

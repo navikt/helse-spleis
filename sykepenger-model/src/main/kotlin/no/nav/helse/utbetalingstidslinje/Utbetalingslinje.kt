@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -9,16 +8,16 @@ data class Utbetalingslinje(
     var tom: LocalDate,
     val dagsats: Int
 ) {
-    internal fun toTidslinje() = Utbetalingstidslinje().apply {
-        fom.datesUntil(tom.plusDays(1)).forEach {
-            if (it.erHelg()) this.addHelg(0.0, it) else this.addNAVdag(dagsats.toDouble(), it)
-        }
-    }
+//    internal fun toTidslinje() = Utbetalingstidslinje().apply {
+//        fom.datesUntil(tom.plusDays(1)).forEach {
+//            if (it.erHelg()) this.addHelg(0.0, it) else this.addNAVdag(dagsats.toDouble(), it)
+//        }
+//    }
 }
 
-internal fun List<Utbetalingslinje>.utbetalingstidslinje() = this
-    .map { it.toTidslinje() }
-    .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+//internal fun List<Utbetalingslinje>.utbetalingstidslinje() = this
+//    .map { it.toTidslinje() }
+//    .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
 /**
  * Oppdrag expects a continuous payment timeline spanning weekends.

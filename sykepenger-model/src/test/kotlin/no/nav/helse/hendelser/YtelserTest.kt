@@ -73,6 +73,7 @@ internal class YtelserTest {
                 )
             },
             inntektshistorikk = emptyList(),
+            graderingsliste = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),

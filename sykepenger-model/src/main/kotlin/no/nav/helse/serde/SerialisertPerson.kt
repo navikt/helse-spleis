@@ -40,7 +40,8 @@ class SerialisertPerson(val json: String) {
             V1FjernHendelsetypeEnumFraDag(),
             V2EndreTilstandTyper(),
             V3FjerneUtbetalingsreferanseFraArbeidsgiver(),
-            V4LagerAktivitetslogg()
+            V4LagerAktivitetslogg(),
+            V6LeggerTilGrad()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -102,7 +103,15 @@ class SerialisertPerson(val json: String) {
             aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
         )
 
-        vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it) })
+        vedtaksperioder.addAll(data.vedtaksperioder.map {
+            parseVedtaksperiode(
+                person,
+                arbeidsgiver,
+                personData,
+                data,
+                it
+            )
+        })
 
         return arbeidsgiver
     }
@@ -111,13 +120,13 @@ class SerialisertPerson(val json: String) {
         return createUtbetalingstidslinje(data.dager.map {
             when (it.type) {
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
-                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
                 }
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
-                    createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!)
+                    createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!, grad = it.grad!!)
                 }
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
-                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
                 }
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
                     Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
@@ -130,8 +139,9 @@ class SerialisertPerson(val json: String) {
                         inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
                             ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
                             ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
+                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperioden -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                             null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
-                        }
+                        }, grad = Double.NaN
                     )
                 }
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
@@ -187,9 +197,9 @@ class SerialisertPerson(val json: String) {
             JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
             JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
             JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
-            JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen)
-            JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen)
-            JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen)
+            JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen, data.grad)
+            JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen, data.grad)
+            JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, data.grad)
             JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
             JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
         }
@@ -329,7 +339,8 @@ internal data class PersonData(
         ) {
             data class DagData(
                 val dagen: LocalDate,
-                val type: JsonDagType
+                val type: JsonDagType,
+                val grad: Double
             )
 
             data class SykdomshistorikkData(
@@ -359,7 +370,8 @@ internal data class PersonData(
         ) {
             enum class BegrunnelseData {
                 SykepengedagerOppbrukt,
-                MinimumInntekt
+                MinimumInntekt,
+                EgenmeldingUtenforArbeidsgiverperioden
             }
 
             enum class TypeData {
@@ -377,7 +389,8 @@ internal data class PersonData(
                 val dato: LocalDate,
                 val inntekt: Double,
                 val utbetaling: Int?,
-                val begrunnelse: BegrunnelseData?
+                val begrunnelse: BegrunnelseData?,
+                val grad: Double?
             )
         }
     }

@@ -53,7 +53,7 @@ internal class SpeilBuilderTest {
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             if (firstTime) {
                 leftPadWithDays.forEach {
-                    target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it))
+                    target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it, 100.00))
                 }
                 firstTime = false
             }
@@ -62,7 +62,7 @@ internal class SpeilBuilderTest {
 
         override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
             rightPadWithDays.forEach {
-                target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it))
+                target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it, 100.00))
             }
             target.postVisitUtbetalingstidslinje(utbetalingstidslinje)
         }
@@ -71,7 +71,7 @@ internal class SpeilBuilderTest {
             target.preVisitUtbetalingstidslinje(tidslinje)
             // legg på tulletidslinje som element 0 i arbeidsgiver.utbetalingstidslinjer-arrayen for å sikre at vi velger siste:
             leftPadWithDays.forEach {
-                target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it))
+                target.visitNavDag(Utbetalingstidslinje.Utbetalingsdag.NavDag(1000.0, it, 100.00))
             }
             target.postVisitUtbetalingstidslinje(tidslinje)
 

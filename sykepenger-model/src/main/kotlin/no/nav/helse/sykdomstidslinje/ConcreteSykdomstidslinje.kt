@@ -64,8 +64,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal fun harTilstøtende(other: ConcreteSykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
 
     companion object {
-        fun sykedag(gjelder: LocalDate, grad: Double, factory: DagFactory) =
-            if (!gjelder.erHelg()) factory.sykedag(gjelder, grad) else factory.sykHelgedag(gjelder)
+        fun sykedag(gjelder: LocalDate, grad: Double, factory: DagFactory): Dag =
+            if (!gjelder.erHelg()) factory.sykedag(gjelder, grad) else factory.sykHelgedag(gjelder, grad)
 
         fun egenmeldingsdag(gjelder: LocalDate, factory: DagFactory) =
             factory.egenmeldingsdag(gjelder)

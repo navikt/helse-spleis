@@ -12,6 +12,7 @@ internal class DagTest {
         val dagSykedagenDekker = LocalDate.of(2019, 9, 23)
         val sykedag = ConcreteSykdomstidslinje.sykedag(
             dagSykedagenDekker,
+            100.0,
             Søknad.SøknadDagFactory
         )
 

@@ -263,7 +263,7 @@ internal class PersonTest {
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID().toString(),
-                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), emptyList(), Aktivitetslogger(), Aktivitetslogg()),
+                utbetalingshistorikk = Utbetalingshistorikk(emptyList(), emptyList(), emptyList(), emptyList(), Aktivitetslogger(), Aktivitetslogg()),
                 foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogger(), Aktivitetslogg()),
                 aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg()

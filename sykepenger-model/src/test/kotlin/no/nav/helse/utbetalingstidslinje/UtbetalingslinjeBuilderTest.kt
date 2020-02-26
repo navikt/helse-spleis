@@ -46,7 +46,7 @@ internal class UtbetalingslinjeBuilderTest {
         assertEquals(1500, linjer.last().dagsats)
     }
 
-    private fun opprettUtbetalingslinjer(vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>) {
+    private fun opprettUtbetalingslinjer(vararg dager: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>) {
         val tidslinje = tidslinjeOf(*dager)
         MaksimumUtbetaling(
             Sykdomsgrader(listOf(tidslinje)),

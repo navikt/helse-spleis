@@ -50,6 +50,11 @@ internal class JsonBuilderTest {
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
         testSerialiseringAvPerson(lagPerson())
+
+        val jsonBuilder = JsonBuilder()
+        lagPerson().accept(jsonBuilder)
+        val json = jsonBuilder.toString()
+        println(json)
     }
 
     @Test
@@ -219,6 +224,7 @@ internal class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
+                    graderingsliste = emptyList(),
                     aktivitetslogger = aktivitetslogger,
                     aktivitetslogg = it
                 ),
