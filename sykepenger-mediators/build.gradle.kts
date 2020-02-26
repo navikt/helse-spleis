@@ -1,5 +1,4 @@
 val ktorVersion = "1.2.4"
-val kafkaVersion = "2.3.0"
 val flywayVersion = "6.0.0-beta"
 val hikariVersion = "3.3.1"
 val vaultJdbcVersion = "1.3.1"
@@ -14,8 +13,6 @@ dependencies {
     implementation(project(":sykepenger-model"))
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
-
-    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
@@ -34,7 +31,6 @@ dependencies {
 
     testImplementation("org.awaitility:awaitility:3.1.6")
     testImplementation("no.nav:kafka-embedded-env:2.3.0")
-    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
 
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
