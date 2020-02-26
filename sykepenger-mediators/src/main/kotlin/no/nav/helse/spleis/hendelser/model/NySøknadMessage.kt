@@ -3,9 +3,10 @@ package no.nav.helse.spleis.hendelser.model
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.hendelser.asLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
 import java.util.*
@@ -13,13 +14,12 @@ import java.util.*
 // Understands a JSON message representing a Ny Søknad
 internal class NySøknadMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    problems: MessageProblems
 ) :
-    SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    SøknadMessage(originalMessage, problems) {
     init {
-        requiredValue("status", "NY")
-        requiredKey("sykmeldingId", "fom", "tom")
+        requireValue("status", "NY")
+        requireKey("sykmeldingId", "fom", "tom")
     }
 
     override val id: UUID
@@ -44,7 +44,7 @@ internal class NySøknadMessage(
         processor.process(this)
     }
 
-    internal fun asSykmelding() = Sykmelding(
+    internal fun asSykmelding(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) = Sykmelding(
         meldingsreferanseId = this.id,
         fnr = fnr,
         aktørId = aktørId,
@@ -60,9 +60,7 @@ internal class NySøknadMessage(
         tom = søknadTom
     )
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
-            NySøknadMessage(message, problems, aktivitetslogg)
+    object Factory : MessageFactory<NySøknadMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = NySøknadMessage(message, problems)
     }
 }

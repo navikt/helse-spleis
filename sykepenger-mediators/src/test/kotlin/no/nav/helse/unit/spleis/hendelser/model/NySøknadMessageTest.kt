@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.NySøknadMessage
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -62,11 +61,11 @@ internal class NySøknadMessageTest {
 
     @Test
     internal fun `invalid messages`() {
-        Aktivitetslogger(InvalidJson).also {
-            assertThrows<Aktivitetslogger.AktivitetException> {
-                NySøknadMessage(InvalidJson, it, Aktivitetslogg())
+        MessageProblems(InvalidJson).also {
+            assertThrows<MessageProblems.MessageException> {
+                NySøknadMessage(InvalidJson, it)
             }
-            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $InvalidJson" }
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $InvalidJson" }
         }
         assertInvalidMessage(UnknownJson)
         assertInvalidMessage(ValidAvbruttSøknad)
@@ -79,16 +78,15 @@ internal class NySøknadMessageTest {
     }
 
     private fun assertValidSøknadMessage(message: String) {
-        val problems = Aktivitetslogger(message)
-        val aktivitetslogg = Aktivitetslogg()
-        NySøknadMessage(message, problems, aktivitetslogg)
-        assertFalse(problems.hasErrorsOld()) { "was supposed to recognize $message: $problems" }
+        val problems = MessageProblems(message)
+        NySøknadMessage(message, problems)
+        assertFalse(problems.hasErrors()) { "was supposed to recognize $message: $problems" }
     }
 
     private fun assertInvalidMessage(message: String) {
-        Aktivitetslogger(message).also {
-            NySøknadMessage(message, it, Aktivitetslogg())
-            assertTrue(it.hasErrorsOld()) { "was not supposed to recognize $message" }
+        MessageProblems(message).also {
+            NySøknadMessage(message, it)
+            assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
         }
     }
 

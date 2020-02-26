@@ -1,16 +1,15 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.*
 import no.nav.helse.spleis.rest.PersonRestInterface
-import org.apache.kafka.clients.producer.KafkaProducer
 import javax.sql.DataSource
 
 // Understands how to create the mediators and create the objects they need
 internal class HelseBuilder(
     dataSource: DataSource,
-    kafkaRapid: KafkaRapid,
-    hendelseProducer: KafkaProducer<String, String>
+    rapidsConnection: RapidsConnection
 ) {
 
     private val hendelseDirector: HendelseMediator
@@ -31,11 +30,10 @@ internal class HelseBuilder(
         )
 
         hendelseDirector = HendelseMediator(
-            rapid = kafkaRapid,
+            rapidsConnection = rapidsConnection,
             personRepository = personRepository,
             lagrePersonDao = lagrePersonDao,
             lagreUtbetalingDao = lagreUtbetalingDao,
-            producer = hendelseProducer,
             hendelseProbe = hendelseProbe,
             hendelseRecorder = hendelseRecorder
         )

@@ -2,6 +2,7 @@ package no.nav.helse.unit.spleis.hendelser.model
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.YtelserMessage
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -14,18 +15,20 @@ class YtelserMessageTest {
     fun `Kan mappe om message til modell uten feil`() {
         val aktivitetslogger = Aktivitetslogger()
         val aktivitetslogg = Aktivitetslogg()
-        YtelserMessage(json, aktivitetslogger, aktivitetslogg).asYtelser().valider()
+        YtelserMessage(json, MessageProblems("{}")).asYtelser(aktivitetslogger, aktivitetslogg).valider()
 
         assertFalse(aktivitetslogger.hasErrorsOld())
+        assertFalse(aktivitetslogg.hasErrors())
     }
 
     @Test
     fun `ukjente perioder gir feil i mapping`() {
         val aktivitetslogger = Aktivitetslogger()
         val aktivitetslogg = Aktivitetslogg()
-        YtelserMessage(ukjentPeriode, aktivitetslogger, aktivitetslogg).asYtelser().valider()
+        YtelserMessage(ukjentPeriode, MessageProblems("{}")).asYtelser(aktivitetslogger, aktivitetslogg).valider()
 
         assertTrue(aktivitetslogger.hasErrorsOld())
+        assertFalse(aktivitetslogg.hasErrors())
     }
 }
 
