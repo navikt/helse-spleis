@@ -33,7 +33,7 @@ class ApplicationBuilder(env: Map<String, String>) {
 
     private val kafkaConfig = KafkaConfig(
         bootstrapServers = env.getValue("KAFKA_BOOTSTRAP_SERVERS"),
-        consumerGroupId = env.getOrDefault("KAFKA_APP_ID", "spleis-v3"),
+        consumerGroupId = env.getOrDefault("KAFKA_APP_ID", "spleis-v1"),
         username = "/var/run/secrets/nais.io/service_user/username".readFile() ?: env.getValue("KAFKA_USERNAME"),
         password = "/var/run/secrets/nais.io/service_user/password".readFile() ?: env.getValue("KAFKA_PASSWORD"),
         truststore = env["NAV_TRUSTSTORE_PATH"],
