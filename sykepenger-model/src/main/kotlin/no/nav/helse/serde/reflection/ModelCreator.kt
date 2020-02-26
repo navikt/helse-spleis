@@ -16,11 +16,10 @@ internal fun createPerson(
     aktørId: String,
     fødselsnummer: String,
     arbeidsgivere: MutableList<Arbeidsgiver>,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) = Person::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(aktørId, fødselsnummer, arbeidsgivere, aktivitetslogger, aktivitetslogg)
+    .call(aktørId, fødselsnummer, arbeidsgivere, aktivitetslogg)
 
 internal fun createArbeidsgiver(
     person: Person,
@@ -28,11 +27,10 @@ internal fun createArbeidsgiver(
     id: UUID,
     inntekthistorikk: Inntekthistorikk,
     tidslinjer: MutableList<Utbetalingstidslinje>,
-    perioder: MutableList<Vedtaksperiode>,
-    aktivitetslogger: Aktivitetslogger
+    perioder: MutableList<Vedtaksperiode>
 ) = Arbeidsgiver::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, aktivitetslogger)
+    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder)
 
 internal fun createVedtaksperiode(
     person: Person,
@@ -49,14 +47,12 @@ internal fun createVedtaksperiode(
     førsteFraværsdag: LocalDate?,
     inntektFraInntektsmelding: Double?,
     dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    sykdomshistorikk: Sykdomshistorikk,
-    aktivitetslogger: Aktivitetslogger
+    sykdomshistorikk: Sykdomshistorikk
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, utbetalingslinjer, godkjentAv,
-        utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk,
-        aktivitetslogger
+        utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk
     )
 
 internal fun createSykdomshistorikk(

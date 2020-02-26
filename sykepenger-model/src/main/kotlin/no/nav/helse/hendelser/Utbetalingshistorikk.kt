@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
@@ -12,31 +11,25 @@ class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val ukjentePerioder: List<JsonNode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
-    private val aktivitetslogger: Aktivitetslogger,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
     private val sisteFraværsdag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
 
     internal fun utbetalingslinjer(): List<Utbetalingslinje> =
-        utbetalinger.map { it.utbetalingslinjer(aktivitetslogger) }
+        utbetalinger.map { it.utbetalingslinjer(aktivitetslogg) }
 
     internal fun sisteFraværsdag() = sisteFraværsdag
 
-    internal fun valider(): Aktivitetslogger {
-        utbetalinger.forEach { it.valider(this, aktivitetslogger) }
-        inntektshistorikk.forEach { it.valider(aktivitetslogger) }
-        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk fra Infotrygd inneholder perioder vi ikke klarer å tolke") }
-        return aktivitetslogger
-    }
-
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Sykepengehistorikk")
+    internal fun valider(): Aktivitetslogg {
+        utbetalinger.forEach { it.valider(this, aktivitetslogg) }
+        inntektshistorikk.forEach { it.valider(aktivitetslogg) }
+        if (ukjentePerioder.isNotEmpty()) { aktivitetslogg.error("Utbetalingshistorikk fra Infotrygd inneholder perioder vi ikke klarer å tolke") }
+        return aktivitetslogg
     }
 
     internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, inntekthistorikk) }
-
     }
 
     class Inntektsopplysning(
@@ -45,9 +38,9 @@ class Utbetalingshistorikk(
         private val orgnummer: String
     ) {
 
-        internal fun valider(aktivitetslogger: Aktivitetslogger) {
+        internal fun valider(aktivitetslogg: Aktivitetslogg) {
             if (orgnummer.isBlank()) {
-                aktivitetslogger.errorOld("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
+                aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             }
         }
 
@@ -57,12 +50,12 @@ class Utbetalingshistorikk(
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
-        open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
-            aktivitetslogger.severeOld("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
+        open fun utbetalingslinjer(aktivitetslogg: Aktivitetslogg): Utbetalingslinje {
+            aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
         }
 
-        open fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-            aktivitetslogger.errorOld("Utbetalingsperioden %s (fra Infotrygd) er ikke støttet", this::class.simpleName)
+        open fun valider(historikk: Utbetalingshistorikk, aktivitetslogg: Aktivitetslogg) {
+            aktivitetslogg.error("Utbetalingsperioden %s (fra Infotrygd) er ikke støttet", this::class.simpleName)
         }
 
         class RefusjonTilArbeidsgiver(
@@ -70,12 +63,12 @@ class Utbetalingshistorikk(
             tom: LocalDate,
             dagsats: Int
         ) : Periode(fom, tom, dagsats) {
-            override fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
+            override fun utbetalingslinjer(aktivitetslogg: Aktivitetslogg): Utbetalingslinje {
                 return Utbetalingslinje(fom, tom, dagsats)
             }
 
-            override fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {
-                if (fom > tom) aktivitetslogger.errorOld("Utbetalingsperiode fra Infotrygd har en FOM etter TOM")
+            override fun valider(historikk: Utbetalingshistorikk, aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.error("Utbetalingsperiode fra Infotrygd har en FOM etter TOM")
             }
         }
 

@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -73,11 +72,9 @@ internal class YtelserTest {
                 )
             },
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogger(), Aktivitetslogg()),
-        aktivitetslogger = Aktivitetslogger(),
+        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogg()),
         aktivitetslogg = Aktivitetslogg()
     )
 

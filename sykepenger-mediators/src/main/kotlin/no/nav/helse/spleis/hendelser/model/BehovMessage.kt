@@ -54,7 +54,6 @@ internal class YtelserMessage(
         val foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = this["@løsning.Foreldrepenger.Foreldrepengeytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
             svangerskapsytelse = this["@løsning.Foreldrepenger.Svangerskapsytelse"].takeIf(JsonNode::isObject)?.let(::asPeriode),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -121,7 +120,6 @@ internal class YtelserMessage(
                     orgnummer = opplysning["orgnummer"].asText()
                 )
             },
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -133,7 +131,6 @@ internal class YtelserMessage(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }
@@ -190,7 +187,6 @@ internal class VilkårsgrunnlagMessage(
                 }
             ),
             erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean(),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }
@@ -232,7 +228,6 @@ internal class ManuellSaksbehandlingMessage(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
             utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean(),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -271,7 +266,6 @@ internal class UtbetalingMessage(
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
             status = this["@løsning.${Behovstype.Utbetaling.name}.status"].asText(),
             melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText(),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }

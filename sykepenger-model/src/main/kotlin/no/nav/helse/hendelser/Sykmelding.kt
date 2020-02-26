@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -16,25 +15,20 @@ class Sykmelding(
     private val aktørId: String,
     private val orgnummer: String,
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
 
     private val sykeperioder: List<Sykeperiode>
 
     init {
-        if (sykeperioder.isEmpty()) aktivitetslogger.severeOld("Ingen sykeperioder")
+        if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
         this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
-        if (!ingenOverlappende()) aktivitetslogger.severeOld("Sykeperioder overlapper")
+        if (!ingenOverlappende()) severe("Sykeperioder overlapper")
     }
 
-    override fun valider(): Aktivitetslogger {
-        if (!hundreProsentSykmeldt()) aktivitetslogger.errorOld("Sykmeldingen inneholder graderte sykeperioder")
-        return aktivitetslogger
-    }
-
-    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Sykmelding")
+    override fun valider(): Aktivitetslogg {
+        if (!hundreProsentSykmeldt()) aktivitetslogg.error("Sykmeldingen inneholder graderte sykeperioder")
+        return aktivitetslogg
     }
 
     override fun melding(ignore: String) = "Ny Søknad"

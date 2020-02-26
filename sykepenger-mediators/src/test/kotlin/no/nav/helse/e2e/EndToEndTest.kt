@@ -24,7 +24,6 @@ import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -396,7 +395,6 @@ internal class EndToEndTest {
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
     }

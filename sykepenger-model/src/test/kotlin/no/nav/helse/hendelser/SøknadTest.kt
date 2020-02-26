@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -18,105 +17,103 @@ internal class SøknadTest {
     }
 
     private lateinit var søknad: Søknad
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100))
-        assertFalse(søknad.valider().hasErrorsOld())
+        assertFalse(søknad.valider().hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad under 100% støttes ikke`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `søknad med ferie`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 4.januar))
-        assertFalse(søknad.valider().hasErrorsOld())
+        assertFalse(søknad.valider().hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Utdanning(5.januar, 10.januar))
-        assertTrue(søknad.valider().hasNeedsOld())
+        assertTrue(søknad.valider().hasNeeds())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad ikke 100`() {
         søknad(Sykdom(1.januar, 10.januar, 50))
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `sykdom faktiskgrad ikke 100`() {
         søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 16.januar))
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Utdanning(16.januar, 10.januar))
-        assertTrue(søknad.valider().hasNeedsOld())
+        assertTrue(søknad.valider().hasNeeds())
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
-        assertTrue(søknad.valider().hasNeedsOld())
+        assertTrue(søknad.valider().hasNeeds())
     }
 
     @Test
     internal fun `arbeidag ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Arbeid(2.januar, 16.januar))
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `egenmelding ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
-        assertFalse(søknad.valider().hasErrorsOld())
+        assertFalse(søknad.valider().hasErrors())
         assertEquals(11, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = true)
-        assertTrue(søknad.valider().hasErrorsOld())
+        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `søknad uten andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = false)
-        assertFalse(søknad.valider().hasErrorsOld())
+        assertFalse(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `må ha perioder`() {
-        assertThrows<Aktivitetslogger.AktivitetException> { søknad() }
+        assertThrows<Aktivitetslogg.AktivitetException> { søknad() }
     }
 
     @Test
     internal fun `må ha sykdomsperioder`() {
-        assertThrows<Aktivitetslogger.AktivitetException> { søknad(Ferie(2.januar, 16.januar)) }
+        assertThrows<Aktivitetslogg.AktivitetException> { søknad(Ferie(2.januar, 16.januar)) }
     }
 
     private fun søknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
@@ -126,7 +123,6 @@ internal class SøknadTest {
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = harAndreInntektskilder
         )

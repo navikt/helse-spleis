@@ -88,7 +88,6 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Triple(1.januar, 2.januar, 100)),
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
@@ -105,7 +104,6 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Søknad.Periode.Permisjon(5.januar, 5.januar),
             Søknad.Periode.Utdanning(5.januar, 5.januar)
         ),
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false
     )

@@ -89,7 +89,6 @@ internal class GodkjenningHendelseTest {
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
         addObserver(personObserver)
@@ -110,16 +109,13 @@ internal class GodkjenningHendelseTest {
             ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
         addObserver(personObserver)
@@ -132,7 +128,6 @@ internal class GodkjenningHendelseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
@@ -145,7 +140,6 @@ internal class GodkjenningHendelseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         ).apply {
@@ -163,7 +157,6 @@ internal class GodkjenningHendelseTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
@@ -181,7 +174,6 @@ internal class GodkjenningHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
@@ -212,9 +204,9 @@ internal class GodkjenningHendelseTest {
             sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
         }
 
-        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            this@GodkjenningHendelseTest.aktivitetslogger = aktivitetslogger
-        }
+//        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+//            this@GodkjenningHendelseTest.aktivitetslogger = aktivitetslogger
+//        }
 
         internal val vedtaksperiodeteller get() = vedtaksperiodeindeks + 1
 

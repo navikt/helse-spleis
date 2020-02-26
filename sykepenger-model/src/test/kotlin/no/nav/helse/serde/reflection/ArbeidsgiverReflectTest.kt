@@ -14,8 +14,7 @@ internal class ArbeidsgiverReflectTest {
                 "inntekthistorikk",
                 "perioder",
                 "tidslinjer",
-                "person",
-                "aktivitetslogger"
+                "person"
             )
         )
     }

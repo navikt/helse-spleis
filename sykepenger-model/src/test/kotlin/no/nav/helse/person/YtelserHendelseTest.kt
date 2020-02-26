@@ -20,7 +20,6 @@ internal class YtelserHendelseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -29,7 +28,7 @@ internal class YtelserHendelseTest {
 
     @Test
     internal fun `ytelser på feil tidspunkt`() {
-        assertThrows<Aktivitetslogger.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
+        assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
         assertEquals(0, inspektør.vedtaksperiodeTeller)
 
         person.håndter(sykmelding())
@@ -118,7 +117,7 @@ internal class YtelserHendelseTest {
         assertEquals(
             expectedTilstand,
             inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        ) { "Forventet tilstand $expectedTilstand: ${inspektør.personlogg}" }
     }
 
     private fun håndterYtelser(
@@ -154,16 +153,13 @@ internal class YtelserHendelseTest {
             ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
@@ -174,7 +170,6 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
 
@@ -185,7 +180,6 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
@@ -207,7 +201,6 @@ internal class YtelserHendelseTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
 
@@ -223,7 +216,6 @@ internal class YtelserHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
         )
@@ -233,9 +225,14 @@ internal class YtelserHendelseTest {
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val vedtaksperiodeIder = mutableSetOf<UUID>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        internal lateinit var personlogg: Aktivitetslogg
 
         init {
             person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personlogg = aktivitetslogg
         }
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
@@ -252,9 +249,9 @@ internal class YtelserHendelseTest {
             sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
         }
 
-        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            this@YtelserHendelseTest.aktivitetslogger = aktivitetslogger
-        }
+//        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
+//            this@YtelserHendelseTest.aktivitetslogger = aktivitetslogger
+//        }
 
         internal val vedtaksperiodeTeller get() = tilstander.size
 

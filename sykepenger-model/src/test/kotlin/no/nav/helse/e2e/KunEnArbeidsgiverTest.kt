@@ -42,7 +42,6 @@ internal class KunEnArbeidsgiverTest {
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var hendelselogger: Aktivitetslogger
     private lateinit var hendelselogg: Aktivitetslogg
     private var forventetEndringTeller = 0
 
@@ -62,7 +61,6 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
@@ -84,7 +82,6 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(21000.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
@@ -104,7 +101,6 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
@@ -124,12 +120,10 @@ internal class KunEnArbeidsgiverTest {
         håndterVilkårsgrunnlag(0, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
         }
         håndterYtelser(0)   // No history
-        assertTrue(hendelselogger.hasErrorsOld())
-        println(hendelselogger)
+        assertTrue(hendelselogg.hasErrors())
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
@@ -149,7 +143,7 @@ internal class KunEnArbeidsgiverTest {
         observatør.utbetalingsreferanseFraUtbetalingEvent = ""
 
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
-        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(1, INNTEKT)
@@ -164,7 +158,6 @@ internal class KunEnArbeidsgiverTest {
 
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
@@ -195,13 +188,12 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
@@ -238,7 +230,7 @@ internal class KunEnArbeidsgiverTest {
         val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
         observatør.utbetalingsreferanseFraUtbetalingEvent = ""
         assertEquals(utbetalingsreferanseISpeilOppslagFørstePeriode, førsteUtbetalingsreferanse)
-        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterYtelser(1)   // No history
 
         val utbetalingsreferanseISpeilOppslagAndrePeriode = serializePersonForSpeil(person)
@@ -250,7 +242,6 @@ internal class KunEnArbeidsgiverTest {
         assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanseFraUtbetalingEvent)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(26, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
@@ -284,7 +275,6 @@ internal class KunEnArbeidsgiverTest {
 
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(2, it.førsteFraværsdager.size)
             assertEquals(it.førsteFraværsdager[0], it.førsteFraværsdager[1])
@@ -303,13 +293,12 @@ internal class KunEnArbeidsgiverTest {
         håndterYtelser(0)   // No history
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
@@ -341,14 +330,13 @@ internal class KunEnArbeidsgiverTest {
         håndterManuellSaksbehandling(0, true)
         val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
         håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
-        assertTrue(hendelselogger.hasMessagesOld(), hendelselogger.toString())
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
         assertNotEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanseFraUtbetalingEvent)
         inspektør.also {
             assertNoErrors(it)
-            assertNoWarnings(it)
             assertMessages(it)
             assertEquals(23, it.dagTeller(NavDag::class))
             assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
@@ -378,22 +366,10 @@ internal class KunEnArbeidsgiverTest {
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
         assertFalse(inspektør.personLogg.hasErrors())
-        assertFalse(inspektør.personLogger.hasErrorsOld())
-        assertFalse(inspektør.arbeidsgiverLogger.hasErrorsOld())
-        assertFalse(inspektør.periodeLogger.hasErrorsOld())
-    }
-
-    private fun assertNoWarnings(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogger.hasWarningsOld())
-        assertFalse(inspektør.arbeidsgiverLogger.hasWarningsOld())
-        assertFalse(inspektør.periodeLogger.hasWarningsOld())
     }
 
     private fun assertMessages(inspektør: TestPersonInspektør) {
-        assertTrue(inspektør.personLogger.hasMessagesOld())
         assertTrue(inspektør.personLogg.hasMessages())
-        assertTrue(inspektør.arbeidsgiverLogger.hasMessagesOld())
-        assertTrue(inspektør.periodeLogger.hasMessagesOld())
     }
 
     private fun håndterSykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
@@ -437,7 +413,6 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -445,7 +420,6 @@ internal class KunEnArbeidsgiverTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(*sykeperioder),
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         ).apply {
             addObserver(observatør)
@@ -453,7 +427,6 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun søknad(vararg perioder: Søknad.Periode): Søknad {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
@@ -461,7 +434,6 @@ internal class KunEnArbeidsgiverTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg,
             harAndreInntektskilder = false
         ).apply {
@@ -478,7 +450,6 @@ internal class KunEnArbeidsgiverTest {
         refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
         endringerIRefusjon: List<LocalDate> = emptyList()
     ): Inntektsmelding {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -490,7 +461,6 @@ internal class KunEnArbeidsgiverTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         ).apply {
             addObserver(observatør)
@@ -498,7 +468,6 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Vilkårsgrunnlag(
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
@@ -512,7 +481,6 @@ internal class KunEnArbeidsgiverTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         ).apply {
@@ -526,7 +494,6 @@ internal class KunEnArbeidsgiverTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
     ): Ytelser {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return Ytelser(
             meldingsreferanseId = UUID.randomUUID(),
@@ -544,16 +511,13 @@ internal class KunEnArbeidsgiverTest {
                     )
                 },
                 inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
-                aktivitetslogger = hendelselogger,
                 aktivitetslogg = hendelselogg
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepenger,
                 svangerskapspenger,
-                Aktivitetslogger(),
                 Aktivitetslogg()
             ),
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         ).apply {
             addObserver(observatør)
@@ -564,7 +528,6 @@ internal class KunEnArbeidsgiverTest {
         vedtaksperiodeIndex: Int,
         utbetalingGodkjent: Boolean
     ): ManuellSaksbehandling {
-        hendelselogger = Aktivitetslogger()
         hendelselogg = Aktivitetslogg()
         return ManuellSaksbehandling(
             aktørId = AKTØRID,
@@ -573,7 +536,6 @@ internal class KunEnArbeidsgiverTest {
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             saksbehandler = "Ola Nordmann",
             utbetalingGodkjent = utbetalingGodkjent,
-            aktivitetslogger = hendelselogger,
             aktivitetslogg = hendelselogg
         ).apply {
             addObserver(observatør)
@@ -625,11 +587,8 @@ internal class KunEnArbeidsgiverTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        internal lateinit var personLogger: Aktivitetslogger
         internal lateinit var personLogg: Aktivitetslogg
         internal lateinit var arbeidsgiver: Arbeidsgiver
-        internal lateinit var arbeidsgiverLogger: Aktivitetslogger
-        internal lateinit var periodeLogger: Aktivitetslogger
         internal lateinit var inntektshistorikk: Inntekthistorikk
         internal lateinit var sykdomshistorikk: Sykdomshistorikk
         internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
@@ -637,10 +596,6 @@ internal class KunEnArbeidsgiverTest {
 
         init {
             person.accept(this)
-        }
-
-        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            personLogger = aktivitetslogger
         }
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
@@ -659,10 +614,6 @@ internal class KunEnArbeidsgiverTest {
             organisasjonsnummer: String
         ) {
             this.arbeidsgiver = arbeidsgiver
-        }
-
-        override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            arbeidsgiverLogger = aktivitetslogger
         }
 
         override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
@@ -690,10 +641,6 @@ internal class KunEnArbeidsgiverTest {
                     1 + (value ?: 0)
                 }
             }
-        }
-
-        override fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            periodeLogger = aktivitetslogger
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

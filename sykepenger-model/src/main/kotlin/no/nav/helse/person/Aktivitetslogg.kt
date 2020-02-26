@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -17,23 +18,23 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         visitor.postVisitAktivitetslogg(this)
     }
 
-    override fun info(melding: String, vararg params: Any) {
+    override fun info(melding: String, vararg params: Any?) {
         add(Aktivitet.Info(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun warn(melding: String, vararg params: Any) {
+    override fun warn(melding: String, vararg params: Any?) {
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun need(melding: String, vararg params: Any) {
+    override fun need(melding: String, vararg params: Any?) {
         add(Aktivitet.Need(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun error(melding: String, vararg params: Any) {
+    override fun error(melding: String, vararg params: Any?) {
         add(Aktivitet.Error(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun severe(melding: String, vararg params: Any): Nothing {
+    override fun severe(melding: String, vararg params: Any?): Nothing {
         add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
@@ -207,11 +208,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 }
 
 internal interface IAktivitetslogg {
-    fun info(melding: String, vararg params: Any)
-    fun warn(melding: String, vararg params: Any)
-    fun need(melding: String, vararg params: Any)
-    fun error(melding: String, vararg params: Any)
-    fun severe(melding: String, vararg params: Any): Nothing
+    fun info(melding: String, vararg params: Any?)
+    fun warn(melding: String, vararg params: Any?)
+    fun need(melding: String, vararg params: Any?)
+    fun error(melding: String, vararg params: Any?)
+    fun severe(melding: String, vararg params: Any?): Nothing
 
     fun hasMessages(): Boolean
     fun hasWarnings(): Boolean
@@ -225,7 +226,7 @@ internal interface IAktivitetslogg {
 }
 
 internal interface AktivitetsloggVisitor {
-    fun preVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
+    fun preVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun visitInfo(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Info,
@@ -266,7 +267,7 @@ internal interface AktivitetsloggVisitor {
     ) {
     }
 
-    fun postVisitAktivitetslogg(aktivitetslogger: Aktivitetslogg) {}
+    fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
 }
 
 interface Aktivitetskontekst {
@@ -314,3 +315,5 @@ internal class Vedtaksperiodekontekst(aktørId: String, fødselsnummer: String, 
 
     override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)
 }
+
+fun Aktivitetslogg.toMap() = AktivitetsloggReflect(this).toMap()

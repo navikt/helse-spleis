@@ -90,7 +90,6 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
@@ -107,7 +106,6 @@ internal class VedtaksperiodeTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = perioder,
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
@@ -126,7 +124,6 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
@@ -141,7 +138,6 @@ internal class VedtaksperiodeTest {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 

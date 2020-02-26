@@ -64,9 +64,6 @@ internal class SpeilBuilder : PersonVisitor {
         fødselsnummer: String
     ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
 
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) =
-        currentState.visitPersonAktivitetslogger(aktivitetslogger)
-
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -78,12 +75,7 @@ internal class SpeilBuilder : PersonVisitor {
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
-    ) =
-        currentState.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
-
-    override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-        currentState.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
-    }
+    ) = currentState.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
 
     override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()

@@ -145,8 +145,7 @@ internal class VilkårsgrunnlagHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
         }
@@ -158,8 +157,7 @@ internal class VilkårsgrunnlagHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         ).apply {
             addObserver(personObserver)
@@ -176,8 +174,7 @@ internal class VilkårsgrunnlagHendelseTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
         }
@@ -194,8 +191,7 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
         ).apply {
             addObserver(personObserver)

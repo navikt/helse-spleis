@@ -47,7 +47,6 @@ internal class PåminnelseMessage(
             tilstandsendringstidspunkt = this["tilstandsendringstidspunkt"].asLocalDateTime(),
             påminnelsestidspunkt = this["påminnelsestidspunkt"].asLocalDateTime(),
             nestePåminnelsestidspunkt = this["nestePåminnelsestidspunkt"].asLocalDateTime(),
-            aktivitetslogger = problems,
             aktivitetslogg = aktivitetslogg
         )
     }

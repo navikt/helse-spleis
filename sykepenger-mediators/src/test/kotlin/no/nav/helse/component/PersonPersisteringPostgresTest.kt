@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Person
 import no.nav.helse.september
 import no.nav.helse.spleis.db.LagrePersonDao
@@ -98,7 +97,6 @@ class PersonPersisteringPostgresTest {
                 aktørId = aktørId,
                 orgnummer = "123456789",
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                aktivitetslogger = Aktivitetslogger(),
                 aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
@@ -142,7 +140,6 @@ class PersonPersisteringPostgresTest {
         aktørId = aktørId,
         orgnummer = "123456789",
         sykeperioder = listOf(Triple(16.september, 5.oktober, 100)),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 

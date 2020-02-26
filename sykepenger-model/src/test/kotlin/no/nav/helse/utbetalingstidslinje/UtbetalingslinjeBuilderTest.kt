@@ -1,12 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.HELG
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -32,7 +28,7 @@ internal class UtbetalingslinjeBuilderTest {
     }
 
     @Test
-    internal fun `a`() {
+    internal fun `Endring i utbetaling`() {
         opprettUtbetalingslinjer(3.NAV(1200.0), 2.NAV(1500.0), 2.HELG, 2.NAV(1500.0))
 
         assertEquals(2, linjer.size)
@@ -52,7 +48,7 @@ internal class UtbetalingslinjeBuilderTest {
             Sykdomsgrader(listOf(tidslinje)),
             listOf(tidslinje),
             Periode(1.januar, 1.mars),
-            Aktivitetslogger()
+            Aktivitetslogg()
         ).beregn()
         linjer = UtbetalingslinjeBuilder(tidslinje).result()
     }

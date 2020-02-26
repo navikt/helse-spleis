@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.behov.BehovType
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.BeforeEach
@@ -54,7 +53,7 @@ internal class BehovMediatorTest {
         }
     }
 
-    private fun hendelse() = object : ArbeidstakerHendelse(Aktivitetslogger(), Aktivitetslogg()) {
+    private fun hendelse() = object : ArbeidstakerHendelse(Aktivitetslogg()) {
         override fun aktørId() = "aktørId"
         override fun fødselsnummer() = "fnr"
         override fun organisasjonsnummer() = "orgnr"

@@ -11,7 +11,6 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
-import no.nav.helse.serde.mapping.konverterTilAktivitetslogger
 import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -60,14 +59,12 @@ class SerialisertPerson(val json: String) {
 
         val personData: PersonData = serdeObjectMapper.treeToValue(jsonNode)
         val arbeidsgivere = mutableListOf<Arbeidsgiver>()
-        val aktivitetslogger = konverterTilAktivitetslogger(personData.aktivitetslogger)
         val aktivitetslogg = personData.aktivitetslogg?.let(::konverterTilAktivitetslogg) ?: Aktivitetslogg()
 
         val person = createPerson(
             aktørId = personData.aktørId,
             fødselsnummer = personData.fødselsnummer,
             arbeidsgivere = arbeidsgivere,
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -98,8 +95,7 @@ class SerialisertPerson(val json: String) {
             id = data.id,
             inntekthistorikk = inntekthistorikk,
             tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
-            perioder = vedtaksperioder,
-            aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
+            perioder = vedtaksperioder
         )
 
         vedtaksperioder.addAll(data.vedtaksperioder.map { parseVedtaksperiode(person, arbeidsgiver, personData, data, it) })
@@ -164,8 +160,7 @@ class SerialisertPerson(val json: String) {
             førsteFraværsdag = data.førsteFraværsdag,
             inntektFraInntektsmelding = data.inntektFraInntektsmelding?.toDouble(),
             dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
-            sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
-            aktivitetslogger = konverterTilAktivitetslogger(data.aktivitetslogger)
+            sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk)
         )
     }
 
@@ -243,31 +238,10 @@ class SerialisertPerson(val json: String) {
 
 }
 
-internal data class AktivitetsloggerData(
-    val originalMessage: String?,
-    val aktiviteter: List<AktivitetData>
-) {
-    data class AktivitetData(
-        val alvorlighetsgrad: Alvorlighetsgrad,
-        val needType: String?,
-        val melding: String,
-        val tidsstempel: String
-    )
-
-    enum class Alvorlighetsgrad {
-        INFO,
-        WARN,
-        NEED,
-        ERROR,
-        SEVERE
-    }
-}
-
 internal data class PersonData(
     val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverData>,
-    val aktivitetslogger: AktivitetsloggerData,
     val aktivitetslogg: AktivitetsloggData?
 ) {
     companion object {
@@ -305,8 +279,7 @@ internal data class PersonData(
         val id: UUID,
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
-        val utbetalingstidslinjer: List<UtbetalingstidslinjeData>,
-        val aktivitetslogger: AktivitetsloggerData
+        val utbetalingstidslinjer: List<UtbetalingstidslinjeData>
     ) {
         data class InntektData(
             val fom: LocalDate,
@@ -324,8 +297,7 @@ internal data class PersonData(
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
-            val utbetalingslinjer: List<UtbetalingslinjeData>?,
-            val aktivitetslogger: AktivitetsloggerData
+            val utbetalingslinjer: List<UtbetalingslinjeData>?
         ) {
             data class DagData(
                 val dagen: LocalDate,

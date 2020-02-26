@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.toMap
 import no.nav.helse.serde.reflection.toMap
 import org.apache.kafka.clients.producer.ProducerRecord
 
@@ -30,7 +31,7 @@ private fun toJson(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) = ob
         "forrigeTilstand" to event.forrigeTilstand,
         "endringstidspunkt" to event.endringstidspunkt,
         "på_grunn_av" to (event.sykdomshendelse::class.simpleName ?: "UKJENT"),
-        "aktivitetslogger" to event.aktivitetslogger.toMap(),
+        "aktivitetslogg" to event.aktivitetslogg.toMap(),
         "timeout" to event.timeout.toSeconds()
     )
 )

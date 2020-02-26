@@ -56,9 +56,6 @@ internal class JsonBuilder : PersonVisitor {
         fødselsnummer: String
     ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
 
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) =
-        currentState.visitPersonAktivitetslogger(aktivitetslogger)
-
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) =
         currentState.visitPersonAktivitetslogg(aktivitetslogg)
 
@@ -75,10 +72,6 @@ internal class JsonBuilder : PersonVisitor {
         organisasjonsnummer: String
     ) =
         currentState.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
-
-    override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-        currentState.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
-    }
 
     override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
@@ -206,10 +199,6 @@ internal class JsonBuilder : PersonVisitor {
             personMap.putAll(PersonReflect(person).toMap())
         }
 
-        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            personMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
-        }
-
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             personMap["aktivitetslogg"] = AktivitetsloggReflect(aktivitetslogg).toMap()
         }
@@ -246,10 +235,6 @@ internal class JsonBuilder : PersonVisitor {
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
-        }
-
-        override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            arbeidsgiverMap["aktivitetslogger"] = AktivitetsloggerReflect(aktivitetslogger).toMap()
         }
 
         override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {

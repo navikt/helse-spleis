@@ -16,10 +16,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.preVisitPerson(person, aktørId, fødselsnummer)
     }
 
-    override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-        target.visitPersonAktivitetslogger(aktivitetslogger)
-    }
-
     override fun preVisitArbeidsgivere() {
         target.preVisitArbeidsgivere()
     }
@@ -34,10 +30,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
         target.preVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
-    }
-
-    override fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-        target.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
     }
 
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
@@ -158,10 +150,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
         target.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
-    }
-
-    override fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-        target.visitVedtaksperiodeAktivitetslogger(aktivitetslogger)
     }
 
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {

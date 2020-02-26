@@ -22,16 +22,12 @@ internal class InntektsmeldingHendelseTest {
     }
 
     private lateinit var person: Person
-    private lateinit var aktivitetslogger: Aktivitetslogger
-    private lateinit var aktivitetslogg: Aktivitetslogg
 
     private val inspektør get() = TestPersonInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person(AKTØRID, UNG_PERSON_FNR_2018)
-        aktivitetslogger = Aktivitetslogger()
-        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -55,7 +51,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        assertFalse(aktivitetslogger.hasErrorsOld())
+        assertFalse(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
     }
@@ -65,7 +61,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
-        assertFalse(aktivitetslogger.hasErrorsOld(), aktivitetslogger.toString())
+        assertFalse(inspektør.personlogg.hasErrors(), inspektør.personlogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
     }
@@ -75,7 +71,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(sykmelding(Triple(19.januar, 30.januar, 100)))
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -84,7 +80,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(inspektør.personlogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -93,8 +89,8 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(aktivitetslogger.hasWarningsOld())
-        assertFalse(aktivitetslogger.hasErrorsOld())
+        assertTrue(inspektør.personlogg.hasWarnings())
+        assertFalse(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
     }
@@ -103,7 +99,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `annen arbeidsgiver`() {
         person.håndter(sykmelding(Triple(6.januar,20.januar, 100), orgnr = "123"))
         person.håndter(inntektsmelding(virksomhetsnummer = "456"))
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -126,8 +122,7 @@ internal class InntektsmeldingHendelseTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList(),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = Aktivitetslogg()
         )
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(
@@ -136,8 +131,7 @@ internal class InntektsmeldingHendelseTest {
         aktørId = AKTØRID,
         orgnummer = orgnr,
         sykeperioder = listOf(*sykeperioder),
-        aktivitetslogger = aktivitetslogger,
-        aktivitetslogg = aktivitetslogg
+        aktivitetslogg = Aktivitetslogg()
     )
 
     private fun søknad(vararg perioder: Søknad.Periode, orgnummer: String = ORGNR) =
@@ -147,8 +141,7 @@ internal class InntektsmeldingHendelseTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg,
+            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -157,9 +150,14 @@ internal class InntektsmeldingHendelseTest {
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
         private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
+        internal lateinit var personlogg: Aktivitetslogg
 
         init {
             person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personlogg = aktivitetslogg
         }
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {

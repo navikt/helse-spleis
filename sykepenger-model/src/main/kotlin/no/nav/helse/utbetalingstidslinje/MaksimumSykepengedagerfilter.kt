@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import java.time.LocalDate
@@ -9,7 +9,8 @@ import java.time.LocalDate
 internal class MaksimumSykepengedagerfilter(private val alder: Alder,
                                             arbeidsgiverRegler: ArbeidsgiverRegler,
                                             private val periode: Periode,
-                                            private val aktivitetslogger: Aktivitetslogger):
+                                            private val aktivitetslogg: Aktivitetslogg
+):
     Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     companion object {
@@ -34,9 +35,9 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 
         if (avvisteDatoer in periode)
-            aktivitetslogger.warnOld("Maksimum sykdomsgrense nådd")
+            aktivitetslogg.warn("Maksimum sykdomsgrense nådd")
         else
-            aktivitetslogger.infoOld("Maksimum sykdomsgrense ikke nådd")
+            aktivitetslogg.info("Maksimum sykdomsgrense ikke nådd")
     }
 
     private fun state(nyState: State) {

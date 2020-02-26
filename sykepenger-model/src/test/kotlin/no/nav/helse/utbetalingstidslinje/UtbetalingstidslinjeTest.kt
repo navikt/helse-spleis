@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
@@ -23,7 +23,7 @@ internal class UtbetalingstidslinjeTest {
             UNG_PERSON_FNR_2018,
             listOf(tidslinje),
             Periode(1.januar, 15.januar),
-            Aktivitetslogger()
+            Aktivitetslogg()
         ).filter()
         undersøke(tidslinje)
         assertEquals(10, inspektør.avvistDagTeller)

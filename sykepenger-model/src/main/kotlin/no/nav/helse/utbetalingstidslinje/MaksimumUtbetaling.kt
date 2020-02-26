@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import kotlin.math.roundToInt
 
@@ -10,7 +10,7 @@ internal class MaksimumUtbetaling(
     private val sykdomsgrader: Sykdomsgrader,
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
-    private val aktivitetslogger: Aktivitetslogger
+    private val aktivitetslogg: Aktivitetslogg
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     init {
@@ -22,9 +22,9 @@ internal class MaksimumUtbetaling(
     internal fun beregn() {
         tidslinjer.forEach { it.accept(this) }
         if (harRedusertUtbetaling)
-            aktivitetslogger.warnOld("Redusert utbetaling minst en dag som faller under maksimum inntekt")
+            aktivitetslogg.warn("Redusert utbetaling minst en dag som faller under maksimum inntekt")
         else
-            aktivitetslogger.infoOld("Utbetaling har ikke blitt redusert på grunn av 6G")
+            aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
     }
 
     override fun visitNavDag(dag: NavDag) {

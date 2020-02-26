@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,7 +61,7 @@ internal class SykdomshistorikkTest {
             Søknad.Periode.Sykdom(10.januar, 12.januar, 100)
         ).also {
             historikk.håndter(it)
-            assertTrue(it.hasErrorsOld())
+            assertTrue(it.hasErrors())
         }
         assertEquals(2, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
@@ -126,7 +125,6 @@ internal class SykdomshistorikkTest {
         aktørId = "12345",
         orgnummer = "987654321",
         sykeperioder = listOf(*sykeperioder),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
@@ -139,7 +137,6 @@ internal class SykdomshistorikkTest {
         aktørId = "12345",
         orgnummer = "987654321",
         perioder = listOf(*perioder),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg(),
         harAndreInntektskilder = false
     )
@@ -162,7 +159,6 @@ internal class SykdomshistorikkTest {
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder,
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 

@@ -97,7 +97,6 @@ internal class UtbetalingsreferanseTest {
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
@@ -116,16 +115,13 @@ internal class UtbetalingsreferanseTest {
             ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepengeYtelse,
             svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 
@@ -136,7 +132,6 @@ internal class UtbetalingsreferanseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(fom, tom, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
 
@@ -147,7 +142,6 @@ internal class UtbetalingsreferanseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
@@ -163,7 +157,6 @@ internal class UtbetalingsreferanseTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
 
@@ -179,7 +172,6 @@ internal class UtbetalingsreferanseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
                 listOf(

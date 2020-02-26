@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import java.time.LocalDateTime
@@ -16,9 +15,8 @@ class Påminnelse(
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogg) {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
@@ -28,17 +26,13 @@ class Påminnelse(
 
     fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {
-            infoOld("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
+            info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         } else {
-            infoOld("Vedtaksperiode blir påminnet")
+            info("Vedtaksperiode blir påminnet")
         }
     }
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
-
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Påminnelse")
-    }
 }

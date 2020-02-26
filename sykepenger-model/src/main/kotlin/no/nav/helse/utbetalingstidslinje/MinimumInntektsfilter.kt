@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
@@ -9,7 +9,7 @@ internal class MinimumInntektsfilter (
     private val alder: Alder,
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
-    private val aktivitetslogger: Aktivitetslogger
+    private val aktivitetslogg: Aktivitetslogg
 ): Utbetalingstidslinje.UtbetalingsdagVisitor {
 
     private var inntekter = mutableMapOf<LocalDate, Double>()
@@ -22,9 +22,9 @@ internal class MinimumInntektsfilter (
         tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
 
         if (inntekter.keys.toList() in periode)
-            aktivitetslogger.warnOld("Avvist minst en dag som faller under minimum inntekt")
+            aktivitetslogg.warn("Avvist minst en dag som faller under minimum inntekt")
         else
-            aktivitetslogger.infoOld("Minimum inntekt har blitt sjekket uten problemer")
+            aktivitetslogg.info("Minimum inntekt har blitt sjekket uten problemer")
     }
 
     override fun visitNavDag(dag: NavDag) {

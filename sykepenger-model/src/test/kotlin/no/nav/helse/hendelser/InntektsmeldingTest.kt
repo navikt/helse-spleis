@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.testhelpers.januar
@@ -14,12 +13,10 @@ import java.util.*
 internal class InntektsmeldingTest {
 
     private lateinit var inntektsmelding: Inntektsmelding
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -49,7 +46,7 @@ internal class InntektsmeldingTest {
             ), emptyList()
         )
         inntektsmelding.valider()
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(aktivitetslogg.hasErrors())
     }
 
     @Test
@@ -59,7 +56,7 @@ internal class InntektsmeldingTest {
             ferieperioder = listOf(Periode(3.januar, 4.januar))
         )
         inntektsmelding.valider()
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(aktivitetslogg.hasErrors())
     }
 
     @Test
@@ -86,7 +83,7 @@ internal class InntektsmeldingTest {
             refusjonBeløp = 100000.00,
             beregnetInntekt = 10000.00
         )
-        assertTrue(inntektsmelding.valider().hasErrorsOld())
+        assertTrue(inntektsmelding.valider().hasErrors())
     }
 
     @Test
@@ -132,7 +129,6 @@ internal class InntektsmeldingTest {
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }

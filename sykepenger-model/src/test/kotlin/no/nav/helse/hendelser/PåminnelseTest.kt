@@ -18,12 +18,10 @@ internal class PåminnelseTest {
         private val orgnummer = "orgnummer"
     }
 
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -33,8 +31,8 @@ internal class PåminnelseTest {
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertTrue(aktivitetslogger.hasMessagesOld(), aktivitetslogger.toString())
-        assertFalse(aktivitetslogger.hasWarningsOld(), aktivitetslogger.toString())
+        assertTrue(aktivitetslogg.hasMessages(), aktivitetslogg.toString())
+        assertFalse(aktivitetslogg.hasWarnings(), aktivitetslogg.toString())
     }
 
     @Test
@@ -42,16 +40,18 @@ internal class PåminnelseTest {
         val tilstand = Vedtaksperiode.StartTilstand
         val vedtaksperiode = vedtaksperiode()
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertFalse(aktivitetslogger.hasWarningsOld())
-        assertTrue(aktivitetslogger.hasMessagesOld())
+        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasMessages())
     }
 
     @Test
     fun `påminnelse for en annen periode`() {
         val tilstand = Vedtaksperiode.StartTilstand
         val vedtaksperiode = vedtaksperiode()
-        assertFalse(vedtaksperiode.håndter(påminnelse(tilstand.type, UUID.randomUUID())))
-        assertFalse(aktivitetslogger.hasMessagesOld())
+        påminnelse(tilstand.type, UUID.randomUUID()).also {
+            assertFalse(vedtaksperiode.håndter(it))
+            assertFalse(it.aktivitetslogg.hasMessages(), it.aktivitetslogg.toString())
+        }
     }
 
     private fun vedtaksperiode(): Vedtaksperiode {
@@ -74,7 +74,6 @@ internal class PåminnelseTest {
             aktørId,
             orgnummer,
             listOf(Triple(1.januar, 6.januar, 100)),
-            aktivitetslogger,
             aktivitetslogg
         )
     }
@@ -90,7 +89,6 @@ internal class PåminnelseTest {
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now(),
-            aktivitetslogger = aktivitetslogger,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = Aktivitetslogg()
         )
 }

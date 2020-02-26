@@ -164,7 +164,6 @@ internal class VilkårsgrunnlagTest {
         inntektsmåneder = inntektsmåneder,
         arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
         erEgenAnsatt = false,
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
@@ -188,7 +187,6 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
@@ -198,7 +196,6 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Periode.Sykdom(16.januar, 30.januar, 100)),
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false
     )
@@ -212,7 +209,6 @@ internal class VilkårsgrunnlagTest {
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf()

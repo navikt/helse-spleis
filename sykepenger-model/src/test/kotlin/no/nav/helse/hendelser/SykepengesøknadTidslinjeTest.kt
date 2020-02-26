@@ -5,7 +5,6 @@ import no.nav.helse.get
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -103,7 +102,6 @@ internal class SykepengesøknadTidslinjeTest {
             aktørId = "aktørId",
             orgnummer = "orgnr",
             perioder = perioder,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
@@ -114,7 +112,6 @@ internal class SykepengesøknadTidslinjeTest {
         aktørId = "aktørId",
         orgnummer = "123456789",
         sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     )
 

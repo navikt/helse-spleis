@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
@@ -17,10 +17,10 @@ internal class MaksimumSykepengedagerfilterTest {
         private const val PERSON_67_ÅR_FNR_2018 = "10015112345"
     }
 
-    private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test internal fun `riktig antall dager`() {
@@ -31,14 +31,14 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test internal fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertTrue(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogg.hasWarnings())
     }
 
     @Test internal fun `stopper betaling etter 248 dager `() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 1.mars)))
-        assertTrue(aktivitetslogger.hasMessagesOld())
-        assertFalse(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogg.hasMessages())
+        assertFalse(aktivitetslogg.hasWarnings())
     }
 
     @Test internal fun `26 uker arbeid resetter utbetalingsgrense`() {
@@ -189,7 +189,7 @@ internal class MaksimumSykepengedagerfilterTest {
             Alder(fnr),
             NormalArbeidstaker,
             periode,
-            aktivitetslogger
+            aktivitetslogg
         ).filter(listOf(this), tidslinjeOf())
         return AvvisteDager(this).datoer
     }

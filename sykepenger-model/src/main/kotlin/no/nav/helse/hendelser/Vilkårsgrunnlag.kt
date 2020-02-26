@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDate
 import java.time.YearMonth
@@ -17,15 +16,14 @@ class Vilkårsgrunnlag(
     private val inntektsmåneder: List<Måned>,
     private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
+) : ArbeidstakerHendelse(aktivitetslogg) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
     private fun beregnetÅrsInntekt(): Double {
-        if (inntektsmåneder.size > 12) severeOld("Forventer 12 eller færre inntektsmåneder")
+        if (inntektsmåneder.size > 12) severe("Forventer 12 eller færre inntektsmåneder")
         return inntektsmåneder
             .flatMap { it.inntektsliste }
             .sumByDouble { it }
@@ -52,20 +50,16 @@ class Vilkårsgrunnlag(
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
 
-        if (erEgenAnsatt) aktivitetslogger.errorOld("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
-        else aktivitetslogger.infoOld("er ikke egen ansatt")
+        if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
+        else info("er ikke egen ansatt")
 
-        if (harAvvikIOppgittInntekt) aktivitetslogger.errorOld("Har mer enn 25 %% avvik")
-        else aktivitetslogger.infoOld("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent*100} %%)")
+        if (harAvvikIOppgittInntekt) error("Har mer enn 25 %% avvik")
+        else info("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent*100} %%)")
 
-        if(grunnlag.harOpptjening) aktivitetslogger.infoOld("Har minst 28 dager opptjening")
-        else aktivitetslogger.errorOld("Har mindre enn 28 dager opptjening")
+        if(grunnlag.harOpptjening) info("Har minst 28 dager opptjening")
+        else error("Har mindre enn 28 dager opptjening")
 
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
-    }
-
-    internal fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Vilkårsgrunnlag")
     }
 
     class Måned(

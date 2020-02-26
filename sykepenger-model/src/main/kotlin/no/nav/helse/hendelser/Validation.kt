@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -17,18 +16,15 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse) {
     }
 
     internal fun valider(block: ValiderBlock) {
-        if (hendelse.hasErrorsOld() || hendelse.hasNeedsOld()) return
+        if (hendelse.hasErrors()) return
         val steg = block()
         if (steg.isValid()) return
-        steg.feilmelding()?.also {
-            hendelse.errorOld(it)
-            hendelse.error(it)
-        }
+        steg.feilmelding()?.also { hendelse.error(it) }
         errorBlock()
     }
 
     internal fun onSuccess(successBlock: SuccessBlock) {
-        if (!hendelse.hasErrorsOld() && !hendelse.hasNeedsOld()) successBlock()
+        if (!hendelse.hasNeeds()) successBlock()
     }
 }
 
@@ -44,12 +40,12 @@ internal interface Valideringssteg {
 // Invoke internal validation of a Hendelse
 internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHendelse) : Valideringssteg {
     override fun isValid() =
-        !hendelse.valider().let { it.hasErrorsOld() || it.hasNeedsOld() }
+        !hendelse.valider().let { it.hasNeeds() }
 }
 
 internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid() =
-        !ytelser.valider().let { it.hasErrorsOld() || it.hasNeedsOld() }
+        !ytelser.valider().let { it.hasNeeds() }
 }
 
 // Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
@@ -67,7 +63,7 @@ internal class ArbeidsgiverHåndterHendelse(
 ) : Valideringssteg {
     override fun isValid(): Boolean {
         hendelse.fortsettÅBehandle(arbeidsgiver)  // Double dispatch to invoke correct method
-        return !hendelse.hasErrorsOld()
+        return !hendelse.hasErrors()
     }
 
     override fun feilmelding() = String.format("Feil under håndtering av %s", hendelse::class.simpleName)
@@ -112,19 +108,17 @@ internal class ByggUtbetalingstidlinjer(
 ) : Valideringssteg {
     private lateinit var engine: ArbeidsgiverUtbetalinger
     override fun isValid(): Boolean {
-        val aktivitetslogger = Aktivitetslogger()
         engine = ArbeidsgiverUtbetalinger(
             tidslinjer = tidslinjer,
             historiskTidslinje = ytelser.sykepengehistorikk().utbetalingslinjer().utbetalingstidslinje(),
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,
-            aktivitetslogger = aktivitetslogger
+            aktivitetslogg = ytelser.aktivitetslogg
         ).also { engine ->
             engine.beregn()
         }
-        ytelser.addAll(aktivitetslogger, "utbetalingstidslinje validering")
-        return !ytelser.hasErrorsOld()
+        return !ytelser.hasErrors()
     }
 
     internal fun maksdato() = engine.maksdato()
@@ -142,10 +136,10 @@ internal class ByggUtbetalingslinjer(private val ytelser: Ytelser,
     override fun isValid(): Boolean {
         utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje).result()
         if (utbetalingslinjer.isEmpty())
-            ytelser.errorOld("Ingen utbetalingslinjer bygget")
+            ytelser.error("Ingen utbetalingslinjer bygget")
         else
-            ytelser.infoOld("Utbetalingslinjer bygget vellykket")
-        return !ytelser.hasErrorsOld() && utbetalingslinjer.isNotEmpty()
+            ytelser.info("Utbetalingslinjer bygget vellykket")
+        return !ytelser.hasErrors() && utbetalingslinjer.isNotEmpty()
     }
 
     override fun feilmelding()   = "Feil ved kalkulering av utbetalingslinjer"

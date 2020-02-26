@@ -13,8 +13,7 @@ internal class Arbeidsgiver private constructor(
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
-    private val perioder: MutableList<Vedtaksperiode>,
-    private val aktivitetslogger: Aktivitetslogger
+    private val perioder: MutableList<Vedtaksperiode>
 ) : Aktivitetskontekst {
 
     internal fun inntektshistorikk() = inntekthistorikk.clone()
@@ -25,13 +24,11 @@ internal class Arbeidsgiver private constructor(
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
-        perioder = mutableListOf(),
-        aktivitetslogger = Aktivitetslogger()
+        perioder = mutableListOf()
     )
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
-        visitor.visitArbeidsgiverAktivitetslogger(aktivitetslogger)
         inntekthistorikk.accept(visitor)
         visitor.preVisitTidslinjer()
         tidslinjer.forEach { it.accept(visitor) }
@@ -51,20 +48,16 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         if (!perioder.fold(false) { håndtert, periode -> håndtert || periode.håndter(sykmelding) }) {
-            aktivitetslogger.infoOld("Lager ny vedtaksperiode")
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
         }
-        sykmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
         if (perioder.none { it.håndter(søknad) }) {
-            søknad.errorOld("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
-        søknad.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
@@ -75,42 +68,34 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.beregnetInntekt.toBigDecimal()
         )
         if (perioder.none { it.håndter(inntektsmelding) }) {
-            inntektsmelding.errorOld("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
-        inntektsmelding.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
         ytelser.addInntekter(inntekthistorikk)
         perioder.forEach { it.håndter(ytelser) }
-        ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
         manuellSaksbehandling.kontekst(this)
         perioder.forEach { it.håndter(manuellSaksbehandling) }
-        manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
         perioder.forEach { it.håndter(vilkårsgrunnlag) }
-        vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(utbetaling: Utbetaling) {
         utbetaling.kontekst(this)
         perioder.forEach { it.håndter(utbetaling) }
-        utbetaling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return perioder.any { it.håndter(påminnelse) }.also {
-            påminnelse.kopierAktiviteterTil(aktivitetslogger)
-        }
+        return perioder.any { it.håndter(påminnelse) }
     }
 
     internal fun sykdomstidslinje(): ConcreteSykdomstidslinje? =

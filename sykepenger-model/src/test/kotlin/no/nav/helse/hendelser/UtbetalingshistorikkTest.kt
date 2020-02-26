@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.juni
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +15,7 @@ internal class UtbetalingshistorikkTest {
         val tom = 10.juni
         val dagsats = 1200
         val sykepengehistorikk = sykepengehistorikk(RefusjonTilArbeidsgiver(fom, tom, dagsats))
-        assertFalse(sykepengehistorikk.valider().hasErrorsOld())
+        assertFalse(sykepengehistorikk.valider().hasErrors())
         val utbetalingslinjer = sykepengehistorikk.utbetalingslinjer()
         assertEquals(1, utbetalingslinjer.size)
         assertEquals(dagsats, utbetalingslinjer[0].dagsats)
@@ -40,8 +39,8 @@ internal class UtbetalingshistorikkTest {
 
     private fun assertInvalid(periode: Utbetalingshistorikk.Periode) {
         val sykepengehistorikk = sykepengehistorikk(periode)
-        assertTrue(sykepengehistorikk.valider().hasErrorsOld())
-        assertThrows<Aktivitetslogger.AktivitetException> { sykepengehistorikk.utbetalingslinjer() }
+        assertTrue(sykepengehistorikk.valider().hasErrors())
+        assertThrows<Aktivitetslogg.AktivitetException> { sykepengehistorikk.utbetalingslinjer() }
     }
 
     private fun sykepengehistorikk(periode: Utbetalingshistorikk.Periode): Utbetalingshistorikk {
@@ -49,7 +48,6 @@ internal class UtbetalingshistorikkTest {
             utbetalinger = listOf(periode),
             ukjentePerioder = emptyList(),
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         )
     }

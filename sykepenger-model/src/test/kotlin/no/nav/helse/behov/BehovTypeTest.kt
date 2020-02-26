@@ -18,7 +18,7 @@ internal class BehovTypeTest {
     internal fun `kopier til aktivitetslogg`() {
         val aktivitetslogg = Aktivitetslogg()
         BehovType.EgenAnsatt(vedtaksperiodekontekst(UUID.randomUUID()))
-            .loggTilAktivitetslogger(aktivitetslogg)
+            .loggTilAktivitetslogg(aktivitetslogg)
 
         assertTrue(aktivitetslogg.hasNeeds())
     }

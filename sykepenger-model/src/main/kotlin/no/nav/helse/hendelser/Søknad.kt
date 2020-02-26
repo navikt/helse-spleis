@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -17,22 +16,17 @@ class Søknad constructor(
     private val orgnummer: String,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
 
     private val fom: LocalDate
     private val tom: LocalDate
 
     init {
-        if (perioder.isEmpty()) aktivitetslogger.severeOld("Søknad må inneholde perioder")
+        if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
         perioder.filterIsInstance<Periode.Sykdom>()
-            .also { fom = it.minBy { it.fom }?.fom ?: aktivitetslogger.severeOld("Søknad mangler fradato") }
-            .also { tom = it.maxBy { it.tom }?.tom ?: aktivitetslogger.severeOld("Søknad mangler tildato") }
-    }
-
-    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Søknad")
+            .also { fom = it.minBy { it.fom }?.fom ?: severe("Søknad mangler fradato") }
+            .also { tom = it.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato") }
     }
 
     override fun sykdomstidslinje() = perioder
@@ -45,10 +39,10 @@ class Søknad constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(): Aktivitetslogger {
-        perioder.forEach { it.valider(this, aktivitetslogger) }
-        if ( harAndreInntektskilder ) aktivitetslogger.errorOld("Søknaden inneholder andre inntektskilder")
-        return aktivitetslogger
+    override fun valider(): Aktivitetslogg {
+        perioder.forEach { it.valider(this, aktivitetslogg) }
+        if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
+        return aktivitetslogg
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
@@ -61,18 +55,18 @@ class Søknad constructor(
 
         internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
-        internal open fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {}
+        internal open fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) {}
 
-        internal fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger, beskjed: String) {
-            if (fom < søknad.fom || tom > søknad.tom) aktivitetslogger.errorOld(beskjed)
+        internal fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg, beskjed: String) {
+            if (fom < søknad.fom || tom > søknad.tom) aktivitetslogg.error(beskjed)
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ferie(fom, tom, SøknadDagFactory)
 
-            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
-                valider(søknad, aktivitetslogger, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) =
+                valider(søknad, aktivitetslogg, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
         }
 
         class Sykdom(
@@ -84,9 +78,9 @@ class Søknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.sykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) {
-                if (grad != 100) aktivitetslogger.errorOld("Søknaden inneholder gradert sykdomsperiode")
-                if (faktiskGrad != 100.0) aktivitetslogger.errorOld("Søker oppgir gradert sykdomsperiode")
+            override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) {
+                if (grad != 100) aktivitetslogg.error("Søknaden inneholder gradert sykdomsperiode")
+                if (faktiskGrad != 100.0) aktivitetslogg.error("Søker oppgir gradert sykdomsperiode")
             }
         }
 
@@ -94,16 +88,16 @@ class Søknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.studiedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.errorOld("Søknaden inneholder en Utdanningsperiode")
+            override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) =
+                aktivitetslogg.error("Søknaden inneholder en Utdanningsperiode")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, SøknadDagFactory)
 
-            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
-                aktivitetslogger.errorOld("Søknaden inneholder en Permisjonsperiode")
+            override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) =
+                aktivitetslogg.error("Søknaden inneholder en Permisjonsperiode")
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -115,8 +109,8 @@ class Søknad constructor(
             override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, SøknadDagFactory)
 
-            override fun valider(søknad: Søknad, aktivitetslogger: Aktivitetslogger) =
-                valider(søknad, aktivitetslogger, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
+            override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) =
+                valider(søknad, aktivitetslogg, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         }
     }
 

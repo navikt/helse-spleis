@@ -29,7 +29,6 @@ interface PersonObserver {
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val sykdomshendelse: ArbeidstakerHendelse,
-        val aktivitetslogger: Aktivitetslogger,
         val aktivitetslogg: Aktivitetslogg,
         val timeout: Duration
     ) {

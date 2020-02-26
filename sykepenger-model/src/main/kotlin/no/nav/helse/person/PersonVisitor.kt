@@ -11,7 +11,6 @@ import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor {
     fun preVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
-    fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
@@ -24,7 +23,6 @@ internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVi
         id: UUID,
         organisasjonsnummer: String
     ) {}
-    fun visitArbeidsgiverAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
     fun preVisitTidslinjer() {}
@@ -48,7 +46,6 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitInntektFraInntektsmelding(inntektFraInntektsmelding: Double?) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
-    fun visitVedtaksperiodeAktivitetslogger(aktivitetslogger: Aktivitetslogger) {}
     fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun preVisitUtbetalingslinjer() {}

@@ -8,14 +8,13 @@ class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    private val aktivitetslogger: Aktivitetslogger,
     internal val aktivitetslogg: Aktivitetslogg
 ) : Aktivitetskontekst {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogger(), Aktivitetslogg())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg())
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -34,39 +33,33 @@ class Person private constructor(
             it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
             it.valider { ArbeidsgiverHåndterHendelse(hendelse, arbeidsgiver) }
         }
-        hendelse.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         finnArbeidsgiver(ytelser).håndter(ytelser)
-        ytelser.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
         registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
         finnArbeidsgiver(manuellSaksbehandling).håndter(manuellSaksbehandling)
-        manuellSaksbehandling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
         finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
-        vilkårsgrunnlag.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(utbetaling: Utbetaling) {
         registrer(utbetaling, "Behandler utbetaling")
         finnArbeidsgiver(utbetaling).håndter(utbetaling)
-        utbetaling.kopierAktiviteterTil(aktivitetslogger)
     }
 
     fun håndter(påminnelse: Påminnelse) {
         registrer(påminnelse, "Behandler påminnelse")
         try {
             if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return
-        } catch (err: Aktivitetslogger.AktivitetException) {
-            påminnelse.infoOld("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+        } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.info("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
             observers.forEach {
                 it.vedtaksperiodeIkkeFunnet(
@@ -79,8 +72,6 @@ class Person private constructor(
                 )
             }
             throw err
-        } finally {
-            påminnelse.kopierAktiviteterTil(aktivitetslogger)
         }
     }
 
@@ -115,7 +106,6 @@ class Person private constructor(
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, aktørId, fødselsnummer)
-        visitor.visitPersonAktivitetslogger(aktivitetslogger)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
@@ -130,11 +120,9 @@ class Person private constructor(
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {
         hendelse.kontekst(this)
         hendelse.info(melding)
-        hendelse.infoOld(melding)
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        aktivitetslogger.infoOld("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidstakerHendelse.info("Invaliderer alle perioder for alle arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
@@ -144,7 +132,6 @@ class Person private constructor(
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finnEllerOpprett(orgnr) {
-                hendelse.infoOld("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
                 arbeidsgiver(orgnr)
             }
@@ -152,7 +139,7 @@ class Person private constructor(
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finn(orgnr) ?: hendelse.severeOld("Finner ikke arbeidsgiver")
+            arbeidsgivere.finn(orgnr) ?: hendelse.severe("Finner ikke arbeidsgiver")
         }
 
     private fun MutableList<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }

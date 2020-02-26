@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test
 
 internal class MaksimumUtbetalingTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
-    private lateinit var aktivitetslogger: Aktivitetslogger
+    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
@@ -21,7 +21,7 @@ internal class MaksimumUtbetalingTest {
             listOf(tidslinje)),
             listOf(tidslinje),
             Periode(1.januar, 31.desember),
-            aktivitetslogger
+            aktivitetslogg
         ).beregn()
         undersøke(tidslinje)
         assertEquals(12000, inspektør.totalUtbetaling())
@@ -33,11 +33,11 @@ internal class MaksimumUtbetalingTest {
             listOf(tidslinje)),
             listOf(tidslinje),
             Periode(1.januar, 31.desember),
-            aktivitetslogger
+            aktivitetslogg
         ).beregn()
         undersøke(tidslinje)
         assertEquals(21610, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogg.hasWarnings())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
@@ -46,13 +46,13 @@ internal class MaksimumUtbetalingTest {
             listOf(tidslinje)),
             listOf(tidslinje),
             Periode(11.januar, 31.desember),
-            aktivitetslogger
+            aktivitetslogg
 
         ).beregn()
         undersøke(tidslinje)
         assertEquals(21610 + 12000, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogger.hasMessagesOld())
-        assertFalse(aktivitetslogger.hasWarningsOld())
+        assertTrue(aktivitetslogg.hasMessages())
+        assertFalse(aktivitetslogg.hasWarnings())
     }
 
 

@@ -34,7 +34,7 @@ sealed class BehovType(private val context: Vedtaksperiodekontekst) {
 
     internal open fun toMap() = emptyMap<String, Any>()
 
-    internal fun loggTilAktivitetslogger(aktivitetslogg: Aktivitetslogg) {
+    internal fun loggTilAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
         aktivitetslogg.need(melding = navn)
     }
 

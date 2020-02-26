@@ -58,7 +58,6 @@ internal class InntektsmeldingMessage(
         aktørId = aktørId,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder

@@ -144,7 +144,6 @@ internal class JsonBuilderTest {
                 aktørId = aktørId,
                 orgnummer = orgnummer,
                 sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = Aktivitetslogg()
             )
 
@@ -157,7 +156,6 @@ internal class JsonBuilderTest {
                 perioder = listOf(
                     Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
@@ -173,7 +171,6 @@ internal class JsonBuilderTest {
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 ferieperioder = emptyList(),
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = Aktivitetslogg()
             )
 
@@ -198,7 +195,6 @@ internal class JsonBuilderTest {
                     )
                 ),
                 erEgenAnsatt = false,
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = Aktivitetslogg()
             )
 
@@ -219,7 +215,6 @@ internal class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
-                    aktivitetslogger = aktivitetslogger,
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
@@ -231,10 +226,8 @@ internal class JsonBuilderTest {
                         fom = 1.juli.minusYears(2),
                         tom = 31.juli.minusYears(2)
                     ),
-                    aktivitetslogger = aktivitetslogger,
                     aktivitetslogg = it
                 ),
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = it
             )}
 
@@ -246,7 +239,6 @@ internal class JsonBuilderTest {
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
-                aktivitetslogger = aktivitetslogger,
                 aktivitetslogg = Aktivitetslogg()
             )
     }

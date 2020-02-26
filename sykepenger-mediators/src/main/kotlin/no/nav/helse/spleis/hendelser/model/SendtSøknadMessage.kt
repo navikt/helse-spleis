@@ -71,7 +71,6 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             orgnummer = orgnummer,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder(),
-            aktivitetslogger = aktivitetslogger,
             aktivitetslogg = aktivitetslogg
         )
     }

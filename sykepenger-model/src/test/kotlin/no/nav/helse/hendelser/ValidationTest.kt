@@ -23,7 +23,7 @@ internal class ValidationTest {
     @Test
     internal fun success() {
         var success = false
-        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
+        Validation(TestHendelse(aktivitetslogg)).also {
             it.onError { fail("Uventet kall") }
             it.onSuccess { success = true }
         }
@@ -33,7 +33,7 @@ internal class ValidationTest {
     @Test
     internal fun failure() {
         var failure = false
-        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
+        Validation(TestHendelse(aktivitetslogg)).also {
             it.onError { failure = true }
             it.valider { FailureBlock() }
             it.onSuccess { fail("Uventet kall") }
@@ -43,7 +43,7 @@ internal class ValidationTest {
 
     @Test internal fun `when does constructor run`() {
         var variableChanged = false
-        Validation(TestHendelse(aktivitetslogger, aktivitetslogg)).also {
+        Validation(TestHendelse(aktivitetslogg)).also {
             it.onError { fail("we failed") }
             it.valider { ReturnValues().also { variableChanged = it.variable()}}
         }
@@ -67,8 +67,8 @@ internal class ValidationTest {
         override fun feilmelding() = "feilmelding"
     }
 
-    private inner class TestHendelse(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg),
+    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) :
+        ArbeidstakerHendelse(aktivitetslogg),
         IAktivitetslogger by aktivitetslogger {
 
         override fun aktørId(): String {

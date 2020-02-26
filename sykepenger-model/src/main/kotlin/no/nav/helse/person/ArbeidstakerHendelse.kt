@@ -4,9 +4,8 @@ import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
 
 abstract class ArbeidstakerHendelse protected constructor(
-    internal val aktivitetslogger: Aktivitetslogger,
     internal val aktivitetslogg: Aktivitetslogg
-) : IAktivitetslogger by aktivitetslogger, IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
+) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
     init {
         aktivitetslogg.kontekst(this)
@@ -29,7 +28,7 @@ abstract class ArbeidstakerHendelse protected constructor(
     internal open fun melding(klassName: String) = klassName
 
     internal fun need(behov: BehovType) {
-        behov.loggTilAktivitetslogger(aktivitetslogg)
+        behov.loggTilAktivitetslogg(aktivitetslogg)
         hendelseObservers.forEach { it.onBehov(behov) }
     }
 }

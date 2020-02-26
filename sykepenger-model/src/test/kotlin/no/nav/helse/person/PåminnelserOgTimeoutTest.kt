@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
@@ -177,7 +176,6 @@ class PåminnelserOgTimeoutTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 20.januar, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         ).apply {
@@ -191,7 +189,6 @@ class PåminnelserOgTimeoutTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
@@ -208,7 +205,6 @@ class PåminnelserOgTimeoutTest {
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
             ferieperioder = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             addObserver(personObserver)
@@ -226,7 +222,6 @@ class PåminnelserOgTimeoutTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
@@ -249,16 +244,13 @@ class PåminnelserOgTimeoutTest {
                 )
             ),
             inntektshistorikk = emptyList(),
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = null,
             svangerskapsytelse = null,
-            aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
         addObserver(personObserver)
@@ -271,7 +263,6 @@ class PåminnelserOgTimeoutTest {
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
         addObserver(personObserver)
@@ -287,7 +278,6 @@ class PåminnelserOgTimeoutTest {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogger = Aktivitetslogger(),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
         addObserver(personObserver)
@@ -326,9 +316,9 @@ class PåminnelserOgTimeoutTest {
 
         internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-            this@PåminnelserOgTimeoutTest.aktivitetslogger = aktivitetslogger
-        }
+//        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+//            this@PåminnelserOgTimeoutTest.aktivitetslogg = aktivitetslogg
+//        }
 
     }
     private inner class TestPersonObserver : PersonObserver, HendelseObserver {

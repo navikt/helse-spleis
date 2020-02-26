@@ -4,7 +4,6 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -27,9 +26,8 @@ class Inntektsmelding(
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
-    aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogger, aktivitetslogg) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
@@ -45,10 +43,6 @@ class Inntektsmelding(
         return (årssats / 260).toInt()
     }
 
-    override fun kopierAktiviteterTil(aktivitetslogger: Aktivitetslogger) {
-        aktivitetslogger.addAll(this.aktivitetslogger, "Inntektsmelding")
-    }
-
     override fun sykdomstidslinje() = (ferieperioder + arbeidsgiverperioder)
         .map { it.sykdomstidslinje(this) }
         .sortedBy { it.førsteDag() }
@@ -57,11 +51,11 @@ class Inntektsmelding(
             acc.plus(tidslinje, { gjelder -> ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory) }, KonfliktskyDagturnering)
         } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
 
-    override fun valider(): Aktivitetslogger {
-        if (!ingenOverlappende()) aktivitetslogger.errorOld("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
-        if (refusjon == null) aktivitetslogger.errorOld("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogger.errorOld("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-        return aktivitetslogger
+    override fun valider(): Aktivitetslogg {
+        if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
+        if (refusjon == null) aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+        return aktivitetslogg
     }
 
     override fun aktørId() = aktørId

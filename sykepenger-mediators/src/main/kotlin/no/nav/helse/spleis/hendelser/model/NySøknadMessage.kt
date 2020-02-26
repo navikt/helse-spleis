@@ -50,7 +50,6 @@ internal class NySøknadMessage(
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,
-        aktivitetslogger = aktivitetslogger,
         aktivitetslogg = aktivitetslogg
     )
 
