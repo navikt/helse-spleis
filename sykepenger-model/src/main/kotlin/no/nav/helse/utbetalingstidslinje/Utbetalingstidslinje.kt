@@ -13,8 +13,6 @@ internal class Utbetalingstidslinje private constructor(
     private val utbetalingsdager: MutableList<Utbetalingsdag>
 ) {
 
-    private lateinit var visitor: MaksimumSykepengedagerfilter
-
     internal constructor() : this(mutableListOf())
 
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
@@ -25,9 +23,6 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }
-
-    internal fun maksdato() = visitor.maksdato()
-    internal fun brukteSykedager() = visitor.brukteSykedager()
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
 
@@ -65,7 +60,7 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.add(Utbetalingsdag.AvvistDag(0.0, dagen, grad, begrunnelse))
     }
 
-    operator internal fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
+    internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.utbetalingsdager.isEmpty()) return this
         if (this.utbetalingsdager.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
@@ -98,8 +93,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun subset(
         fom: LocalDate,
-        tom: LocalDate,
-        others: List<Utbetalingstidslinje> = emptyList()
+        tom: LocalDate
     ): Utbetalingstidslinje {
         return Utbetalingstidslinje(
             utbetalingsdager
@@ -107,7 +101,6 @@ internal class Utbetalingstidslinje private constructor(
                 .toMutableList()
         )
     }
-
 
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
@@ -123,11 +116,6 @@ internal class Utbetalingstidslinje private constructor(
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {
-
-        companion object {
-            internal fun subset(liste: List<Utbetalingsdag>, fom: LocalDate, tom: LocalDate) =
-                liste.filter { it.dato.isAfter(fom.minusDays(1)) && it.dato.isBefore(tom.plusDays(1)) }
-        }
 
         internal abstract val prioritet: Int
 
@@ -194,7 +182,6 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitUkjentDag(this)
         }
     }
-
 }
 
 enum class Begrunnelse {
