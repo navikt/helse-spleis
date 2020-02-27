@@ -42,7 +42,8 @@ class SerialisertPerson(val json: String) {
             V3FjerneUtbetalingsreferanseFraArbeidsgiver(),
             V4LagerAktivitetslogg(),
             V5LagerUtbetalingsreferanse(),
-            V6LeggerTilGrad()
+            V6LeggerTilGrad(),
+            V7UtbetalteSykedager()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -169,6 +170,7 @@ class SerialisertPerson(val json: String) {
             organisasjonsnummer = arbeidsgiverData.organisasjonsnummer,
             tilstand = parseTilstand(data.tilstand),
             maksdato = data.maksdato,
+            betalteSykedager = data.betalteSykedager,
             utbetalingslinjer = data.utbetalingslinjer?.map(::parseUtbetalingslinje),
             godkjentAv = data.godkjentAv,
             utbetalingsreferanse = data.utbetalingsreferanse,
@@ -325,6 +327,7 @@ internal data class PersonData(
         data class VedtaksperiodeData(
             val id: UUID,
             val maksdato: LocalDate?,
+            val betalteSykedager: Int?,
             val godkjentAv: String?,
             val utbetalingsreferanse: String,
             val førsteFraværsdag: LocalDate?,

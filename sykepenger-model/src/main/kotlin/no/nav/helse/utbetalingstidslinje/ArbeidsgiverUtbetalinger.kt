@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
@@ -19,6 +18,7 @@ internal class ArbeidsgiverUtbetalinger(
     }
 
     private var maksdato: LocalDate? = null
+    private var betalteSykedager: Int? = null
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
@@ -28,11 +28,13 @@ internal class ArbeidsgiverUtbetalinger(
         MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogger).also {
             it.filter(tidslinjer, historiskTidslinje)
             maksdato = it.maksdato()
+            betalteSykedager = it.brukteSykedager()
+
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogger).beregn()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) -> arbeidsgiver.push(utbetalingstidslinje) }
     }
 
     internal fun maksdato() = maksdato
-
+    internal fun betalteSykedager() = betalteSykedager
 }

@@ -144,6 +144,10 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitMaksdato(maksdato)
     }
 
+    override fun visitBetalteSykedager(betalteSykedager: Int?) {
+        target.visitBetalteSykedager(betalteSykedager)
+    }
+
     override fun visitGodkjentAv(godkjentAv: String?) {
         target.visitGodkjentAv(godkjentAv)
     }

@@ -26,6 +26,7 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
+    private var betalteSykedager: Int?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
     private var godkjentAv: String?,
     private var utbetalingsreferanse: String,
@@ -56,6 +57,7 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand,
         aktivitetslogger = aktivitetslogger,
         maksdato = null,
+        betalteSykedager = null,
         utbetalingslinjer = null,
         godkjentAv = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
@@ -68,6 +70,7 @@ internal class Vedtaksperiode private constructor(
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id)
         visitor.visitMaksdato(maksdato)
+        visitor.visitBetalteSykedager(betalteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
@@ -628,6 +631,7 @@ internal class Vedtaksperiode private constructor(
                 it.valider { ByggUtbetalingslinjer(ytelser, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
+                    vedtaksperiode.betalteSykedager = engineForTimeline?.betalteSykedager()
                     vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
                     ytelser.infoOld("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                     ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
