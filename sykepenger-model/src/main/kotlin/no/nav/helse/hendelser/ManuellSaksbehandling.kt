@@ -1,11 +1,8 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import java.util.*
 
 class ManuellSaksbehandling(
     private val aktørId: String,
@@ -17,24 +14,6 @@ class ManuellSaksbehandling(
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
-
-    companion object {
-        fun lagBehov(
-            vedtaksperiodeId: UUID,
-            aktørId: String,
-            fødselsnummer: String,
-            organisasjonsnummer: String
-        ): Behov {
-            return Behov.nyttBehov(
-                behov = listOf(Behovstype.Godkjenning),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                additionalParams = emptyMap()
-            )
-        }
-    }
 
     internal fun saksbehandler() = saksbehandler
     internal fun utbetalingGodkjent() = utbetalingGodkjent

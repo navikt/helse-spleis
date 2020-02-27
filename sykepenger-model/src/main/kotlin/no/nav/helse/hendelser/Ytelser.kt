@@ -1,12 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
-import java.time.LocalDate
 import java.util.*
 
 @Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
@@ -21,29 +18,6 @@ class Ytelser(
     aktivitetslogger: Aktivitetslogger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(aktivitetslogger, aktivitetslogg) {
-    internal companion object {
-        fun lagBehov(
-            vedtaksperiodeId: UUID,
-            aktørId: String,
-            fødselsnummer: String,
-            organisasjonsnummer: String,
-            utgangspunktForBeregningAvYtelse: LocalDate
-        ): Behov {
-            val params = mutableMapOf(
-                "utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse
-            )
-
-            return Behov.nyttBehov(
-                behov = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger),
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                additionalParams = params
-            )
-        }
-
-    }
 
     internal fun sykepengehistorikk() = utbetalingshistorikk
 
