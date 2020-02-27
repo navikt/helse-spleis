@@ -7,10 +7,7 @@ import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.rapids_rivers.asYearMonth
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import java.util.*

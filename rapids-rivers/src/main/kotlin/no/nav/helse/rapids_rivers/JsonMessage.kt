@@ -131,5 +131,11 @@ fun JsonNode.asOptionalLocalDate() =
         ?.takeIf(String::isNotEmpty)
         ?.let { LocalDate.parse(it) }
 
+fun JsonNode.asOptionalLocalDateTime() =
+    takeIf(JsonNode::isTextual)
+        ?.asText()
+        ?.takeIf(String::isNotEmpty)
+        ?.let { LocalDateTime.parse(it) }
+
 fun JsonNode.asLocalDateTime(): LocalDateTime =
     asText().let { LocalDateTime.parse(it) }
