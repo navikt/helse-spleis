@@ -2,11 +2,9 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
-import no.nav.helse.behov.Behov
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import java.math.BigDecimal
@@ -125,14 +123,6 @@ internal object TestConstants {
             mottattDato = LocalDateTime.now()
         )
 
-}
-
-internal fun Behov.løsBehov(løsning: Any): String {
-    val pakke = objectMapper.readTree(this.toJson()) as ObjectNode
-    pakke.put("@besvart", LocalDateTime.now().toString())
-    pakke.set<JsonNode>("@løsning", objectMapper.valueToTree<JsonNode>(løsning))
-    pakke.put("@final", true)
-    return pakke.toString()
 }
 
 internal fun SykepengesoknadDTO.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

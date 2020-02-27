@@ -4,9 +4,10 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 
 internal fun tidslinjeOf(
-    vararg dagTriples: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>
+    vararg dagTriples: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>,
+    startDato: LocalDate = LocalDate.of(2018, 1, 1)
 ) = Utbetalingstidslinje().apply {
-    dagTriples.fold(LocalDate.of(2018, 1, 1)){ startDato, (antallDager, utbetalingsdag, inntekt) ->
+    dagTriples.fold(startDato){ startDato, (antallDager, utbetalingsdag, inntekt) ->
         (0 until antallDager).forEach {
             this.utbetalingsdag(inntekt, startDato.plusDays(it.toLong()), 100.00)
         }

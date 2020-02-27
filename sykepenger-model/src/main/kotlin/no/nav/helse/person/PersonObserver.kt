@@ -51,7 +51,8 @@ interface PersonObserver {
         val fødselsnummer: String,
         val utbetalingsreferanse: String,
         val utbetalingslinjer: List<Utbetalingslinje>,
-        val opprettet: LocalDate
+        val opprettet: LocalDate,
+        val forbrukteSykedager: Int
     )
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}

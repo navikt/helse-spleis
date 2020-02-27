@@ -26,6 +26,7 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
+    private var forbrukteSykedager: Int?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
     private var godkjentAv: String?,
     private var utbetalingsreferanse: String,
@@ -53,6 +54,7 @@ internal class Vedtaksperiode private constructor(
         organisasjonsnummer = organisasjonsnummer,
         tilstand = tilstand,
         maksdato = null,
+        forbrukteSykedager = null,
         utbetalingslinjer = null,
         godkjentAv = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
@@ -65,6 +67,7 @@ internal class Vedtaksperiode private constructor(
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id)
         visitor.visitMaksdato(maksdato)
+        visitor.visitforbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
@@ -588,6 +591,7 @@ internal class Vedtaksperiode private constructor(
                 it.valider { ByggUtbetalingslinjer(ytelser, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
+                    vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
                     vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
                     ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                     vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
@@ -713,6 +717,7 @@ internal class Vedtaksperiode private constructor(
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
                 opprettet = LocalDate.now()
             )
             vedtaksperiode.person.vedtaksperiodeUtbetalt(event)

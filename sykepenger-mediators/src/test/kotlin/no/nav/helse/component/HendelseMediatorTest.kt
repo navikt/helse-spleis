@@ -5,10 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.behov.Behov
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
-import no.nav.helse.løsBehov
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -187,23 +184,34 @@ internal class HendelseMediatorTest {
             )
         }
 
-        private fun generiskBehov(
-            aktørId: String,
-            fødselsnummer: String,
-            organisasjonsnummer: String,
-            behov: List<Behovstype> = listOf()
-        ) = Behov.nyttBehov(
-            behov = behov,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = UUID.randomUUID(),
-            additionalParams = mapOf()
-        )
-
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        private fun sendGeneriskBehov(
+            aktørId: String,
+            fødselsnummer: String,
+            organisasjonsnummer: String,
+            behov: List<String> = listOf(),
+            vedtaksperiodeId: UUID = UUID.randomUUID(),
+            løsninger: Map<String, Any> = emptyMap(),
+            ekstraFelter: Map<String, Any> = emptyMap()
+        ) = testRapid.sendTestMessage(
+            objectMapper.writeValueAsString(
+                ekstraFelter + mapOf(
+                    "@id" to UUID.randomUUID().toString(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "@behov" to behov,
+                    "aktørId" to aktørId,
+                    "fødselsnummer" to fødselsnummer,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId.toString(),
+                    "@løsning" to løsninger,
+                    "@final" to true,
+                    "@besvart" to LocalDateTime.now()
+                )
+            )
+        )
 
         private fun sendNyPåminnelse(
             aktørId: String = defaultAktørId,
@@ -231,22 +239,18 @@ internal class HendelseMediatorTest {
             fødselsnummer: String = defaultFødselsnummer,
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
-            val behov = Behov.nyttBehov(
-                behov = listOf(Behovstype.Godkjenning),
+            sendGeneriskBehov(
+                behov = listOf("Godkjenning"),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
-                additionalParams = mapOf(
+                ekstraFelter = mapOf(
                     "saksbehandlerIdent" to "en_saksbehandler"
-                )
-            )
-            sendBehov(
-                behov.løsBehov(
-                    mapOf(
-                        "Godkjenning" to mapOf(
-                            "godkjent" to true
-                        )
+                ),
+                løsninger = mapOf(
+                    "Godkjenning" to mapOf(
+                        "godkjent" to true
                     )
                 )
             )
@@ -257,18 +261,14 @@ internal class HendelseMediatorTest {
             fødselsnummer: String = defaultFødselsnummer,
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
-            val behov = generiskBehov(
+            sendGeneriskBehov(
+                behov = listOf("Sykepengehistorikk", "Foreldrepenger"),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                behov = listOf(Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
-            )
-            sendBehov(
-                behov.løsBehov(
-                    mapOf(
-                        "Sykepengehistorikk" to emptyList<Any>(),
-                        "Foreldrepenger" to emptyMap<String, String>()
-                    )
+                løsninger = mapOf(
+                    "Sykepengehistorikk" to emptyList<Any>(),
+                    "Foreldrepenger" to emptyMap<String, String>()
                 )
             )
         }
@@ -279,20 +279,16 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer,
             egenAnsatt: Boolean = false
         ) {
-            val behov = generiskBehov(
+            sendGeneriskBehov(
+                behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening"),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                behov = listOf(Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
-            )
-
-            sendBehov(
-                behov.løsBehov(
-                    mapOf(
-                        "EgenAnsatt" to egenAnsatt,
-                        "Inntektsberegning" to emptyMap<String, String>(),
-                        "Opptjening" to emptyList<Any>()
-                    )
+                vedtaksperiodeId = UUID.randomUUID(),
+                løsninger = mapOf(
+                    "EgenAnsatt" to egenAnsatt,
+                    "Inntektsberegning" to emptyMap<String, String>(),
+                    "Opptjening" to emptyList<Any>()
                 )
             )
         }
@@ -303,24 +299,20 @@ internal class HendelseMediatorTest {
             organisasjonsnummer: String = defaultOrganisasjonsnummer,
             utbetalingOK: Boolean = true
         ) {
-            val behov = Behov.nyttBehov(
-                behov = listOf(Behovstype.Utbetaling),
+            sendGeneriskBehov(
+                behov = listOf("Utbetaling"),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
-                additionalParams = mapOf(
-                    "utbetalingsreferanse" to "123456789"
-                )
-            )
-            sendBehov(
-                behov.løsBehov(
-                    mapOf(
-                        "Utbetaling" to mapOf(
-                            "status" to if(utbetalingOK) "FERDIG" else "FEIL",
-                            "melding" to if(utbetalingOK) "" else "FEIL fra Spenn"
-                        )
+                løsninger = mapOf(
+                    "Utbetaling" to mapOf(
+                        "status" to if (utbetalingOK) "FERDIG" else "FEIL",
+                        "melding" to if (!utbetalingOK) "FEIL fra Spenn" else ""
                     )
+                ),
+                ekstraFelter = mapOf(
+                    "utbetalingsreferanse" to "123456789"
                 )
             )
         }
@@ -397,7 +389,7 @@ internal class HendelseMediatorTest {
                 tom = LocalDate.now(),
                 type = SoknadstypeDTO.ARBEIDSTAKERE,
                 startSyketilfelle = LocalDate.now(),
-                sendtNav = LocalDateTime.now(),
+                sendtNav = null,
                 egenmeldinger = emptyList(),
                 fravar = emptyList(),
                 soknadsperioder = listOf(
@@ -411,10 +403,6 @@ internal class HendelseMediatorTest {
             )
             testRapid.sendTestMessage(nySøknad.toJsonNode().toString())
             return nySøknad
-        }
-
-        private fun sendBehov(behov: String) {
-            testRapid.sendTestMessage(behov)
         }
     }
 }
