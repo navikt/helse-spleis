@@ -7,17 +7,7 @@ data class Utbetalingslinje(
     val fom: LocalDate,
     var tom: LocalDate,
     val dagsats: Int
-) {
-//    internal fun toTidslinje() = Utbetalingstidslinje().apply {
-//        fom.datesUntil(tom.plusDays(1)).forEach {
-//            if (it.erHelg()) this.addHelg(0.0, it) else this.addNAVdag(dagsats.toDouble(), it)
-//        }
-//    }
-}
-
-//internal fun List<Utbetalingslinje>.utbetalingstidslinje() = this
-//    .map { it.toTidslinje() }
-//    .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+)
 
 /**
  * Oppdrag expects a continuous payment timeline spanning weekends.
