@@ -18,6 +18,7 @@ internal fun PersonObserver.UtbetaltEvent.toJson() = objectMapper.writeValueAsSt
         "utbetalingsreferanse" to this.utbetalingsreferanse,
         "vedtaksperiodeId" to this.vedtaksperiodeId.toString(),
         "utbetalingslinjer" to this.utbetalingslinjer.toJson(),
+        "forbrukteSykedager" to this.forbrukteSykedager,
         "opprettet" to this.opprettet
     )
 )
