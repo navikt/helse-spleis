@@ -11,22 +11,27 @@ internal class CompositeLeafSykdomstidslinjeTest {
     companion object {
         private val førsteMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).mandag,
+            grad = 100.0,
             factory = Søknad.SøknadDagFactory
         )
         private val førsteTirsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).tirsdag,
+            grad = 100.0,
             factory = Søknad.SøknadDagFactory
         )
         private val førsteOnsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).onsdag,
+            grad = 100.0,
             factory = Søknad.SøknadDagFactory
         )
         private val førsteTorsdag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(1).torsdag,
+            grad = 100.0,
             factory = Søknad.SøknadDagFactory
         )
         private val andreMandag = ConcreteSykdomstidslinje.sykedag(
             gjelder = Uke(2).mandag,
+            grad = 100.0,
             factory = Søknad.SøknadDagFactory
         )
 

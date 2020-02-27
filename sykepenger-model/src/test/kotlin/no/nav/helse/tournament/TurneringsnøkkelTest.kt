@@ -10,6 +10,7 @@ import java.time.LocalDate
 
 internal class TurneringsnøkkelTest {
     private val enDag = LocalDate.now()
+    private val grad = 100.0
 
     @Test
     internal fun turneringsnøkkel() {
@@ -23,9 +24,9 @@ internal class TurneringsnøkkelTest {
         assertEquals(Le_A, fraDag(Permisjonsdag.Søknad(enDag)))
         assertEquals(Le_Areg, fraDag(Permisjonsdag.Aareg(enDag)))
         assertEquals(EDU, fraDag(Studiedag(enDag)))
-        assertEquals(S_A, fraDag(Sykedag.Søknad(enDag)))
-        assertEquals(S_SM, fraDag(Sykedag.Sykmelding(enDag)))
-        assertEquals(SW, fraDag(SykHelgedag(enDag)))
+        assertEquals(S_A, fraDag(Sykedag.Søknad(enDag, grad)))
+        assertEquals(S_SM, fraDag(Sykedag.Sykmelding(enDag, grad)))
+        assertEquals(SW, fraDag(SykHelgedag(enDag, grad)))
         assertEquals(Undecided, fraDag(Ubestemtdag(enDag)))
         assertEquals(DA, fraDag(Utenlandsdag(enDag)))
     }

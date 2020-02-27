@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.util.*
 
@@ -12,21 +14,26 @@ class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val ukjentePerioder: List<JsonNode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
+    private val graderingsliste: List<Graderingsperiode>,
     private val aktivitetslogger: Aktivitetslogger,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
     private val sisteFraværsdag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
 
-    internal fun utbetalingslinjer(): List<Utbetalingslinje> =
-        utbetalinger.map { it.utbetalingslinjer(aktivitetslogger) }
+
+    internal fun utbetalingstidslinje() = this.utbetalinger
+        .map { it.toTidslinje(graderingsliste, aktivitetslogger) }
+        .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
     internal fun sisteFraværsdag() = sisteFraværsdag
 
     internal fun valider(): Aktivitetslogger {
         utbetalinger.forEach { it.valider(this, aktivitetslogger) }
         inntektshistorikk.forEach { it.valider(aktivitetslogger) }
-        if (ukjentePerioder.isNotEmpty()) { aktivitetslogger.errorOld("Utbetalingshistorikk fra Infotrygd inneholder perioder vi ikke klarer å tolke") }
+        if (ukjentePerioder.isNotEmpty()) {
+            aktivitetslogger.errorOld("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
+        }
         return aktivitetslogger
     }
 
@@ -56,8 +63,13 @@ class Utbetalingshistorikk(
         }
     }
 
+    class Graderingsperiode(private val fom: LocalDate, private val tom: LocalDate, internal val grad: Double) {
+        internal fun datoIPeriode(dato: LocalDate) =
+            dato.isAfter(fom.minusDays(1)) && dato.isBefore(tom.plusDays(1))
+    }
+
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
-        open fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
+        internal open fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogger: Aktivitetslogger): Utbetalingstidslinje {
             aktivitetslogger.severeOld("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
         }
 
@@ -70,8 +82,18 @@ class Utbetalingshistorikk(
             tom: LocalDate,
             dagsats: Int
         ) : Periode(fom, tom, dagsats) {
-            override fun utbetalingslinjer(aktivitetslogger: Aktivitetslogger): Utbetalingslinje {
-                return Utbetalingslinje(fom, tom, dagsats)
+
+            private fun List<Graderingsperiode>.finnGradForUtbetalingsdag(dag: LocalDate) =
+                this.find { it.datoIPeriode(dag) }?.grad ?: Double.NaN
+
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogger: Aktivitetslogger) = Utbetalingstidslinje().apply {
+                fom.datesUntil(tom.plusDays(1)).forEach {
+                    if (it.erHelg()) this.addHelg(
+                        0.0,
+                        it,
+                        graderingsliste.finnGradForUtbetalingsdag(it)
+                    ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+                }
             }
 
             override fun valider(historikk: Utbetalingshistorikk, aktivitetslogger: Aktivitetslogger) {

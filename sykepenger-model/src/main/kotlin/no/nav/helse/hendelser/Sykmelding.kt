@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.Arbeidsgiver
@@ -61,10 +62,10 @@ class Sykmelding(
         private val tom: LocalDate,
         private val sykdomsgrad: Int
     ) {
-        internal fun kanBehandles() = sykdomsgrad == 100
+        internal fun kanBehandles() = FeatureToggle.støtterGradertSykdom || sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
-            ConcreteSykdomstidslinje.sykedager(fom, tom, SykmeldingDagFactory)
+            ConcreteSykdomstidslinje.sykedager(fom, tom, sykdomsgrad.toDouble(), SykmeldingDagFactory)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
@@ -72,7 +73,7 @@ class Sykmelding(
 
     internal object SykmeldingDagFactory : DagFactory {
         override fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
-        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Sykmelding(dato)
+        override fun sykedag(dato: LocalDate, grad: Double): Sykedag = Sykedag.Sykmelding(dato, grad)
         override fun ubestemtdag(dato: LocalDate): Ubestemtdag { error("Ubestemtdag ikke støttet") }
         override fun utenlandsdag(dato: LocalDate): Utenlandsdag { error("Utenlandsdag ikke støttet") }
     }

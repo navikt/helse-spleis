@@ -115,7 +115,7 @@ internal class ByggUtbetalingstidlinjer(
         val aktivitetslogger = Aktivitetslogger()
         engine = ArbeidsgiverUtbetalinger(
             tidslinjer = tidslinjer,
-            historiskTidslinje = ytelser.sykepengehistorikk().utbetalingslinjer().utbetalingstidslinje(),
+            historiskTidslinje = ytelser.sykepengehistorikk().utbetalingstidslinje(),
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,

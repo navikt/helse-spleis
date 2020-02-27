@@ -110,6 +110,7 @@ internal class GodkjenningHendelseTest {
             ukjentePerioder = emptyList(),
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
+            graderingsliste = emptyList(),
             aktivitetslogger = Aktivitetslogger(),
             aktivitetslogg = Aktivitetslogg()
         ),

@@ -17,7 +17,7 @@ internal class BesteDagTest {
         private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
         private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
         private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Søknad.SøknadDagFactory)
-        private val sykedagFraSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, Søknad.SøknadDagFactory)
+        private val sykedagFraSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, 100.0, Søknad.SøknadDagFactory)
         private val utenlandsFraSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Søknad.SøknadDagFactory)
     }
 

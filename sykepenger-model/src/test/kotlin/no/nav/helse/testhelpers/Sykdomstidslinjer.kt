@@ -13,6 +13,7 @@ internal fun resetSeed(frøDato: LocalDate = LocalDate.of(2018, 1, 1)) {
 internal val Int.S
     get() = ConcreteSykdomstidslinje.sykedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
+        100.0,
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 

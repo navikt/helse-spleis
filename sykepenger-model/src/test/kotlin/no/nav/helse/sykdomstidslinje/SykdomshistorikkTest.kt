@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -7,7 +8,9 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.januar
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +30,11 @@ internal class SykdomshistorikkTest {
     @BeforeEach
     internal fun initialiser() {
         historikk = Sykdomshistorikk()
+    }
+
+    @AfterEach
+    internal fun reset() {
+        FeatureToggle.støtterGradertSykdom = false
     }
 
     @Test
@@ -53,6 +61,35 @@ internal class SykdomshistorikkTest {
         assertEquals(9, inspektør.hendelseSykdomstidslinje[0].length())
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
     }
+
+    @Test
+    internal fun `Gradert sykmelding mottatt`() {
+        FeatureToggle.støtterGradertSykdom = true
+        historikk.håndter(sykmelding(Triple(1.januar, 5.januar, 50)))
+        assertEquals(1, historikk.size)
+        assertEquals(5, historikk.sykdomstidslinje().length())
+        1.januar.datesUntil(6.januar).forEach {
+            assertTrue(historikk.sykdomstidslinje().dag(it) is Sykedag)
+            assertEquals(50.0, (historikk.sykdomstidslinje().dag(it) as Sykedag).grad)
+        }
+    }
+
+    @Test
+    internal fun `Gradert søknad mottatt`() {
+        FeatureToggle.støtterGradertSykdom = true
+        historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 50)))
+        historikk.håndter(
+            søknad(
+                Søknad.Periode.Sykdom(8.januar, 12.januar, 50, faktiskGrad = 50.0),
+                Søknad.Periode.Egenmelding(2.januar, 3.januar)
+            )
+        )
+        8.januar.datesUntil(13.januar).forEach {
+            assertTrue(historikk.sykdomstidslinje().dag(it) is Sykedag)
+            assertEquals(50.0, (historikk.sykdomstidslinje().dag(it) as Sykedag).grad)
+        }
+    }
+
 
     @Test
     internal fun `Håndterer Ubestemt dag`() {

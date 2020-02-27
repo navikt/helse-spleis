@@ -89,6 +89,13 @@ private fun lagTidslinje(
 ): ConcreteSykdomstidslinje =
     SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator)
 
+private fun lagTidslinje(
+    antallDager: Int,
+    generator: DagFactory.(LocalDate, Double) -> Dag,
+    grad: Double = 100.0
+): ConcreteSykdomstidslinje =
+    SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator, grad)
+
 internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val factory: DagFactory = Søknad.SøknadDagFactory) {
 
     private companion object {
@@ -124,7 +131,10 @@ internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val
 
         internal fun lagTidslinje(generator: DagFactory.(LocalDate) -> Dag): ConcreteSykdomstidslinje {
             return CompositeSykdomstidslinje(dager.map { factory.generator(it) }.toList())
+        }
 
+        internal fun lagTidslinje(generator: DagFactory.(LocalDate,Double) -> Dag, grad: Double = 100.0): ConcreteSykdomstidslinje {
+            return CompositeSykdomstidslinje(dager.map { factory.generator(it, grad) }.toList())
         }
     }
 }
