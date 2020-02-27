@@ -89,7 +89,6 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
-        håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -98,7 +97,7 @@ internal class KunEnArbeidsgiverTest {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test
