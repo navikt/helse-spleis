@@ -45,7 +45,7 @@ internal fun tilDTO(
         Meldingstype.SENDT_SØKNAD -> SendtSøknadMessage(hendelse, problems).asSpeilDTO()
         Meldingstype.INNTEKTSMELDING -> InntektsmeldingMessage(hendelse, problems).asSpeilDTO()
         Meldingstype.PÅMINNELSE -> TODO()
-        Meldingstype.YTELSER -> TODO()
+        Meldingstype.YTELSER -> HendelseDTO.UtbetalingshistorikkDTO()
         Meldingstype.VILKÅRSGRUNNLAG -> TODO()
         Meldingstype.MANUELL_SAKSBEHANDLING -> TODO()
         Meldingstype.UTBETALING -> TODO()
