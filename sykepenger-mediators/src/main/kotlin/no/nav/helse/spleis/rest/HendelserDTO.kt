@@ -30,4 +30,8 @@ internal sealed class HendelseDTO {
     ): HendelseDTO() {
         override val type = Meldingstype.INNTEKTSMELDING
     }
+
+    class UtbetalingshistorikkDTO() : HendelseDTO() {
+        override val type = Meldingstype.YTELSER
+    }
 }

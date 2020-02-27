@@ -32,7 +32,7 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, Søknad.SøknadDagFactory)
+        val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, 100.0, Søknad.SøknadDagFactory)
         val søknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Søknad.SøknadDagFactory)
 
         val tidslinje = (søknadSykedager + søknadArbeidsdager)
@@ -79,7 +79,9 @@ internal class CsvDagturneringTest {
 
         val sykedag: TestHendelseBuilder
             get() {
-                dagbuilder = ConcreteSykdomstidslinje.Companion::sykedag
+                dagbuilder = { dag:LocalDate, factory:DagFactory ->
+                    ConcreteSykdomstidslinje.sykedag(dag, 100.0, factory)
+                }
                 return this
             }
 

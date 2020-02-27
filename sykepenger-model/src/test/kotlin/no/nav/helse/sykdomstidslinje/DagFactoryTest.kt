@@ -12,6 +12,7 @@ import java.time.LocalDate
 internal class DagFactoryTest {
 
     private val enDag = LocalDate.now()
+    private val grad = 100.0
 
     @Test
     internal fun sykmeldingFactory() {
@@ -25,8 +26,8 @@ internal class DagFactoryTest {
         assertThrows<IllegalStateException> { factory.utenlandsdag(enDag) }
 
         assertDag(enDag, factory.implisittDag(enDag))
-        assertDag(enDag, factory.sykedag(enDag))
-        assertDag(enDag, factory.sykHelgedag(enDag))
+        assertDag(enDag, factory.sykedag(enDag, grad))
+        assertDag(enDag, factory.sykHelgedag(enDag, grad))
     }
 
     @Test
@@ -38,8 +39,8 @@ internal class DagFactoryTest {
         assertDag(enDag, factory.implisittDag(enDag))
         assertDag(enDag, factory.permisjonsdag(enDag))
         assertDag(enDag, factory.studiedag(enDag))
-        assertDag(enDag, factory.sykedag(enDag))
-        assertDag(enDag, factory.sykHelgedag(enDag))
+        assertDag(enDag, factory.sykedag(enDag, grad))
+        assertDag(enDag, factory.sykHelgedag(enDag, grad))
         assertDag(enDag, factory.ubestemtdag(enDag))
         assertDag(enDag, factory.utenlandsdag(enDag))
     }
@@ -53,7 +54,7 @@ internal class DagFactoryTest {
         assertDag(enDag, factory.implisittDag(enDag))
         assertThrows<IllegalStateException> { factory.permisjonsdag(enDag) }
         assertDag(enDag, factory.studiedag(enDag))
-        assertDag(enDag, factory.sykHelgedag(enDag))
+        assertDag(enDag, factory.sykHelgedag(enDag, grad))
         assertDag(enDag, factory.ubestemtdag(enDag))
         assertDag(enDag, factory.utenlandsdag(enDag))
     }

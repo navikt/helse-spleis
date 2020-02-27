@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -75,11 +76,11 @@ class Søknad constructor(
             private val faktiskGrad: Double = grad.toDouble()
         ) : Periode(fom, tom) {
             override fun sykdomstidslinje() =
-                ConcreteSykdomstidslinje.sykedager(fom, tom, SøknadDagFactory)
+                ConcreteSykdomstidslinje.sykedager(fom, tom, faktiskGrad, SøknadDagFactory)
 
             override fun valider(søknad: Søknad, aktivitetslogg: Aktivitetslogg) {
-                if (grad != 100) aktivitetslogg.error("Søknaden inneholder gradert sykdomsperiode")
-                if (faktiskGrad != 100.0) aktivitetslogg.error("Søker oppgir gradert sykdomsperiode")
+                if (grad != 100 && (!FeatureToggle.støtterGradertSykdom)) aktivitetslogg.error("Søknaden inneholder gradert sykdomsperiode")
+                if (faktiskGrad != grad.toDouble()/* && (!FeatureToggle.støtterGradertSykdom)*/) aktivitetslogg.error("Søker oppgir gradert sykdomsperiode")
             }
         }
 
@@ -118,6 +119,6 @@ class Søknad constructor(
         override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Søknad(dato)
         override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Søknad(dato)
         override fun permisjonsdag(dato: LocalDate): Permisjonsdag = Permisjonsdag.Søknad(dato)
-        override fun sykedag(dato: LocalDate): Sykedag = Sykedag.Søknad(dato)
+        override fun sykedag(dato: LocalDate, grad: Double): Sykedag = Sykedag.Søknad(dato, grad)
     }
 }

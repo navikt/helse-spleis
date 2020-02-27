@@ -120,6 +120,9 @@ internal class YtelserMessage(
                     orgnummer = opplysning["orgnummer"].asText()
                 )
             },
+            graderingsliste = this["@løsning.Sykepengehistorikk"].flatMap {
+                it.path("graderingsliste")
+            }.map { Utbetalingshistorikk.Graderingsperiode(it["fom"].asLocalDate(), it["tom"].asLocalDate(), it["grad"].asDouble()) },
             aktivitetslogg = aktivitetslogg
         )
 

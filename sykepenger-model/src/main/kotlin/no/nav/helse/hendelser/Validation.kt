@@ -110,7 +110,7 @@ internal class ByggUtbetalingstidlinjer(
     override fun isValid(): Boolean {
         engine = ArbeidsgiverUtbetalinger(
             tidslinjer = tidslinjer,
-            historiskTidslinje = ytelser.sykepengehistorikk().utbetalingslinjer().utbetalingstidslinje(),
+            historiskTidslinje = ytelser.sykepengehistorikk().utbetalingstidslinje(),
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,

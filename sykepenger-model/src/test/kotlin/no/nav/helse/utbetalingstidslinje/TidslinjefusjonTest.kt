@@ -1,11 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class TidslinjefusjonTest {
@@ -129,19 +125,6 @@ internal class TidslinjefusjonTest {
         assertEquals(1, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, inspektør.arbeidsdagTeller)
         assertEquals(1, inspektør.fridagTeller)
-    }
-
-    @Test internal fun `bygg historisk utbetalingstidslinje`() {
-        undersøke(
-            HistoriskUtbetaling.utbetalingstidslinje(listOf(
-                HistoriskUtbetaling(123, 1.januar, 5.januar),
-                HistoriskUtbetaling(123, 15.januar, 29.januar),
-                HistoriskUtbetaling(456, 22.januar, 5.februar)
-            ))
-        )
-        assertEquals(36, inspektør.size)
-        assertEquals(21, inspektør.navDagTeller)
-        assertEquals(6, inspektør.navHelgDagTeller)
     }
 
     @Test internal fun `legger til tom utbetalingstidslinje`() {

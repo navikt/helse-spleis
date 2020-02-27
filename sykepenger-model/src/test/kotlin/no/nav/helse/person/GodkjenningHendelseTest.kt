@@ -109,6 +109,7 @@ internal class GodkjenningHendelseTest {
                 ukjentePerioder = emptyList(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
+                graderingsliste = emptyList(),
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(
@@ -199,10 +200,6 @@ internal class GodkjenningHendelseTest {
         override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
             sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
         }
-
-//        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-//            this@GodkjenningHendelseTest.aktivitetslogger = aktivitetslogger
-//        }
 
         internal val vedtaksperiodeteller get() = vedtaksperiodeindeks + 1
 

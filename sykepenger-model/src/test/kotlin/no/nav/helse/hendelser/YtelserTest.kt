@@ -56,28 +56,30 @@ internal class YtelserTest {
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
-    ) = Ytelser(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        utbetalingshistorikk = Utbetalingshistorikk(
-            ukjentePerioder = emptyList(),
-            utbetalinger = utbetalinger.map {
-                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                    it.first,
-                    it.second,
-                    it.third
-                )
-            },
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, Aktivitetslogg()),
-        aktivitetslogg = Aktivitetslogg()
-    )
-
+    ) = Aktivitetslogg().let {
+        Ytelser(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            utbetalingshistorikk = Utbetalingshistorikk(
+                ukjentePerioder = emptyList(),
+                utbetalinger = utbetalinger.map {
+                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                        it.first,
+                        it.second,
+                        it.third
+                    )
+                },
+                inntektshistorikk = emptyList(),
+                graderingsliste = emptyList(),
+                aktivitetslogg = it
+            ),
+            foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, it),
+            aktivitetslogg = it
+        )
+    }
     private companion object {
         private val organisasjonsnummer = "123456789"
         private val aktørId = "987654321"

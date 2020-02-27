@@ -143,26 +143,28 @@ internal class YtelserHendelseTest {
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
-    ) = Ytelser(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = ORGNR,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        utbetalingshistorikk = Utbetalingshistorikk(
-            ukjentePerioder = emptyList(),
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepengeYtelse,
-            svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        aktivitetslogg = Aktivitetslogg()
-    )
-
+    ) = Aktivitetslogg().let {
+        Ytelser(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            utbetalingshistorikk = Utbetalingshistorikk(
+                ukjentePerioder = emptyList(),
+                utbetalinger = utbetalinger,
+                inntektshistorikk = emptyList(),
+                graderingsliste = emptyList(),
+                aktivitetslogg = it
+            ),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = foreldrepengeYtelse,
+                svangerskapsytelse = svangerskapYtelse,
+                aktivitetslogg = it
+            ),
+            aktivitetslogg = it
+        )
+    }
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -244,10 +246,6 @@ internal class YtelserHendelseTest {
         override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
             sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
         }
-
-//        override fun visitPersonAktivitetslogger(aktivitetslogger: Aktivitetslogger) {
-//            this@YtelserHendelseTest.aktivitetslogger = aktivitetslogger
-//        }
 
         internal val vedtaksperiodeTeller get() = tilstander.size
 

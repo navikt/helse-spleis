@@ -240,6 +240,7 @@ class PåminnelserOgTimeoutTest {
                 )
             ),
             inntektshistorikk = emptyList(),
+            graderingsliste = emptyList(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(
@@ -310,10 +311,6 @@ class PåminnelserOgTimeoutTest {
 
         internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-//        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-//            this@PåminnelserOgTimeoutTest.aktivitetslogg = aktivitetslogg
-//        }
-
     }
     private inner class TestPersonObserver : PersonObserver, HendelseObserver {
 

@@ -115,6 +115,7 @@ internal class UtbetalingsreferanseTest {
                 ukjentePerioder = emptyList(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
+                graderingsliste = emptyList(),
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(

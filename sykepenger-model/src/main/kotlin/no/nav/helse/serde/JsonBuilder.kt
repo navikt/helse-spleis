@@ -304,7 +304,7 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-            dager.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
+            dager.add(UtbetalingsdagMedGradReflect(dag, "ArbeidsgiverperiodeDag").toMap())
         }
 
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
@@ -312,7 +312,7 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
-            dager.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
+            dager.add(UtbetalingsdagMedGradReflect(dag, "NavHelgDag").toMap())
         }
 
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
@@ -443,9 +443,9 @@ internal class JsonBuilder : PersonVisitor {
             leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
 
         override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = leggTilDag(JsonDagType.SYK_HELGEDAG, sykHelgedag)
-        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilDag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
-        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilDag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = leggTilSykedag(JsonDagType.SYK_HELGEDAG, sykHelgedag)
+        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
+        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
 
@@ -454,6 +454,16 @@ internal class JsonBuilder : PersonVisitor {
                 mutableMapOf(
                     "dagen" to dag.dagen,
                     "type" to jsonDagType.name
+                )
+            )
+        }
+
+        private fun leggTilSykedag(jsonDagType: JsonDagType, dag: DagMedGrad) {
+            sykdomstidslinjeListe.add(
+                mutableMapOf(
+                    "dagen" to (dag as Dag).dagen,
+                    "type" to jsonDagType.name,
+                    "grad" to dag.grad
                 )
             )
         }

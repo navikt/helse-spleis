@@ -145,7 +145,7 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     // No 26 week gap with base of 246 NAV days
-    private fun tilbakevendendeSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>): Utbetalingstidslinje {
+    private fun tilbakevendendeSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>): Utbetalingstidslinje {
         return tidslinjeOf(
             365.ARB,
             48.NAV,
@@ -165,7 +165,7 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     // 26 week gap inside 3 year window of 246 days with 54 NAV days days after the gap
-    private fun enAnnenSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate) -> Unit, Double>): Utbetalingstidslinje {
+    private fun enAnnenSykdom(vararg dagTriple: Triple<Int, Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit, Double>): Utbetalingstidslinje {
         return tidslinjeOf(
             365.ARB,
             48.NAV,

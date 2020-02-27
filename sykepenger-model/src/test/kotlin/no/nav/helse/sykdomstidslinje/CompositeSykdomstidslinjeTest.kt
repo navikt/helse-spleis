@@ -22,8 +22,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `kan bestemme hvilken type dager mellom to perioder skal ha`() {
-        val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, Søknad.SøknadDagFactory)
-        val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, Søknad.SøknadDagFactory)
+        val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, 100.0, Søknad.SøknadDagFactory)
+        val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, 100.0, Søknad.SøknadDagFactory)
 
         val arbeidsgiverperiode =
             arbeidsgiverperiode1.plus(arbeidsgiverperiode2, { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) }, historiskDagturnering)
@@ -44,8 +44,8 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
-        val førsteInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, Søknad.SøknadDagFactory)
-        val andreInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, Søknad.SøknadDagFactory)
+        val førsteInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).tirsdag, 100.0, Søknad.SøknadDagFactory)
+        val andreInterval = ConcreteSykdomstidslinje.sykedager(Uke(1).fredag, Uke(2).mandag, 100.0, Søknad.SøknadDagFactory)
 
         val interval = andreInterval + førsteInterval
 
@@ -57,7 +57,7 @@ internal class CompositeSykdomstidslinjeTest {
     @Test
     internal fun `tidslinje med ubestemt dag er utenfor omfang`() {
         val studiedag = ConcreteSykdomstidslinje.studiedag(Uke(1).mandag, Søknad.SøknadDagFactory)
-        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, Søknad.SøknadDagFactory)
+        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, 100.0, Søknad.SøknadDagFactory)
         val tidslinje = studiedag + sykedag
 
         assertTrue(tidslinje.erUtenforOmfang())
