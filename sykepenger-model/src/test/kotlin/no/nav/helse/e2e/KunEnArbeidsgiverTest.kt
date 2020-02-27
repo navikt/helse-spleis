@@ -68,6 +68,7 @@ internal class KunEnArbeidsgiverTest {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -80,8 +81,9 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALT
         )
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
     }
 
     @Test
@@ -690,6 +692,7 @@ internal class KunEnArbeidsgiverTest {
         private val vedtaksperiodeIder = mutableMapOf<Int, String>()
         internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
         internal lateinit var utbetalingsreferanseFraUtbetalingEvent: String
+        val utbetalteVedtaksperioder = mutableListOf<String>()
 
         internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
             etterspurteBehov.partisjoner().let {
@@ -697,6 +700,10 @@ internal class KunEnArbeidsgiverTest {
                     .filter { key.name in (it["@behov"] as List<*>) }
                     .size == 1
             }
+
+        override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
+            utbetalteVedtaksperioder.add(event.vedtaksperiodeId.toString())
+        }
 
         internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
 

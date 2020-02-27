@@ -772,6 +772,7 @@ internal class Vedtaksperiode private constructor(
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
                 opprettet = LocalDate.now()
             )
             vedtaksperiode.person.vedtaksperiodeUtbetalt(event)

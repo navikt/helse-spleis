@@ -29,7 +29,6 @@ internal class ArbeidsgiverUtbetalinger(
             it.filter(tidslinjer, historiskTidslinje)
             maksdato = it.maksdato()
             forbrukteSykedager = it.forbrukteSykedager()
-
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogger).beregn()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) -> arbeidsgiver.push(utbetalingstidslinje) }
