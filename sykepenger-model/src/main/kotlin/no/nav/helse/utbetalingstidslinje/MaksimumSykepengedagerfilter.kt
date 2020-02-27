@@ -20,14 +20,14 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
     private var state: State = State.Initiell
     private val teller = UtbetalingTeller(alder, arbeidsgiverRegler)
     private var opphold = 0
-    private var betalteSykedager = 0
+    private var forbrukteSykedager = 0
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
     private val avvisteDatoer = mutableListOf<LocalDate>()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
 
     internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
-    internal fun brukteSykedager() = betalteSykedager
+    internal fun forbrukteSykedager() = forbrukteSykedager
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, historiskTidslinje: Utbetalingstidslinje) {
         require(tidslinjer.size == 1) {"Flere arbeidsgivere er ikke støttet enda"}
@@ -114,7 +114,7 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
                 avgrenser.dekrementerfom = dagen.minusYears(HISTORISK_PERIODE_I_ÅR)
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
-                avgrenser.betalteSykedager = 1
+                avgrenser.forbrukteSykedager = 1
                 avgrenser.state(Syk)
             }
         }
@@ -127,7 +127,7 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
-                avgrenser.betalteSykedager += 1
+                avgrenser.forbrukteSykedager += 1
                 avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
@@ -141,7 +141,7 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.teller.inkrementer(dagen)
                 avgrenser.sisteBetalteDag = dagen
-                avgrenser.betalteSykedager += 1
+                avgrenser.forbrukteSykedager += 1
                 avgrenser.dekrementer(dagen)
                 avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
             }

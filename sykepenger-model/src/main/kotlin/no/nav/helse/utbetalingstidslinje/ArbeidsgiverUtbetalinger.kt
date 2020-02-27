@@ -18,7 +18,7 @@ internal class ArbeidsgiverUtbetalinger(
     }
 
     private var maksdato: LocalDate? = null
-    private var betalteSykedager: Int? = null
+    private var forbrukteSykedager: Int? = null
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
@@ -28,7 +28,7 @@ internal class ArbeidsgiverUtbetalinger(
         MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogger).also {
             it.filter(tidslinjer, historiskTidslinje)
             maksdato = it.maksdato()
-            betalteSykedager = it.brukteSykedager()
+            forbrukteSykedager = it.forbrukteSykedager()
 
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogger).beregn()
@@ -36,5 +36,5 @@ internal class ArbeidsgiverUtbetalinger(
     }
 
     internal fun maksdato() = maksdato
-    internal fun betalteSykedager() = betalteSykedager
+    internal fun forbrukteSykedager() = forbrukteSykedager
 }

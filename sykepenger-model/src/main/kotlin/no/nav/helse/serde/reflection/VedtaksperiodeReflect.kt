@@ -13,7 +13,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val fødselsnummer: String = vedtaksperiode["fødselsnummer"]
     private val organisasjonsnummer: String = vedtaksperiode["organisasjonsnummer"]
     private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
-    private val betalteSykedager: Int? = vedtaksperiode["betalteSykedager"]
+    private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
@@ -33,7 +33,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal fun toMap() = mutableMapOf<String, Any?>(
         "id" to id,
         "maksdato" to maksdato,
-        "betalteSykedager" to betalteSykedager,
+        "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,

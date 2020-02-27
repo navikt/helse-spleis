@@ -128,7 +128,7 @@ internal class ByggUtbetalingstidlinjer(
     }
 
     internal fun maksdato() = engine.maksdato()
-    internal fun betalteSykedager() = engine.betalteSykedager()
+    internal fun forbrukteSykedager() = engine.forbrukteSykedager()
     override fun feilmelding() = "Feil ved kalkulering av utbetalingstidslinjer"
 }
 

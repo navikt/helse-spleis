@@ -43,7 +43,7 @@ internal fun createVedtaksperiode(
     organisasjonsnummer: String,
     tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
     maksdato: LocalDate?,
-    betalteSykedager: Int?,
+    forbrukteSykedager: Int?,
     utbetalingslinjer: List<Utbetalingslinje>?,
     godkjentAv: String?,
     utbetalingsreferanse: String?,
@@ -55,7 +55,7 @@ internal fun createVedtaksperiode(
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
-        person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, betalteSykedager, utbetalingslinjer, godkjentAv,
+        person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, forbrukteSykedager, utbetalingslinjer, godkjentAv,
         utbetalingsreferanse, førsteFraværsdag, inntektFraInntektsmelding, dataForVilkårsvurdering, sykdomshistorikk,
         aktivitetslogger
     )

@@ -149,7 +149,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val historikk = tidslinjeOf(31.NAV, startDato = 1.januar(2018))
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(41, filter.brukteSykedager())
+        assertEquals(41, filter.forbrukteSykedager())
     }
 
     @Test internal fun `teller sykedager med overlapp`() {
@@ -157,7 +157,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val historikk = tidslinjeOf(16.ARB, 31.NAV, startDato = 1.januar(2018))
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(31, filter.brukteSykedager())
+        assertEquals(31, filter.forbrukteSykedager())
     }
 
     @Test internal fun `teller sykedager med konflikt`() {
@@ -165,13 +165,13 @@ internal class MaksimumSykepengedagerfilterTest {
         val historikk = tidslinjeOf(16.ARB, 31.NAV, startDato = 1.januar)
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(41, filter.brukteSykedager())
+        assertEquals(41, filter.forbrukteSykedager())
     }
 
     @Test internal fun `teller sykedager med 26 uker`() {
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(listOf(enAnnenSykdom()), tidslinjeOf()) }
-        assertEquals(54, filter.brukteSykedager())
+        assertEquals(54, filter.forbrukteSykedager())
     }
 
     private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
