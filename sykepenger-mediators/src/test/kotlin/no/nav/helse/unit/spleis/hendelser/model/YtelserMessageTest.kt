@@ -16,7 +16,7 @@ class YtelserMessageTest {
         val aktivitetslogg = Aktivitetslogg()
         YtelserMessage(json, aktivitetslogger, aktivitetslogg).asYtelser().valider()
 
-        assertFalse(aktivitetslogger.hasErrorsOld())
+        assertFalse(aktivitetslogg.hasErrors())
     }
 
     @Test
@@ -25,7 +25,7 @@ class YtelserMessageTest {
         val aktivitetslogg = Aktivitetslogg()
         YtelserMessage(ukjentPeriode, aktivitetslogger, aktivitetslogg).asYtelser().valider()
 
-        assertTrue(aktivitetslogger.hasErrorsOld())
+        assertTrue(aktivitetslogg.hasErrors(), aktivitetslogg.toString())
     }
 }
 

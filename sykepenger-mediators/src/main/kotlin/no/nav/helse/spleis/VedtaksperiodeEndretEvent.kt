@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Topics
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.toMap
-import no.nav.helse.serde.reflection.toMap
 import org.apache.kafka.clients.producer.ProducerRecord
 
 internal fun PersonObserver.VedtaksperiodeEndretTilstandEvent.producerRecord() =
