@@ -169,8 +169,7 @@ internal class YtelserHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogg = Aktivitetslogg()
+            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
         )
 
     private fun søknad() =
@@ -180,7 +179,6 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -200,8 +198,7 @@ internal class YtelserHendelseTest {
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            ferieperioder = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
+            ferieperioder = emptyList()
         )
 
     private fun vilkårsgrunnlag() =
@@ -216,7 +213,6 @@ internal class YtelserHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
         )
 

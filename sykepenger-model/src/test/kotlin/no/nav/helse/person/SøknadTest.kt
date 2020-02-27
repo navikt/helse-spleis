@@ -20,22 +20,20 @@ internal class SøknadTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
@@ -45,7 +43,7 @@ internal class SøknadTest {
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 50)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -53,7 +51,7 @@ internal class SøknadTest {
     @Test
     internal fun `mangler Sykmelding`() {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -61,7 +59,7 @@ internal class SøknadTest {
     internal fun `søknad kan utvide sykdomstidslinje`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
         assertEquals(10, inspektør.sykdomstidslinje(0).length())
@@ -71,8 +69,8 @@ internal class SøknadTest {
     internal fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
-        assertTrue(aktivitetslogg.hasNeeds())
-        assertTrue(aktivitetslogg.hasErrors(), aktivitetslogg.toString())
+        assertTrue(inspektør.personLogg.hasNeeds())
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
@@ -80,9 +78,9 @@ internal class SøknadTest {
     internal fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -92,7 +90,7 @@ internal class SøknadTest {
         person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(6.januar, 10.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -104,7 +102,7 @@ internal class SøknadTest {
         person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
@@ -117,7 +115,7 @@ internal class SøknadTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Triple(4.januar, 10.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -128,7 +126,7 @@ internal class SøknadTest {
         person.håndter(
                 søknad(Sykdom(1.januar, 5.januar, 100), orgnummer = "orgnummer2")
             )
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -140,7 +138,6 @@ internal class SøknadTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = false
         )
 
@@ -150,17 +147,21 @@ internal class SøknadTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder),
-            aktivitetslogg = aktivitetslogg
+            sykeperioder = listOf(*sykeperioder)
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        internal lateinit var personLogg: Aktivitetslogg
 
         init {
             person.accept(this)
+        }
+
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            personLogg = aktivitetslogg
         }
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {

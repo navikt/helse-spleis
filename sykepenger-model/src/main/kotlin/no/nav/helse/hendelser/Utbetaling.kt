@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 
 class Utbetaling(
@@ -9,15 +8,14 @@ class Utbetaling(
     private val fødselsnummer: String,
     private val orgnummer: String,
     internal val utbetalingsreferanse: String,
-    private val status: String,
-    internal val melding: String,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(
-    aktivitetslogg
-) {
+    private val status: Status,
+    internal val melding: String
+) : ArbeidstakerHendelse() {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun isOK() = status == "FERDIG"
+    internal fun isOK() = status == Status.FERDIG
+
+    enum class Status { FERDIG, FEIL }
 }

@@ -90,7 +90,6 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList()
         )
@@ -105,8 +104,7 @@ internal class VedtaksperiodeTest {
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = perioder,
-        aktivitetslogg = Aktivitetslogg()
+        sykeperioder = perioder
     )
 
     private fun søknad(
@@ -124,7 +122,6 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -137,8 +134,7 @@ internal class VedtaksperiodeTest {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogg = Aktivitetslogg()
+        nestePåminnelsestidspunkt = LocalDateTime.now()
     )
 
     private fun periodeFor(sykmelding: Sykmelding, id: UUID = UUID.randomUUID()) = Vedtaksperiode(

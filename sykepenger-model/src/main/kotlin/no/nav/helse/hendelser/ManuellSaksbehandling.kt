@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.behov.Behov
 import no.nav.helse.behov.Behovstype
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.util.*
 
@@ -12,9 +11,8 @@ class ManuellSaksbehandling(
     private val organisasjonsnummer: String,
     internal val vedtaksperiodeId: String,
     private val saksbehandler: String,
-    private val utbetalingGodkjent: Boolean,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogg) {
+    private val utbetalingGodkjent: Boolean
+) : ArbeidstakerHendelse() {
 
     companion object {
         fun lagBehov(

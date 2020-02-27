@@ -143,8 +143,7 @@ internal class JsonBuilderTest {
                 fnr = fnr,
                 aktørId = aktørId,
                 orgnummer = orgnummer,
-                sykeperioder = listOf(Triple(1.januar, 31.januar, 100)),
-                aktivitetslogg = Aktivitetslogg()
+                sykeperioder = listOf(Triple(1.januar, 31.januar, 100))
             )
 
         private val søknad
@@ -156,7 +155,6 @@ internal class JsonBuilderTest {
                 perioder = listOf(
                     Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
                 ),
-                aktivitetslogg = Aktivitetslogg(),
                 harAndreInntektskilder = false
             )
 
@@ -170,8 +168,7 @@ internal class JsonBuilderTest {
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 31000.00,
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-                ferieperioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg()
+                ferieperioder = emptyList()
             )
 
         private val vilkårsgrunnlag
@@ -194,8 +191,7 @@ internal class JsonBuilderTest {
                         )
                     )
                 ),
-                erEgenAnsatt = false,
-                aktivitetslogg = Aktivitetslogg()
+                erEgenAnsatt = false
             )
 
         private val ytelser
@@ -238,8 +234,7 @@ internal class JsonBuilderTest {
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = true,
-                saksbehandler = "en_saksbehandler_ident",
-                aktivitetslogg = Aktivitetslogg()
+                saksbehandler = "en_saksbehandler_ident"
             )
     }
 }

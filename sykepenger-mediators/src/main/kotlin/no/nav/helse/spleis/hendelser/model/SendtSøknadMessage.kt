@@ -2,22 +2,21 @@ package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.hendelser.asLocalDate
-import no.nav.helse.spleis.hendelser.asOptionalLocalDate
 import no.nav.helse.spleis.rest.HendelseDTO
 import java.time.LocalDateTime
 import java.util.*
 
 // Understands a JSON message representing a Søknad
-internal class SendtSøknadMessage(originalMessage: String, private val aktivitetslogger: Aktivitetslogger, private val aktivitetslogg: Aktivitetslogg) :
-    SøknadMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
+    SøknadMessage(originalMessage, problems) {
     init {
-        requiredValue("status", "SENDT")
-        requiredKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
+        requireValue("status", "SENDT")
+        requireKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
@@ -51,10 +50,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
-            else -> {
-                aktivitetslogger.severeOld("Ukjent fraværstype $fraværstype")
-                aktivitetslogg.severe("Ukjent fraværstype $fraværstype")
-            }
+            else -> problems.severe("Ukjent fraværstype $fraværstype")
         }
     } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
     ?: emptyList())
@@ -70,13 +66,11 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,
-            harAndreInntektskilder = harAndreInntektskilder(),
-            aktivitetslogg = aktivitetslogg
+            harAndreInntektskilder = harAndreInntektskilder()
         )
     }
 
-    private fun harAndreInntektskilder() =
-        !this.isKeyMissing("andreInntektskilder") && !this["andreInntektskilder"].let { it.isNull || it.isEmpty }
+    private fun harAndreInntektskilder() = this["andreInntektskilder"].isArray && !this["andreInntektskilder"].isEmpty
 
     fun asSpeilDTO(): HendelseDTO = HendelseDTO.SendtSøknadDTO(
         rapportertdato = rapportertdato,
@@ -85,9 +79,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val aktivite
         tom = søknadTom
     )
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
-            SendtSøknadMessage(message, problems, aktivitetslogg)
+    object Factory : MessageFactory<SendtSøknadMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = SendtSøknadMessage(message, problems)
     }
 }

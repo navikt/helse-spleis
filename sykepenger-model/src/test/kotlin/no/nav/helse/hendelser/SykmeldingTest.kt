@@ -52,8 +52,7 @@ internal class SykmeldingTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
-            sykeperioder = listOf(*sykeperioder),
-            aktivitetslogg = aktivitetslogg
+            sykeperioder = listOf(*sykeperioder)
         )
     }
 

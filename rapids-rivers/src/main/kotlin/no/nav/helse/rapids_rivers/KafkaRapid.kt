@@ -1,9 +1,11 @@
 package no.nav.helse.rapids_rivers
 
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.WakeupException
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -17,7 +19,7 @@ class KafkaRapid(
     producerConfig: Properties,
     private val rapidTopic: String,
     extraTopics: List<String> = emptyList()
-) : RapidsConnection() {
+) : RapidsConnection(), ConsumerRebalanceListener {
 
     private val log = LoggerFactory.getLogger(KafkaRapid::class.java)
 
@@ -52,6 +54,14 @@ class KafkaRapid(
         consumer.wakeup()
     }
 
+    override fun onPartitionsAssigned(partitions: Collection<TopicPartition>) {
+        log.info("partitions assigned: $partitions")
+    }
+
+    override fun onPartitionsRevoked(partitions: Collection<TopicPartition>) {
+        log.info("partitions revoked: $partitions")
+    }
+
     private fun onRecord(record: ConsumerRecord<String, String>) {
         val context = KafkaMessageContext(record, this)
         listeners.forEach { it.onMessage(record.value(), context) }
@@ -59,7 +69,7 @@ class KafkaRapid(
 
     private fun consumeMessages() {
         try {
-            consumer.subscribe(topics)
+            consumer.subscribe(topics, this)
             while (running.get()) {
                 consumer.poll(Duration.ofSeconds(1))
                     .forEach(::onRecord)

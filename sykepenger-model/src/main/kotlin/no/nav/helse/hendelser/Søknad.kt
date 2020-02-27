@@ -15,9 +15,8 @@ class Søknad constructor(
     private val aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Periode>,
-    private val harAndreInntektskilder: Boolean,
-    aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
+    private val harAndreInntektskilder: Boolean
+) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val fom: LocalDate
     private val tom: LocalDate

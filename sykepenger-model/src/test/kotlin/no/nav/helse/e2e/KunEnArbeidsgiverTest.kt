@@ -6,6 +6,7 @@ import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.TilstandType.*
@@ -42,7 +43,7 @@ internal class KunEnArbeidsgiverTest {
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var hendelselogg: Aktivitetslogg
+    private lateinit var hendelselogg: ArbeidstakerHendelse
     private var forventetEndringTeller = 0
 
     @BeforeEach
@@ -261,6 +262,54 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `To tilstøtende perioder der den første er utbetalt`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK ,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALT
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
+    internal fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FEIL)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK ,
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
     internal fun `tilstøtende periode arver første fraværsdag`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
@@ -412,31 +461,47 @@ internal class KunEnArbeidsgiverTest {
         assertEndringTeller()
     }
 
+    private fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Status) {
+        person.håndter(utbetaling(vedtaksperiodeIndex, status))
+        assertEndringTeller()
+    }
+
+    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
+        Utbetaling(
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER,
+            utbetalingsreferanse = "ref",
+            status = status,
+            melding = "hei"
+        )
+
+
+
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
-        hendelselogg = Aktivitetslogg()
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sykeperioder = listOf(*sykeperioder),
-            aktivitetslogg = hendelselogg
+            sykeperioder = listOf(*sykeperioder)
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }
 
     private fun søknad(vararg perioder: Søknad.Periode): Søknad {
-        hendelselogg = Aktivitetslogg()
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
-            aktivitetslogg = hendelselogg,
             harAndreInntektskilder = false
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }
@@ -450,7 +515,6 @@ internal class KunEnArbeidsgiverTest {
         refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
         endringerIRefusjon: List<LocalDate> = emptyList()
     ): Inntektsmelding {
-        hendelselogg = Aktivitetslogg()
         return Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
@@ -460,15 +524,14 @@ internal class KunEnArbeidsgiverTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
-            aktivitetslogg = hendelselogg
+            ferieperioder = ferieperioder
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }
 
     private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
-        hendelselogg = Aktivitetslogg()
         return Vilkårsgrunnlag(
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             aktørId = AKTØRID,
@@ -481,9 +544,9 @@ internal class KunEnArbeidsgiverTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogg = hendelselogg,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }
@@ -494,7 +557,7 @@ internal class KunEnArbeidsgiverTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
     ): Ytelser {
-        hendelselogg = Aktivitetslogg()
+        val aktivitetslogg = Aktivitetslogg()
         return Ytelser(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
@@ -511,15 +574,16 @@ internal class KunEnArbeidsgiverTest {
                     )
                 },
                 inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
-                aktivitetslogg = hendelselogg
+                aktivitetslogg = aktivitetslogg
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepenger,
                 svangerskapspenger,
-                Aktivitetslogg()
+                aktivitetslogg
             ),
-            aktivitetslogg = hendelselogg
+            aktivitetslogg = aktivitetslogg
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }
@@ -528,16 +592,15 @@ internal class KunEnArbeidsgiverTest {
         vedtaksperiodeIndex: Int,
         utbetalingGodkjent: Boolean
     ): ManuellSaksbehandling {
-        hendelselogg = Aktivitetslogg()
         return ManuellSaksbehandling(
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             saksbehandler = "Ola Nordmann",
-            utbetalingGodkjent = utbetalingGodkjent,
-            aktivitetslogg = hendelselogg
+            utbetalingGodkjent = utbetalingGodkjent
         ).apply {
+            hendelselogg = this
             addObserver(observatør)
         }
     }

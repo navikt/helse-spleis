@@ -343,7 +343,6 @@ internal class PersonTest {
             aktørId = aktørId,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
         )
@@ -356,8 +355,7 @@ internal class PersonTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = perioder,
-        aktivitetslogg = Aktivitetslogg()
+        sykeperioder = perioder
     )
 
     private fun søknad(perioder: List<Søknad.Periode> = listOf(Søknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
@@ -367,7 +365,6 @@ internal class PersonTest {
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -381,8 +378,7 @@ internal class PersonTest {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogg = Aktivitetslogg()
+        nestePåminnelsestidspunkt = LocalDateTime.now()
     )
 
     private class TestPersonObserver : PersonObserver, HendelseObserver {

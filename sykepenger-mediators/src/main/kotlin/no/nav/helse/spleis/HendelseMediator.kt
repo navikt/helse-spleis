@@ -1,39 +1,34 @@
 package no.nav.helse.spleis
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.*
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.hendelser.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
-    rapid: KafkaRapid,
+    private val rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
     private val lagrePersonDao: PersonObserver,
     private val lagreUtbetalingDao: PersonObserver,
     private val vedtaksperiodeProbe: VedtaksperiodeProbe = VedtaksperiodeProbe,
-    private val producer: KafkaProducer<String, String>,
     private val hendelseProbe: HendelseProbe,
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
-    private val parser = Parser(this)
+    private val parser = Parser(this, rapidsConnection)
 
-    private val personObserver = PersonMediator(producer, sikkerLogg)
+    private val personObserver = PersonMediator(rapidsConnection)
 
     init {
-        rapid.addListener(parser)
-
         parser.register(NySøknadMessage.Factory)
         parser.register(SendtSøknadMessage.Factory)
         parser.register(InntektsmeldingMessage.Factory)
@@ -44,17 +39,11 @@ internal class HendelseMediator(
         parser.register(PåminnelseMessage.Factory)
     }
 
-    override fun onRecognizedMessage(
-        message: JsonMessage,
-        aktivitetslogger: Aktivitetslogger,
-        aktivitetslogg: Aktivitetslogg
-    ) {
-        val messageProcessor = Processor(
-            BehovMediator(
-                producer,
-                sikkerLogg
-            )
-        )
+    override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
+        sikkerLogg.debug("gjenkjente melding {} som {}", message.id, message::class.simpleName)
+        val aktivitetslogger = Aktivitetslogger()
+        val aktivitetslogg = Aktivitetslogg()
+        val messageProcessor = Processor(BehovMediator(rapidsConnection, sikkerLogg))
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
@@ -75,19 +64,12 @@ internal class HendelseMediator(
         }
     }
 
-    override fun onMessageError(aktivitetException: Aktivitetslogger.AktivitetException) {
-        sikkerLogg.error("feil på melding: ${aktivitetException.message}", aktivitetException)
-        AktivitetsloggerProbe.inspiser(aktivitetException)
+    override fun onMessageException(exception: MessageProblems.MessageException) {
+        sikkerLogg.error("feil på melding: {}", exception)
     }
 
-    override fun onMessageError(aktivitetException: Aktivitetslogg.AktivitetException) {
-        sikkerLogg.error("feil på melding: ${aktivitetException.message}", aktivitetException)
-        // TODO: pull message counts from Aktivitetslogg for statistics
-//        AktivitetsloggerProbe.inspiser(aktivitetException)
-    }
-
-    override fun onUnrecognizedMessage(aktivitetslogger: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) {
-        sikkerLogg.debug("ukjent melding: ${aktivitetslogger.toReport()}")
+    override fun onUnrecognizedMessage(problems: List<Pair<String, MessageProblems>>) {
+        sikkerLogg.debug("ukjent melding:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
@@ -162,35 +144,24 @@ internal class HendelseMediator(
         }
     }
 
-    private class PersonMediator(
-        private val producer: KafkaProducer<String, String>,
-        private val sikkerLogg: Logger
-    ) : PersonObserver {
-        private val log = LoggerFactory.getLogger(this::class.java)
+    private class PersonMediator(private val rapidsConnection: RapidsConnection) : PersonObserver {
 
         override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
         override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-            producer.send(påminnelse.producerRecord()).get()
+            rapidsConnection.publish(påminnelse.fødselsnummer(), påminnelse.toJson())
         }
 
         override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-            producer.send(event.producerRecord()).get()
+            rapidsConnection.publish(event.fødselsnummer, event.toJson())
         }
 
         override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-            producer.send(event.producerRecord()).get().also {
-                log.info(
-                    "legger utbetalt vedtak: {} på topic med {} og {}",
-                    keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
-                    keyValue("partisjon", it.partition()),
-                    keyValue("offset", it.offset())
-                )
-            }
+            rapidsConnection.publish(event.fødselsnummer, event.toJson())
         }
 
         override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-            producer.send(vedtaksperiodeEvent.producerRecord())
+            rapidsConnection.publish(vedtaksperiodeEvent.fødselsnummer, vedtaksperiodeEvent.toJson())
         }
     }
 

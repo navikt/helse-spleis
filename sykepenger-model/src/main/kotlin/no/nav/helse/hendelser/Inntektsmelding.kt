@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Arbeidsgiverperiode
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogg
@@ -12,7 +11,6 @@ import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
 import no.nav.helse.tournament.KonfliktskyDagturnering
-import java.lang.Double.min
 import java.time.LocalDate
 import java.util.*
 
@@ -25,9 +23,8 @@ class Inntektsmelding(
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
-    ferieperioder: List<Periode>,
-    aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
+    ferieperioder: List<Periode>
+) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
@@ -36,11 +33,6 @@ class Inntektsmelding(
         this.arbeidsgiverperioder =
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
-    }
-
-    internal fun dagsats(dato: LocalDate, grunnbeløp: Grunnbeløp): Int {
-        val årssats = min(beregnetInntekt * 12, grunnbeløp.beløp(dato))
-        return (årssats / 260).toInt()
     }
 
     override fun sykdomstidslinje() = (ferieperioder + arbeidsgiverperioder)

@@ -4,7 +4,7 @@ import no.nav.helse.behov.BehovType
 import no.nav.helse.hendelser.HendelseObserver
 
 abstract class ArbeidstakerHendelse protected constructor(
-    internal val aktivitetslogg: Aktivitetslogg
+    internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
     init {

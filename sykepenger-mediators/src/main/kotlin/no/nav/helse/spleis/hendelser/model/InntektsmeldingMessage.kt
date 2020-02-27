@@ -1,21 +1,23 @@
 package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
-import no.nav.helse.spleis.hendelser.*
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.spleis.hendelser.MessageFactory
+import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
 import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
     originalMessage: String,
-    private val aktivitetslogger: Aktivitetslogger,
-    private val aktivitetslogg: Aktivitetslogg
+    problems: MessageProblems
 ) :
-    JsonMessage(originalMessage, aktivitetslogger, aktivitetslogg) {
+    HendelseMessage(originalMessage, problems) {
     init {
-        requiredKey(
+        requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
@@ -58,7 +60,6 @@ internal class InntektsmeldingMessage(
         aktørId = aktørId,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
-        aktivitetslogg = aktivitetslogg,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder
     )
@@ -68,9 +69,7 @@ internal class InntektsmeldingMessage(
         førsteFraværsdag = førsteFraværsdag
     )
 
-    object Factory : MessageFactory {
-
-        override fun createMessage(message: String, problems: Aktivitetslogger, aktivitetslogg: Aktivitetslogg) =
-            InntektsmeldingMessage(message, problems, aktivitetslogg)
+    object Factory : MessageFactory<InntektsmeldingMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = InntektsmeldingMessage(message, problems)
     }
 }

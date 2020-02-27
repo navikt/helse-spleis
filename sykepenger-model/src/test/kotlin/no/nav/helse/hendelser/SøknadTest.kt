@@ -123,7 +123,6 @@ internal class SøknadTest {
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),
-            aktivitetslogg = aktivitetslogg,
             harAndreInntektskilder = harAndreInntektskilder
         )
     }

@@ -96,8 +96,7 @@ internal class UtbetalingsreferanseTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent,
-        aktivitetslogg = Aktivitetslogg()
+        utbetalingGodkjent = godkjent
     )
 
     private fun ytelser(
@@ -105,34 +104,34 @@ internal class UtbetalingsreferanseTest {
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
-    ) = Ytelser(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        utbetalingshistorikk = Utbetalingshistorikk(
-            ukjentePerioder = emptyList(),
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepengeYtelse,
-            svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        aktivitetslogg = Aktivitetslogg()
-    )
-
+    ) = Aktivitetslogg().let {
+        Ytelser(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            utbetalingshistorikk = Utbetalingshistorikk(
+                ukjentePerioder = emptyList(),
+                utbetalinger = utbetalinger,
+                inntektshistorikk = emptyList(),
+                aktivitetslogg = it
+            ),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = foreldrepengeYtelse,
+                svangerskapsytelse = svangerskapYtelse,
+                aktivitetslogg = it
+            ),
+            aktivitetslogg = it
+        )
+    }
     private fun sykmelding(fom: LocalDate, tom: LocalDate) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            sykeperioder = listOf(Triple(fom, tom, 100)),
-            aktivitetslogg = Aktivitetslogg()
+            sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
     private fun søknad(fom: LocalDate, tom: LocalDate) =
@@ -142,7 +141,6 @@ internal class UtbetalingsreferanseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -156,8 +154,7 @@ internal class UtbetalingsreferanseTest {
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16))),
-            ferieperioder = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
+            ferieperioder = emptyList()
         )
 
     private fun vilkårsgrunnlag(vedtaksperiodeId: UUID) =
@@ -172,7 +169,6 @@ internal class UtbetalingsreferanseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
                 listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(

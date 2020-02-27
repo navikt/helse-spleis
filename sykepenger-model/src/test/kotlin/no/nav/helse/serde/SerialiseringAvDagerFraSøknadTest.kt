@@ -87,8 +87,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Triple(1.januar, 2.januar, 100)),
-        aktivitetslogg = aktivitetslogg
+        sykeperioder = listOf(Triple(1.januar, 2.januar, 100))
     )
 
     private val søknad get() = Søknad(
@@ -104,7 +103,6 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Søknad.Periode.Permisjon(5.januar, 5.januar),
             Søknad.Periode.Utdanning(5.januar, 5.januar)
         ),
-        aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false
     )
 }

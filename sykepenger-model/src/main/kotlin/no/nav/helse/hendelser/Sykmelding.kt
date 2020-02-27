@@ -14,9 +14,8 @@ class Sykmelding(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    sykeperioder: List<Triple<LocalDate, LocalDate, Int>>,
-    aktivitetslogg: Aktivitetslogg
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg) {
+    sykeperioder: List<Triple<LocalDate, LocalDate, Int>>
+) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykeperioder: List<Sykeperiode>
 

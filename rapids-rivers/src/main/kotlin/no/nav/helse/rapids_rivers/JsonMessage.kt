@@ -14,7 +14,7 @@ import java.time.YearMonth
 
 // Understands a specific JSON-formatted message
 open class JsonMessage(
-    private val originalMessage: String,
+    originalMessage: String,
     private val problems: MessageProblems
 ) {
     private companion object {

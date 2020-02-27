@@ -88,8 +88,7 @@ internal class GodkjenningHendelseTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent,
-        aktivitetslogg = Aktivitetslogg()
+        utbetalingGodkjent = godkjent
     ).apply {
         addObserver(personObserver)
     }
@@ -99,36 +98,36 @@ internal class GodkjenningHendelseTest {
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
-    ) = Ytelser(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        utbetalingshistorikk = Utbetalingshistorikk(
-            ukjentePerioder = emptyList(),
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepengeYtelse,
-            svangerskapsytelse = svangerskapYtelse,
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        aktivitetslogg = Aktivitetslogg()
-    ).apply {
-        addObserver(personObserver)
+    ) = Aktivitetslogg().let {
+        Ytelser(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            utbetalingshistorikk = Utbetalingshistorikk(
+                ukjentePerioder = emptyList(),
+                utbetalinger = utbetalinger,
+                inntektshistorikk = emptyList(),
+                aktivitetslogg = it
+            ),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = foreldrepengeYtelse,
+                svangerskapsytelse = svangerskapYtelse,
+                aktivitetslogg = it
+            ),
+            aktivitetslogg = it
+        ).apply {
+            addObserver(personObserver)
+        }
     }
-
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogg = Aktivitetslogg()
+            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
         ).apply {
             addObserver(personObserver)
         }
@@ -140,7 +139,6 @@ internal class GodkjenningHendelseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         ).apply {
             addObserver(personObserver)
@@ -156,8 +154,7 @@ internal class GodkjenningHendelseTest {
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            ferieperioder = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
+            ferieperioder = emptyList()
         ).apply {
             addObserver(personObserver)
         }
@@ -174,7 +171,6 @@ internal class GodkjenningHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
             addObserver(personObserver)

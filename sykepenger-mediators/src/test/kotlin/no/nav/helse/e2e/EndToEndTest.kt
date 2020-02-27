@@ -14,6 +14,8 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.*
 import no.nav.helse.TestConstants.inntektsmeldingDTO
@@ -23,7 +25,6 @@ import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -46,11 +47,9 @@ import org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.sql.Connection
 import java.time.Duration.ofMillis
 import java.time.LocalDate
@@ -59,134 +58,139 @@ import java.time.YearMonth
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
+@TestInstance(Lifecycle.PER_CLASS)
 internal class EndToEndTest {
 
-    private companion object {
+    private val timeoutSecondsPerStep = 5L
 
-        private val timeoutSecondsPerStep = 5L
+    private val objectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    private val username = "srvkafkaclient"
+    private val password = "kafkaclient"
+    private val kafkaApplicationId = "spleis-v1"
 
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
-        private const val kafkaApplicationId = "spleis-v1"
+    private val topics = listOf(rapidTopic, søknadTopic)
+    // Use one partition per topic to make message sending more predictable
+    private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
 
-        private val topics = listOf(rapidTopic, søknadTopic)
-        // Use one partition per topic to make message sending more predictable
-        private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
+    private val embeddedKafkaEnvironment = KafkaEnvironment(
+        autoStart = false,
+        noOfBrokers = 1,
+        topicInfos = topicInfos,
+        withSchemaRegistry = false,
+        withSecurity = false
+    )
 
-        private val embeddedKafkaEnvironment = KafkaEnvironment(
-            autoStart = false,
-            noOfBrokers = 1,
-            topicInfos = topicInfos,
-            withSchemaRegistry = false,
-            withSecurity = false
+    private lateinit var testConsumer: TestConsumer
+    private lateinit var adminClient: AdminClient
+    private lateinit var kafkaProducer: KafkaProducer<String, String>
+
+    private lateinit var embeddedPostgres: EmbeddedPostgres
+    private lateinit var postgresConnection: Connection
+
+    private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
+    private lateinit var jwtStub: JwtStub
+
+    private lateinit var app: ApplicationBuilder
+    private lateinit var appBaseUrl: String
+
+    private fun applicationConfig(wiremockBaseUrl: String, port: Int): Map<String, String> {
+        return mapOf(
+            "KAFKA_APP_ID" to kafkaApplicationId,
+            "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
+            "KAFKA_USERNAME" to username,
+            "KAFKA_PASSWORD" to password,
+            "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
+            "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres"),
+            "AZURE_CONFIG_URL" to "$wiremockBaseUrl/config",
+            "AZURE_CLIENT_ID" to "spleis_azure_ad_app_id",
+            "AZURE_CLIENT_SECRET" to "el_secreto",
+            "AZURE_REQUIRED_GROUP" to "sykepenger-saksbehandler-gruppe",
+            "HTTP_PORT" to "$port"
+        )
+    }
+
+    private fun producerProperties() =
+        Properties().apply {
+            put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
+            put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
+            // Make sure our producer waits until the message is received by Kafka before returning. This is to make sure the tests can send messages in a specific order
+            put(ACKS_CONFIG, "all")
+            put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+            put(LINGER_MS_CONFIG, "0")
+            put(RETRIES_CONFIG, "0")
+            put(SASL_MECHANISM, "PLAIN")
+        }
+
+    private fun consumerProperties(): MutableMap<String, Any>? {
+        return HashMap<String, Any>().apply {
+            put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
+            put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
+            put(SASL_MECHANISM, "PLAIN")
+            put(GROUP_ID_CONFIG, "end-to-end-test")
+            put(AUTO_OFFSET_RESET_CONFIG, "earliest")
+        }
+    }
+
+    @BeforeAll
+    internal fun `start embedded environment`() {
+        embeddedPostgres = EmbeddedPostgres.builder().start()
+        postgresConnection = embeddedPostgres.postgresDatabase.connection
+
+        embeddedKafkaEnvironment.start()
+        adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
+        kafkaProducer = KafkaProducer(
+            producerProperties(), StringSerializer(), StringSerializer()
         )
 
-        private lateinit var adminClient: AdminClient
-        private lateinit var kafkaProducer: KafkaProducer<String, String>
+        testConsumer = TestConsumer()
 
-        private lateinit var embeddedPostgres: EmbeddedPostgres
-        private lateinit var postgresConnection: Connection
-
-        private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
-        private lateinit var jwtStub: JwtStub
-
-        private lateinit var app: ApplicationBuilder
-        private lateinit var appBaseUrl: String
-
-        private fun applicationConfig(wiremockBaseUrl: String, port: Int): Map<String, String> {
-            return mapOf(
-                "KAFKA_APP_ID" to kafkaApplicationId,
-                "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
-                "KAFKA_USERNAME" to username,
-                "KAFKA_PASSWORD" to password,
-                "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
-                "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres"),
-                "AZURE_CONFIG_URL" to "$wiremockBaseUrl/config",
-                "AZURE_CLIENT_ID" to "spleis_azure_ad_app_id",
-                "AZURE_CLIENT_SECRET" to "el_secreto",
-                "AZURE_REQUIRED_GROUP" to "sykepenger-saksbehandler-gruppe",
-                "HTTP_PORT" to "$port"
+        //Stub ID provider (for authentication of REST endpoints)
+        wireMockServer.start()
+        jwtStub =
+            JwtStub(
+                "Microsoft Azure AD",
+                wireMockServer
             )
-        }
+        stubFor(jwtStub.stubbedJwkProvider())
+        stubFor(jwtStub.stubbedConfigProvider())
 
-        private fun producerProperties() =
-            Properties().apply {
-                put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
-                put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
-                // Make sure our producer waits until the message is received by Kafka before returning. This is to make sure the tests can send messages in a specific order
-                put(ACKS_CONFIG, "all")
-                put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
-                put(LINGER_MS_CONFIG, "0")
-                put(RETRIES_CONFIG, "0")
-                put(SASL_MECHANISM, "PLAIN")
-            }
-
-        private fun consumerProperties(): MutableMap<String, Any>? {
-            return HashMap<String, Any>().apply {
-                put(BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaEnvironment.brokersURL)
-                put(SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
-                put(SASL_MECHANISM, "PLAIN")
-                put(GROUP_ID_CONFIG, "end-to-end-test")
-                put(AUTO_OFFSET_RESET_CONFIG, "earliest")
-            }
-        }
-
-        @BeforeAll
-        @JvmStatic
-        internal fun `start embedded environment`() {
-            embeddedPostgres = EmbeddedPostgres.builder().start()
-            postgresConnection = embeddedPostgres.postgresDatabase.connection
-
-            embeddedKafkaEnvironment.start()
-            adminClient = embeddedKafkaEnvironment.adminClient ?: fail("Klarte ikke få tak i adminclient")
-            kafkaProducer = KafkaProducer(
-                producerProperties(), StringSerializer(), StringSerializer()
+        val port = randomPort()
+        appBaseUrl = "http://localhost:$port"
+        app = ApplicationBuilder(
+            applicationConfig(
+                wireMockServer.baseUrl(),
+                port
             )
+        )
 
-            //Stub ID provider (for authentication of REST endpoints)
-            wireMockServer.start()
-            jwtStub =
-                JwtStub(
-                    "Microsoft Azure AD",
-                    wireMockServer
-                )
-            stubFor(jwtStub.stubbedJwkProvider())
-            stubFor(jwtStub.stubbedConfigProvider())
-
-            val port = randomPort()
-            appBaseUrl = "http://localhost:$port"
-            app = ApplicationBuilder(
-                applicationConfig(
-                    wireMockServer.baseUrl(),
-                    port
-                )
-            ).apply {
-                start()
-            }
+        GlobalScope.launch {
+            app.start()
         }
 
-        @AfterAll
-        @JvmStatic
-        internal fun `stop embedded environment`() {
-            app.stop()
-            wireMockServer.stop()
-            TestConsumer.close()
-            adminClient.close()
-            embeddedKafkaEnvironment.tearDown()
 
-            postgresConnection.close()
-            embeddedPostgres.close()
-        }
+        // send one initial message per topic and wait for the application to commit the offsets (i.e. the app is ready)
+        topics.map { sendKafkaMessage(it, "key", "{}").get() }
+            .forEach { it.assertMessageIsConsumed(10L) }
+    }
 
+    @AfterAll
+    internal fun `stop embedded environment`() {
+        app.stop()
+        wireMockServer.stop()
+        testConsumer.close()
+        adminClient.close()
+        embeddedKafkaEnvironment.tearDown()
+
+        postgresConnection.close()
+        embeddedPostgres.close()
     }
 
     @BeforeEach
     fun `create test consumer`() {
-        TestConsumer.reset()
+        testConsumer.reset()
     }
 
     @Test
@@ -273,7 +277,7 @@ internal class EndToEndTest {
         val fødselsnummer = "01018000000"
         val virksomhetsnummer = "123456789"
 
-        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
         sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
         sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
 
@@ -358,7 +362,7 @@ internal class EndToEndTest {
             .atMost(30L, SECONDS)
             .untilAsserted {
                 assertNotNull(
-                    TestConsumer.records(rapidTopic)
+                    testConsumer.records(rapidTopic)
                         .map { objectMapper.readTree(it.value()) }
                         .filter { it["@event_name"]?.asText() == "vedtaksperiode_ikke_funnet" }
                         .filter { enAktørId == it["aktørId"].textValue() }
@@ -394,8 +398,7 @@ internal class EndToEndTest {
             tilstand = TilstandType.START,
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
-            nestePåminnelsestidspunkt = LocalDateTime.now(),
-            aktivitetslogg = Aktivitetslogg()
+            nestePåminnelsestidspunkt = LocalDateTime.now()
         )
     }
 
@@ -560,7 +563,7 @@ internal class EndToEndTest {
         await()
             .atMost(timeoutSecondsPerStep, SECONDS)
             .until {
-                behov = TestConsumer.records(rapidTopic)
+                behov = testConsumer.records(rapidTopic)
                     .map { objectMapper.readValue<ObjectNode>(it.value()) }
                     .filter { it.hasNonNull("@behov") }
                     .filter { it["@behov"].map(JsonNode::asText).contains(behovType.name) }
@@ -582,7 +585,7 @@ internal class EndToEndTest {
         await()
             .atMost(timeoutSecondsPerStep, SECONDS)
             .untilAsserted {
-                val meldingerPåTopic = TestConsumer.records(rapidTopic)
+                val meldingerPåTopic = testConsumer.records(rapidTopic)
                 val vedtaksperiodeEndretHendelser = meldingerPåTopic
                     .map { objectMapper.readTree(it.value()) }
                     .filter { it["@event_name"]?.asText() == "vedtaksperiode_endret" }
@@ -608,7 +611,7 @@ internal class EndToEndTest {
     private fun synchronousSendKafkaMessage(topic: String, key: String, message: String) {
         val metadata = sendKafkaMessage(topic, key, message)
         kafkaProducer.flush()
-        metadata.get().assertMessageIsConsumed()
+        metadata.get().assertMessageIsConsumed(timeoutSecondsPerStep)
     }
 
     private fun JsonNode.løsBehov(løsning: Any) = also {
@@ -622,23 +625,23 @@ internal class EndToEndTest {
      * Check that the consumers has received this message, by comparing the position of the message with the reported
      * last read message of the consumer group
      */
-    private fun RecordMetadata.assertMessageIsConsumed(recordMetadata: RecordMetadata = this) {
+    private fun RecordMetadata.assertMessageIsConsumed(timeoutSeconds: Long) {
         await()
-            .atMost(timeoutSecondsPerStep, SECONDS)
-            .untilAsserted {
+            .atMost(timeoutSeconds, SECONDS)
+            .until {
                 val offsetAndMetadataMap =
                     adminClient.listConsumerGroupOffsets(
                         kafkaApplicationId
                     ).partitionsToOffsetAndMetadata().get()
-                val topicPartition = TopicPartition(recordMetadata.topic(), recordMetadata.partition())
-                val currentPositionOfSentMessage = recordMetadata.offset()
-                val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset()?.minus(1)
-                    ?: fail() // This offset represents next position to read from, so we subtract 1 to get the last read offset
-                assertTrue(currentConsumerGroupPosition >= currentPositionOfSentMessage)
+                val topicPartition = TopicPartition(this.topic(), this.partition())
+                val currentPositionOfSentMessage = this.offset()
+                val currentConsumerGroupPosition = offsetAndMetadataMap[topicPartition]?.offset() ?: -1
+
+                currentConsumerGroupPosition > currentPositionOfSentMessage
             }
     }
 
-    private object TestConsumer {
+    private inner class TestConsumer {
         private val records = mutableListOf<ConsumerRecord<String, String>>()
 
         private val kafkaConsumer =

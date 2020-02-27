@@ -6,20 +6,21 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.Meldingstype
-import no.nav.helse.spleis.hendelser.JsonMessage
+import no.nav.helse.spleis.hendelser.model.HendelseMessage
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.util.*
 import javax.sql.DataSource
 
-class HendelsePersisteringPostgresTest {
+internal class HendelsePersisteringPostgresTest {
 
     companion object {
         private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -63,7 +64,7 @@ class HendelsePersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
         val dao = HendelseRecorder(dataSource)
 
-        JsonMessage("{}", Aktivitetslogger(), Aktivitetslogg()).also {
+        TestMessage().also {
             dao.lagreMelding(Meldingstype.UKJENT, it.id, it.toJson())
             assertEquals(1, meldinger(dataSource).size)
         }
@@ -73,9 +74,13 @@ class HendelsePersisteringPostgresTest {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf("SELECT data FROM melding ORDER BY id").map {
-                    JsonMessage(it.string("data"), Aktivitetslogger(), Aktivitetslogg())
+                    JsonMessage(it.string("data"), MessageProblems(it.string("data")))
                 }.asList
             )
         }
+    }
+
+    class TestMessage : HendelseMessage("{}", MessageProblems("{}")) {
+        override val id = UUID.randomUUID()
     }
 }

@@ -163,8 +163,7 @@ internal class VilkårsgrunnlagTest {
         orgnummer = "orgnummer",
         inntektsmåneder = inntektsmåneder,
         arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
-        erEgenAnsatt = false,
-        aktivitetslogg = aktivitetslogg
+        erEgenAnsatt = false
     )
 
     private fun vedtaksperiode() =
@@ -186,8 +185,7 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Triple(16.januar, 30.januar, 100)),
-        aktivitetslogg = aktivitetslogg
+        sykeperioder = listOf(Triple(16.januar, 30.januar, 100))
     )
 
     private fun søknad() = Søknad(
@@ -196,7 +194,6 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Periode.Sykdom(16.januar, 30.januar, 100)),
-        aktivitetslogg = aktivitetslogg,
         harAndreInntektskilder = false
     )
 
@@ -209,7 +206,6 @@ internal class VilkårsgrunnlagTest {
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
-            aktivitetslogg = aktivitetslogg,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf()
         )

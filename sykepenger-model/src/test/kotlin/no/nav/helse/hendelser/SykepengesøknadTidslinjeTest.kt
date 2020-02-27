@@ -4,7 +4,6 @@ import no.nav.helse.Uke
 import no.nav.helse.get
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -102,7 +101,6 @@ internal class SykepengesøknadTidslinjeTest {
             aktørId = "aktørId",
             orgnummer = "orgnr",
             perioder = perioder,
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 
@@ -111,8 +109,7 @@ internal class SykepengesøknadTidslinjeTest {
         fnr = "fnr",
         aktørId = "aktørId",
         orgnummer = "123456789",
-        sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100)),
-        aktivitetslogg = Aktivitetslogg()
+        sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100))
     )
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)

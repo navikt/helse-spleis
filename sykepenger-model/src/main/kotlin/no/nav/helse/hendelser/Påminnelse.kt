@@ -14,9 +14,8 @@ class Påminnelse(
     private val tilstand: TilstandType,
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
-    private val nestePåminnelsestidspunkt: LocalDateTime,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogg) {
+    private val nestePåminnelsestidspunkt: LocalDateTime
+) : ArbeidstakerHendelse(Aktivitetslogg()) {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

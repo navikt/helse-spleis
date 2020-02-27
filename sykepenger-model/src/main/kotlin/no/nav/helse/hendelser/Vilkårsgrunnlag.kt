@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDate
 import java.time.YearMonth
@@ -15,9 +14,8 @@ class Vilkårsgrunnlag(
     private val orgnummer: String,
     private val inntektsmåneder: List<Måned>,
     private val arbeidsforhold: MangeArbeidsforhold,
-    private val erEgenAnsatt: Boolean,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogg) {
+    private val erEgenAnsatt: Boolean
+) : ArbeidstakerHendelse() {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

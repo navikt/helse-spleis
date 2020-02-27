@@ -176,7 +176,6 @@ class PåminnelserOgTimeoutTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 20.januar, 100)),
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         ).apply {
             addObserver(personObserver)
@@ -188,8 +187,7 @@ class PåminnelserOgTimeoutTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(Triple(1.januar, 20.januar, 100)),
-            aktivitetslogg = Aktivitetslogg()
+            sykeperioder = listOf(Triple(1.januar, 20.januar, 100))
         ).apply {
             addObserver(personObserver)
         }
@@ -204,8 +202,7 @@ class PåminnelserOgTimeoutTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
-            ferieperioder = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
+            ferieperioder = emptyList()
         ).apply {
             addObserver(personObserver)
         }
@@ -222,7 +219,6 @@ class PåminnelserOgTimeoutTest {
                 )
             },
             erEgenAnsatt = false,
-            aktivitetslogg = Aktivitetslogg(),
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
             addObserver(personObserver)
@@ -262,8 +258,7 @@ class PåminnelserOgTimeoutTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = true,
-        aktivitetslogg = Aktivitetslogg()
+        utbetalingGodkjent = true
     ).apply {
         addObserver(personObserver)
     }
@@ -277,8 +272,7 @@ class PåminnelserOgTimeoutTest {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now(),
-        aktivitetslogg = Aktivitetslogg()
+        nestePåminnelsestidspunkt = LocalDateTime.now()
     ).apply {
         addObserver(personObserver)
     }

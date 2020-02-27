@@ -4,7 +4,6 @@ import no.nav.helse.person.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -19,11 +18,6 @@ internal class PåminnelseTest {
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     fun `info ved påminnelse for nåværende tilstand`() {
@@ -73,8 +67,7 @@ internal class PåminnelseTest {
             fødselsnummer,
             aktørId,
             orgnummer,
-            listOf(Triple(1.januar, 6.januar, 100)),
-            aktivitetslogg
+            listOf(Triple(1.januar, 6.januar, 100))
         )
     }
 
@@ -88,7 +81,6 @@ internal class PåminnelseTest {
             tilstand = tilstandType,
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
-            nestePåminnelsestidspunkt = LocalDateTime.now(),
-            aktivitetslogg = Aktivitetslogg()
-        )
+            nestePåminnelsestidspunkt = LocalDateTime.now()
+        ).also { aktivitetslogg = it.aktivitetslogg }
 }

@@ -121,8 +121,7 @@ internal class InntektsmeldingHendelseTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = emptyList(),
-            aktivitetslogg = Aktivitetslogg()
+            ferieperioder = emptyList()
         )
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(
@@ -130,8 +129,7 @@ internal class InntektsmeldingHendelseTest {
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
         orgnummer = orgnr,
-        sykeperioder = listOf(*sykeperioder),
-        aktivitetslogg = Aktivitetslogg()
+        sykeperioder = listOf(*sykeperioder)
     )
 
     private fun søknad(vararg perioder: Søknad.Periode, orgnummer: String = ORGNR) =
@@ -141,7 +139,6 @@ internal class InntektsmeldingHendelseTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            aktivitetslogg = Aktivitetslogg(),
             harAndreInntektskilder = false
         )
 

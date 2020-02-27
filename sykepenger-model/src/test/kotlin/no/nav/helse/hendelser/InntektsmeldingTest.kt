@@ -1,11 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -13,12 +11,6 @@ import java.util.*
 internal class InntektsmeldingTest {
 
     private lateinit var inntektsmelding: Inntektsmelding
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    internal fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     internal fun `sykdom med en antatt arbeidsdag`() {
@@ -46,7 +38,7 @@ internal class InntektsmeldingTest {
             ), emptyList()
         )
         inntektsmelding.valider()
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inntektsmelding.hasErrors())
     }
 
     @Test
@@ -56,7 +48,7 @@ internal class InntektsmeldingTest {
             ferieperioder = listOf(Periode(3.januar, 4.januar))
         )
         inntektsmelding.valider()
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inntektsmelding.hasErrors())
     }
 
     @Test
@@ -128,8 +120,7 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
-            aktivitetslogg = aktivitetslogg
+            ferieperioder = ferieperioder
         )
     }
 }

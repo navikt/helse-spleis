@@ -6,9 +6,8 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import java.util.*
 
 abstract class SykdomstidslinjeHendelse(
-    private val meldingsreferanseId: UUID,
-    aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogg) {
+    private val meldingsreferanseId: UUID
+) : ArbeidstakerHendelse() {
     internal fun meldingsreferanseId() = meldingsreferanseId
 
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje

@@ -28,7 +28,7 @@ internal class Vedtaksperiode private constructor(
     private var maksdato: LocalDate?,
     private var utbetalingslinjer: List<Utbetalingslinje>?,
     private var godkjentAv: String?,
-    private var utbetalingsreferanse: String?,
+    private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var inntektFraInntektsmelding: Double?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
@@ -55,7 +55,7 @@ internal class Vedtaksperiode private constructor(
         maksdato = null,
         utbetalingslinjer = null,
         godkjentAv = null,
-        utbetalingsreferanse = null,
+        utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
         inntektFraInntektsmelding = null,
         dataForVilkårsvurdering = null,
@@ -67,6 +67,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitMaksdato(maksdato)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
+        visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitInntektFraInntektsmelding(inntektFraInntektsmelding)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         sykdomshistorikk.accept(visitor)
@@ -80,7 +81,7 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    private fun periode() = Periode(
+    internal fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
@@ -230,7 +231,7 @@ internal class Vedtaksperiode private constructor(
         this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode) =
-        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD)
+        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD, UTBETALT, UTBETALING_FEILET)
 
     internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         if (this.periode().start > other.periode().start) tilstand.håndter(arbeidsgiver, this, hendelse)
@@ -643,10 +644,8 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        // TODO: Gjør private når TilUtbetaling ikke lenger trenger den
-        internal fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
-                ?: genererUtbetalingsreferanse(vedtaksperiode.id)
+        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse ?: genererUtbetalingsreferanse(vedtaksperiode.id)
     }
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
@@ -656,16 +655,9 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (vedtaksperiode.utbetalingsreferanse == null) {
-                // TODO: Kun for overgangsperiode nå som utbetalingsreferansegenerering er flyttet til AvventerGodkjenning
-                // Fjern dette når det ikke lenger finnes noen i AvventerGodkjenning-state uten utbetref
-               vedtaksperiode.utbetalingsreferanse = AvventerGodkjenning.lagUtbetalingsReferanse(vedtaksperiode)
-            }
-            val utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse)
-
             hendelse.need(BehovType.Utbetaling(
                 context = vedtaksperiode.kontekst,
-                utbetalingsreferanse = utbetalingsreferanse,
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer).joinForOppdrag(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 saksbehandler = requireNotNull(vedtaksperiode.godkjentAv)
@@ -675,7 +667,7 @@ internal class Vedtaksperiode private constructor(
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                utbetalingsreferanse = utbetalingsreferanse,
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
                 opprettet = LocalDate.now()
             )
@@ -719,7 +711,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = vedtaksperiode.id,
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
-                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse ?: hendelse.severe("Utbetalt vedtaksperiode uten betalingsreferanse"),
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
                 opprettet = LocalDate.now()
             )
@@ -734,7 +726,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.severe("Feilrespons fra oppdrag")
+            hendelse.error("Feilrespons fra oppdrag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

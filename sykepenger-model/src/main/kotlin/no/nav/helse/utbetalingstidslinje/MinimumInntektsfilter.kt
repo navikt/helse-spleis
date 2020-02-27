@@ -16,12 +16,11 @@ internal class MinimumInntektsfilter (
 
     internal fun filter() {
         tidslinjer.forEach { it.accept(this) }
-        inntekter = inntekter
-            .filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMutableMap()
+        val inntekterUnderMinimum = inntekter.filter { (dato, inntekt) -> inntekt < alder.minimumInntekt(dato) }.toMap()
 
-        tidslinjer.forEach { it.avvis(inntekter.keys.toList(), Begrunnelse.MinimumInntekt) }
+        tidslinjer.forEach { it.avvis(inntekterUnderMinimum.keys.toList(), Begrunnelse.MinimumInntekt) }
 
-        if (inntekter.keys.toList() in periode)
+        if (inntekterUnderMinimum.keys.toList() in periode)
             aktivitetslogg.warn("Avvist minst en dag som faller under minimum inntekt")
         else
             aktivitetslogg.info("Minimum inntekt har blitt sjekket uten problemer")

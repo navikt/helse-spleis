@@ -18,18 +18,16 @@ internal class SykmeldingTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
     internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -40,7 +38,7 @@ internal class SykmeldingTest {
     internal fun `En ny Sykmelding er ugyldig`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -50,7 +48,7 @@ internal class SykmeldingTest {
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
@@ -60,7 +58,7 @@ internal class SykmeldingTest {
     internal fun `To søknader uten overlapp`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
@@ -72,7 +70,7 @@ internal class SykmeldingTest {
     internal fun `To søknader med overlapp`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -83,7 +81,7 @@ internal class SykmeldingTest {
     internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
         person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
         person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
@@ -94,8 +92,7 @@ internal class SykmeldingTest {
             fnr = SykmeldingTest.UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder),
-            aktivitetslogg = aktivitetslogg
+            sykeperioder = listOf(*sykeperioder)
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
