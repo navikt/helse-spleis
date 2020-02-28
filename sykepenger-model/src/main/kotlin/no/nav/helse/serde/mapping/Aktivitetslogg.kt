@@ -25,7 +25,8 @@ internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData):
                 it.melding,
                 it.tidsstempel
             )
-            AktivitetsloggData.Alvorlighetsgrad.NEED -> aktivitetClass.getNestedClass("Need").getInstance(
+            AktivitetsloggData.Alvorlighetsgrad.BEHOV -> aktivitetClass.getNestedClass("Behov").getInstance(
+                Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.behovtype!!),
                 kontekster,
                 it.melding,
                 it.tidsstempel

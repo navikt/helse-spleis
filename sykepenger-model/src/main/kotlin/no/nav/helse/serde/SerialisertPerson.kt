@@ -44,7 +44,8 @@ class SerialisertPerson(val json: String) {
             V6LeggerTilGrad(),
             V7ForbrukteSykedager(),
             V8FjernAktivitetslogger(),
-            V9LeggerTilKontekstMap()
+            V9LeggerTilKontekstMap(),
+            V10FjernAktiviteter()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -267,7 +268,7 @@ internal data class PersonData(
         data class AktivitetData(
             val alvorlighetsgrad: Alvorlighetsgrad,
             val label: Char,
-            val needType: String?,
+            val behovtype: String?,
             val melding: String,
             val tidsstempel: String,
             val kontekster: List<SpesifikkKontekstData>
@@ -281,7 +282,7 @@ internal data class PersonData(
         enum class Alvorlighetsgrad {
             INFO,
             WARN,
-            NEED,
+            BEHOV,
             ERROR,
             SEVERE
         }
