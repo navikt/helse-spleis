@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogg
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,9 +63,7 @@ internal class ValidationTest {
         override fun feilmelding() = "feilmelding"
     }
 
-    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) :
-        ArbeidstakerHendelse(aktivitetslogg),
-        IAktivitetslogg by aktivitetslogg {
+    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(aktivitetslogg) {
 
         override fun aktørId(): String {
             fail("Uventet kall")

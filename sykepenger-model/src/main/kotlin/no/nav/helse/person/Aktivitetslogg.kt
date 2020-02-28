@@ -26,8 +26,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, vararg params: Any?) {
-        add(Aktivitet.Behov(type, kontekster.toSpesifikk(), String.format(melding, *params)))
+    override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any>) {
+        add(Aktivitet.Behov(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
     override fun error(melding: String, vararg params: Any?) {
@@ -49,9 +49,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun hasMessages() = info().isNotEmpty() || hasWarnings()
 
-    override fun hasWarnings() = warn().isNotEmpty() || hasNeeds()
+    override fun hasWarnings() = warn().isNotEmpty() || hasBehov()
 
-    override fun hasNeeds() = behov().isNotEmpty() || hasErrors()
+    override fun hasBehov() = behov().isNotEmpty() || hasErrors()
 
     override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
 
@@ -95,7 +95,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        fun kontekst(): Map<String, String> =
+        open fun kontekst(): Map<String, Any> =
             kontekster.fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
@@ -149,6 +149,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val type: Behovtype,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
+            private val detaljer: Map<String, Any> = emptyMap(),
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, 'N', melding, tidsstempel, kontekster) {
             companion object {
@@ -157,18 +158,20 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
             }
 
+            override fun kontekst() = super.kontekst().toMutableMap() + detaljer
+
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitBehov(kontekster, this, type, melding, tidsstempel)
             }
 
-                enum class Behovtype {
-                    Sykepengehistorikk,
-                    Foreldrepenger,
-                    EgenAnsatt,
-                    Godkjenning,
-                    Utbetaling,
-                    Inntektsberegning,
-                    Opptjening
+            enum class Behovtype {
+                Sykepengehistorikk,
+                Foreldrepenger,
+                EgenAnsatt,
+                Godkjenning,
+                Utbetaling,
+                Inntektsberegning,
+                Opptjening
             }
         }
 
@@ -208,13 +211,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
  interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
-    fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, vararg params: Any?)
+    fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any> = emptyMap())
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
     fun hasMessages(): Boolean
     fun hasWarnings(): Boolean
-    fun hasNeeds(): Boolean
+    fun hasBehov(): Boolean
     fun hasErrors(): Boolean
     fun aktivitetsteller(): Int
 
@@ -245,8 +248,8 @@ internal interface AktivitetsloggVisitor {
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Behov,
         type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
-        tidsstempel: String,
-        melding: String
+        melding: String,
+        tidsstempel: String
     ) {
     }
 

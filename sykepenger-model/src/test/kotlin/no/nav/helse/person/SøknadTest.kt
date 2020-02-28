@@ -69,7 +69,7 @@ internal class SøknadTest {
     internal fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Utdanning(4.januar, 5.januar)))
-        assertTrue(inspektør.personLogg.hasNeeds())
+        assertTrue(inspektør.personLogg.hasBehov())
         assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }

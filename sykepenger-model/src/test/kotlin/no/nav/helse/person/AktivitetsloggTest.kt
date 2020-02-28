@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class AktivitetsloggTest {
 
@@ -116,6 +117,24 @@ internal class AktivitetsloggTest {
         assertEquals(5, aktivitetslogg.aktivitetsteller())
         assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
         assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())
+    }
+
+    @Test
+    internal fun `Behov kan ha detaljer`() {
+        val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse1.kontekst(person)
+        val param1 = "value"
+        val param2 = LocalDate.now()
+        hendelse1.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
+            "param1" to param1,
+            "param2" to param2
+        ))
+
+        assertEquals(1, aktivitetslogg.behov().size)
+        assertEquals(3, aktivitetslogg.behov().first().kontekst().size)
+        assertEquals("Person", aktivitetslogg.behov().first().kontekst()["Person"])
+        assertEquals(param1, aktivitetslogg.behov().first().kontekst()["param1"])
+        assertEquals(param2, aktivitetslogg.behov().first().kontekst()["param2"])
     }
 
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {

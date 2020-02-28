@@ -24,7 +24,7 @@ internal class Validation(private val hendelse: ArbeidstakerHendelse) {
     }
 
     internal fun onSuccess(successBlock: SuccessBlock) {
-        if (!hendelse.hasNeeds()) successBlock()
+        if (!hendelse.hasBehov()) successBlock()
     }
 }
 
@@ -40,12 +40,12 @@ internal interface Valideringssteg {
 // Invoke internal validation of a Hendelse
 internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHendelse) : Valideringssteg {
     override fun isValid() =
-        !hendelse.valider().let { it.hasNeeds() }
+        !hendelse.valider().let { it.hasBehov() }
 }
 
 internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid() =
-        !ytelser.valider().let { it.hasNeeds() }
+        !ytelser.valider().let { it.hasBehov() }
 }
 
 // Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
