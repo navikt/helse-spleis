@@ -64,6 +64,7 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
         override fun visitBehov(
             kontekster: List<SpesifikkKontekst>,
             aktivitet: Behov,
+            type: Behov.Behovtype,
             melding: String,
             tidsstempel: String
         ) {

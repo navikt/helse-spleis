@@ -1,12 +1,13 @@
 package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
@@ -38,11 +39,11 @@ internal class YtelserMessage(
 ) :
     BehovMessage(originalMessage, problems) {
     init {
-        requireAll("@behov", Behovstype.Sykepengehistorikk, Behovstype.Foreldrepenger)
-        requireKey("@løsning.${Behovstype.Foreldrepenger.name}")
-        requireKey("@løsning.${Behovstype.Sykepengehistorikk.name}")
-        interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Foreldrepengeytelse")
-        interestedIn("@løsning.${Behovstype.Foreldrepenger.name}.Svangerskapsytelse")
+        requireAll("@behov", Sykepengehistorikk, Foreldrepenger)
+        requireKey("@løsning.${Foreldrepenger.name}")
+        requireKey("@løsning.${Sykepengehistorikk.name}")
+        interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
+        interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -119,7 +120,13 @@ internal class YtelserMessage(
             },
             graderingsliste = this["@løsning.Sykepengehistorikk"].flatMap {
                 it.path("graderingsliste")
-            }.map { Utbetalingshistorikk.Graderingsperiode(it["fom"].asLocalDate(), it["tom"].asLocalDate(), it["grad"].asDouble()) },
+            }.map {
+                Utbetalingshistorikk.Graderingsperiode(
+                    it["fom"].asLocalDate(),
+                    it["tom"].asLocalDate(),
+                    it["grad"].asDouble()
+                )
+            },
             aktivitetslogg = aktivitetslogg
         )
 
@@ -147,10 +154,10 @@ internal class VilkårsgrunnlagMessage(
 ) :
     BehovMessage(originalMessage, problems) {
     init {
-        requireAll("@behov", Behovstype.Inntektsberegning, Behovstype.EgenAnsatt, Behovstype.Opptjening)
-        requireKey("@løsning.${Behovstype.Inntektsberegning.name}")
-        requireKey("@løsning.${Behovstype.EgenAnsatt.name}")
-        requireKey("@løsning.${Behovstype.Opptjening.name}")
+        requireAll("@behov", Inntektsberegning, EgenAnsatt, Opptjening)
+        requireKey("@løsning.${Inntektsberegning.name}")
+        requireKey("@løsning.${EgenAnsatt.name}")
+        requireKey("@løsning.${Opptjening.name}")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -163,13 +170,13 @@ internal class VilkårsgrunnlagMessage(
             aktørId = this["aktørId"].asText(),
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
-            inntektsmåneder = this["@løsning.${Behovstype.Inntektsberegning.name}"].map {
+            inntektsmåneder = this["@løsning.${Inntektsberegning.name}"].map {
                 Vilkårsgrunnlag.Måned(
                     årMåned = it["årMåned"].asYearMonth(),
                     inntektsliste = it["inntektsliste"].map { it["beløp"].asDouble() }
                 )
             },
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(this["@løsning.${Behovstype.Opptjening.name}"]
+            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(this["@løsning.${Opptjening.name}"]
                 .map {
                     Vilkårsgrunnlag.Arbeidsforhold(
                         orgnummer = it["orgnummer"].asText(),
@@ -178,7 +185,7 @@ internal class VilkårsgrunnlagMessage(
                     )
                 }
             ),
-            erEgenAnsatt = this["@løsning.${Behovstype.EgenAnsatt.name}"].asBoolean()
+            erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean()
         )
     }
 
@@ -195,8 +202,8 @@ internal class ManuellSaksbehandlingMessage(
 ) :
     BehovMessage(originalMessage, problems) {
     init {
-        requireAll("@behov", Behovstype.Godkjenning)
-        requireKey("@løsning.${Behovstype.Godkjenning.name}.godkjent")
+        requireAll("@behov", Godkjenning)
+        requireKey("@løsning.${Godkjenning.name}.godkjent")
         requireKey("saksbehandlerIdent")
         interestedIn("godkjenttidspunkt")
     }
@@ -213,7 +220,7 @@ internal class ManuellSaksbehandlingMessage(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
             godkjenttidspunkt = this["godkjenttidspunkt"].asOptionalLocalDateTime(),
-            utbetalingGodkjent = this["@løsning.${Behovstype.Godkjenning.name}.godkjent"].asBoolean()
+            utbetalingGodkjent = this["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
         )
 
     object Factory : MessageFactory<ManuellSaksbehandlingMessage> {
@@ -228,10 +235,10 @@ internal class UtbetalingMessage(
 ) :
     BehovMessage(originalMessage, problems) {
     init {
-        requireAll("@behov", Behovstype.Utbetaling)
-        requireKey("@løsning.${Behovstype.Utbetaling.name}")
-        requireKey("@løsning.${Behovstype.Utbetaling.name}.status")
-        requireKey("@løsning.${Behovstype.Utbetaling.name}.melding")
+        requireAll("@behov", Behovtype.Utbetaling)
+        requireKey("@løsning.${Behovtype.Utbetaling.name}")
+        requireKey("@løsning.${Behovtype.Utbetaling.name}.status")
+        requireKey("@løsning.${Behovtype.Utbetaling.name}.melding")
         requireKey("utbetalingsreferanse")
     }
 
@@ -246,8 +253,8 @@ internal class UtbetalingMessage(
             fødselsnummer = this["fødselsnummer"].asText(),
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
-            status = enumValueOf(this["@løsning.${Behovstype.Utbetaling.name}.status"].asText()),
-            melding = this["@løsning.${Behovstype.Utbetaling.name}.melding"].asText()
+            status = enumValueOf(this["@løsning.${Behovtype.Utbetaling.name}.status"].asText()),
+            melding = this["@løsning.${Behovtype.Utbetaling.name}.melding"].asText()
         )
     }
 

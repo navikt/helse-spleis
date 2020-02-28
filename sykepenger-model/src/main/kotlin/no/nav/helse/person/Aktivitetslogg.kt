@@ -26,8 +26,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun behov(melding: String, vararg params: Any?) {
-        add(Aktivitet.Behov(kontekster.toSpesifikk(), String.format(melding, *params)))
+    override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, vararg params: Any?) {
+        add(Aktivitet.Behov(type, kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any?) {
@@ -146,6 +146,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
 
         class Behov(
+            private val type: Behovtype,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
@@ -154,13 +155,21 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Behov> {
                     return aktiviteter.filterIsInstance<Behov>()
                 }
-
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitBehov(kontekster, this, melding, tidsstempel)
+                visitor.visitBehov(kontekster, this, type, melding, tidsstempel)
             }
 
+                enum class Behovtype {
+                    Sykepengehistorikk,
+                    Foreldrepenger,
+                    EgenAnsatt,
+                    Godkjenning,
+                    Utbetaling,
+                    Inntektsberegning,
+                    Opptjening
+            }
         }
 
         internal class Error(
@@ -199,7 +208,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
  interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
-    fun behov(melding: String, vararg params: Any?)
+    fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, vararg params: Any?)
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
@@ -235,6 +244,7 @@ internal interface AktivitetsloggVisitor {
     fun visitBehov(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Behov,
+        type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
         tidsstempel: String,
         melding: String
     ) {

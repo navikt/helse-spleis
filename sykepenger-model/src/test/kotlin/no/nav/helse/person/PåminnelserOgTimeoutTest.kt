@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.Behovstype
 import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,8 +62,8 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
         assertEquals(2, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Foreldrepenger))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Sykepengehistorikk))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -85,9 +85,9 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
         assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
         assertEquals(3, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Inntektsberegning))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.EgenAnsatt))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Opptjening))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Inntektsberegning))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
     }
 
     @Test
@@ -101,8 +101,8 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         assertEquals(2, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Foreldrepenger))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovstype.Sykepengehistorikk))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
+        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -315,7 +315,7 @@ class PåminnelserOgTimeoutTest {
 
         internal val etterspurteBehov = mutableListOf<BehovType>()
 
-        internal fun etterspurteBehov(vedtaksperiodeId: UUID, key: Behovstype) =
+        internal fun etterspurteBehov(vedtaksperiodeId: UUID, key: Behovtype) =
             etterspurteBehov.partisjoner().let {
                 it.filter { it["vedtaksperiodeId"] == vedtaksperiodeId }
                     .filter { key.name in (it["@behov"] as List<*>) }

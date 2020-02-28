@@ -22,9 +22,9 @@ import no.nav.helse.TestConstants.inntektsmeldingDTO
 import no.nav.helse.TestConstants.søknadDTO
 import no.nav.helse.Topics.rapidTopic
 import no.nav.helse.Topics.søknadTopic
-import no.nav.helse.behov.Behovstype
-import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -558,7 +558,7 @@ internal class EndToEndTest {
         sendKafkaMessage(rapidTopic, UUID.randomUUID().toString(), behov)
     }
 
-    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovstype): ObjectNode {
+    private fun ventPåBehov(aktørId: String, fødselsnummer: String, behovType: Behovtype): ObjectNode {
         var behov: ObjectNode? = null
         await()
             .atMost(timeoutSecondsPerStep, SECONDS)

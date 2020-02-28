@@ -2,6 +2,8 @@ package no.nav.helse.unit.behov
 
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SpesifikkKontekst
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,13 +28,13 @@ internal class AktivitetsloggBehovTest {
         hendelse1.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
-        hendelse1.behov("Godkjenning")
+        hendelse1.behov(Godkjenning, "Trenger godkjenning")
         hendelse1.warn("Advarsel")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
         hendelse2.kontekst(arbeidsgiver2)
-        hendelse2.behov("Utbetaling")
+        hendelse2.behov(Utbetaling, "Skal utbetale")
         hendelse2.info("Infomelding")
 
         assertEquals(2, aktivitetslogg.behov().size)

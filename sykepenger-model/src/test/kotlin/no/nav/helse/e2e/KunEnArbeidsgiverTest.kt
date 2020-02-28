@@ -2,14 +2,14 @@ package no.nav.helse.e2e
 
 import no.nav.helse.FeatureToggle
 import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.Behovstype
-import no.nav.helse.behov.Behovstype.*
 import no.nav.helse.behov.partisjoner
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -649,7 +649,7 @@ internal class KunEnArbeidsgiverTest {
         internal lateinit var utbetalingsreferanseFraUtbetalingEvent: String
         val utbetalteVedtaksperioder = mutableListOf<String>()
 
-        internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovstype) =
+        internal fun etterspurteBehov(vedtaksperiodeIndex: Int, key: Behovtype) =
             etterspurteBehov.partisjoner().let {
                 it.filter { it["vedtaksperiodeId"] == UUID.fromString(vedtaksperiodeIder(vedtaksperiodeIndex)) }
                     .filter { key.name in (it["@behov"] as List<*>) }
