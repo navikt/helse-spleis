@@ -122,7 +122,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
-        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId) return
+        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId()) return
         manuellSaksbehandling.kontekst(this)
         tilstand.håndter(person, arbeidsgiver, this, manuellSaksbehandling)
     }

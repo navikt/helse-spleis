@@ -299,6 +299,8 @@ internal class EndToEndTest {
 
         utbetalingsreferanse.hentUtbetaling {
             assertTrue(this.contains(aktørID))
+            assertTrue(this.contains("godkjentAv"))
+            assertTrue(this.contains("godkjenttidspunkt"))
         }
     }
 
@@ -480,7 +482,8 @@ internal class EndToEndTest {
         val behov = ventPåBehov(aktørId, fødselsnummer, Godkjenning)
 
         val løstBehov = behov
-            .apply { put("saksbehandlerIdent", saksbehandler) }
+            .apply { put("saksbehandlerIdent", saksbehandler)
+                     put("godkjenttidspunkt", LocalDateTime.now().toString())}
             .løsBehov(mapOf(Godkjenning.name to mapOf("godkjent" to utbetalingGodkjent)))
         sendBehov(løstBehov)
     }

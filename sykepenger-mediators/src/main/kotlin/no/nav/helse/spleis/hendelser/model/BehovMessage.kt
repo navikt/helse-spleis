@@ -219,7 +219,7 @@ internal class ManuellSaksbehandlingMessage(
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
-            godkjenttidspunkt = this["godkjenttidspunkt"].asOptionalLocalDateTime(),
+            godkjenttidspunkt = this["godkjenttidspunkt"].asLocalDateTime(),
             utbetalingGodkjent = this["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
         )
 

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.KClass
@@ -632,7 +633,8 @@ internal class KunEnArbeidsgiverTest {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
             saksbehandler = "Ola Nordmann",
-            utbetalingGodkjent = utbetalingGodkjent
+            utbetalingGodkjent = utbetalingGodkjent,
+            godkjenttidspunkt = LocalDateTime.now()
         ).apply {
             hendelselogg = this
             addObserver(observatør)

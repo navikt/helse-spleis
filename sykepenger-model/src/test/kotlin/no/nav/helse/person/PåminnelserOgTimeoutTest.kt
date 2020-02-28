@@ -258,7 +258,8 @@ class PåminnelserOgTimeoutTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = true
+        utbetalingGodkjent = true,
+        godkjenttidspunkt = LocalDateTime.now()
     ).apply {
         addObserver(personObserver)
     }

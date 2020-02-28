@@ -12,6 +12,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -237,7 +238,8 @@ internal class JsonBuilderTest {
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = true,
-                saksbehandler = "en_saksbehandler_ident"
+                saksbehandler = "en_saksbehandler_ident",
+                godkjenttidspunkt = LocalDateTime.now()
             )
     }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -87,7 +88,8 @@ internal class GodkjenningHendelseTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent
+        utbetalingGodkjent = godkjent,
+        godkjenttidspunkt = LocalDateTime.now()
     ).apply {
         addObserver(personObserver)
     }

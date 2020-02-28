@@ -7,12 +7,13 @@ class ManuellSaksbehandling(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    internal val vedtaksperiodeId: String,
+    private val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val utbetalingGodkjent: Boolean,
-    private val godkjenttidspunkt: LocalDateTime? = null
+    private val godkjenttidspunkt: LocalDateTime
 ) : ArbeidstakerHendelse() {
 
+    internal fun vedtaksperiodeId() = vedtaksperiodeId
     internal fun saksbehandler() = saksbehandler
     internal fun utbetalingGodkjent() = utbetalingGodkjent
     internal fun godkjenttidspunkt() = godkjenttidspunkt

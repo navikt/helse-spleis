@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -96,7 +97,8 @@ internal class UtbetalingsreferanseTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent
+        utbetalingGodkjent = godkjent,
+        godkjenttidspunkt = LocalDateTime.now()
     )
 
     private fun ytelser(

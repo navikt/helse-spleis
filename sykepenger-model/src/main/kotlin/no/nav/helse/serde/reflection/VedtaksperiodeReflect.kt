@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
@@ -14,6 +15,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
+    private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     private val inntektFraInntektsmelding: Double? = vedtaksperiode["inntektFraInntektsmelding"]
@@ -33,6 +35,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "maksdato" to maksdato,
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
+        "godkjenttidspunkt" to godkjenttidspunkt,
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
         "inntektFraInntektsmelding" to inntektFraInntektsmelding,
@@ -43,6 +46,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "id" to id,
         "maksdato" to maksdato,
         "godkjentAv" to godkjentAv,
+        "godkjenttidspunkt" to godkjenttidspunkt,
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
         "inntektFraInntektsmelding" to inntektFraInntektsmelding,

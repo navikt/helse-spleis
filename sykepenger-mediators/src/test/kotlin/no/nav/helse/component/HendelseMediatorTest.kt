@@ -246,7 +246,8 @@ internal class HendelseMediatorTest {
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
                 ekstraFelter = mapOf(
-                    "saksbehandlerIdent" to "en_saksbehandler"
+                    "saksbehandlerIdent" to "en_saksbehandler",
+                    "godkjenttidspunkt" to LocalDateTime.now()
                 ),
                 løsninger = mapOf(
                     "Godkjenning" to mapOf(
