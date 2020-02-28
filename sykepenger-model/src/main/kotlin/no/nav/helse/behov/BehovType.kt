@@ -1,6 +1,5 @@
 package no.nav.helse.behov
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Vedtaksperiodekontekst
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import java.time.LocalDate
@@ -33,10 +32,6 @@ sealed class BehovType(private val context: Vedtaksperiodekontekst) {
     private val navn = this::class.simpleName!!
 
     internal open fun toMap() = emptyMap<String, Any>()
-
-    internal fun loggTilAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-        //aktivitetslogg.behov(melding = navn)
-    }
 
     class GjennomgåTidslinje internal constructor(context: Vedtaksperiodekontekst) : BehovType(context) {
         constructor(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, vedtaksperiodeId: UUID) : this(

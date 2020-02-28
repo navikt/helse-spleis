@@ -1,11 +1,11 @@
 package no.nav.helse.behov
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Vedtaksperiodekontekst
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -13,15 +13,6 @@ import java.time.YearMonth
 import java.util.*
 
 internal class BehovTypeTest {
-
-    @Test
-    internal fun `kopier til aktivitetslogg`() {
-        val aktivitetslogg = Aktivitetslogg()
-        BehovType.EgenAnsatt(vedtaksperiodekontekst(UUID.randomUUID()))
-            .loggTilAktivitetslogg(aktivitetslogg)
-
-        assertTrue(aktivitetslogg.hasNeeds())
-    }
 
     @Test
     internal fun `samme kontekst er lik`() {
