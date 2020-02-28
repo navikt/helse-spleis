@@ -41,19 +41,12 @@ internal class HendelseMediator(
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         sikkerLogg.debug("gjenkjente melding {} som {}", message.id, message::class.simpleName)
-        val aktivitetslogg = Aktivitetslogg()
         val messageProcessor = Processor(BehovMediator(rapidsConnection, sikkerLogg))
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
-
-            if (aktivitetslogg.hasErrors()) {
-                sikkerLogg.error("aktivitetslogg inneholder errors: ${aktivitetslogg.toString()}")
-            } else if (aktivitetslogg.hasMessages()) {
-                sikkerLogg.info("aktivitetslogg inneholder meldinger: ${aktivitetslogg.toString()}")
-            }
         } catch (err: Aktivitetslogg.AktivitetException) {
-            sikkerLogg.error("feil på melding: $err")
+            sikkerLogg.error("feil på melding: ${err.message}", err)
         } catch (err: UtenforOmfangException) {
             sikkerLogg.error("melding er utenfor omfang: ${err.message}", err)
         }
@@ -67,61 +60,71 @@ internal class HendelseMediator(
         sikkerLogg.debug("ukjent melding:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
+    private fun finalize(mediator: BehovMediator, hendelse: ArbeidstakerHendelse) {
+        if (hendelse.hasErrors()) {
+            sikkerLogg.error("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
+        } else if (hendelse.hasMessages()) {
+            sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
+        }
+
+        mediator.finalize(hendelse)
+    }
+
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
         override fun process(message: NySøknadMessage) {
             val sykmelding = message.asSykmelding()
             hendelseProbe.onSykmelding(sykmelding)
             person(sykmelding).håndter(sykmelding)
-            behovMediator.finalize(sykmelding)
+            finalize(behovMediator, sykmelding)
         }
 
         override fun process(message: SendtSøknadMessage) {
             val søknad = message.asSøknad()
             hendelseProbe.onSøknad(søknad)
             person(søknad).håndter(søknad)
-            behovMediator.finalize(søknad)
+            finalize(behovMediator, søknad)
         }
 
         override fun process(message: InntektsmeldingMessage) {
             val inntektsmelding = message.asInntektsmelding()
             hendelseProbe.onInntektsmelding(inntektsmelding)
             person(inntektsmelding).håndter(inntektsmelding)
-            behovMediator.finalize(inntektsmelding)
+            finalize(behovMediator, inntektsmelding)
         }
 
         override fun process(message: YtelserMessage) {
             val ytelser = message.asYtelser()
             hendelseProbe.onYtelser(ytelser)
             person(ytelser).håndter(ytelser)
-            behovMediator.finalize(ytelser)
+            finalize(behovMediator, ytelser)
         }
 
         override fun process(message: VilkårsgrunnlagMessage) {
             val vilkårsgrunnlag = message.asVilkårsgrunnlag()
             hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
             person(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
-            behovMediator.finalize(vilkårsgrunnlag)
+            finalize(behovMediator, vilkårsgrunnlag)
         }
 
         override fun process(message: ManuellSaksbehandlingMessage) {
             val manuellSaksbehandling = message.asManuellSaksbehandling()
             hendelseProbe.onManuellSaksbehandling(manuellSaksbehandling)
             person(manuellSaksbehandling).håndter(manuellSaksbehandling)
-            behovMediator.finalize(manuellSaksbehandling)
+            finalize(behovMediator, manuellSaksbehandling)
         }
 
         override fun process(message: UtbetalingMessage) {
             val utbetaling = message.asUtbetaling()
             hendelseProbe.onUtbetaling(utbetaling)
             person(utbetaling).håndter(utbetaling)
-            behovMediator.finalize(utbetaling)
+            finalize(behovMediator, utbetaling)
         }
 
         override fun process(message: PåminnelseMessage) {
             val påminnelse = message.asPåminnelse()
             hendelseProbe.onPåminnelse(påminnelse)
             person(påminnelse).håndter(påminnelse)
-            behovMediator.finalize(påminnelse)
+            finalize(behovMediator, påminnelse)
         }
 
         private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {

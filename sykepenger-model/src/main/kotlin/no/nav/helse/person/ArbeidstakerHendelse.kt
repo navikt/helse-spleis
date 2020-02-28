@@ -31,4 +31,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     internal fun need(behov: BehovType) {
         hendelseObservers.forEach { it.onBehov(behov) }
     }
+
+    fun toLogString() = aktivitetslogg.toString()
 }
