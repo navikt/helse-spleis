@@ -24,7 +24,6 @@ class PåminnelserOgTimeoutTest {
     private lateinit var person: Person
     private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogger: Aktivitetslogger
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -282,7 +281,7 @@ class PåminnelserOgTimeoutTest {
         assertEquals(
             expectedTilstand,
             inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        )
     }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

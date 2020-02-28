@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 

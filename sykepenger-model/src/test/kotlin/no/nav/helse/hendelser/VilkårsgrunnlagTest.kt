@@ -11,7 +11,6 @@ import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
-    private val aktivitetslogger = Aktivitetslogger()
     private val aktivitetslogg = Aktivitetslogg()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val aktørId = "123"
@@ -53,8 +52,6 @@ internal class VilkårsgrunnlagTest {
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        println(aktivitetslogger)
-
         assertEquals(0.20, dataForVilkårsvurdering(vedtaksperiode)?.avviksprosent)
         assertEquals(15000.00, dataForVilkårsvurdering(vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.erEgenAnsatt)
@@ -72,8 +69,6 @@ internal class VilkårsgrunnlagTest {
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        println(aktivitetslogger)
-
         assertEquals(27, dataForVilkårsvurdering(vedtaksperiode)?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand(vedtaksperiode)?.type)
@@ -89,8 +84,6 @@ internal class VilkårsgrunnlagTest {
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        println(aktivitetslogger)
-
         assertEquals(28, dataForVilkårsvurdering(vedtaksperiode)?.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering(vedtaksperiode)?.harOpptjening)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand(vedtaksperiode)?.type)
@@ -105,8 +98,6 @@ internal class VilkårsgrunnlagTest {
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
 
-        println(aktivitetslogger)
-
         assertEquals(0, dataForVilkårsvurdering(vedtaksperiode)?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand(vedtaksperiode)?.type)
@@ -120,8 +111,6 @@ internal class VilkårsgrunnlagTest {
         )
         val vedtaksperiode = vedtaksperiode()
         vedtaksperiode.håndter(vilkårsgrunnlag)
-
-        println(aktivitetslogger)
 
         assertEquals(0, dataForVilkårsvurdering(vedtaksperiode)?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.harOpptjening)

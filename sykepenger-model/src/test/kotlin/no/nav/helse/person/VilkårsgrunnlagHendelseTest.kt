@@ -20,7 +20,6 @@ internal class VilkårsgrunnlagHendelseTest {
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var personObserver: TestPersonObserver
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -28,7 +27,6 @@ internal class VilkårsgrunnlagHendelseTest {
         personObserver = TestPersonObserver()
         person = Person("12345", UNG_PERSON_FNR_2018)
         person.addObserver(personObserver)
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -123,7 +121,7 @@ internal class VilkårsgrunnlagHendelseTest {
         assertEquals(
             expectedTilstand,
             inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        )
     }
 
     private fun håndterVilkårsgrunnlag(

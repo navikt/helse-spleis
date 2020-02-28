@@ -41,26 +41,21 @@ internal class HendelseMediator(
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         sikkerLogg.debug("gjenkjente melding {} som {}", message.id, message::class.simpleName)
-        val aktivitetslogger = Aktivitetslogger()
         val aktivitetslogg = Aktivitetslogg()
         val messageProcessor = Processor(BehovMediator(rapidsConnection, sikkerLogg))
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
 
-            if (aktivitetslogger.hasErrorsOld() || aktivitetslogg.hasErrors()) {
-                sikkerLogg.error("aktivitetslogger inneholder errors: ${aktivitetslogger.toReport()}")
-            } else if (aktivitetslogger.hasMessagesOld() || aktivitetslogg.hasMessages()) {
-                sikkerLogg.info("aktivitetslogger inneholder meldinger: ${aktivitetslogger.toReport()}")
+            if (aktivitetslogg.hasErrors()) {
+                sikkerLogg.error("aktivitetslogg inneholder errors: ${aktivitetslogg.toString()}")
+            } else if (aktivitetslogg.hasMessages()) {
+                sikkerLogg.info("aktivitetslogg inneholder meldinger: ${aktivitetslogg.toString()}")
             }
-        } catch (err: Aktivitetslogger.AktivitetException) {
-            sikkerLogg.error("feil på melding: $err")
         } catch (err: Aktivitetslogg.AktivitetException) {
             sikkerLogg.error("feil på melding: $err")
         } catch (err: UtenforOmfangException) {
             sikkerLogg.error("melding er utenfor omfang: ${err.message}", err)
-        } finally {
-            AktivitetsloggerProbe.inspiser(aktivitetslogger)
         }
     }
 

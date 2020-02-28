@@ -1,9 +1,8 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogger
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogger
+import no.nav.helse.person.IAktivitetslogg
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -11,12 +10,10 @@ import org.junit.jupiter.api.fail
 
 internal class ValidationTest {
 
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -69,7 +66,7 @@ internal class ValidationTest {
 
     private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) :
         ArbeidstakerHendelse(aktivitetslogg),
-        IAktivitetslogger by aktivitetslogger {
+        IAktivitetslogg by aktivitetslogg {
 
         override fun aktørId(): String {
             fail("Uventet kall")

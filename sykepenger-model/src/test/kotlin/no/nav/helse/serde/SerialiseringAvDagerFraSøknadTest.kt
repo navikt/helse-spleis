@@ -66,14 +66,12 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val fnr = "12020052345"
     private val orgnummer = "987654321"
 
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private lateinit var person: Person
 
     @BeforeEach
     internal fun setup() {
-        aktivitetslogger = Aktivitetslogger()
         aktivitetslogg = Aktivitetslogg()
 
         person = Person(aktørId, fnr).apply {

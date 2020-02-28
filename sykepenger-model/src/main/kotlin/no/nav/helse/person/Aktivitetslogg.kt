@@ -74,15 +74,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
     }
 
-    fun tellerEtterMelding(): Map<Pair<String, String>, Int> {
-        return mutableMapOf<Pair<String, String>, Int>().apply {
-            aktiviteter.forEach {
-                val teller = this.getOrDefault(it.pair(), 0)
-                this.put(it.pair(), teller + 1)
-            }
-        }
-    }
-
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     private fun warn() = Aktivitet.Warn.filter(aktiviteter)
     private fun need() = Aktivitet.Need.filter(aktiviteter)
@@ -116,8 +107,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         private fun meldingerString(): String {
             return kontekster.map { "(${it.melding()})" }.fold("") { acc, s -> acc + " " + s }
         }
-
-        internal fun pair() = this.javaClass.canonicalName.split('.').last().toLowerCase() to melding
 
         abstract fun accept(visitor: AktivitetsloggVisitor)
 

@@ -23,7 +23,6 @@ internal class GodkjenningHendelseTest {
     private lateinit var person: Person
     private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogger: Aktivitetslogger
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -71,7 +70,7 @@ internal class GodkjenningHendelseTest {
         assertEquals(
             expectedTilstand,
             inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogger" }
+        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogg" }
     }
 
     private fun håndterYtelser() {

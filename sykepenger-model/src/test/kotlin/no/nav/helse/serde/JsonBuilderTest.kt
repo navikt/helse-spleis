@@ -90,11 +90,9 @@ internal class JsonBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
-        private lateinit var aktivitetslogger: Aktivitetslogger
         private lateinit var aktivitetslogg: Aktivitetslogg
 
         internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person {
-            aktivitetslogger = Aktivitetslogger()
             aktivitetslogg = Aktivitetslogg()
 
             val person = Person(aktørId, fnr).apply {
@@ -125,7 +123,6 @@ internal class JsonBuilderTest {
                 if (stopState == TilstandType.TIL_UTBETALING) return@apply
             }
 
-            assertFalse(aktivitetslogger.hasErrorsOld()) { "Aktivitetslogger contains errors: ${aktivitetslogger.toReport()}" }
             assertFalse(aktivitetslogg.hasErrors()) { "Aktivitetslogg contains errors: $aktivitetslogg" }
 
             return person
