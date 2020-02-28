@@ -134,6 +134,6 @@ internal class Arbeidsgiver private constructor(
     internal class GjenopptaBehandling(val hendelse: ArbeidstakerHendelse)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Arbeidsgiver ${organisasjonsnummer}", "Arbeidsgiver ${organisasjonsnummer}")
+        return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }
 }

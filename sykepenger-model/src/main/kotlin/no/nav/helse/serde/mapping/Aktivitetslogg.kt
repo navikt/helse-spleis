@@ -13,7 +13,7 @@ internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData):
 
     val aktiviteter = aktivitetslogg.get<Aktivitetslogg, MutableList<Any>>("aktiviteter")
     aktivitetsloggData.aktiviteter.forEach {
-        val kontekster = it.kontekster.map { SpesifikkKontekst(it.kontekstType, it.melding) }
+        val kontekster = it.kontekster.map { SpesifikkKontekst(it.kontekstType, it.kontekstMap) }
         aktiviteter.add(when (it.alvorlighetsgrad) {
             AktivitetsloggData.Alvorlighetsgrad.INFO -> aktivitetClass.getNestedClass("Info").getInstance(
                 kontekster,

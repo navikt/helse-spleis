@@ -114,7 +114,7 @@ class Person private constructor(
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Person", "Person: ${fødselsnummer}")
+        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer, "aktørId" to aktørId))
     }
 
     private fun registrer(hendelse: ArbeidstakerHendelse, melding: String) {

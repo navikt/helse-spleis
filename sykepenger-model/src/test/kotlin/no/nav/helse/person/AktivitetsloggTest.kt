@@ -165,7 +165,7 @@ internal class AktivitetsloggTest {
     private class TestKontekst(
         private val melding: String
     ): Aktivitetskontekst {
-        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding)
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding, mapOf(melding to melding))
     }
 
     private class TestHendelse(
@@ -175,7 +175,7 @@ internal class AktivitetsloggTest {
         init {
             logg.kontekst(this)
         }
-        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse", melding)
+        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse")
         override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)
         }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 
 internal class V8FjernAktivitetslogger : JsonMigration(version = 8) {
 
-    override val description = "Legger til tom aktivitetslogg i person"
+    override val description = "Fjerner gammel aktivitetslogger"
 
     private val aktivitetsloggerKey = "aktivitetslogger"
 

@@ -21,7 +21,7 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return this.javaClass.canonicalName.split('.').last().let {
-            SpesifikkKontekst(it, melding(it))
+            SpesifikkKontekst(it)
         }
     }
 

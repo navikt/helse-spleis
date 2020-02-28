@@ -40,8 +40,8 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
         private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
             return kontekster.map {
                 mutableMapOf(
-                    "kontekstType" to it.konteskstType(),
-                    "melding" to it.melding()
+                    "kontekstType" to it.kontekstType,
+                    "kontekstMap" to it.kontekstMap
                 )
             }
         }
