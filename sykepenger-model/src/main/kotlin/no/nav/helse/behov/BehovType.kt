@@ -35,7 +35,7 @@ sealed class BehovType(private val context: Vedtaksperiodekontekst) {
     internal open fun toMap() = emptyMap<String, Any>()
 
     internal fun loggTilAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-        aktivitetslogg.need(melding = navn)
+        aktivitetslogg.behov(melding = navn)
     }
 
     class GjennomgåTidslinje internal constructor(context: Vedtaksperiodekontekst) : BehovType(context) {

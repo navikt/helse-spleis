@@ -61,9 +61,9 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             leggTilMelding(kontekster, WARN, melding, tidsstempel)
         }
 
-        override fun visitNeed(
+        override fun visitBehov(
             kontekster: List<SpesifikkKontekst>,
-            aktivitet: Need,
+            aktivitet: Behov,
             melding: String,
             tidsstempel: String
         ) {

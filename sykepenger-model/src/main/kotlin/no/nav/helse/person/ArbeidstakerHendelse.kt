@@ -27,6 +27,7 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     internal open fun melding(klassName: String) = klassName
 
+    @Deprecated("Skal bruke aktivitetslogg.behov()")
     internal fun need(behov: BehovType) {
         behov.loggTilAktivitetslogg(aktivitetslogg)
         hendelseObservers.forEach { it.onBehov(behov) }

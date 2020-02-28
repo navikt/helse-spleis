@@ -26,8 +26,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun need(melding: String, vararg params: Any?) {
-        add(Aktivitet.Need(kontekster.toSpesifikk(), String.format(melding, *params)))
+    override fun behov(melding: String, vararg params: Any?) {
+        add(Aktivitet.Behov(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun error(melding: String, vararg params: Any?) {
@@ -51,7 +51,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun hasWarnings() = warn().isNotEmpty() || hasNeeds()
 
-    override fun hasNeeds() = need().isNotEmpty() || hasErrors()
+    override fun hasNeeds() = behov().isNotEmpty() || hasErrors()
 
     override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
 
@@ -73,10 +73,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet -> kontekst in aktivitet })
         }
     }
-
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     private fun warn() = Aktivitet.Warn.filter(aktiviteter)
-    private fun need() = Aktivitet.Need.filter(aktiviteter)
+    fun behov() = Aktivitet.Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
 
@@ -85,7 +84,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         fun aktivitetslogg() = aktivitetslogg
     }
 
-    internal sealed class Aktivitet(
+    sealed class Aktivitet(
         private val alvorlighetsgrad: Int,
         internal val label: Char,
         private var melding: String,
@@ -96,6 +95,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
+        fun kontekst(): Map<String, String> =
+            kontekster.fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
             .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
@@ -108,10 +109,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             return kontekster.map { "(${it.melding()})" }.fold("") { acc, s -> acc + " " + s }
         }
 
-        abstract fun accept(visitor: AktivitetsloggVisitor)
+        internal abstract fun accept(visitor: AktivitetsloggVisitor)
 
         operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
-
         internal class Info(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
@@ -121,13 +121,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Info> {
                     return aktiviteter.filterIsInstance<Info>()
                 }
-            }
 
+            }
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitInfo(kontekster, this, melding, tidsstempel)
             }
-        }
 
+        }
         internal class Warn(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
@@ -137,27 +137,28 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Warn> {
                     return aktiviteter.filterIsInstance<Warn>()
                 }
-            }
 
+            }
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitWarn(kontekster, this, melding, tidsstempel)
             }
+
         }
 
-        internal class Need(
+        class Behov(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(50, 'N', melding, tidsstempel, kontekster) {
-
             companion object {
-                internal fun filter(aktiviteter: List<Aktivitet>): List<Need> {
-                    return aktiviteter.filterIsInstance<Need>()
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Behov> {
+                    return aktiviteter.filterIsInstance<Behov>()
                 }
+
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitNeed(kontekster, this, melding, tidsstempel)
+                visitor.visitBehov(kontekster, this, melding, tidsstempel)
             }
 
         }
@@ -198,7 +199,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
  interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
-    fun need(melding: String, vararg params: Any?)
+    fun behov(melding: String, vararg params: Any?)
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
@@ -231,9 +232,9 @@ internal interface AktivitetsloggVisitor {
     ) {
     }
 
-    fun visitNeed(
+    fun visitBehov(
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Need,
+        aktivitet: Aktivitetslogg.Aktivitet.Behov,
         tidsstempel: String,
         melding: String
     ) {
