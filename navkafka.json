@@ -126,6 +126,10 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvspre",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
@@ -143,6 +147,10 @@
                 },
                 {
                     "member": "N143409",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "O142910",
                     "role": "MANAGER"
                 }
             ],
