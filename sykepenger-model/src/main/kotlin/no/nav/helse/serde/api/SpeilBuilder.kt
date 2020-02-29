@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.*
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -283,27 +284,27 @@ internal class SpeilBuilder : PersonVisitor {
     private class UtbetalingstidslinjeVisitor(private val utbetalingstidslinjeMap: MutableList<MutableMap<String, Any?>>) : UtbetalingsdagVisitor {
 
         override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
-            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.Arbeidsdag).toMap())
         }
 
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "ArbeidsgiverperiodeDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
         }
 
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            utbetalingstidslinjeMap.add(NavDagReflect(dag, "NavDag").toMap())
+            utbetalingstidslinjeMap.add(NavDagReflect(dag, TypeData.NavDag).toMap())
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
-            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "NavHelgDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.NavHelgDag).toMap())
         }
 
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
-            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.Fridag).toMap())
         }
 
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
-            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
+            utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.UkjentDag).toMap())
         }
 
         override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {

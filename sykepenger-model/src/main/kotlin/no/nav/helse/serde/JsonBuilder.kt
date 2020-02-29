@@ -2,6 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.*
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -300,27 +301,27 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
-            dager.add(UtbetalingsdagReflect(dag, "Arbeidsdag").toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.Arbeidsdag).toMap())
         }
 
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-            dager.add(UtbetalingsdagMedGradReflect(dag, "ArbeidsgiverperiodeDag").toMap())
+            dager.add(UtbetalingsdagMedGradReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
         }
 
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            dager.add(NavDagReflect(dag, "NavDag").toMap())
+            dager.add(NavDagReflect(dag, TypeData.NavDag).toMap())
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
-            dager.add(UtbetalingsdagMedGradReflect(dag, "NavHelgDag").toMap())
+            dager.add(UtbetalingsdagMedGradReflect(dag, TypeData.NavHelgDag).toMap())
         }
 
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
-            dager.add(UtbetalingsdagReflect(dag, "Fridag").toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.Fridag).toMap())
         }
 
         override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
-            dager.add(UtbetalingsdagReflect(dag, "UkjentDag").toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.UkjentDag).toMap())
         }
 
         override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {

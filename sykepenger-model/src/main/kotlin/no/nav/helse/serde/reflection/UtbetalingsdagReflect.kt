@@ -1,11 +1,13 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 
-internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: String) {
+internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
     private val inntekt: Double = utbetalingsdag["inntekt"]
     private val dato: LocalDate = utbetalingsdag["dato"]
 
@@ -16,7 +18,7 @@ internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbeta
     )
 }
 
-internal class UtbetalingsdagMedGradReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: String) {
+internal class UtbetalingsdagMedGradReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
     private val inntekt: Double = utbetalingsdag["inntekt"]
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val grad: Double = utbetalingsdag["grad"]
@@ -30,7 +32,7 @@ internal class UtbetalingsdagMedGradReflect(utbetalingsdag: Utbetalingstidslinje
 }
 
 
-internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: String) {
+internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
     private val inntekt: Double = utbetalingsdag["inntekt"]
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val utbetaling: Int = utbetalingsdag["utbetaling"]
@@ -52,7 +54,7 @@ internal class AvvistdagReflect(avvistdag: Utbetalingstidslinje.Utbetalingsdag.A
     private val grad: Double = avvistdag["grad"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "type" to "AvvistDag",
+        "type" to TypeData.AvvistDag,
         "inntekt" to inntekt,
         "dato" to dato,
         "begrunnelse" to begrunnelse.name,
