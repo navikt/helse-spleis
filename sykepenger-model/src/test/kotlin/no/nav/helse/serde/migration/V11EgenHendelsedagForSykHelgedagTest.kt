@@ -15,39 +15,49 @@ internal class V11EgenHendelsedagForSykHelgedagTest {
         listOf(V11EgenHendelsedagForSykHelgedag()).migrate(json)
         val migratedJson = objectMapper.readTree(json.toString())
 
-        val sykdomshistorikk = migratedJson
+        val sykdomshistorikkFørstePeriode = migratedJson
             .path("arbeidsgivere")
             .first()
             .path("vedtaksperioder")
             .first()
             .path("sykdomshistorikk")
 
-        assertEquals(3, sykdomshistorikk.size())
+        assertEquals(1, sykdomshistorikkFørstePeriode.size())
+        assertEquals("SYK_HELGEDAG_SYKMELDING", dager(sykdomshistorikkFørstePeriode.first().path("beregnetSykdomstidslinje"))["2020-02-01"])
+        assertEquals("SYK_HELGEDAG_SYKMELDING", dager(sykdomshistorikkFørstePeriode.first().path("hendelseSykdomstidslinje"))["2020-02-01"])
 
-        val beregnetTidslinje = dager(sykdomshistorikk.first().path("beregnetSykdomstidslinje"))
+        val sykdomshistorikkAndrePeriode = migratedJson
+            .path("arbeidsgivere")
+            .first()
+            .path("vedtaksperioder")[1]
+            .path("sykdomshistorikk")
+
+        assertEquals(3, sykdomshistorikkAndrePeriode.size())
+
+        val beregnetTidslinje = dager(sykdomshistorikkAndrePeriode.first().path("beregnetSykdomstidslinje"))
 
         assertEquals("SYK_HELGEDAG_SØKNAD", beregnetTidslinje["2020-01-02"])
         assertEquals("SYK_HELGEDAG_SØKNAD", beregnetTidslinje["2020-01-03"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", beregnetTidslinje["2020-01-05"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", beregnetTidslinje["2020-01-06"])
 
-        val søknadHendelseTidslinje = dager(sykdomshistorikk[1].path("hendelseSykdomstidslinje"))
+        val søknadHendelseTidslinje = dager(sykdomshistorikkAndrePeriode[1].path("hendelseSykdomstidslinje"))
         assertEquals("SYK_HELGEDAG_SØKNAD", søknadHendelseTidslinje["2020-01-02"])
         assertEquals("SYK_HELGEDAG_SØKNAD", søknadHendelseTidslinje["2020-01-03"])
         assertNull(søknadHendelseTidslinje["2020-01-05"])
         assertNull(søknadHendelseTidslinje["2020-01-06"])
-        val søknadBeregnetTidslinje = dager(sykdomshistorikk[1].path("beregnetSykdomstidslinje"))
+        val søknadBeregnetTidslinje = dager(sykdomshistorikkAndrePeriode[1].path("beregnetSykdomstidslinje"))
         assertEquals("SYK_HELGEDAG_SØKNAD", søknadBeregnetTidslinje["2020-01-02"])
         assertEquals("SYK_HELGEDAG_SØKNAD", søknadBeregnetTidslinje["2020-01-03"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", søknadBeregnetTidslinje["2020-01-05"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", søknadBeregnetTidslinje["2020-01-06"])
 
-        val sykmeldingHendelseTidslinje = dager(sykdomshistorikk[2].path("hendelseSykdomstidslinje"))
+        val sykmeldingHendelseTidslinje = dager(sykdomshistorikkAndrePeriode[2].path("hendelseSykdomstidslinje"))
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingHendelseTidslinje["2020-01-02"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingHendelseTidslinje["2020-01-03"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingHendelseTidslinje["2020-01-05"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingHendelseTidslinje["2020-01-06"])
-        val sykmeldingBeregnetTidslinje = dager(sykdomshistorikk[2].path("beregnetSykdomstidslinje"))
+        val sykmeldingBeregnetTidslinje = dager(sykdomshistorikkAndrePeriode[2].path("beregnetSykdomstidslinje"))
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingBeregnetTidslinje["2020-01-02"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingBeregnetTidslinje["2020-01-03"])
         assertEquals("SYK_HELGEDAG_SYKMELDING", sykmeldingBeregnetTidslinje["2020-01-05"])
@@ -66,6 +76,26 @@ private const val personJson = """
   "arbeidsgivere": [
     {
       "vedtaksperioder": [
+        {
+            "sykdomshistorikk": [
+                {
+                    "tidsstempel": "2020-02-20T00:00:00.000000",
+                    "hendelseId": "uuid",
+                    "hendelseSykdomstidslinje": [
+                        {
+                            "dagen": "2020-02-01",
+                            "type": "SYK_HELGEDAG"
+                        }
+                    ],
+                    "beregnetSykdomstidslinje": [
+                        {
+                            "dagen": "2020-02-01",
+                            "type": "SYK_HELGEDAG"
+                        }
+                    ]
+                }
+            ]
+        },
         {
           "sykdomshistorikk": [
             {

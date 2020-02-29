@@ -57,7 +57,7 @@ internal class V11EgenHendelsedagForSykHelgedag() : JsonMigration(version = 11) 
 
         return sykHelgedager.groupBy { (dagen, _, _) -> dagen }
             .mapValues { (_, value) ->
-                value.map { it.second to it.third }
+                value.map { (if (sykdomshistorikk.size() == 1) Hendelsetype.Sykmelding else it.second) to it.third }
             }
     }
 
@@ -71,6 +71,7 @@ internal class V11EgenHendelsedagForSykHelgedag() : JsonMigration(version = 11) 
         val dagtyper = tidslinje.map { it[dagtypeKey].textValue() }
         if (SykmeldingDagType.SYKEDAG_SYKMELDING.name in dagtyper) return Hendelsetype.Sykmelding
         if (dagtyper.any { it in SøknadDagType.values().map(Enum<*>::name) }) return Hendelsetype.Søknad
+        if (dagtyper.all { it == sykHelgedagType }) return Hendelsetype.Sykmelding // guess
         return Hendelsetype.Inntektsmelding
     }
 
