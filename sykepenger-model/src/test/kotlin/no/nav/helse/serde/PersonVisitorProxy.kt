@@ -216,7 +216,11 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitStudiedag(studiedag)
     }
 
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {
+        target.visitSykHelgedag(sykHelgedag)
+    }
+
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
         target.visitSykHelgedag(sykHelgedag)
     }
 

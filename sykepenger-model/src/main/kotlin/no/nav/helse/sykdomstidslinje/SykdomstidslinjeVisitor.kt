@@ -13,7 +13,8 @@ internal interface SykdomstidslinjeVisitor {
     fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) {}
     fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) {}
     fun visitStudiedag(studiedag: Studiedag) {}
-    fun visitSykHelgedag(sykHelgedag: SykHelgedag) {}
+    fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {}
+    fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {}
     fun visitSykedag(sykedag: Sykedag.Sykmelding) {}
     fun visitSykedag(sykedag: Sykedag.Søknad) {}
     fun visitUbestemt(ubestemtdag: Ubestemtdag) {}

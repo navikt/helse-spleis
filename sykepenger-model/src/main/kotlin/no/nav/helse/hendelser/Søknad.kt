@@ -119,6 +119,10 @@ class Søknad constructor(
         override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Søknad(dato)
         override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Søknad(dato)
         override fun permisjonsdag(dato: LocalDate): Permisjonsdag = Permisjonsdag.Søknad(dato)
-        override fun sykedag(dato: LocalDate, grad: Double): Sykedag = Sykedag.Søknad(dato, grad)
+        override fun studiedag(dato: LocalDate): Studiedag = Studiedag(dato)
+        override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Søknad = Sykedag.Søknad(dato, grad)
+        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Søknad = SykHelgedag.Søknad(dato, grad)
+        override fun utenlandsdag(dato: LocalDate): Utenlandsdag = Utenlandsdag(dato)
+
     }
 }

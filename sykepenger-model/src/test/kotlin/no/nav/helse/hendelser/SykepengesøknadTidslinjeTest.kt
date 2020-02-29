@@ -28,7 +28,7 @@ internal class SykepengesøknadTidslinjeTest {
         val tidslinje = (søknad().sykdomstidslinje() + sykmelding().sykdomstidslinje())
 
         assertType(Sykedag.Sykmelding::class, tidslinje[sykeperiodeFOM])
-        assertType(SykHelgedag::class, tidslinje[sykeperiodeTOM])
+        assertType(SykHelgedag.Sykmelding::class, tidslinje[sykeperiodeTOM])
         assertEquals(sykeperiodeTOM, tidslinje.sisteDag())
     }
 

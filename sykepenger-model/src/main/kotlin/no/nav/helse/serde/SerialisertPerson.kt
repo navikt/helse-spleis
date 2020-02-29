@@ -45,7 +45,8 @@ class SerialisertPerson(val json: String) {
             V7ForbrukteSykedager(),
             V8FjernAktivitetslogger(),
             V9LeggerTilKontekstMap(),
-            V10FjernAktiviteter()
+            V10FjernAktiviteter(),
+            V11EgenHendelsedagForSykHelgedag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -201,7 +202,8 @@ class SerialisertPerson(val json: String) {
             JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
             JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen, data.grad)
             JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen, data.grad)
-            JsonDagType.SYK_HELGEDAG -> SykHelgedag(data.dagen, data.grad)
+            JsonDagType.SYK_HELGEDAG_SYKMELDING -> SykHelgedag.Sykmelding(data.dagen, data.grad)
+            JsonDagType.SYK_HELGEDAG_SØKNAD -> SykHelgedag.Søknad(data.dagen, data.grad)
             JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
             JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
         }

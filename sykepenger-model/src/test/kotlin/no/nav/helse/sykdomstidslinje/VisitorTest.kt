@@ -65,7 +65,10 @@ internal class VisitorTest {
             implisittDagerCount += 1
         }
 
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {
+            sykedagerCount += 1
+        }
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
             sykedagerCount += 1
         }
     }

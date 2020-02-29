@@ -5,7 +5,9 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.DagFactory
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.util.*
@@ -65,9 +67,7 @@ class Sykmelding(
     }
 
     internal object SykmeldingDagFactory : DagFactory {
-        override fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
-        override fun sykedag(dato: LocalDate, grad: Double): Sykedag = Sykedag.Sykmelding(dato, grad)
-        override fun ubestemtdag(dato: LocalDate): Ubestemtdag { error("Ubestemtdag ikke støttet") }
-        override fun utenlandsdag(dato: LocalDate): Utenlandsdag { error("Utenlandsdag ikke støttet") }
+        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Sykmelding = SykHelgedag.Sykmelding(dato, grad)
+        override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Sykmelding = Sykedag.Sykmelding(dato, grad)
     }
 }

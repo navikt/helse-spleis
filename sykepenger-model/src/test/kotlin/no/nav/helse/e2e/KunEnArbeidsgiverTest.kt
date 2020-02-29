@@ -738,7 +738,8 @@ internal class KunEnArbeidsgiverTest {
             override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(Sykedag::class)
             override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(Sykedag::class)
 
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = inkrementer(SykHelgedag::class)
+            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = inkrementer(SykHelgedag::class)
+            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = inkrementer(SykHelgedag::class)
 
             private fun inkrementer(klasse: KClass<out Dag>) {
                 dagtelling.compute(klasse) { _, value ->

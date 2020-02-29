@@ -75,7 +75,11 @@ internal enum class Turneringsnøkkel {
                 turneringsnøkkel = EDU
             }
 
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag) {
+            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {
+                turneringsnøkkel = SW
+            }
+
+            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
                 turneringsnøkkel = SW
             }
 

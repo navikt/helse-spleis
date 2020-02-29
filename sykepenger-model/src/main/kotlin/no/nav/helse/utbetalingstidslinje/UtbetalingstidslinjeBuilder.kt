@@ -50,7 +50,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitSykedag(sykedag: Sykedag.Søknad) = sykedag(sykedag.dagen, sykedag.grad)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = egenmeldingsdag(egenmeldingsdag.dagen)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = egenmeldingsdag(egenmeldingsdag.dagen)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag) = sykHelgedag(sykHelgedag.dagen, sykHelgedag.grad)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = sykHelgedag(sykHelgedag.dagen, sykHelgedag.grad)
+    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = sykHelgedag(sykHelgedag.dagen, sykHelgedag.grad)
 
     private fun egenmeldingsdag(dagen: LocalDate) =
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode) || sisteNavDagForArbeidsgiverFørPerioden?.let { (ChronoUnit.DAYS.between(it, dagen) <= 16) } == true)

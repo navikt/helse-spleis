@@ -22,7 +22,7 @@ internal class DagFactoryTest {
         assertThrows<IllegalStateException> { factory.feriedag(enDag) }
         assertThrows<IllegalStateException> { factory.permisjonsdag(enDag) }
         assertThrows<IllegalStateException> { factory.studiedag(enDag) }
-        assertThrows<IllegalStateException> { factory.ubestemtdag(enDag) }
+        assertDag(enDag, factory.ubestemtdag(enDag))
         assertThrows<IllegalStateException> { factory.utenlandsdag(enDag) }
 
         assertDag(enDag, factory.implisittDag(enDag))
@@ -53,10 +53,10 @@ internal class DagFactoryTest {
         assertDag(enDag, factory.feriedag(enDag))
         assertDag(enDag, factory.implisittDag(enDag))
         assertThrows<IllegalStateException> { factory.permisjonsdag(enDag) }
-        assertDag(enDag, factory.studiedag(enDag))
-        assertDag(enDag, factory.sykHelgedag(enDag, grad))
+        assertThrows<IllegalStateException> { factory.studiedag(enDag) }
+        assertThrows<IllegalStateException> { factory.sykHelgedag(enDag, grad) }
         assertDag(enDag, factory.ubestemtdag(enDag))
-        assertDag(enDag, factory.utenlandsdag(enDag))
+        assertThrows<IllegalStateException> { factory.utenlandsdag(enDag) }
     }
 
     private fun assertDag(expectedDato: LocalDate, actual: Dag) {

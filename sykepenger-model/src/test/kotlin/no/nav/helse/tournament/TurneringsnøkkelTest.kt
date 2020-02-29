@@ -26,7 +26,8 @@ internal class TurneringsnøkkelTest {
         assertEquals(EDU, fraDag(Studiedag(enDag)))
         assertEquals(S_A, fraDag(Sykedag.Søknad(enDag, grad)))
         assertEquals(S_SM, fraDag(Sykedag.Sykmelding(enDag, grad)))
-        assertEquals(SW, fraDag(SykHelgedag(enDag, grad)))
+        assertEquals(SW, fraDag(SykHelgedag.Sykmelding(enDag, grad)))
+        assertEquals(SW, fraDag(SykHelgedag.Søknad(enDag, grad)))
         assertEquals(Undecided, fraDag(Ubestemtdag(enDag)))
         assertEquals(DA, fraDag(Utenlandsdag(enDag)))
     }
