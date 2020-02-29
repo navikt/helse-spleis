@@ -7,6 +7,8 @@ internal class V6LeggerTilGrad : JsonMigration(version = 6) {
 
     override val description = "Legger til grad på sykedager og utbetalingsdager"
 
+    private val dagerMedGrad = listOf("SYKEDAG_SYKMELDING", "SYKEDAG_SØKNAD", "SYK_HELGEDAG")
+
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
@@ -24,10 +26,8 @@ internal class V6LeggerTilGrad : JsonMigration(version = 6) {
 
     private fun migrerTidslinje(tidslinje: JsonNode) {
         tidslinje.forEach { dag ->
-            if (dag.has("type")) {
-                if (!dag["type"].textValue().endsWith("_INNTEKTSMELDING")) {
-                    (dag as ObjectNode).put("grad", 100.0)
-                }
+            if (dag["type"].textValue() in dagerMedGrad) {
+                (dag as ObjectNode).put("grad", 100.0)
             }
         }
     }
