@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 internal class V11EgenHendelsedagForSykHelgedag() : JsonMigration(version = 11) {
 
-    override val description = "Setter kildehendelse til Søknad for alle Sykhelgedager."
+    override val description = "Kalkulerer riktig hendelsetype for alle Sykhelgedager."
 
     private val tidsstempelKey = "tidsstempel"
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
