@@ -1,7 +1,10 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
@@ -47,8 +50,6 @@ internal class HendelseMediator(
             message.accept(messageProcessor)
         } catch (err: Aktivitetslogg.AktivitetException) {
             sikkerLogg.error("feil på melding: ${err.message}", err)
-        } catch (err: UtenforOmfangException) {
-            sikkerLogg.error("melding er utenfor omfang: ${err.message}", err)
         }
     }
 

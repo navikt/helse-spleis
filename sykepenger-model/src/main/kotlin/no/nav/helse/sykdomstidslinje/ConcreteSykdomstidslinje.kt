@@ -29,7 +29,6 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return CompositeSykdomstidslinje(
             førsteStartdato.datesUntil(this.sisteSluttdato(other).plusDays(1))
                 .map {
-                    val firstOfOther = other.dag(other.førsteDag())
                     beste(this.dag(it), other.dag(it), dagturnering) ?: gapDayCreator(it)
                 }.toList()
         )
