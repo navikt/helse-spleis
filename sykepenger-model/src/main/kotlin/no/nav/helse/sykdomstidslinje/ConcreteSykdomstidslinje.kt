@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDate
@@ -46,9 +47,12 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
 
-    @Deprecated("Skal bruke Aktivitetslogger.error()")
-    fun erUtenforOmfang(): Boolean {
-        return flatten().any { it::class in arrayOf(Permisjonsdag.Søknad::class, Permisjonsdag.Aareg::class, Ubestemtdag::class) }
+    fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+        val ugyldigeDager = listOf(Permisjonsdag.Søknad::class, Permisjonsdag.Aareg::class, Ubestemtdag::class)
+        return flatten().filter { it::class in ugyldigeDager }
+            .distinctBy { it::class.simpleName }
+            .onEach { aktivitetslogg.error("Sykdomstidslinjen inneholder ustøttet dag: %s", it::class.simpleName) }
+            .isEmpty()
     }
 
     private fun førsteStartdato(other: ConcreteSykdomstidslinje) =

@@ -33,7 +33,7 @@ internal class Sykdomshistorikk private constructor(
         hendelse.sykdomstidslinje()
     } else {
         sykdomstidslinje().plus(hendelseSykdomstidslinje, ::ImplisittDag, historiskDagturnering).also {
-            if (it.erUtenforOmfang()) hendelse.error("Ikke støttet dag")
+            it.valider(hendelse)
         }
     }
 

@@ -186,8 +186,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
 
-        if (sykdomshistorikk.sykdomstidslinje().erUtenforOmfang()) {
-            hendelse.error("Ikke støttet dag")
+        if (!sykdomshistorikk.sykdomstidslinje().valider(hendelse)) {
             tilstand(hendelse, TilInfotrygd)
         } else {
             tilstand(hendelse, nesteTilstand)

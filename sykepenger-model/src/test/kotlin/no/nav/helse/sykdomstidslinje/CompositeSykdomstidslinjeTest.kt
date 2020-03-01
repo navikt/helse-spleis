@@ -2,14 +2,14 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
 import no.nav.helse.tournament.historiskDagturnering
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -60,13 +60,17 @@ internal class CompositeSykdomstidslinjeTest {
         val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, 100.0, Søknad.SøknadDagFactory)
         val tidslinje = studiedag + sykedag
 
-        assertTrue(tidslinje.erUtenforOmfang())
+        val aktivitetslogg = Aktivitetslogg()
+        assertFalse(tidslinje.valider(aktivitetslogg))
+        assertTrue(aktivitetslogg.hasErrors())
     }
 
     @Test
     internal fun `tidslinje med permisjonsdag er utenfor omfang`() {
         val permisjonsdag = ConcreteSykdomstidslinje.permisjonsdag(Uke(1).mandag, Søknad.SøknadDagFactory)
-        assertTrue(permisjonsdag.erUtenforOmfang())
+        val aktivitetslogg = Aktivitetslogg()
+        assertFalse(permisjonsdag.valider(aktivitetslogg))
+        assertTrue(aktivitetslogg.hasErrors())
     }
 
     private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
