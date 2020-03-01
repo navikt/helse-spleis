@@ -9,10 +9,7 @@ import no.nav.helse.spleis.hendelser.model.*
 import java.util.*
 import javax.sql.DataSource
 
-internal class HendelseRecorder(
-    private val dataSource: DataSource,
-    private val probe: PostgresProbe = PostgresProbe
-): MessageProcessor {
+internal class HendelseRecorder(private val dataSource: DataSource): MessageProcessor {
 
     override fun process(message: NySøknadMessage) {
         lagreMelding(Meldingstype.NY_SØKNAD, message.id, message.toJson())

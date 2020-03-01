@@ -8,10 +8,7 @@ import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
-class PersonPostgresRepository(
-    private val dataSource: DataSource,
-    private val probe: PostgresProbe = PostgresProbe
-) : PersonRepository {
+class PersonPostgresRepository(private val dataSource: DataSource) : PersonRepository {
 
     override fun hentPerson(aktørId: String): Person? {
         return using(sessionOf(dataSource)) { session ->
@@ -26,7 +23,7 @@ class PersonPostgresRepository(
         }?.let {
             it.deserialize()
         }?.also {
-            probe.personLestFraDb()
+            PostgresProbe.personLestFraDb()
         }
     }
 
