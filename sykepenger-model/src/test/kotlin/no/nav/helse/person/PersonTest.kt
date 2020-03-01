@@ -219,8 +219,7 @@ internal class PersonTest {
         søknad(
             perioder = listOf(
                 Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
-            ),
-            sendtNav = Uke(1).mandag.plusMonths(4).atStartOfDay()
+            )
         ).also {
             testPerson.håndter(it)
             assertTrue(it.hasErrors())
@@ -359,7 +358,15 @@ internal class PersonTest {
         sykeperioder = perioder
     )
 
-    private fun søknad(perioder: List<Søknad.Periode> = listOf(Søknad.Periode.Sykdom(16.september, 5.oktober, 100)), sendtNav: LocalDateTime = LocalDateTime.now()) =
+    private fun søknad(
+        perioder: List<Søknad.Periode> = listOf(
+            Søknad.Periode.Sykdom(
+                16.september,
+                5.oktober,
+                100
+            )
+        )
+    ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fødselsnummer,

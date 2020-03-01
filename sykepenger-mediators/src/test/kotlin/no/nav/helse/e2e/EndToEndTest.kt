@@ -14,6 +14,7 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
@@ -58,6 +59,7 @@ import java.time.YearMonth
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
+@KtorExperimentalAPI
 @TestInstance(Lifecycle.PER_CLASS)
 internal class EndToEndTest {
 
@@ -199,7 +201,7 @@ internal class EndToEndTest {
         val fødselsnummer = "01017000000"
         val virksomhetsnummer = "123456789"
 
-        val søknad = sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
+        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
             fødselsnummer = fødselsnummer,

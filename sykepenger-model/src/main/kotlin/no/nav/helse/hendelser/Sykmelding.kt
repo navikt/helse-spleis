@@ -33,7 +33,7 @@ class Sykmelding(
         return aktivitetslogg
     }
 
-    override fun melding(ignore: String) = "Ny Søknad"
+    override fun melding(klassName: String) = "Ny Søknad"
 
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 

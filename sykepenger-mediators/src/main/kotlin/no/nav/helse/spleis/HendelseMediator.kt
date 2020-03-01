@@ -74,49 +74,49 @@ internal class HendelseMediator(
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {
         override fun process(message: NySøknadMessage) {
             val sykmelding = message.asSykmelding()
-            hendelseProbe.onSykmelding(sykmelding)
+            hendelseProbe.onSykmelding()
             person(sykmelding).håndter(sykmelding)
             finalize(behovMediator, sykmelding)
         }
 
         override fun process(message: SendtSøknadMessage) {
             val søknad = message.asSøknad()
-            hendelseProbe.onSøknad(søknad)
+            hendelseProbe.onSøknad()
             person(søknad).håndter(søknad)
             finalize(behovMediator, søknad)
         }
 
         override fun process(message: InntektsmeldingMessage) {
             val inntektsmelding = message.asInntektsmelding()
-            hendelseProbe.onInntektsmelding(inntektsmelding)
+            hendelseProbe.onInntektsmelding()
             person(inntektsmelding).håndter(inntektsmelding)
             finalize(behovMediator, inntektsmelding)
         }
 
         override fun process(message: YtelserMessage) {
             val ytelser = message.asYtelser()
-            hendelseProbe.onYtelser(ytelser)
+            hendelseProbe.onYtelser()
             person(ytelser).håndter(ytelser)
             finalize(behovMediator, ytelser)
         }
 
         override fun process(message: VilkårsgrunnlagMessage) {
             val vilkårsgrunnlag = message.asVilkårsgrunnlag()
-            hendelseProbe.onVilkårsgrunnlag(vilkårsgrunnlag)
+            hendelseProbe.onVilkårsgrunnlag()
             person(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
             finalize(behovMediator, vilkårsgrunnlag)
         }
 
         override fun process(message: ManuellSaksbehandlingMessage) {
             val manuellSaksbehandling = message.asManuellSaksbehandling()
-            hendelseProbe.onManuellSaksbehandling(manuellSaksbehandling)
+            hendelseProbe.onManuellSaksbehandling()
             person(manuellSaksbehandling).håndter(manuellSaksbehandling)
             finalize(behovMediator, manuellSaksbehandling)
         }
 
         override fun process(message: UtbetalingMessage) {
             val utbetaling = message.asUtbetaling()
-            hendelseProbe.onUtbetaling(utbetaling)
+            hendelseProbe.onUtbetaling()
             person(utbetaling).håndter(utbetaling)
             finalize(behovMediator, utbetaling)
         }

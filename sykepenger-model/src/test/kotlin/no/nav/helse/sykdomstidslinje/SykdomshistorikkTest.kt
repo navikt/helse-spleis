@@ -204,11 +204,11 @@ internal class SykdomshistorikkTest {
             sykdomshistorikk.accept(this)
         }
 
-        override fun preVisitComposite(tidslinje: CompositeSykdomstidslinje) {
+        override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
             if (hendelseSykdomstidslinje.size == beregnetSykdomstidslinjer.size) {
-                hendelseSykdomstidslinje.add(tidslinje)
+                hendelseSykdomstidslinje.add(compositeSykdomstidslinje)
             } else {
-                beregnetSykdomstidslinjer.add(tidslinje)
+                beregnetSykdomstidslinjer.add(compositeSykdomstidslinje)
             }
         }
 

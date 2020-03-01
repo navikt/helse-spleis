@@ -153,10 +153,10 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
         }
 
         internal object Karantene: State() {
-            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dato: LocalDate) {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avgrenser.avvisteDatoer.add(dato)
-                avgrenser.nextState(dato)?.run { avgrenser.state(this) }
+                avgrenser.avvisteDatoer.add(dagen)
+                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {

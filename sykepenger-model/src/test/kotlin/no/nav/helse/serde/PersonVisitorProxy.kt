@@ -112,8 +112,8 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitUkjentDag(dag)
     }
 
-    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        target.postVisitUtbetalingstidslinje(tidslinje)
+    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
+        target.postVisitUtbetalingstidslinje(utbetalingstidslinje)
     }
 
     override fun equals(other: Any?): Boolean {

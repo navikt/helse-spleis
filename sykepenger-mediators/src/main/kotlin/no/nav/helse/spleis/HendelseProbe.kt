@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import io.prometheus.client.Counter
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Påminnelse
 
 class HendelseProbe {
     private companion object {
@@ -22,31 +22,31 @@ class HendelseProbe {
         tell("Påminnelse")
     }
 
-    fun onYtelser(ytelser: Ytelser) {
+    fun onYtelser() {
         tell("Ytelser")
     }
 
-    fun onUtbetaling(utbetaling: Utbetaling) {
+    fun onUtbetaling() {
         tell("Utbetaling")
     }
 
-    fun onManuellSaksbehandling(manuellSaksbehandling: ManuellSaksbehandling) {
+    fun onManuellSaksbehandling() {
         tell("Godkjenning")
     }
 
-    fun onVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) {
+    fun onVilkårsgrunnlag() {
         tell("Vilkårsgrunnlag")
     }
 
-    fun onInntektsmelding(inntektsmelding: Inntektsmelding) {
+    fun onInntektsmelding() {
         tell("Inntektsmelding")
     }
 
-    fun onSykmelding(sykmelding: Sykmelding) {
+    fun onSykmelding() {
         tell("Sykmelding")
     }
 
-    fun onSøknad(søknad: Søknad) {
+    fun onSøknad() {
         tell("Søknad")
     }
 

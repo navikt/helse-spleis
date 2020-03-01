@@ -114,7 +114,7 @@ internal class VedtaksperiodeTest {
                 5.oktober,
                 100
             )
-        ), rapportertDato: LocalDateTime = LocalDateTime.now()
+        )
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),

@@ -75,8 +75,8 @@ internal sealed class Strategy {
 }
 internal object Undecided : Strategy() {
 
-    override fun decide(row: Dag, column: Dag): Dag = Ubestemtdag(row, column)
-    override fun decideInverse(row: Dag, column: Dag) = Ubestemtdag(row, column)
+    override fun decide(row: Dag, column: Dag): Dag = Ubestemtdag(row.dagen)
+    override fun decideInverse(row: Dag, column: Dag) = Ubestemtdag(row.dagen)
 }
 internal object Row : Strategy() {
 
