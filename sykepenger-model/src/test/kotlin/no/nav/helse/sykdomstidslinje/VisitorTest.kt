@@ -6,7 +6,6 @@ import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.sykedager
-import no.nav.helse.tournament.KonfliktskyDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -72,6 +71,4 @@ internal class VisitorTest {
             sykedagerCount += 1
         }
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

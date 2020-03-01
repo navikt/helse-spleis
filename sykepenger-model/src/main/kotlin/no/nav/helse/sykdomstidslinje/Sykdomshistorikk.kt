@@ -1,8 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDateTime
 import java.util.*
 
@@ -32,7 +30,7 @@ internal class Sykdomshistorikk private constructor(
     ) = if (elementer.isEmpty()) {
         hendelse.sykdomstidslinje()
     } else {
-        sykdomstidslinje().plus(hendelseSykdomstidslinje, ::ImplisittDag, historiskDagturnering).also {
+        (sykdomstidslinje() + hendelseSykdomstidslinje).also {
             it.valider(hendelse)
         }
     }

@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -17,22 +18,17 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun length(): Int
     internal abstract fun dag(dato: LocalDate): Dag?
 
-    fun plus(
-        other: ConcreteSykdomstidslinje,
-        gapDayCreator: (LocalDate) -> Dag,
-        dagturnering: Dagturnering
-    ): ConcreteSykdomstidslinje {
+    operator fun plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag)
+    fun plus(other: ConcreteSykdomstidslinje, dagturnering: Dagturnering) = this.plus(other, ::ImplisittDag, dagturnering)
+    fun plus(other: ConcreteSykdomstidslinje, gapDayCreator: (LocalDate) -> Dag) = this.plus(other, gapDayCreator, historiskDagturnering)
+    fun plus(other: ConcreteSykdomstidslinje, gapDayCreator: (LocalDate) -> Dag, dagturnering: Dagturnering): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
-
-        val førsteStartdato = this.førsteStartdato(other)
-
-        return CompositeSykdomstidslinje(
-            førsteStartdato.datesUntil(this.sisteSluttdato(other).plusDays(1))
-                .map {
-                    beste(this.dag(it), other.dag(it), dagturnering) ?: gapDayCreator(it)
-                }.toList()
-        )
+        val førsteDag = this.førsteStartdato(other)
+        val sisteDag = this.sisteSluttdato(other).plusDays(1)
+        return CompositeSykdomstidslinje(førsteDag.datesUntil(sisteDag).map {
+            beste(dagturnering, this.dag(it), other.dag(it)) ?: gapDayCreator(it)
+        }.toList())
     }
 
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
@@ -190,10 +186,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                     .toList())
         }
 
-        private fun beste(a: Dag?, b: Dag?, dagturnering: Dagturnering): Dag? {
+        private fun beste(dagturnering: Dagturnering, a: Dag?, b: Dag?): Dag? {
             if (a == null) return b
             if (b == null) return a
-            return a.beste(b, dagturnering)
+            return dagturnering.beste(a, b)
         }
     }
 }

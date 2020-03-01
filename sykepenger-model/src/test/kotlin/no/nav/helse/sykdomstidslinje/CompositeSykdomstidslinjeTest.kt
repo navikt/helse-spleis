@@ -8,7 +8,6 @@ import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
-import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -25,8 +24,7 @@ internal class CompositeSykdomstidslinjeTest {
         val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, 100.0, Søknad.SøknadDagFactory)
         val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, 100.0, Søknad.SøknadDagFactory)
 
-        val arbeidsgiverperiode =
-            arbeidsgiverperiode1.plus(arbeidsgiverperiode2, { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) }, historiskDagturnering)
+        val arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) })
 
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)
@@ -72,6 +70,4 @@ internal class CompositeSykdomstidslinjeTest {
         assertFalse(permisjonsdag.valider(aktivitetslogg))
         assertTrue(aktivitetslogg.hasErrors())
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }

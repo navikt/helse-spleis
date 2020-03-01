@@ -5,9 +5,7 @@ import no.nav.helse.get
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.september
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -111,6 +109,4 @@ internal class SykepengesøknadTidslinjeTest {
         orgnummer = "123456789",
         sykeperioder = listOf(Triple(sykeperiodeFOM, sykeperiodeTOM, 100))
     )
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }

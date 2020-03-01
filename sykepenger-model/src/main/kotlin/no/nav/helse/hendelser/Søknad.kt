@@ -31,7 +31,7 @@ class Søknad constructor(
 
     override fun sykdomstidslinje() = perioder
         .map { it.sykdomstidslinje() }
-        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, SøknadDagFactory::implisittDag, søknadDagturnering) }
+        .reduce { concreteSykdomstidslinje, other -> concreteSykdomstidslinje.plus(other, søknadDagturnering) }
 
     override fun fødselsnummer() = fnr
 

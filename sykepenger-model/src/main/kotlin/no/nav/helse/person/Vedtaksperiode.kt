@@ -7,9 +7,7 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
-import no.nav.helse.tournament.historiskDagturnering
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.Duration
@@ -706,7 +704,7 @@ internal class Vedtaksperiode private constructor(
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .map { it.sykdomshistorikk.sykdomstidslinje() }
             .reduce { concreteSykdomstidslinje, other ->
-                concreteSykdomstidslinje.plus(other, ::ImplisittDag, historiskDagturnering)
+                concreteSykdomstidslinje + other
             }
     }
 }

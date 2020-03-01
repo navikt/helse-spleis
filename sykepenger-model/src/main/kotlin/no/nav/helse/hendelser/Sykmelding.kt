@@ -40,7 +40,7 @@ class Sykmelding(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, SykmeldingDagFactory::implisittDag, KonfliktskyDagturnering)}
+        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, KonfliktskyDagturnering)}
 
     override fun fødselsnummer() = fnr
 

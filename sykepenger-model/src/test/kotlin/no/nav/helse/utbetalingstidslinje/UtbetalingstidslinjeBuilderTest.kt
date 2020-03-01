@@ -2,9 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.testhelpers.*
-import no.nav.helse.tournament.KonfliktskyDagturnering
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
@@ -470,6 +468,4 @@ internal class UtbetalingstidslinjeBuilderTest {
             dagtelling.compute(klasse) { _, value -> 1 + (value ?: 0) }
         }
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

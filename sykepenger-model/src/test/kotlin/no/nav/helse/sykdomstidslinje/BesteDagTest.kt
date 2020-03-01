@@ -69,7 +69,7 @@ internal class BesteDagTest {
         dag2: Dag,
         expectedWinnerClass: KClass<T>
     ) {
-        val winner = dag1.beste(dag2, historiskDagturnering)
+        val winner = historiskDagturnering.beste(dag1, dag2)
         assertEquals(expectedWinnerClass, winner::class)
     }
 

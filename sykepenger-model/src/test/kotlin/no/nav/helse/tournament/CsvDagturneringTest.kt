@@ -4,7 +4,10 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.DagFactory
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -124,7 +127,5 @@ internal class CsvDagturneringTest {
             )
 
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }
 

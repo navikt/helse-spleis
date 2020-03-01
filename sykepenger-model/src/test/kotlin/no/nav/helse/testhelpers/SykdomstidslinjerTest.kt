@@ -1,8 +1,5 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.tournament.KonfliktskyDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,6 +24,4 @@ internal class SykdomstidslinjerTest {
         assertEquals(18, tidslinje.flatten().size)
         assertEquals(18.januar, tidslinje.flatten().last().sisteDag())
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, KonfliktskyDagturnering)
 }

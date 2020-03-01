@@ -1,9 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.testhelpers.Uke
-import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -70,6 +68,4 @@ internal class CompositeLeafSykdomstidslinjeTest {
         assertEquals(andreMandag.sisteDag(), interval.sisteDag())
         assertEquals(8, interval.flatten().size)
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag, historiskDagturnering)
 }
