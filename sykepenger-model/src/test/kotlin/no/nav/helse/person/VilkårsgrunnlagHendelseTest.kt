@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.partisjoner
+import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,15 +19,11 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var personObserver: TestPersonObserver
-    private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach
     internal fun opprettPerson() {
-        personObserver = TestPersonObserver()
         person = Person("12345", UNG_PERSON_FNR_2018)
-        person.addObserver(personObserver)
-        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -64,10 +60,10 @@ internal class VilkårsgrunnlagHendelseTest {
         val utgangspunktForBeregningAvYtelse = inspektør.sykdomstidslinje(0).førsteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
         assertEquals(
-            utgangspunktForBeregningAvYtelse.minusDays(1),
-            personObserver.etterspurtBehov(
+            utgangspunktForBeregningAvYtelse.minusDays(1).toString(),
+            hendelse.etterspurtBehov(
                 vedtaksperiodeId,
-                "Sykepengehistorikk",
+                Behovtype.Sykepengehistorikk,
                 "utgangspunktForBeregningAvYtelse"
             )
         )
@@ -144,7 +140,7 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             sykeperioder = listOf(Triple(1.januar, 31.januar, 100))
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun søknad() =
@@ -156,7 +152,7 @@ internal class VilkårsgrunnlagHendelseTest {
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
             harAndreInntektskilder = false
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun inntektsmelding(beregnetInntekt: Double) =
@@ -171,7 +167,7 @@ internal class VilkårsgrunnlagHendelseTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = emptyList()
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun vilkårsgrunnlag(
@@ -188,7 +184,7 @@ internal class VilkårsgrunnlagHendelseTest {
             erEgenAnsatt = egenAnsatt,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
@@ -224,21 +220,5 @@ internal class VilkårsgrunnlagHendelseTest {
 
         internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?: throw IllegalAccessException()
 
-    }
-
-    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
-        private val etterspurteBehov = mutableListOf<BehovType>()
-
-        inline fun <reified T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
-            return etterspurteBehov.partisjoner().let {
-                it.filter { it["vedtaksperiodeId"] == id }
-                    .filter { behov in (it["@behov"] as List<*>) }
-                    .first()[felt] as T?
-            }
-        }
-
-        override fun onBehov(behov: BehovType) {
-            etterspurteBehov.add(behov)
-        }
     }
 }

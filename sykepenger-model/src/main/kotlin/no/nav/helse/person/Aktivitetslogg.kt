@@ -4,7 +4,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -162,7 +161,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             fun detaljer() = detaljer
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitBehov(kontekster, this, type, melding, tidsstempel)
+                visitor.visitBehov(kontekster, this, type, melding, detaljer, tidsstempel)
             }
 
             enum class Behovtype {
@@ -250,6 +249,7 @@ internal interface AktivitetsloggVisitor {
         aktivitet: Behov,
         type: Behov.Behovtype,
         melding: String,
+        detaljer: Map<String, Any>,
         tidsstempel: String
     ) {
     }
@@ -282,40 +282,6 @@ class SpesifikkKontekst(internal val kontekstType: String, internal val kontekst
     override fun equals(other: Any?) =
         this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap
     override fun hashCode() = kontekstMap.hashCode()
-}
-
-internal open class Personkontekst(private val aktørId: String, private val fødselsnummer: String) : Aktivitetskontekst {
-    override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer, "aktørId" to aktørId))
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Personkontekst) return false
-        return this.toMap() == other.toMap()
-    }
-
-    override fun hashCode() = toMap().hashCode()
-
-    open fun toMap() = mapOf<String, Any>(
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer
-    )
-}
-
-internal open class Arbeidsgiverkontekst(aktørId: String, fødselsnummer: String, private val organisasjonsnummer: String) : Personkontekst(aktørId, fødselsnummer) {
-    override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
-    }
-
-    override fun toMap() = super.toMap() + ("organisasjonsnummer" to organisasjonsnummer)
-}
-
-internal class Vedtaksperiodekontekst(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, private val vedtaksperiodeId: UUID) : Arbeidsgiverkontekst(aktørId, fødselsnummer, organisasjonsnummer) {
-    override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to vedtaksperiodeId.toString()))
-    }
-
-    override fun toMap(): Map<String, Any> = super.toMap() + ("vedtaksperiodeId" to vedtaksperiodeId)
 }
 
 fun Aktivitetslogg.toMap() = AktivitetsloggReflect(this).toMap()

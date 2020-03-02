@@ -1,18 +1,14 @@
 package no.nav.helse.spleis
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.behov.BehovType
-import no.nav.helse.hendelser.HendelseObserver
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
 
-object VedtaksperiodeProbe : PersonObserver, HendelseObserver {
+object VedtaksperiodeProbe : PersonObserver {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
-
-    override fun onBehov(behov: BehovType) {}
 
     override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 

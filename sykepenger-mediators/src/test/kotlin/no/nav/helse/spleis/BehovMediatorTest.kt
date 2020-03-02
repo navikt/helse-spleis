@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
-import no.nav.helse.behov.BehovType
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -138,33 +137,6 @@ internal class BehovMediatorTest {
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
 
         assertThrows<IllegalArgumentException> { behovMediator.håndter(hendelse) }
-    }
-
-    @Test
-    fun `to forskjellige kontekster gir to meldinger på kafka`() {
-        val hendelse = hendelse()
-        val vedtaksperiode1 = UUID.randomUUID()
-        val vedtaksperiode2 = UUID.randomUUID()
-
-        behovMediator.onBehov(BehovType.Godkjenning(aktørId, fødselsnummer, "orgnr", vedtaksperiode1))
-        behovMediator.onBehov(BehovType.GjennomgåTidslinje(aktørId, fødselsnummer, "orgnr", vedtaksperiode2))
-        behovMediator.onBehov(BehovType.Godkjenning(aktørId, fødselsnummer, "orgnr", vedtaksperiode2))
-        behovMediator.finalize(hendelse)
-
-        assertEquals(2, messages.size)
-        assertTrue(messages.all { it.first == hendelse.fødselsnummer() })
-        messages.map { objectMapper.readTree(it.second) }.let {
-            assertTrue(it.all { it["@event_name"].asText() == "behov" })
-            assertTrue(it.all { it.hasNonNull("@opprettet") })
-            assertTrue(it.all { it.hasNonNull("@id") })
-        }
-    }
-
-
-    private fun hendelse() = object : ArbeidstakerHendelse(Aktivitetslogg()) {
-        override fun aktørId() = aktørId
-        override fun fødselsnummer() = fødselsnummer
-        override fun organisasjonsnummer() = "orgnr"
     }
 
     private class TestKontekst(

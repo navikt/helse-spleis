@@ -26,7 +26,7 @@ internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData):
                 Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.behovtype!!),
                 kontekster,
                 it.melding,
-                emptyMap(),
+                it.detaljer,
                 it.tidsstempel
             )
             AktivitetsloggData.Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.Error(

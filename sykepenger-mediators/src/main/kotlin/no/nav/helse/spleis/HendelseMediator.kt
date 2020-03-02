@@ -66,7 +66,6 @@ internal class HendelseMediator(
         if (hendelse.hasErrors()) return sikkerLogg.error("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
         sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
 
-        mediator.finalize(hendelse)
         mediator.håndter(hendelse)
     }
 
@@ -128,8 +127,6 @@ internal class HendelseMediator(
         }
 
         private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
-            arbeidstakerHendelse.addObserver(behovMediator)
-            arbeidstakerHendelse.addObserver(vedtaksperiodeProbe)
             return (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
                 aktørId = arbeidstakerHendelse.aktørId(),
                 fødselsnummer = arbeidstakerHendelse.fødselsnummer()

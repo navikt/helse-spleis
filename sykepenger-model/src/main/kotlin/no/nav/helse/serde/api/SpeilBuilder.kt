@@ -14,7 +14,6 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.joinForOppdrag
 import java.util.*
 
 
@@ -354,7 +353,7 @@ internal class SpeilBuilder : PersonVisitor {
         }
 
         override fun postVisitUtbetalingslinjer() {
-            linjerForSpeil.joinForOppdrag().forEach { utbetalingslinje ->
+            linjerForSpeil.forEach { utbetalingslinje ->
                 val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
                     "fom" to utbetalingslinje.fom,
                     "tom" to utbetalingslinje.tom,

@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.partisjoner
+import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,6 +22,7 @@ internal class UtbetalingsreferanseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
+    private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -30,52 +31,43 @@ internal class UtbetalingsreferanseTest {
 
     @Test
     fun `tilstøtende periode får samme utbetalingsreferanse`() {
-        val utbetalingObserver = UtbetalingObserver()
-
         håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
             .also {
-                it.addObserver(utbetalingObserver)
                 person.håndter(it)
             }
+
+        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
+        assertEquals(utbetalingsreferanse1, inspektør.utbetalingsreferanser[0])
 
         håndterYtelser(fom = 1.februar, tom = 28.februar, sendtInntektsmelding = false, vedtaksperiodeindeks = 1)
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
             .also {
-                it.addObserver(utbetalingObserver)
                 person.håndter(it)
             }
+        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
+        assertEquals(utbetalingsreferanse2, inspektør.utbetalingsreferanser[1])
 
-        assertEquals(2, utbetalingObserver.referanser.size)
-        assertEquals(
-            utbetalingObserver.referanser[inspektør.vedtaksperiodeId(0)],
-            utbetalingObserver.referanser[inspektør.vedtaksperiodeId(1)]
-        )
+        assertEquals(utbetalingsreferanse1, utbetalingsreferanse2)
     }
 
     @Test
     fun `ikke-tilstøtende periode får unik utbetalingsreferanse`() {
-        val utbetalingObserver = UtbetalingObserver()
-
         håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
             .also {
-                it.addObserver(utbetalingObserver)
                 person.håndter(it)
             }
+        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
 
         håndterYtelser(fom = 2.februar, tom = 28.februar, sendtInntektsmelding = true, vedtaksperiodeindeks = 1)
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
             .also {
-                it.addObserver(utbetalingObserver)
                 person.håndter(it)
             }
+        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
 
-        assertEquals(2, utbetalingObserver.referanser.size)
-        assertNotEquals(
-            utbetalingObserver.referanser[inspektør.vedtaksperiodeId(0)],
-            utbetalingObserver.referanser[inspektør.vedtaksperiodeId(1)]
-        )
+        assertNotEquals(utbetalingsreferanse1, utbetalingsreferanse2)
     }
 
     private fun håndterYtelser(
@@ -99,7 +91,9 @@ internal class UtbetalingsreferanseTest {
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now()
-    )
+    ).apply {
+        hendelse = this
+    }
 
     private fun ytelser(
         vedtaksperiodeId: UUID,
@@ -186,6 +180,8 @@ internal class UtbetalingsreferanseTest {
 
         private var vedtaksperiodeindeks: Int = -1
         private val vedtaksperiodeIder = mutableSetOf<UUID>()
+        internal val utbetalingsreferanser = mutableMapOf<Int, String>()
+
         init {
             person.accept(this)
         }
@@ -195,18 +191,11 @@ internal class UtbetalingsreferanseTest {
             vedtaksperiodeIder.add(id)
         }
 
+        override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
+            this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
+        }
+
         internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
 
-    }
-
-    private class UtbetalingObserver : HendelseObserver {
-        internal val referanser = mutableMapOf<UUID, String>()
-
-        override fun onBehov(behov: BehovType) {
-            if (behov !is BehovType.Utbetaling) return
-            listOf(behov).partisjoner().first().also {
-                referanser[it.getValue("vedtaksperiodeId") as UUID] = it.getValue("utbetalingsreferanse") as String
-            }
-        }
     }
 }

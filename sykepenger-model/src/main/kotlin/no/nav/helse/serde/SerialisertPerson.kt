@@ -273,7 +273,8 @@ internal data class PersonData(
             val behovtype: String?,
             val melding: String,
             val tidsstempel: String,
-            val kontekster: List<SpesifikkKontekstData>
+            val kontekster: List<SpesifikkKontekstData>,
+            val detaljer: Map<String, Any>
         )
 
         data class SpesifikkKontekstData(

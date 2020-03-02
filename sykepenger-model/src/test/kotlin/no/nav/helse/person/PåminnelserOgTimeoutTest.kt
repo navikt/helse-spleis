@@ -1,12 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.partisjoner
+import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
@@ -22,14 +22,12 @@ class PåminnelserOgTimeoutTest {
     }
 
     private lateinit var person: Person
-    private lateinit var personObserver: TestPersonObserver
+    private lateinit var hendelse: ArbeidstakerHendelse
     private val inspektør get() = TestPersonInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {
-        personObserver = TestPersonObserver()
         person = Person("12345", UNG_PERSON_FNR_2018)
-        person.addObserver(personObserver)
     }
 
     @Test
@@ -57,13 +55,12 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
-        assertEquals(2, personObserver.etterspurteBehov.size)
-        personObserver.etterspurteBehov.clear()
+        assertEquals(2, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
         assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
-        assertEquals(2, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+        assertEquals(2, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -71,7 +68,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding())
         person.håndter(inntektsmelding())
         person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD))
-        assertEquals(0, personObserver.etterspurteBehov.size)
+        assertEquals(0, hendelse.behov().size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -80,14 +77,13 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        assertEquals(5, personObserver.etterspurteBehov.size)
-        personObserver.etterspurteBehov.clear()
+        assertEquals(3, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
         assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
-        assertEquals(3, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Inntektsberegning))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
+        assertEquals(3, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Inntektsberegning))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
     }
 
     @Test
@@ -96,13 +92,12 @@ class PåminnelserOgTimeoutTest {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(7, personObserver.etterspurteBehov.size)
-        personObserver.etterspurteBehov.clear()
+        assertEquals(2, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
-        assertEquals(2, personObserver.etterspurteBehov.size)
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
-        assertEquals(1, personObserver.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+        assertEquals(2, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -113,11 +108,10 @@ class PåminnelserOgTimeoutTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
-        assertEquals(8, personObserver.etterspurteBehov.size)
-        personObserver.etterspurteBehov.clear()
+        assertEquals(1, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
-        assertEquals(0, personObserver.etterspurteBehov.size)
+        assertEquals(0, hendelse.behov().size)
     }
 
     @Test
@@ -128,11 +122,10 @@ class PåminnelserOgTimeoutTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
         person.håndter(manuellSaksbehandling())
+        assertEquals(1, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
-        assertEquals(9, personObserver.etterspurteBehov.size)
-        personObserver.etterspurteBehov.clear()
         assertTilstand(TilstandType.TIL_UTBETALING)
-        assertEquals(0, personObserver.etterspurteBehov.size)
+        assertEquals(0, hendelse.behov().size)
     }
 
     @Test
@@ -177,7 +170,7 @@ class PåminnelserOgTimeoutTest {
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             harAndreInntektskilder = false
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun sykmelding() =
@@ -188,7 +181,7 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(1.januar, 20.januar, 100))
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun inntektsmelding() =
@@ -203,7 +196,7 @@ class PåminnelserOgTimeoutTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
             ferieperioder = emptyList()
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun vilkårsgrunnlag() =
@@ -220,7 +213,7 @@ class PåminnelserOgTimeoutTest {
             erEgenAnsatt = false,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun ytelser() = Ytelser(
@@ -249,7 +242,7 @@ class PåminnelserOgTimeoutTest {
         ),
         aktivitetslogg = Aktivitetslogg()
     ).apply {
-        addObserver(personObserver)
+        hendelse = this
     }
 
     private fun manuellSaksbehandling() = ManuellSaksbehandling(
@@ -261,7 +254,7 @@ class PåminnelserOgTimeoutTest {
         utbetalingGodkjent = true,
         godkjenttidspunkt = LocalDateTime.now()
     ).apply {
-        addObserver(personObserver)
+        hendelse = this
     }
 
     private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
@@ -275,7 +268,7 @@ class PåminnelserOgTimeoutTest {
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now()
     ).apply {
-        addObserver(personObserver)
+        hendelse = this
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
@@ -311,20 +304,5 @@ class PåminnelserOgTimeoutTest {
 
         internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-    }
-    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
-
-        internal val etterspurteBehov = mutableListOf<BehovType>()
-
-        internal fun etterspurteBehov(vedtaksperiodeId: UUID, key: Behovtype) =
-            etterspurteBehov.partisjoner().let {
-                it.filter { it["vedtaksperiodeId"] == vedtaksperiodeId }
-                    .filter { key.name in (it["@behov"] as List<*>) }
-                    .size
-            }
-
-        override fun onBehov(behov: BehovType) {
-            etterspurteBehov.add(behov)
-        }
     }
 }

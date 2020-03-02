@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.BehovType
-import no.nav.helse.behov.partisjoner
+import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,15 +22,12 @@ internal class GodkjenningHendelseTest {
     }
 
     private lateinit var person: Person
-    private lateinit var personObserver: TestPersonObserver
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach
     internal fun opprettPerson() {
-        personObserver = TestPersonObserver()
         person = Person("12345", UNG_PERSON_FNR_2018)
-        person.addObserver(personObserver)
     }
 
     @Test
@@ -38,7 +35,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = personObserver.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), "Utbetaling", "utbetalingsreferanse")
+        val utbetalingsreferanse = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
         assertNotNull(utbetalingsreferanse)
     }
 
@@ -71,7 +68,7 @@ internal class GodkjenningHendelseTest {
         assertEquals(
             expectedTilstand,
             inspektør.tilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: $aktivitetslogg" }
+        )
     }
 
     private fun håndterYtelser() {
@@ -91,7 +88,7 @@ internal class GodkjenningHendelseTest {
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now()
     ).apply {
-        addObserver(personObserver)
+        hendelse = this
     }
 
     private fun ytelser(
@@ -120,7 +117,7 @@ internal class GodkjenningHendelseTest {
             ),
             aktivitetslogg = it
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
     }
     private fun sykmelding() =
@@ -131,7 +128,7 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun søknad() =
@@ -143,7 +140,7 @@ internal class GodkjenningHendelseTest {
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun inntektsmelding() =
@@ -158,7 +155,7 @@ internal class GodkjenningHendelseTest {
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList()
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private fun vilkårsgrunnlag() =
@@ -175,7 +172,7 @@ internal class GodkjenningHendelseTest {
             erEgenAnsatt = false,
             arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
-            addObserver(personObserver)
+            hendelse = this
         }
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
@@ -207,21 +204,5 @@ internal class GodkjenningHendelseTest {
         internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
 
         internal fun tilstand(indeks: Int) = tilstander[indeks]
-    }
-
-    private inner class TestPersonObserver : PersonObserver, HendelseObserver {
-        private val etterspurteBehov = mutableListOf<BehovType>()
-
-        inline fun <reified T> etterspurtBehov(id: UUID, behov: String, felt: String): T? {
-            return etterspurteBehov.partisjoner().let {
-                it.filter { it["vedtaksperiodeId"] == id }
-                    .filter { behov in (it["@behov"] as List<*>) }
-                    .first()[felt] as T?
-            }
-        }
-
-        override fun onBehov(behov: BehovType) {
-            etterspurteBehov.add(behov)
-        }
     }
 }

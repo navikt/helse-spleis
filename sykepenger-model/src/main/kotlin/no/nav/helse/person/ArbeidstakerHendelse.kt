@@ -1,8 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.behov.BehovType
-import no.nav.helse.hendelser.HendelseObserver
-
 abstract class ArbeidstakerHendelse protected constructor(
     internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
@@ -10,10 +7,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     init {
         aktivitetslogg.kontekst(this)
     }
-
-    private val hendelseObservers = mutableListOf<HendelseObserver>()
-
-    fun addObserver(hendelseObserver: HendelseObserver) = hendelseObservers.add(hendelseObserver)
 
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String
@@ -26,11 +19,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     }
 
     internal open fun melding(klassName: String) = klassName
-
-    @Deprecated("Skal bruke aktivitetslogg.behov()")
-    internal fun need(behov: BehovType) {
-        hendelseObservers.forEach { it.onBehov(behov) }
-    }
 
     fun toLogString() = aktivitetslogg.toString()
 }

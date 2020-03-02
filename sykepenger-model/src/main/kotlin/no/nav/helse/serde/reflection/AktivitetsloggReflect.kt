@@ -21,49 +21,6 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             aktivitetslogg.accept(this)
         }
 
-        private fun leggTilMelding(
-            kontekster: List<SpesifikkKontekst>,
-            alvorlighetsgrad: Alvorlighetsgrad,
-            melding: String,
-            tidsstempel: String
-        ) {
-            aktiviteter.add(
-                mutableMapOf<String, Any>(
-                    "kontekster" to map(kontekster),
-                    "alvorlighetsgrad" to alvorlighetsgrad.name,
-                    "melding" to melding,
-                    "tidsstempel" to tidsstempel
-                )
-            )
-        }
-
-        private fun leggTilMelding(
-            kontekster: List<SpesifikkKontekst>,
-            alvorlighetsgrad: Alvorlighetsgrad,
-            type: Behov.Behovtype,
-            melding: String,
-            tidsstempel: String
-        ) {
-            aktiviteter.add(
-                mutableMapOf<String, Any>(
-                    "kontekster" to map(kontekster),
-                    "alvorlighetsgrad" to alvorlighetsgrad.name,
-                    "behovtype" to type.toString(),
-                    "melding" to melding,
-                    "tidsstempel" to tidsstempel
-                )
-            )
-        }
-
-        private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
-            return kontekster.map {
-                mutableMapOf(
-                    "kontekstType" to it.kontekstType,
-                    "kontekstMap" to it.kontekstMap
-                )
-            }
-        }
-
         override fun visitInfo(
             kontekster: List<SpesifikkKontekst>,
             aktivitet: Info,
@@ -84,9 +41,10 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             aktivitet: Behov,
             type: Behov.Behovtype,
             melding: String,
+            detaljer: Map<String, Any>,
             tidsstempel: String
         ) {
-            leggTilMelding(kontekster, BEHOV, type, melding, tidsstempel)
+            leggTilBehov(kontekster, BEHOV, type, melding, detaljer, tidsstempel)
         }
 
         override fun visitError(
@@ -99,6 +57,52 @@ internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg)
             kontekster: List<SpesifikkKontekst>, aktivitet: Severe, melding: String, tidsstempel: String
         ) {
             leggTilMelding(kontekster, SEVERE, melding, tidsstempel)
+        }
+
+        private fun leggTilMelding(
+            kontekster: List<SpesifikkKontekst>,
+            alvorlighetsgrad: Alvorlighetsgrad,
+            melding: String,
+            tidsstempel: String
+        ) {
+            aktiviteter.add(
+                mutableMapOf<String, Any>(
+                    "kontekster" to map(kontekster),
+                    "alvorlighetsgrad" to alvorlighetsgrad.name,
+                    "melding" to melding,
+                    "detaljer" to emptyMap<String, Any>(),
+                    "tidsstempel" to tidsstempel
+                )
+            )
+        }
+
+        private fun leggTilBehov(
+            kontekster: List<SpesifikkKontekst>,
+            alvorlighetsgrad: Alvorlighetsgrad,
+            type: Behov.Behovtype,
+            melding: String,
+            detaljer: Map<String, Any>,
+            tidsstempel: String
+        ) {
+            aktiviteter.add(
+                mutableMapOf<String, Any>(
+                    "kontekster" to map(kontekster),
+                    "alvorlighetsgrad" to alvorlighetsgrad.name,
+                    "behovtype" to type.toString(),
+                    "melding" to melding,
+                    "detaljer" to detaljer,
+                    "tidsstempel" to tidsstempel
+                )
+            )
+        }
+
+        private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
+            return kontekster.map {
+                mutableMapOf(
+                    "kontekstType" to it.kontekstType,
+                    "kontekstMap" to it.kontekstMap
+                )
+            }
         }
     }
 }
