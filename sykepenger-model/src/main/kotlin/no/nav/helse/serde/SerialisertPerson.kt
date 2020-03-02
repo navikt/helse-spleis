@@ -141,7 +141,7 @@ class SerialisertPerson(val json: String) {
                         inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
                             ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
                             ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
-                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperioden -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                             null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
                         }, grad = Double.NaN
                     )
@@ -351,7 +351,7 @@ internal data class PersonData(
             enum class BegrunnelseData {
                 SykepengedagerOppbrukt,
                 MinimumInntekt,
-                EgenmeldingUtenforArbeidsgiverperioden
+                EgenmeldingUtenforArbeidsgiverperiode
             }
 
             enum class TypeData {
