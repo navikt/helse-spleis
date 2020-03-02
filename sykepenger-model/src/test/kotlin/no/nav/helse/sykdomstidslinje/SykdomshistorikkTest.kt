@@ -5,8 +5,13 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -88,7 +93,6 @@ internal class SykdomshistorikkTest {
         }
     }
 
-
     @Test
     internal fun `Håndterer Ubestemt dag`() {
         historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 100)))
@@ -101,6 +105,30 @@ internal class SykdomshistorikkTest {
         }
         assertEquals(2, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
+    }
+
+    @Test
+    internal fun `håndterer ubestemt dag`() {
+        val hendelse = sykdomshendelse(Ubestemtdag(LocalDate.now()))
+        historikk.håndter(hendelse)
+        assertTrue(hendelse.hasErrors())
+        assertEquals(1, historikk.size)
+    }
+
+    @Test
+    internal fun `håndterer permisjonsdag fra søknad`() {
+        val hendelse = sykdomshendelse(Permisjonsdag.Søknad(LocalDate.now()))
+        historikk.håndter(hendelse)
+        assertTrue(hendelse.hasErrors())
+        assertEquals(1, historikk.size)
+    }
+
+    @Test
+    internal fun `håndterer permisjonsdag fra aareg`() {
+        val hendelse = sykdomshendelse(Permisjonsdag.Aareg(LocalDate.now()))
+        historikk.håndter(hendelse)
+        assertTrue(hendelse.hasErrors())
+        assertEquals(1, historikk.size)
     }
 
     @Test
@@ -150,6 +178,18 @@ internal class SykdomshistorikkTest {
         assertEquals(11, inspektør.beregnetSykdomstidslinjer[0].length())
         assertEquals(inspektør.hendelser[0], søknadId)
         assertEquals(inspektør.hendelser[1], sykmeldingId)
+    }
+
+    private fun sykdomshendelse(dag: Dag): SykdomstidslinjeHendelse {
+        return object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+            override fun sykdomstidslinje() = dag
+            override fun toSpesifikkKontekst() = SpesifikkKontekst("Testhendelse 1")
+            override fun valider() = throw NotImplementedError("not implemented")
+            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw NotImplementedError("not implemented")
+            override fun aktørId() = throw NotImplementedError("not implemented")
+            override fun fødselsnummer() = throw NotImplementedError("not implemented")
+            override fun organisasjonsnummer() = throw NotImplementedError("not implemented")
+        }
     }
 
     private fun sykmelding(

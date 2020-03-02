@@ -28,12 +28,12 @@ internal class Sykdomshistorikk private constructor(
     private fun kalkulerBeregnetSykdomstidslinje(
         hendelse: SykdomstidslinjeHendelse,
         hendelseSykdomstidslinje: ConcreteSykdomstidslinje
-    ) = if (elementer.isEmpty()) {
-        hendelse.sykdomstidslinje()
-    } else {
-        sykdomstidslinje().merge(hendelseSykdomstidslinje, historiskDagturnering).also {
-            it.valider(hendelse)
-        }
+    ): ConcreteSykdomstidslinje {
+        val tidslinje = if (elementer.isEmpty())
+            hendelse.sykdomstidslinje()
+        else
+            sykdomstidslinje().merge(hendelseSykdomstidslinje, historiskDagturnering)
+        return tidslinje.also { it.valider(hendelse) }
     }
 
     internal class Element private constructor(
