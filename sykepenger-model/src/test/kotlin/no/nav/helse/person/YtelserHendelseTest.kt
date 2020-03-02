@@ -48,22 +48,6 @@ internal class YtelserHendelseTest {
     }
 
     @Test
-    fun `historie nyere enn 6 måneder`() {
-        val sisteHistoriskeSykedag = førsteSykedag.minusDays(180)
-        håndterYtelser(
-            utbetalinger = listOf(
-                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                    sisteHistoriskeSykedag.minusDays(14),
-                    sisteHistoriskeSykedag,
-                    1000
-                )
-            )
-        )
-
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `historie nyere enn perioden`() {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
         håndterYtelser(

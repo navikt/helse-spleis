@@ -526,7 +526,6 @@ internal class Vedtaksperiode private constructor(
                 it.valider { ValiderYtelser(ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
-                it.valider { GapPå26Uker(vedtaksperiode.sykdomshistorikk.sykdomstidslinje(), sisteHistoriskeSykedag) }
                 it.valider {
                     HarInntektshistorikk(
                         arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
