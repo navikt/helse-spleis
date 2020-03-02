@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,8 +27,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun behov(type: Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any>) {
-        add(Aktivitet.Behov(type, kontekster.toSpesifikk(), melding, detaljer))
+    override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any>) {
+        add(Behov(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
     override fun error(melding: String, vararg params: Any?) {
@@ -75,7 +76,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
     }
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     private fun warn() = Aktivitet.Warn.filter(aktiviteter)
-    fun behov() = Aktivitet.Behov.filter(aktiviteter)
+    override fun behov() = Aktivitet.Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
 
@@ -95,7 +96,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        open fun kontekst(): Map<String, Any> =
+        fun kontekst(): Map<String, String> =
             kontekster.fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
@@ -146,7 +147,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
 
         class Behov(
-            private val type: Behovtype,
+            val type: Behovtype,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val detaljer: Map<String, Any> = emptyMap(),
@@ -158,7 +159,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
             }
 
-            override fun kontekst() = super.kontekst().toMutableMap() + detaljer
+            fun detaljer() = detaljer
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitBehov(kontekster, this, type, melding, tidsstempel)
@@ -208,10 +209,10 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
     }
 }
- interface IAktivitetslogg {
+interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
-    fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any> = emptyMap())
+    fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any> = emptyMap())
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
@@ -220,7 +221,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
     fun hasBehov(): Boolean
     fun hasErrors(): Boolean
     fun aktivitetsteller(): Int
-
+    fun behov(): List<Behov>
     fun barn(): Aktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
@@ -246,8 +247,8 @@ internal interface AktivitetsloggVisitor {
 
     fun visitBehov(
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Behov,
-        type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
+        aktivitet: Behov,
+        type: Behov.Behovtype,
         melding: String,
         tidsstempel: String
     ) {

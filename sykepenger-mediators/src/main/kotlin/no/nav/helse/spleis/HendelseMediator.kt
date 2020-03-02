@@ -62,13 +62,12 @@ internal class HendelseMediator(
     }
 
     private fun finalize(mediator: BehovMediator, hendelse: ArbeidstakerHendelse) {
-        if (hendelse.hasErrors()) {
-            sikkerLogg.error("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
-        } else if (hendelse.hasMessages()) {
-            sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
-        }
+        if (!hendelse.hasMessages()) return
+        if (hendelse.hasErrors()) return sikkerLogg.error("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
+        sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
 
         mediator.finalize(hendelse)
+        mediator.håndter(hendelse)
     }
 
     private inner class Processor(private val behovMediator: BehovMediator) : MessageProcessor {

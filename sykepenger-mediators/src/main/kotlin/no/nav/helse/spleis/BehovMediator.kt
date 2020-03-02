@@ -48,6 +48,30 @@ internal class BehovMediator(
         }
     }
 
+    internal fun håndter(hendelse: ArbeidstakerHendelse) {
+        hendelse.behov().groupBy { it.kontekst() }.forEach { (kontekst, behov) ->
+            val behovsliste = mutableListOf<String>()
+            val id = UUID.randomUUID()
+            mutableMapOf(
+                "@event_name" to "behov",
+                "@opprettet" to LocalDateTime.now(),
+                "@id" to id,
+                "@behov" to behovsliste
+            ).apply {
+                putAll(kontekst)
+                behov.forEach {
+                    require(it.type.name !in behovsliste) { "Kan ikke produsere samme behov $it.type.name på samme kontekst" }
+                    require(it.detaljer().filterKeys { this.containsKey(it) }.isEmpty()) { "Kan ikke produsere behov med duplikate detaljer" }
+                    behovsliste.add(it.type.name)
+                    putAll(it.detaljer())
+                }
+
+                sikkerLogg.info("sender {} som {}", id, this.toJson())
+                rapidsConnection.publish(hendelse.fødselsnummer(), this.toJson())
+            }
+        }
+    }
+
     private fun Map<String, Any>.toJson() = objectMapper.writeValueAsString(this)
 
 }

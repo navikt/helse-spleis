@@ -131,10 +131,11 @@ internal class AktivitetsloggTest {
         ))
 
         assertEquals(1, aktivitetslogg.behov().size)
-        assertEquals(3, aktivitetslogg.behov().first().kontekst().size)
+        assertEquals(1, aktivitetslogg.behov().first().kontekst().size)
+        assertEquals(2, aktivitetslogg.behov().first().detaljer().size)
         assertEquals("Person", aktivitetslogg.behov().first().kontekst()["Person"])
-        assertEquals(param1, aktivitetslogg.behov().first().kontekst()["param1"])
-        assertEquals(param2, aktivitetslogg.behov().first().kontekst()["param2"])
+        assertEquals(param1, aktivitetslogg.behov().first().detaljer()["param1"])
+        assertEquals(param2, aktivitetslogg.behov().first().detaljer()["param2"])
     }
 
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {

@@ -1,22 +1,28 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
 import no.nav.helse.behov.BehovType
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class BehovMediatorTest {
 
     private companion object {
+        private val aktørId = "aktørId"
+        private val fødselsnummer = "fnr"
+
         private lateinit var behovMediator: BehovMediator
 
         private val objectMapper = jacksonObjectMapper()
@@ -25,7 +31,6 @@ internal class BehovMediatorTest {
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
-
     private val testRapid = object : RapidsConnection() {
         override fun publish(message: String) {
             messages.add(null to message)
@@ -39,10 +44,100 @@ internal class BehovMediatorTest {
         override fun stop() {}
     }
 
+    private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var person: Person
+
     @BeforeEach
     fun setup() {
+        person = Person(aktørId, fødselsnummer)
+        aktivitetslogg = Aktivitetslogg()
         behovMediator = BehovMediator(testRapid, mockk(relaxed = true))
         messages.clear()
+    }
+
+    @Test
+    internal fun `grupperer behov`(){
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+            "historikkFom" to LocalDate.now()
+        ))
+        hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
+        hendelse.kontekst(arbeidsgiver2)
+        val vedtaksperiode2 = TestKontekst("Vedtaksperiode 2")
+        hendelse.kontekst(vedtaksperiode2)
+        hendelse.behov(Utbetaling, "Skal utbetale")
+
+        behovMediator.håndter(hendelse)
+
+        assertEquals(2, messages.size)
+        assertEquals(fødselsnummer, messages[0].first)
+        assertEquals(fødselsnummer, messages[1].first)
+
+        objectMapper.readTree(messages[0].second).also {
+            assertEquals("behov", it["@event_name"].asText())
+            assertTrue(it.hasNonNull("@id"))
+            assertDoesNotThrow { UUID.fromString(it["@id"].asText()) }
+            assertTrue(it.hasNonNull("@opprettet"))
+            assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
+            assertEquals(listOf("Sykepengehistorikk", "Foreldrepenger"), it["@behov"].map(JsonNode::asText))
+            assertEquals("behov", it["@event_name"].asText())
+            assertEquals(aktørId, it["aktørId"].asText())
+            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
+            assertEquals("Arbeidsgiver 1", it["Arbeidsgiver 1"].asText())
+            assertEquals("Vedtaksperiode 1", it["Vedtaksperiode 1"].asText())
+            assertEquals(LocalDate.now().toString(), it["historikkFom"].asText())
+        }
+        objectMapper.readTree(messages[1].second).also {
+            assertEquals("behov", it["@event_name"].asText())
+            assertTrue(it.hasNonNull("@id"))
+            assertDoesNotThrow { UUID.fromString(it["@id"].asText()) }
+            assertTrue(it.hasNonNull("@opprettet"))
+            assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
+            assertEquals(listOf("Utbetaling"), it["@behov"].map(JsonNode::asText))
+            assertEquals("behov", it["@event_name"].asText())
+            assertEquals(aktørId, it["aktørId"].asText())
+            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
+            assertEquals("Arbeidsgiver 2", it["Arbeidsgiver 2"].asText())
+            assertEquals("Vedtaksperiode 2", it["Vedtaksperiode 2"].asText())
+        }
+    }
+
+    @Test
+    internal fun `sjekker etter duplikatverdier`(){
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+            "historikkFom" to LocalDate.now()
+        ))
+        hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
+            "historikkFom" to LocalDate.now()
+        ))
+
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(hendelse) }
+    }
+
+    @Test
+    internal fun `kan ikke produsere samme behov`(){
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
+
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(hendelse) }
     }
 
     @Test
@@ -51,9 +146,9 @@ internal class BehovMediatorTest {
         val vedtaksperiode1 = UUID.randomUUID()
         val vedtaksperiode2 = UUID.randomUUID()
 
-        behovMediator.onBehov(BehovType.Godkjenning("aktørId", "fnr", "orgnr", vedtaksperiode1))
-        behovMediator.onBehov(BehovType.GjennomgåTidslinje("aktørId", "fnr", "orgnr", vedtaksperiode2))
-        behovMediator.onBehov(BehovType.Godkjenning("aktørId", "fnr", "orgnr", vedtaksperiode2))
+        behovMediator.onBehov(BehovType.Godkjenning(aktørId, fødselsnummer, "orgnr", vedtaksperiode1))
+        behovMediator.onBehov(BehovType.GjennomgåTidslinje(aktørId, fødselsnummer, "orgnr", vedtaksperiode2))
+        behovMediator.onBehov(BehovType.Godkjenning(aktørId, fødselsnummer, "orgnr", vedtaksperiode2))
         behovMediator.finalize(hendelse)
 
         assertEquals(2, messages.size)
@@ -65,9 +160,40 @@ internal class BehovMediatorTest {
         }
     }
 
+
     private fun hendelse() = object : ArbeidstakerHendelse(Aktivitetslogg()) {
-        override fun aktørId() = "aktørId"
-        override fun fødselsnummer() = "fnr"
+        override fun aktørId() = aktørId
+        override fun fødselsnummer() = fødselsnummer
         override fun organisasjonsnummer() = "orgnr"
+    }
+
+    private class TestKontekst(
+        private val melding: String
+    ): Aktivitetskontekst {
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding, mapOf(melding to melding))
+    }
+
+    private class TestHendelse(
+        private val melding: String,
+        internal val logg: Aktivitetslogg
+    ): ArbeidstakerHendelse(logg), Aktivitetskontekst {
+        init {
+            logg.kontekst(this)
+        }
+
+        override fun aktørId(): String {
+            return aktørId
+        }
+
+        override fun fødselsnummer(): String {
+            return fødselsnummer
+        }
+
+        override fun organisasjonsnummer() = "not_relevant"
+
+        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse")
+        override fun kontekst(kontekst: Aktivitetskontekst) {
+            logg.kontekst(kontekst)
+        }
     }
 }
