@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
+import no.nav.helse.tournament.KonfliktskyDagturnering
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +25,7 @@ internal class CompositeSykdomstidslinjeTest {
         val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, 100.0, Søknad.SøknadDagFactory)
         val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, 100.0, Søknad.SøknadDagFactory)
 
-        val arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) })
+        val arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, KonfliktskyDagturnering) { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) }
 
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)

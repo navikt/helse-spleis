@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.reduser
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.util.*
@@ -33,14 +34,13 @@ class Sykmelding(
         return aktivitetslogg
     }
 
-    override fun melding(klassName: String) = "Ny Søknad"
+    override fun melding(klassName: String) = "Sykmelding"
 
     private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
 
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
-    override fun sykdomstidslinje() =
-        sykeperioder.map(Sykeperiode::sykdomstidslinje).reduce { acc, linje -> acc.plus(linje, KonfliktskyDagturnering)}
+    override fun sykdomstidslinje() = sykeperioder.map(Sykeperiode::sykdomstidslinje).reduser(KonfliktskyDagturnering)
 
     override fun fødselsnummer() = fnr
 

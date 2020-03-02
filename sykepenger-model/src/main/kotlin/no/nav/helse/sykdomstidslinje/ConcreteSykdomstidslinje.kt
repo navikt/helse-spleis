@@ -7,6 +7,9 @@ import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
+internal fun List<ConcreteSykdomstidslinje>.reduser(dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
+    reduce { result, other -> result.plus(other, dagturnering, inneklemtDag) }
+
 internal interface SykdomstidslinjeElement {
     fun accept(visitor: SykdomstidslinjeVisitor)
 }
@@ -18,10 +21,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun length(): Int
     internal abstract fun dag(dato: LocalDate): Dag?
 
-    operator fun plus(other: ConcreteSykdomstidslinje) = this.plus(other, ::ImplisittDag)
-    fun plus(other: ConcreteSykdomstidslinje, dagturnering: Dagturnering) = this.plus(other, ::ImplisittDag, dagturnering)
-    fun plus(other: ConcreteSykdomstidslinje, gapDayCreator: (LocalDate) -> Dag) = this.plus(other, gapDayCreator, historiskDagturnering)
-    fun plus(other: ConcreteSykdomstidslinje, gapDayCreator: (LocalDate) -> Dag, dagturnering: Dagturnering): ConcreteSykdomstidslinje {
+    operator fun plus(other: ConcreteSykdomstidslinje) = this.plus(other, historiskDagturnering, ::ImplisittDag)
+    fun plus(other: ConcreteSykdomstidslinje, dagturnering: Dagturnering, gapDayCreator: (LocalDate) -> Dag): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
         val førsteDag = this.førsteStartdato(other)
