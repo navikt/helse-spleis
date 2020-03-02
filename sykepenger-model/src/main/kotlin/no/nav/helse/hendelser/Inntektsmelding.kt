@@ -10,7 +10,7 @@ import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
-import no.nav.helse.sykdomstidslinje.reduser
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.util.*
@@ -40,7 +40,7 @@ class Inntektsmelding(
         .map { it.sykdomstidslinje(this) }
         .sortedBy { it.førsteDag() }
         .takeUnless { it.isEmpty() }
-        ?.reduser(KonfliktskyDagturnering) { gjelder -> ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory) }
+        ?.merge(KonfliktskyDagturnering) { gjelder -> ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory) }
         ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
 
     override fun valider(): Aktivitetslogg {

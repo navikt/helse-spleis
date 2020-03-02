@@ -4,6 +4,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -30,7 +32,7 @@ internal fun perioder(
     periode2: ConcreteSykdomstidslinje,
     test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
 ) {
-    (periode1 + periode2).test(periode1, periode2)
+    listOf(periode1, periode2).merge(historiskDagturnering).test(periode1, periode2)
 }
 
 internal fun perioder(
@@ -39,7 +41,7 @@ internal fun perioder(
     periode3: ConcreteSykdomstidslinje,
     test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
 ) {
-    (periode1 + periode2 + periode3).test(periode1, periode2, periode3)
+    listOf(periode1, periode2, periode3).merge(historiskDagturnering).test(periode1, periode2, periode3)
 }
 
 
@@ -50,7 +52,7 @@ internal fun perioder(
     periode4: ConcreteSykdomstidslinje,
     test: ConcreteSykdomstidslinje.(ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje, ConcreteSykdomstidslinje) -> Unit
 ) {
-    (periode1 + periode2 + periode3 + periode4).test(periode1, periode2, periode3, periode4)
+    listOf(periode1, periode2, periode3, periode4).merge(historiskDagturnering).test(periode1, periode2, periode3, periode4)
 }
 
 internal fun ConcreteSykdomstidslinje.fra(): ConcreteSykdomstidslinje {

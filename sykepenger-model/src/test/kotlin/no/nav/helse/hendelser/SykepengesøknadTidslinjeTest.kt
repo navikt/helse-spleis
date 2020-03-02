@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,7 +24,7 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`() {
-        val tidslinje = (søknad().sykdomstidslinje() + sykmelding().sykdomstidslinje())
+        val tidslinje = søknad().sykdomstidslinje().merge(sykmelding().sykdomstidslinje(), historiskDagturnering)
 
         assertType(Sykedag.Sykmelding::class, tidslinje[sykeperiodeFOM])
         assertType(SykHelgedag.Sykmelding::class, tidslinje[sykeperiodeTOM])
@@ -33,10 +34,10 @@ internal class SykepengesøknadTidslinjeTest {
     @Test
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`() {
 
-        val tidslinje = (søknad( perioder = listOf(
+        val tidslinje = søknad(perioder = listOf(
             Periode.Egenmelding(egenmeldingFom, egenmeldingTom),
             Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100))
-        ).sykdomstidslinje() + sykmelding().sykdomstidslinje())
+        ).sykdomstidslinje().merge(sykmelding().sykdomstidslinje(), historiskDagturnering)
 
         assertEquals(egenmeldingFom, tidslinje.førsteDag())
         assertType(Egenmeldingsdag.Søknad::class, tidslinje[egenmeldingFom])
@@ -45,12 +46,12 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får ferien fra søknaden`() {
-        val tidslinje = (sykmelding().sykdomstidslinje() + søknad(
+        val tidslinje = sykmelding().sykdomstidslinje().merge(søknad(
             perioder = listOf(
                 Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100),
                 Periode.Ferie(ferieFom, ferieTom)
             )
-        ).sykdomstidslinje())
+        ).sykdomstidslinje(), historiskDagturnering)
 
         assertType(Feriedag.Søknad::class, tidslinje[ferieFom])
         assertType(Feriedag.Søknad::class, tidslinje[ferieTom])

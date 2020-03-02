@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDateTime
 import java.util.*
 
@@ -12,7 +13,7 @@ internal class Sykdomshistorikk private constructor(
     internal val size get() = elementer.size
     internal fun isEmpty() = elementer.isEmpty()
 
-    internal fun   sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
+    internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(0, Element.opprett(this, hendelse))
@@ -30,7 +31,7 @@ internal class Sykdomshistorikk private constructor(
     ) = if (elementer.isEmpty()) {
         hendelse.sykdomstidslinje()
     } else {
-        (sykdomstidslinje() + hendelseSykdomstidslinje).also {
+        sykdomstidslinje().merge(hendelseSykdomstidslinje, historiskDagturnering).also {
             it.valider(hendelse)
         }
     }

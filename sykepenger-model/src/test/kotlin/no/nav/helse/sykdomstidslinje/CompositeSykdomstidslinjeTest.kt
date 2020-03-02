@@ -25,7 +25,7 @@ internal class CompositeSykdomstidslinjeTest {
         val arbeidsgiverperiode1 = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).onsdag, 100.0, Søknad.SøknadDagFactory)
         val arbeidsgiverperiode2 = ConcreteSykdomstidslinje.sykedager(Uke(2).onsdag, Uke(2).fredag, 100.0, Søknad.SøknadDagFactory)
 
-        val arbeidsgiverperiode = arbeidsgiverperiode1.plus(arbeidsgiverperiode2, KonfliktskyDagturnering) { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) }
+        val arbeidsgiverperiode = arbeidsgiverperiode1.merge(arbeidsgiverperiode2, KonfliktskyDagturnering) { ConcreteSykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory) }
 
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).mandag]!!::class)
         assertEquals(Sykedag.Søknad::class, arbeidsgiverperiode[Uke(1).tirsdag]!!::class)
@@ -55,10 +55,7 @@ internal class CompositeSykdomstidslinjeTest {
 
     @Test
     internal fun `tidslinje med ubestemt dag er utenfor omfang`() {
-        val studiedag = ConcreteSykdomstidslinje.studiedag(Uke(1).mandag, Søknad.SøknadDagFactory)
-        val sykedag = ConcreteSykdomstidslinje.sykedag(Uke(1).mandag, 100.0, Søknad.SøknadDagFactory)
-        val tidslinje = studiedag + sykedag
-
+        val tidslinje = ConcreteSykdomstidslinje.ubestemtdager(Uke(1).mandag, Uke(1).mandag, Søknad.SøknadDagFactory)
         val aktivitetslogg = Aktivitetslogg()
         assertFalse(tidslinje.valider(aktivitetslogg))
         assertTrue(aktivitetslogg.hasErrors())

@@ -8,6 +8,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
+import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.Duration
@@ -184,7 +185,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
 
-        if (!sykdomshistorikk.sykdomstidslinje().valider(hendelse)) {
+        if (hendelse.hasErrors()) {
             tilstand(hendelse, TilInfotrygd)
         } else {
             tilstand(hendelse, nesteTilstand)
@@ -309,9 +310,7 @@ internal class Vedtaksperiode private constructor(
     internal object StartTilstand : Vedtaksperiodetilstand {
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            vedtaksperiode.tilstand(sykmelding, MottattSykmelding) {
-                vedtaksperiode.sykdomshistorikk.håndter(sykmelding)
-            }
+            vedtaksperiode.håndter(sykmelding, MottattSykmelding)
             sykmelding.info("Fullført behandling av sykmelding")
         }
 
@@ -707,10 +706,6 @@ internal class Vedtaksperiode private constructor(
             .sortedBy { it.førsteFraværsdag }
             .firstOrNull { it.førsteFraværsdag != null }
 
-        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
-            .map { it.sykdomshistorikk.sykdomstidslinje() }
-            .reduce { concreteSykdomstidslinje, other ->
-                concreteSykdomstidslinje + other
-            }
+        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder.map { it.sykdomshistorikk.sykdomstidslinje() }.join()
     }
 }

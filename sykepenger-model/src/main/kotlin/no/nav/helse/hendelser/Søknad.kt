@@ -6,7 +6,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.sykdomstidslinje.reduser
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.util.*
@@ -30,7 +30,7 @@ class Søknad constructor(
             .also { tom = it.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato") }
     }
 
-    override fun sykdomstidslinje() = perioder.map(Periode::sykdomstidslinje).reduser(søknadDagturnering)
+    override fun sykdomstidslinje() = perioder.map(Periode::sykdomstidslinje).merge(søknadDagturnering)
 
     override fun fødselsnummer() = fnr
 

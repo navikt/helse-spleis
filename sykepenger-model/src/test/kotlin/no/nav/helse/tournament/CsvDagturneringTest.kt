@@ -38,7 +38,7 @@ internal class CsvDagturneringTest {
         val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, 100.0, Søknad.SøknadDagFactory)
         val søknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Søknad.SøknadDagFactory)
 
-        val tidslinje = (søknadSykedager + søknadArbeidsdager)
+        val tidslinje = søknadSykedager.merge(søknadArbeidsdager, historiskDagturnering)
         assertTrue(
             tidslinje[Uke(1).onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"

@@ -3,12 +3,12 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
-import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
-internal fun List<ConcreteSykdomstidslinje>.reduser(dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
-    reduce { result, other -> result.plus(other, dagturnering, inneklemtDag) }
+internal fun List<ConcreteSykdomstidslinje>.join() = ConcreteSykdomstidslinje.join(this)
+
+internal fun List<ConcreteSykdomstidslinje>.merge(dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) = ConcreteSykdomstidslinje.merge(this, dagturnering, inneklemtDag)
 
 internal interface SykdomstidslinjeElement {
     fun accept(visitor: SykdomstidslinjeVisitor)
@@ -21,15 +21,25 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun length(): Int
     internal abstract fun dag(dato: LocalDate): Dag?
 
-    operator fun plus(other: ConcreteSykdomstidslinje) = this.plus(other, historiskDagturnering, ::ImplisittDag)
-    fun plus(other: ConcreteSykdomstidslinje, dagturnering: Dagturnering, gapDayCreator: (LocalDate) -> Dag): ConcreteSykdomstidslinje {
+    operator fun plus(other: ConcreteSykdomstidslinje): ConcreteSykdomstidslinje {
+        require(!overlapperMed(other)) { "Kan ikke koble sammen overlappende tidslinjer uten å oppgi en turneringsmetode." }
+        return kobleSammen(other) {
+            this.dag(it) ?: other.dag(it) ?: ImplisittDag(it)
+        }
+    }
+
+    fun merge(other: ConcreteSykdomstidslinje, dagturnering: Dagturnering, gapDayCreator: (LocalDate) -> Dag = ::ImplisittDag): ConcreteSykdomstidslinje {
+        return kobleSammen(other) {
+            beste(dagturnering, this.dag(it), other.dag(it)) ?: gapDayCreator(it)
+        }
+    }
+
+    private fun kobleSammen(other: ConcreteSykdomstidslinje, mapper: (LocalDate) -> Dag): ConcreteSykdomstidslinje {
         if (this.length() == 0) return other
         if (other.length() == 0) return this
         val førsteDag = this.førsteStartdato(other)
         val sisteDag = this.sisteSluttdato(other).plusDays(1)
-        return CompositeSykdomstidslinje(førsteDag.datesUntil(sisteDag).map {
-            beste(dagturnering, this.dag(it), other.dag(it)) ?: gapDayCreator(it)
-        }.toList())
+        return CompositeSykdomstidslinje(førsteDag.datesUntil(sisteDag).map(mapper).toList())
     }
 
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
@@ -64,6 +74,12 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal fun harTilstøtende(other: ConcreteSykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
 
     companion object {
+        internal fun join(liste: List<ConcreteSykdomstidslinje>) =
+            liste.reduce { result, other -> result + other }
+
+        internal fun merge(liste: List<ConcreteSykdomstidslinje>, dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
+            liste.reduce { result, other -> result.merge(other, dagturnering, inneklemtDag) }
+
         fun sykedag(gjelder: LocalDate, grad: Double, factory: DagFactory): Dag =
             if (!gjelder.erHelg()) factory.sykedag(gjelder, grad) else factory.sykHelgedag(gjelder, grad)
 

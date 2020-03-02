@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -42,7 +44,7 @@ internal class SykdomstidslinjeTestHelpersTest {
             assertEquals(it[2].dagen.plusDays(1), it[3].dagen)
         }
 
-        (2.sykedager.fra(torsdag) + 2.sykHelgdager + 1.sykedager + 2.feriedager.fra(onsdag)).also {
+        (2.sykedager.fra(torsdag) + 2.sykHelgdager + 1.sykedager).merge(2.feriedager.fra(onsdag), historiskDagturnering).also {
             assertEquals(6, it.length())
         }.flatten().also {
             assertEquals(onsdag, it.first().dagen)
@@ -52,7 +54,7 @@ internal class SykdomstidslinjeTestHelpersTest {
 
     @Test
     internal fun `overlappende perioder`() {
-        (4.sykedager.fra(mandag) + 2.feriedager.fra(mandag)).also {
+        4.sykedager.fra(mandag).merge(2.feriedager.fra(mandag), historiskDagturnering).also {
             assertEquals(4, it.length())
         }.flatten().also {
             assertEquals(it[0].dagen.plusDays(1), it[1].dagen)
@@ -60,4 +62,6 @@ internal class SykdomstidslinjeTestHelpersTest {
             assertEquals(it[2].dagen.plusDays(1), it[3].dagen)
         }
     }
+
+    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.merge(other, historiskDagturnering)
 }
