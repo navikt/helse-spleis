@@ -2,7 +2,10 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 // Understands issues that arose when analyzing a JSON message
@@ -86,12 +89,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     sealed class Aktivitet(
         private val alvorlighetsgrad: Int,
-        internal val label: Char,
+        private val label: Char,
         private var melding: String,
         private val tidsstempel: String,
         internal val kontekster: List<SpesifikkKontekst>
     ) : Comparable<Aktivitet> {
-        companion object {
+        private companion object {
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
@@ -106,7 +109,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         override fun toString() = tidsstempel + "\t" + melding + meldingerString()
 
         private fun meldingerString(): String {
-            return kontekster.map { "(${it.melding()})" }.fold("") { acc, s -> acc + " " + s }
+            return kontekster.joinToString(separator = " ") { "(${it.melding()})" }
         }
 
         internal abstract fun accept(visitor: AktivitetsloggVisitor)
@@ -155,6 +158,50 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Behov> {
                     return aktiviteter.filterIsInstance<Behov>()
+                }
+
+                internal fun sykepengehistorikk(aktivitetslogg: IAktivitetslogg, utgangspunktForBeregningAvYtelse: LocalDate) {
+                    aktivitetslogg.behov(Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
+                        "utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse.toString()
+                    ))
+                }
+
+                internal fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(Behovtype.Foreldrepenger, "Trenger informasjon om foreldrepengeytelser fra FPSAK")
+                }
+
+                internal fun inntektsberegning(aktivitetslogg: IAktivitetslogg, beregningStart: YearMonth, beregningSlutt: YearMonth) {
+                    aktivitetslogg.behov(Behovtype.Inntektsberegning, "Trenger inntektsberegning", mapOf(
+                        "beregningStart" to beregningStart.toString(),
+                        "beregningSlutt" to beregningSlutt.toString()
+                    ))
+                }
+
+                internal fun egenAnsatt(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(Behovtype.EgenAnsatt, "Trenger informasjon om EgenAnsatt")
+                }
+
+                internal fun opptjening(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
+                }
+
+                internal fun godkjenning(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler")
+                }
+
+                internal fun utbetaling(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, saksbehandler: String) {
+                    aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", mapOf(
+                        "utbetalingsreferanse" to utbetalingsreferanse,
+                        "utbetalingslinjer" to utbetalingslinjer.map {
+                            mapOf(
+                                "fom" to it.fom.toString(),
+                                "tom" to it.tom.toString(),
+                                "dagsats" to it.dagsats
+                            )
+                        },
+                        "maksdato" to maksdato.toString(),
+                        "saksbehandler" to saksbehandler
+                    ))
                 }
             }
 

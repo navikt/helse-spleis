@@ -2,7 +2,13 @@ package no.nav.helse.person
 
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehistorikk
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -193,21 +199,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        hendelse.behov(Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                "utgangspunktForBeregningAvYtelse" to sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1).toString()
-        ))
-        hendelse.behov(Behovtype.Foreldrepenger, "Trenger informasjon om foreldrepengeytelser fra FPSAK")
+        sykepengehistorikk(hendelse, sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1))
+        foreldrepenger(hendelse)
     }
 
     internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
         val beregningSlutt = YearMonth.from(førsteFraværsdag)
-        val beregningStart = beregningSlutt.minusMonths(11)
-        hendelse.behov(Behovtype.Inntektsberegning, "Trenger inntektsberegning", mapOf(
-            "beregningStart" to beregningStart.toString(),
-            "beregningSlutt" to beregningSlutt.toString()
-        ))
-        hendelse.behov(Behovtype.EgenAnsatt, "Trenger informasjon om EgenAnsatt")
-        hendelse.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
+        inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
+        egenAnsatt(hendelse)
+        opptjening(hendelse)
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -579,7 +579,7 @@ internal class Vedtaksperiode private constructor(
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
-            hendelse.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler")
+            godkjenning(hendelse)
         }
 
         override fun håndter(
@@ -617,18 +617,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", mapOf(
-                "utbetalingsreferanse" to vedtaksperiode.utbetalingsreferanse,
-                "utbetalingslinjer" to requireNotNull(vedtaksperiode.utbetalingslinjer).map {
-                    mapOf(
-                        "fom" to it.fom.toString(),
-                        "tom" to it.tom.toString(),
-                        "dagsats" to it.dagsats
-                    )
-                },
-                "maksdato" to requireNotNull(vedtaksperiode.maksdato).toString(),
-                "saksbehandler" to requireNotNull(vedtaksperiode.godkjentAv)
-            ))
+            utbetaling(hendelse, vedtaksperiode.utbetalingsreferanse, requireNotNull(vedtaksperiode.utbetalingslinjer), requireNotNull(vedtaksperiode.maksdato), requireNotNull(vedtaksperiode.godkjentAv))
             val event = PersonObserver.UtbetalingEvent(
                 vedtaksperiodeId = vedtaksperiode.id,
                 aktørId = vedtaksperiode.aktørId,
