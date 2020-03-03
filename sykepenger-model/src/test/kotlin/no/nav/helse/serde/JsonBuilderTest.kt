@@ -45,6 +45,8 @@ internal class JsonBuilderTest {
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
 
+        println(personPre)
+
         assertEquals(personPre, personPost)
     }
 

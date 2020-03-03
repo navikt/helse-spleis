@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Arbeidsgive
 import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
@@ -74,6 +75,14 @@ class Inntektsmelding(
         .sortedBy { it.fom }
         .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
         .all { it }
+
+    internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
+        inntekthistorikk.add(
+            førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
+            meldingsreferanseId(),
+            beregnetInntekt.toBigDecimal()
+        )
+    }
 
     class Refusjon(
         val opphørsdato: LocalDate?,

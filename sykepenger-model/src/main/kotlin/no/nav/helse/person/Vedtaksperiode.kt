@@ -117,7 +117,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         inntektsmelding.kontekst(this)
-        tilstand.håndter(this, inntektsmelding)
+        tilstand.håndter(this, arbeidsgiver, inntektsmelding)
     }
 
     internal fun håndter(ytelser: Ytelser) {
@@ -265,7 +265,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+        fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
             inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
         }
 
@@ -337,7 +341,14 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            if (arbeidsgiver.tilstøtende(vedtaksperiode) != null) return inntektsmelding.warn("Forventet ikke inntektsmelding i %s fordi perioden har tilstøtende periode", type.name)
+
+            arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknad)
@@ -357,7 +368,12 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Avventer ferdigbehandling av tidligere periode eller inntektsmelding før videre behandling")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerTidligerePeriode)
@@ -422,7 +438,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
@@ -460,7 +481,12 @@ internal class Vedtaksperiode private constructor(
 
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
             vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)

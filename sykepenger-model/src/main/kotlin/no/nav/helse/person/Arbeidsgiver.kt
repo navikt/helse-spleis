@@ -62,11 +62,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        inntekthistorikk.add(
-            inntektsmelding.førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
-            inntektsmelding.meldingsreferanseId(),
-            inntektsmelding.beregnetInntekt.toBigDecimal()
-        )
         if (perioder.none { it.håndter(inntektsmelding) }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
@@ -106,6 +101,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse) {
         perioder.forEach { it.invaliderPeriode(hendelse) }
+    }
+
+    internal fun addInntektsmelding(inntektsmelding: Inntektsmelding) {
+        inntektsmelding.addInntekt(inntekthistorikk)
     }
 
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {

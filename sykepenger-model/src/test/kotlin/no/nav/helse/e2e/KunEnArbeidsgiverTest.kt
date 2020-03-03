@@ -1,26 +1,22 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.FeatureToggle
-import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
-import no.nav.helse.person.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.api.serializePersonForSpeil
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -30,7 +26,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import kotlin.reflect.KClass
 
 internal class KunEnArbeidsgiverTest {
 
@@ -631,163 +626,6 @@ internal class KunEnArbeidsgiverTest {
             godkjenttidspunkt = LocalDateTime.now()
         ).apply {
             hendelselogg = this
-        }
-    }
-
-    private inner class TestObservatør : PersonObserver {
-        internal var endreTeller = 0
-        private var periodeIndek = -1
-        private val periodeIndekser = mutableMapOf<String, Int>()
-        private val vedtaksperiodeIder = mutableMapOf<Int, String>()
-        internal val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        internal lateinit var utbetalingsreferanseFraUtbetalingEvent: String
-        val utbetalteVedtaksperioder = mutableListOf<String>()
-
-        override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-            utbetalteVedtaksperioder.add(event.vedtaksperiodeId.toString())
-        }
-
-        internal fun vedtaksperiodeIder(indeks: Int) = vedtaksperiodeIder[indeks] ?: fail("Missing vedtaksperiodeId")
-
-        override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-            endreTeller += 1
-            val indeks = periodeIndeks(event.id.toString())
-            tilstander[indeks]?.add(event.gjeldendeTilstand) ?: fail("Missing collection initialization")
-        }
-
-        override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-            utbetalingsreferanseFraUtbetalingEvent = event.utbetalingsreferanse
-        }
-
-        private fun periodeIndeks(vedtaksperiodeId: String): Int {
-            return periodeIndekser.getOrPut(vedtaksperiodeId, {
-                periodeIndek++
-                tilstander[periodeIndek] = mutableListOf(START)
-                vedtaksperiodeIder[periodeIndek] = vedtaksperiodeId
-                periodeIndek
-            })
-        }
-    }
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-        private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
-        internal lateinit var personLogg: Aktivitetslogg
-        internal lateinit var arbeidsgiver: Arbeidsgiver
-        internal lateinit var inntektshistorikk: Inntekthistorikk
-        internal lateinit var sykdomshistorikk: Sykdomshistorikk
-        internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
-        internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
-
-        init {
-            person.accept(this)
-        }
-
-        internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Behovtype) =
-            personLogg.etterspurteBehovFinnes(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype)
-
-        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personLogg = aktivitetslogg
-        }
-
-        override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-            if (førsteFraværsdag != null) {
-                førsteFraværsdager.add(førsteFraværsdag)
-            }
-        }
-
-        override fun preVisitArbeidsgiver(
-            arbeidsgiver: Arbeidsgiver,
-            id: UUID,
-            organisasjonsnummer: String
-        ) {
-            this.arbeidsgiver = arbeidsgiver
-        }
-
-        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
-            this.inntektshistorikk = inntekthistorikk
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = mutableListOf()
-            vedtaksperiodeIder[vedtaksperiodeindeks] = id
-        }
-
-        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            this.sykdomshistorikk = sykdomshistorikk
-            this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
-        }
-
-        private inner class Dagteller : SykdomstidslinjeVisitor {
-            override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(Sykedag::class)
-            override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(Sykedag::class)
-
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = inkrementer(SykHelgedag::class)
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = inkrementer(SykHelgedag::class)
-
-            private fun inkrementer(klasse: KClass<out Dag>) {
-                dagtelling.compute(klasse) { _, value ->
-                    1 + (value ?: 0)
-                }
-            }
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks]?.add(tilstand.type) ?: fail("Missing collection initialization")
-        }
-
-        internal val vedtaksperiodeTeller get() = tilstander.size
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks] ?: fail("Missing collection initialization")
-
-        internal fun dagTeller(klasse: KClass<out Utbetalingsdag>) =
-            TestTidslinjeInspektør(arbeidsgiver.peekTidslinje()).dagtelling[klasse] ?: 0
-    }
-
-    private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
-        Utbetalingstidslinje.UtbetalingsdagVisitor {
-
-        internal val dagtelling: MutableMap<KClass<out Utbetalingsdag>, Int> = mutableMapOf()
-        internal val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingsdag>>()
-
-        init {
-            tidslinje.accept(this)
-        }
-
-        override fun visitNavDag(dag: NavDag) {
-            datoer[dag.dato] = NavDag::class
-            inkrementer(NavDag::class)
-        }
-
-        override fun visitArbeidsdag(dag: Arbeidsdag) {
-            datoer[dag.dato] = Arbeidsdag::class
-            inkrementer(Arbeidsdag::class)
-        }
-
-        override fun visitNavHelgDag(dag: NavHelgDag) {
-            datoer[dag.dato] = NavHelgDag::class
-            inkrementer(NavHelgDag::class)
-        }
-
-        override fun visitUkjentDag(dag: UkjentDag) {
-            datoer[dag.dato] = UkjentDag::class
-            inkrementer(UkjentDag::class)
-        }
-
-        override fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {
-            datoer[dag.dato] = ArbeidsgiverperiodeDag::class
-            inkrementer(ArbeidsgiverperiodeDag::class)
-        }
-
-        override fun visitFridag(dag: Fridag) {
-            datoer[dag.dato] = Fridag::class
-            inkrementer(Fridag::class)
-        }
-
-        private fun inkrementer(klasse: KClass<out Utbetalingsdag>) {
-            dagtelling.compute(klasse) { _, value -> 1 + (value ?: 0) }
         }
     }
 }

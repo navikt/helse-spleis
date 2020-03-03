@@ -15,10 +15,11 @@ import kotlin.collections.set
 
 internal class InntektsmeldingHendelseTest {
 
-    companion object {
+    private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "12345"
         private const val ORGNR = "987654321"
+        private const val INNTEKT = 1234.0
     }
 
     private lateinit var person: Person
@@ -28,6 +29,14 @@ internal class InntektsmeldingHendelseTest {
     @BeforeEach
     internal fun opprettPerson() {
         person = Person(AKTØRID, UNG_PERSON_FNR_2018)
+    }
+
+    @Test
+    internal fun `legger inn beregnet inntekt i inntekthistorikk`() {
+        val inntekthistorikk = Inntekthistorikk()
+        inntektsmelding(beregnetInntekt = INNTEKT, førsteFraværsdag = 1.januar)
+            .addInntekt(inntekthistorikk)
+        assertEquals(INNTEKT.toBigDecimal(), inntekthistorikk.inntekt(1.januar))
     }
 
     @Test
