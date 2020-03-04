@@ -58,7 +58,7 @@ internal class HendelseMediator(
     }
 
     override fun onUnrecognizedMessage(message: String, problems: List<Pair<String, MessageProblems>>) {
-        sikkerLogg.debug("ukjent melding:\n$message\n\nProblemer:${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
     private fun finalize(mediator: BehovMediator, hendelse: ArbeidstakerHendelse) {
