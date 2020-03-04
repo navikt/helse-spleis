@@ -47,7 +47,8 @@ class SerialisertPerson(val json: String) {
             V9LeggerTilKontekstMap(),
             V10FjernAktiviteter(),
             V11EgenHendelsedagForSykHelgedag(),
-            V12LeggerTilDetaljer()
+            V12LeggerTilDetaljer(),
+            V13FjernerGradFraArbeidsgiverperiodeDag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
