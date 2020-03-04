@@ -13,6 +13,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -49,7 +50,13 @@ internal class HendelseMediator(
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
         } catch (err: Aktivitetslogg.AktivitetException) {
-            sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+            try {
+                MDC.setContextMap(contextMap + err.kontekst())
+                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            } finally {
+                MDC.setContextMap(contextMap)
+            }
         }
     }
 
