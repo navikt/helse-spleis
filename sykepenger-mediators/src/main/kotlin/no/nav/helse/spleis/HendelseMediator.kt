@@ -49,12 +49,12 @@ internal class HendelseMediator(
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
         } catch (err: Aktivitetslogg.AktivitetException) {
-            sikkerLogg.error("feil på melding: ${err.message}", err)
+            sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
         }
     }
 
     override fun onMessageException(exception: MessageProblems.MessageException) {
-        sikkerLogg.error("feil på melding: {}", exception)
+        sikkerLogg.error("feil ved parsing av melding: {}", exception)
     }
 
     override fun onUnrecognizedMessage(message: String, problems: List<Pair<String, MessageProblems>>) {
@@ -63,7 +63,7 @@ internal class HendelseMediator(
 
     private fun finalize(mediator: BehovMediator, hendelse: ArbeidstakerHendelse) {
         if (!hendelse.hasMessages()) return
-        if (hendelse.hasErrors()) return sikkerLogg.error("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
+        if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
         sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
 
         mediator.håndter(hendelse)
