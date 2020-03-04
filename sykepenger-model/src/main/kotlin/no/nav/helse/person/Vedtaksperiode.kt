@@ -38,7 +38,6 @@ internal class Vedtaksperiode private constructor(
     private var godkjenttidspunkt: LocalDateTime?,
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
-    private var inntektFraInntektsmelding: Double?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private val sykdomshistorikk: Sykdomshistorikk
 ) : Aktivitetskontekst {
@@ -67,7 +66,6 @@ internal class Vedtaksperiode private constructor(
         godkjenttidspunkt = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
-        inntektFraInntektsmelding = null,
         dataForVilkårsvurdering = null,
         sykdomshistorikk = Sykdomshistorikk()
     )
@@ -79,7 +77,6 @@ internal class Vedtaksperiode private constructor(
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
-        visitor.visitInntektFraInntektsmelding(inntektFraInntektsmelding)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
@@ -356,7 +353,6 @@ internal class Vedtaksperiode private constructor(
 
             arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknad)
             inntektsmelding.info("Fullført behandling av inntektsmelding")
         }
@@ -381,7 +377,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerTidligerePeriode)
             inntektsmelding.info("Fullført behandling av inntektsmelding")
         }
@@ -458,7 +453,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
             inntektsmelding.info("Fullført behandling av inntektsmelding")
         }
@@ -501,7 +495,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             arbeidsgiver.addInntektsmelding(inntektsmelding)
             vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
-            vedtaksperiode.inntektFraInntektsmelding = inntektsmelding.beregnetInntekt
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøving)
             inntektsmelding.info("Fullført behandling av inntektsmelding")
         }
@@ -522,12 +515,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            val førsteFraværsdag = vedtaksperiode.førsteFraværsdag
-                ?: vilkårsgrunnlag.severe("Første fraværsdag mangler i Vilkårsprøving tilstand")
-            val inntektFraInntektsmelding = vedtaksperiode.inntektFraInntektsmelding
-                ?: vilkårsgrunnlag.severe("Epic 3: Trenger mulighet for syketilfeller hvor det ikke er en inntektsmelding (syketilfellet starter i infotrygd)")
+            val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode().start)
+                ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", vedtaksperiode.periode().start)
 
-            val resultat = vilkårsgrunnlag.måHåndteresManuelt(inntektFraInntektsmelding, førsteFraværsdag)
+            val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, vedtaksperiode.periode().start)
             vedtaksperiode.dataForVilkårsvurdering = resultat.grunnlagsdata
 
             if (resultat.måBehandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)

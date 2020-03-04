@@ -240,7 +240,7 @@ internal class SpeilBuilder : PersonVisitor {
     }
 
     private inner class ArbeidsgiverState(
-        arbeidsgiver: Arbeidsgiver,
+        private val arbeidsgiver: Arbeidsgiver,
         private val arbeidsgiverMap: MutableMap<String, Any?>
     ) :
         JsonState {
@@ -260,7 +260,7 @@ internal class SpeilBuilder : PersonVisitor {
             val avgrensetUtbetalingstidslinje = mutableListOf<MutableMap<String, Any?>>()
 
             vedtaksperiodeMap["utbetalingstidslinje"] = avgrensetUtbetalingstidslinje
-            pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
+            pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiver, vedtaksperiodeMap))
             vedtaksperioder.add(vedtaksperiodeMap)
 
             val utbetalingstidslinje = utbetalingstidslinjer.last()
@@ -318,10 +318,11 @@ internal class SpeilBuilder : PersonVisitor {
 
     private inner class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
+        arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>
     ) : JsonState {
         init {
-            vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap())
+            vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap(arbeidsgiver))
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

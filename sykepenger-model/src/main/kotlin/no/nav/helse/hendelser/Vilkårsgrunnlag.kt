@@ -1,9 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.math.absoluteValue
 import kotlin.streams.toList
 
 @Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
@@ -16,37 +17,45 @@ class Vilkårsgrunnlag(
     private val arbeidsforhold: MangeArbeidsforhold,
     private val erEgenAnsatt: Boolean
 ) : ArbeidstakerHendelse() {
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = orgnummer
+    private val sammenligningsgrunnlag: BigDecimal
 
-    private fun beregnetÅrsInntekt(): Double {
+    init {
+        if (inntektsmåneder.isEmpty()) severe("Må ha minst én inntekt")
         if (inntektsmåneder.size > 12) severe("Forventer 12 eller færre inntektsmåneder")
-        return inntektsmåneder
+        sammenligningsgrunnlag = inntektsmåneder
             .flatMap { it.inntektsliste }
             .sumByDouble { it }
+            .toBigDecimal()
     }
 
-    private fun avviksprosentInntekt(månedsinntektFraInntektsmelding: Double) =
-        ((månedsinntektFraInntektsmelding * 12) - beregnetÅrsInntekt()).absoluteValue / beregnetÅrsInntekt()
+    override fun aktørId() = aktørId
+    override fun fødselsnummer() = fødselsnummer
 
-    internal fun harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding: Double) =
-        avviksprosentInntekt(månedsinntektFraInntektsmelding) > 0.25
+    override fun organisasjonsnummer() = orgnummer
+
+    private fun avviksprosentInntekt(beregnetInntekt: BigDecimal) =
+        (beregnetInntekt * 12.toBigDecimal())
+            .minus(sammenligningsgrunnlag)
+            .abs()
+            .divide(sammenligningsgrunnlag)
+
+    internal fun harAvvikIOppgittInntekt(beregnetInntekt: BigDecimal) =
+        avviksprosentInntekt(beregnetInntekt) > 0.25.toBigDecimal()
 
     internal fun måHåndteresManuelt(
-        månedsinntektFraInntektsmelding: Double,
+        beregnetInntekt: BigDecimal,
         førsteFraværsdag: LocalDate
     ): Resultat {
         val antallOpptjeningsdager =  arbeidsforhold.antallOpptjeningsdager(førsteFraværsdag, orgnummer)
         val grunnlag = Grunnlagsdata(
             erEgenAnsatt = erEgenAnsatt,
-            beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsInntekt(),
-            avviksprosent = avviksprosentInntekt(månedsinntektFraInntektsmelding),
+            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.setScale(2, RoundingMode.HALF_UP).toDouble(),
+            avviksprosent = avviksprosentInntekt(beregnetInntekt).toDouble(),
             antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
             harOpptjening = antallOpptjeningsdager >= 28
         )
 
-        val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(månedsinntektFraInntektsmelding)
+        val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(beregnetInntekt)
 
         if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else info("er ikke egen ansatt")

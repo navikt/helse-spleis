@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
@@ -18,7 +19,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
-    private val inntektFraInntektsmelding: Double? = vedtaksperiode["inntektFraInntektsmelding"]
     private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, Vilkårsgrunnlag
         .Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
@@ -38,18 +38,17 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjenttidspunkt" to godkjenttidspunkt,
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
-        "inntektFraInntektsmelding" to inntektFraInntektsmelding,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering
     )
 
-    internal fun toSpeilMap() = mutableMapOf<String, Any?>(
+    internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
         "id" to id,
         "maksdato" to maksdato,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
-        "inntektFraInntektsmelding" to inntektFraInntektsmelding,
+        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it) },
         "dataForVilkårsvurdering" to dataForVilkårsvurdering
     )
 }

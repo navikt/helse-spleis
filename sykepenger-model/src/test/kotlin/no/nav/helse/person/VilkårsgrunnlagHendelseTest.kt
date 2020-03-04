@@ -28,7 +28,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `egen ansatt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = tolvMånederMedInntekt(1000.0), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
@@ -37,7 +37,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `avvik i inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = tolvMånederMedInntekt(1.0), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)

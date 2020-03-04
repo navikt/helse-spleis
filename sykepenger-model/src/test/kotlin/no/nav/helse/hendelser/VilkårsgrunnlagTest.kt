@@ -7,11 +7,11 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
-    private val aktivitetslogg = Aktivitetslogg()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val aktørId = "123"
     private val fødselsnummer = "234"
@@ -20,15 +20,20 @@ internal class VilkårsgrunnlagTest {
     private val arbeidsgiver = Arbeidsgiver(person, orgnummer)
 
     @Test
+    internal fun `må ha minst én inntekt`() {
+        assertThrows<Aktivitetslogg.AktivitetException> { vilkårsgrunnlag(emptyList()) }
+    }
+
+    @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
             .map { Måned(YearMonth.of(2017, it), listOf(1000.0)) })
 
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1000.00))
-        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.01))
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.00))
-        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(749.99))
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(750.00))
+        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1000.00.toBigDecimal()))
+        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.01.toBigDecimal()))
+        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.00.toBigDecimal()))
+        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(749.99.toBigDecimal()))
+        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(750.00.toBigDecimal()))
 
     }
 

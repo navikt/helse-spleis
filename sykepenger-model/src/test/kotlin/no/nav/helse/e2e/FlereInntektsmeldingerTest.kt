@@ -52,8 +52,6 @@ internal class FlereInntektsmeldingerTest {
             assertEquals(1, it.inntekter[0]?.size)
             assertEquals(1, it.førsteFraværsdager.size)
             assertEquals(3.januar, it.førsteFraværsdager[0])
-            assertEquals(INNTEKT, it.inntektFraInntektsmeldinger[0])
-            assertNull(it.inntektFraInntektsmeldinger[1])
         }
         assertTrue(inntektsmelding.hasWarnings())
         assertTilstander(0, START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD)

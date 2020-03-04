@@ -59,12 +59,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
-    override fun visitInntektFraInntektsmelding(inntektFraInntektsmelding: Double?) {
-        if (inntektFraInntektsmelding != null) {
-            inntektFraInntektsmeldinger[vedtaksperiodeindeks] = inntektFraInntektsmelding
-        }
-    }
-
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk = inntekthistorikk
     }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
@@ -288,7 +289,14 @@ internal class HendelseMediatorTest {
                 vedtaksperiodeId = UUID.randomUUID(),
                 løsninger = mapOf(
                     "EgenAnsatt" to egenAnsatt,
-                    "Inntektsberegning" to emptyMap<String, String>(),
+                    "Inntektsberegning" to listOf(
+                        mapOf(
+                            "årMåned" to YearMonth.now().toString(),
+                            "inntektsliste" to listOf(
+                                mapOf("beløp" to 1000.0)
+                            )
+                        )
+                    ),
                     "Opptjening" to emptyList<Any>()
                 )
             )

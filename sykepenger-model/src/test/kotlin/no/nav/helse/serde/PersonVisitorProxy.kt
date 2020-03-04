@@ -148,10 +148,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitFørsteFraværsdag(førsteFraværsdag)
     }
 
-    override fun visitInntektFraInntektsmelding(inntektFraInntektsmelding: Double?) {
-        target.visitInntektFraInntektsmelding(inntektFraInntektsmelding)
-    }
-
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
         target.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
     }

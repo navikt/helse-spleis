@@ -46,7 +46,6 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
     fun visitGodkjentAv(godkjentAv: String?) {}
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {}
-    fun visitInntektFraInntektsmelding(inntektFraInntektsmelding: Double?) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
