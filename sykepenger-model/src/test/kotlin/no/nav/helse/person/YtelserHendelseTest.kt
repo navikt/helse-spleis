@@ -1,5 +1,7 @@
 package no.nav.helse.person
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -62,6 +64,18 @@ internal class YtelserHendelseTest {
     }
 
     @Test
+    fun `ugyldig utbetalinghistorikk før inntektsmelding kaster perioden ut`() {
+        håndterUgyldigYtelser()
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
+        håndterYtelser(ukjentePerioder = listOf(jacksonObjectMapper().createObjectNode()))
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `fordrepengeytelse før periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
@@ -107,7 +121,8 @@ internal class YtelserHendelseTest {
     private fun håndterYtelser(
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeytelse: Periode? = null,
-        svangerskapsytelse: Periode? = null
+        svangerskapsytelse: Periode? = null,
+        ukjentePerioder: List<JsonNode> = emptyList()
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -116,15 +131,28 @@ internal class YtelserHendelseTest {
         person.håndter(
             ytelser(
                 utbetalinger = utbetalinger,
+                ukjentePerioder = ukjentePerioder,
                 foreldrepengeYtelse = foreldrepengeytelse,
                 svangerskapYtelse = svangerskapsytelse
             )
         )
     }
 
+    private fun håndterUgyldigYtelser() {
+        person.håndter(sykmelding())
+        person.håndter(søknad())
+        person.håndter(ytelser(
+            utbetalinger = emptyList(),
+            ukjentePerioder = listOf(jacksonObjectMapper().createObjectNode()),
+            foreldrepengeYtelse = null,
+            svangerskapYtelse = null
+        ))
+    }
+
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
+        ukjentePerioder: List<JsonNode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -135,7 +163,7 @@ internal class YtelserHendelseTest {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                ukjentePerioder = emptyList(),
+                ukjentePerioder = ukjentePerioder,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),

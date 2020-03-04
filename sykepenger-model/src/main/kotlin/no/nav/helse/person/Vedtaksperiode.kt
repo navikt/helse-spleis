@@ -433,6 +433,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
+            if (ytelser.valider().hasErrors()) {
+                ytelser.error("Feil i ytelser i %s", type)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            }
+
             val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
             if (sisteUtbetalteDag != null && sisteUtbetalteDag.harTilstøtende(vedtaksperiode.periode().start)) {
                 ytelser.error("Har tilstøtende periode i Infotrygd som er utbetalt")
