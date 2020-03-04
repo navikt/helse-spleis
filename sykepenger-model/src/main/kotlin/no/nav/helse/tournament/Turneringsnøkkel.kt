@@ -13,7 +13,8 @@ internal enum class Turneringsnøkkel {
     V_IM,
     Le_Areg,
     Le_A,
-    SW,
+    SW_SM,
+    SW_A,
     SRD_IM,
     SRD_A,
     EDU,
@@ -76,11 +77,11 @@ internal enum class Turneringsnøkkel {
             }
 
             override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {
-                turneringsnøkkel = SW
+                turneringsnøkkel = SW_SM
             }
 
             override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
-                turneringsnøkkel = SW
+                turneringsnøkkel = SW_A
             }
 
             override fun visitSykedag(sykedag: Sykedag.Sykmelding) {

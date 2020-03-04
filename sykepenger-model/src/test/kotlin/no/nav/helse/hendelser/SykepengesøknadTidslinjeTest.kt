@@ -26,8 +26,8 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`() {
         val tidslinje = søknad().sykdomstidslinje().merge(sykmelding().sykdomstidslinje(), historiskDagturnering)
 
-        assertType(Sykedag.Sykmelding::class, tidslinje[sykeperiodeFOM])
-        assertType(SykHelgedag.Sykmelding::class, tidslinje[sykeperiodeTOM])
+        assertType(Sykedag.Søknad::class, tidslinje[sykeperiodeFOM])
+        assertType(SykHelgedag.Søknad::class, tidslinje[sykeperiodeTOM])
         assertEquals(sykeperiodeTOM, tidslinje.sisteDag())
     }
 

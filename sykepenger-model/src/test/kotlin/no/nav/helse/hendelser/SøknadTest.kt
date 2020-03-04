@@ -75,18 +75,10 @@ internal class SøknadTest {
     }
 
     @Test
-    @Disabled
     internal fun `sykdom faktiskgrad ikke 100 støttes når støttes (epic 18+)`() {
         FeatureToggle.støtterGradertSykdom = true
         søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
         assertFalse(søknad.valider().hasErrors())
-    }
-
-    @Test
-    internal fun `re-graderte søknader støttes ikke ennå (epic 18)`() {
-        FeatureToggle.støtterGradertSykdom = true
-        søknad(Sykdom(1.januar, 10.januar, 50, 40.0))
-        assertTrue(søknad.valider().hasErrors())
     }
 
 
