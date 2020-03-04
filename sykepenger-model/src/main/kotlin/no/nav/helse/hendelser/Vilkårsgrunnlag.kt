@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.math.BigDecimal
+import java.math.MathContext
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,7 +43,7 @@ class Vilkårsgrunnlag(
         (beregnetInntekt * 12.toBigDecimal())
             .minus(sammenligningsgrunnlag)
             .abs()
-            .divide(sammenligningsgrunnlag)
+            .divide(sammenligningsgrunnlag, MathContext.DECIMAL128)
 
     internal fun harAvvikIOppgittInntekt(beregnetInntekt: BigDecimal) =
         avviksprosentInntekt(beregnetInntekt) > 0.25.toBigDecimal()
