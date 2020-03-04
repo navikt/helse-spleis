@@ -333,9 +333,15 @@ internal class Vedtaksperiode private constructor(
             val nesteTilstand =
                 when {
                     !arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) -> AvventerTidligerePeriodeEllerInntektsmelding
-                    else -> arbeidsgiver.tilstøtende(vedtaksperiode)?.also {
-                        vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
-                    }?.let { AvventerHistorikk } ?: UndersøkerHistorikk
+                    else -> arbeidsgiver.tilstøtende(vedtaksperiode)
+                        ?.also {
+                            vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
+                        }?.let {
+                            if (it.tilstand == TilInfotrygd) {
+                                søknad.error("Har tidligere periode som er gått til infotrygd")
+                                TilInfotrygd
+                            } else AvventerHistorikk
+                        } ?: UndersøkerHistorikk
                 }
             vedtaksperiode.håndter(søknad, nesteTilstand)
             søknad.info("Fullført behandling av søknad")
@@ -718,8 +724,7 @@ internal class Vedtaksperiode private constructor(
     companion object {
         internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
             .filter { it.harTilstøtende(other) }
-            .sortedBy { it.førsteFraværsdag }
-            .firstOrNull { it.førsteFraværsdag != null }
+            .minBy { it.periode().start }
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder.map { it.sykdomshistorikk.sykdomstidslinje() }.join()
     }

@@ -432,9 +432,22 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-    private fun assertEndringTeller() {
-        forventetEndringTeller += 1
-        assertEquals(forventetEndringTeller, observatør.endreTeller)
+    @Test
+    internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterPåminnelse(0, MOTTATT_SYKMELDING)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, TIL_INFOTRYGD
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, TIL_INFOTRYGD
+        )
     }
 
     private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
@@ -451,28 +464,24 @@ internal class KunEnArbeidsgiverTest {
 
     private fun håndterSykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
         person.håndter(sykmelding(*sykeperioder))
-        assertEndringTeller()
     }
 
     private fun håndterSøknad(vedtaksperiodeIndex: Int, vararg perioder: Søknad.Periode) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(søknad(*perioder))
-        assertEndringTeller()
     }
 
     private fun håndterInntektsmelding(vedtaksperiodeIndex: Int, arbeidsgiverperioder: List<Periode>) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(inntektsmelding(arbeidsgiverperioder))
-        assertEndringTeller()
     }
 
     private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT))
-        assertEndringTeller()
     }
 
     private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
@@ -480,18 +489,19 @@ internal class KunEnArbeidsgiverTest {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
-        assertEndringTeller()
+    }
+
+    private fun håndterPåminnelse(vedtaksperiodeIndex: Int, påminnetTilstand: TilstandType) {
+        person.håndter(påminnelse(vedtaksperiodeIndex, påminnetTilstand))
     }
 
     private fun håndterManuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
-        assertEndringTeller()
     }
 
     private fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Status) {
         person.håndter(utbetaling(vedtaksperiodeIndex, status))
-        assertEndringTeller()
     }
 
     private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
@@ -573,6 +583,23 @@ internal class KunEnArbeidsgiverTest {
         ).apply {
             hendelselogg = this
         }
+    }
+
+    private fun påminnelse(
+        vedtaksperiodeIndex: Int,
+        påminnetTilstand: TilstandType
+    ): Påminnelse {
+        return Påminnelse(
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            antallGangerPåminnet = 0,
+            tilstand = påminnetTilstand,
+            tilstandsendringstidspunkt = LocalDateTime.now(),
+            påminnelsestidspunkt = LocalDateTime.now(),
+            nestePåminnelsestidspunkt = LocalDateTime.now()
+        )
     }
 
     private fun ytelser(
