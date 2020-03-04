@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -30,6 +31,15 @@ internal class VilkårsgrunnlagHendelseTest {
     fun `egen ansatt`() {
         håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = tolvMånederMedInntekt(1000.0), arbeidsforhold = ansattSidenStart2017())
 
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(1, inspektør.vedtaksperiodeIder.size)
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `ingen inntekt`() {
+        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
+        assertTrue(person.aktivitetslogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)

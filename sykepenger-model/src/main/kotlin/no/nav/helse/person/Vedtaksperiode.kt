@@ -515,6 +515,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            if (vilkårsgrunnlag.valider().hasErrors()) {
+                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
+                return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
+            }
+
             val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode().start)
                 ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", vedtaksperiode.periode().start)
 

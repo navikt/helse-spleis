@@ -7,7 +7,6 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.*
 
@@ -20,8 +19,14 @@ internal class VilkårsgrunnlagTest {
     private val arbeidsgiver = Arbeidsgiver(person, orgnummer)
 
     @Test
-    internal fun `må ha minst én inntekt`() {
-        assertThrows<Aktivitetslogg.AktivitetException> { vilkårsgrunnlag(emptyList()) }
+    internal fun `ugyldige verdier`() {
+        vilkårsgrunnlag(emptyList()).also {
+            assertTrue(it.valider().hasErrors())
+        }
+
+        vilkårsgrunnlag(listOf(Måned(YearMonth.now(), listOf(0.0)))).also {
+            assertTrue(it.valider().hasErrors())
+        }
     }
 
     @Test

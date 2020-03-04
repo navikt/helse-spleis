@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -20,8 +21,6 @@ class Vilkårsgrunnlag(
     private val sammenligningsgrunnlag: BigDecimal
 
     init {
-        if (inntektsmåneder.isEmpty()) severe("Må ha minst én inntekt")
-        if (inntektsmåneder.size > 12) severe("Forventer 12 eller færre inntektsmåneder")
         sammenligningsgrunnlag = inntektsmåneder
             .flatMap { it.inntektsliste }
             .sumByDouble { it }
@@ -32,6 +31,12 @@ class Vilkårsgrunnlag(
     override fun fødselsnummer() = fødselsnummer
 
     override fun organisasjonsnummer() = orgnummer
+
+    internal fun valider(): Aktivitetslogg {
+        if (inntektsmåneder.size > 12) error("Forventer 12 eller færre inntektsmåneder")
+        if (sammenligningsgrunnlag <= BigDecimal.ZERO) error("sammenligningsgrunnlaget er <= 0")
+        return aktivitetslogg
+    }
 
     private fun avviksprosentInntekt(beregnetInntekt: BigDecimal) =
         (beregnetInntekt * 12.toBigDecimal())
