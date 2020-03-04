@@ -87,7 +87,8 @@ internal class KunEnArbeidsgiverTest {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(21000.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertTrue(it.inntekter.isEmpty())
+            assertNull(it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -178,6 +179,22 @@ internal class KunEnArbeidsgiverTest {
             START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
+    }
+
+    @Test
+    internal fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterYtelser(0, Triple(1.januar, 2.januar, 15000)) // -> TIL_INFOTRYGD
+
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)), 1.februar)
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -472,10 +489,10 @@ internal class KunEnArbeidsgiverTest {
         person.håndter(søknad(*perioder))
     }
 
-    private fun håndterInntektsmelding(vedtaksperiodeIndex: Int, arbeidsgiverperioder: List<Periode>) {
+    private fun håndterInntektsmelding(vedtaksperiodeIndex: Int, arbeidsgiverperioder: List<Periode>, førsteFraværsdag: LocalDate = 1.januar) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        person.håndter(inntektsmelding(arbeidsgiverperioder))
+        person.håndter(inntektsmelding(arbeidsgiverperioder, førsteFraværsdag = førsteFraværsdag))
     }
 
     private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
@@ -605,6 +622,7 @@ internal class KunEnArbeidsgiverTest {
     private fun ytelser(
         vedtaksperiodeIndex: Int,
         utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning> = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null
     ): Ytelser {
@@ -624,7 +642,7 @@ internal class KunEnArbeidsgiverTest {
                         it.third
                     )
                 },
-                inntektshistorikk = listOf(Inntektsopplysning(1.desember(2017), INNTEKT.toInt() - 10000, ORGNUMMER)),
+                inntektshistorikk = inntektshistorikk,
                 graderingsliste = emptyList<Utbetalingshistorikk.Graderingsperiode>(),
                 aktivitetslogg = aktivitetslogg
             ),

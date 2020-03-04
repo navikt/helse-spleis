@@ -69,7 +69,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
-        ytelser.addInntekter(inntekthistorikk)
         perioder.forEach { it.håndter(ytelser) }
     }
 

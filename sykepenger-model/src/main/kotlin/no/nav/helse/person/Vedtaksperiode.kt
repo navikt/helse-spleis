@@ -566,11 +566,14 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 it.valider { HarArbeidsgivertidslinje(arbeidsgiver) }
-                val utbetalingstidslinje = utbetalingstidslinje(arbeidsgiver, vedtaksperiode, sisteHistoriskeSykedag)
                 var engineForTimeline: ByggUtbetalingstidlinjer? = null
                 it.valider {
                     ByggUtbetalingstidlinjer(
-                        mapOf(arbeidsgiver to utbetalingstidslinje),
+                        mapOf(arbeidsgiver to utbetalingstidslinje(
+                            arbeidsgiver,
+                            vedtaksperiode,
+                            sisteHistoriskeSykedag
+                        )),
                         vedtaksperiode.periode(),
                         ytelser,
                         Alder(vedtaksperiode.fødselsnummer)
@@ -726,6 +729,8 @@ internal class Vedtaksperiode private constructor(
             .filter { it.harTilstøtende(other) }
             .minBy { it.periode().start }
 
-        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder.map { it.sykdomshistorikk.sykdomstidslinje() }.join()
+        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
+            .filterNot { it.tilstand == TilInfotrygd }
+            .map { it.sykdomshistorikk.sykdomstidslinje() }.join()
     }
 }
