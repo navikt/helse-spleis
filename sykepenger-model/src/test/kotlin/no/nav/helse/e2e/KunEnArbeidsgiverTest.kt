@@ -85,7 +85,7 @@ internal class KunEnArbeidsgiverTest {
         håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
         inspektør.also {
-            assertNoErrors(it)
+            assertTrue(it.personLogg.hasErrors())
             assertMessages(it)
             assertTrue(it.inntekter.isEmpty())
             assertNull(it.inntektshistorikk.inntekt(2.januar))

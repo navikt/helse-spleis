@@ -17,14 +17,14 @@ class Ytelser(
     private val foreldrepermisjon: Foreldrepermisjon,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(aktivitetslogg) {
-    internal fun sykepengehistorikk() = utbetalingshistorikk
+    internal fun utbetalingshistorikk() = utbetalingshistorikk
 
     internal fun foreldrepenger() = foreldrepermisjon
 
     fun valider() = utbetalingshistorikk.valider()
 
     internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
-        sykepengehistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)
+        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)
     }
 
     override fun aktørId(): String {

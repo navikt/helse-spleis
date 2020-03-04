@@ -16,13 +16,13 @@ class Utbetalingshistorikk(
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
-    private val sisteFraværsdag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
+    private val sisteUtbetalteDag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
 
     internal fun utbetalingstidslinje() = this.utbetalinger
         .map { it.toTidslinje(graderingsliste, aktivitetslogg) }
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun sisteFraværsdag() = sisteFraværsdag
+    internal fun sisteUtbetalteDag() = sisteUtbetalteDag
 
     internal fun valider(): Aktivitetslogg {
         utbetalinger.forEach { it.valider(this, aktivitetslogg) }

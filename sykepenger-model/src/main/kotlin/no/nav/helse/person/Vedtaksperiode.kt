@@ -433,9 +433,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
-            if (sisteHistoriskeSykedag != null && sisteHistoriskeSykedag.harTilstøtende(vedtaksperiode.periode().start))
+            val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
+            if (sisteUtbetalteDag != null && sisteUtbetalteDag.harTilstøtende(vedtaksperiode.periode().start)) {
+                ytelser.error("Har tilstøtende periode i Infotrygd som er utbetalt")
                 return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            }
 
             vedtaksperiode.tilstand(ytelser, AvventerInntektsmelding)
         }
@@ -559,7 +561,7 @@ internal class Vedtaksperiode private constructor(
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 it.valider { ValiderYtelser(ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
-                val sisteHistoriskeSykedag = ytelser.sykepengehistorikk().sisteFraværsdag()
+                val sisteHistoriskeSykedag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
                 it.valider {
                     HarInntektshistorikk(
                         arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()

@@ -12,9 +12,9 @@ import java.util.*
 internal class YtelserTest {
 
     @Test
-    fun `siste fraværsdato fra tom sykepengehistorikk`() {
+    fun `siste utbetalte dag fra tom sykepengehistorikk`() {
         val ytelser = ytelser()
-        assertNull(ytelser.sykepengehistorikk().sisteFraværsdag())
+        assertNull(ytelser.utbetalingshistorikk().sisteUtbetalteDag())
     }
 
     @Test
@@ -25,11 +25,11 @@ internal class YtelserTest {
             )
         )
 
-        assertEquals(2.juni, ytelser.sykepengehistorikk().sisteFraværsdag())
+        assertEquals(2.juni, ytelser.utbetalingshistorikk().sisteUtbetalteDag())
     }
 
     @Test
-    fun `siste fraværsdag fra sykepengehistorikk med flere periode`() {
+    fun `siste utbetalte dag fra sykepengehistorikk med flere periode`() {
         val ytelser = ytelser(
             utbetalinger = listOf(
                 Triple(1.juni, 2.juni, 1000),
@@ -37,7 +37,7 @@ internal class YtelserTest {
             )
         )
 
-        assertEquals(2.juli, ytelser.sykepengehistorikk().sisteFraværsdag())
+        assertEquals(2.juli, ytelser.utbetalingshistorikk().sisteUtbetalteDag())
     }
 
     @Test
@@ -49,7 +49,7 @@ internal class YtelserTest {
             )
         )
 
-        assertEquals(3.juni, sykepengehistorikkHendelse.sykepengehistorikk().sisteFraværsdag())
+        assertEquals(3.juni, sykepengehistorikkHendelse.utbetalingshistorikk().sisteUtbetalteDag())
     }
 
     private fun ytelser(
