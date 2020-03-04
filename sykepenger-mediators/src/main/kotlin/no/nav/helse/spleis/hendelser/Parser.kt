@@ -26,7 +26,7 @@ internal class Parser(private val director: ParserDirector, rapidsConnection: Ra
                 if (!problems.hasErrors()) return director.onRecognizedMessage(packet, context)
                 accumulatedProblems.add(packet::class.simpleName!! to problems)
             }
-            director.onUnrecognizedMessage(accumulatedProblems)
+            director.onUnrecognizedMessage(message, accumulatedProblems)
         } catch (err: MessageProblems.MessageException) {
             director.onMessageException(err)
         }
@@ -35,7 +35,7 @@ internal class Parser(private val director: ParserDirector, rapidsConnection: Ra
     // GoF Mediator
     internal interface ParserDirector {
         fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext)
-        fun onUnrecognizedMessage(problems: List<Pair<String, MessageProblems>>)
+        fun onUnrecognizedMessage(message: String, problems: List<Pair<String, MessageProblems>>)
         fun onMessageException(exception: MessageProblems.MessageException)
     }
 }

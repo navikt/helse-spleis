@@ -127,7 +127,7 @@ internal class ParserTest : Parser.ParserDirector {
         messageException = exception
     }
 
-    override fun onUnrecognizedMessage(problems: List<Pair<String, MessageProblems>>) {
+    override fun onUnrecognizedMessage(message: String, problems: List<Pair<String, MessageProblems>>) {
         unrecognizedMessage = true
         messageProblems.clear()
         messageProblems.addAll(problems)
