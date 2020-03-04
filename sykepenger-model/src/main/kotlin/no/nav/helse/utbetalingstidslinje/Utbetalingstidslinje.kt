@@ -32,8 +32,8 @@ internal class Utbetalingstidslinje private constructor(
                 utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse, utbetalingsdag.grad)
         }
     }
-    internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate, grad: Double) {
-        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato, grad))
+    internal fun addArbeidsgiverperiodedag(inntekt: Double, dato: LocalDate, grad: Double = Double.NaN) {
+        utbetalingsdager.add(Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt, dato))
     }
 
     internal fun addNAVdag(inntekt: Double, dato: LocalDate, grad: Double) {
@@ -57,7 +57,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun addAvvistDag(dagen: LocalDate, grad: Double, begrunnelse: Begrunnelse) {
-        utbetalingsdager.add(Utbetalingsdag.AvvistDag(0.0, dagen, grad, begrunnelse))
+        utbetalingsdager.add(AvvistDag(0.0, dagen, grad, begrunnelse))
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
@@ -125,7 +125,7 @@ internal class Utbetalingstidslinje private constructor(
 
         abstract fun accept(visitor: UtbetalingsdagVisitor)
 
-        internal class ArbeidsgiverperiodeDag(inntekt: Double, dato: LocalDate, internal val grad: Double) : Utbetalingsdag(inntekt, dato) {
+        internal class ArbeidsgiverperiodeDag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(inntekt, dato) {
             override val prioritet = 30
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsgiverperiodeDag(this)
         }

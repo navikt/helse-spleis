@@ -393,10 +393,10 @@ internal class SpeilBuilder : PersonVisitor {
             leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
 
         override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = leggTilDag(JsonDagType.SYK_HELGEDAG_SYKMELDING, sykHelgedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = leggTilDag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
-        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilDag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
-        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilDag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, sykHelgedag)
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
+        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
+        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
 
@@ -405,6 +405,16 @@ internal class SpeilBuilder : PersonVisitor {
                 mutableMapOf(
                     "dagen" to dag.dagen,
                     "type" to jsonDagType.name
+                )
+            )
+        }
+
+        private fun leggTilSykedag(jsonDagType: JsonDagType, dag: DagMedGrad) {
+            sykdomstidslinjeListe.add(
+                mutableMapOf(
+                    "dagen" to (dag as Dag).dagen,
+                    "type" to jsonDagType.name,
+                    "grad" to dag.grad
                 )
             )
         }

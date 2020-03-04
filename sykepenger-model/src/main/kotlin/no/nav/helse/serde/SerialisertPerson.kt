@@ -123,7 +123,7 @@ class SerialisertPerson(val json: String) {
         return createUtbetalingstidslinje(data.dager.map {
             when (it.type) {
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
-                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
+                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
                 }
                 ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
                     createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!, grad = it.grad!!)

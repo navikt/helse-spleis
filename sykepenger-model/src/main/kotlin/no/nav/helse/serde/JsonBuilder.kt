@@ -306,7 +306,7 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-            dager.add(UtbetalingsdagMedGradReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
         }
 
         override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {

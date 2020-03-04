@@ -3,10 +3,11 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 
-internal class Sykdomsgradfilter(sykdomsgrader: Sykdomsgrader,
-                                 tidslinjer: List<Utbetalingstidslinje>,
-                                 periode: Periode,
-                                 private val aktivitetslogg: Aktivitetslogg
+internal class Sykdomsgradfilter(
+    sykdomsgrader: Sykdomsgrader,
+    tidslinjer: List<Utbetalingstidslinje>,
+    periode: Periode,
+    private val aktivitetslogg: Aktivitetslogg
 ) {
 
     internal fun filter() {
