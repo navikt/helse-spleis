@@ -1,4 +1,4 @@
-package no.nav.helse.component
+package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
