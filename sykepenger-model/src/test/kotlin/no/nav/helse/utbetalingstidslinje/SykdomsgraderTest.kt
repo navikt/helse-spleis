@@ -19,6 +19,6 @@ internal class SykdomsgraderTest {
     fun `ved manglende dag, blir total sykdomsgrad 0`() {
         val sykdomsgrader = Sykdomsgrader(listOf(tidslinjeOf(5.NAV(1200.0, 50.0), 1.ARB)))
         assertEquals(50.0, sykdomsgrader[1.januar])
-        assertEquals(0.0, sykdomsgrader[6.januar])
+        assertEquals(Double.NaN, sykdomsgrader[6.januar])
     }
 }

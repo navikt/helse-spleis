@@ -61,6 +61,17 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
+    internal fun `avgrenset betaling pga minimun sykdomsgrad`() {
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200.0, 19.0), 2.HELG, 5.NAV)
+
+        assertEquals(12, inspektør.size)
+        assertEquals(10, inspektør.avvistDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(0, inspektør.totalUtbetaling())
+        assertTrue(aktivitetslogg.hasWarnings())
+    }
+
+    @Test
     internal fun `avgrenset betaling pga oppbrukte sykepengedager`() {
         undersøke(PERSON_67_ÅR_FNR_2018,
             7.UTELATE,

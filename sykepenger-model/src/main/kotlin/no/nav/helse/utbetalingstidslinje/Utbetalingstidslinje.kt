@@ -187,5 +187,6 @@ internal class Utbetalingstidslinje private constructor(
 enum class Begrunnelse {
     SykepengedagerOppbrukt,
     MinimumInntekt,
-    EgenmeldingUtenforArbeidsgiverperiode
+    EgenmeldingUtenforArbeidsgiverperiode,
+    MinimumSykdomsgrad
 }
