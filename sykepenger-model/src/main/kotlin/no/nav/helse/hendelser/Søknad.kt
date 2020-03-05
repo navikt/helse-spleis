@@ -30,7 +30,7 @@ class Søknad constructor(
             .also { tom = it.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato") }
     }
 
-    override fun sykdomstidslinje() = perioder.map(Periode::sykdomstidslinje).merge(søknadDagturnering)
+    override fun sykdomstidslinje(tom: LocalDate) = perioder.map(Periode::sykdomstidslinje).merge(søknadDagturnering)
 
     override fun fødselsnummer() = fnr
 

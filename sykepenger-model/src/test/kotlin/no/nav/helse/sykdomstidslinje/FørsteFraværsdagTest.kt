@@ -112,7 +112,7 @@ internal class FørsteFraværsdagTest {
             Periode(20.januar(2020), 20.januar(2020)),
             Periode(4.februar(2020), 18.februar(2020))
         ), førsteFraværsdag = 4.februar(2020))
-        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding)
+        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding, 21.februar(2020))
     }
 
     @Test
@@ -123,7 +123,7 @@ internal class FørsteFraværsdagTest {
             Periode(13.januar(2020), 17.januar(2020)),
             Periode(20.januar(2020), 30.januar(2020))
         ), førsteFraværsdag = 20.januar(2020))
-        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding)
+        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding, 16.februar(2020))
     }
 
     @Test
@@ -135,14 +135,14 @@ internal class FørsteFraværsdagTest {
             Periode(28.januar(2020), 28.januar(2020)),
             Periode(3.februar(2020), 16.februar(2020))
         ), førsteFraværsdag = 3.februar(2020))
-        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding)
+        assertFørsteFraværsdag(sykmelding, søknad, inntektsmelding, 19.februar(2020))
     }
 
-    private fun assertFørsteFraværsdag(sykmelding: Sykmelding, søknad: Søknad, inntektsmelding: Inntektsmelding) {
+    private fun assertFørsteFraværsdag(sykmelding: Sykmelding, søknad: Søknad, inntektsmelding: Inntektsmelding, tom: LocalDate) {
         val tidslinje = listOf(
-            sykmelding.sykdomstidslinje(),
-            søknad.sykdomstidslinje(),
-            inntektsmelding.sykdomstidslinje()
+            sykmelding.sykdomstidslinje(tom),
+            søknad.sykdomstidslinje(tom),
+            inntektsmelding.sykdomstidslinje(tom)
         ).merge(historiskDagturnering)
 
         val førsteFraværsdag = tidslinje.førsteFraværsdag()

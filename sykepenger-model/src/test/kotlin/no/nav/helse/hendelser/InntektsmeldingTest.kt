@@ -15,7 +15,7 @@ internal class InntektsmeldingTest {
     @Test
     internal fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
-        val tidslinje = inntektsmelding.sykdomstidslinje()
+        val tidslinje = inntektsmelding.sykdomstidslinje(5.januar)
         assertEquals(Arbeidsdag.Inntektsmelding::class, tidslinje.dag(3.januar)!!::class)
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(1.januar)!!::class)
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(2.januar)!!::class)
@@ -26,7 +26,7 @@ internal class InntektsmeldingTest {
     @Test
     internal fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
         inntektsmelding(emptyList(), listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
-        val sykdomstidslinje = inntektsmelding.sykdomstidslinje()
+        val sykdomstidslinje = inntektsmelding.sykdomstidslinje(5.januar)
         assertEquals(1.januar, sykdomstidslinje.førsteDag())
     }
 
@@ -54,17 +54,17 @@ internal class InntektsmeldingTest {
     @Test
     internal fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
-        assertEquals(2.januar, inntektsmelding.sykdomstidslinje().førsteDag())
-        assertEquals(2.januar, inntektsmelding.sykdomstidslinje().sisteDag())
+        assertEquals(2.januar, inntektsmelding.sykdomstidslinje(2.januar).førsteDag())
+        assertEquals(2.januar, inntektsmelding.sykdomstidslinje(2.januar).sisteDag())
     }
 
     @Test
     internal fun `ferieperiode og arbeidsgiverperiode blir slått sammen`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), listOf(Periode(17.januar, 18.januar)))
 
-        assertEquals(1.januar, inntektsmelding.sykdomstidslinje().førsteDag())
-        assertEquals(18.januar, inntektsmelding.sykdomstidslinje().sisteDag())
-        assertEquals(18, inntektsmelding.sykdomstidslinje().flatten().size)
+        assertEquals(1.januar, inntektsmelding.sykdomstidslinje(18.januar).førsteDag())
+        assertEquals(18.januar, inntektsmelding.sykdomstidslinje(18.januar).sisteDag())
+        assertEquals(18, inntektsmelding.sykdomstidslinje(18.januar).flatten().size)
     }
 
     @Test

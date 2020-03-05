@@ -37,7 +37,7 @@ class Inntektsmelding(
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
     }
 
-    override fun sykdomstidslinje() = (ferieperioder + arbeidsgiverperioder)
+    override fun sykdomstidslinje(tom: LocalDate) = (ferieperioder + arbeidsgiverperioder)
         .map { it.sykdomstidslinje(this) }
         .sortedBy { it.førsteDag() }
         .takeUnless { it.isEmpty() }

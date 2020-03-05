@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.historiskDagturnering
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -16,7 +17,12 @@ internal class Sykdomshistorikk private constructor(
     internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
-        elementer.add(0, Element.opprett(this, hendelse))
+        elementer.add(
+            0, Element.opprett(
+                this, hendelse,
+                if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
+            )
+        )
     }
 
     internal fun accept(visitor: SykdomshistorikkVisitor) {
@@ -30,7 +36,7 @@ internal class Sykdomshistorikk private constructor(
         hendelseSykdomstidslinje: ConcreteSykdomstidslinje
     ): ConcreteSykdomstidslinje {
         val tidslinje = if (elementer.isEmpty())
-            hendelse.sykdomstidslinje()
+            hendelseSykdomstidslinje
         else
             sykdomstidslinje().merge(hendelseSykdomstidslinje, historiskDagturnering)
         return tidslinje.also { it.valider(hendelse) }
@@ -56,9 +62,10 @@ internal class Sykdomshistorikk private constructor(
         companion object {
             fun opprett(
                 historikk: Sykdomshistorikk,
-                hendelse: SykdomstidslinjeHendelse
+                hendelse: SykdomstidslinjeHendelse,
+                tom: LocalDate
             ): Element {
-                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
                 return Element(
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
