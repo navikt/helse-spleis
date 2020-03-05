@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -75,16 +74,6 @@ internal class Overlappende(
 ) : Valideringssteg {
     override fun isValid() = !foreldrepermisjon.overlapper(sykdomsperiode)
     override fun feilmelding() = "Har overlappende foreldrepengeperioder med syketilfelle"
-}
-
-internal class GapPå26Uker(
-    private val tidslinje: ConcreteSykdomstidslinje,
-    private val sisteHistoriskeSykedag: LocalDate?
-) : Valideringssteg {
-    override fun isValid() =
-        sisteHistoriskeSykedag.let { it == null || it.plusWeeks(26) < tidslinje.førsteDag() }
-
-    override fun feilmelding() = "Har historikk innenfor 26 uker"
 }
 
 internal class HarInntektshistorikk(
