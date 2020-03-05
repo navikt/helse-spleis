@@ -42,6 +42,27 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return CompositeSykdomstidslinje(førsteDag.datesUntil(sisteDag).map(mapper).toList())
     }
 
+    internal fun førsteFraværsdag(): LocalDate {
+        return førsteSykedagDagEtterSisteIkkeSykedag() ?: førsteSykedag()
+    }
+
+    private fun førsteSykedagDagEtterSisteIkkeSykedag() =
+        kuttEtterSisteSykedag().let { dager ->
+            dager.firstOrNull { it is Arbeidsdag || it is ImplisittDag }?.let { ikkeSykedag ->
+                dager.lastOrNull { it.dagen.isAfter(ikkeSykedag.dagen) && (it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag) }?.dagen
+            }
+        }
+
+    private fun førsteSykedag() = flatten().first { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag }.dagen
+
+    private fun kuttEtterSisteSykedag() =
+        flatten().reversed().let { dager ->
+            val indeksSisteSykedag = dager.indexOfFirst { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag  }.also {
+                check(it >= 0) { "Tidslinjen består ikke av noen sykedager" }
+            }
+            dager.subList(indeksSisteSykedag, dager.size - 1)
+        }
+
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
         if (kuttDag.isBefore(førsteDag())) return null
         if (!kuttDag.isBefore(sisteDag())) return this

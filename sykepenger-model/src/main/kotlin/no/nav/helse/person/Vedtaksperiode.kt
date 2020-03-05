@@ -520,10 +520,11 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
             }
 
-            val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode().start)
-                ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", vedtaksperiode.periode().start)
+            val førsteFraværsdag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag()
+            val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(førsteFraværsdag)
+                ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
 
-            val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, vedtaksperiode.periode().start)
+            val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, førsteFraværsdag)
             vedtaksperiode.dataForVilkårsvurdering = resultat.grunnlagsdata
 
             if (resultat.måBehandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
