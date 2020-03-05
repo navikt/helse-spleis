@@ -55,6 +55,35 @@ internal class MaksimumUtbetalingTest {
         assertFalse(aktivitetslogg.hasWarnings())
     }
 
+    @Test fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
+        val tidslinje = tidslinjeOf(10.NAV(3500.00, 50.0))
+        MaksimumUtbetaling(Sykdomsgrader(
+            listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            aktivitetslogg
+
+        ).beregn()
+        undersøke(tidslinje)
+        assertEquals(10810, inspektør.totalUtbetaling())
+        assertTrue(aktivitetslogg.hasWarnings())
+    }
+
+    @Test fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
+        val tidslinje = tidslinjeOf(10.NAV(1200.00, 50.0))
+        MaksimumUtbetaling(Sykdomsgrader(
+            listOf(tidslinje)),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            aktivitetslogg
+
+        ).beregn()
+        undersøke(tidslinje)
+        assertEquals(6000, inspektør.totalUtbetaling())
+        assertTrue(aktivitetslogg.hasMessages())
+        assertFalse(aktivitetslogg.hasWarnings())
+    }
+
 
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje).result()

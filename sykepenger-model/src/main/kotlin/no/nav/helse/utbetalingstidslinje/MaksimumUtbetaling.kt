@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import kotlin.math.roundToInt
 
 internal class MaksimumUtbetaling(
-    private val sykdomsgrader: Sykdomsgrader,
+    private val sykdomsgrader: Sykdomsgrader, // Skal brukes når vi støtter flere arbeidsgivere
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
     private val aktivitetslogg: Aktivitetslogg
@@ -29,6 +29,6 @@ internal class MaksimumUtbetaling(
 
     override fun visitNavDag(dag: NavDag) {
         if (dag.dato in periode && dag.inntekt > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
-        dag.utbetaling = minOf(dag.inntekt, `6G`.dagsats(dag.dato)).roundToInt()
+        dag.utbetaling = (minOf(dag.inntekt, `6G`.dagsats(dag.dato)).roundToInt() * (dag.grad / 100)).roundToInt() // TODO: Foreløpig ikke avklart om dette er riktig avrundingsstrategi
     }
 }
