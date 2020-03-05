@@ -220,7 +220,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
         TilstandType.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
         TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
-        TilstandType.UTBETALT -> Vedtaksperiode.Utbetalt
+        TilstandType.UTBETALT -> Vedtaksperiode.Avsluttet
         TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
         TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
         TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding

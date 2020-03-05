@@ -627,7 +627,9 @@ internal class Vedtaksperiode private constructor(
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
             if (manuellSaksbehandling.utbetalingGodkjent()) {
-                vedtaksperiode.tilstand(manuellSaksbehandling, TilUtbetaling) {
+                vedtaksperiode.tilstand(manuellSaksbehandling,
+                    if (vedtaksperiode.utbetalingslinjer.isNullOrEmpty()) Avsluttet else TilUtbetaling
+                ) {
                     vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
                     vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
                         manuellSaksbehandling.info("Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
@@ -673,7 +675,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
             if (utbetaling.isOK()) {
-                vedtaksperiode.tilstand(utbetaling, Utbetalt) {
+                vedtaksperiode.tilstand(utbetaling, Avsluttet) {
                     utbetaling.info("OK fra Oppdragssystemet")
                 }
             } else {
@@ -694,7 +696,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
-    internal object Utbetalt : Vedtaksperiodetilstand {
+    internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = UTBETALT
         override val timeout: Duration = Duration.ZERO
 

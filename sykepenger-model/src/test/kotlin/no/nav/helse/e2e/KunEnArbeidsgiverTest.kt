@@ -128,11 +128,12 @@ internal class KunEnArbeidsgiverTest {
             assertMessages(it)
         }
         håndterYtelser(0)   // No history
-        assertTrue(hendelselogg.hasErrors())
+        assertFalse(hendelselogg.hasErrors())
+        håndterManuellSaksbehandling(0, true)
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, UTBETALT
         )
     }
 
