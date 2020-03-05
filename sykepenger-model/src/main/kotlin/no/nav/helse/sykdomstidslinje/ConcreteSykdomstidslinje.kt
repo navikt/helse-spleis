@@ -63,9 +63,13 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             dager.subList(indeksSisteSykedag, dager.size - 1)
         }
 
+    internal fun subset(fom: LocalDate?, tom:LocalDate): ConcreteSykdomstidslinje? {
+        if(fom == null) return kutt(tom)
+        return CompositeSykdomstidslinje(this.flatten().filter { it.dagen.isAfter(fom) && !it.dagen.isAfter(tom) })
+    }
+
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
         if (kuttDag.isBefore(førsteDag())) return null
-        if (!kuttDag.isBefore(sisteDag())) return this
         return CompositeSykdomstidslinje(this.flatten().filterNot { it.dagen.isAfter(kuttDag) })
     }
 

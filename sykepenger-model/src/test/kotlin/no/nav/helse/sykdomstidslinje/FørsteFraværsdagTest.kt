@@ -140,9 +140,9 @@ internal class FørsteFraværsdagTest {
 
     private fun assertFørsteFraværsdag(sykmelding: Sykmelding, søknad: Søknad, inntektsmelding: Inntektsmelding, tom: LocalDate) {
         val tidslinje = listOf(
-            sykmelding.sykdomstidslinje(tom),
-            søknad.sykdomstidslinje(tom),
-            inntektsmelding.sykdomstidslinje(tom)
+            sykmelding.sykdomstidslinje(),
+            søknad.sykdomstidslinje(),
+            inntektsmelding.sykdomstidslinje()
         ).merge(historiskDagturnering)
 
         val førsteFraværsdag = tidslinje.førsteFraværsdag()

@@ -163,7 +163,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        sykdomshistorikk.isEmpty() || this.sykdomshistorikk.sykdomstidslinje().let { it.overlapperMed(hendelse.sykdomstidslinje(it.sisteDag())) }
+        sykdomshistorikk.isEmpty() || this.sykdomshistorikk.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,

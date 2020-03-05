@@ -30,6 +30,8 @@ class Inntektsmelding(
 
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
+    private var forrigeTom: LocalDate? = null
+    private var sykdomstidslinje: ConcreteSykdomstidslinje? = null
 
     init {
         this.arbeidsgiverperioder =
@@ -37,12 +39,31 @@ class Inntektsmelding(
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
     }
 
-    override fun sykdomstidslinje(tom: LocalDate) = (ferieperioder + arbeidsgiverperioder)
-        .map { it.sykdomstidslinje(this) }
-        .sortedBy { it.førsteDag() }
-        .takeUnless { it.isEmpty() }
-        ?.merge(KonfliktskyDagturnering) { gjelder -> ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory) }
-        ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+
+    override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
+        if (sykdomstidslinje == null) {
+            sykdomstidslinje = (ferieperioder + arbeidsgiverperioder)
+                .map { it.sykdomstidslinje(this) }
+                .sortedBy { it.førsteDag() }
+                .takeUnless { it.isEmpty() }
+                ?.merge(KonfliktskyDagturnering) { gjelder ->
+                    ConcreteSykdomstidslinje.ikkeSykedag(
+                        gjelder,
+                        InntektsmeldingDagFactory
+                    )
+                }
+                ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+        }
+        return sykdomstidslinje!!
+    }
+    override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
+        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+
+        return sykdomstidslinje().subset(forrigeTom, tom)
+            .also { forrigeTom = tom }
+            ?: severe("Ugydlig subsetting av tidslinjen til inntektsmeldingen")
+
+    }
 
     override fun valider(): Aktivitetslogg {
         if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")

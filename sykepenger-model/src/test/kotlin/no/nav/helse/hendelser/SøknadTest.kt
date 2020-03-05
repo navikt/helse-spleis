@@ -5,8 +5,11 @@ import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.*
 
 internal class SøknadTest {
@@ -32,7 +35,7 @@ internal class SøknadTest {
     internal fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100))
         assertFalse(søknad.valider().hasErrors())
-        assertEquals(10, søknad.sykdomstidslinje(10.januar).length())
+        assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
@@ -45,14 +48,14 @@ internal class SøknadTest {
     internal fun `søknad med ferie`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider().hasErrors())
-        assertEquals(10, søknad.sykdomstidslinje(10.januar).length())
+        assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Utdanning(5.januar, 10.januar))
         assertTrue(søknad.valider().hasBehov())
-        assertEquals(10, søknad.sykdomstidslinje(10.januar).length())
+        assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
@@ -110,7 +113,7 @@ internal class SøknadTest {
     internal fun `egenmelding ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
         assertFalse(søknad.valider().hasErrors())
-        assertEquals(11, søknad.sykdomstidslinje(12.januar).length())
+        assertEquals(11, søknad.sykdomstidslinje().length())
     }
 
     @Test

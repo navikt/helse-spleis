@@ -21,6 +21,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -489,6 +490,31 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING, TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    @Disabled
+    internal fun `kort sykmelding etterfulgt av lang sykmelding`() {
+        håndterSykmelding(Triple(3.januar, 8.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 8.januar, 100))
+
+        håndterSykmelding(Triple(9.januar, 31.januar, 100))
+        håndterSøknad(1, Sykdom(9.januar, 31.januar, 100))
+
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(1, true)
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING
+            )
+
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD
         )
     }
 
