@@ -185,14 +185,21 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
+        sykdomshistorikk.håndter(hendelse)
+        if (hendelse.førsteFraværsdag > sykdomshistorikk.sykdomstidslinje().sisteDag())
+            hendelse.error("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
+        if (hendelse.førsteFraværsdag != sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
+            hendelse.warn("Inntektsmelding har oppgitt en annen første fraværsdag")
+
+        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        tilstand(hendelse, nesteTilstand)
+    }
+
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
-
-        if (hendelse.hasErrors()) {
-            tilstand(hendelse, TilInfotrygd)
-        } else {
-            tilstand(hendelse, nesteTilstand)
-        }
+        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        tilstand(hendelse, nesteTilstand)
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {

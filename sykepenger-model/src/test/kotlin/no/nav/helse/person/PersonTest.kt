@@ -329,7 +329,7 @@ internal class PersonTest {
     private fun inntektsmelding(
         virksomhetsnummer: String = organisasjonsnummer,
         arbeidsgiverperioder: List<Periode> = listOf(Periode(10.september, 10.september.plusDays(16))),
-        førsteFraværsdag: LocalDate = LocalDate.now()
+        førsteFraværsdag: LocalDate = 10.september
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),

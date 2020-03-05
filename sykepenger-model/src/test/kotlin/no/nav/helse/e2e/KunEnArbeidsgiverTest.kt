@@ -199,6 +199,30 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 4.januar)
+        inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
+        assertTilstander(0, START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
+    }
+
+    @Test
+    internal fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    internal fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        assertTilstander(0, START, MOTTATT_SYKMELDING, TIL_INFOTRYGD)
+    }
+
+    @Test
     internal fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
