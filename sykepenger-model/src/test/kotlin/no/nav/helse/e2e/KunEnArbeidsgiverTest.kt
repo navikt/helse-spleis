@@ -74,7 +74,7 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALT
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
     }
@@ -133,7 +133,7 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, UTBETALT
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
     }
 
@@ -322,7 +322,7 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK ,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALT
+            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,

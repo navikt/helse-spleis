@@ -263,7 +263,7 @@ internal class EndToEndTest {
             fødselsnummer = fødselsnummer,
             virksomhetsnummer = virksomhetsnummer,
             previousState = TilstandType.TIL_UTBETALING,
-            currentState = TilstandType.UTBETALT
+            currentState = TilstandType.AVSLUTTET
         )
 
         aktørID.hentPerson {

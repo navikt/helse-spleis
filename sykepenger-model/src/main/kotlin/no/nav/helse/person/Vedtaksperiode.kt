@@ -239,7 +239,7 @@ internal class Vedtaksperiode private constructor(
         this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode) =
-        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD, UTBETALT, UTBETALING_FEILET)
+        (this.periode().start >= other.periode().start) || this.tilstand.type in listOf(TIL_UTBETALING, TIL_INFOTRYGD, AVSLUTTET, UTBETALING_FEILET)
 
     internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         if (this.periode().start > other.periode().start) {
@@ -705,7 +705,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
-        override val type = UTBETALT
+        override val type = AVSLUTTET
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
