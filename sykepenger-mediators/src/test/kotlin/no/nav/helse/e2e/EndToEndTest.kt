@@ -256,7 +256,7 @@ internal class EndToEndTest {
             currentState = TilstandType.TIL_UTBETALING
         )
 
-        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, true)
+        val utbetalingsreferanse = sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, true)
 
         assertVedtaksperiodeEndretEvent(
             aktørId = aktørID,
@@ -267,90 +267,18 @@ internal class EndToEndTest {
         )
 
         aktørID.hentPerson {
+            val json = objectMapper.readTree(this)
             assertTrue(this.contains("maksdato"))
             assertTrue(this.contains("utbetalingslinjer"))
             assertTrue(this.contains("dagsats"))
+            assertTrue(json.path("hendelser").isArray)
+            assertEquals(3, json.path("hendelser").size())
         }
-    }
-
-    @Test
-    fun `gitt en periode til utbetaling, skal vi kunne hente opp personen via utbetalingsreferanse`() {
-        val aktørID = "87659123421962"
-        val fødselsnummer = "01018000000"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
-
-        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
-
-        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
-
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.AVVENTER_GODKJENNING,
-            currentState = TilstandType.TIL_UTBETALING
-        )
-
-        val utbetalingsbehov = ventPåBehov(aktørId = aktørID, fødselsnummer = fødselsnummer, behovType = Utbetaling)
-        val utbetalingsreferanse: String = utbetalingsbehov["utbetalingsreferanse"].asText()
 
         utbetalingsreferanse.hentUtbetaling {
             assertTrue(this.contains(aktørID))
             assertTrue(this.contains("godkjentAv"))
             assertTrue(this.contains("godkjenttidspunkt"))
-        }
-    }
-
-    @Test
-    fun `FEIL fra Spenn fører til UTBETALING_FEILET tilstand`() {
-        val aktørID = "876591234219622312"
-        val fødselsnummer = "01019000000"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendSøknad(aktørID, fødselsnummer, virksomhetsnummer)
-        sendInnteksmelding(aktørID, fødselsnummer, virksomhetsnummer)
-        sendVilkårsgrunnlagsløsning(aktørID, fødselsnummer)
-        sendSykepengehistorikkløsningUtenHistorikk(aktørID, fødselsnummer)
-        sendGodkjenningFraSaksbehandlerløsning(aktørID, fødselsnummer, true, "en_saksbehandler_ident")
-        sendUtbetalingSvarFraSpenn(aktørID, fødselsnummer, false)
-
-        assertVedtaksperiodeEndretEvent(
-            aktørId = aktørID,
-            fødselsnummer = fødselsnummer,
-            virksomhetsnummer = virksomhetsnummer,
-            previousState = TilstandType.TIL_UTBETALING,
-            currentState = TilstandType.UTBETALING_FEILET
-        )
-    }
-
-    @Test
-    fun `gitt en sykmelding, så skal den kunne hentes ut på personen`() {
-        val enAktørId = "1211109876233"
-        val fødselsnummer = "01019000123"
-        val virksomhetsnummer = "123456789"
-
-        sendNySøknad(enAktørId, fødselsnummer, virksomhetsnummer)
-        sendSøknad(enAktørId, fødselsnummer, virksomhetsnummer)
-        sendInnteksmelding(enAktørId, fødselsnummer, virksomhetsnummer)
-        sendVilkårsgrunnlagsløsning(enAktørId, fødselsnummer)
-        sendSykepengehistorikkløsningUtenHistorikk(enAktørId, fødselsnummer)
-
-        assertVedtaksperiodeEndretEvent(
-            fødselsnummer,
-            virksomhetsnummer,
-            enAktørId,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_GODKJENNING
-        )
-
-        enAktørId.hentPerson {
-            assertEquals(3, objectMapper.readTree(this)["hendelser"].size())
         }
     }
 
@@ -494,7 +422,7 @@ internal class EndToEndTest {
         aktørId: String,
         fødselsnummer: String,
         utbetalingOK: Boolean
-    ) {
+    ): String {
         val behov = ventPåBehov(aktørId, fødselsnummer, Utbetaling)
 
         val løstBehov = behov
@@ -507,6 +435,8 @@ internal class EndToEndTest {
                 )
             )
         sendBehov(løstBehov)
+
+        return behov["utbetalingsreferanse"].asText()
     }
 
     private fun sendInnteksmelding(
