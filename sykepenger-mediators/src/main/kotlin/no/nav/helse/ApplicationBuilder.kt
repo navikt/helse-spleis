@@ -40,7 +40,7 @@ class ApplicationBuilder(env: Map<String, String>) {
         truststorePassword = env["NAV_TRUSTSTORE_PASSWORD"]
     )
 
-    private val rapidsConnection = KafkaRapid.create(kafkaConfig, Topics.rapidTopic, listOf(Topics.søknadTopic))
+    private val rapidsConnection = KafkaRapid.create(kafkaConfig, Topics.rapidTopic)
 
     private val ktor = KtorBuilder()
         .log(log)

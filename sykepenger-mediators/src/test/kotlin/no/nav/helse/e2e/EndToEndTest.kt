@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.ApplicationBuilder
 import no.nav.helse.Topics.rapidTopic
-import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.handleRequest
 import no.nav.helse.randomPort
 import no.nav.helse.responseBody
@@ -47,13 +46,10 @@ internal class EndToEndTest {
     private val password = "kafkaclient"
     private val kafkaApplicationId = "spleis-v1"
 
-    private val topics = listOf(rapidTopic, søknadTopic)
-    private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
-
     private val embeddedKafkaEnvironment = KafkaEnvironment(
         autoStart = false,
         noOfBrokers = 1,
-        topicInfos = topicInfos,
+        topicInfos = listOf(KafkaEnvironment.TopicInfo(rapidTopic, partitions = 1)),
         withSchemaRegistry = false,
         withSecurity = false
     )
@@ -126,9 +122,10 @@ internal class EndToEndTest {
 
         GlobalScope.launch { app.start() }
 
-        // send one initial message per topic and wait for the application to commit the offsets (i.e. the app is ready)
-        topics.map { sendKafkaMessage(it, "key", "{}").get() }
-            .forEach { it.assertMessageIsConsumed(10L) }
+        // send one initial message and wait for the application to commit the offsets (i.e. the app is ready)
+        sendKafkaMessage(rapidTopic, "key", "{}")
+            .get()
+            .assertMessageIsConsumed(10L)
     }
 
     @AfterAll
