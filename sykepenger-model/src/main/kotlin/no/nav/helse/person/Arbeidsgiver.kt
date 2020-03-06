@@ -126,7 +126,7 @@ internal class Arbeidsgiver private constructor(
         perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
 
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        perioder.forEach { it.håndter(this, vedtaksperiode, GjenopptaBehandling(hendelse)) }
+        perioder.forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)

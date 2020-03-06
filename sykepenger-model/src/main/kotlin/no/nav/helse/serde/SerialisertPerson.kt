@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
+import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
@@ -218,29 +219,32 @@ class SerialisertPerson(val json: String) {
     }
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
-        TilstandType.OLD_START -> Vedtaksperiode.StartTilstand
-        TilstandType.MOTTATT_SYKMELDING -> Vedtaksperiode.MottattSykmelding
-        TilstandType.AVVENTER_SØKNAD -> Vedtaksperiode.AvventerSøknad
-        TilstandType.AVVENTER_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
-        TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
-        TilstandType.AVVENTER_HISTORIKK -> Vedtaksperiode.AvventerHistorikk
-        TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
-        TilstandType.UNDERSØKER_HISTORIKK -> Vedtaksperiode.UndersøkerHistorikk
-        TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
-        TilstandType.AVSLUTTET -> Vedtaksperiode.Avsluttet
-        TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
-        TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
-        TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
-        TilstandType.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
-        TilstandType.START -> Vedtaksperiode.Start
-        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.SykmeldingMottattFerdigForlengelse
-        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.SykmeldingMottattUferdigForlengelse
-        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> Vedtaksperiode.SykmeldingMottattFerdigGap
-        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> Vedtaksperiode.SykmeldingMottattUferdigGap
-        TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
-        TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> Vedtaksperiode.AvventerVilkårsprøvingGap
-        TilstandType.AVVENTER_GAP -> Vedtaksperiode.AvventerGap
-        TilstandType.AVVENTER_INNTEKTSMELDING_GAP -> Vedtaksperiode.AvventerInntektsmeldingGap
+        TilstandType.OLD_START -> StartTilstand
+        TilstandType.MOTTATT_SYKMELDING -> MottattSykmelding
+        TilstandType.AVVENTER_SØKNAD -> AvventerSøknad
+        TilstandType.AVVENTER_INNTEKTSMELDING -> AvventerInntektsmelding
+        TilstandType.AVVENTER_VILKÅRSPRØVING -> AvventerVilkårsprøving
+        TilstandType.AVVENTER_HISTORIKK -> AvventerHistorikk
+        TilstandType.AVVENTER_GODKJENNING -> AvventerGodkjenning
+        TilstandType.UNDERSØKER_HISTORIKK -> UndersøkerHistorikk
+        TilstandType.TIL_UTBETALING -> TilUtbetaling
+        TilstandType.AVSLUTTET -> Avsluttet
+        TilstandType.UTBETALING_FEILET -> UtbetalingFeilet
+        TilstandType.TIL_INFOTRYGD -> TilInfotrygd
+        TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> AvventerTidligerePeriodeEllerInntektsmelding
+        TilstandType.AVVENTER_TIDLIGERE_PERIODE -> AvventerTidligerePeriode
+        TilstandType.START -> Start
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> SykmeldingMottattFerdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> SykmeldingMottattUferdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> SykmeldingMottattFerdigGap
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> SykmeldingMottattUferdigGap
+        TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> AvventerSøknadFerdigGap
+        TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> AvventerVilkårsprøvingGap
+        TilstandType.AVVENTER_GAP -> AvventerGap
+        TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP -> AvventerSøknadUferdigGap
+        TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP -> AvventerInntektsmeldingFerdigGap
+        TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP -> AvventerInntektsmeldingUferdigGap
+        TilstandType.AVVENTER_UFERDIG_GAP -> AvventerUferdigGap
     }
 
     private fun parseUtbetalingslinje(

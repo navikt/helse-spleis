@@ -122,7 +122,7 @@ internal class KunEnArbeidsgiverTest {
         }
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_GAP,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
@@ -145,53 +145,199 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
-//    @Test
-//    internal fun `Har tilstøtende perioder i historikk`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
-//    }
-//
-//    @Test
-//    internal fun `ingen historie med Inntektsmelding først`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterVilkårsgrunnlag(0, INNTEKT)
-//        håndterYtelser(0)   // No history
-//        håndterManuellSaksbehandling(0, true)
-//        inspektør.also {
-//            assertNoErrors(it)
-//            assertMessages(it)
-//            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-//            assertEquals(3, it.sykdomshistorikk.size)
-//        }
-//        assertTilstander(
-//            0,
-//            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//    }
-//
-//    @Test
-//    internal fun `ingen nav utbetaling kreves`() {
-//        håndterSykmelding(Triple(3.januar, 5.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 5.januar)))
-//        håndterSøknad(0, Sykdom(3.januar, 5.januar, 100))
-//        håndterVilkårsgrunnlag(0, INNTEKT)
-//        inspektør.also {
-//            assertNoErrors(it)
-//            assertMessages(it)
-//        }
-//        håndterYtelser(0)   // No history
-//        assertFalse(hendelselogg.hasErrors())
-//        håndterManuellSaksbehandling(0, true)
-//        assertTilstander(
-//            0,
-//            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
-//        )
-//    }
+    @Test
+    internal fun `ingen nav utbetaling kreves`() {
+        håndterSykmelding(Triple(3.januar, 5.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 5.januar, 100))
+        håndterYtelser(0)   // No history
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertFalse(hendelselogg.hasErrors())
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+        )
+    }
+
+
+    @Test
+    internal fun `To perioder med opphold`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
+    @Test
+    internal fun `Kiler tilstand i uferdig venter for inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterYtelser(1)   // No history
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
+    @Test
+    internal fun `Kilt etter søknad og inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
+    @Test
+    internal fun `Kilt etter inntektsmelding og søknad`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
+    @Test
+    internal fun `Kilt etter inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
 //
 //    @Test
 //    internal fun `To perioder med opphold`() {
