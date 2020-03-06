@@ -54,8 +54,8 @@ internal class FlereInntektsmeldingerTest {
             assertEquals(3.januar, it.førsteFraværsdager[0])
         }
         assertTrue(inntektsmelding.hasWarnings())
-        assertTilstander(0, START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING)
+        assertTilstander(0, OLD_START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
+        assertTilstander(1, OLD_START, MOTTATT_SYKMELDING)
     }
 
     private fun assertEndringTeller() {

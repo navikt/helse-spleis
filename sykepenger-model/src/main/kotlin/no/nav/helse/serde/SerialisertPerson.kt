@@ -213,7 +213,7 @@ class SerialisertPerson(val json: String) {
     }
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
-        TilstandType.START -> Vedtaksperiode.StartTilstand
+        TilstandType.OLD_START -> Vedtaksperiode.StartTilstand
         TilstandType.MOTTATT_SYKMELDING -> Vedtaksperiode.MottattSykmelding
         TilstandType.AVVENTER_SØKNAD -> Vedtaksperiode.AvventerSøknad
         TilstandType.AVVENTER_INNTEKTSMELDING -> Vedtaksperiode.AvventerInntektsmelding
@@ -227,6 +227,13 @@ class SerialisertPerson(val json: String) {
         TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
         TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> Vedtaksperiode.AvventerTidligerePeriodeEllerInntektsmelding
         TilstandType.AVVENTER_TIDLIGERE_PERIODE -> Vedtaksperiode.AvventerTidligerePeriode
+        TilstandType.START -> Vedtaksperiode.Start
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.SykmeldingMottattFerdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.SykmeldingMottattUferdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> Vedtaksperiode.SykmeldingMottattFerdigGap
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> Vedtaksperiode.SykmeldingMottattUferdigGap
+        TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
+        TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> Vedtaksperiode.AvventerVilkårsprøvingGap
     }
 
     private fun parseUtbetalingslinje(

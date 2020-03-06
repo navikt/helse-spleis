@@ -50,7 +50,7 @@ internal class Vedtaksperiode private constructor(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        tilstand: Vedtaksperiodetilstand = StartTilstand
+        tilstand: Vedtaksperiodetilstand = Start
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
@@ -108,7 +108,7 @@ internal class Vedtaksperiode private constructor(
         overlapperMed(søknad).also {
             if (!it) return it
             søknad.kontekst(this)
-            tilstand.håndter(this, arbeidsgiver, person, søknad)
+            tilstand.håndter(this, søknad)
         }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
@@ -196,10 +196,15 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand)
     }
 
+
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
+        håndter(hendelse) { nesteTilstand }
+    }
+
+    private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: () -> Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
-        tilstand(hendelse, nesteTilstand)
+        tilstand(hendelse, nesteTilstand())
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
@@ -244,7 +249,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(arbeidsgiver: Arbeidsgiver, other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         if (this.periode().start > other.periode().start) {
             hendelse.hendelse.kontekst(this)
-            tilstand.håndter(arbeidsgiver, this, hendelse)
+            tilstand.oldhåndter(arbeidsgiver, this, hendelse)
         }
     }
 
@@ -254,12 +259,17 @@ internal class Vedtaksperiode private constructor(
 
         val timeout: Duration
 
+        fun oldhåndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            sykmelding.error("Forventet ikke sykmelding i %s", type.name)
+            vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+        }
+
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.error("Forventet ikke sykmelding i %s", type.name)
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
-        fun håndter(
+        fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
@@ -269,7 +279,17 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
-        fun håndter(
+        fun håndter(vedtaksperiode: Vedtaksperiode,
+                    søknad: Søknad) {
+            søknad.error("Forventet ikke søknad i %s", type.name)
+            vedtaksperiode.tilstand(søknad, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
+        }
+
+        fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
@@ -302,7 +322,7 @@ internal class Vedtaksperiode private constructor(
             utbetaling.error("Forventet ikke utbetaling i %s", type.name)
         }
 
-        fun håndter(
+        fun oldhåndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
@@ -317,18 +337,110 @@ internal class Vedtaksperiode private constructor(
 
     internal object StartTilstand : Vedtaksperiodetilstand {
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+        override fun oldhåndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             vedtaksperiode.håndter(sykmelding, MottattSykmelding)
             sykmelding.info("Fullført behandling av sykmelding")
         }
 
+        override val type = OLD_START
+        override val timeout: Duration = Duration.ofDays(30)
+    }
+
+    internal object Start: Vedtaksperiodetilstand {
         override val type = START
         override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            vedtaksperiode.håndter(sykmelding){ nesteTilstand(vedtaksperiode, sykmelding) }
+            sykmelding.info("Fullført behandling av sykmelding")
+        }
+
+        private fun nesteTilstand(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Vedtaksperiodetilstand {
+            val forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
+            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+
+            return when {
+                forlengelse && ferdig -> SykmeldingMottattFerdigForlengelse
+                forlengelse && !ferdig -> SykmeldingMottattUferdigForlengelse
+                !forlengelse && ferdig -> SykmeldingMottattFerdigGap
+                !forlengelse && !ferdig -> SykmeldingMottattUferdigGap
+                else -> sykmelding.severe("Klarer ikke bestemme hvilken sykmeldingmottattilstand vi skal til")
+            }
+        }
+    }
+
+    internal object SykmeldingMottattFerdigForlengelse: Vedtaksperiodetilstand{
+        override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+        override val timeout: Duration = Duration.ofDays(30)
+    }
+    internal object SykmeldingMottattUferdigForlengelse: Vedtaksperiodetilstand{
+        override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+        override val timeout: Duration = Duration.ofDays(30)
+    }
+    internal object SykmeldingMottattFerdigGap: Vedtaksperiodetilstand{
+        override val type = MOTTATT_SYKMELDING_FERDIG_GAP
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, inntektsmelding: Inntektsmelding) {
+            arbeidsgiver.addInntektsmelding(inntektsmelding)
+            vedtaksperiode.førsteFraværsdag = inntektsmelding.førsteFraværsdag
+            vedtaksperiode.håndter(inntektsmelding, AvventerSøknadFerdigGap)
+            inntektsmelding.info("Fullført behandling av inntektsmelding")
+        }
+
+    }
+
+    internal object SykmeldingMottattUferdigGap: Vedtaksperiodetilstand{
+        override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
+        override val timeout: Duration = Duration.ofDays(30)
+    }
+
+    internal object AvventerSøknadFerdigGap: Vedtaksperiodetilstand {
+        override val type = AVVENTER_SØKNAD_FERDIG_GAP
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
+            søknad.info("Fullført behandling av søknad")
+        }
+    }
+
+    internal object AvventerVilkårsprøvingGap: Vedtaksperiodetilstand {
+        override val type = AVVENTER_VILKÅRSPRØVING_GAP
+        override val timeout: Duration = Duration.ofHours(1)
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+            hendelse.info("Forespør vilkårsgrunnlag")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            if (vilkårsgrunnlag.valider().hasErrors()) {
+                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", AvventerVilkårsprøving.type)
+                return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
+            }
+
+            val førsteFraværsdag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag()
+            val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(førsteFraværsdag)
+                ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
+
+            val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, førsteFraværsdag)
+            vedtaksperiode.dataForVilkårsvurdering = resultat.grunnlagsdata
+
+            if (resultat.måBehandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
+
+            vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
+            vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)
+        }
     }
 
     internal object MottattSykmelding : Vedtaksperiodetilstand {
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
@@ -351,7 +463,7 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
@@ -377,7 +489,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Avventer ferdigbehandling av tidligere periode eller inntektsmelding før videre behandling")
         }
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
@@ -388,7 +500,7 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding.info("Fullført behandling av inntektsmelding")
         }
 
-        override fun håndter(
+        override fun oldhåndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
@@ -412,7 +524,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Avventer ferdigbehandlig av tidligere periode før videre behandling")
         }
 
-        override fun håndter(
+        override fun oldhåndter(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
@@ -453,7 +565,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
@@ -471,7 +583,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSøknad : Vedtaksperiodetilstand {
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             person: Person,
@@ -495,7 +607,7 @@ internal class Vedtaksperiode private constructor(
 
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun håndter(
+        override fun oldhåndter(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
@@ -685,6 +797,16 @@ internal class Vedtaksperiode private constructor(
             if (utbetaling.isOK()) {
                 vedtaksperiode.tilstand(utbetaling, Avsluttet) {
                     utbetaling.info("OK fra Oppdragssystemet")
+                    val event = PersonObserver.UtbetaltEvent(
+                        vedtaksperiodeId = vedtaksperiode.id,
+                        aktørId = vedtaksperiode.aktørId,
+                        fødselsnummer = vedtaksperiode.fødselsnummer,
+                        utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                        utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                        forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
+                        opprettet = LocalDate.now()
+                    )
+                    vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
                 }
             } else {
                 vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
@@ -707,21 +829,6 @@ internal class Vedtaksperiode private constructor(
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
         override val timeout: Duration = Duration.ZERO
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.info("Sendt til Oppdragssystemet for utbetaling")
-
-            val event = PersonObserver.UtbetaltEvent(
-                vedtaksperiodeId = vedtaksperiode.id,
-                aktørId = vedtaksperiode.aktørId,
-                fødselsnummer = vedtaksperiode.fødselsnummer,
-                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
-                utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
-                forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
-                opprettet = LocalDate.now()
-            )
-            vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }

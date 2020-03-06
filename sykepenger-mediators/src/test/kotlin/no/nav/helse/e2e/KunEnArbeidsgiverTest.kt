@@ -213,7 +213,7 @@ internal class KunEnArbeidsgiverTest {
                 "fødselsnummer" to UNG_PERSON_FNR_2018,
                 "organisasjonsnummer" to ORGNUMMER,
                 "vedtaksperiodeId" to UUID.randomUUID().toString(),
-                "tilstand" to TilstandType.START.name,
+                "tilstand" to TilstandType.OLD_START.name,
                 "antallGangerPåminnet" to 0,
                 "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
                 "påminnelsestidspunkt" to LocalDateTime.now().toString(),
