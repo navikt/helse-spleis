@@ -62,7 +62,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        if (perioder.none { it.håndter(inntektsmelding) }) {
+        if (!perioder.fold(false) { håndtert, periode ->  håndtert || periode.håndter(inntektsmelding) }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
     }
