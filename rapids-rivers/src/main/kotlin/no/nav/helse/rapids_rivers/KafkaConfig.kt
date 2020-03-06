@@ -16,13 +16,14 @@ class KafkaConfig(
     private val username: String? = null,
     private val password: String? = null,
     private val truststore: String? = null,
-    private val truststorePassword: String? = null
+    private val truststorePassword: String? = null,
+    private val autoOffsetResetConfig: String? = null
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     internal fun consumerConfig() = kafkaBaseConfig().apply {
         put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId)
-        put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
+        put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetResetConfig ?: "latest")
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true")
         put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000")
     }
