@@ -426,6 +426,36 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: Ytelser
+        ) {
+            if (ytelser.valider().hasErrors()) {
+                ytelser.error("Feil i ytelser i %s", UndersøkerHistorikk.type)
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            }
+
+            val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
+            if (sisteUtbetalteDag != null && sisteUtbetalteDag.harTilstøtende(vedtaksperiode.periode().start)) {
+                ytelser.error("Har tilstøtende periode i Infotrygd som er utbetalt")
+                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            }
+
+            vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingGap)
+        }
+
+    }
+
+    internal object AvventerInntektsmeldingGap: Vedtaksperiodetilstand {
+        override val type = AVVENTER_INNTEKTSMELDING_GAP
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
+        }
     }
 
     internal object AvventerVilkårsprøvingGap: Vedtaksperiodetilstand {

@@ -123,38 +123,43 @@ class SerialisertPerson(val json: String) {
 
     private fun konverterTilUtbetalingstidslinje(data: ArbeidsgiverData.UtbetalingstidslinjeData): Utbetalingstidslinje {
         return createUtbetalingstidslinje(data.dager.map {
-            when (it.type) {
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
-                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
-                    createNavUtbetalingdag(inntekt = it.inntekt, dato = it.dato, utbetaling = it.utbetaling!!, grad = it.grad!!)
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
-                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
-                    Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Fridag -> {
-                    Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.AvvistDag -> {
-                    Utbetalingsdag.AvvistDag(
-                        inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
-                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
-                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
-                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
-                            ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
-                            null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
-                        }, grad = Double.NaN
-                    )
-                }
-                ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
-                    Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
+                when (it.type) {
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
+                        Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavDag -> {
+                        createNavUtbetalingdag(
+                            inntekt = it.inntekt,
+                            dato = it.dato,
+                            utbetaling = it.utbetaling!!,
+                            grad = it.grad!!
+                        )
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
+                        Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
+                        Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.Fridag -> {
+                        Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.AvvistDag -> {
+                        Utbetalingsdag.AvvistDag(
+                            inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
+                                ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
+                                ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
+                                ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+                                ArbeidsgiverData.UtbetalingstidslinjeData.BegrunnelseData.MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
+                                null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
+                            }, grad = Double.NaN
+                        )
+                    }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
+                        Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
+                    }
                 }
             }
-        }
             .toMutableList())
     }
 
@@ -235,6 +240,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
         TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> Vedtaksperiode.AvventerVilkårsprøvingGap
         TilstandType.AVVENTER_GAP -> Vedtaksperiode.AvventerGap
+        TilstandType.AVVENTER_INNTEKTSMELDING_GAP -> Vedtaksperiode.AvventerInntektsmeldingGap
     }
 
     private fun parseUtbetalingslinje(

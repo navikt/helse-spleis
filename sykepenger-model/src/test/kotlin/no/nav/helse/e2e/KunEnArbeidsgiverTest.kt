@@ -102,6 +102,32 @@ internal class KunEnArbeidsgiverTest {
         assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
     }
 
+    @Test
+    internal fun `gap historie før inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterYtelser(0)   // No history
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(18, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
+    }
+
 //    @Test
 //    internal fun `Har tilstøtende perioder i historikk`() {
 //        håndterSykmelding(Triple(3.januar, 26.januar, 100))
