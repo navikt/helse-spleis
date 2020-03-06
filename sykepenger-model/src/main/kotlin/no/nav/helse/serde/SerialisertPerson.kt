@@ -234,6 +234,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> Vedtaksperiode.SykmeldingMottattUferdigGap
         TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
         TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> Vedtaksperiode.AvventerVilkårsprøvingGap
+        TilstandType.AVVENTER_GAP -> Vedtaksperiode.AvventerGap
     }
 
     private fun parseUtbetalingslinje(
