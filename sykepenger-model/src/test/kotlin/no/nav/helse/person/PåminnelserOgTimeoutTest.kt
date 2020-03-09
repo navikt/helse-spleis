@@ -32,12 +32,22 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `timeoutverdier`() {
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.StartTilstand.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmelding.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmelding.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknad.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøving.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.Start.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingFerdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingUferdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingFerdigForlengelse.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingUferdigForlengelse.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknadUferdigForlengelse.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknadFerdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingUferdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerUferdigForlengelse.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerUferdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
+        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingGap.timeout)
         assertEquals(Duration.ofDays(7), Vedtaksperiode.AvventerGodkjenning.timeout)
         assertEquals(Duration.ZERO, Vedtaksperiode.TilUtbetaling.timeout)
         assertEquals(Duration.ZERO, Vedtaksperiode.TilInfotrygd.timeout)
@@ -46,7 +56,7 @@ class PåminnelserOgTimeoutTest {
     @Test
     fun `påminnelse i mottatt sykmelding`() {
         person.håndter(sykmelding())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING))
+        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -54,10 +64,10 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i mottatt søknad`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
-        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+        assertTilstand(TilstandType.AVVENTER_GAP)
         assertEquals(2, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
-        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+        person.håndter(påminnelse(TilstandType.AVVENTER_GAP))
+        assertTilstand(TilstandType.AVVENTER_GAP)
         assertEquals(2, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
@@ -67,7 +77,7 @@ class PåminnelserOgTimeoutTest {
     fun `påminnelse i mottatt inntektsmelding`() {
         person.håndter(sykmelding())
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD))
+        person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP))
         assertEquals(0, hendelse.behov().size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
@@ -78,8 +88,8 @@ class PåminnelserOgTimeoutTest {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         assertEquals(3, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP))
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
         assertEquals(3, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Inntektsberegning))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
@@ -132,21 +142,18 @@ class PåminnelserOgTimeoutTest {
     fun `ignorerer påminnelser på tidligere tilstander`() {
         person.håndter(sykmelding())
         person.håndter(påminnelse(TilstandType.TIL_INFOTRYGD))
-        assertTilstand(TilstandType.MOTTATT_SYKMELDING)
+        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
 
         person.håndter(søknad())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING))
-        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
-
-        person.håndter(påminnelse(TilstandType.UNDERSØKER_HISTORIKK))
-        assertTilstand(TilstandType.UNDERSØKER_HISTORIKK)
+        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
+        assertTilstand(TilstandType.AVVENTER_GAP)
 
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING))
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
+        person.håndter(påminnelse(TilstandType.AVVENTER_GAP))
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
 
         person.håndter(vilkårsgrunnlag())
-        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING))
+        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP))
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
 
         person.håndter(ytelser())
@@ -290,7 +297,7 @@ class PåminnelserOgTimeoutTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.OLD_START
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
             vedtaksperiodeIder.add(id)
         }
 

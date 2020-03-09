@@ -31,7 +31,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
     }
 
     @Test
@@ -62,8 +62,8 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
-        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(1))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.tilstand(1))
     }
 
     @Test
@@ -111,7 +111,7 @@ internal class SykmeldingTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.OLD_START
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

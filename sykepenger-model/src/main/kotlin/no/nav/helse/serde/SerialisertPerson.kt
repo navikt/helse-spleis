@@ -219,20 +219,12 @@ class SerialisertPerson(val json: String) {
     }
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
-        TilstandType.OLD_START -> StartTilstand
-        TilstandType.MOTTATT_SYKMELDING -> MottattSykmelding
-        TilstandType.AVVENTER_SØKNAD -> AvventerSøknad
-        TilstandType.AVVENTER_INNTEKTSMELDING -> AvventerInntektsmelding
-        TilstandType.AVVENTER_VILKÅRSPRØVING -> AvventerVilkårsprøving
         TilstandType.AVVENTER_HISTORIKK -> AvventerHistorikk
         TilstandType.AVVENTER_GODKJENNING -> AvventerGodkjenning
-        TilstandType.UNDERSØKER_HISTORIKK -> UndersøkerHistorikk
         TilstandType.TIL_UTBETALING -> TilUtbetaling
         TilstandType.AVSLUTTET -> Avsluttet
         TilstandType.UTBETALING_FEILET -> UtbetalingFeilet
         TilstandType.TIL_INFOTRYGD -> TilInfotrygd
-        TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> AvventerTidligerePeriodeEllerInntektsmelding
-        TilstandType.AVVENTER_TIDLIGERE_PERIODE -> AvventerTidligerePeriode
         TilstandType.START -> Start
         TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> MottattSykmeldingFerdigForlengelse
         TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> MottattSykmeldingUferdigForlengelse

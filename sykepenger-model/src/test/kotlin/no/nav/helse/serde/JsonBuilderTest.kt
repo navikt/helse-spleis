@@ -60,16 +60,6 @@ internal class JsonBuilderTest {
         println(json)
     }
 
-    @Test
-    fun `serialisering og deserialisering skal funke for alle states`() {
-        testSerialiseringAvPerson(lagPerson(TilstandType.MOTTATT_SYKMELDING))
-        testSerialiseringAvPerson(lagPerson(TilstandType.UNDERSØKER_HISTORIKK))
-        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_VILKÅRSPRØVING))
-        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_HISTORIKK))
-        testSerialiseringAvPerson(lagPerson(TilstandType.AVVENTER_GODKJENNING))
-        testSerialiseringAvPerson(lagPerson(TilstandType.TIL_UTBETALING))
-    }
-
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
@@ -95,7 +85,7 @@ internal class JsonBuilderTest {
         private lateinit var vedtaksperiodeId: String
         private lateinit var aktivitetslogg: Aktivitetslogg
 
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person {
+        internal fun lagPerson(): Person {
             aktivitetslogg = Aktivitetslogg()
 
             val person = Person(aktørId, fnr).apply {
@@ -107,40 +97,17 @@ internal class JsonBuilderTest {
                     }
                 })
 
-                assertEquals(TilstandType.MOTTATT_SYKMELDING, hentTilstand(this).type)
-                if (stopState == TilstandType.MOTTATT_SYKMELDING) return@apply
                 håndter(søknad)
-                assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this).type)
-                if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply
                 håndter(inntektsmelding)
-                assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, hentTilstand(this).type)
-                if (stopState == TilstandType.AVVENTER_VILKÅRSPRØVING) return@apply
                 håndter(vilkårsgrunnlag)
-                assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand(this).type)
-                if (stopState == TilstandType.AVVENTER_HISTORIKK) return@apply
                 håndter(ytelser)
-                assertEquals(TilstandType.AVVENTER_GODKJENNING, hentTilstand(this).type)
-                if (stopState == TilstandType.AVVENTER_GODKJENNING) return@apply
                 håndter(manuellSaksbehandling)
-                assertEquals(TilstandType.TIL_UTBETALING, hentTilstand(this).type)
-                if (stopState == TilstandType.TIL_UTBETALING) return@apply
             }
 
             assertFalse(aktivitetslogg.hasErrors()) { "Aktivitetslogg contains errors: $aktivitetslogg" }
 
             return person
         }
-
-        private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
-            lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
-            person.accept(object : PersonVisitor {
-                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-                    _tilstand = tilstand
-                }
-            })
-            return _tilstand
-        }
-
 
         private val sykmelding
             get() = Sykmelding(

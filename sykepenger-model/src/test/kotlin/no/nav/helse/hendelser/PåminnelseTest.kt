@@ -21,7 +21,7 @@ internal class PåminnelseTest {
 
     @Test
     fun `info ved påminnelse for nåværende tilstand`() {
-        val tilstand = Vedtaksperiode.MottattSykmelding
+        val tilstand = Vedtaksperiode.MottattSykmeldingFerdigGap
         val vedtaksperiode = vedtaksperiode()
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
@@ -31,7 +31,7 @@ internal class PåminnelseTest {
 
     @Test
     fun `info ved påminnelse for annen tilstand`() {
-        val tilstand = Vedtaksperiode.StartTilstand
+        val tilstand = Vedtaksperiode.Start
         val vedtaksperiode = vedtaksperiode()
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
         assertFalse(aktivitetslogg.hasWarnings())
@@ -40,7 +40,7 @@ internal class PåminnelseTest {
 
     @Test
     fun `påminnelse for en annen periode`() {
-        val tilstand = Vedtaksperiode.StartTilstand
+        val tilstand = Vedtaksperiode.Start
         val vedtaksperiode = vedtaksperiode()
         påminnelse(tilstand.type, UUID.randomUUID()).also {
             assertFalse(vedtaksperiode.håndter(it))

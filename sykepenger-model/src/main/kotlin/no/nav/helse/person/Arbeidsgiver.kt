@@ -122,8 +122,8 @@ internal class Arbeidsgiver private constructor(
     internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
 
-    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
+    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode, forlengelse: Boolean) =
+        perioder.all { it.erFerdigBehandlet(vedtaksperiode, forlengelse) }
 
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         perioder.forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }

@@ -2,7 +2,6 @@ package no.nav.helse.serde.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.JsonBuilderTest.Companion.lagPerson
 import no.nav.helse.serde.PersonVisitorProxy
 import no.nav.helse.testhelpers.februar
@@ -18,20 +17,8 @@ import kotlin.streams.toList
 internal class SpeilBuilderTest {
 
     @Test
-    internal fun `print person i AVVENTER_GODKJENNING-state som SPEIL-json`() {
-        val person = lagPerson(TilstandType.AVVENTER_GODKJENNING)
-        println(serializePersonForSpeil(person))
-    }
-
-    @Test
-    internal fun `print person i TIL_UTBETALING-state som SPEIL-json`() {
-        val person = lagPerson(TilstandType.TIL_UTBETALING)
-        println(serializePersonForSpeil(person))
-    }
-
-    @Test
     internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
-        val person = lagPerson(TilstandType.AVVENTER_GODKJENNING)
+        val person = lagPerson()
         val jsonBuilder = SpeilBuilder()
         person.accept(DayPadderProxy(
             target = jsonBuilder,

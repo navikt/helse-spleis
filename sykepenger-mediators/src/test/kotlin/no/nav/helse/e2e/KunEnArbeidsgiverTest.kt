@@ -62,8 +62,7 @@ internal class KunEnArbeidsgiverTest {
         sendManuellSaksbehandling(0)
         sendUtbetaling(0)
 
-        assertTilstander(0, "MOTTATT_SYKMELDING", "UNDERSØKER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
+        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
     }
 
     @BeforeAll
@@ -213,7 +212,7 @@ internal class KunEnArbeidsgiverTest {
                 "fødselsnummer" to UNG_PERSON_FNR_2018,
                 "organisasjonsnummer" to ORGNUMMER,
                 "vedtaksperiodeId" to UUID.randomUUID().toString(),
-                "tilstand" to TilstandType.OLD_START.name,
+                "tilstand" to TilstandType.START.name,
                 "antallGangerPåminnet" to 0,
                 "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
                 "påminnelsestidspunkt" to LocalDateTime.now().toString(),

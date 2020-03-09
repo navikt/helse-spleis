@@ -52,7 +52,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.tilstand(0))
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         assertFalse(inspektør.personlogg.hasErrors(), inspektør.personlogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.tilstand(0))
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class InntektsmeldingHendelseTest {
         assertTrue(inspektør.personlogg.hasWarnings())
         assertFalse(inspektør.personlogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
     }
 
     @Test
@@ -168,7 +168,7 @@ internal class InntektsmeldingHendelseTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.OLD_START
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
         }
 
         override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {

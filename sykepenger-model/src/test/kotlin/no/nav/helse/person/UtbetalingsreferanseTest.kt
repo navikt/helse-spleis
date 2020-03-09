@@ -36,7 +36,7 @@ internal class UtbetalingsreferanseTest {
             .also {
                 person.håndter(it)
             }
-
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
         val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
         assertEquals(utbetalingsreferanse1, inspektør.utbetalingsreferanser[0])
 
@@ -45,6 +45,7 @@ internal class UtbetalingsreferanseTest {
             .also {
                 person.håndter(it)
             }
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
         val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
         assertEquals(utbetalingsreferanse2, inspektør.utbetalingsreferanser[1])
 
@@ -58,6 +59,7 @@ internal class UtbetalingsreferanseTest {
             .also {
                 person.håndter(it)
             }
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
         val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
 
         håndterYtelser(fom = 2.februar, tom = 28.februar, sendtInntektsmelding = true, vedtaksperiodeindeks = 1)
@@ -65,6 +67,7 @@ internal class UtbetalingsreferanseTest {
             .also {
                 person.håndter(it)
             }
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
         val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
 
         assertNotEquals(utbetalingsreferanse1, utbetalingsreferanse2)
@@ -174,6 +177,17 @@ internal class UtbetalingsreferanseTest {
                     )
                 )
             )
+        )
+
+    private fun utbetaling(vedtaksperiodeId: UUID, status: Utbetaling.Status) =
+        Utbetaling(
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = orgnummer,
+            utbetalingsreferanse = "ref",
+            status = status,
+            melding = "hei"
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

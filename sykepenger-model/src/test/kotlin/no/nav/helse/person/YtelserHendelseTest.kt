@@ -36,17 +36,17 @@ internal class YtelserHendelseTest {
         person.håndter(sykmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.MOTTATT_SYKMELDING)
+        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
 
         person.håndter(søknad())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING)
+        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
 
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING)
+        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
     }
 
     @Test
@@ -247,7 +247,7 @@ internal class YtelserHendelseTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.OLD_START
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
             vedtaksperiodeIder.add(id)
         }
 

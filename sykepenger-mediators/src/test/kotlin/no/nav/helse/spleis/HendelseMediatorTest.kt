@@ -225,7 +225,7 @@ internal class HendelseMediatorTest {
                     "fødselsnummer" to fødselsnummer,
                     "organisasjonsnummer" to organisasjonsnummer,
                     "vedtaksperiodeId" to UUID.randomUUID().toString(),
-                    "tilstand" to TilstandType.OLD_START.name,
+                    "tilstand" to TilstandType.START.name,
                     "antallGangerPåminnet" to 0,
                     "tilstandsendringstidspunkt" to LocalDateTime.now().toString(),
                     "påminnelsestidspunkt" to LocalDateTime.now().toString(),

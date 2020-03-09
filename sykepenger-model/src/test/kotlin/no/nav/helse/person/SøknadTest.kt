@@ -31,11 +31,11 @@ internal class SøknadTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
     }
 
@@ -61,7 +61,7 @@ internal class SøknadTest {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
         assertEquals(10, inspektør.sykdomstidslinje(0).length())
     }
 
@@ -104,9 +104,9 @@ internal class SøknadTest {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.UNDERSØKER_HISTORIKK, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
-        assertEquals(TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, inspektør.tilstand(1))
+        assertEquals(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.tilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
     }
 
@@ -166,7 +166,7 @@ internal class SøknadTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.OLD_START
+            tilstander[vedtaksperiodeindeks] = TilstandType.START
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {

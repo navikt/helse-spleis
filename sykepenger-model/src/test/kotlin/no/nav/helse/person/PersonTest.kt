@@ -54,14 +54,14 @@ internal class PersonTest {
         assertTrue(inspektør.personLogg.toString().contains("Ny arbeidsgiver"))
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING)
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
     internal fun `påminnelse blir delegert til perioden`() {
         testPerson.also {
             it.håndter(sykmelding())
-            it.håndter(påminnelse(tilstandType = MOTTATT_SYKMELDING))
+            it.håndter(påminnelse(tilstandType = MOTTATT_SYKMELDING_FERDIG_GAP))
         }
 
         assertPersonEndret()
@@ -74,7 +74,7 @@ internal class PersonTest {
     internal fun `påminnelse for periode som ikke finnes`() {
         val påminnelse = påminnelse(
             vedtaksperiodeId = UUID.randomUUID(),
-            tilstandType = MOTTATT_SYKMELDING
+            tilstandType = MOTTATT_SYKMELDING_FERDIG_GAP
         )
 
         assertThrows<Aktivitetslogg.AktivitetException> { testPerson.also { it.håndter(påminnelse) } }
@@ -102,7 +102,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
     }
 
     @Test
@@ -115,43 +115,10 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre søknaden`() {
-        testPerson.also {
-            it.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
-            it.håndter(
-                søknad(
-                    perioder = listOf(
-                        Søknad.Periode.Sykdom(
-                            fom = 1.juli,
-                            tom = 20.juli,
-                            grad = 100
-                        )
-                    )
-                )
-            )
-        }
-        søknad(
-            perioder = listOf(
-                Søknad.Periode.Sykdom(
-                    fom = 10.juli,
-                    tom = 30.juli,
-                    grad = 100
-                )
-            )
-        ).also {
-            testPerson.håndter(it)
-            it.hasErrors()
-        }
-        assertPersonEndret()
-        assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
-    }
-
-    @Test
     internal fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING, inspektør.tilstand(0))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         søknad(
@@ -172,33 +139,8 @@ internal class PersonTest {
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, TIL_INFOTRYGD) // Invalidation of first period
+        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD) // Invalidation of first period
     }
-
-    @Test
-    internal fun `eksisterende periode må behandles i infotrygd når vi mottar den andre inntektsmeldingen`() {
-        testPerson.håndter(sykmelding(orgnummer = "12", perioder = listOf(Triple(1.juli, 9.juli, 100))))
-            testPerson.håndter(
-                inntektsmelding(
-                    virksomhetsnummer = "12",
-                    førsteFraværsdag = 1.juli,
-                    arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
-                )
-            )
-        inntektsmelding(
-            virksomhetsnummer = "12",
-            førsteFraværsdag = 1.juli,
-            arbeidsgiverperioder = listOf(Periode(1.juli, 1.juli.plusDays(16)))
-        ).also {
-            testPerson.håndter(it)
-            assertTrue(it.hasWarnings())
-            assertFalse(it.hasErrors())
-        }
-        assertPersonEndret()
-        assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
-    }
-
 
     @Test
     internal fun `sykmelding med periode som ikke er 100 %`() {
@@ -251,7 +193,7 @@ internal class PersonTest {
         }
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(UNDERSØKER_HISTORIKK)
+        assertVedtaksperiodetilstand(AVVENTER_GAP)
     }
 
     @Test
@@ -430,7 +372,7 @@ internal class PersonTest {
 
         override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
             vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = OLD_START
+            tilstander[vedtaksperiodeindeks] = START
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
