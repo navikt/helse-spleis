@@ -9,7 +9,7 @@ val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation(project(":rapids-rivers"))
+    implementation("no.nav.helse:rapids-and-rivers:1.302b30e")
     implementation(project(":sykepenger-model"))
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
@@ -38,9 +38,20 @@ dependencies {
     }
 }
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     maven("https://kotlin.bintray.com/ktor")
     maven("http://packages.confluent.io/maven/")
+
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/rapids-and-rivers")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 tasks.named<Jar>("jar") {
