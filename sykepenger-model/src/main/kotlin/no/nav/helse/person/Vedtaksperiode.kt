@@ -370,21 +370,26 @@ internal class Vedtaksperiode private constructor(
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
             return when {
-                forlengelse && ferdig -> SykmeldingMottattFerdigForlengelse
-                forlengelse && !ferdig -> SykmeldingMottattUferdigForlengelse
-                !forlengelse && ferdig -> SykmeldingMottattFerdigGap
-                !forlengelse && !ferdig -> SykmeldingMottattUferdigGap
+                forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
+                forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
+                !forlengelse && ferdig -> MottattSykmeldingFerdigGap
+                !forlengelse && !ferdig -> MottattSykmeldingUferdigGap
                 else -> sykmelding.severe("Klarer ikke bestemme hvilken sykmeldingmottattilstand vi skal til")
             }
         }
     }
 
-    internal object SykmeldingMottattFerdigForlengelse : Vedtaksperiodetilstand {
+    internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
         override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvventerHistorikk)
+            søknad.info("Fullført behandling av søknad")
+        }
     }
 
-    internal object SykmeldingMottattUferdigForlengelse : Vedtaksperiodetilstand {
+    internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
         override val timeout: Duration = Duration.ofDays(30)
 
@@ -400,9 +405,16 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
         }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            gjenopptaBehandling: GjenopptaBehandling
+        ) {
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
+        }
     }
 
-    internal object SykmeldingMottattFerdigGap : Vedtaksperiodetilstand {
+    internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_GAP
         override val timeout: Duration = Duration.ofDays(30)
 
@@ -420,7 +432,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object SykmeldingMottattUferdigGap : Vedtaksperiodetilstand {
+    internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
         override val timeout: Duration = Duration.ofDays(30)
 
@@ -428,7 +440,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, SykmeldingMottattFerdigGap)
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -539,6 +551,14 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
         }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            vedtaksperiode.håndter(inntektsmelding, AvventerUferdigForlengelse)
+        }
     }
 
     internal object AvventerUferdigForlengelse : Vedtaksperiodetilstand {
@@ -555,7 +575,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, SykmeldingMottattFerdigForlengelse)
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

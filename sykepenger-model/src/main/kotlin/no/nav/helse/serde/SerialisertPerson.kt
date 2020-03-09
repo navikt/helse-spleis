@@ -234,10 +234,10 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING -> AvventerTidligerePeriodeEllerInntektsmelding
         TilstandType.AVVENTER_TIDLIGERE_PERIODE -> AvventerTidligerePeriode
         TilstandType.START -> Start
-        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> SykmeldingMottattFerdigForlengelse
-        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> SykmeldingMottattUferdigForlengelse
-        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> SykmeldingMottattFerdigGap
-        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> SykmeldingMottattUferdigGap
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> MottattSykmeldingFerdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> MottattSykmeldingUferdigForlengelse
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> MottattSykmeldingFerdigGap
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> MottattSykmeldingUferdigGap
         TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> AvventerSøknadFerdigGap
         TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> AvventerVilkårsprøvingGap
         TilstandType.AVVENTER_GAP -> AvventerGap
