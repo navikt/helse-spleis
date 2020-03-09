@@ -9,7 +9,7 @@ val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("no.nav.helse:rapids-and-rivers:1.56d085f")
+    implementation("no.nav.helse:rapids-and-rivers:1.44ef801")
     implementation(project(":sykepenger-model"))
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
