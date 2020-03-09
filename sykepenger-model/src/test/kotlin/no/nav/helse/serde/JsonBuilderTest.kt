@@ -10,8 +10,10 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -93,13 +95,40 @@ internal class JsonBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
-        private lateinit var aktivitetslogg: Aktivitetslogg
 
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person {
-            aktivitetslogg = Aktivitetslogg()
+        internal data class PeriodeMedTilstand(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val stopptilstand: TilstandType
+        )
 
-            val person = Person(aktørId, fnr).apply {
-                håndter(sykmelding)
+        internal fun lagPerson(vararg perioder: PeriodeMedTilstand): Person = Person(aktørId, fnr).apply {
+            perioder.forEach {
+                håndter(sykmelding(it.fom, it.tom))
+
+                accept(object : PersonVisitor {
+                    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+                        vedtaksperiodeId = id.toString()
+                    }
+                })
+
+                if (it.stopptilstand == TilstandType.MOTTATT_SYKMELDING) return@forEach
+                håndter(søknad(it.fom, it.tom))
+                if (it.stopptilstand == TilstandType.UNDERSØKER_HISTORIKK) return@forEach
+                håndter(inntektsmelding(it.fom))
+                if (it.stopptilstand == TilstandType.AVVENTER_VILKÅRSPRØVING) return@forEach
+                håndter(vilkårsgrunnlag)
+                if (it.stopptilstand == TilstandType.AVVENTER_HISTORIKK) return@forEach
+                håndter(ytelser)
+                if (it.stopptilstand == TilstandType.AVVENTER_GODKJENNING) return@forEach
+                håndter(manuellSaksbehandling)
+                if (it.stopptilstand == TilstandType.TIL_UTBETALING) return@forEach
+            }
+        }
+
+        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding())
 
                 accept(object : PersonVisitor {
                     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
@@ -109,10 +138,10 @@ internal class JsonBuilderTest {
 
                 assertEquals(TilstandType.MOTTATT_SYKMELDING, hentTilstand(this).type)
                 if (stopState == TilstandType.MOTTATT_SYKMELDING) return@apply
-                håndter(søknad)
+                håndter(søknad())
                 assertEquals(TilstandType.UNDERSØKER_HISTORIKK, hentTilstand(this).type)
                 if (stopState == TilstandType.UNDERSØKER_HISTORIKK) return@apply
-                håndter(inntektsmelding)
+                håndter(inntektsmelding())
                 assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING, hentTilstand(this).type)
                 if (stopState == TilstandType.AVVENTER_VILKÅRSPRØVING) return@apply
                 håndter(vilkårsgrunnlag)
@@ -126,11 +155,6 @@ internal class JsonBuilderTest {
                 if (stopState == TilstandType.TIL_UTBETALING) return@apply
             }
 
-            assertFalse(aktivitetslogg.hasErrors()) { "Aktivitetslogg contains errors: $aktivitetslogg" }
-
-            return person
-        }
-
         private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
             lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
             person.accept(object : PersonVisitor {
@@ -141,40 +165,36 @@ internal class JsonBuilderTest {
             return _tilstand
         }
 
+        private fun sykmelding(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            sykeperioder = listOf(Triple(fom, tom, 100))
+        )
 
-        private val sykmelding
-            get() = Sykmelding(
-                meldingsreferanseId = UUID.randomUUID(),
-                fnr = fnr,
-                aktørId = aktørId,
-                orgnummer = orgnummer,
-                sykeperioder = listOf(Triple(1.januar, 31.januar, 100))
-            )
+        private fun søknad(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Søknad(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            perioder = listOf(
+                Søknad.Periode.Sykdom(fom, tom, 100)
+            ),
+            harAndreInntektskilder = false
+        )
 
-        private val søknad
-            get() = Søknad(
-                meldingsreferanseId = UUID.randomUUID(),
-                fnr = fnr,
-                aktørId = aktørId,
-                orgnummer = orgnummer,
-                perioder = listOf(
-                    Søknad.Periode.Sykdom(1.januar, 31.januar, 100)
-                ),
-                harAndreInntektskilder = false
-            )
-
-        private val inntektsmelding
-            get() = Inntektsmelding(
-                meldingsreferanseId = UUID.randomUUID(),
-                refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
-                orgnummer = orgnummer,
-                fødselsnummer = fnr,
-                aktørId = aktørId,
-                førsteFraværsdag = 1.januar,
-                beregnetInntekt = 31000.00,
-                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-                ferieperioder = emptyList()
-            )
+        private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+            orgnummer = orgnummer,
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            førsteFraværsdag = fom,
+            beregnetInntekt = 31000.00,
+            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            ferieperioder = emptyList()
+        )
 
         private val vilkårsgrunnlag
             get() = Vilkårsgrunnlag(
@@ -200,38 +220,40 @@ internal class JsonBuilderTest {
             )
 
         private val ytelser
-            get() = Aktivitetslogg().let {Ytelser(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = aktørId,
-                fødselsnummer = fnr,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingshistorikk = Utbetalingshistorikk(
-                    ukjentePerioder = emptyList(),
-                    utbetalinger = listOf(
-                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                            fom = 1.januar.minusYears(1),
-                            tom = 31.januar.minusYears(1),
-                            dagsats = 31000
-                        )
+            get() = Aktivitetslogg().let {
+                Ytelser(
+                    meldingsreferanseId = UUID.randomUUID(),
+                    aktørId = aktørId,
+                    fødselsnummer = fnr,
+                    organisasjonsnummer = orgnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalingshistorikk = Utbetalingshistorikk(
+                        ukjentePerioder = emptyList(),
+                        utbetalinger = listOf(
+                            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                                fom = 1.januar.minusYears(1),
+                                tom = 31.januar.minusYears(1),
+                                dagsats = 31000
+                            )
+                        ),
+                        inntektshistorikk = emptyList(),
+                        graderingsliste = emptyList(),
+                        aktivitetslogg = it
                     ),
-                    inntektshistorikk = emptyList(),
-                    graderingsliste = emptyList(),
+                    foreldrepermisjon = Foreldrepermisjon(
+                        foreldrepengeytelse = Periode(
+                            fom = 1.januar.minusYears(2),
+                            tom = 31.januar.minusYears(2)
+                        ),
+                        svangerskapsytelse = Periode(
+                            fom = 1.juli.minusYears(2),
+                            tom = 31.juli.minusYears(2)
+                        ),
+                        aktivitetslogg = it
+                    ),
                     aktivitetslogg = it
-                ),
-                foreldrepermisjon = Foreldrepermisjon(
-                    foreldrepengeytelse = Periode(
-                        fom = 1.januar.minusYears(2),
-                        tom = 31.januar.minusYears(2)
-                    ),
-                    svangerskapsytelse = Periode(
-                        fom = 1.juli.minusYears(2),
-                        tom = 31.juli.minusYears(2)
-                    ),
-                    aktivitetslogg = it
-                ),
-                aktivitetslogg = it
-            )}
+                )
+            }
 
         private val manuellSaksbehandling
             get() = ManuellSaksbehandling(
