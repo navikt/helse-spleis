@@ -338,128 +338,78 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-//
-//    @Test
-//    internal fun `To perioder med opphold`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-//        håndterVilkårsgrunnlag(0, INNTEKT)
-//        håndterYtelser(0)   // No history
-//        håndterManuellSaksbehandling(0, true)
-//        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
-//        observatør.utbetalingsreferanseFraUtbetalingEvent = ""
-//
-//        håndterSykmelding(Triple(1.februar, 23.februar, 100))
-//        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-//        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
-//        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
-//        håndterVilkårsgrunnlag(1, INNTEKT)
-//        håndterYtelser(1)   // No history
-//        håndterManuellSaksbehandling(1, true)
-//        val andreUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
-//
-//        // TODO: Sjekk / Fiks at ikke "gamle" utbetalingslinjer blir med på utbetalinger for
-//        //  ny periode/nytt sykdomsforløp slik at det ikke blir dobbelutbetalinger fra Spenn (!)
-//
-//        assertNotEquals(førsteUtbetalingsreferanse, andreUtbetalingsreferanse)
-//
-//        inspektør.also {
-//            assertNoErrors(it)
-//            assertMessages(it)
-//            assertEquals(23, it.dagTeller(NavDag::class))
-//            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
-//            assertEquals(8, it.dagTeller(NavHelgDag::class))
-//            assertEquals(3, it.dagTeller(Arbeidsdag::class))
-//        }
-//        assertTilstander(
-//            0,
-//            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//        assertTilstander(
-//            1,
-//            START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//    }
-//
-//    @Test
-//    internal fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterYtelser(0, Triple(1.januar, 2.januar, 15000)) // -> TIL_INFOTRYGD
-//
-//        håndterSykmelding(Triple(1.februar, 23.februar, 100))
-//        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
-//        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)), 1.februar)
-//        håndterVilkårsgrunnlag(1, INNTEKT)
-//        håndterYtelser(1)   // No history
-//
-//        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
-//        assertTilstander(1, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
-//    }
-//
-//    @Test
-//    internal fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 4.januar)
-//        inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
-//        assertTilstander(0, START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD)
-//    }
-//
-//    @Test
-//    internal fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-//        assertTilstander(0, START, MOTTATT_SYKMELDING, UNDERSØKER_HISTORIKK, TIL_INFOTRYGD)
-//    }
-//
-//    @Test
-//    internal fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        assertTilstander(0, START, MOTTATT_SYKMELDING, TIL_INFOTRYGD)
-//    }
-//
-//    @Test
-//    internal fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSykmelding(Triple(1.februar, 23.februar, 100))
-//        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
-//        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterVilkårsgrunnlag(0, INNTEKT)
-//        håndterYtelser(0)   // No history
-//        forventetEndringTeller++
-//        håndterManuellSaksbehandling(0, true)
-//        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-//        håndterVilkårsgrunnlag(1, INNTEKT)
-//        håndterYtelser(1)   // No history
-//        håndterManuellSaksbehandling(1, true)
-//        inspektør.also {
-//            assertNoErrors(it)
-//            assertMessages(it)
-//            assertEquals(23, it.dagTeller(NavDag::class))
-//            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
-//            assertEquals(8, it.dagTeller(NavHelgDag::class))
-//            assertEquals(3, it.dagTeller(Arbeidsdag::class))
-//        }
-//        assertTilstander(
-//            0,
-//            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//        assertTilstander(
-//            1,
-//            START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_TIDLIGERE_PERIODE,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//    }
-//
+    @Test
+    internal fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterYtelser(0, Triple(1.januar, 2.januar, 15000)) // -> TIL_INFOTRYGD
+
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)), 1.februar)
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+    }
+
+    @Test
+    internal fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 4.januar)
+        inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+    }
+
+    @Test
+    internal fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    internal fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    internal fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmelding(1, listOf(Periode(1.februar, 16.februar)))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        forventetEndringTeller++
+        håndterManuellSaksbehandling(0, true)
+        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+        )
+    }
+
 //    @Test
 //    internal fun `To tilstøtende perioder`() {
 //        håndterSykmelding(Triple(3.januar, 26.januar, 100))
