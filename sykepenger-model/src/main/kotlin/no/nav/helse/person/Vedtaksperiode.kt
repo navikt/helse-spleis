@@ -73,7 +73,7 @@ internal class Vedtaksperiode private constructor(
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id)
         visitor.visitMaksdato(maksdato)
-        visitor.visitforbrukteSykedager(forbrukteSykedager)
+        visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)

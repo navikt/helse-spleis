@@ -44,6 +44,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
         "id" to id,
         "maksdato" to maksdato,
+        "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "utbetalingsreferanse" to utbetalingsreferanse,
