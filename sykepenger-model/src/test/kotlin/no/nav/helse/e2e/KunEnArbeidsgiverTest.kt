@@ -410,53 +410,68 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
-//    @Test
-//    internal fun `To tilstøtende perioder`() {
-//        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-//        håndterSykmelding(Triple(29.januar, 23.februar, 100))
-//        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
-//        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
-//        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
-//        håndterVilkårsgrunnlag(0, INNTEKT)
-//        håndterYtelser(0)   // No history
-//        forventetEndringTeller++
-//
-//        val utbetalingsreferanseISpeilOppslagFørstePeriode = serializePersonForSpeil(person)
-//            .first["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingsreferanse"].asText()
-//
-//        håndterManuellSaksbehandling(0, true)
-//        val førsteUtbetalingsreferanse = observatør.utbetalingsreferanseFraUtbetalingEvent
-//        observatør.utbetalingsreferanseFraUtbetalingEvent = ""
-//        assertEquals(utbetalingsreferanseISpeilOppslagFørstePeriode, førsteUtbetalingsreferanse)
-//        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-//        håndterYtelser(1)   // No history
-//
-//        val utbetalingsreferanseISpeilOppslagAndrePeriode = serializePersonForSpeil(person)
-//            .first["arbeidsgivere"][0]["vedtaksperioder"][1]["utbetalingsreferanse"].asText()
-//        assertEquals(førsteUtbetalingsreferanse, utbetalingsreferanseISpeilOppslagAndrePeriode)
-//
-//        håndterManuellSaksbehandling(1, true)
-//        println(serializePersonForSpeil(person))
-//        assertEquals(førsteUtbetalingsreferanse, observatør.utbetalingsreferanseFraUtbetalingEvent)
-//        inspektør.also {
-//            assertNoErrors(it)
-//            assertMessages(it)
-//            assertEquals(26, it.dagTeller(NavDag::class))
-//            assertEquals(16, it.dagTeller(ArbeidsgiverperiodeDag::class))
-//            assertEquals(8, it.dagTeller(NavHelgDag::class))
-//            assertEquals(0, it.dagTeller(Arbeidsdag::class))
-//        }
-//        assertTilstander(
-//            0,
-//            START, MOTTATT_SYKMELDING, AVVENTER_SØKNAD,
-//            AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//        assertTilstander(
-//            1,
-//            START, MOTTATT_SYKMELDING, AVVENTER_TIDLIGERE_PERIODE_ELLER_INNTEKTSMELDING, AVVENTER_HISTORIKK,
-//            AVVENTER_GODKJENNING, TIL_UTBETALING
-//        )
-//    }
+    @Test
+    internal fun `To tilstøtende perioder søknad først`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(1, Sykdom(29.januar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
+    @Test
+    internal fun `To tilstøtende perioder inntektsmelding først`() {
+        håndterSykmelding(Triple(3.januar, 7.januar, 100))
+        håndterSykmelding(Triple(8.januar, 23.februar, 100))
+        håndterInntektsmelding(0, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(0, Sykdom(3.januar, 7.januar, 100))
+        håndterSøknad(1, Sykdom(8.januar, 23.februar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+
+        håndterManuellSaksbehandling(0, true)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
 //
 //    @Test
 //    internal fun `To tilstøtende perioder der den første er utbetalt`() {
@@ -673,7 +688,7 @@ internal class KunEnArbeidsgiverTest {
     }
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
     }
 
     private fun assertMessages(inspektør: TestPersonInspektør) {

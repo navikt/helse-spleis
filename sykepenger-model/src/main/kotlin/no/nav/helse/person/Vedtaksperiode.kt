@@ -387,6 +387,19 @@ internal class Vedtaksperiode private constructor(
     internal object SykmeldingMottattUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
         override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
+            søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiver: Arbeidsgiver,
+            inntektsmelding: Inntektsmelding
+        ) {
+            vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
+        }
     }
 
     internal object SykmeldingMottattFerdigGap : Vedtaksperiodetilstand {
@@ -516,6 +529,38 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerVilkårsprøvingGap)
+        }
+    }
+
+    internal object AvventerInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
+        override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+        }
+    }
+
+    internal object AvventerUferdigForlengelse : Vedtaksperiodetilstand {
+        override val type = AVVENTER_UFERDIG_FORLENGELSE
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+        }
+    }
+
+    internal object AvventerSøknadUferdigForlengelse : Vedtaksperiodetilstand {
+        override val type = AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+        override val timeout: Duration = Duration.ofDays(30)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, SykmeldingMottattFerdigForlengelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvventerUferdigForlengelse)
+            søknad.info("Fullført behandling av søknad")
         }
     }
 

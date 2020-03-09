@@ -245,6 +245,9 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP -> AvventerInntektsmeldingFerdigGap
         TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP -> AvventerInntektsmeldingUferdigGap
         TilstandType.AVVENTER_UFERDIG_GAP -> AvventerUferdigGap
+        TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> AvventerInntektsmeldingUferdigForlengelse
+        TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE -> AvventerSøknadUferdigForlengelse
+        TilstandType.AVVENTER_UFERDIG_FORLENGELSE -> AvventerUferdigForlengelse
     }
 
     private fun parseUtbetalingslinje(
