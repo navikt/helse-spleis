@@ -169,6 +169,15 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    internal fun håndter(other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
+        val forlengelse = arbeidsgiver.tilstøtende(this) != null
+        val ferdig = arbeidsgiver.tidligerePerioderFerdigBehandlet(this, forlengelse)
+        if (this.periode().start > other.periode().start && ferdig) {
+            hendelse.hendelse.kontekst(this)
+            tilstand.håndter(this, hendelse)
+        }
+    }
+
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
@@ -268,12 +277,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndter(other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
-        if (this.periode().start > other.periode().start) {
-            hendelse.hendelse.kontekst(this)
-            tilstand.håndter(this, hendelse)
-        }
-    }
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand {
