@@ -7,13 +7,10 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
 import no.nav.helse.ApplicationBuilder
-import no.nav.helse.Topics.rapidTopic
-import no.nav.helse.Topics.søknadTopic
 import no.nav.helse.handleRequest
 import no.nav.helse.randomPort
 import no.nav.helse.responseBody
@@ -39,21 +36,18 @@ import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 
-@KtorExperimentalAPI
 @TestInstance(Lifecycle.PER_CLASS)
 internal class EndToEndTest {
+    private val rapidTopic = "helse-rapid-v1"
 
     private val username = "srvkafkaclient"
     private val password = "kafkaclient"
     private val kafkaApplicationId = "spleis-v1"
 
-    private val topics = listOf(rapidTopic, søknadTopic)
-    private val topicInfos = topics.map { KafkaEnvironment.TopicInfo(it, partitions = 1) }
-
     private val embeddedKafkaEnvironment = KafkaEnvironment(
         autoStart = false,
         noOfBrokers = 1,
-        topicInfos = topicInfos,
+        topicInfos = listOf(KafkaEnvironment.TopicInfo(rapidTopic, partitions = 1)),
         withSchemaRegistry = false,
         withSecurity = false
     )
@@ -72,11 +66,11 @@ internal class EndToEndTest {
 
     private fun applicationConfig(wiremockBaseUrl: String, port: Int): Map<String, String> {
         return mapOf(
-            "KAFKA_APP_ID" to kafkaApplicationId,
+            "KAFKA_CONSUMER_GROUP_ID" to kafkaApplicationId,
+            "KAFKA_RAPID_TOPIC" to rapidTopic,
             "KAFKA_BOOTSTRAP_SERVERS" to embeddedKafkaEnvironment.brokersURL,
             "KAFKA_USERNAME" to username,
             "KAFKA_PASSWORD" to password,
-            "KAFKA_COMMIT_INTERVAL_MS_CONFIG" to "100", // Consumer commit interval must be low because we want quick feedback in the [assertMessageIsConsumed] method
             "DATABASE_JDBC_URL" to embeddedPostgres.getJdbcUrl("postgres", "postgres"),
             "AZURE_CONFIG_URL" to "$wiremockBaseUrl/config",
             "AZURE_CLIENT_ID" to "spleis_azure_ad_app_id",
@@ -126,9 +120,10 @@ internal class EndToEndTest {
 
         GlobalScope.launch { app.start() }
 
-        // send one initial message per topic and wait for the application to commit the offsets (i.e. the app is ready)
-        topics.map { sendKafkaMessage(it, "key", "{}").get() }
-            .forEach { it.assertMessageIsConsumed(10L) }
+        // send one initial message and wait for the application to commit the offsets (i.e. the app is ready)
+        sendKafkaMessage(rapidTopic, "key", "{}")
+            .get()
+            .assertMessageIsConsumed(10L)
     }
 
     @AfterAll
@@ -144,6 +139,12 @@ internal class EndToEndTest {
 
     @Test
     fun `rest apis`() {
+        await("vent til isReady")
+            .atMost(10, SECONDS)
+            .untilAsserted {
+                ("/isready").httpGet(HttpStatusCode.OK)
+            }
+
         ("/api/person/aktørId").httpGet(HttpStatusCode.NotFound)
         ("/api/utbetaling/utbetalingsreferanse").httpGet(HttpStatusCode.NotFound)
     }

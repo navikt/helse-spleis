@@ -42,7 +42,7 @@ internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVi
 internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, SykdomshistorikkVisitor {
     fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
     fun visitMaksdato(maksdato: LocalDate?) {}
-    fun visitforbrukteSykedager(forbrukteSykedager: Int?) {}
+    fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
     fun visitGodkjentAv(godkjentAv: String?) {}
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {}

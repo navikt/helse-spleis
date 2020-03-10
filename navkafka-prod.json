@@ -1,0 +1,161 @@
+{
+    "topics": [
+        {
+            "configEntries": {
+                "retention.ms": -1
+            },
+            "members": [
+                {
+                    "member": "srvspleis",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspleis",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspenn",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspenn",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsputnik",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsputnik",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkel-persono",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkel-persono",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelsykepeng",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelsykepeng",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelinntekt",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelinntekt",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelvilkar",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelvilkar",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspock",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspock",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvbehovsakkumulat",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvbehovsakkumulat",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspade",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspade",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvvedtaksfeed",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvvedtaksfeed",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspetakkel",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspedisjon",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspedisjon",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspetakkel",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspurv",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvhelserisk",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvhelserisk",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvhelsesjekk",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspre",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "S151890",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "S150563",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "S149030",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "E156407",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "N143409",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "O142910",
+                    "role": "MANAGER"
+                }
+            ],
+            "numPartitions": 1,
+            "topicName": "helse-rapid-v1"
+        }
+    ]
+}

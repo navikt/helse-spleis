@@ -98,6 +98,14 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvspedisjon",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspedisjon",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvspetakkel",
                     "role": "CONSUMER"
                 },
@@ -107,10 +115,6 @@
                 },
                 {
                     "member": "srvhelserisk",
-                    "role": "PRODUCER"
-                },
-                {
-                    "member": "srvsyfoinntektsmel",
                     "role": "PRODUCER"
                 },
                 {
