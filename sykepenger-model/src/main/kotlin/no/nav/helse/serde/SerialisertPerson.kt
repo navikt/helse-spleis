@@ -12,7 +12,8 @@ import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
-import no.nav.helse.serde.migration.*
+import no.nav.helse.serde.migration.JsonMigration
+import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -36,22 +37,7 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 
 class SerialisertPerson(val json: String) {
     internal companion object {
-        private val migrations = listOf(
-            V1FjernHendelsetypeEnumFraDag(),
-            V2EndreTilstandTyper(),
-            V3FjerneUtbetalingsreferanseFraArbeidsgiver(),
-            V4LagerAktivitetslogg(),
-            V5LagerUtbetalingsreferanse(),
-            V6LeggerTilGrad(),
-            V7ForbrukteSykedager(),
-            V8FjernAktivitetslogger(),
-            V9LeggerTilKontekstMap(),
-            V10FjernAktiviteter(),
-            V11EgenHendelsedagForSykHelgedag(),
-            V12LeggerTilDetaljer(),
-            V13FjernerGradFraArbeidsgiverperiodeDag(),
-            V14EndreUtbetaltTilstandType()
-        )
+        private val migrations = emptyList<JsonMigration>()
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
         fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)

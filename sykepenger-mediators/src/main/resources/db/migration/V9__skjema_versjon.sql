@@ -1,2 +1,0 @@
-ALTER TABLE person ADD COLUMN skjema_versjon INT NOT NULL DEFAULT -1;
-ALTER TABLE person ALTER COLUMN skjema_versjon DROP DEFAULT;
