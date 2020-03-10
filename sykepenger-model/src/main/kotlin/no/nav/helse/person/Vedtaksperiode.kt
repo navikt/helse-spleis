@@ -344,10 +344,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun nesteTilstand(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Vedtaksperiodetilstand {
-            val forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
+            val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
+            val forlengelse = tilstøtende != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode, forlengelse)
 
             return when {
+                forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {
+                    sykmelding.error("Forlenger en periode som er gått til infotrygd")
+                    TilInfotrygd
+                }
                 forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                 forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
                 !forlengelse && ferdig -> MottattSykmeldingFerdigGap
@@ -604,6 +609,14 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
+
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.let {
+                vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
+                if (it.tilstand == TilInfotrygd) {
+                    hendelse.error("Kan ikke forlenge en sak som er gått til infotrygd")
+                    vedtaksperiode.tilstand(hendelse, TilInfotrygd)
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
