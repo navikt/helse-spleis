@@ -114,7 +114,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         inntektsmelding.kontekst(this)
-        tilstand.håndter(this, arbeidsgiver, inntektsmelding)
+        tilstand.håndter(this, inntektsmelding)
     }
 
     internal fun håndter(ytelser: Ytelser) {
@@ -274,15 +274,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            søknad: Søknad
-        ) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.error("Forventet ikke søknad i %s", type.name)
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver, inntektsmelding: Inntektsmelding) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
         }
 
@@ -367,7 +364,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
         ) {
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
@@ -387,7 +383,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
         ) {
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadFerdigGap)
@@ -417,13 +412,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
             inntektsmelding: Inntektsmelding
         ) {
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigGap)
         }
     }
-
 
     internal object AvventerSøknadFerdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_FERDIG_GAP
@@ -449,11 +442,7 @@ internal class Vedtaksperiode private constructor(
             påminnelse.info("Forespør sykdoms- og inntektshistorikk (Påminnet)")
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
-            inntektsmelding: Inntektsmelding
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
 
@@ -483,18 +472,11 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
-            inntektsmelding: Inntektsmelding
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigGap)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            gjenopptaBehandling: GjenopptaBehandling
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerGap)
         }
     }
@@ -516,11 +498,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
         }
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
-            inntektsmelding: Inntektsmelding
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigForlengelse)
         }
     }
@@ -566,11 +544,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_GAP
         override val timeout: Duration = Duration.ofDays(30)
 
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgiver: Arbeidsgiver,
-            inntektsmelding: Inntektsmelding
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
     }
