@@ -30,6 +30,11 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspillav",
+                    "role": "PRODUCER"
+                },
+                {
+
                     "member": "srvsparkel-persono",
                     "role": "PRODUCER"
                 },

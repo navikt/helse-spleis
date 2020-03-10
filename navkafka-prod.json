@@ -70,6 +70,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspillav",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvbehovsakkumulat",
                     "role": "PRODUCER"
                 },
