@@ -32,6 +32,25 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
+    internal fun `overlapp med ferie og arbeidsgiverperiode`() {
+        val inntektsmelding = Inntektsmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            refusjon = Inntektsmelding.Refusjon(1.januar, INNTEKT, emptyList()),
+            orgnummer = ORGNR,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = INNTEKT,
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            ferieperioder = listOf(Periode(16.januar, 31.januar))
+        )
+
+        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(inntektsmelding)
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+    }
+
+    @Test
     internal fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntekthistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT, førsteFraværsdag = 1.januar)
