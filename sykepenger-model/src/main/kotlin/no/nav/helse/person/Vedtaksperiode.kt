@@ -80,9 +80,6 @@ internal class Vedtaksperiode private constructor(
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
-        visitor.preVisitVedtaksperiodeSykdomstidslinje()
-        sykdomshistorikk.sykdomstidslinje().accept(visitor)
-        visitor.postVisitVedtaksperiodeSykdomstidslinje()
         visitor.preVisitUtbetalingslinjer()
         utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer()

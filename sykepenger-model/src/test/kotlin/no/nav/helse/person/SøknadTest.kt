@@ -63,7 +63,7 @@ internal class SøknadTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
-        assertEquals(10, inspektør.sykdomstidslinje(0).length())
+        assertEquals(5, inspektør.sykdomstidslinje(0).length())
     }
 
     @Test
