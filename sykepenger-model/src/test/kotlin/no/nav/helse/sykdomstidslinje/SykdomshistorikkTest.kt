@@ -213,7 +213,8 @@ internal class SykdomshistorikkTest {
         aktørId = "12345",
         orgnummer = "987654321",
         perioder = listOf(*perioder),
-        harAndreInntektskilder = false
+        harAndreInntektskilder = false,
+        rapportertdato = perioder.last().tom.atStartOfDay()
     )
 
     private fun inntektsmelding(

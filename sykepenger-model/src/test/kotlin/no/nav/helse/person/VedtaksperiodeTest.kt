@@ -122,7 +122,8 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(

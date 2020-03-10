@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class Søknad constructor(
@@ -17,7 +18,8 @@ class Søknad constructor(
     private val aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Periode>,
-    private val harAndreInntektskilder: Boolean
+    private val harAndreInntektskilder: Boolean,
+    private val rapportertdato: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val fom: LocalDate
@@ -42,6 +44,7 @@ class Søknad constructor(
     override fun valider(): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
+        if ( rapportertdato.toLocalDate().isAfter(tom.plusMonths(3))) error("Søknaden er sendt inn 3 måneder etter TOM")
         return aktivitetslogg
     }
 

@@ -193,7 +193,8 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = sisteSykedag.atStartOfDay()
         )
 
     private fun inntektsmelding(

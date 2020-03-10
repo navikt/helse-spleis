@@ -8,7 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -101,7 +104,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Søknad.Periode.Permisjon(5.januar, 5.januar),
             Søknad.Periode.Utdanning(5.januar, 5.januar)
         ),
-        harAndreInntektskilder = false
+        harAndreInntektskilder = false,
+        rapportertdato = 5.januar.atStartOfDay()
     )
 }
 

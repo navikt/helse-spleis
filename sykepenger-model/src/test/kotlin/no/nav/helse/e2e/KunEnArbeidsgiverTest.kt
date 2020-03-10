@@ -924,7 +924,8 @@ internal class KunEnArbeidsgiverTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = harAndreInntektskilder
+            harAndreInntektskilder = harAndreInntektskilder,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         ).apply {
             hendelselogg = this
         }

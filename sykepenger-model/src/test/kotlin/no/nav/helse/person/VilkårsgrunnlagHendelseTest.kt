@@ -160,7 +160,8 @@ internal class VilkårsgrunnlagHendelseTest {
             aktørId = "aktørId",
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = 31.januar.atStartOfDay()
         ).apply {
             hendelse = this
         }

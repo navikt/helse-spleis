@@ -100,7 +100,8 @@ internal class SykepengesøknadTidslinjeTest {
             aktørId = "aktørId",
             orgnummer = "orgnr",
             perioder = perioder,
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         )
 
     private fun sykmelding() = Sykmelding(

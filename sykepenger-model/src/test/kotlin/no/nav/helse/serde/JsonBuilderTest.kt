@@ -153,7 +153,8 @@ internal class JsonBuilderTest {
             perioder = listOf(
                 Søknad.Periode.Sykdom(fom, tom, 100)
             ),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = tom.atStartOfDay()
         )
 
         private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(

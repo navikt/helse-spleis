@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SøknadTest {
@@ -145,7 +146,8 @@ internal class SøknadTest {
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),
-            harAndreInntektskilder = harAndreInntektskilder
+            harAndreInntektskilder = harAndreInntektskilder,
+            rapportertdato = perioder.lastOrNull()?.tom?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 }

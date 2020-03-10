@@ -66,7 +66,8 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,
-            harAndreInntektskilder = harAndreInntektskilder()
+            harAndreInntektskilder = harAndreInntektskilder(),
+            rapportertdato = rapportertdato
         )
     }
 

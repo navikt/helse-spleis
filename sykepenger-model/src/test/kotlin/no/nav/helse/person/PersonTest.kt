@@ -8,7 +8,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -158,14 +157,13 @@ internal class PersonTest {
     }
 
     @Test
-    @Disabled
     internal fun `søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         søknad(
             perioder = listOf(
                 Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
-            )
-        ).also {
-            testPerson.håndter(it)
+            ),
+            rapportertdato = LocalDateTime.now()
+        ).valider().also {
             assertTrue(it.hasErrors())
         }
     }
@@ -291,7 +289,8 @@ internal class PersonTest {
                 5.oktober,
                 100
             )
-        )
+        ),
+        rapportertdato: LocalDateTime = perioder.last().tom.atStartOfDay()
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
@@ -299,7 +298,8 @@ internal class PersonTest {
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = rapportertdato
         )
 
 

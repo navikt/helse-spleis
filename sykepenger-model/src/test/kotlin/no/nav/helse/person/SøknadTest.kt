@@ -129,7 +129,8 @@ internal class SøknadTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         )
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =

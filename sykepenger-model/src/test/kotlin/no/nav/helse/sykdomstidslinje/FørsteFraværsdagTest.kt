@@ -170,7 +170,8 @@ internal class FørsteFraværsdagTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         )
     }
 

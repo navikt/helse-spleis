@@ -138,7 +138,8 @@ internal class GodkjenningHendelseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = sisteSykedag.atStartOfDay()
         ).apply {
             hendelse = this
         }

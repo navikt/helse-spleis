@@ -141,7 +141,8 @@ internal class UtbetalingsreferanseTest {
             aktørId = "aktørId",
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = tom.atStartOfDay()
         )
 
     private fun inntektsmelding(fom: LocalDate) =

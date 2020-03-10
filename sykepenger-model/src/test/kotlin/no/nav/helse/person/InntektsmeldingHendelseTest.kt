@@ -149,7 +149,8 @@ internal class InntektsmeldingHendelseTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = false
+            harAndreInntektskilder = false,
+            rapportertdato = perioder.last().tom.atStartOfDay()
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
