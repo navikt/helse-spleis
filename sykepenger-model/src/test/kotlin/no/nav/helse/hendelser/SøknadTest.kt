@@ -147,7 +147,7 @@ internal class SøknadTest {
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            rapportertdato = perioder.lastOrNull()?.tom?.atStartOfDay() ?: LocalDateTime.now()
+            sendtTilNAV = perioder.lastOrNull()?.tom?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 }

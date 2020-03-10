@@ -154,7 +154,7 @@ internal class JsonBuilderTest {
                 Søknad.Periode.Sykdom(fom, tom, 100)
             ),
             harAndreInntektskilder = false,
-            rapportertdato = tom.atStartOfDay()
+            sendtTilNAV = tom.atStartOfDay()
         )
 
         private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(

@@ -139,7 +139,7 @@ internal class GodkjenningHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
-            rapportertdato = sisteSykedag.atStartOfDay()
+            sendtTilNAV = sisteSykedag.atStartOfDay()
         ).apply {
             hendelse = this
         }

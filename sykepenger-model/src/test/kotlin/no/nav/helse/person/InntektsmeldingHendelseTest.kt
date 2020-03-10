@@ -150,7 +150,7 @@ internal class InntektsmeldingHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            rapportertdato = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = perioder.last().tom.atStartOfDay()
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

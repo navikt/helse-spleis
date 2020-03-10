@@ -176,7 +176,7 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(1.januar, 20.januar, 100)),
             harAndreInntektskilder = false,
-            rapportertdato = 20.januar.atStartOfDay()
+            sendtTilNAV = 20.januar.atStartOfDay()
         ).apply {
             hendelse = this
         }

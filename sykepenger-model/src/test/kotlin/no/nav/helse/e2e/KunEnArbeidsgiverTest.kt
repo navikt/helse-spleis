@@ -32,7 +32,7 @@ internal class KunEnArbeidsgiverTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
-        private val rapportertdato = 1.februar.atStartOfDay()
+        private val sendtTilNAV = 1.februar.atStartOfDay()
     }
 
     private lateinit var person: Person
@@ -925,7 +925,7 @@ internal class KunEnArbeidsgiverTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            rapportertdato = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = perioder.last().tom.atStartOfDay()
         ).apply {
             hendelselogg = this
         }

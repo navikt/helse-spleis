@@ -194,7 +194,7 @@ internal class VilkårsgrunnlagTest {
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         harAndreInntektskilder = false,
-        rapportertdato = 30.januar.atStartOfDay()
+        sendtTilNAV = 30.januar.atStartOfDay()
     )
 
     private fun inntektsmelding() =

@@ -96,7 +96,8 @@ class PersonPersisteringPostgresTest {
                 aktørId = aktørId,
                 orgnummer = "123456789",
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
-                harAndreInntektskilder = false
+                harAndreInntektskilder = false,
+                sendtTilNAV = 5.oktober.atStartOfDay()
             )
         )
 

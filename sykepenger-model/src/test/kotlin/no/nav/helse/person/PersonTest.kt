@@ -162,7 +162,7 @@ internal class PersonTest {
             perioder = listOf(
                 Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
             ),
-            rapportertdato = LocalDateTime.now()
+            sendtTilNAV = LocalDateTime.now()
         ).valider().also {
             assertTrue(it.hasErrors())
         }
@@ -290,7 +290,7 @@ internal class PersonTest {
                 100
             )
         ),
-        rapportertdato: LocalDateTime = perioder.last().tom.atStartOfDay()
+        sendtTilNAV: LocalDateTime = perioder.last().tom.atStartOfDay()
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
@@ -299,7 +299,7 @@ internal class PersonTest {
             orgnummer = organisasjonsnummer,
             perioder = perioder,
             harAndreInntektskilder = false,
-            rapportertdato = rapportertdato
+            sendtTilNAV = sendtTilNAV
         )
 
 

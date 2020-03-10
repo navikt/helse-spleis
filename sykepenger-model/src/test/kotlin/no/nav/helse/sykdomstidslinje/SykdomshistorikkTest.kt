@@ -214,7 +214,7 @@ internal class SykdomshistorikkTest {
         orgnummer = "987654321",
         perioder = listOf(*perioder),
         harAndreInntektskilder = false,
-        rapportertdato = perioder.last().tom.atStartOfDay()
+        sendtTilNAV = perioder.last().tom.atStartOfDay()
     )
 
     private fun inntektsmelding(

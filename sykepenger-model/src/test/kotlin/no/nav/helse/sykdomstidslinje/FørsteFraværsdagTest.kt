@@ -171,7 +171,7 @@ internal class FørsteFraværsdagTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            rapportertdato = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = perioder.last().tom.atStartOfDay()
         )
     }
 

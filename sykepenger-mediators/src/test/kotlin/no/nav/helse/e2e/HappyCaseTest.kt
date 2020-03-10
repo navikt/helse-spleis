@@ -27,7 +27,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class KunEnArbeidsgiverTest {
+internal class HappyCaseTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
@@ -140,7 +140,7 @@ internal class KunEnArbeidsgiverTest {
             tom = perioder.maxBy { it.tom!! }?.tom,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
-            sendtNav = LocalDateTime.now(),
+            sendtNav = perioder.maxBy { it.tom!! }?.tom?.atStartOfDay(),
             egenmeldinger = emptyList(),
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
