@@ -8,6 +8,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -131,15 +132,16 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasWarnings())
+            assertFalse(it.hasErrors())
         }
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.tilstand(0))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD) // Invalidation of first period
     }
 
     @Test
@@ -156,28 +158,11 @@ internal class PersonTest {
     }
 
     @Test
+    @Disabled
     internal fun `søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
         søknad(
             perioder = listOf(
                 Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
-            )
-        ).also {
-            testPerson.håndter(it)
-            assertTrue(it.hasErrors())
-        }
-    }
-
-    @Test
-    internal fun `søknad med periode som ikke er 100 % kaster exception`() {
-        søknad(
-            perioder = listOf(
-                Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100),
-                Søknad.Periode.Sykdom(
-                    fom = Uke(1).fredag,
-                    tom = Uke(1).fredag,
-                    grad = 100,
-                    faktiskGrad = 90.0
-                )
             )
         ).also {
             testPerson.håndter(it)

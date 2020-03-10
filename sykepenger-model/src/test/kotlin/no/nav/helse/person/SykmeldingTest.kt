@@ -77,15 +77,6 @@ internal class SykmeldingTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
-    @Test
-    internal fun `To søknader uten overlapp hvor den ene ikke er 100%`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 50)))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
-    }
-
     private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),

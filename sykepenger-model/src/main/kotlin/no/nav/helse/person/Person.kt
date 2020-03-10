@@ -26,13 +26,10 @@ class Person private constructor(
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, hendelsesmelding: String) {
         registrer(hendelse, "Behandler $hendelsesmelding")
-        Validation(hendelse).also {
-            it.onError { invaliderAllePerioder(hendelse) }
-            it.valider { ValiderSykdomshendelse(hendelse) }
-            val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-            it.valider { ValiderKunEnArbeidsgiver(arbeidsgivere) }
-            it.valider { ArbeidsgiverHåndterHendelse(hendelse, arbeidsgiver) }
-        }
+        val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
+        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
+
+        hendelse.fortsettÅBehandle(arbeidsgiver)
     }
 
     fun håndter(ytelser: Ytelser) {
@@ -123,7 +120,7 @@ class Person private constructor(
     }
 
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
-        arbeidstakerHendelse.info("Invaliderer alle perioder for alle arbeidsgivere")
+        arbeidstakerHendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
         }

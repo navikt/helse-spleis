@@ -51,7 +51,8 @@ internal class SøknadTest {
     @Test
     internal fun `mangler Sykmelding`() {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarnings())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -80,21 +81,11 @@ internal class SøknadTest {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
     }
-
-    @Test
-    internal fun `flere søknader`() {
-        person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
-        person.håndter(søknad(Sykdom(6.januar, 10.januar, 100)))
-        person.håndter(søknad(Sykdom(6.januar, 10.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
-    }
-
 
     @Test
     internal fun `To søknader uten overlapp`() {

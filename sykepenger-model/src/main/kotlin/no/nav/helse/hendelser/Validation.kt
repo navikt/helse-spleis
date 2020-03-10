@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.LocalDate
@@ -36,36 +35,9 @@ internal interface Valideringssteg {
     fun feilmelding(): String? = null
 }
 
-// Invoke internal validation of a Hendelse
-internal class ValiderSykdomshendelse(private val hendelse: SykdomstidslinjeHendelse) : Valideringssteg {
-    override fun isValid() =
-        !hendelse.valider().let { it.hasBehov() }
-}
-
 internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid() =
         !ytelser.valider().let { it.hasBehov() }
-}
-
-// Confirm that only one Arbeidsgiver exists for a Person (temporary; remove in Epic 7)
-internal class ValiderKunEnArbeidsgiver(
-    private val arbeidsgivere: List<Arbeidsgiver>
-) : Valideringssteg {
-    override fun isValid() = arbeidsgivere.size == 1
-    override fun feilmelding() = "Bruker har mer enn én arbeidsgiver"
-}
-
-// Continue processing Hendelse with appropriate Arbeidsgiver
-internal class ArbeidsgiverHåndterHendelse(
-    private val hendelse: SykdomstidslinjeHendelse,
-    private val arbeidsgiver: Arbeidsgiver
-) : Valideringssteg {
-    override fun isValid(): Boolean {
-        hendelse.fortsettÅBehandle(arbeidsgiver)  // Double dispatch to invoke correct method
-        return !hendelse.hasErrors()
-    }
-
-    override fun feilmelding() = String.format("Feil under håndtering av %s", hendelse::class.simpleName)
 }
 
 internal class Overlappende(

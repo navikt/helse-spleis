@@ -98,23 +98,35 @@ internal class Vedtaksperiode private constructor(
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
 
+    private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
+        if (hendelse.valider().hasErrors())
+            return tilstand(hendelse, TilInfotrygd)
+        block()
+    }
+
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
         sykmelding.kontekst(this)
-        tilstand.håndter(this, sykmelding)
+        valider(sykmelding) {
+            tilstand.håndter(this, sykmelding)
+        }
     }
 
     internal fun håndter(søknad: Søknad) =
         overlapperMed(søknad).also {
             if (!it) return it
             søknad.kontekst(this)
-            tilstand.håndter(this, søknad)
+            valider(søknad) {
+                tilstand.håndter(this, søknad)
+            }
         }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         inntektsmelding.kontekst(this)
-        tilstand.håndter(this, inntektsmelding)
+        valider(inntektsmelding) {
+            tilstand.håndter(this, inntektsmelding)
+        }
     }
 
     internal fun håndter(ytelser: Ytelser) {
@@ -249,7 +261,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode, forlengelse: Boolean): Boolean {
         if (this.periode().start >= other.periode().start) return true
-        if(this.tilstand.type == TIL_INFOTRYGD && forlengelse) return false
+        if (this.tilstand.type == TIL_INFOTRYGD && forlengelse) return false
         return this.tilstand.type in listOf(
             TIL_INFOTRYGD,
             AVSLUTTET
@@ -275,8 +287,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            søknad.error("Forventet ikke søknad i %s", type.name)
-            vedtaksperiode.tilstand(søknad, TilInfotrygd)
+            søknad.warn("Forventet ikke søknad i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
