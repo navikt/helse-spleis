@@ -4,7 +4,10 @@ on:
   push:
     branches:
     - master
-
+env:
+    APP: spleis
+    TEAM: tbd
+    IMAGE: docker.pkg.github.com/${{ github.repository }}/spleis
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,39 +17,35 @@ jobs:
       with:
         java-version: '12.x'
     - name: create docker tag
-      env:
-        DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/spleis
-      run: |
-        echo $DOCKER_IMAGE > .docker_image
-        echo $(echo $GITHUB_SHA | cut -c1-7) > .docker_tag
+      run: echo ::set-env name=TAG::$(echo ${{ github.sha }} | cut -c1-7)
     - name: test and build
       run: ./gradlew test build
       env:
         ORG_GRADLE_PROJECT_githubUser: x-access-token
         ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
     - name: build docker image
-      run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
+      run: docker build . --pull -t ${{ env.IMAGE }}:${{ env.TAG }}
     - name: push docker image
       run: |
         echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
-        docker push $(cat .docker_image):$(cat .docker_tag)
+        docker push ${{ env.IMAGE }}:${{ env.TAG }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: deploy to dev
-      uses: navikt/deployment-cli/action@0.4.1
+      uses: nais/deploy/actions/deploy@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AWAIT_SECONDS: 0
-      with:
-        cluster: dev-fss
-        team: tbd
-        resources: deploy/preprod.yaml
+        APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+        CLUSTER: dev-fss
+        ENVIRONMENT: dev-fss
+        RESOURCE: deploy/dev.yml
+        WAIT: false
+        VAR: "image=${{env.IMAGE}},tag=${{env.TAG}},team=${{env.TEAM}},app=${{env.APP}}"
     - name: deploy to prod
-      uses: navikt/deployment-cli/action@0.4.1
+      uses: nais/deploy/actions/deploy@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AWAIT_SECONDS: 0
-      with:
-        cluster: prod-fss
-        team: tbd
-        resources: deploy/prod.yaml
+        APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+        CLUSTER: prod-fss
+        ENVIRONMENT: prod-fss
+        RESOURCE: deploy/prod.yml
+        WAIT: false
+        VAR: "image=${{env.IMAGE}},tag=${{env.TAG}},team=${{env.TEAM}},app=${{env.APP}}"
