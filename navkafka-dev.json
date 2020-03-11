@@ -42,6 +42,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspammer",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspammer",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvsparkel-persono",
                     "role": "PRODUCER"
                 },
