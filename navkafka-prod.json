@@ -74,6 +74,14 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvspeider",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspeider",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvbehovsakkumulat",
                     "role": "PRODUCER"
                 },

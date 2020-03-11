@@ -34,7 +34,14 @@
                     "role": "PRODUCER"
                 },
                 {
-
+                    "member": "srvspeider",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspeider",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvsparkel-persono",
                     "role": "PRODUCER"
                 },
