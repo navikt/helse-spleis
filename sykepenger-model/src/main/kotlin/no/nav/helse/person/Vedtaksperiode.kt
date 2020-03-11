@@ -118,11 +118,14 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
-        if (!it) return it
-        inntektsmelding.kontekst(this)
-        valider(inntektsmelding) {
-            tilstand.håndter(this, inntektsmelding)
+    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
+        if(inntektsmelding.valider().hasErrors()) return false
+        return overlapperMed(inntektsmelding).also {
+            if (!it) return it
+            inntektsmelding.kontekst(this)
+            valider(inntektsmelding) {
+                tilstand.håndter(this, inntektsmelding)
+            }
         }
     }
 
