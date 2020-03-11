@@ -1,6 +1,5 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
@@ -12,14 +11,12 @@ internal interface Dagturnering {
 internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
 internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
-internal class KonfliktskyDagturnering(private val aktivitetslogg: IAktivitetslogg) : Dagturnering {
+internal object KonfliktskyDagturnering : Dagturnering {
     override fun beste(venstre: Dag, høyre: Dag): Dag {
         return when {
             venstre is ImplisittDag -> høyre
             høyre is ImplisittDag -> venstre
-            else -> høyre.also {
-                aktivitetslogg.error("Strategien ${this::class.simpleName} kan ikke bestemme beste dag siden ingen er ImplisittDag. Venstre=${venstre::class.simpleName}, høyre=${høyre::class.simpleName}")
-            }
+            else -> Ubestemtdag(venstre.dagen)
         }
     }
 }
