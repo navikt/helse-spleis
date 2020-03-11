@@ -127,10 +127,10 @@ internal class InntektsmeldingHendelseTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(Periode(16.januar, 31.januar))
         )
-
+        assertTrue(inntektsmelding.valider().hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
     }
 
     private fun inntektsmelding(

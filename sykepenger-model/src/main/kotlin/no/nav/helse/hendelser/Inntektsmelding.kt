@@ -31,31 +31,25 @@ class Inntektsmelding(
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
-    private var sykdomstidslinje: ConcreteSykdomstidslinje? = null
+    private val sykdomstidslinje: ConcreteSykdomstidslinje
 
     init {
         this.arbeidsgiverperioder =
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
+        this.sykdomstidslinje = (this.ferieperioder + this.arbeidsgiverperioder)
+            .map { it.sykdomstidslinje(this) }
+            .sortedBy { it.førsteDag() }
+            .takeUnless { it.isEmpty() }
+            ?.merge(KonfliktskyDagturnering(this)) { gjelder ->
+                ConcreteSykdomstidslinje.ikkeSykedag(
+                    gjelder,
+                    InntektsmeldingDagFactory
+                )
+            } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
     }
 
-
-    override fun sykdomstidslinje(): ConcreteSykdomstidslinje {
-        if (sykdomstidslinje == null) {
-            sykdomstidslinje = (ferieperioder + arbeidsgiverperioder)
-                .map { it.sykdomstidslinje(this) }
-                .sortedBy { it.førsteDag() }
-                .takeUnless { it.isEmpty() }
-                ?.merge(KonfliktskyDagturnering) { gjelder ->
-                    ConcreteSykdomstidslinje.ikkeSykedag(
-                        gjelder,
-                        InntektsmeldingDagFactory
-                    )
-                }
-                ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
-        }
-        return sykdomstidslinje!!
-    }
+    override fun sykdomstidslinje() = sykdomstidslinje
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
