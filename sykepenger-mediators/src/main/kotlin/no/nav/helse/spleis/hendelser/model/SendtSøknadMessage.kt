@@ -15,15 +15,15 @@ import java.util.*
 internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
+        requireValue("@event_name", "sendt_søknad")
+        requireKey("@id")
         requireValue("status", "SENDT")
         requireKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
 
-    override val id: UUID
-        get() = UUID.fromString(this["id"].asText())
-
+    override val id: UUID get() = UUID.fromString(this["@id"].asText())
     private val søknadFom get() = this["fom"].asLocalDate()
     private val søknadTom get() = this["tom"].asLocalDate()
     private val fnr get() = this["fnr"].asText()

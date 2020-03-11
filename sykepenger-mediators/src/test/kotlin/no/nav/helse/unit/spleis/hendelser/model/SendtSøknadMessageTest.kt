@@ -114,6 +114,10 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree(this)
-private fun SykepengesoknadDTO.toJson(): String = objectMapper.writeValueAsString(this)
+private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree<JsonNode>(this).apply {
+    this as ObjectNode
+    put("@id", UUID.randomUUID().toString())
+    put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad" else "ukjent")
+}
+private fun SykepengesoknadDTO.toJson(): String = asJsonNode().toString()
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

@@ -16,13 +16,13 @@ internal class NySøknadMessage(
 ) :
     SøknadMessage(originalMessage, problems) {
     init {
+        requireValue("@event_name", "ny_søknad")
+        requireKey("@id")
         requireValue("status", "NY")
         requireKey("sykmeldingId", "fom", "tom")
     }
 
-    override val id: UUID
-        get() = UUID.fromString(this["sykmeldingId"].asText())
-
+    override val id: UUID get() = UUID.fromString(this["@id"].asText())
     private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()

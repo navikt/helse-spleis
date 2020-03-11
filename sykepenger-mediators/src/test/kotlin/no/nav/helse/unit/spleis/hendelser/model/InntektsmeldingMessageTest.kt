@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
-import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -65,7 +64,7 @@ internal class InntektsmeldingMessageTest {
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now()
-    ).toJsonNode().toJson()
+    ).asJsonNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
     private val ValidInntektsmeldingWithUnknownFieldsJson = ValidInntektsmelding.let {
@@ -89,7 +88,7 @@ internal class InntektsmeldingMessageTest {
     private fun assertValidInntektsmeldingMessage(message: String) {
         val problems = MessageProblems(message)
         InntektsmeldingMessage(message, problems)
-        assertFalse(problems.hasErrors())
+        assertFalse(problems.hasErrors()) { problems.toExtendedReport() }
     }
 
     private fun assertInvalidMessage(message: String) {
@@ -118,5 +117,9 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun Inntektsmeldingkontrakt.asJsonNode(): JsonNode = objectMapper.valueToTree(this)
+private fun Inntektsmeldingkontrakt.asJsonNode(): JsonNode = objectMapper.valueToTree<JsonNode>(this).apply {
+    this as ObjectNode
+    put("@id", UUID.randomUUID().toString())
+    put("@event_name", "inntektsmelding")
+}
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

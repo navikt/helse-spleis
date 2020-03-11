@@ -17,6 +17,8 @@ internal class InntektsmeldingMessage(
 ) :
     HendelseMessage(originalMessage, problems) {
     init {
+        requireValue("@event_name", "inntektsmelding")
+        requireKey("@id")
         requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
@@ -29,12 +31,7 @@ internal class InntektsmeldingMessage(
         interestedIn("refusjon.opphoersdato")
     }
 
-    override val id: UUID get() = UUID.fromString(this["inntektsmeldingId"].textValue())
-
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
-
+    override val id: UUID get() = UUID.fromString(this["@id"].asText())
     private val refusjon
         get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
             Inntektsmelding.Refusjon(
@@ -51,6 +48,10 @@ internal class InntektsmeldingMessage(
     private val beregnetInntekt get() = this["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder get() = this["arbeidsgiverperioder"].map(::asPeriode)
     private val ferieperioder get() = this["ferieperioder"].map(::asPeriode)
+
+    override fun accept(processor: MessageProcessor) {
+        processor.process(this)
+    }
 
     internal fun asInntektsmelding() = Inntektsmelding(
         meldingsreferanseId = this.id,

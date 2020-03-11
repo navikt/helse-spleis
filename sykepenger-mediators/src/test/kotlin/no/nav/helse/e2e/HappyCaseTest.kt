@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
@@ -122,7 +123,11 @@ internal class HappyCaseTest {
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()
         )
-        testRapid.sendTestMessage(nySøknad.toJsonNode().toString())
+        testRapid.sendTestMessage(nySøknad.toJsonNode().apply {
+            this as ObjectNode
+            put("@id", UUID.randomUUID().toString())
+            put("@event_name", "ny_søknad")
+        }.toString())
     }
 
     private fun sendSøknad(vedtaksperiodeIndeks: Int, vararg perioder: SoknadsperiodeDTO) {
@@ -146,7 +151,11 @@ internal class HappyCaseTest {
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()
         )
-        testRapid.sendTestMessage(sendtSøknad.toJsonNode().toString())
+        testRapid.sendTestMessage(sendtSøknad.toJsonNode().apply {
+            this as ObjectNode
+            put("@id", UUID.randomUUID().toString())
+            put("@event_name", "sendt_søknad")
+        }.toString())
     }
 
     private fun sendInnteksmelding(
@@ -179,7 +188,11 @@ internal class HappyCaseTest {
             foersteFravaersdag = førsteFraværsdag,
             mottattDato = LocalDateTime.now()
         )
-        testRapid.sendTestMessage(inntektsmelding.toJsonNode().toString())
+        testRapid.sendTestMessage(inntektsmelding.toJsonNode().apply {
+            this as ObjectNode
+            put("@id", UUID.randomUUID().toString())
+            put("@event_name", "inntektsmelding")
+        }.toString())
     }
 
     private fun sendGeneriskBehov(

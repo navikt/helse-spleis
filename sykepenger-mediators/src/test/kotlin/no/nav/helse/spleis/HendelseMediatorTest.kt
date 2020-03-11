@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
@@ -351,7 +352,11 @@ internal class HendelseMediatorTest {
                 foersteFravaersdag = LocalDate.now(),
                 mottattDato = LocalDateTime.now()
             )
-            testRapid.sendTestMessage(inntektsmelding.toJsonNode().toString())
+            testRapid.sendTestMessage(inntektsmelding.toJsonNode().apply {
+                this as ObjectNode
+                put("@id", UUID.randomUUID().toString())
+                put("@event_name", "inntektsmelding")
+            }.toString())
             return inntektsmelding
         }
 
@@ -377,7 +382,11 @@ internal class HendelseMediatorTest {
                 soknadsperioder = listOf(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100)),
                 opprettet = LocalDateTime.now()
             )
-            testRapid.sendTestMessage(sendtSøknad.toJsonNode().toString())
+            testRapid.sendTestMessage(sendtSøknad.toJsonNode().apply {
+                this as ObjectNode
+                put("@id", UUID.randomUUID().toString())
+                put("@event_name", "sendt_søknad")
+            }.toString())
         }
 
         private fun sendNySøknad(
@@ -409,7 +418,11 @@ internal class HendelseMediatorTest {
                 ),
                 opprettet = LocalDateTime.now()
             )
-            testRapid.sendTestMessage(nySøknad.toJsonNode().toString())
+            testRapid.sendTestMessage(nySøknad.toJsonNode().apply {
+                this as ObjectNode
+                put("@id", UUID.randomUUID().toString())
+                put("@event_name", "ny_søknad")
+            }.toString())
             return nySøknad
         }
     }
