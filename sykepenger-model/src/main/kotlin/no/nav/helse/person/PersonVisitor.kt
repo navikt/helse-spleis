@@ -52,8 +52,6 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
     fun preVisitUtbetalingslinjer() {}
     fun postVisitUtbetalingslinjer() {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
-    fun preVisitVedtaksperiodeSykdomstidslinje() {}
-    fun postVisitVedtaksperiodeSykdomstidslinje() {}
 }
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {

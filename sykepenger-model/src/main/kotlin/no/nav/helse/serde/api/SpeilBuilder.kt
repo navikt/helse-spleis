@@ -175,8 +175,6 @@ internal class SpeilBuilder : PersonVisitor {
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
-    override fun preVisitVedtaksperiodeSykdomstidslinje() = currentState.preVisitVedtaksperiodeSykdomstidslinje()
-    override fun postVisitVedtaksperiodeSykdomstidslinje() = currentState.postVisitVedtaksperiodeSykdomstidslinje()
     override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer()
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
         currentState.visitUtbetalingslinje(utbetalingslinje)
@@ -329,10 +327,10 @@ internal class SpeilBuilder : PersonVisitor {
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
         }
 
-        override fun preVisitVedtaksperiodeSykdomstidslinje() {
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinjeListe
-            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+            pushState(SykdomshistorikkState(sykdomstidslinjeListe))
         }
 
         override fun preVisitUtbetalingslinjer() {
@@ -364,6 +362,26 @@ internal class SpeilBuilder : PersonVisitor {
             }
             popState()
         }
+    }
+
+    private inner class SykdomshistorikkState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+        JsonState {
+
+        override fun preVisitBeregnetSykdomstidslinje() {
+            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+        }
+
+        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            popState()
+        }
+
+        override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            popState()
+        }
+        override fun preVisitHendelseSykdomstidslinje() {}
+        override fun postVisitHendelseSykdomstidslinje() {}
+
+        override fun postVisitBeregnetSykdomstidslinje() {}
     }
 
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
@@ -419,15 +437,7 @@ internal class SpeilBuilder : PersonVisitor {
             )
         }
 
-        override fun postVisitHendelseSykdomstidslinje() {
-            popState()
-        }
-
         override fun postVisitBeregnetSykdomstidslinje() {
-            popState()
-        }
-
-        override fun postVisitVedtaksperiodeSykdomstidslinje() {
             popState()
         }
     }

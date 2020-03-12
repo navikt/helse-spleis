@@ -172,14 +172,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.postVisitVedtaksperiode(vedtaksperiode, id)
     }
 
-    override fun preVisitVedtaksperiodeSykdomstidslinje() {
-        target.preVisitVedtaksperiodeSykdomstidslinje()
-    }
-
-    override fun postVisitVedtaksperiodeSykdomstidslinje() {
-        target.postVisitVedtaksperiodeSykdomstidslinje()
-    }
-
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) {
         target.visitEgenmeldingsdag(egenmeldingsdag)
     }

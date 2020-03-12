@@ -165,8 +165,6 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
-    override fun preVisitVedtaksperiodeSykdomstidslinje() = currentState.preVisitVedtaksperiodeSykdomstidslinje()
-    override fun postVisitVedtaksperiodeSykdomstidslinje() = currentState.postVisitVedtaksperiodeSykdomstidslinje()
     override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer()
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
         currentState.visitUtbetalingslinje(utbetalingslinje)
@@ -476,10 +474,6 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun postVisitBeregnetSykdomstidslinje() {
-            popState()
-        }
-
-        override fun postVisitVedtaksperiodeSykdomstidslinje() {
             popState()
         }
     }
