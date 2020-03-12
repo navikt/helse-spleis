@@ -54,10 +54,12 @@ class Inntektsmelding(
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
         return sykdomstidslinje().subset(forrigeTom, tom)
-            .also { forrigeTom = tom }
+            .also { trimLeft(tom) }
             ?: severe("Ugydlig subsetting av tidslinjen til inntektsmeldingen")
 
     }
+
+    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
     override fun valider(): Aktivitetslogg {
         if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")

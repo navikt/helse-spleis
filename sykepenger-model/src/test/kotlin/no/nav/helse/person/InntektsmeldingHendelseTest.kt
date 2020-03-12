@@ -86,12 +86,10 @@ internal class InntektsmeldingHendelseTest {
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
     }
 
-
     @Test
     internal fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personlogg.hasWarnings())
-        assertFalse(inspektør.personlogg.hasErrors())
+        assertTrue(inspektør.personlogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 

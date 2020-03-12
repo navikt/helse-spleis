@@ -276,7 +276,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand {
         val type: TilstandType
@@ -292,6 +291,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
             inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
         }
 

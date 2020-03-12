@@ -133,12 +133,11 @@ internal class PersonTest {
         ).also {
             testPerson.håndter(it)
             assertTrue(it.hasWarnings())
-            assertFalse(it.hasErrors())
+            assertTrue(it.hasErrors())
         }
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()

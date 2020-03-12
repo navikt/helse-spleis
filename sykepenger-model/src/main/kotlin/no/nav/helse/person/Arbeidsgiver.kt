@@ -56,14 +56,14 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
         if (perioder.none { it.håndter(søknad) }) {
-            søknad.warn("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
+            søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
         if(perioder.map { it.håndter(inntektsmelding)}.none { it } ) {
-            inntektsmelding.warn("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
     }
 

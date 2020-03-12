@@ -51,8 +51,7 @@ internal class SøknadTest {
     @Test
     internal fun `mangler Sykmelding`() {
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasWarnings())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
