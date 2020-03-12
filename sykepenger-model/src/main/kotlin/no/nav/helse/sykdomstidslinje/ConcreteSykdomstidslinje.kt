@@ -73,13 +73,13 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         return CompositeSykdomstidslinje(this.flatten().filterNot { it.dagen.isAfter(kuttDag) })
     }
 
-    fun overlapperMed(other: ConcreteSykdomstidslinje) =
+    internal fun overlapperMed(other: ConcreteSykdomstidslinje) =
         when {
             this.length() == 0 || other.length() == 0 -> false
             else -> this.harGrenseInnenfor(other) || other.harGrenseInnenfor(this)
         }
 
-    fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         val ugyldigeDager = listOf(Permisjonsdag.Søknad::class, Permisjonsdag.Aareg::class, Ubestemtdag::class)
         return flatten().filter { it::class in ugyldigeDager }
             .distinctBy { it::class.simpleName }
