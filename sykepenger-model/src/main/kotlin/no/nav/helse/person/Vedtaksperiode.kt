@@ -284,8 +284,7 @@ internal class Vedtaksperiode private constructor(
         val timeout: Duration
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.error("Forventet ikke sykmelding i %s", type.name)
-            vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+            sykmelding.warn("Forventet ikke sykmelding i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

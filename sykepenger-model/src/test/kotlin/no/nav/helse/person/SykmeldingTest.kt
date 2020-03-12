@@ -26,7 +26,7 @@ internal class SykmeldingTest {
 
     @Test
     internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -36,18 +36,18 @@ internal class SykmeldingTest {
 
     @Test
     internal fun `En ny Sykmelding er ugyldig`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasErrors())
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
     }
 
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
         assertTrue(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -56,8 +56,8 @@ internal class SykmeldingTest {
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(nySøknad(Triple(6.januar, 10.januar, 100)))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -68,16 +68,15 @@ internal class SykmeldingTest {
 
     @Test
     internal fun `To søknader med overlapp`() {
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        person.håndter(nySøknad(Triple(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasMessages())
-        assertTrue(inspektør.personLogg.hasErrors())
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
     }
 
-    private fun nySøknad(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
+    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = SykmeldingTest.UNG_PERSON_FNR_2018,

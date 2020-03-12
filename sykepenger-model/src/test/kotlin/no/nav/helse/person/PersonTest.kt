@@ -110,7 +110,8 @@ internal class PersonTest {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
         sykmelding(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasWarnings())
+            assertFalse(it.hasErrors())
         }
     }
 
