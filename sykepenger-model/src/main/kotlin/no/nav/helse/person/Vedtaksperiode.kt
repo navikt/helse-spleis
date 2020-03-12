@@ -211,7 +211,7 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag > sykdomshistorikk.sykdomstidslinje().sisteDag())
-            hendelse.error("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
+            hendelse.warn("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
         if (hendelse.førsteFraværsdag != sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
             hendelse.warn("Inntektsmelding har oppgitt en annen første fraværsdag")
 
@@ -287,6 +287,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
             søknad.warn("Forventet ikke søknad i %s", type.name)
         }
 

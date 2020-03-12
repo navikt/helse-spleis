@@ -55,7 +55,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        if (perioder.none { it.håndter(søknad) }) {
+        if(perioder.map { it.håndter(søknad)}.none { it } ) {
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
     }

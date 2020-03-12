@@ -368,7 +368,7 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
     }
 
     @Test
@@ -376,7 +376,7 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
     }
 
     @Test
@@ -763,6 +763,43 @@ internal class KunEnArbeidsgiverTest {
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
+    }
+
+    @Test
+    internal fun epic3case() {
+        håndterSykmelding(Triple(1.januar(2020), 5.januar(2020), 100))
+        håndterSykmelding(Triple(6.januar(2020), 10.januar(2020), 100))
+        håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
+        håndterSøknad(
+            Sykdom(13.januar(2020), 17.januar(2020), 100),
+            Søknad.Periode.Egenmelding(30.desember(2019), 31.desember(2019))
+        )
+        håndterSykmelding(Triple(18.januar(2020), 26.januar(2020), 100))
+        håndterSøknad(Sykdom(18.januar(2020), 26.januar(2020), 100))
+        håndterSykmelding(Triple(27.januar(2020), 30.januar(2020), 100))
+        håndterSøknad(Sykdom(27.januar(2020), 30.januar(2020), 100))
+        håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
+        håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(
+            Periode(30.desember(2019), 31.desember(2019)),
+            Periode(1.januar(2020), 5.januar(2020)),
+            Periode(6.januar(2020), 10.januar(2020)),
+            Periode(13.januar(2020), 16.januar(2020))
+        ), førsteFraværsdag = 13.januar(2020))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(
+            Periode(30.desember(2019), 31.desember(2019)),
+            Periode(1.januar(2020), 5.januar(2020)),
+            Periode(6.januar(2020), 10.januar(2020)),
+            Periode(13.januar(2020), 16.januar(2020))
+        ), førsteFraværsdag = 13.januar(2020))
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
+        assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(4, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertEquals(5, observatør.tilstander.size)
+
     }
 
     private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
