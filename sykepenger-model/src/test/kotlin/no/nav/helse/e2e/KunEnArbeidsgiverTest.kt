@@ -766,6 +766,17 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `gradert sykmelding først`() {
+        // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
+        håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
+        assertTilstander(0, START, TIL_INFOTRYGD)
+
+        håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
+        håndterSøknad(Sykdom(13.januar(2020), 17.januar(2020), 100))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+    }
+
+    @Test
     internal fun epic3case() {
         håndterSykmelding(Triple(1.januar(2020), 5.januar(2020), 100))
         håndterSykmelding(Triple(6.januar(2020), 10.januar(2020), 100))
