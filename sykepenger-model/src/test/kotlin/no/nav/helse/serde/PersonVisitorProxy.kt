@@ -60,14 +60,6 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
     }
 
-    override fun preVisitInntekter() {
-        target.preVisitInntekter()
-    }
-
-    override fun postVisitInntekter() {
-        target.postVisitInntekter()
-    }
-
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
         target.visitInntekt(inntekt)
     }

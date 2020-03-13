@@ -17,14 +17,12 @@ internal interface PersonVisitor : ArbeidsgiverVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, UtbetalingsdagVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
     ) {}
-    fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
-    fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
     fun preVisitTidslinjer() {}
     fun postVisitTidslinjer() {}
     fun preVisitPerioder() {}
@@ -34,9 +32,6 @@ internal interface ArbeidsgiverVisitor : UtbetalingsdagVisitor, VedtaksperiodeVi
         id: UUID,
         organisasjonsnummer: String
     ) {}
-    fun preVisitInntekter() {}
-    fun postVisitInntekter() {}
-    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {}
 }
 
 internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, SykdomshistorikkVisitor {
@@ -63,4 +58,12 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun postVisitHendelseSykdomstidslinje() {}
     fun preVisitBeregnetSykdomstidslinje() {}
     fun postVisitBeregnetSykdomstidslinje() {}
+}
+
+internal interface InntekthistorikkVisitor {
+    fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
+//    fun preVisitTidslinjer() {}
+    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {}
+//    fun postVisitTidslinjer() {}
+    fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 }

@@ -83,7 +83,6 @@ internal class JsonBuilder : PersonVisitor {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun preVisitInntekter() = currentState.preVisitInntekter()
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(inntekt)
     override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =

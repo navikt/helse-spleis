@@ -5,6 +5,28 @@ import java.time.LocalDate
 import java.util.*
 
 internal class Inntekthistorikk {
+    private val inntekter = mutableListOf<Inntekt>()
+
+    internal fun clone(): Inntekthistorikk {
+        return Inntekthistorikk().also {
+            it.inntekter.addAll(this.inntekter)
+        }
+    }
+
+    internal fun accept(visitor: InntekthistorikkVisitor) {
+        visitor.preVisitInntekthistorikk(this)
+        inntekter.forEach { it.accept(visitor) }
+        visitor.postVisitInntekthistorikk(this)
+    }
+
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal) {
+        inntekter.removeAll { it.fom() == fom }
+        inntekter.add(Inntekt(fom, hendelseId, beløp))
+        inntekter.sort()
+    }
+
+    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
+
     internal class Inntekt(
         private val fom: LocalDate,
         internal val hendelseId: UUID,
@@ -15,7 +37,9 @@ internal class Inntekthistorikk {
                 inntekter.lastOrNull { it.fom <= dato }?.beløp
         }
 
-        fun accept(visitor: ArbeidsgiverVisitor) {
+        internal fun fom() = fom
+
+        fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntekt(this)
         }
 
@@ -24,28 +48,4 @@ internal class Inntekthistorikk {
         override fun hashCode() = fom.hashCode() * 37 + beløp.hashCode()
     }
 
-    private val inntekter = mutableListOf<Inntekt>()
-
-    internal fun clone(): Inntekthistorikk {
-        return Inntekthistorikk().also {
-            it.inntekter.addAll(this.inntekter)
-        }
-    }
-
-    internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitInntekthistorikk(this)
-
-        visitor.preVisitInntekter()
-        inntekter.forEach { it.accept(visitor) }
-        visitor.postVisitInntekter()
-
-        visitor.postVisitInntekthistorikk(this)
-    }
-
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal) {
-        inntekter.add(Inntekt(fom, hendelseId, beløp))
-        inntekter.sort()
-    }
-
-    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
 }

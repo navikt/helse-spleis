@@ -85,8 +85,6 @@ internal class SpeilBuilder : PersonVisitor {
     override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
-
-    override fun preVisitInntekter() = currentState.preVisitInntekter()
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
         hendelseReferanser.add(inntekt.hendelseId)
         currentState.visitInntekt(inntekt)
