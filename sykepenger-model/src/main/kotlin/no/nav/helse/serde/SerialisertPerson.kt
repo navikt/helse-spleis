@@ -104,6 +104,7 @@ class SerialisertPerson(val json: String) {
                 it
             )
         })
+        vedtaksperioder.sortBy { periode -> periode.periode().start }
 
         return arbeidsgiver
     }

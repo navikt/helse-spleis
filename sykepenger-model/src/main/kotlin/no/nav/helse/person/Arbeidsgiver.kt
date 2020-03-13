@@ -50,6 +50,7 @@ internal class Arbeidsgiver private constructor(
         if(perioder.map { it.håndter(sykmelding)}.none { it } ) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
+            perioder.sortBy { periode -> periode.periode().start }
         }
     }
 
