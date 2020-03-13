@@ -769,11 +769,11 @@ internal class KunEnArbeidsgiverTest {
     internal fun `gradert sykmelding først`() {
         // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
         håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
-        assertTilstander(0, START, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
 
         håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
         håndterSøknad(Sykdom(13.januar(2020), 17.januar(2020), 100))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
     }
 
     @Test
@@ -813,12 +813,54 @@ internal class KunEnArbeidsgiverTest {
 
     }
 
+    @Test
+    internal fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        inspektør.also {
+            assertNoErrors(it)
+            assertNoWarnings(it)
+        }
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        forventetEndringTeller++
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(1, listOf(Periode(16.januar, 16.februar))) // Touches prior periode
+        assertNoErrors(inspektør)
+
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+        assertNoErrors(inspektør)
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+    }
+
     private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
         assertEquals(tilstander.asList(), observatør.tilstander[indeks])
     }
 
     private fun assertNoErrors(inspektør: TestPersonInspektør) {
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+    }
+
+    private fun assertNoWarnings(inspektør: TestPersonInspektør) {
+        assertFalse(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
     }
 
     private fun assertWarnings(inspektør: TestPersonInspektør) {

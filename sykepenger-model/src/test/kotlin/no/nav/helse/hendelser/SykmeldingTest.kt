@@ -4,7 +4,8 @@ import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -34,13 +35,6 @@ internal class SykmeldingTest {
     internal fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
         assertEquals(16, sykmelding.sykdomstidslinje().length())
-    }
-
-    @Test
-    internal fun `sykdomsgrad under 100% støttes ikke`() {
-        sykmelding(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
-        assertTrue(sykmelding.valider().hasErrors())
-
     }
 
     @Test

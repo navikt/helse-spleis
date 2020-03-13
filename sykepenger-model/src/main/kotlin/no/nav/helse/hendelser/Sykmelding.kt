@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.FeatureToggle
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -29,14 +28,11 @@ class Sykmelding(
         if (!ingenOverlappende()) severe("Sykeperioder overlapper")
     }
 
-    override fun valider(): Aktivitetslogg {
-        if (!hundreProsentSykmeldt()) aktivitetslogg.error("Sykmeldingen inneholder graderte sykeperioder")
-        return aktivitetslogg
-    }
+    override fun valider() = aktivitetslogg  // No invalid possibilities if passed init block
 
     override fun melding(klassName: String) = "Sykmelding"
 
-    private fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() }
+    internal fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() } // Temporary until partial sickness supported
 
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
