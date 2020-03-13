@@ -26,7 +26,8 @@ internal sealed class HendelseDTO {
 
     data class InntektsmeldingDTO(
         val beregnetInntekt: Number,
-        val førsteFraværsdag: LocalDate
+        val førsteFraværsdag: LocalDate,
+        val mottattDato: LocalDateTime
     ): HendelseDTO() {
         override val type = Meldingstype.INNTEKTSMELDING
     }

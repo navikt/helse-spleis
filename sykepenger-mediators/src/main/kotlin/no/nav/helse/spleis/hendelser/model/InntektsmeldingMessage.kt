@@ -67,7 +67,8 @@ internal class InntektsmeldingMessage(
 
     fun asSpeilDTO() = HendelseDTO.InntektsmeldingDTO(
         beregnetInntekt = beregnetInntekt,
-        førsteFraværsdag = førsteFraværsdag
+        førsteFraværsdag = førsteFraværsdag,
+        mottattDato = mottattDato
     )
 
     object Factory : MessageFactory<InntektsmeldingMessage> {
