@@ -54,6 +54,10 @@ repositories {
     }
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 tasks.named<Jar>("jar") {
     archiveBaseName.set("app")
 
