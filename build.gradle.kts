@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.60"
+    kotlin("jvm") version "1.3.70"
 }
 
 val junitJupiterVersion = "5.4.0"
@@ -31,13 +31,6 @@ allprojects {
 
     tasks.named<KotlinCompile>("compileTestKotlin") {
         kotlinOptions.jvmTarget = "12"
-    }
-
-    tasks.withType<Test> {
-        useJUnitPlatform()
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
     }
 
     tasks.withType<Wrapper> {
