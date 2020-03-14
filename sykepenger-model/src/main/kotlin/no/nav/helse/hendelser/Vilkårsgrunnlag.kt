@@ -16,7 +16,7 @@ class Vilkårsgrunnlag(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val inntektsmåneder: List<Måned>,
-    private val arbeidsforhold: MangeArbeidsforhold,
+    private val arbeidsforhold: List<Arbeidsforhold>,
     private val erEgenAnsatt: Boolean
 ) : ArbeidstakerHendelse() {
     private val sammenligningsgrunnlag: BigDecimal
@@ -52,10 +52,13 @@ class Vilkårsgrunnlag(
         beregnetInntekt: BigDecimal,
         førsteFraværsdag: LocalDate
     ): Resultat {
-        val antallOpptjeningsdager =  arbeidsforhold.antallOpptjeningsdager(førsteFraværsdag, orgnummer)
+        val antallOpptjeningsdager = Arbeidsforhold.antallOptjeningsdager(arbeidsforhold, førsteFraværsdag, orgnummer)
         val grunnlag = Grunnlagsdata(
             erEgenAnsatt = erEgenAnsatt,
-            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.setScale(2, RoundingMode.HALF_UP).toDouble(),
+            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.setScale(
+                2,
+                RoundingMode.HALF_UP
+            ).toDouble(),
             avviksprosent = avviksprosentInntekt(beregnetInntekt).toDouble(),
             antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
             harOpptjening = antallOpptjeningsdager >= 28
@@ -67,9 +70,9 @@ class Vilkårsgrunnlag(
         else info("er ikke egen ansatt")
 
         if (harAvvikIOppgittInntekt) error("Har mer enn 25 %% avvik")
-        else info("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent*100} %%)")
+        else info("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent * 100} %%)")
 
-        if(grunnlag.harOpptjening) info("Har minst 28 dager opptjening")
+        if (grunnlag.harOpptjening) info("Har minst 28 dager opptjening")
         else error("Har mindre enn 28 dager opptjening")
 
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
@@ -80,11 +83,23 @@ class Vilkårsgrunnlag(
         internal val inntektsliste: List<Double>
     )
 
-    class Arbeidsforhold (
-        internal val orgnummer: String,
-        internal val fom: LocalDate,
-        internal val tom: LocalDate? = null
-    )
+    class Arbeidsforhold(
+        private val orgnummer: String,
+        private val fom: LocalDate,
+        private val tom: LocalDate? = null
+    ) {
+        companion object {
+            fun antallOptjeningsdager(liste: List<Arbeidsforhold>, førsteFraværsdag: LocalDate, orgnummer: String) = liste
+                .filter { it.orgnummer == orgnummer }
+                .filter { it.fom <= førsteFraværsdag }
+                .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
+                .map { it.fom }
+                .min()
+                ?.datesUntil(førsteFraværsdag)
+                ?.toList()
+                ?.size ?: 0
+        }
+    }
 
     class Resultat(
         internal val måBehandlesManuelt: Boolean,
@@ -98,15 +113,5 @@ class Vilkårsgrunnlag(
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean
     )
-
-    class MangeArbeidsforhold(
-        private val arbeidsforhold: List<Arbeidsforhold>
-    ) {
-        internal fun antallOpptjeningsdager(førsteFraværsdag: LocalDate, orgnummer: String) = arbeidsforhold
-            .filter { it.orgnummer == orgnummer }
-            .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
-            .map { it.fom }
-            .min()?.datesUntil(førsteFraværsdag)?.toList()?.size ?: 0
-    }
 }
 

@@ -170,12 +170,10 @@ internal class UtbetalingsreferanseTest {
                 )
             },
             erEgenAnsatt = false,
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
-                listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        orgnummer,
-                        1.januar(2017)
-                    )
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer,
+                    1.januar(2017)
                 )
             )
         )

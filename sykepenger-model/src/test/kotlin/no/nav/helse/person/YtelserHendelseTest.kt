@@ -228,7 +228,7 @@ internal class YtelserHendelseTest {
                 )
             },
             erEgenAnsatt = false,
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017))))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
         )
 
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {

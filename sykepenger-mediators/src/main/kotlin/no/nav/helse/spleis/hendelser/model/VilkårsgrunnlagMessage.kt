@@ -34,15 +34,13 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
                     inntektsliste = it["inntektsliste"].map { it["beløp"].asDouble() }
                 )
             },
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(this["@løsning.${Opptjening.name}"]
-                .map {
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        orgnummer = it["orgnummer"].asText(),
-                        fom = it["ansattSiden"].asLocalDate(),
-                        tom = it["ansattTil"].asOptionalLocalDate()
-                    )
-                }
-            ),
+            arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = it["orgnummer"].asText(),
+                    fom = it["ansattSiden"].asLocalDate(),
+                    tom = it["ansattTil"].asOptionalLocalDate()
+                )
+            },
             erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean()
         )
     }

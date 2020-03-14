@@ -7,6 +7,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -84,6 +85,23 @@ internal class VilkårsgrunnlagTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand(vedtaksperiode)?.type)
 
     }
+
+    @Test
+    internal fun `arbeidsforhold nyere enn første fraværsdag`() {
+        val vedtaksperiode = vedtaksperiode()
+        val vilkårsgrunnlag = vilkårsgrunnlag(
+            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
+            listOf(Arbeidsforhold("orgnummer", førsteFraværsdag(vedtaksperiode).plusDays(1)))
+        )
+
+        vedtaksperiode.håndter(vilkårsgrunnlag)
+
+        assertEquals(0, dataForVilkårsvurdering(vedtaksperiode)?.antallOpptjeningsdagerErMinst)
+        assertEquals(false, dataForVilkårsvurdering(vedtaksperiode)?.harOpptjening)
+        assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand(vedtaksperiode)?.type)
+
+    }
+
     @Test
     internal fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
@@ -127,6 +145,16 @@ internal class VilkårsgrunnlagTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand(vedtaksperiode)?.type)
     }
 
+    private fun førsteFraværsdag(vedtaksperiode: Vedtaksperiode): LocalDate {
+        var _førsteFraværsdag: LocalDate? = null
+        vedtaksperiode.accept(object : VedtaksperiodeVisitor {
+            override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
+                _førsteFraværsdag = førsteFraværsdag
+            }
+        })
+        return requireNotNull(_førsteFraværsdag)
+    }
+
     private fun dataForVilkårsvurdering(vedtaksperiode: Vedtaksperiode): Grunnlagsdata? {
         var _dataForVilkårsvurdering: Grunnlagsdata? = null
         vedtaksperiode.accept(object : VedtaksperiodeVisitor {
@@ -161,7 +189,7 @@ internal class VilkårsgrunnlagTest {
         fødselsnummer = "12345678901",
         orgnummer = "orgnummer",
         inntektsmåneder = inntektsmåneder,
-        arbeidsforhold = MangeArbeidsforhold(arbeidsforhold),
+        arbeidsforhold = arbeidsforhold,
         erEgenAnsatt = false
     )
 

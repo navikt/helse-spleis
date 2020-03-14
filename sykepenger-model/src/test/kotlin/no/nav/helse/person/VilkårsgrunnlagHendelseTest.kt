@@ -193,7 +193,7 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             inntektsmåneder = inntekter,
             erEgenAnsatt = egenAnsatt,
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(arbeidsforhold)
+            arbeidsforhold = arbeidsforhold
         ).apply {
             hendelse = this
         }

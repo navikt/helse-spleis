@@ -181,12 +181,10 @@ internal class JsonBuilderTest {
                         inntektsliste = listOf(31000.0)
                     )
                 },
-                arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
-                    listOf(
-                        Vilkårsgrunnlag.Arbeidsforhold(
-                            orgnummer,
-                            1.januar(2017)
-                        )
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        orgnummer,
+                        1.januar(2017)
                     )
                 ),
                 erEgenAnsatt = false

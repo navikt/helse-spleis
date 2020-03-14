@@ -219,7 +219,7 @@ class PåminnelserOgTimeoutTest {
                 )
             },
             erEgenAnsatt = false,
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
         ).apply {
             hendelse = this
         }

@@ -1085,14 +1085,7 @@ internal class KunEnArbeidsgiverTest {
                 )
             },
             erEgenAnsatt = false,
-            arbeidsforhold = Vilkårsgrunnlag.MangeArbeidsforhold(
-                listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER,
-                        1.januar(2017)
-                    )
-                )
-            )
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
         ).apply {
             hendelselogg = this
         }
