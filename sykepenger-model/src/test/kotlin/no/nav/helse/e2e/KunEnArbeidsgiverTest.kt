@@ -13,14 +13,10 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,7 +30,6 @@ internal class KunEnArbeidsgiverTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
-        private val sendtTilNAV = 1.februar.atStartOfDay()
     }
 
     private lateinit var person: Person
@@ -895,6 +890,31 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `Ingen sykedager i tidslinjen - første fraværsdag bug`() {
+        håndterSykmelding(Triple(6.januar(2020), 7.januar(2020), 100))
+        håndterSykmelding(Triple(8.januar(2020), 10.januar(2020), 100))
+        håndterSykmelding(Triple(27.januar(2020), 28.januar(2020), 100))
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+
+        håndterInntektsmelding(listOf(
+            Periode(18.november(2019), 23.november(2019)),
+            Periode(14.oktober(2019), 18.oktober(2019)),
+            Periode(1.november(2019), 5.november(2019))
+        ), 18.november(2019), listOf(
+            Periode(5.desember(2019), 6.desember(2019)),
+            Periode(30.desember(2019), 30.desember(2019)),
+            Periode(2.januar(2020), 3.januar(2020)),
+            Periode(22.januar(2020), 22.januar(2020))
+        ))
+
+        // TODO: Which state should the period go to after Inntektsmelding?
+        // assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+    }
+
+    @Test
     internal fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
@@ -980,8 +1000,8 @@ internal class KunEnArbeidsgiverTest {
         håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag)
     }
 
-    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, førsteFraværsdag: LocalDate = 1.januar) {
-        person.håndter(inntektsmelding(arbeidsgiverperioder, førsteFraværsdag = førsteFraværsdag))
+    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, førsteFraværsdag: LocalDate = 1.januar, ferieperioder: List<Periode> = emptyList()) {
+        person.håndter(inntektsmelding(arbeidsgiverperioder, ferieperioder = ferieperioder, førsteFraværsdag = førsteFraværsdag))
     }
 
     private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
