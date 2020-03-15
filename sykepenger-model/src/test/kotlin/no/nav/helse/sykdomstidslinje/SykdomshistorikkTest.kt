@@ -155,6 +155,16 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
+    internal fun `Inntektsmelding først`() {
+        historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
+        val inspektør = HistorikkInspektør(historikk)
+        assertEquals(1, historikk.size)
+        assertEquals(16, historikk.sykdomstidslinje().length())
+        assertEquals(9.januar, inspektør.beregnetSykdomstidslinjer[0].førsteDag())
+        assertEquals(24.januar, inspektør.beregnetSykdomstidslinjer[0].sisteDag())
+    }
+
+    @Test
     internal fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         historikk.håndter(sykmelding(Triple(7.januar, 28.januar, 100)))
         historikk.håndter(søknad(Søknad.Periode.Sykdom(7.januar, 28.januar, 100)))
@@ -207,7 +217,7 @@ internal class SykdomshistorikkTest {
     private fun sykdomshendelse(dag: Dag): SykdomstidslinjeHendelse {
         return object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
             override fun sykdomstidslinje() = dag
-            override fun sykdomstidslinje(fom: LocalDate, tom: LocalDate) = dag
+            override fun sykdomstidslinje(fom: LocalDate?, tom: LocalDate) = dag
             override fun toSpesifikkKontekst() = SpesifikkKontekst("Testhendelse 1")
             override fun valider() = throw NotImplementedError("not implemented")
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw NotImplementedError("not implemented")

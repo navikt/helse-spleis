@@ -37,7 +37,7 @@ class Sykmelding(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() = sykeperioder.map(Sykeperiode::sykdomstidslinje).merge(KonfliktskyDagturnering)
-    override fun sykdomstidslinje(fom: LocalDate, tom: LocalDate) = sykdomstidslinje()
+    override fun sykdomstidslinje(fom: LocalDate?, tom: LocalDate) = sykdomstidslinje()
 
     override fun fødselsnummer() = fnr
 
