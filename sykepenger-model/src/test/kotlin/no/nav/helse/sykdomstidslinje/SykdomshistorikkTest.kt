@@ -24,7 +24,7 @@ internal class SykdomshistorikkTest {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
-    private lateinit var inspektør: HistorikkInspektør
+    private val inspektør: HistorikkInspektør get() = HistorikkInspektør(historikk)
 
     private lateinit var historikk: Sykdomshistorikk
     @BeforeEach
@@ -53,7 +53,6 @@ internal class SykdomshistorikkTest {
                 Søknad.Periode.Egenmelding(2.januar, 3.januar)
             )
         )
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(2, historikk.size)
         assertEquals(11, historikk.sykdomstidslinje().length())
         assertEquals(5, inspektør.hendelseSykdomstidslinje[1].length())
@@ -143,7 +142,6 @@ internal class SykdomshistorikkTest {
                 ferieperioder = listOf(Periode(4.januar, 8.januar))
             )
         )
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(3, historikk.size)
         assertEquals(12, historikk.sykdomstidslinje().length())
         assertEquals(5, inspektør.hendelseSykdomstidslinje[2].length())
@@ -157,7 +155,6 @@ internal class SykdomshistorikkTest {
     @Test
     internal fun `Inntektsmelding først`() {
         historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(1, historikk.size)
         assertEquals(16, historikk.sykdomstidslinje().length())
         assertEquals(9.januar, inspektør.beregnetSykdomstidslinjer[0].førsteDag())
@@ -169,7 +166,6 @@ internal class SykdomshistorikkTest {
         historikk.håndter(sykmelding(Triple(7.januar, 28.januar, 100)))
         historikk.håndter(søknad(Søknad.Periode.Sykdom(7.januar, 28.januar, 100)))
         historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(3, historikk.size)
         assertEquals(22, historikk.sykdomstidslinje().length())
         assertEquals(7.januar, inspektør.beregnetSykdomstidslinjer[0].førsteDag())
@@ -182,7 +178,6 @@ internal class SykdomshistorikkTest {
     internal fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         historikk.håndter(sykmelding(Triple(7.januar, 28.januar, 100)))
         historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(2, historikk.size)
         assertEquals(22, historikk.sykdomstidslinje().length())
         assertEquals(7.januar, inspektør.beregnetSykdomstidslinjer[0].førsteDag())
@@ -203,7 +198,6 @@ internal class SykdomshistorikkTest {
                 hendelseId = søknadId
             )
         )
-        val inspektør = HistorikkInspektør(historikk)
         assertEquals(2, historikk.size)
         assertEquals(11, historikk.sykdomstidslinje().length())
         assertEquals(5, inspektør.hendelseSykdomstidslinje[1].length())
