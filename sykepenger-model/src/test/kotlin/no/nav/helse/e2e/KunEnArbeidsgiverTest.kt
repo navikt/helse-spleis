@@ -909,9 +909,21 @@ internal class KunEnArbeidsgiverTest {
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+    }
 
-        // TODO: Which state should the period go to after Inntektsmelding?
-        // assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+    @Test
+    internal fun `Cannot round NaN value`() {
+        håndterSykmelding(Triple(15.januar(2020), 12.februar(2020), 100))
+        håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
+        håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0,
+            Triple(3.april(2019), 30.april(2019), 100),
+            Triple(18.mars(2018), 2.april(2018), 100),
+            Triple(29.november(2017), 3.desember(2017), 100),
+            Triple(13.november(2017), 28.november(2017), 100)
+        )
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
     @Test
