@@ -912,7 +912,7 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `Cannot round NaN value`() {
+    internal fun `inntektsmelding starter etter sykmeldingsperioden`() {
         håndterSykmelding(Triple(15.januar(2020), 12.februar(2020), 100))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
