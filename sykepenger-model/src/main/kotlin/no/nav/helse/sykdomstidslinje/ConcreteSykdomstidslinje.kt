@@ -64,8 +64,11 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         }
 
     internal fun subset(fom: LocalDate?, tom:LocalDate): ConcreteSykdomstidslinje? {
-        if(fom == null) return kutt(tom)
-        return CompositeSykdomstidslinje(this.flatten().filter { it.dagen.isAfter(fom) && !it.dagen.isAfter(tom) })
+        if (fom == null) return kutt(tom)
+        return this.flatten()
+            .filter { it.dagen.isAfter(fom) && !it.dagen.isAfter(tom) }
+            .takeIf(List<*>::isNotEmpty)
+            ?.let { CompositeSykdomstidslinje(it) }
     }
 
     internal fun kutt(kuttDag: LocalDate): ConcreteSykdomstidslinje? {
