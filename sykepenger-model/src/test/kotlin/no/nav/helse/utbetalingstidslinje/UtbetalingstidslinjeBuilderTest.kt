@@ -391,7 +391,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `riktig inntekt for riktig dag`() {
         resetSeed(1.desember(2017))
         20.S.utbetalingslinjer()
-        assertInntekt(Double.NaN)
+        assertInntekt(1430.8)
 
         resetSeed(8.januar)
         20.S.utbetalingslinjer()

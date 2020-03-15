@@ -103,7 +103,7 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.invaliderPeriode(hendelse) }
     }
 
-    internal fun addInntektsmelding(inntektsmelding: Inntektsmelding) {
+    internal fun addInntekt(inntektsmelding: Inntektsmelding) {
         inntektsmelding.addInntekt(inntekthistorikk)
     }
 

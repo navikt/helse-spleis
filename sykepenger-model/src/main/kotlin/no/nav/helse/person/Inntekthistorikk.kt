@@ -25,12 +25,13 @@ internal class Inntekthistorikk {
         inntekter.sort()
     }
 
-    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
+    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato) ?:
+        inntekter.firstOrNull()?.beløp
 
     internal class Inntekt(
         private val fom: LocalDate,
         internal val hendelseId: UUID,
-        val beløp: BigDecimal
+        internal val beløp: BigDecimal
     ) : Comparable<Inntekt> {
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =

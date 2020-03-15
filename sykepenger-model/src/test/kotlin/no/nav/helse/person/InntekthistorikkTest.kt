@@ -17,6 +17,11 @@ internal class InntekthistorikkTest {
         assertEquals(1, historikk.size)
         assertEquals(nyInntekt, historikk.inntekt(3.januar))
         assertEquals(nyInntekt, historikk.inntekt(5.januar))
+        assertEquals(nyInntekt, historikk.inntekt(1.januar)) // Using rule that first salary is used
+    }
+
+    @Test internal fun `Null kom tilbake for tom inntektshistorie`() {
+        val historikk = Inntekthistorikk()
         assertNull(historikk.inntekt(1.januar))
     }
 
