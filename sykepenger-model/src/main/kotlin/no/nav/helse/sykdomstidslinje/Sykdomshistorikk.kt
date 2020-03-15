@@ -20,6 +20,7 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(
             0, Element.opprett(
                 this, hendelse,
+                if (elementer.isEmpty()) LocalDate.MIN else sykdomstidslinje().førsteDag(),
                 if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
             )
         )
@@ -63,9 +64,10 @@ internal class Sykdomshistorikk private constructor(
             fun opprett(
                 historikk: Sykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
+                fom: LocalDate,
                 tom: LocalDate
             ): Element {
-                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(fom, tom)
                 return Element(
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,

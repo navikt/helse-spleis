@@ -34,7 +34,7 @@ class Søknad constructor(
     }
 
     override fun sykdomstidslinje() = perioder.map(Periode::sykdomstidslinje).merge(søknadDagturnering)
-    override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
+    override fun sykdomstidslinje(fom: LocalDate, tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
         return sykdomstidslinje().subset(forrigeTom, tom)

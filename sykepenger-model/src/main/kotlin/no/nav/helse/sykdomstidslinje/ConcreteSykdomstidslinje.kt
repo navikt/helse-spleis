@@ -63,6 +63,11 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
             dager.subList(indeksSisteSykedag, dager.size - 1)
         }
 
+    internal fun padLeft(førsteDag: LocalDate, mapper: (LocalDate) -> Dag): ConcreteSykdomstidslinje {
+        if (this.førsteDag() <= førsteDag) return this
+        return CompositeSykdomstidslinje(førsteDag.datesUntil(this.førsteDag()).map(mapper).toList() + this.flatten())
+    }
+
     internal fun subset(fom: LocalDate?, tom:LocalDate): ConcreteSykdomstidslinje? {
         if (fom == null) return kutt(tom)
         return this.flatten()

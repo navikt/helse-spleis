@@ -11,7 +11,7 @@ abstract class SykdomstidslinjeHendelse(
 ) : ArbeidstakerHendelse() {
     internal fun meldingsreferanseId() = meldingsreferanseId
 
-    internal abstract fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje
+    internal abstract fun sykdomstidslinje(fom: LocalDate, tom: LocalDate): ConcreteSykdomstidslinje
     internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun valider(): Aktivitetslogg
