@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.3.70"
 }
 
-val junitJupiterVersion = "5.4.0"
+val junitJupiterVersion = "5.6.0"
 
 allprojects {
     group = "no.nav.helse"
@@ -13,7 +13,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        api(kotlin("stdlib-jdk8"))
+        implementation(kotlin("stdlib-jdk8"))
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
@@ -46,8 +46,6 @@ repositories {
 val githubUser: String by project
 val githubPassword: String by project
 
-val jacksonVersion = "2.10.0"
-
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
@@ -63,9 +61,6 @@ subprojects {
     }
 
     dependencies {
-        api("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")

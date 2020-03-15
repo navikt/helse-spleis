@@ -1,15 +1,14 @@
 val ktorVersion = "1.2.4"
-val flywayVersion = "6.0.0-beta"
-val hikariVersion = "3.3.1"
+val flywayVersion = "6.3.1"
+val hikariVersion = "3.4.2"
 val vaultJdbcVersion = "1.3.1"
-val kotliqueryVersion = "1.3.0"
+val kotliqueryVersion = "1.3.1"
 val wireMockVersion = "2.23.2"
 val mockkVersion = "1.9.3"
-val micrometerRegistryPrometheusVersion = "1.1.5"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("no.nav.helse:rapids-and-rivers:1.44ef801")
+    implementation("com.github.navikt:rapids-and-rivers:1.aebc340")
     implementation(project(":sykepenger-model"))
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")
