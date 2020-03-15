@@ -895,10 +895,6 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(8.januar(2020), 10.januar(2020), 100))
         håndterSykmelding(Triple(27.januar(2020), 28.januar(2020), 100))
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
-
         håndterInntektsmelding(listOf(
             Periode(18.november(2019), 23.november(2019)),
             Periode(14.oktober(2019), 18.oktober(2019)),
@@ -909,6 +905,10 @@ internal class KunEnArbeidsgiverTest {
             Periode(2.januar(2020), 3.januar(2020)),
             Periode(22.januar(2020), 22.januar(2020))
         ))
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
 
         // TODO: Which state should the period go to after Inntektsmelding?
         // assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
