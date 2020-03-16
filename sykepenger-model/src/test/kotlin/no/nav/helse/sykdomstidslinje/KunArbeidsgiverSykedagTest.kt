@@ -3,9 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -20,12 +18,39 @@ internal class KunArbeidsgiverSykedagTest {
         private const val ORGNUMMER = "987654321"
     }
 
-    @Test internal fun `a`() {
+    @Test internal fun `omgående innsending`() {
         undersøke(søknad(1.mars)).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(20, it.dagstypeTeller["Sykedag"])
             assertEquals(8, it.dagstypeTeller["SykHelgedag"])
             assertNull(it.dagstypeTeller["KunArbeidsgiverSykedag"])
+        }
+    }
+
+    @Test internal fun `siste dag innlevering`() {
+        undersøke(søknad(30.april)).also {
+            assertEquals(28, it.dagerTeller)
+            assertEquals(20, it.dagstypeTeller["Sykedag"])
+            assertEquals(8, it.dagstypeTeller["SykHelgedag"])
+            assertNull(it.dagstypeTeller["KunArbeidsgiverSykedag"])
+        }
+    }
+
+    @Test internal fun `Noen dager er ugyldige`() {
+        undersøke(søknad(1.mai)).also {
+            assertEquals(28, it.dagerTeller)
+            assertEquals(10, it.dagstypeTeller["Sykedag"])
+            assertEquals(10, it.dagstypeTeller["KunArbeidsgiverSykedag"])
+            assertEquals(8, it.dagstypeTeller["SykHelgedag"])
+        }
+    }
+
+    @Test internal fun `Alle dager er ugyldige`() {
+        undersøke(søknad(1.juni)).also {
+            assertEquals(28, it.dagerTeller)
+            assertNull(it.dagstypeTeller["Sykedag"])
+            assertEquals(20, it.dagstypeTeller["KunArbeidsgiverSykedag"])
+            assertEquals(8, it.dagstypeTeller["SykHelgedag"])
         }
     }
 

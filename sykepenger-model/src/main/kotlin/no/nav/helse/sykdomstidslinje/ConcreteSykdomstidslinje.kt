@@ -111,6 +111,9 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
         fun sykedag(gjelder: LocalDate, grad: Double, factory: DagFactory): Dag =
             if (!gjelder.erHelg()) factory.sykedag(gjelder, grad) else factory.sykHelgedag(gjelder, grad)
 
+        fun kunArbeidsgiverSykedag(dato: LocalDate, grad: Double, factory: DagFactory): Dag =
+            if (!dato.erHelg()) factory.kunArbeidsgiverSykedag(dato, grad) else factory.sykHelgedag(dato, grad)
+
         fun egenmeldingsdag(gjelder: LocalDate, factory: DagFactory) =
             factory.egenmeldingsdag(gjelder)
 
@@ -129,6 +132,14 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                 sykedag(
                     it, grad, factory
                 )
+            }.toList())
+        }
+
+        fun sykedager(fra: LocalDate, til: LocalDate, avskjæringsdato: LocalDate, grad: Double, factory: DagFactory): ConcreteSykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+                if (it < avskjæringsdato) kunArbeidsgiverSykedag(it, grad, factory)
+                    else sykedag(it, grad, factory)
             }.toList())
         }
 
