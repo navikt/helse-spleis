@@ -33,7 +33,7 @@ class Søknad constructor(
             .also { tom = it.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato") }
     }
 
-    override fun sykdomstidslinje() = perioder.map { it.sykdomstidslinje(avskjæringsdato() ?: fom) }.merge(søknadDagturnering)
+    override fun sykdomstidslinje() = perioder.map(Periode::sykdomstidslinje).merge(søknadDagturnering)
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
@@ -63,11 +63,9 @@ class Søknad constructor(
 
     override fun melding(klassName: String) = "Søknad"
 
-    private fun avskjæringsdato(): LocalDate? = sendtTilNAV?.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1)
-
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
 
-        internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): ConcreteSykdomstidslinje
+        internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
         internal open fun valider(søknad: Søknad) {}
 
@@ -76,7 +74,7 @@ class Søknad constructor(
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
+            override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ferie(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) =
@@ -89,8 +87,8 @@ class Søknad constructor(
             private val grad: Int,
             private val faktiskGrad: Double = grad.toDouble()
         ) : Periode(fom, tom) {
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-                ConcreteSykdomstidslinje.sykedager(fom, tom, avskjæringsdato, faktiskGrad, SøknadDagFactory)
+            override fun sykdomstidslinje() =
+                ConcreteSykdomstidslinje.sykedager(fom, tom, faktiskGrad, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) {
                 if (grad != 100 && (!FeatureToggle.støtterGradertSykdom)) søknad.error("Søknaden inneholder gradert sykdomsperiode")
@@ -99,7 +97,7 @@ class Søknad constructor(
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
+            override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.studiedager(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) =
@@ -107,7 +105,7 @@ class Søknad constructor(
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
+            override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.permisjonsdager(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) =
@@ -115,12 +113,12 @@ class Søknad constructor(
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
+            override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
+            override fun sykdomstidslinje() =
                 ConcreteSykdomstidslinje.ikkeSykedager(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) =
