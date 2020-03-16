@@ -8,8 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.mai
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -46,8 +48,6 @@ internal class JsonBuilderTest {
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
-
-        println(personPre)
 
         assertEquals(personPre, personPost)
     }
@@ -137,7 +137,7 @@ internal class JsonBuilderTest {
             return _tilstand
         }
 
-        private fun sykmelding(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Sykmelding(
+        private fun sykmelding(fom: LocalDate = 1.januar, tom: LocalDate = 1.februar) = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -145,7 +145,7 @@ internal class JsonBuilderTest {
             sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
-        private fun søknad(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Søknad(
+        private fun søknad(fom: LocalDate = 1.januar, tom: LocalDate = 1.februar) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -154,7 +154,7 @@ internal class JsonBuilderTest {
                 Søknad.Periode.Sykdom(fom, tom, 100)
             ),
             harAndreInntektskilder = false,
-            sendtTilNAV = tom.atStartOfDay()
+            sendtTilNAV = 1.mai.atStartOfDay()
         )
 
         private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(
@@ -203,7 +203,7 @@ internal class JsonBuilderTest {
                         utbetalinger = listOf(
                             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                                 fom = 1.januar.minusYears(1),
-                                tom = 31.januar.minusYears(1),
+                                tom = 1.februar.minusYears(1),
                                 dagsats = 31000
                             )
                         ),
@@ -214,7 +214,7 @@ internal class JsonBuilderTest {
                     foreldrepermisjon = Foreldrepermisjon(
                         foreldrepengeytelse = Periode(
                             fom = 1.januar.minusYears(2),
-                            tom = 31.januar.minusYears(2)
+                            tom = 1.februar.minusYears(2)
                         ),
                         svangerskapsytelse = Periode(
                             fom = 1.juli.minusYears(2),
