@@ -17,6 +17,13 @@ internal val Int.S
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.K
+    get() = ConcreteSykdomstidslinje.sykedager(
+        dagensDato, dagensDato.plusDays(this.toLong() - 1),
+        100.0,
+        Søknad.SøknadDagFactory
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 internal val Int.F
     get() = ConcreteSykdomstidslinje.ferie(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),

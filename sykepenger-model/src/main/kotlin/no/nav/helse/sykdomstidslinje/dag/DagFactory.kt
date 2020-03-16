@@ -9,6 +9,7 @@ internal interface DagFactory {
     fun feriedag(dato: LocalDate): Feriedag { error("Feriedag ikke støttet") }
     fun implisittDag(dato: LocalDate): ImplisittDag = ImplisittDag(dato)
     fun permisjonsdag(dato: LocalDate): Permisjonsdag { error("Permisjonsdag ikke støttet") }
+    fun kunArbeidsgiverSykedag(dato: LocalDate, grad: Double): KunArbeidsgiverSykedag { error("KunArbeidsgiverSykedag ikke støttet") }
     fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
     fun sykedag(dato: LocalDate, grad: Double): Sykedag { error("Sykedag ikke støttet") }
     fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag { error("SykHelgedag ikke støttet") }
