@@ -50,14 +50,10 @@ class Inntektsmelding(
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
-    override fun sykdomstidslinje(fom: LocalDate?, tom: LocalDate): ConcreteSykdomstidslinje {
+    override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return sykdomstidslinje().let {
-            if (fom == null) it else it.padLeft(fom) { gjelder ->
-                ConcreteSykdomstidslinje.ikkeSykedag(gjelder, InntektsmeldingDagFactory)
-            }
-        }.subset(forrigeTom?.plusDays(1), tom)
+        return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
             ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen")
     }
