@@ -964,6 +964,27 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
+    @Test
+    internal fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(10.januar(2020), 21.januar(2020), 100))
+        håndterSykmelding(Triple(23.januar(2020), 24.januar(2020), 100))
+        håndterSøknad(Sykdom(23.januar(2020), 24.januar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(6.januar(2020), 21.januar(2020))),
+            førsteFraværsdag = 23.januar(2020),
+            ferieperioder = listOf(Periode(4.februar(2020), 5.februar(2020)))
+        )
+
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP
+        )
+    }
+
     private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
         assertEquals(tilstander.asList(), observatør.tilstander[indeks])
     }
