@@ -9,7 +9,6 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -77,7 +76,7 @@ internal class SykepengesøknadTidslinjeTest {
         val tidslinje = søknad(
             perioder = listOf(
                 Periode.Sykdom(Uke(1).mandag, Uke(1).fredag, 100),
-                Periode.Arbeid(Uke(1).onsdag, LocalDate.now())
+                Periode.Arbeid(Uke(1).onsdag, Uke(10).fredag)
             )
         ).also {
             it.toString()

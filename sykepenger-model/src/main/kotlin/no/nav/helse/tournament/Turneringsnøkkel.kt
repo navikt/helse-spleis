@@ -9,6 +9,7 @@ internal enum class Turneringsnøkkel {
     WD_IM,
     S_SM,
     S_A,
+    K_A,
     V_A,
     V_IM,
     Le_Areg,
@@ -62,6 +63,10 @@ internal enum class Turneringsnøkkel {
 
             override fun visitImplisittDag(implisittDag: ImplisittDag) {
                 turneringsnøkkel = I
+            }
+
+            override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) {
+                turneringsnøkkel = K_A
             }
 
             override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) {
