@@ -154,6 +154,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspesialist",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspesialist",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
