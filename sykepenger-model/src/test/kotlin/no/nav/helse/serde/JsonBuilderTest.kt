@@ -92,52 +92,27 @@ internal class JsonBuilderTest {
             val stopptilstand: TilstandType
         )
 
-        internal fun lagPerson(vararg perioder: PeriodeMedTilstand): Person = Person(aktørId, fnr).apply {
-            perioder.forEach {
-                håndter(sykmelding(it.fom, it.tom))
-
-                accept(object : PersonVisitor {
-                    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-                        vedtaksperiodeId = id.toString()
-                    }
-                })
-
-                håndter(søknad(it.fom, it.tom))
-                håndter(inntektsmelding(it.fom))
-                håndter(vilkårsgrunnlag)
-                håndter(ytelser)
-                håndter(manuellSaksbehandling)
-            }
-        }
-
         internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person =
             Person(aktørId, fnr).apply {
-                håndter(sykmelding())
-
-                accept(object : PersonVisitor {
-                    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-                        vedtaksperiodeId = id.toString()
-                    }
-                })
-
-                håndter(søknad())
-                håndter(inntektsmelding())
+                håndter(sykmelding(1.januar, 31.januar))
+                fangeVedtaksperiodeId()
+                håndter(søknad(1.januar, 31.januar))
+                håndter(inntektsmelding(1.januar))
                 håndter(vilkårsgrunnlag)
                 håndter(ytelser)
                 håndter(manuellSaksbehandling)
+                håndter(utbetalt)
         }
 
-        private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
-            lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
-            person.accept(object : PersonVisitor {
-                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-                    _tilstand = tilstand
+        private fun Person.fangeVedtaksperiodeId() {
+            accept(object : PersonVisitor {
+                override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+                    vedtaksperiodeId = id.toString()
                 }
             })
-            return _tilstand
         }
 
-        private fun sykmelding(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Sykmelding(
+        private fun sykmelding(fom: LocalDate, tom: LocalDate) = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -145,7 +120,7 @@ internal class JsonBuilderTest {
             sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
-        private fun søknad(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) = Søknad(
+        private fun søknad(fom: LocalDate, tom: LocalDate) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -157,7 +132,7 @@ internal class JsonBuilderTest {
             sendtTilNAV = tom.atStartOfDay()
         )
 
-        private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(
+        private fun inntektsmelding(fom: LocalDate) = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
             orgnummer = orgnummer,
@@ -235,6 +210,17 @@ internal class JsonBuilderTest {
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
                 godkjenttidspunkt = LocalDateTime.now()
+            )
+
+        private val utbetalt get() =
+            Utbetaling(
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                orgnummer = orgnummer,
+                utbetalingsreferanse = "ref",
+                status = Utbetaling.Status.FERDIG,
+                melding = "hei"
             )
     }
 }
