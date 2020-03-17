@@ -124,6 +124,15 @@ class Søknad constructor(
             override fun valider(søknad: Søknad) =
                 valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         }
+
+        class Utlandsopphold(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+            override fun sykdomstidslinje() =
+                ConcreteSykdomstidslinje.utenlandsdager(fom, tom, SøknadDagFactory)
+
+            override fun valider(søknad: Søknad) {
+                søknad.error("Søknaden inneholder utelandsopphold")
+            }
+        }
     }
 
     internal object SøknadDagFactory : DagFactory {

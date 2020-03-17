@@ -50,6 +50,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
             in listOf("UTDANNING_FULLTID", "UTDANNING_DELTID") -> Periode.Utdanning(fom, søknadTom)
             "PERMISJON" -> Periode.Permisjon(fom, it.path("tom").asLocalDate())
             "FERIE" -> Periode.Ferie(fom, it.path("tom").asLocalDate())
+            "UTLANDSOPPHOLD" -> Periode.Utlandsopphold(fom, it.path("tom").asLocalDate())
             else -> problems.severe("Ukjent fraværstype $fraværstype")
         }
     } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
