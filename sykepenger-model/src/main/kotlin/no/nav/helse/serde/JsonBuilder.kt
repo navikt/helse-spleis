@@ -366,9 +366,6 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeMap["utbetalingslinjer"]?.let {
-                if (it is List<*> && it.isEmpty()) vedtaksperiodeMap["utbetalingslinjer"] = null
-            }
             popState()
         }
     }

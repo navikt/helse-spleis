@@ -39,27 +39,24 @@ internal class JsonBuilderTest {
 
     @Test
     internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
-        val person = lagPerson()
+        val person = person()
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
-
-        println(personPre)
-
-        assertEquals(personPre, personPost)
+        assertEquals(personPre, personPost, personPre.toString())
     }
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
-        testSerialiseringAvPerson(lagPerson())
+        testSerialiseringAvPerson(person())
+    }
 
-        val jsonBuilder = JsonBuilder()
-        lagPerson().accept(jsonBuilder)
-        val json = jsonBuilder.toString()
-        println(json)
+    @Test
+    fun `ingen betalingsperson`() {
+        testSerialiseringAvPerson(ingenBetalingsperson())
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -86,13 +83,7 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
 
-        internal data class PeriodeMedTilstand(
-            val fom: LocalDate,
-            val tom: LocalDate,
-            val stopptilstand: TilstandType
-        )
-
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person =
+        internal fun person(): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(1.januar, 31.januar))
                 fangeVedtaksperiodeId()
@@ -102,7 +93,19 @@ internal class JsonBuilderTest {
                 håndter(ytelser)
                 håndter(manuellSaksbehandling)
                 håndter(utbetalt)
-        }
+            }
+
+        internal fun ingenBetalingsperson(): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(1.januar, 9.januar))
+                fangeVedtaksperiodeId()
+                håndter(søknad(1.januar, 9.januar))
+                håndter(inntektsmelding(1.januar))
+                håndter(vilkårsgrunnlag)
+                håndter(ytelser)
+                håndter(manuellSaksbehandling)
+                håndter(utbetalt)
+            }
 
         private fun Person.fangeVedtaksperiodeId() {
             accept(object : PersonVisitor {

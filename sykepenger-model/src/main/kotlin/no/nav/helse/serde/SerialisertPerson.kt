@@ -168,7 +168,7 @@ class SerialisertPerson(val json: String) {
             tilstand = parseTilstand(data.tilstand),
             maksdato = data.maksdato,
             forbrukteSykedager = data.forbrukteSykedager,
-            utbetalingslinjer = data.utbetalingslinjer?.map(::parseUtbetalingslinje),
+            utbetalingslinjer = data.utbetalingslinjer.map(::parseUtbetalingslinje),
             godkjentAv = data.godkjentAv,
             godkjenttidspunkt = data.godkjenttidspunkt,
             utbetalingsreferanse = data.utbetalingsreferanse,
@@ -318,7 +318,7 @@ internal data class PersonData(
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
-            val utbetalingslinjer: List<UtbetalingslinjeData>?
+            val utbetalingslinjer: List<UtbetalingslinjeData>
         ) {
             data class DagData(
                 val dagen: LocalDate,

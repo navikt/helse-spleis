@@ -33,7 +33,7 @@ internal class Vedtaksperiode private constructor(
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
     private var forbrukteSykedager: Int?,
-    private var utbetalingslinjer: List<Utbetalingslinje>?,
+    private val utbetalingslinjer: MutableList<Utbetalingslinje>,
     private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
     private var utbetalingsreferanse: String,
@@ -61,7 +61,7 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand,
         maksdato = null,
         forbrukteSykedager = null,
-        utbetalingslinjer = null,
+        utbetalingslinjer = mutableListOf(),
         godkjentAv = null,
         godkjenttidspunkt = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
@@ -666,7 +666,10 @@ internal class Vedtaksperiode private constructor(
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
-                    vedtaksperiode.utbetalingslinjer = engineForLine?.utbetalingslinjer()
+                    vedtaksperiode.utbetalingslinjer.also {
+                        it.clear()
+                        it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
+                    }
                     ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
                     vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
                 }
