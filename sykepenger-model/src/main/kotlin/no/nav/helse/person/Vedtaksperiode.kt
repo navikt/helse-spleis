@@ -41,7 +41,7 @@ internal class Vedtaksperiode private constructor(
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private val sykdomshistorikk: Sykdomshistorikk
 ) : Aktivitetskontekst {
-    private val påminnelseThreshold = 10
+    private val påminnelseThreshold = Integer.MAX_VALUE
 
     internal constructor(
         person: Person,
