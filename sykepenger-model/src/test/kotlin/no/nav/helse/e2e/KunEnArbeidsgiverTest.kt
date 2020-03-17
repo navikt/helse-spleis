@@ -17,7 +17,6 @@ import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -966,7 +965,6 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    @Disabled
     internal fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
         håndterSykmelding(Triple(10.januar(2020), 21.januar(2020), 100))
         håndterSykmelding(Triple(23.januar(2020), 24.januar(2020), 100))

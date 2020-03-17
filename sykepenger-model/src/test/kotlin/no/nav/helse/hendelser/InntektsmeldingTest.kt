@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
+import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -83,8 +86,8 @@ internal class InntektsmeldingTest {
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(1.januar)!!::class)
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(2.januar)!!::class)
-        assertEquals(Ubestemtdag::class, tidslinje.dag(3.januar)!!::class)
-        assertEquals(Ubestemtdag::class, tidslinje.dag(4.januar)!!::class)
+        assertEquals(Feriedag.Inntektsmelding::class, tidslinje.dag(3.januar)!!::class)
+        assertEquals(Feriedag.Inntektsmelding::class, tidslinje.dag(4.januar)!!::class)
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(5.januar)!!::class)
         assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje.dag(6.januar)!!::class)
     }
