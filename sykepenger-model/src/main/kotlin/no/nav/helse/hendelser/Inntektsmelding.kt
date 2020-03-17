@@ -53,7 +53,10 @@ class Inntektsmelding(
                 ?: arbeidsgiverperiodetidslinje
 
         this.sykdomstidslinje = inntektsmeldingtidslinje.let {
-            if (it.overlapperMed(førsteFraværsdagtidslinje)) it else it + førsteFraværsdagtidslinje
+            if (arbeidsgiverperiodetidslinje.overlapperMed(førsteFraværsdagtidslinje)) it else it.merge(
+                førsteFraværsdagtidslinje,
+                InntektsmeldingTurnering
+            )
         }
     }
 
