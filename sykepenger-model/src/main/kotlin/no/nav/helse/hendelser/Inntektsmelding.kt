@@ -54,7 +54,9 @@ class Inntektsmelding(
         val ferieperiodetidslinje = this.ferieperioder
             .map { it.sykdomstidslinje(this) }
             .takeUnless { it.isEmpty() }
-            ?.join()
+            ?.merge(object : Dagturnering {
+                override fun beste(venstre: Dag, høyre: Dag) = venstre
+            })
 
         val inntektsmeldingtidslinje =
             ferieperiodetidslinje?.let { arbeidsgiverperiodetidslinje.merge(it, KonfliktskyDagturnering) }

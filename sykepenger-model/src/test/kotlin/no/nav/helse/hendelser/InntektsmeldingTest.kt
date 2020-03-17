@@ -90,6 +90,18 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    internal fun `overlapp i ferieperioder`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 2.januar)),
+            listOf(Periode(3.januar, 4.januar), Periode(3.januar, 4.januar)),
+            førsteFraværsdag = 1.januar
+        )
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(Feriedag.Inntektsmelding::class, tidslinje.dag(3.januar)!!::class)
+        assertEquals(Feriedag.Inntektsmelding::class, tidslinje.dag(4.januar)!!::class)
+    }
+
+    @Test
     internal fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
         inntektsmelding(emptyList(), listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
         val sykdomstidslinje = inntektsmelding.sykdomstidslinje()
