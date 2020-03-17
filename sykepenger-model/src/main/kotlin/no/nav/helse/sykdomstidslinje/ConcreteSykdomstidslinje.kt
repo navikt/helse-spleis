@@ -6,7 +6,7 @@ import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDate
 import kotlin.streams.toList
 
-internal fun List<ConcreteSykdomstidslinje>.join() = ConcreteSykdomstidslinje.join(this)
+internal fun List<ConcreteSykdomstidslinje>.join(inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) = ConcreteSykdomstidslinje.join(this, inneklemtDag)
 
 internal fun List<ConcreteSykdomstidslinje>.merge(dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) = ConcreteSykdomstidslinje.merge(this, dagturnering, inneklemtDag)
 
@@ -22,9 +22,13 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun dag(dato: LocalDate): Dag?
 
     operator fun plus(other: ConcreteSykdomstidslinje): ConcreteSykdomstidslinje {
+        return this.plus(other, ::ImplisittDag)
+    }
+
+    fun plus(other: ConcreteSykdomstidslinje, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag): ConcreteSykdomstidslinje {
         require(!overlapperMed(other)) { "Kan ikke koble sammen overlappende tidslinjer uten å oppgi en turneringsmetode." }
         return kobleSammen(other) {
-            this.dag(it) ?: other.dag(it) ?: ImplisittDag(it)
+            this.dag(it) ?: other.dag(it) ?: inneklemtDag(it)
         }
     }
 
@@ -102,8 +106,8 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal fun harTilstøtende(other: ConcreteSykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
 
     companion object {
-        internal fun join(liste: List<ConcreteSykdomstidslinje>) =
-            liste.reduce { result, other -> result + other }
+        internal fun join(liste: List<ConcreteSykdomstidslinje>, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
+            liste.reduce { result, other -> result.plus(other, inneklemtDag)}
 
         internal fun merge(liste: List<ConcreteSykdomstidslinje>, dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
             liste.reduce { result, other -> result.merge(other, dagturnering, inneklemtDag) }

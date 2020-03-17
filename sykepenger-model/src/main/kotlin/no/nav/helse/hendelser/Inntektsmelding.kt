@@ -8,10 +8,13 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.tournament.KonfliktskyDagturnering
 import java.time.LocalDate
 import java.util.*
@@ -37,16 +40,29 @@ class Inntektsmelding(
         this.arbeidsgiverperioder =
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
-        this.sykdomstidslinje = (this.ferieperioder + this.arbeidsgiverperioder)
+        val førsteFraværsdagtidslinje =
+            ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+        val arbeidsgiverperiodetidslinje = this.arbeidsgiverperioder
             .map { it.sykdomstidslinje(this) }
-            .sortedBy { it.førsteDag() }
             .takeUnless { it.isEmpty() }
-            ?.merge(KonfliktskyDagturnering) { dato ->
-                ConcreteSykdomstidslinje.ikkeSykedag(
-                    dato,
-                    InntektsmeldingDagFactory
-                )
-            } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+            ?.merge(object : Dagturnering {
+                override fun beste(venstre: Dag, høyre: Dag) = venstre
+            }) {
+                ConcreteSykdomstidslinje.ikkeSykedag(it, InntektsmeldingDagFactory)
+            } ?: førsteFraværsdagtidslinje
+
+        val ferieperiodetidslinje = this.ferieperioder
+            .map { it.sykdomstidslinje(this) }
+            .takeUnless { it.isEmpty() }
+            ?.join()
+
+        val inntektsmeldingtidslinje =
+            ferieperiodetidslinje?.let { arbeidsgiverperiodetidslinje.merge(it, KonfliktskyDagturnering) }
+                ?: arbeidsgiverperiodetidslinje
+
+        this.sykdomstidslinje = inntektsmeldingtidslinje.let {
+            if (it.overlapperMed(førsteFraværsdagtidslinje)) it else it + førsteFraværsdagtidslinje
+        }
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
@@ -58,7 +74,9 @@ class Inntektsmelding(
             ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen")
     }
 
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
+    internal fun trimLeft(dato: LocalDate) {
+        forrigeTom = dato
+    }
 
     override fun valider(): Aktivitetslogg {
         if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
