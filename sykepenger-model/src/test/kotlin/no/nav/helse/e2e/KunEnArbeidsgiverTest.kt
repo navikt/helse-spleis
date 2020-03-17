@@ -965,6 +965,22 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
+    internal fun `enkeltstående sykedag i arbeidsgiverperiode-gap`() {
+        håndterSykmelding(Triple(10.februar(2020), 12.februar(2020), 100))
+        håndterSykmelding(Triple(14.februar(2020), 14.februar(2020), 100))
+        håndterSykmelding(Triple(27.februar(2020), 28.februar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(10.februar(2020), 12.februar(2020)),
+                Periode(27.februar(2020), 28.februar(2020))
+            ),
+            førsteFraværsdag = 27.februar(2020)
+        )
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP)
+    }
+
+    @Test
     internal fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
         håndterSykmelding(Triple(10.januar(2020), 21.januar(2020), 100))
         håndterSykmelding(Triple(23.januar(2020), 24.januar(2020), 100))
