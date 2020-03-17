@@ -41,9 +41,9 @@ class Inntektsmelding(
             .map { it.sykdomstidslinje(this) }
             .sortedBy { it.førsteDag() }
             .takeUnless { it.isEmpty() }
-            ?.merge(KonfliktskyDagturnering) { gjelder ->
+            ?.merge(KonfliktskyDagturnering) { dato ->
                 ConcreteSykdomstidslinje.ikkeSykedag(
-                    gjelder,
+                    dato,
                     InntektsmeldingDagFactory
                 )
             } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
