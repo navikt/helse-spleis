@@ -741,6 +741,46 @@ internal class KunEnArbeidsgiverTest {
         )
     }
 
+    @Test internal fun `periode uten sykedager`() {
+        håndterSykmelding(Triple(3.januar, 4.januar, 100))
+        håndterSykmelding(Triple(8.januar, 9.januar, 100))
+        håndterSykmelding(Triple(15.januar, 16.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(
+            Periode(3.januar, 4.januar),
+            Periode(15.januar, 16.januar)))
+
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 4.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+
+        håndterSøknadMedValidering(1, Sykdom(8.januar, 9.januar, 100))
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+        )
+
+        assertTilstander(
+            2,
+            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP
+        )
+    }
+
     @Test
     internal fun `Sykmelding med gradering`() {
         FeatureToggle.støtterGradertSykdom = true
@@ -881,10 +921,12 @@ internal class KunEnArbeidsgiverTest {
     internal fun `Sykmelding i omvendt rekkefølge`() {
         håndterSykmelding(Triple(10.januar, 20.januar, 100))
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
-        håndterInntektsmelding(listOf(
-            Periode(4.januar, 5.januar),
-            Periode(9.januar, 23.januar)
-        ))
+        håndterInntektsmelding(
+            listOf(
+                Periode(4.januar, 5.januar),
+                Periode(9.januar, 23.januar)
+            )
+        )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
     }
@@ -895,16 +937,18 @@ internal class KunEnArbeidsgiverTest {
         håndterSykmelding(Triple(8.januar(2020), 10.januar(2020), 100))
         håndterSykmelding(Triple(27.januar(2020), 28.januar(2020), 100))
 
-        håndterInntektsmelding(listOf(
-            Periode(18.november(2019), 23.november(2019)),
-            Periode(14.oktober(2019), 18.oktober(2019)),
-            Periode(1.november(2019), 5.november(2019))
-        ), 18.november(2019), listOf(
-            Periode(5.desember(2019), 6.desember(2019)),
-            Periode(30.desember(2019), 30.desember(2019)),
-            Periode(2.januar(2020), 3.januar(2020)),
-            Periode(22.januar(2020), 22.januar(2020))
-        ))
+        håndterInntektsmelding(
+            listOf(
+                Periode(18.november(2019), 23.november(2019)),
+                Periode(14.oktober(2019), 18.oktober(2019)),
+                Periode(1.november(2019), 5.november(2019))
+            ), 18.november(2019), listOf(
+                Periode(5.desember(2019), 6.desember(2019)),
+                Periode(30.desember(2019), 30.desember(2019)),
+                Periode(2.januar(2020), 3.januar(2020)),
+                Periode(22.januar(2020), 22.januar(2020))
+            )
+        )
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
@@ -917,13 +961,22 @@ internal class KunEnArbeidsgiverTest {
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0,
+        håndterYtelser(
+            0,
             Triple(3.april(2019), 30.april(2019), 100),
             Triple(18.mars(2018), 2.april(2018), 100),
             Triple(29.november(2017), 3.desember(2017), 100),
             Triple(13.november(2017), 28.november(2017), 100)
         )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING
+        )
     }
 
     @Test
@@ -1050,8 +1103,18 @@ internal class KunEnArbeidsgiverTest {
         håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag)
     }
 
-    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, førsteFraværsdag: LocalDate = 1.januar, ferieperioder: List<Periode> = emptyList()) {
-        person.håndter(inntektsmelding(arbeidsgiverperioder, ferieperioder = ferieperioder, førsteFraværsdag = førsteFraværsdag))
+    private fun håndterInntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        førsteFraværsdag: LocalDate = 1.januar,
+        ferieperioder: List<Periode> = emptyList()
+    ) {
+        person.håndter(
+            inntektsmelding(
+                arbeidsgiverperioder,
+                ferieperioder = ferieperioder,
+                førsteFraværsdag = førsteFraværsdag
+            )
+        )
     }
 
     private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {

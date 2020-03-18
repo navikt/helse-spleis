@@ -593,7 +593,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             val førsteFraværsdag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag()
-                ?: vilkårsgrunnlag.severe("Ingen sykedager er funnet i perioden")
+                ?: vedtaksperiode.periode().start
             val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(førsteFraværsdag)
                 ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
 
