@@ -14,8 +14,8 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 
@@ -231,9 +231,7 @@ internal class FørsteFraværsdagTest {
         }
 
         private fun assertUgyldigTilstand(sykdomstidslinje: ConcreteSykdomstidslinje) {
-            assertThrows<IllegalStateException> {
-                sykdomstidslinje.førsteFraværsdag()
-            }
+            assertNull(sykdomstidslinje.førsteFraværsdag())
         }
     }
 }

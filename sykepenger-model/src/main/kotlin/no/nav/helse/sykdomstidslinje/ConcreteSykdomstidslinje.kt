@@ -59,11 +59,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     private fun førsteSykedag() = flatten().firstOrNull() { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag }?.dagen
 
-    private fun kuttEtterSisteSykedag() =
+    private fun kuttEtterSisteSykedag(): List<Dag> =
         flatten().reversed().let { dager ->
-            val indeksSisteSykedag = dager.indexOfFirst { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag  }.also {
-                check(it >= 0) { "Tidslinjen består ikke av noen sykedager" }
-            }
+            val indeksSisteSykedag = dager.indexOfFirst { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag }
+            if (indeksSisteSykedag < 0) return emptyList()
             dager.subList(indeksSisteSykedag, dager.size - 1)
         }
 
