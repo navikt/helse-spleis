@@ -175,6 +175,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         }
 
         override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.setNåværendeInntekt(dagen.minusDays(1))
             splitter.håndterArbeidsgiverdag(dagen)
             splitter.state(ArbeidsgiverperiodeSykedager)
         }
