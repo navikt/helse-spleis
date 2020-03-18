@@ -7,12 +7,9 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.DagFactory
-import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.sykdomstidslinje.dag.Feriedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.tournament.KonfliktskyDagturnering
+import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDate
 import java.util.*
 
@@ -37,16 +34,30 @@ class Inntektsmelding(
         this.arbeidsgiverperioder =
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
-        this.sykdomstidslinje = (this.ferieperioder + this.arbeidsgiverperioder)
+        val førsteFraværsdagtidslinje =
+            ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+        val arbeidsgiverperiodetidslinje = this.arbeidsgiverperioder
             .map { it.sykdomstidslinje(this) }
-            .sortedBy { it.førsteDag() }
             .takeUnless { it.isEmpty() }
-            ?.merge(KonfliktskyDagturnering) { gjelder ->
-                ConcreteSykdomstidslinje.ikkeSykedag(
-                    gjelder,
-                    InntektsmeldingDagFactory
-                )
-            } ?: ConcreteSykdomstidslinje.egenmeldingsdag(førsteFraværsdag, InntektsmeldingDagFactory)
+            ?.merge(IdentiskDagTurnering) {
+                ConcreteSykdomstidslinje.ikkeSykedag(it, InntektsmeldingDagFactory)
+            } ?: førsteFraværsdagtidslinje
+
+        val ferieperiodetidslinje = this.ferieperioder
+            .map { it.sykdomstidslinje(this) }
+            .takeUnless { it.isEmpty() }
+            ?.merge(IdentiskDagTurnering)
+
+        val inntektsmeldingtidslinje =
+            ferieperiodetidslinje?.let { arbeidsgiverperiodetidslinje.merge(it, InntektsmeldingTurnering) }
+                ?: arbeidsgiverperiodetidslinje
+
+        this.sykdomstidslinje = inntektsmeldingtidslinje.let {
+            if (arbeidsgiverperiodetidslinje.overlapperMed(førsteFraværsdagtidslinje)) it else it.merge(
+                førsteFraværsdagtidslinje,
+                InntektsmeldingTurnering
+            )
+        }
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
@@ -58,7 +69,9 @@ class Inntektsmelding(
             ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen")
     }
 
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
+    internal fun trimLeft(dato: LocalDate) {
+        forrigeTom = dato
+    }
 
     override fun valider(): Aktivitetslogg {
         if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
@@ -132,5 +145,28 @@ class Inntektsmelding(
         override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Inntektsmelding(dato)
         override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Inntektsmelding(dato)
         override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Inntektsmelding(dato)
+    }
+
+    private object InntektsmeldingTurnering : Dagturnering {
+        override fun beste(venstre: Dag, høyre: Dag): Dag {
+            return when {
+                venstre is ImplisittDag -> høyre
+                høyre is ImplisittDag -> venstre
+                venstre is Feriedag.Inntektsmelding && høyre is Arbeidsdag.Inntektsmelding -> venstre
+                høyre is Feriedag.Inntektsmelding && venstre is Arbeidsdag.Inntektsmelding -> høyre
+                else -> Ubestemtdag(venstre.dagen)
+            }
+        }
+    }
+
+    private object IdentiskDagTurnering : Dagturnering {
+        override fun beste(venstre: Dag, høyre: Dag): Dag {
+            return when {
+                venstre::class == høyre::class -> venstre
+                venstre is ImplisittDag -> høyre
+                høyre is ImplisittDag -> venstre
+                else -> Ubestemtdag(venstre.dagen)
+            }
+        }
     }
 }

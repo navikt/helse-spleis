@@ -19,12 +19,16 @@ class Søknad constructor(
     private val orgnummer: String,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
-    private val sendtTilNAV: LocalDateTime?
+    private val sendtTilNAV: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val fom: LocalDate
     private val tom: LocalDate
     private var forrigeTom: LocalDate? = null
+
+    private companion object {
+        private const val tidslinjegrense = 16L
+    }
 
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
@@ -33,7 +37,10 @@ class Søknad constructor(
             .also { tom = it.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato") }
     }
 
-    override fun sykdomstidslinje() = perioder.map { it.sykdomstidslinje(avskjæringsdato() ?: fom) }.merge(søknadDagturnering)
+    override fun sykdomstidslinje() = perioder
+        .map{ it.sykdomstidslinje(avskjæringsdato() ?: fom) }
+        .filter { it.førsteDag().isAfter(fom.minusDays(tidslinjegrense)) }
+        .merge(søknadDagturnering)
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
@@ -53,7 +60,7 @@ class Søknad constructor(
     override fun valider(): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
-        if (sendtTilNAV?.toLocalDate()?.isAfter(tom.plusMonths(3)) == true) error("Søknaden er sendt inn 3 måneder etter TOM")
+        if (sendtTilNAV.toLocalDate()?.isAfter(fom.plusMonths(3)) == true) error("Søknaden er sendt inn 3 måneder etter TOM")
         return aktivitetslogg
     }
 
@@ -117,6 +124,11 @@ class Søknad constructor(
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
+
+            override fun valider(søknad: Søknad) {
+                if (fom < søknad.fom.minusDays(tidslinjegrense)) søknad.warn("Søknaden inneholder Egenmeldingsdager eldre enn $tidslinjegrense dager før perioden")
+                if (tom > søknad.tom) søknad.warn("Søknaden inneholder Egenmeldingsdager nyere enn perioden")
+            }
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
@@ -125,6 +137,15 @@ class Søknad constructor(
 
             override fun valider(søknad: Søknad) =
                 valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
+        }
+
+        class Utlandsopphold(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+            override fun sykdomstidslinje(ignore: LocalDate) =
+                ConcreteSykdomstidslinje.utenlandsdager(fom, tom, SøknadDagFactory)
+
+            override fun valider(søknad: Søknad) {
+                søknad.error("Søknaden inneholder utelandsopphold")
+            }
         }
     }
 

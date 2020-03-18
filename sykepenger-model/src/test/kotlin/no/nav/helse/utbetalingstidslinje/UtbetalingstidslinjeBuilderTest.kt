@@ -32,6 +32,15 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `sykedager i periode som starter i helg får riktig inntekt`() {
+        resetSeed(6.januar)
+        (16.S + 4.S).utbetalingslinjer()
+        assertEquals(4, inspektør.dagtelling[NavDag::class])
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertInntekt(1430.8)
+    }
+
+    @Test
     fun `en utbetalingslinje med tre dager`() {
         (16.S + 3.S).utbetalingslinjer()
         assertEquals(3, inspektør.dagtelling[NavDag::class])

@@ -4,7 +4,9 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -56,13 +58,23 @@ internal class SøknadTest {
     }
 
     @Test
-    internal fun `søknad kan utvide sykdomstidslinje`() {
+    internal fun `søknad kan ikke utvide sykdomstidslinje frem i tid`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje(0).length())
+    }
+
+    @Test
+    internal fun `søknad kan utvide sykdomstidslinje tilbake i tid`() {
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar, 5.januar, 100)))
+        assertFalse(inspektør.personLogg.hasErrors())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
+        assertEquals(9, inspektør.sykdomstidslinje(0).length()) { inspektør.sykdomstidslinje(0).toString() }
     }
 
     @Test
@@ -145,7 +157,7 @@ internal class SøknadTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        private val sykdomstidslinjer = mutableMapOf<Int, ConcreteSykdomstidslinje>()
         internal lateinit var personLogg: Aktivitetslogg
 
         init {
@@ -165,8 +177,8 @@ internal class SøknadTest {
             tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         }
 
         internal val vedtaksperiodeTeller get() = tilstander.size

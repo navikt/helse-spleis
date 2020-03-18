@@ -8,7 +8,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import no.nav.helse.testhelpers.mai
@@ -41,25 +40,24 @@ internal class JsonBuilderTest {
 
     @Test
     internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
-        val person = lagPerson()
+        val person = person()
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
-
-        assertEquals(personPre, personPost)
+        assertEquals(personPre, personPost, personPre.toString())
     }
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
-        testSerialiseringAvPerson(lagPerson())
+        testSerialiseringAvPerson(person())
+    }
 
-        val jsonBuilder = JsonBuilder()
-        lagPerson().accept(jsonBuilder)
-        val json = jsonBuilder.toString()
-        println(json)
+    @Test
+    fun `ingen betalingsperson`() {
+        testSerialiseringAvPerson(ingenBetalingsperson())
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -86,58 +84,39 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
 
-        internal data class PeriodeMedTilstand(
-            val fom: LocalDate,
-            val tom: LocalDate,
-            val stopptilstand: TilstandType
-        )
-
-        internal fun lagPerson(vararg perioder: PeriodeMedTilstand): Person = Person(aktørId, fnr).apply {
-            perioder.forEach {
-                håndter(sykmelding(it.fom, it.tom))
-
-                accept(object : PersonVisitor {
-                    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-                        vedtaksperiodeId = id.toString()
-                    }
-                })
-
-                håndter(søknad(it.fom, it.tom))
-                håndter(inntektsmelding(it.fom))
-                håndter(vilkårsgrunnlag)
-                håndter(ytelser)
-                håndter(manuellSaksbehandling)
-            }
-        }
-
-        internal fun lagPerson(stopState: TilstandType = TilstandType.TIL_UTBETALING): Person =
+        internal fun person(): Person =
             Person(aktørId, fnr).apply {
-                håndter(sykmelding())
-
-                accept(object : PersonVisitor {
-                    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-                        vedtaksperiodeId = id.toString()
-                    }
-                })
-
-                håndter(søknad())
-                håndter(inntektsmelding())
+                håndter(sykmelding(1.januar, 31.januar))
+                fangeVedtaksperiodeId()
+                håndter(søknad(1.januar, 31.januar))
+                håndter(inntektsmelding(1.januar))
                 håndter(vilkårsgrunnlag)
                 håndter(ytelser)
                 håndter(manuellSaksbehandling)
-        }
+                håndter(utbetalt)
+            }
 
-        private fun hentTilstand(person: Person): Vedtaksperiode.Vedtaksperiodetilstand {
-            lateinit var _tilstand: Vedtaksperiode.Vedtaksperiodetilstand
-            person.accept(object : PersonVisitor {
-                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-                    _tilstand = tilstand
+        internal fun ingenBetalingsperson(): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(1.januar, 9.januar))
+                fangeVedtaksperiodeId()
+                håndter(søknad(1.januar, 9.januar))
+                håndter(inntektsmelding(1.januar))
+                håndter(vilkårsgrunnlag)
+                håndter(ytelser)
+                håndter(manuellSaksbehandling)
+                håndter(utbetalt)
+            }
+
+        private fun Person.fangeVedtaksperiodeId() {
+            accept(object : PersonVisitor {
+                override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+                    vedtaksperiodeId = id.toString()
                 }
             })
-            return _tilstand
         }
 
-        private fun sykmelding(fom: LocalDate = 1.januar, tom: LocalDate = 1.februar) = Sykmelding(
+        private fun sykmelding(fom: LocalDate, tom: LocalDate) = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -145,7 +124,7 @@ internal class JsonBuilderTest {
             sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
-        private fun søknad(fom: LocalDate = 1.januar, tom: LocalDate = 1.februar) = Søknad(
+        private fun søknad(fom: LocalDate, tom: LocalDate) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -157,7 +136,7 @@ internal class JsonBuilderTest {
             sendtTilNAV = 1.mai.atStartOfDay()
         )
 
-        private fun inntektsmelding(fom: LocalDate = 1.januar) = Inntektsmelding(
+        private fun inntektsmelding(fom: LocalDate) = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
             orgnummer = orgnummer,
@@ -203,7 +182,7 @@ internal class JsonBuilderTest {
                         utbetalinger = listOf(
                             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                                 fom = 1.januar.minusYears(1),
-                                tom = 1.februar.minusYears(1),
+                                tom = 31.januar.minusYears(1),
                                 dagsats = 31000
                             )
                         ),
@@ -214,7 +193,7 @@ internal class JsonBuilderTest {
                     foreldrepermisjon = Foreldrepermisjon(
                         foreldrepengeytelse = Periode(
                             fom = 1.januar.minusYears(2),
-                            tom = 1.februar.minusYears(2)
+                            tom = 31.januar.minusYears(2)
                         ),
                         svangerskapsytelse = Periode(
                             fom = 1.juli.minusYears(2),
@@ -235,6 +214,17 @@ internal class JsonBuilderTest {
                 utbetalingGodkjent = true,
                 saksbehandler = "en_saksbehandler_ident",
                 godkjenttidspunkt = LocalDateTime.now()
+            )
+
+        private val utbetalt get() =
+            Utbetaling(
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                orgnummer = orgnummer,
+                utbetalingsreferanse = "ref",
+                status = Utbetaling.Status.FERDIG,
+                melding = "hei"
             )
     }
 }

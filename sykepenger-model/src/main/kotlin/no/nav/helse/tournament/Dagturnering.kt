@@ -1,7 +1,6 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 
 internal interface Dagturnering {
@@ -10,16 +9,6 @@ internal interface Dagturnering {
 
 internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
 internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
-
-internal object KonfliktskyDagturnering : Dagturnering {
-    override fun beste(venstre: Dag, høyre: Dag): Dag {
-        return when {
-            venstre is ImplisittDag -> høyre
-            høyre is ImplisittDag -> venstre
-            else -> Ubestemtdag(venstre.dagen)
-        }
-    }
-}
 
 private class CsvDagturnering(private val source: String): Dagturnering {
 

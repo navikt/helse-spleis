@@ -4,6 +4,7 @@ import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -15,7 +16,7 @@ import java.util.*
 
 internal class SøknadTest {
 
-    companion object {
+    private companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
@@ -118,6 +119,14 @@ internal class SøknadTest {
     }
 
     @Test
+    internal fun `egenmelding ligger langt utenfor sykdomsvindu`() {
+        søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
+        assertFalse(søknad.valider().hasErrors())
+        assertTrue(søknad.valider().hasWarnings())
+        assertEquals(8, søknad.sykdomstidslinje().length())
+    }
+
+    @Test
     internal fun `søknad med andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100), harAndreInntektskilder = true)
         assertTrue(søknad.valider().hasErrors())
@@ -142,7 +151,7 @@ internal class SøknadTest {
     private fun søknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = SykmeldingTest.UNG_PERSON_FNR_2018,
+            fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),

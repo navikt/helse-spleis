@@ -2,8 +2,7 @@ package no.nav.helse.serde.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.JsonBuilderTest.Companion.lagPerson
+import no.nav.helse.serde.JsonBuilderTest.Companion.person
 import no.nav.helse.serde.PersonVisitorProxy
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -19,7 +18,7 @@ internal class SpeilBuilderTest {
 
     @Test
     internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
-        val person = lagPerson()
+        val person = person()
         val jsonBuilder = SpeilBuilder()
         person.accept(
             DayPadderProxy(

@@ -90,6 +90,23 @@ internal class SendtSøknadMessageTest {
         assertValidSøknadMessage(ValidSendtSøknad)
     }
 
+    @Test
+    internal fun `søknad med utlandsopphold`() {
+        val søknadMedUtlandsopphold = ValidSøknad
+            .copy(
+                fravar = listOf(
+                    FravarDTO(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        type = FravarstypeDTO.UTLANDSOPPHOLD
+                    )
+                )
+            ).toJson()
+        MessageProblems(søknadMedUtlandsopphold).also {
+            assertFalse(SendtSøknadMessage(søknadMedUtlandsopphold, it).asSøknad().hasErrors())
+        }
+    }
+
     private fun assertValidSøknadMessage(message: String) {
         val problems = MessageProblems(message)
         SendtSøknadMessage(message, problems)

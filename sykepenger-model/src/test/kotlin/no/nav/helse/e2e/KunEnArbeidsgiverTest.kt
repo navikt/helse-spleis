@@ -1,53 +1,19 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.FeatureToggle
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.AfterEach
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
-internal class KunEnArbeidsgiverTest {
-
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "42"
-        private const val ORGNUMMER = "987654321"
-        private const val INNTEKT = 31000.00
-    }
-
-    private lateinit var person: Person
-    private lateinit var observatør: TestObservatør
-    private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var hendelselogg: ArbeidstakerHendelse
-    private var forventetEndringTeller = 0
-
-    @BeforeEach
-    internal fun setup() {
-        person = Person(UNG_PERSON_FNR_2018, AKTØRID)
-        observatør = TestObservatør().also { person.addObserver(it) }
-    }
-
-    @AfterEach
-    internal fun reset() {
-        FeatureToggle.støtterGradertSykdom = false
-    }
+internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     internal fun `ingen historie med inntektsmelding først`() {
@@ -763,24 +729,6 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd`() {
-        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)
-
-        håndterSykmelding(Triple(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-
-        assertTilstander(
-            0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD
-        )
-        assertTilstander(
-            1,
-            START, TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     internal fun `dupliserte hendelser produserer bare advarsler`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
@@ -815,115 +763,17 @@ internal class KunEnArbeidsgiverTest {
     }
 
     @Test
-    internal fun `gradert sykmelding først`() {
-        // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
-        håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-
-        håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
-        håndterSøknad(Sykdom(13.januar(2020), 17.januar(2020), 100))
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
-    }
-
-    @Test
-    internal fun `Søknad treffer flere perioder`() {
-        håndterSykmelding(Triple(1.januar(2020), 5.januar(2020), 100))
-        håndterSykmelding(Triple(6.januar(2020), 10.januar(2020), 100))
-        håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
-        håndterSøknad(
-            Sykdom(13.januar(2020), 17.januar(2020), 100),
-            Søknad.Periode.Egenmelding(30.desember(2019), 31.desember(2019))
-        )
-        håndterSykmelding(Triple(18.januar(2020), 26.januar(2020), 100))
-        håndterSøknad(Sykdom(18.januar(2020), 26.januar(2020), 100))
-        håndterSykmelding(Triple(27.januar(2020), 30.januar(2020), 100))
-        håndterSøknad(Sykdom(27.januar(2020), 30.januar(2020), 100))
-        håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
-        håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(30.desember(2019), 31.desember(2019)),
-                Periode(1.januar(2020), 5.januar(2020)),
-                Periode(6.januar(2020), 10.januar(2020)),
-                Periode(13.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 13.januar(2020)
-        )
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(30.desember(2019), 31.desember(2019)),
-                Periode(1.januar(2020), 5.januar(2020)),
-                Periode(6.januar(2020), 10.januar(2020)),
-                Periode(13.januar(2020), 16.januar(2020))
-            ), førsteFraværsdag = 13.januar(2020)
-        )
-
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE
-        )
-        assertTilstander(
-            2,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE
-        )
-        assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(4, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
-        assertEquals(5, observatør.tilstander.size)
-    }
-
-    @Test
     internal fun `Sykmelding i omvendt rekkefølge`() {
         håndterSykmelding(Triple(10.januar, 20.januar, 100))
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
-        håndterInntektsmelding(listOf(
-            Periode(4.januar, 5.januar),
-            Periode(9.januar, 23.januar)
-        ))
+        håndterInntektsmelding(
+            listOf(
+                Periode(4.januar, 5.januar),
+                Periode(9.januar, 23.januar)
+            )
+        )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-    }
-
-    @Test
-    internal fun `Ingen sykedager i tidslinjen - første fraværsdag bug`() {
-        håndterSykmelding(Triple(6.januar(2020), 7.januar(2020), 100))
-        håndterSykmelding(Triple(8.januar(2020), 10.januar(2020), 100))
-        håndterSykmelding(Triple(27.januar(2020), 28.januar(2020), 100))
-
-        håndterInntektsmelding(listOf(
-            Periode(18.november(2019), 23.november(2019)),
-            Periode(14.oktober(2019), 18.oktober(2019)),
-            Periode(1.november(2019), 5.november(2019))
-        ), 18.november(2019), listOf(
-            Periode(5.desember(2019), 6.desember(2019)),
-            Periode(30.desember(2019), 30.desember(2019)),
-            Periode(2.januar(2020), 3.januar(2020)),
-            Periode(22.januar(2020), 22.januar(2020))
-        ))
-
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
-    }
-
-    @Test
-    internal fun `inntektsmelding starter etter sykmeldingsperioden`() {
-        håndterSykmelding(Triple(15.januar(2020), 12.februar(2020), 100))
-        håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
-        håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0,
-            Triple(3.april(2019), 30.april(2019), 100),
-            Triple(18.mars(2018), 2.april(2018), 100),
-            Triple(29.november(2017), 3.desember(2017), 100),
-            Triple(13.november(2017), 28.november(2017), 100)
-        )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -962,242 +812,5 @@ internal class KunEnArbeidsgiverTest {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
-    }
-
-    private fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
-        assertEquals(tilstander.asList(), observatør.tilstander[indeks])
-    }
-
-    private fun assertNoErrors(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
-    }
-
-    private fun assertNoWarnings(inspektør: TestPersonInspektør) {
-        assertFalse(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
-    }
-
-    private fun assertWarnings(inspektør: TestPersonInspektør) {
-        assertTrue(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
-    }
-
-    private fun assertMessages(inspektør: TestPersonInspektør) {
-        assertTrue(inspektør.personLogg.hasMessages(), inspektør.personLogg.toString())
-    }
-
-    private fun håndterSykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
-        person.håndter(sykmelding(*sykeperioder))
-    }
-
-    private fun håndterSøknadMedValidering(
-        vedtaksperiodeIndex: Int,
-        vararg perioder: Søknad.Periode,
-        harAndreInntektskilder: Boolean = false
-    ) {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
-    }
-
-    private fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false) {
-        person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder))
-    }
-
-    private fun håndterInntektsmeldingMedValidering(
-        vedtaksperiodeIndex: Int,
-        arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = 1.januar
-    ) {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag)
-    }
-
-    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, førsteFraværsdag: LocalDate = 1.januar, ferieperioder: List<Periode> = emptyList()) {
-        person.håndter(inntektsmelding(arbeidsgiverperioder, ferieperioder = ferieperioder, førsteFraværsdag = førsteFraværsdag))
-    }
-
-    private fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT))
-    }
-
-    private fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
-        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
-    }
-
-    private fun håndterPåminnelse(vedtaksperiodeIndex: Int, påminnetTilstand: TilstandType) {
-        person.håndter(påminnelse(vedtaksperiodeIndex, påminnetTilstand))
-    }
-
-    private fun håndterManuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
-        person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
-    }
-
-    private fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Status) {
-        person.håndter(utbetaling(vedtaksperiodeIndex, status))
-    }
-
-    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
-        Utbetaling(
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            utbetalingsreferanse = "ref",
-            status = status,
-            melding = "hei"
-        )
-
-
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
-        return Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            sykeperioder = listOf(*sykeperioder)
-        ).apply {
-            hendelselogg = this
-        }
-    }
-
-    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean): Søknad {
-        return Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            perioder = listOf(*perioder),
-            harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = perioder.last().tom.atStartOfDay()
-        ).apply {
-            hendelselogg = this
-        }
-    }
-
-    private fun inntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        ferieperioder: List<Periode> = emptyList(),
-        refusjonBeløp: Double = INNTEKT,
-        beregnetInntekt: Double = INNTEKT,
-        førsteFraværsdag: LocalDate = 1.januar,
-        refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
-        endringerIRefusjon: List<LocalDate> = emptyList()
-    ): Inntektsmelding {
-        return Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder
-        ).apply {
-            hendelselogg = this
-        }
-    }
-
-    private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
-        return Vilkårsgrunnlag(
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            inntektsmåneder = (1..12).map {
-                Vilkårsgrunnlag.Måned(
-                    YearMonth.of(2017, it),
-                    listOf(inntekt)
-                )
-            },
-            erEgenAnsatt = false,
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
-        ).apply {
-            hendelselogg = this
-        }
-    }
-
-    private fun påminnelse(
-        vedtaksperiodeIndex: Int,
-        påminnetTilstand: TilstandType
-    ): Påminnelse {
-        return Påminnelse(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            antallGangerPåminnet = 0,
-            tilstand = påminnetTilstand,
-            tilstandsendringstidspunkt = LocalDateTime.now(),
-            påminnelsestidspunkt = LocalDateTime.now(),
-            nestePåminnelsestidspunkt = LocalDateTime.now()
-        )
-    }
-
-    private fun ytelser(
-        vedtaksperiodeIndex: Int,
-        utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = listOf(
-            Inntektsopplysning(
-                1.desember(2017),
-                INNTEKT.toInt() - 10000,
-                ORGNUMMER
-            )
-        ),
-        foreldrepenger: Periode? = null,
-        svangerskapspenger: Periode? = null
-    ): Ytelser {
-        val aktivitetslogg = Aktivitetslogg()
-        return Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            utbetalingshistorikk = Utbetalingshistorikk(
-                ukjentePerioder = emptyList(),
-                utbetalinger = utbetalinger.map {
-                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                        it.first,
-                        it.second,
-                        it.third
-                    )
-                },
-                inntektshistorikk = inntektshistorikk,
-                graderingsliste = emptyList<Utbetalingshistorikk.Graderingsperiode>(),
-                aktivitetslogg = aktivitetslogg
-            ),
-            foreldrepermisjon = Foreldrepermisjon(
-                foreldrepenger,
-                svangerskapspenger,
-                aktivitetslogg
-            ),
-            aktivitetslogg = aktivitetslogg
-        ).apply {
-            hendelselogg = this
-        }
-    }
-
-    private fun manuellSaksbehandling(
-        vedtaksperiodeIndex: Int,
-        utbetalingGodkjent: Boolean
-    ): ManuellSaksbehandling {
-        return ManuellSaksbehandling(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
-            saksbehandler = "Ola Nordmann",
-            utbetalingGodkjent = utbetalingGodkjent,
-            godkjenttidspunkt = LocalDateTime.now()
-        ).apply {
-            hendelselogg = this
-        }
     }
 }

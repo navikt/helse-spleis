@@ -3,12 +3,10 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.Uke
 import no.nav.helse.testhelpers.get
-import no.nav.helse.tournament.KonfliktskyDagturnering
+import no.nav.helse.tournament.Dagturnering
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -68,4 +66,15 @@ internal class CompositeSykdomstidslinjeTest {
         assertFalse(permisjonsdag.valider(aktivitetslogg))
         assertTrue(aktivitetslogg.hasErrors())
     }
+
+    private object KonfliktskyDagturnering : Dagturnering {
+        override fun beste(venstre: Dag, høyre: Dag): Dag {
+            return when {
+                venstre is ImplisittDag -> høyre
+                høyre is ImplisittDag -> venstre
+                else -> Ubestemtdag(venstre.dagen)
+            }
+        }
+    }
+
 }
