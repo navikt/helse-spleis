@@ -4,11 +4,11 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
-import java.time.LocalDateTime
 import java.util.*
 
 // Understands a JSON message representing a Søknad
@@ -29,8 +29,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
-    private val rapportertdato get() = this["opprettet"].asText().let { LocalDateTime.parse(it) }
-    private val sendtNav get() = this["sendtNav"].asText().let { LocalDateTime.parse(it) }
+    private val sendtNav get() = this["sendtNav"].asLocalDateTime()
     private val perioder get() = this["soknadsperioder"].map {
         Periode.Sykdom(
             fom = it.path("fom").asLocalDate(),
@@ -75,7 +74,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     private fun harAndreInntektskilder() = this["andreInntektskilder"].isArray && !this["andreInntektskilder"].isEmpty
 
     fun asSpeilDTO(): HendelseDTO = HendelseDTO.SendtSøknadDTO(
-        rapportertdato = rapportertdato,
+        rapportertdato = sendtNav,
         sendtNav = sendtNav,
         fom = søknadFom,
         tom = søknadTom
