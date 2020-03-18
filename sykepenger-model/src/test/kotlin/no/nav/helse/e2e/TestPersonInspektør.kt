@@ -31,6 +31,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         person.accept(this)
     }
 
+    internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
+
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

@@ -8,6 +8,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+
 internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
@@ -275,6 +276,24 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ferieperioder = listOf(Periode(7.oktober(2019), 11.oktober(2019)))
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+    }
+
+    @Test
+    internal fun `person med gammel sykmelding`() {
+        håndterSykmelding(Triple(13.januar(2020), 31.januar(2020), 100))
+        håndterSykmelding(Triple(9.februar(2017), 15.februar(2017), 100))
+        håndterSøknad(Sykdom(13.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(13.januar(2020), 21.januar(2020))
+            ),
+            førsteFraværsdag = 13.januar(2020)
+        )
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(1)   // No history
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 }
 
