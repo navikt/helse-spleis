@@ -14,7 +14,7 @@ import java.util.*
 
 internal class SykmeldingTest {
 
-    companion object {
+    private companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 

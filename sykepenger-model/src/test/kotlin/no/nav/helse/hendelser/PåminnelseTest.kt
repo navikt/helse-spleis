@@ -10,7 +10,7 @@ import java.util.*
 
 internal class PåminnelseTest {
 
-    companion object {
+    private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val aktørId = "aktørId"
         private val fødselsnummer = "fødselsnummer"

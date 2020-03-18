@@ -27,7 +27,7 @@ class Søknad constructor(
     private var forrigeTom: LocalDate? = null
 
     private companion object {
-        private const val tidslinjegrense = 30L
+        private const val tidslinjegrense = 16L
     }
 
     init {
@@ -124,7 +124,7 @@ class Søknad constructor(
                 ConcreteSykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) {
-                if (fom < søknad.fom.minusDays(tidslinjegrense)) søknad.warn("Søknaden inneholder Egenmeldingsdager eldre enn 30 dager før perioden")
+                if (fom < søknad.fom.minusDays(tidslinjegrense)) søknad.warn("Søknaden inneholder Egenmeldingsdager eldre enn $tidslinjegrense dager før perioden")
                 if (tom > søknad.tom) søknad.warn("Søknaden inneholder Egenmeldingsdager nyere enn perioden")
             }
         }
