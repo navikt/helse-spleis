@@ -1,4 +1,4 @@
-package no.nav.helse.e2e.showstoppers
+package no.nav.helse.bugs_showstoppers
 
 import no.nav.helse.e2e.AbstractEndToEndTest
 import no.nav.helse.hendelser.Periode
@@ -9,7 +9,7 @@ import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class Epic3Test : AbstractEndToEndTest() {
+internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd`() {
