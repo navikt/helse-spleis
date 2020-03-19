@@ -4,7 +4,7 @@ CREATE TABLE person
     skjema_versjon INT                      NOT NULL,
     fnr            VARCHAR(32)              NOT NULL,
     aktor_id       VARCHAR(32)              NOT NULL,
-    data           JSONB                    NOT NULL,
+    data           JSON                     NOT NULL,
     opprettet      TIMESTAMP WITH TIME ZONE NOT NULL default (now() at time zone 'utc'),
     PRIMARY KEY (id)
 );
@@ -23,9 +23,13 @@ CREATE TABLE utbetalingsreferanse
 CREATE TABLE melding
 (
     id           BIGSERIAL,
+    fnr          VARCHAR(32)              NOT NULL,
     melding_id   VARCHAR(40)              NOT NULL,
     melding_type VARCHAR(40)              NOT NULL,
-    data         JSONB                    NOT NULL,
+    data         JSON                     NOT NULL,
     lest_dato    TIMESTAMP WITH TIME ZONE NOT NULL default (now() at time zone 'utc'),
     PRIMARY KEY (id)
 );
+
+CREATE INDEX "index_melding_fnr" ON melding USING btree (fnr);
+CREATE UNIQUE INDEX "index_melding_id" ON melding USING btree (melding_id);
