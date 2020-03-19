@@ -8,7 +8,7 @@ val mockkVersion = "1.9.3"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.aebc340")
+    implementation("com.github.navikt:rapids-and-rivers:1.f1afe50")
     implementation(project(":sykepenger-model"))
 
     implementation("io.ktor:ktor-jackson:$ktorVersion")

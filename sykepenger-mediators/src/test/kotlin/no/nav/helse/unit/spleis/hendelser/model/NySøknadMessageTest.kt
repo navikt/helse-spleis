@@ -105,6 +105,7 @@ private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree
     this as ObjectNode
     put("@id", UUID.randomUUID().toString())
     put("@event_name", if (this["status"].asText() == "NY") "ny_søknad" else "ukjent")
+    put("@opprettet", LocalDateTime.now().toString())
 }
 private fun SykepengesoknadDTO.toJson(): String = asJsonNode().toString()
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

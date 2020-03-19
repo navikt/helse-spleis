@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -17,7 +18,9 @@ internal class NySøknadMessage(
     init {
         requireValue("@event_name", "ny_søknad")
         requireValue("status", "NY")
-        requireKey("sykmeldingId", "fom", "tom")
+        requireKey("sykmeldingId")
+        require("fom", JsonNode::asLocalDate)
+        require("tom", JsonNode::asLocalDate)
     }
 
     private val aktørId get() = this["aktorId"].asText()

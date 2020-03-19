@@ -127,6 +127,7 @@ internal class HappyCaseTest {
             this as ObjectNode
             put("@id", UUID.randomUUID().toString())
             put("@event_name", "ny_søknad")
+            put("@opprettet", LocalDateTime.now().toString())
         }.toString())
     }
 
@@ -155,6 +156,7 @@ internal class HappyCaseTest {
             this as ObjectNode
             put("@id", UUID.randomUUID().toString())
             put("@event_name", "sendt_søknad")
+            put("@opprettet", LocalDateTime.now().toString())
         }.toString())
     }
 
@@ -192,6 +194,7 @@ internal class HappyCaseTest {
             this as ObjectNode
             put("@id", UUID.randomUUID().toString())
             put("@event_name", "inntektsmelding")
+            put("@opprettet", LocalDateTime.now().toString())
         }.toString())
     }
 
@@ -205,6 +208,7 @@ internal class HappyCaseTest {
             ekstraFelter + mapOf(
                 "@id" to UUID.randomUUID().toString(),
                 "@opprettet" to LocalDateTime.now(),
+                "@event_name" to "behov",
                 "@behov" to behov,
                 "aktørId" to AKTØRID,
                 "fødselsnummer" to UNG_PERSON_FNR_2018,
@@ -220,6 +224,8 @@ internal class HappyCaseTest {
     private fun sendNyPåminnelse() {
         objectMapper.writeValueAsString(
             mapOf(
+                "@id" to UUID.randomUUID().toString(),
+                "@opprettet" to LocalDateTime.now(),
                 "@event_name" to "påminnelse",
                 "aktørId" to AKTØRID,
                 "fødselsnummer" to UNG_PERSON_FNR_2018,

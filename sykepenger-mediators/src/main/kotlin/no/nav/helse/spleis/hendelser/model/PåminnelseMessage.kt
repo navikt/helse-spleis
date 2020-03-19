@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -18,11 +19,12 @@ internal class PåminnelseMessage(
         requireValue("@event_name", "påminnelse")
         requireKey(
             "antallGangerPåminnet",
-            "tilstandsendringstidspunkt", "påminnelsestidspunkt",
-            "nestePåminnelsestidspunkt", "vedtaksperiodeId",
-            "organisasjonsnummer", "fødselsnummer", "aktørId"
+            "vedtaksperiodeId", "organisasjonsnummer",
+            "fødselsnummer", "aktørId"
         )
-
+        require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
+        require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
+        require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
         requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 

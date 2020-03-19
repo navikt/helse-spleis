@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -17,15 +18,15 @@ internal class InntektsmeldingMessage(
     HendelseMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "inntektsmelding")
-        requireKey("@id")
         requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
             "endringIRefusjoner", "arbeidsgiverperioder",
-            "status", "arkivreferanse", "ferieperioder",
-            "foersteFravaersdag", "mottattDato"
+            "status", "arkivreferanse", "ferieperioder"
         )
+        require("mottattDato", JsonNode::asLocalDateTime)
+        require("foersteFravaersdag", JsonNode::asLocalDate)
         interestedIn("refusjon.beloepPrMnd")
         interestedIn("refusjon.opphoersdato")
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -16,7 +17,10 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     init {
         requireValue("@event_name", "sendt_søknad")
         requireValue("status", "SENDT")
-        requireKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
+        requireKey("id", "egenmeldinger", "fravar")
+        require("fom", JsonNode::asLocalDate)
+        require("tom", JsonNode::asLocalDate)
+        require("sendtNav", JsonNode::asLocalDateTime)
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
