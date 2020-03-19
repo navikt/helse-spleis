@@ -64,3 +64,9 @@ internal val Int.U
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.FO
+    get() = ConcreteSykdomstidslinje.kunArbeidsgiverDager(
+        dagensDato, dagensDato.plusDays(this.toLong() - 1),
+        Søknad.SøknadDagFactory, 100.0
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }

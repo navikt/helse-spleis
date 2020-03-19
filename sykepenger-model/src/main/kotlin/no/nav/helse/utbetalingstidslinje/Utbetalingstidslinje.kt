@@ -192,7 +192,7 @@ internal class Utbetalingstidslinje private constructor(
 
         internal class ForeldetDag(inntekt: Double = 0.0, dato: LocalDate) :
             Utbetalingsdag(inntekt, dato) {
-            override val prioritet = 60
+            override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitForeldetDag(this)
         }
 
@@ -207,6 +207,5 @@ enum class Begrunnelse {
     SykepengedagerOppbrukt,
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
-    MinimumSykdomsgrad,
-    ForeldetSykedag
+    MinimumSykdomsgrad
 }

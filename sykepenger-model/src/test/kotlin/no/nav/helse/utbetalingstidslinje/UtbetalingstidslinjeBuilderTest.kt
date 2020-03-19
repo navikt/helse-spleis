@@ -390,6 +390,20 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(NavDag::class, inspektør.datoer[22.januar])
     }
 
+    @Test
+    fun `KunArbeidsgiverSykedag godkjennes som ArbeidsgverperiodeDag`() {
+        (10.FO + 6.S).utbetalingslinjer()
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+    }
+
+    @Test
+    fun `KunArbeidsgiverSykedag blir ForeldetDag utenfor arbeidsgiverperioden`() {
+        (20.FO).utbetalingslinjer()
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(3, inspektør.dagtelling[ForeldetDag::class])
+        assertEquals(1, inspektør.dagtelling[NavHelgDag::class])
+    }
+
     private val inntekthistorikk = Inntekthistorikk().apply {
         add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal())
         add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal())
@@ -471,6 +485,11 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visitFridag(dag: Fridag) {
             datoer[dag.dato] = Fridag::class
             inkrementer(Fridag::class)
+        }
+
+        override fun visitForeldetDag(dag: ForeldetDag) {
+            datoer[dag.dato] = ForeldetDag::class
+            inkrementer(ForeldetDag::class)
         }
 
         private fun inkrementer(klasse: KClass<out Utbetalingsdag>) {

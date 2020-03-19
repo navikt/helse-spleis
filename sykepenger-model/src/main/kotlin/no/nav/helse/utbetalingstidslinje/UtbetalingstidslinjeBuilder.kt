@@ -55,8 +55,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) = kunArbeidsgiverSykedag(sykedag.dagen)
 
     private fun kunArbeidsgiverSykedag(dagen: LocalDate) {
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode) || sisteNavDagForArbeidsgiverFørPerioden?.let { (ChronoUnit.DAYS.between(it, dagen) <= 16) } == true)
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode) || sisteNavDagForArbeidsgiverFørPerioden?.let { (ChronoUnit.DAYS.between(it, dagen) <= 16) } == true) {
+            state = UtbetalingSykedager
             tidslinje.addForeldetDag(dagen)
+        }
         else state.sykedagerIArbeidsgiverperioden(this, dagen, Double.NaN)
     }
 

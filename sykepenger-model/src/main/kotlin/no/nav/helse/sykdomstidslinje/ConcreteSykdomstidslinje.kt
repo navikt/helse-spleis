@@ -245,6 +245,19 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
                     .toList())
         }
 
+        fun kunArbeidsgiverDager(
+            fra: LocalDate,
+            til: LocalDate,
+            factory: DagFactory,
+            grad: Double
+        ): ConcreteSykdomstidslinje {
+            require(!fra.isAfter(til)) { "fra må være før eller lik til" }
+            return CompositeSykdomstidslinje(
+                fra.datesUntil(til.plusDays(1))
+                    .map { kunArbeidsgiverSykedag(it, grad, factory) }
+                    .toList())
+        }
+
         private fun beste(dagturnering: Dagturnering, a: Dag?, b: Dag?): Dag? {
             if (a == null) return b
             if (b == null) return a
