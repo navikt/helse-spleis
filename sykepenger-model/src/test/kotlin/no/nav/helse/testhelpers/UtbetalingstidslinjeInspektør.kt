@@ -13,6 +13,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     internal var navHelgDagTeller = 0
     internal var ukjentDagTeller = 0
     internal var totalUtbetaling = 0
+    internal var totalInntekt = 0.0
     internal val size get() =
         arbeidsdagTeller +
             arbeidsgiverperiodeDagTeller +
@@ -42,8 +43,10 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     override fun visitNavDag(dag: NavDag) {
         navDagTeller += 1
         totalUtbetaling += dag.utbetaling
+        totalInntekt += dag.inntekt
     }
     override fun visitNavHelgDag(dag: NavHelgDag) { navHelgDagTeller += 1 }
     override fun visitUkjentDag(dag: UkjentDag) { ukjentDagTeller += 1 }
     internal fun totalUtbetaling() = totalUtbetaling
+    internal fun totalInntekt() = totalInntekt
 }

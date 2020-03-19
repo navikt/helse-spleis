@@ -17,7 +17,7 @@ internal class UtbetalingstidslinjeTest {
         private val UNG_PERSON_FNR_2018 = Alder("12020052345")
     }
 
-    @Test internal fun `avviste dager blir konvertert til Navdager`() {
+    @Test internal fun `avviste dager blir konvertert til Navdager med opprinnelig inntekt`() {
         val tidslinje = tidslinjeOf(10.NAV(12.0), 5.NAV(1200.0))
         MinimumInntektsfilter(
             UNG_PERSON_FNR_2018,
@@ -32,6 +32,8 @@ internal class UtbetalingstidslinjeTest {
         undersøke(tidslinje.klonOgKonverterAvvistDager())
         assertEquals(0, inspektør.avvistDagTeller)
         assertEquals(15, inspektør.navDagTeller)
+        assertEquals(120.0 + 6000.0, inspektør.totalInntekt())
+
     }
 
     private fun undersøke(tidslinje: Utbetalingstidslinje) {

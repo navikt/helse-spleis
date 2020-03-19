@@ -52,10 +52,17 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) = egenmeldingsdag(egenmeldingsdag.dagen)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = sykHelgedag(sykHelgedag.dagen, sykHelgedag.grad)
     override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = sykHelgedag(sykHelgedag.dagen, sykHelgedag.grad)
+    override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) = kunArbeidsgiverSykedag(sykedag.dagen)
+
+    private fun kunArbeidsgiverSykedag(dagen: LocalDate) {
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode) || sisteNavDagForArbeidsgiverFørPerioden?.let { (ChronoUnit.DAYS.between(it, dagen) <= 16) } == true)
+            tidslinje.addForeldetDag(dagen)
+        else state.sykedagerIArbeidsgiverperioden(this, dagen, Double.NaN)
+    }
 
     private fun egenmeldingsdag(dagen: LocalDate) =
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode) || sisteNavDagForArbeidsgiverFørPerioden?.let { (ChronoUnit.DAYS.between(it, dagen) <= 16) } == true)
-            tidslinje.addAvvistDag(dagen, Double.NaN, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
+            tidslinje.addAvvistDag(Double.NaN, dagen, Double.NaN, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
     else state.sykedagerIArbeidsgiverperioden(this, dagen, Double.NaN)
 
     private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
