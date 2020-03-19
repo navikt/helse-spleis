@@ -57,7 +57,7 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO melding (melding_id, melding_type, data) VALUES (?, ?, (to_json(?::json)))",
+                    "INSERT INTO melding (melding_id, melding_type, data) VALUES (?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
                     meldingsId.toString(),
                     meldingstype.name,
                     orginalmelding
