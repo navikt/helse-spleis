@@ -57,6 +57,10 @@ internal class HendelseMediator(
             } finally {
                 MDC.setContextMap(contextMap)
             }
+        } catch (err: Exception) {
+            MDC.put("melding_id", message.id.toString())
+            MDC.put("melding_type", message::class.simpleName)
+            throw err
         }
     }
 
