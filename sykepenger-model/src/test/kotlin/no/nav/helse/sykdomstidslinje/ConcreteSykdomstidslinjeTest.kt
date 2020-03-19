@@ -16,9 +16,9 @@ internal class ConcreteSykdomstidslinjeTest {
         assertNull(tidslinje.subset(null, 2.januar))
 
         assertTidslinje(tidslinje.subset(2.januar, 4.januar), 3.januar, 4.januar)
-        assertTidslinje(tidslinje.subset(3.januar, 4.januar), 4.januar, 4.januar)
+        assertTidslinje(tidslinje.subset(3.januar, 4.januar), 3.januar, 4.januar)
+        assertTidslinje(tidslinje.subset(4.januar, 5.januar), 4.januar, 4.januar)
         assertNull(tidslinje.subset(1.januar, 2.januar))
-        assertNull(tidslinje.subset(4.januar, 5.januar))
     }
 
     @Test

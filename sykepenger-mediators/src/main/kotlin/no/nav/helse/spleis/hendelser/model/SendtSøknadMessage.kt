@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -9,24 +10,23 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
-import java.util.*
 
 // Understands a JSON message representing a Søknad
 internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "sendt_søknad")
-        requireKey("@id")
         requireValue("status", "SENDT")
-        requireKey("id", "sendtNav", "fom", "tom", "egenmeldinger", "fravar")
+        requireKey("id", "egenmeldinger", "fravar")
+        require("fom", JsonNode::asLocalDate)
+        require("tom", JsonNode::asLocalDate)
+        require("sendtNav", JsonNode::asLocalDateTime)
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
     }
 
-    override val id: UUID get() = UUID.fromString(this["@id"].asText())
     private val søknadFom get() = this["fom"].asLocalDate()
     private val søknadTom get() = this["tom"].asLocalDate()
-    private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
     private val sendtNav get() = this["sendtNav"].asLocalDateTime()
@@ -62,7 +62,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     internal fun asSøknad(): Søknad {
         return Søknad(
             meldingsreferanseId = this.id,
-            fnr = fnr,
+            fnr = fødselsnummer,
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -8,7 +9,6 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
-import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
@@ -18,20 +18,20 @@ internal class InntektsmeldingMessage(
     HendelseMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "inntektsmelding")
-        requireKey("@id")
         requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
             "endringIRefusjoner", "arbeidsgiverperioder",
-            "status", "arkivreferanse", "ferieperioder",
-            "foersteFravaersdag", "mottattDato"
+            "status", "arkivreferanse", "ferieperioder"
         )
+        require("mottattDato", JsonNode::asLocalDateTime)
+        require("foersteFravaersdag", JsonNode::asLocalDate)
         interestedIn("refusjon.beloepPrMnd")
         interestedIn("refusjon.opphoersdato")
     }
 
-    override val id: UUID get() = UUID.fromString(this["@id"].asText())
+    override val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val refusjon
         get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
             Inntektsmelding.Refusjon(
@@ -41,7 +41,6 @@ internal class InntektsmeldingMessage(
             )
         }
     private val orgnummer get() = this["virksomhetsnummer"].asText()
-    private val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val aktørId get() = this["arbeidstakerAktorId"].asText()
     private val mottattDato get() = this["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag get() = this["foersteFravaersdag"].asLocalDate()
@@ -75,3 +74,4 @@ internal class InntektsmeldingMessage(
         override fun createMessage(message: String, problems: MessageProblems) = InntektsmeldingMessage(message, problems)
     }
 }
+

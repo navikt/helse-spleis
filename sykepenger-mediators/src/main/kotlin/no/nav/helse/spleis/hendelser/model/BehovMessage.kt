@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.MessageProblems
-import java.util.*
+import no.nav.helse.rapids_rivers.asLocalDateTime
 
 // Understands a JSON message representing a Need with solution
 internal abstract class BehovMessage(
@@ -11,13 +12,14 @@ internal abstract class BehovMessage(
     HendelseMessage(originalMessage, problems) {
     init {
         requireKey(
-            "@behov", "@id", "@opprettet",
-            "@final", "@løsning", "@besvart",
+            "@behov", "@final", "@løsning",
             "aktørId", "fødselsnummer",
             "organisasjonsnummer", "vedtaksperiodeId"
         )
+        require("@opprettet", JsonNode::asLocalDateTime)
+        require("@besvart", JsonNode::asLocalDateTime)
         requireValue("@final", true)
     }
 
-    override val id: UUID get() = UUID.fromString(this["@id"].asText())
+    override val fødselsnummer: String get() = this["fødselsnummer"].asText()
 }

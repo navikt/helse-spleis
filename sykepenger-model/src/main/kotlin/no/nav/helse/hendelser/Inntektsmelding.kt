@@ -64,9 +64,10 @@ class Inntektsmelding(
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
+        val subsetFom = forrigeTom?.plusDays(1)
+        return sykdomstidslinje().subset(subsetFom, tom)
             .also { trimLeft(tom) }
-            ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen")
+            ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen: [$subsetFom, $tom] gav en tom tidslinje")
     }
 
     internal fun trimLeft(dato: LocalDate) {

@@ -9,11 +9,11 @@ internal class PersonRestInterface(
     private val utbetalingsreferanseRepository: UtbetalingsreferanseRepository
 ) {
 
-    fun hentSak(aktørId: String): Person? = personRepository.hentPerson(aktørId)
+    fun hentSak(aktørId: String): Person? = personRepository.hentPersonAktørId(aktørId)
 
     fun hentSakForUtbetaling(utbetalingsreferanse: String): Person? {
         return utbetalingsreferanseRepository.hentUtbetaling(utbetalingsreferanse)?.let {
-            personRepository.hentPerson(it.aktørId)
+            personRepository.hentPersonAktørId(it.aktørId)
         }
     }
 }

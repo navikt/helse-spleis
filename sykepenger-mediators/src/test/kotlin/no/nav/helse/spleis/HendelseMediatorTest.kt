@@ -120,7 +120,7 @@ internal class HendelseMediatorTest {
             override fun stop() {}
         }
 
-        override fun hentPerson(aktørId: String): Person? {
+        override fun hentPerson(fødselsnummer: String): Person? {
             return mockk<Person>(relaxed = true) {
 
                 every {
@@ -173,6 +173,10 @@ internal class HendelseMediatorTest {
             }
         }
 
+        override fun hentPersonAktørId(aktørId: String): Person? {
+            TODO("not implemented")
+        }
+
         init {
             HendelseMediator(
                 rapidsConnection = testRapid,
@@ -202,6 +206,7 @@ internal class HendelseMediatorTest {
                 ekstraFelter + mapOf(
                     "@id" to UUID.randomUUID().toString(),
                     "@opprettet" to LocalDateTime.now(),
+                    "@event_name" to "behov",
                     "@behov" to behov,
                     "aktørId" to aktørId,
                     "fødselsnummer" to fødselsnummer,
@@ -221,6 +226,8 @@ internal class HendelseMediatorTest {
         ) {
             objectMapper.writeValueAsString(
                 mapOf(
+                    "@id" to UUID.randomUUID().toString(),
+                    "@opprettet" to LocalDateTime.now(),
                     "@event_name" to "påminnelse",
                     "aktørId" to aktørId,
                     "fødselsnummer" to fødselsnummer,
@@ -356,6 +363,7 @@ internal class HendelseMediatorTest {
                 this as ObjectNode
                 put("@id", UUID.randomUUID().toString())
                 put("@event_name", "inntektsmelding")
+                put("@opprettet", LocalDateTime.now().toString())
             }.toString())
             return inntektsmelding
         }
@@ -386,6 +394,7 @@ internal class HendelseMediatorTest {
                 this as ObjectNode
                 put("@id", UUID.randomUUID().toString())
                 put("@event_name", "sendt_søknad")
+                put("@opprettet", LocalDateTime.now().toString())
             }.toString())
         }
 
@@ -422,6 +431,7 @@ internal class HendelseMediatorTest {
                 this as ObjectNode
                 put("@id", UUID.randomUUID().toString())
                 put("@event_name", "ny_søknad")
+                put("@opprettet", LocalDateTime.now().toString())
             }.toString())
             return nySøknad
         }

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.ManuellSaksbehandling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -13,7 +14,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, problems: M
         requireAll("@behov", Godkjenning)
         requireKey("@løsning.${Godkjenning.name}.godkjent")
         requireKey("saksbehandlerIdent")
-        interestedIn("godkjenttidspunkt")
+        require("godkjenttidspunkt", JsonNode::asLocalDateTime)
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -23,7 +24,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, problems: M
     internal fun asManuellSaksbehandling() =
         ManuellSaksbehandling(
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),

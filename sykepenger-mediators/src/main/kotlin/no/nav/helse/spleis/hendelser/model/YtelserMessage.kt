@@ -88,7 +88,7 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
         return Ytelser(
             meldingsreferanseId = this.id,
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             utbetalingshistorikk = utbetalingshistorikk,

@@ -26,7 +26,7 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
         return Vilkårsgrunnlag(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             orgnummer = this["organisasjonsnummer"].asText(),
             inntektsmåneder = this["@løsning.${Inntektsberegning.name}"].map {
                 Vilkårsgrunnlag.Måned(

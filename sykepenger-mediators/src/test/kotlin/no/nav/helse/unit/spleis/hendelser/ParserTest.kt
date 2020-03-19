@@ -8,6 +8,7 @@ import no.nav.helse.spleis.hendelser.model.HendelseMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class ParserTest : Parser.ParserDirector {
@@ -60,7 +61,7 @@ internal class ParserTest : Parser.ParserDirector {
             requireKey("key")
             message2 = this
         }
-        parser.onMessage("{\"key\": \"value\"}", context)
+        parser.onMessage("{\"@id\": \"foo\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
 
         assertEquals(message2, recognizedMessage)
         assertTrue(messageProblems.isEmpty())
@@ -75,7 +76,7 @@ internal class ParserTest : Parser.ParserDirector {
         }
         messageFactory("key")
 
-        parser.onMessage("{\"key\": \"value\"}", context)
+        parser.onMessage("{\"@id\": \"foo\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
 
         assertEquals(message1, recognizedMessage)
     }
@@ -151,5 +152,6 @@ internal class ParserTest : Parser.ParserDirector {
 
     private class TestMessage(originalJson: String, problems: MessageProblems) : HendelseMessage(originalJson, problems) {
         override val id = UUID.randomUUID()
+        override val fødselsnummer = UUID.randomUUID().toString()
     }
 }

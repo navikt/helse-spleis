@@ -61,8 +61,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
     }
-
-    override fun onShutdown(rapidsConnection: RapidsConnection) {}
 }
 
 private fun String.readFile() =

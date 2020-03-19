@@ -73,7 +73,7 @@ class PersonPersisteringPostgresTest {
         val dataSource = HikariDataSource(hikariConfig)
         val repo = PersonPostgresRepository(dataSource)
 
-        val person = Person("2", "fnr")
+        val person = Person("aktørId", "2")
         person.addObserver(LagrePersonDao(dataSource))
         person.håndter(nySøknad("2"))
 
@@ -85,15 +85,15 @@ class PersonPersisteringPostgresTest {
     internal fun `hver endring av person fører til at ny versjon lagres`() {
         val dataSource = HikariDataSource(hikariConfig)
 
-        val aktørId = "3"
-        val person = Person(aktørId, "fnr")
+        val fødselsnummer = "3"
+        val person = Person("aktørId", fødselsnummer)
         person.addObserver(LagrePersonDao(dataSource))
-        person.håndter(nySøknad(aktørId))
+        person.håndter(nySøknad(fødselsnummer))
         person.håndter(
             Søknad(
                 meldingsreferanseId = UUID.randomUUID(),
-                fnr = "fnr",
-                aktørId = aktørId,
+                fnr = fødselsnummer,
+                aktørId = "aktørId",
                 orgnummer = "123456789",
                 perioder = listOf(Periode.Sykdom(16.september, 5.oktober, 100)),
                 harAndreInntektskilder = false,
@@ -102,14 +102,7 @@ class PersonPersisteringPostgresTest {
         )
 
         val antallVersjoner = using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "SELECT count(data) as rowCount FROM person WHERE aktor_id = ?",
-                    aktørId
-                )
-                    .map { it.int("rowCount") }
-                    .asSingle
-            )
+            session.run(queryOf("SELECT count(data) as rowCount FROM person WHERE fnr = ?", fødselsnummer).map { it.int("rowCount") }.asSingle)
         }
         assertEquals(2, antallVersjoner, "Antall versjoner av personaggregat skal være 2, men var $antallVersjoner")
     }

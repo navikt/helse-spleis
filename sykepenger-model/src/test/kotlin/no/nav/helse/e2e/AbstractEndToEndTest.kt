@@ -28,7 +28,7 @@ internal abstract class AbstractEndToEndTest {
         const val INNTEKT = 31000.00
     }
 
-    private lateinit var person: Person
+    protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = TestPersonInspektør(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
@@ -46,7 +46,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
-        assertEquals(tilstander.asList(), observatør.tilstander[indeks])
+        val id = inspektør.vedtaksperiodeId(indeks)
+        assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
     protected fun assertNoErrors(inspektør: TestPersonInspektør) {
@@ -135,7 +136,7 @@ internal abstract class AbstractEndToEndTest {
 
     private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
         Utbetaling(
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -197,7 +198,7 @@ internal abstract class AbstractEndToEndTest {
 
     private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -222,7 +223,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             antallGangerPåminnet = 0,
             tilstand = påminnetTilstand,
             tilstandsendringstidspunkt = LocalDateTime.now(),
@@ -250,7 +251,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
                 ukjentePerioder = emptyList(),
                 utbetalinger = utbetalinger.map {
@@ -283,7 +284,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = observatør.vedtaksperiodeIder(vedtaksperiodeIndex),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             saksbehandler = "Ola Nordmann",
             utbetalingGodkjent = utbetalingGodkjent,
             godkjenttidspunkt = LocalDateTime.now()

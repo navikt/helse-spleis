@@ -24,7 +24,7 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
         return ModelUtbetaling(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
             status = enumValueOf(this["@løsning.${Utbetaling.name}.status"].asText()),

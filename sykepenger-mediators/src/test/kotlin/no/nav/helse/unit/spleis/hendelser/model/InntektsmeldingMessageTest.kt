@@ -121,5 +121,6 @@ private fun Inntektsmeldingkontrakt.asJsonNode(): JsonNode = objectMapper.valueT
     this as ObjectNode
     put("@id", UUID.randomUUID().toString())
     put("@event_name", "inntektsmelding")
+    put("@opprettet", LocalDateTime.now().toString())
 }
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

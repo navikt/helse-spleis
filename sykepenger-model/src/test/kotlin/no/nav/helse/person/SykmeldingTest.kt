@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.SykmeldingTest
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
