@@ -295,5 +295,19 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
+
+    @Test
+    internal fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(3.februar(2020), 17.februar(2020), 100))
+        håndterSykmelding(Triple(18.februar(2020), 1.mars(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(3.februar(2020), 18.februar(2020))
+            ),
+            førsteFraværsdag = 3.januar(2020)
+        )
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+    }
 }
 
