@@ -76,7 +76,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             var håndtert = 0
             var forrigeProsent = 0
             while (antall > håndtert) {
-                val meldinger = it.run(queryOf("SELECT id,melding_type,data FROM melding ORDER BY id ASC LIMIT 1000 OFFSET ?", håndtert).map {
+                val meldinger = it.run(queryOf("SELECT id,melding_type,data FROM melding WHERE fnr='' ORDER BY id ASC LIMIT 1000 OFFSET ?", håndtert).map {
                     Triple(it.long(1), it.string(2), it.string(3))
                 }.asList)
 
