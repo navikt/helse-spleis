@@ -10,7 +10,8 @@ import java.util.*
 
 internal abstract class HendelseMessage(originalMessage: String, problems: MessageProblems) : JsonMessage(originalMessage, problems) {
 
-    internal abstract val id: UUID
+    internal open val id: UUID get() = UUID.fromString(this["@id"].asText())
+    internal abstract val fødselsnummer: String
 
     open fun accept(processor: MessageProcessor) {}
 }

@@ -27,6 +27,7 @@ internal class PåminnelseMessage(
     }
 
     override val id: UUID = UUID.randomUUID()
+    override val fødselsnummer: String get() = this["fødselsnummer"].asText()
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this)
@@ -35,7 +36,7 @@ internal class PåminnelseMessage(
     internal fun asPåminnelse(): Påminnelse {
         return Påminnelse(
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             antallGangerPåminnet = this["antallGangerPåminnet"].asInt(),

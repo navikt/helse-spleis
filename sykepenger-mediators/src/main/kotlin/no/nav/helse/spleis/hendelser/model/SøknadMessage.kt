@@ -7,6 +7,8 @@ internal abstract class SøknadMessage(originalMessage: String, problems: Messag
     HendelseMessage(originalMessage, problems) {
 
     init {
-        requireKey("fnr", "aktorId", "arbeidsgiver.orgnummer", "opprettet", "soknadsperioder")
+        requireKey("@id", "fnr", "aktorId", "arbeidsgiver.orgnummer", "opprettet", "soknadsperioder")
     }
+
+    override val fødselsnummer: String get() = this["fnr"].asText()
 }

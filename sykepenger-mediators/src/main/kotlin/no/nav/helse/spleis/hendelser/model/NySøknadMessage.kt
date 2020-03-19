@@ -7,7 +7,6 @@ import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
-import java.util.*
 
 // Understands a JSON message representing a Ny Søknad
 internal class NySøknadMessage(
@@ -17,13 +16,10 @@ internal class NySøknadMessage(
     SøknadMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "ny_søknad")
-        requireKey("@id")
         requireValue("status", "NY")
         requireKey("sykmeldingId", "fom", "tom")
     }
 
-    override val id: UUID get() = UUID.fromString(this["@id"].asText())
-    private val fnr get() = this["fnr"].asText()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
     private val søknadFom get() = this["fom"].asLocalDate()
@@ -44,7 +40,7 @@ internal class NySøknadMessage(
 
     internal fun asSykmelding() = Sykmelding(
         meldingsreferanseId = this.id,
-        fnr = fnr,
+        fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder

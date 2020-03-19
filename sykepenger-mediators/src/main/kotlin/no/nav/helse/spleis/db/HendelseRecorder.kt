@@ -12,35 +12,35 @@ import javax.sql.DataSource
 internal class HendelseRecorder(private val dataSource: DataSource): MessageProcessor {
 
     override fun process(message: NySøknadMessage) {
-        lagreMelding(Meldingstype.NY_SØKNAD, message.id, message.toJson())
+        lagreMelding(Meldingstype.NY_SØKNAD, message)
     }
 
     override fun process(message: SendtSøknadMessage) {
-        lagreMelding(Meldingstype.SENDT_SØKNAD, message.id, message.toJson())
+        lagreMelding(Meldingstype.SENDT_SØKNAD, message)
     }
 
     override fun process(message: InntektsmeldingMessage) {
-        lagreMelding(Meldingstype.INNTEKTSMELDING, message.id, message.toJson())
+        lagreMelding(Meldingstype.INNTEKTSMELDING, message)
     }
 
     override fun process(message: PåminnelseMessage) {
-        lagreMelding(Meldingstype.PÅMINNELSE, message.id, message.toJson())
+        lagreMelding(Meldingstype.PÅMINNELSE, message)
     }
 
     override fun process(message: YtelserMessage) {
-        lagreMelding(Meldingstype.YTELSER, message.id, message.toJson())
+        lagreMelding(Meldingstype.YTELSER, message)
     }
 
     override fun process(message: VilkårsgrunnlagMessage) {
-        lagreMelding(Meldingstype.VILKÅRSGRUNNLAG, message.id, message.toJson())
+        lagreMelding(Meldingstype.VILKÅRSGRUNNLAG, message)
     }
 
     override fun process(message: ManuellSaksbehandlingMessage) {
-        lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message.id, message.toJson())
+        lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message)
     }
 
     override fun process(message: UtbetalingMessage) {
-        lagreMelding(Meldingstype.UTBETALING, message.id, message.toJson())
+        lagreMelding(Meldingstype.UTBETALING, message)
     }
 
     fun hentHendelser(hendelseIder: Set<UUID>) =
@@ -53,14 +53,15 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
             }.asList)
         }
 
-    fun lagreMelding(meldingstype: Meldingstype, meldingsId: UUID, orginalmelding: String) {
+    private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO melding (melding_id, melding_type, data) VALUES (?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    meldingsId.toString(),
+                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
+                    melding.fødselsnummer,
+                    melding.id.toString(),
                     meldingstype.name,
-                    orginalmelding
+                    melding.toJson()
                 ).asExecute
             )
         }.also {
@@ -77,6 +78,5 @@ internal enum class Meldingstype {
     YTELSER,
     VILKÅRSGRUNNLAG,
     MANUELL_SAKSBEHANDLING,
-    UTBETALING,
-    UKJENT
+    UTBETALING
 }

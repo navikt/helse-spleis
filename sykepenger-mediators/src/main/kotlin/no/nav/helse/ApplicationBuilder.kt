@@ -1,17 +1,23 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.jackson.jackson
 import io.ktor.request.path
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HelseBuilder
+import no.nav.helse.spleis.db.Meldingstype.*
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.io.File
 import java.io.FileNotFoundException
+import kotlin.math.floor
 
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
@@ -60,9 +66,41 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
-    }
+        val ds = dataSourceBuilder.getDataSource()
 
-    override fun onShutdown(rapidsConnection: RapidsConnection) {}
+        val objectMapper = jacksonObjectMapper()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        using(sessionOf(ds)) {
+            val antall = it.run(queryOf("SELECT COUNT(1) FROM melding WHERE fnr=''").map { it.long(1) }.asSingle) ?: return@using
+            var håndtert = 0
+            var forrigeProsent = 0
+            while (antall > håndtert) {
+                val meldinger = it.run(queryOf("SELECT id,melding_type,data FROM melding ORDER BY id ASC LIMIT 1000 OFFSET ?", håndtert).map {
+                    Triple(it.long(1), it.string(2), it.string(3))
+                }.asList)
+
+                meldinger.map { (id, type, jsonString) ->
+                    val json = objectMapper.readTree(jsonString)
+                    val fnr = when (valueOf(type)) {
+                        NY_SØKNAD, SENDT_SØKNAD -> json["fnr"].asText()
+                        INNTEKTSMELDING -> json["arbeidstakerFnr"].asText()
+                        PÅMINNELSE, YTELSER, VILKÅRSGRUNNLAG, MANUELL_SAKSBEHANDLING, UTBETALING -> json["fødselsnummer"].asText()
+                    }
+
+                    it.run(queryOf("UPDATE melding SET fnr=? WHERE id=?", fnr, id).asUpdate)
+                    håndtert += 1
+
+                    val donePercent = floor(håndtert / antall.toDouble() * 100).toInt()
+                    if (donePercent > forrigeProsent) {
+                        forrigeProsent = donePercent
+                        log.info("$donePercent % ferdig, $håndtert av $antall håndtert. ${antall - håndtert} gjenstående.")
+                    }
+                }
+            }
+            log.info("100 % ferdig, $håndtert av $antall håndtert. ${antall - håndtert} gjenstående.")
+        }
+    }
 }
 
 private fun String.readFile() =

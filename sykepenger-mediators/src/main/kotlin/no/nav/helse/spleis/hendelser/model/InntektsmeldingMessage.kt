@@ -8,7 +8,6 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.rest.HendelseDTO
-import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
@@ -31,7 +30,7 @@ internal class InntektsmeldingMessage(
         interestedIn("refusjon.opphoersdato")
     }
 
-    override val id: UUID get() = UUID.fromString(this["@id"].asText())
+    override val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val refusjon
         get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
             Inntektsmelding.Refusjon(
@@ -41,7 +40,6 @@ internal class InntektsmeldingMessage(
             )
         }
     private val orgnummer get() = this["virksomhetsnummer"].asText()
-    private val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val aktørId get() = this["arbeidstakerAktorId"].asText()
     private val mottattDato get() = this["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag get() = this["foersteFravaersdag"].asLocalDate()
@@ -75,3 +73,4 @@ internal class InntektsmeldingMessage(
         override fun createMessage(message: String, problems: MessageProblems) = InntektsmeldingMessage(message, problems)
     }
 }
+

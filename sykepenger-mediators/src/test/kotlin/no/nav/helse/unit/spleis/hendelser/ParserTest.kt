@@ -151,5 +151,6 @@ internal class ParserTest : Parser.ParserDirector {
 
     private class TestMessage(originalJson: String, problems: MessageProblems) : HendelseMessage(originalJson, problems) {
         override val id = UUID.randomUUID()
+        override val fødselsnummer = UUID.randomUUID().toString()
     }
 }

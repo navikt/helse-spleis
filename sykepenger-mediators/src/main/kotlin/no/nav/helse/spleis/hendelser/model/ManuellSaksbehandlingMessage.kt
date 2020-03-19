@@ -23,7 +23,7 @@ internal class ManuellSaksbehandlingMessage(originalMessage: String, problems: M
     internal fun asManuellSaksbehandling() =
         ManuellSaksbehandling(
             aktørId = this["aktørId"].asText(),
-            fødselsnummer = this["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             organisasjonsnummer = this["organisasjonsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             saksbehandler = this["saksbehandlerIdent"].asText(),
