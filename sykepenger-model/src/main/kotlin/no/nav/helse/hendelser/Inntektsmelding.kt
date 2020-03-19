@@ -66,7 +66,7 @@ class Inntektsmelding(
 
         return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
-            ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen")
+            ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen: [$forrigeTom, $tom] gav en tom tidslinje")
     }
 
     internal fun trimLeft(dato: LocalDate) {
