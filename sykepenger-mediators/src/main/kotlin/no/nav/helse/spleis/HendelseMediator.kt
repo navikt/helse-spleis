@@ -43,7 +43,7 @@ internal class HendelseMediator(
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        sikkerLogg.debug("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
+        sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
