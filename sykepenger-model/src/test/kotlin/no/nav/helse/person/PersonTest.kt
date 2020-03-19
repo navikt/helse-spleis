@@ -157,18 +157,6 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `søknad kan ikke være sendt mer enn 3 måneder etter perioden`() {
-        søknad(
-            perioder = listOf(
-                Søknad.Periode.Sykdom(fom = Uke(1).mandag, tom = Uke(1).torsdag, grad = 100)
-            ),
-            sendtTilNAV = LocalDateTime.now()
-        ).valider().also {
-            assertTrue(it.hasErrors())
-        }
-    }
-
-    @Test
     internal fun `søknad trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
             it.håndter(sykmelding())

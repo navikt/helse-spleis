@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
 import no.nav.helse.testhelpers.mai
@@ -133,7 +134,7 @@ internal class JsonBuilderTest {
                 Søknad.Periode.Sykdom(fom, tom, 100)
             ),
             harAndreInntektskilder = false,
-            sendtTilNAV = 1.mai.atStartOfDay()
+            sendtTilNAV = 1.april.atStartOfDay()
         )
 
         private fun inntektsmelding(fom: LocalDate) = Inntektsmelding(

@@ -90,7 +90,7 @@ internal class SpeilBuilder : PersonVisitor {
         currentState.visitInntekt(inntekt)
     }
 
-    override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
+    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
 
@@ -245,7 +245,11 @@ internal class SpeilBuilder : PersonVisitor {
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
-        private val utbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
+        private lateinit var utbetalingstidslinje: Utbetalingstidslinje
+
+        override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
+            utbetalingstidslinje = tidslinjer.last()
+        }
 
         override fun preVisitPerioder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
@@ -259,13 +263,8 @@ internal class SpeilBuilder : PersonVisitor {
             pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiver, vedtaksperiodeMap))
             vedtaksperioder.add(vedtaksperiodeMap)
 
-            val utbetalingstidslinje = utbetalingstidslinjer.last()
-                .subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
+            utbetalingstidslinje.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
             utbetalingstidslinje.accept(UtbetalingstidslinjeVisitor(avgrensetUtbetalingstidslinje))
-        }
-
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-            utbetalingstidslinjer.add(tidslinje)
         }
 
         override fun postVisitArbeidsgiver(

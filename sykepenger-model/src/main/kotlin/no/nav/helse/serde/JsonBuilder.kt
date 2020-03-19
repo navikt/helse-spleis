@@ -84,7 +84,7 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(inntekt)
-    override fun preVisitTidslinjer() = currentState.preVisitTidslinjer()
+    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
 
@@ -245,7 +245,7 @@ internal class JsonBuilder : PersonVisitor {
 
         private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitTidslinjer() {
+        override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
         }
 

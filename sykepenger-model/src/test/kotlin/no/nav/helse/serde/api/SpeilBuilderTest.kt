@@ -2,6 +2,7 @@ package no.nav.helse.serde.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.serde.JsonBuilderTest.Companion.ingenBetalingsperson
 import no.nav.helse.serde.JsonBuilderTest.Companion.person
 import no.nav.helse.serde.PersonVisitorProxy
 import no.nav.helse.testhelpers.februar
@@ -35,6 +36,29 @@ internal class SpeilBuilderTest {
         )
         assertEquals(
             31.januar,
+            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
+        )
+    }
+
+    @Test
+    internal fun `person uten utbetalingsdager`() {
+        val person = ingenBetalingsperson()
+        val jsonBuilder = SpeilBuilder()
+        person.accept(
+            DayPadderProxy(
+                target = jsonBuilder,
+                leftPadWithDays = 1.januar.minusDays(30).datesUntil(1.januar).toList(),
+                rightPadWithDays = 1.februar.datesUntil(1.mars).toList()
+            )
+        )
+
+        val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
+        assertEquals(
+            1.januar,
+            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].first()["dato"].asText())
+        )
+        assertEquals(
+            9.januar,
             LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
         )
     }

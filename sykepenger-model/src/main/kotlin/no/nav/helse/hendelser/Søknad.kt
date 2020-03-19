@@ -60,7 +60,6 @@ class Søknad constructor(
     override fun valider(): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
-        if (sendtTilNAV.toLocalDate()?.isAfter(fom.plusMonths(3)) == true) error("Søknaden er sendt inn 3 måneder etter TOM")
         return aktivitetslogg
     }
 

@@ -5,6 +5,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import java.time.LocalDate
 import java.util.*
@@ -23,8 +24,8 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Utbetalingsdag
         id: UUID,
         organisasjonsnummer: String
     ) {}
-    fun preVisitTidslinjer() {}
-    fun postVisitTidslinjer() {}
+    fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
+    fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun preVisitPerioder() {}
     fun postVisitPerioder() {}
     fun postVisitArbeidsgiver(

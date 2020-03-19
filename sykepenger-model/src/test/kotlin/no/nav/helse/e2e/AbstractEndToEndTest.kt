@@ -79,8 +79,8 @@ internal abstract class AbstractEndToEndTest {
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
 
-    protected fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false) {
-        person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder))
+    protected fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false, sendtTilNav: LocalDate = perioder.last().tom) {
+        person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder, sendtTilNav = sendtTilNav))
     }
 
     protected fun håndterInntektsmeldingMedValidering(
@@ -157,7 +157,7 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean): Søknad {
+    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean, sendtTilNav: LocalDate = perioder.last().tom): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -165,7 +165,7 @@ internal abstract class AbstractEndToEndTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = sendtTilNav.atStartOfDay()
         ).apply {
             hendelselogg = this
         }

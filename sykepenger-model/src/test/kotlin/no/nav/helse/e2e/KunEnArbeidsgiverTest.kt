@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -63,6 +64,30 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(observatør.vedtaksperiodeIder(0)))
+    }
+
+    @Test
+    internal fun `søknad sendt etter 3 mnd`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100), sendtTilNav = 1.mai)
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertNull(it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
+            assertDoesNotThrow {it.arbeidsgiver.peekTidslinje()}
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+        )
     }
 
     @Test

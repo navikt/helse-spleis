@@ -40,12 +40,12 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun preVisitTidslinjer() {
-        target.preVisitTidslinjer()
+    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
+        target.preVisitTidslinjer(tidslinjer)
     }
 
-    override fun postVisitTidslinjer() {
-        target.postVisitTidslinjer()
+    override fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
+        target.postVisitTidslinjer(tidslinjer)
     }
 
     override fun preVisitPerioder() {
