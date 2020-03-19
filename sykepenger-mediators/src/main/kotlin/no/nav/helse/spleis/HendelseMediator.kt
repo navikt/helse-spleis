@@ -133,7 +133,7 @@ internal class HendelseMediator(
         }
 
         private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
-            return (personRepository.hentPerson(arbeidstakerHendelse.aktørId()) ?: Person(
+            return (personRepository.hentPerson(arbeidstakerHendelse.fødselsnummer()) ?: Person(
                 aktørId = arbeidstakerHendelse.aktørId(),
                 fødselsnummer = arbeidstakerHendelse.fødselsnummer()
             )).also {

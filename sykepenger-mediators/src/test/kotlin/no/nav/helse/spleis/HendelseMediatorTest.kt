@@ -120,7 +120,7 @@ internal class HendelseMediatorTest {
             override fun stop() {}
         }
 
-        override fun hentPerson(aktørId: String): Person? {
+        override fun hentPerson(fødselsnummer: String): Person? {
             return mockk<Person>(relaxed = true) {
 
                 every {
@@ -171,6 +171,10 @@ internal class HendelseMediatorTest {
                     lestUtbetaling = true
                 }
             }
+        }
+
+        override fun hentPersonAktørId(aktørId: String): Person? {
+            TODO("not implemented")
         }
 
         init {
