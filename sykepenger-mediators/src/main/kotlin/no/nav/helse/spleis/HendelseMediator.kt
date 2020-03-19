@@ -19,7 +19,7 @@ import org.slf4j.MDC
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
-    private val rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
     private val lagrePersonDao: PersonObserver,
     private val lagreUtbetalingDao: PersonObserver,
@@ -31,6 +31,7 @@ internal class HendelseMediator(
     private val parser = Parser(this, rapidsConnection)
 
     private val personObserver = PersonMediator(rapidsConnection)
+    private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
 
     init {
         parser.register(NySøknadMessage.Factory)
@@ -45,7 +46,7 @@ internal class HendelseMediator(
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         sikkerLogg.debug("gjenkjente melding {} som {}", message.id, message::class.simpleName)
-        val messageProcessor = Processor(BehovMediator(rapidsConnection, sikkerLogg))
+        val messageProcessor = Processor(behovMediator)
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
