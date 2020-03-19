@@ -45,7 +45,7 @@ internal class HendelseMediator(
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        sikkerLogg.debug("gjenkjente melding {} som {}", message.id, message::class.simpleName)
+        sikkerLogg.debug("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
         val messageProcessor = Processor(behovMediator)
         try {
             message.accept(hendelseRecorder)
