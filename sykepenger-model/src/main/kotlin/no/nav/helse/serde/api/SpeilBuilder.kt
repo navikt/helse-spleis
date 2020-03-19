@@ -424,10 +424,10 @@ internal class SpeilBuilder : PersonVisitor {
             )
         }
 
-        private fun leggTilSykedag(jsonDagType: JsonDagType, dag: DagMedGrad) {
+        private fun leggTilSykedag(jsonDagType: JsonDagType, dag: GradertDag) {
             sykdomstidslinjeListe.add(
                 mutableMapOf(
-                    "dagen" to (dag as Dag).dagen,
+                    "dagen" to dag.dagen,
                     "type" to jsonDagType.name,
                     "grad" to dag.grad
                 )
