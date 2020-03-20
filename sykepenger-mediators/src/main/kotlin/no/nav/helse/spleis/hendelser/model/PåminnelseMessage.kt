@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import java.util.*
 
 // Understands a JSON message representing a Påminnelse
 internal class PåminnelseMessage(
@@ -28,7 +27,6 @@ internal class PåminnelseMessage(
         requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 
-    override val id: UUID = UUID.randomUUID()
     override val fødselsnummer: String get() = this["fødselsnummer"].asText()
 
     override fun accept(processor: MessageProcessor) {
