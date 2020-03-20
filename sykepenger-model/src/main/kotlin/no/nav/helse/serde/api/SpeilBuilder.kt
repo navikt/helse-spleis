@@ -85,12 +85,15 @@ internal class SpeilBuilder : PersonVisitor {
     override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
+
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
         hendelseReferanser.add(inntekt.hendelseId)
         currentState.visitInntekt(inntekt)
     }
 
-    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
+    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
+        currentState.preVisitTidslinjer(tidslinjer)
+
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
 
@@ -249,10 +252,10 @@ internal class SpeilBuilder : PersonVisitor {
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
-        private lateinit var utbetalingstidslinje: Utbetalingstidslinje
+        private var utbetalingstidslinje: Utbetalingstidslinje? = null
 
         override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
-            utbetalingstidslinje = tidslinjer.last()
+            utbetalingstidslinje = tidslinjer.lastOrNull()
         }
 
         override fun preVisitPerioder() {
@@ -267,8 +270,9 @@ internal class SpeilBuilder : PersonVisitor {
             pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiver, vedtaksperiodeMap))
             vedtaksperioder.add(vedtaksperiodeMap)
 
-            utbetalingstidslinje.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
-            utbetalingstidslinje.accept(UtbetalingstidslinjeVisitor(avgrensetUtbetalingstidslinje))
+            utbetalingstidslinje
+                ?.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
+                ?.accept(UtbetalingstidslinjeVisitor(avgrensetUtbetalingstidslinje))
         }
 
         override fun postVisitArbeidsgiver(
@@ -280,7 +284,8 @@ internal class SpeilBuilder : PersonVisitor {
         }
     }
 
-    private class UtbetalingstidslinjeVisitor(private val utbetalingstidslinjeMap: MutableList<MutableMap<String, Any?>>) : UtbetalingsdagVisitor {
+    private class UtbetalingstidslinjeVisitor(private val utbetalingstidslinjeMap: MutableList<MutableMap<String, Any?>>) :
+        UtbetalingsdagVisitor {
 
         override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
             utbetalingstidslinjeMap.add(UtbetalingsdagReflect(dag, TypeData.Arbeidsdag).toMap())
@@ -388,6 +393,7 @@ internal class SpeilBuilder : PersonVisitor {
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             popState()
         }
+
         override fun preVisitHendelseSykdomstidslinje() {}
         override fun postVisitHendelseSykdomstidslinje() {}
 
@@ -421,8 +427,12 @@ internal class SpeilBuilder : PersonVisitor {
             leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
 
         override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, sykHelgedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) =
+            leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, sykHelgedag)
+
+        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) =
+            leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
+
         override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
         override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)

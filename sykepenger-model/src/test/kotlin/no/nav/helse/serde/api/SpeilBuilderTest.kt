@@ -20,6 +20,7 @@ import no.nav.helse.testhelpers.juni
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -27,6 +28,8 @@ import kotlin.streams.toList
 
 
 internal class SpeilBuilderTest {
+    val aktørId = "1234"
+    val fnr = "5678"
 
     @Test
     internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
@@ -98,11 +101,25 @@ internal class SpeilBuilderTest {
     }
 
     @Test
-    fun `maybe`() {
-        val aktørId = "1234"
-        val fnr = "5678"
+    fun `en periode uten utbetalingstidslinje`() {
+        val person = Person(aktørId, fnr).apply {
+            håndter(sykmelding(hendelseId = UUID.randomUUID(), fom = 1.januar, tom = 31.januar))
+        }
+        val (json, _) = serializePersonForSpeil(person)
+
+        val arbeidsgiver = json["arbeidsgivere"][0]
+        val vedtaksperioder = arbeidsgiver["vedtaksperioder"]
+
+        assertEquals(1, vedtaksperioder.size())
+        assertFalse(
+            arbeidsgiver.hasNonNull("utbetalingstidslinje"),
+            "Forventet en arbeidsgiver uten utbetalingstidslinje"
+        )
+    }
+
+    @Test
+    fun `passer på at vedtakene har en referanse til hendelsene`() {
         var vedtaksperiodeIder: Set<String>
-        val speilBuilder = SpeilBuilder()
         val hendelseIderVedtak1 = (0.until(3)).map { UUID.randomUUID() }
         val hendelseIderVedtak2 = (0.until(3)).map { UUID.randomUUID() }
 
@@ -128,8 +145,6 @@ internal class SpeilBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
             håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
         }
-
-        person.accept(speilBuilder)
 
         val (json, _) = serializePersonForSpeil(person)
 

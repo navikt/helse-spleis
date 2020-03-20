@@ -94,7 +94,7 @@ internal class JsonBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalt())
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
         internal fun ingenBetalingsperson(sendtSøknad: LocalDate = 1.april): Person =
@@ -106,7 +106,7 @@ internal class JsonBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalt())
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
         private fun Person.fangeVedtaksperiodeId() {
@@ -226,7 +226,7 @@ internal class JsonBuilderTest {
             godkjenttidspunkt = LocalDateTime.now()
         )
 
-        private fun utbetalt() = Utbetaling(
+        internal fun utbetalt(vedtaksperiodeId: String) = Utbetaling(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
