@@ -3,17 +3,18 @@ package no.nav.helse.spleis.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
-class LagrePersonDao(private val dataSource: DataSource) : PersonObserver {
-    override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {
-        val serialisering = personEndretEvent.person.serialize()
+class LagrePersonDao(private val dataSource: DataSource) {
+    fun lagrePerson(person: Person, hendelse: ArbeidstakerHendelse) {
+        val serialisering = person.serialize()
         lagrePerson(
-            aktørId = personEndretEvent.aktørId,
-            fødselsnummer = personEndretEvent.fødselsnummer,
+            aktørId = hendelse.aktørId(),
+            fødselsnummer = hendelse.fødselsnummer(),
             skjemaVersjon = serialisering.skjemaVersjon,
             personJson = serialisering.json
         )

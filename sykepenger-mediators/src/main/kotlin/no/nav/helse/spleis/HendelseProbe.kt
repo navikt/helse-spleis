@@ -3,17 +3,15 @@ package no.nav.helse.spleis
 import io.prometheus.client.Counter
 import no.nav.helse.hendelser.Påminnelse
 
-class HendelseProbe {
-    private companion object {
-        private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
-            .labelNames("hendelse")
-            .register()
+object HendelseProbe {
+    private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
+        .labelNames("hendelse")
+        .register()
 
-        private val påminnetCounter =
-            Counter.build("paminnet_totals", "Antall ganger vi har mottatt en påminnelse")
-                .labelNames("tilstand")
-                .register()
-    }
+    private val påminnetCounter =
+        Counter.build("paminnet_totals", "Antall ganger vi har mottatt en påminnelse")
+            .labelNames("tilstand")
+            .register()
 
     fun onPåminnelse(påminnelse: Påminnelse) {
         påminnetCounter
