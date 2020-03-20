@@ -588,7 +588,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             if (vilkårsgrunnlag.valider().hasErrors()) {
-                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", AvventerVilkårsprøvingGap.type)
+                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
             }
 
