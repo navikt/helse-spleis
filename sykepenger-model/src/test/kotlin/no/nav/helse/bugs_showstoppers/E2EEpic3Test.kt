@@ -25,10 +25,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     internal fun `gradert sykmelding først`() {
         // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
         håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
         håndterSøknad(Sykdom(13.januar(2020), 17.januar(2020), 100))
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
     @Test

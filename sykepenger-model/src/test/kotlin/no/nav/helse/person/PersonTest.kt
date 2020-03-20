@@ -152,7 +152,7 @@ internal class PersonTest {
             )
         ).also {
             testPerson.håndter(it)
-            assertTrue(it.hasErrors())
+            assertFalse(it.hasErrors())
         }
     }
 

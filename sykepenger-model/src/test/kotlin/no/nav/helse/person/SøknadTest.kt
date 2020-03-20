@@ -45,9 +45,9 @@ internal class SøknadTest {
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar, 5.januar, 50)))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_GAP, inspektør.tilstand(0))
     }
 
     @Test
