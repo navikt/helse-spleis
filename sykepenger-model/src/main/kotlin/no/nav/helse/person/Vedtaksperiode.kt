@@ -81,7 +81,7 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
         visitor.preVisitUtbetalingslinjer()
-        utbetalingslinjer?.forEach { visitor.visitUtbetalingslinje(it) }
+        utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer()
         visitor.postVisitVedtaksperiode(this, id)
     }
@@ -104,28 +104,19 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
         sykmelding.kontekst(this)
-        valider(sykmelding) {
-            tilstand.håndter(this, sykmelding)
-        }
+        valider(sykmelding) { tilstand.håndter(this, sykmelding) }
     }
 
-    internal fun håndter(søknad: Søknad) =
-        overlapperMed(søknad).also {
-            if (!it) return it
-            søknad.kontekst(this)
-            valider(søknad) {
-                tilstand.håndter(this, søknad)
-            }
-        }
+    internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
+        if (!it) return it
+        søknad.kontekst(this)
+        valider(søknad) { tilstand.håndter(this, søknad) }
+    }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
-        return overlapperMed(inntektsmelding).also {
-            if (!it) return it
-            inntektsmelding.kontekst(this)
-            valider(inntektsmelding) {
-                tilstand.håndter(this, inntektsmelding)
-            }
-        }
+    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
+        if (!it) return it
+        inntektsmelding.kontekst(this)
+        valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
     }
 
     internal fun håndter(ytelser: Ytelser) {
@@ -582,7 +573,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             if (vilkårsgrunnlag.valider().hasErrors()) {
-                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
+                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", AvventerVilkårsprøvingGap.type)
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
             }
 

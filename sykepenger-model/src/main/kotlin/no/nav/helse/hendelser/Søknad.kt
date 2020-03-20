@@ -43,7 +43,7 @@ class Søknad constructor(
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return sykdomstidslinje().subset(forrigeTom, tom)
+        return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
             ?: severe("Ugydlig subsetting av tidslinjen til søknad")
     }

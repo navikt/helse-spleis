@@ -24,7 +24,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
-    internal val inntektFraInntektsmeldinger: MutableMap<Int, Double> = mutableMapOf()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
 
     init {
@@ -71,7 +70,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
         this.sykdomshistorikk = sykdomshistorikk
-        this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
+        if(!sykdomshistorikk.isEmpty())
+            this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
     }
 
     private inner class Dagteller : SykdomstidslinjeVisitor {
