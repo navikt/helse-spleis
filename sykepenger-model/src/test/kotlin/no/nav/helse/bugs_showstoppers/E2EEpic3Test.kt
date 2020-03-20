@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -308,6 +309,55 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
+    internal fun `2periode som begynner på siste dag i arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(13.januar(2020), 28.januar(2020), 100)) // sykmelding A
+        håndterSykmelding(Triple(13.januar(2020), 19.januar(2020), 80),
+            Triple(20.januar(2020), 26.januar(2020), 100)) // sykmelding B (ignored)
+        håndterSykmelding(Triple(27.januar(2020), 11.februar(2020), 100)) // sykmelding C (ignored)
+        håndterSykmelding(Triple(10.februar(2020), 29.februar(2020), 100)) // sykmelding D
+        håndterSøknad(Sykdom(27.januar(2020), 11.februar(2020), 100)) // søknad for sykemelding C (covers A & D actually)
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(13.januar(2020), 28.januar(2020))
+            ),
+            førsteFraværsdag = 13.januar(2020)
+        ) // <-- error here
+        håndterSøknad(Sykdom(10.februar(2020), 29.februar(2020), 100)) // søknad for sykmelding D (ignored)
+        håndterSykmelding(Triple(1.mars(2020), 15.mars(2020), 100)) // sykmelding E
+        assertEquals(3, inspektør.vedtaksperiodeTeller)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+    }
+    @Test
+    internal fun `3periode som begynner på siste dag i arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(15.januar(2020), 30.januar(2020), 100)) // sykmelding A, part 1
+        håndterSykmelding(Triple(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
+        håndterSykmelding(Triple(16.januar(2020), 31.januar(2020), 100)) // sykmelding B
+        håndterSykmelding(Triple(1.februar(2020), 16.februar(2020), 100)) // sykmelding C
+        håndterSøknad(Sykdom(16.januar(2020), 31.januar(2020), 100)) // -> sykmelding B
+        håndterSøknad(Sykdom(1.februar(2020), 16.februar(2020), 100)) // sykmelding C
+        håndterSøknad(Sykdom(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
+        håndterSykmelding(Triple(18.februar(2020), 8.mars(2020), 100)) // sykmelding D
+        assertEquals(3, inspektør.vedtaksperiodeTeller)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(15.januar(2020), 30.januar(2020))
+            ),
+            førsteFraværsdag = 15.januar(2020)
+        ) // <-- error here
+        håndterYtelser(0) // No history
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
     }
 }
 
