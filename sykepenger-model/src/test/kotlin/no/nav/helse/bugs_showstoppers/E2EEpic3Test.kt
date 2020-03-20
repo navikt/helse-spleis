@@ -390,5 +390,36 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(4, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
     }
+
+    @Test
+    internal fun `ferie inni arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(21.desember(2019), 5.januar(2020), 80))
+        håndterSøknad(
+            Egenmelding(18.september(2019), 20.september(2019)),
+            Sykdom(21.desember(2019), 5.januar(2020), 80)
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(18.september(2019), 20.september(2019)),
+                Periode(21.september(2019), 22.september(2019)),
+                Periode(23.september(2019), 30.september(2019)),
+                Periode(1.oktober(2019), 2.oktober(2019)),
+                Periode(8.oktober(2019), 8.oktober(2019)) // grad for 8. oktober is NaN
+            ),
+            ferieperioder = listOf(
+                Periode(3.oktober(2019), 7.oktober(2019)),
+                Periode(9.desember(2019), 23.desember(2019)),
+                Periode(27.desember(2019), 27.desember(2019)),
+                Periode(30.desember(2019), 30.desember(2019))
+            ),
+            førsteFraværsdag = 24.desember(2019)
+        )
+
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0) // No history
+
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+    }
 }
 
