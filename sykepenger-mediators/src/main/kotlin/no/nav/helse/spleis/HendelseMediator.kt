@@ -27,6 +27,7 @@ internal class HendelseMediator(
     private val hendelseProbe: HendelseProbe,
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
+    private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
     private val parser = Parser(this, rapidsConnection)
     private val messageProcessor = Processor(PersonMediator(rapidsConnection), BehovMediator(rapidsConnection, sikkerLogg))
@@ -56,9 +57,26 @@ internal class HendelseMediator(
                 MDC.setContextMap(contextMap)
             }
         } catch (err: Exception) {
-            MDC.put("melding_id", message.id.toString())
-            MDC.put("melding_type", message::class.simpleName)
-            throw err
+            withMDC(mapOf(
+                "melding_id" to message.id.toString(),
+                "melding_type" to (message::class.simpleName ?: "ukjent")
+            )) {
+                log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+
+                withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
+                    sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                }
+            }
+        }
+    }
+
+    private fun withMDC(context: Map<String, String>, block: () -> Unit) {
+        val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+        try {
+            MDC.setContextMap(contextMap + context)
+            block()
+        } finally {
+            MDC.setContextMap(contextMap)
         }
     }
 
