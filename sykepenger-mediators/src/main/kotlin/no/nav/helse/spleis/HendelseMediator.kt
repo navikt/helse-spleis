@@ -30,7 +30,10 @@ internal class HendelseMediator(
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
     private val parser = Parser(this, rapidsConnection)
-    private val messageProcessor = Processor(PersonMediator(rapidsConnection), BehovMediator(rapidsConnection, sikkerLogg))
+
+    private val personMediator = PersonMediator(rapidsConnection)
+    private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
+    private val messageProcessor = Processor()
 
     init {
         parser.register(NySøknadMessage.Factory)
@@ -88,92 +91,92 @@ internal class HendelseMediator(
         sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
-    private inner class Processor(private val personMediator: PersonMediator, private val behovMediator: BehovMediator) : MessageProcessor {
+    private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
+        return (personRepository.hentPerson(arbeidstakerHendelse.fødselsnummer()) ?: Person(
+            aktørId = arbeidstakerHendelse.aktørId(),
+            fødselsnummer = arbeidstakerHendelse.fødselsnummer()
+        )).also {
+            it.addObserver(personMediator)
+            it.addObserver(lagrePersonDao)
+            it.addObserver(lagreUtbetalingDao)
+            it.addObserver(vedtaksperiodeProbe)
+        }
+    }
+
+    private fun finalize(person: Person, hendelse: ArbeidstakerHendelse) {
+        if (!hendelse.hasMessages()) return
+        if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
+        sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
+
+        behovMediator.håndter(hendelse)
+    }
+
+    private inner class Processor() : MessageProcessor {
         override fun process(message: NySøknadMessage) {
-            person(message.asSykmelding()) { person, sykmelding ->
+            håndter(message.asSykmelding()) { person, sykmelding ->
                 hendelseProbe.onSykmelding()
                 person.håndter(sykmelding)
             }
         }
 
         override fun process(message: SendtSøknadMessage) {
-            person(message.asSøknad()) { person, søknad ->
+            håndter(message.asSøknad()) { person, søknad ->
                 hendelseProbe.onSøknad()
                 person.håndter(søknad)
             }
         }
 
         override fun process(message: InntektsmeldingMessage) {
-            person(message.asInntektsmelding()) { person, inntektsmelding ->
+            håndter(message.asInntektsmelding()) { person, inntektsmelding ->
                 hendelseProbe.onInntektsmelding()
                 person.håndter(inntektsmelding)
             }
         }
 
         override fun process(message: YtelserMessage) {
-            person(message.asYtelser()) { person, ytelser ->
+            håndter(message.asYtelser()) { person, ytelser ->
                 hendelseProbe.onYtelser()
                 person.håndter(ytelser)
             }
         }
 
         override fun process(message: VilkårsgrunnlagMessage) {
-            person(message.asVilkårsgrunnlag()) { person, vilkårsgrunnlag ->
+            håndter(message.asVilkårsgrunnlag()) { person, vilkårsgrunnlag ->
                 hendelseProbe.onVilkårsgrunnlag()
                 person.håndter(vilkårsgrunnlag)
             }
         }
 
         override fun process(message: ManuellSaksbehandlingMessage) {
-            person(message.asManuellSaksbehandling()) { person, manuellSaksbehandling ->
+            håndter(message.asManuellSaksbehandling()) { person, manuellSaksbehandling ->
                 hendelseProbe.onManuellSaksbehandling()
                 person.håndter(manuellSaksbehandling)
             }
         }
 
         override fun process(message: UtbetalingMessage) {
-            person(message.asUtbetaling()) { person, utbetaling ->
+            håndter(message.asUtbetaling()) { person, utbetaling ->
                 hendelseProbe.onUtbetaling()
                 person.håndter(utbetaling)
             }
         }
 
         override fun process(message: PåminnelseMessage) {
-            person(message.asPåminnelse()) { person, påminnelse ->
+            håndter(message.asPåminnelse()) { person, påminnelse ->
                 hendelseProbe.onPåminnelse(påminnelse)
                 person.håndter(påminnelse)
             }
         }
 
-        private fun <Hendelse: ArbeidstakerHendelse> person(hendelse: Hendelse, handler: (Person, Hendelse) -> Unit) {
-            handler(person(hendelse), hendelse)
-            finalize(hendelse)
-        }
-
-        private fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
-            return (personRepository.hentPerson(arbeidstakerHendelse.fødselsnummer()) ?: Person(
-                aktørId = arbeidstakerHendelse.aktørId(),
-                fødselsnummer = arbeidstakerHendelse.fødselsnummer()
-            )).also {
-                it.addObserver(personMediator)
-                it.addObserver(lagrePersonDao)
-                it.addObserver(lagreUtbetalingDao)
-                it.addObserver(vedtaksperiodeProbe)
+        private fun <Hendelse: ArbeidstakerHendelse> håndter(hendelse: Hendelse, handler: (Person, Hendelse) -> Unit) {
+            person(hendelse).also {
+                handler(it, hendelse)
+                finalize(it, hendelse)
             }
-        }
-
-        private fun finalize(hendelse: ArbeidstakerHendelse) {
-            if (!hendelse.hasMessages()) return
-            if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
-            sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
-
-            behovMediator.håndter(hendelse)
         }
     }
 
     private class PersonMediator(private val rapidsConnection: RapidsConnection) : PersonObserver {
-
-        override fun personEndret(personEndretEvent: PersonObserver.PersonEndretEvent) {}
 
         override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
             rapidsConnection.publish(påminnelse.fødselsnummer(), påminnelse.toJson())
