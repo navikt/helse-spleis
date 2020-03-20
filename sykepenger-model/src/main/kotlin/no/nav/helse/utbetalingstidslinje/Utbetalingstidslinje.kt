@@ -154,7 +154,7 @@ internal class Utbetalingstidslinje private constructor(
             internal constructor(inntekt: Double, dato: LocalDate, grad: Double) : this(inntekt, dato, 0, grad)
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
             internal fun utbetalingslinje() =
-                Utbetalingslinje(dato, dato, inntekt.roundToInt())
+                Utbetalingslinje(dato, dato, utbetaling, grad)
 
             internal fun oppdater(last: Utbetalingslinje) {
                 last.tom = dato

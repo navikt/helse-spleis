@@ -384,7 +384,8 @@ internal class JsonBuilder : PersonVisitor {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
                 "fom" to utbetalingslinje.fom,
                 "tom" to utbetalingslinje.tom,
-                "dagsats" to utbetalingslinje.dagsats
+                "dagsats" to utbetalingslinje.dagsats,
+                "grad" to utbetalingslinje.grad
             )
             utbetalingstidslinjeListe.add(utbetalingstidslinjeMap)
         }

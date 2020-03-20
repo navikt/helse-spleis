@@ -34,6 +34,10 @@ internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslin
         // Ignorer
     }
 
+    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+        helseState.ikkeBetalingsdag()
+    }
+
     private interface HelseState {
         fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag)
         fun ikkeBetalingsdag() {}
@@ -52,7 +56,7 @@ internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslin
         }
 
         override fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-            if (utbetalingslinjer.last().dagsats == dag.utbetaling)
+            if (utbetalingslinjer.last().dagsats == dag.utbetaling && utbetalingslinjer.last().grad == dag.grad)
                 dag.oppdater(utbetalingslinjer.last())
             else
                 utbetalingslinjer.add(dag.utbetalingslinje())
