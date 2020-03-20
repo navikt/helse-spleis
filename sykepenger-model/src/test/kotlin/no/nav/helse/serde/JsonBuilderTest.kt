@@ -85,11 +85,11 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
 
-        internal fun person(): Person =
+        internal fun person(sendtSøknad: LocalDate = 1.april): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(1.januar, 31.januar))
                 fangeVedtaksperiodeId()
-                håndter(søknad(1.januar, 31.januar))
+                håndter(søknad(1.januar, 31.januar, sendtSøknad.atStartOfDay()))
                 håndter(inntektsmelding(1.januar))
                 håndter(vilkårsgrunnlag)
                 håndter(ytelser)
@@ -97,11 +97,11 @@ internal class JsonBuilderTest {
                 håndter(utbetalt)
             }
 
-        internal fun ingenBetalingsperson(): Person =
+        internal fun ingenBetalingsperson(sendtSøknad: LocalDate = 1.april): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(1.januar, 9.januar))
                 fangeVedtaksperiodeId()
-                håndter(søknad(1.januar, 9.januar))
+                håndter(søknad(1.januar, 9.januar, sendtSøknad.atStartOfDay()))
                 håndter(inntektsmelding(1.januar))
                 håndter(vilkårsgrunnlag)
                 håndter(ytelser)
@@ -125,7 +125,7 @@ internal class JsonBuilderTest {
             sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
-        private fun søknad(fom: LocalDate, tom: LocalDate) = Søknad(
+        private fun søknad(fom: LocalDate, tom: LocalDate, sendtSøknad: LocalDateTime) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = fnr,
             aktørId = aktørId,
@@ -134,7 +134,7 @@ internal class JsonBuilderTest {
                 Søknad.Periode.Sykdom(fom, tom, 100)
             ),
             harAndreInntektskilder = false,
-            sendtTilNAV = 1.april.atStartOfDay()
+            sendtTilNAV = sendtSøknad
         )
 
         private fun inntektsmelding(fom: LocalDate) = Inntektsmelding(

@@ -308,6 +308,13 @@ internal class SpeilBuilder : PersonVisitor {
 
             avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
         }
+
+        override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+            val foreldetDagMap = mutableMapOf<String, Any?>()
+            utbetalingstidslinjeMap.add(foreldetDagMap)
+
+            foreldetDagMap.putAll(UtbetalingsdagReflect(dag, TypeData.ForeldetDag).toMap())
+        }
     }
 
 

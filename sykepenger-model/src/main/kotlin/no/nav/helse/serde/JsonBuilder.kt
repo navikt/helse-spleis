@@ -330,6 +330,13 @@ internal class JsonBuilder : PersonVisitor {
             avvistDagMap.putAll(AvvistdagReflect(dag).toMap())
         }
 
+        override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+            val foreldetDagMap = mutableMapOf<String, Any?>()
+            dager.add(foreldetDagMap)
+
+            foreldetDagMap.putAll(UtbetalingsdagReflect(dag, TypeData.ForeldetDag).toMap())
+        }
+
         override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
             popState()
         }

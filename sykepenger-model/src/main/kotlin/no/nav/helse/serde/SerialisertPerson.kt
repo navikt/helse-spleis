@@ -146,6 +146,9 @@ class SerialisertPerson(val json: String) {
                     ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.UkjentDag -> {
                         Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
                     }
+                    ArbeidsgiverData.UtbetalingstidslinjeData.TypeData.ForeldetDag -> {
+                        Utbetalingsdag.ForeldetDag(inntekt = it.inntekt, dato = it.dato)
+                    }
                 }
             }
             .toMutableList())
@@ -366,7 +369,8 @@ internal data class PersonData(
                 Arbeidsdag,
                 Fridag,
                 AvvistDag,
-                UkjentDag
+                UkjentDag,
+                ForeldetDag
             }
 
             data class UtbetalingsdagData(

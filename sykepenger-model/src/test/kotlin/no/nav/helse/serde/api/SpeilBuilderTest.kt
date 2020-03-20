@@ -5,9 +5,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.serde.JsonBuilderTest.Companion.ingenBetalingsperson
 import no.nav.helse.serde.JsonBuilderTest.Companion.person
 import no.nav.helse.serde.PersonVisitorProxy
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -59,6 +57,29 @@ internal class SpeilBuilderTest {
         )
         assertEquals(
             9.januar,
+            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
+        )
+    }
+
+    @Test
+    internal fun `person med foreldet dager`() {
+        val person = person(1.juni)
+        val jsonBuilder = SpeilBuilder()
+        person.accept(
+            DayPadderProxy(
+                target = jsonBuilder,
+                leftPadWithDays = 1.januar.minusDays(30).datesUntil(1.januar).toList(),
+                rightPadWithDays = 1.februar.datesUntil(1.mars).toList()
+            )
+        )
+
+        val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
+        assertEquals(
+            1.januar,
+            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].first()["dato"].asText())
+        )
+        assertEquals(
+            31.januar,
             LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
         )
     }

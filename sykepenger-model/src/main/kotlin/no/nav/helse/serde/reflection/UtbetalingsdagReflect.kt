@@ -1,6 +1,5 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
