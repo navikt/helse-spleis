@@ -18,8 +18,11 @@ import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.sykepengesoknad.dto.*
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,7 +31,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class HappyCaseTest {
+internal abstract class AbstractEndToEndTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
@@ -40,31 +43,11 @@ internal class HappyCaseTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private val testRapid = TestRapid()
+    protected val testRapid = TestRapid()
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
     private lateinit var helseBuilder: HelseBuilder
-
-    @Test
-    fun `påminnelse for vedtaksperiode som ikke finnes`() {
-        sendNyPåminnelse()
-        assertEquals(1, testRapid.inspektør.antall())
-        assertEquals("vedtaksperiode_ikke_funnet", testRapid.inspektør.melding(0).path("@event_name").asText())
-    }
-
-    @Test
-    fun `ingen historie med Søknad først`() {
-        sendNySøknad(0, SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelserUtenHistorikk(0)
-        sendManuellSaksbehandling(0)
-        sendUtbetaling(0)
-
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
-    }
 
     @BeforeAll
     internal fun setupAll() {
@@ -105,7 +88,7 @@ internal class HappyCaseTest {
             maxLifetime = 30001
         }
 
-    private fun sendNySøknad(vedtaksperiodeIndeks: Int, vararg perioder: SoknadsperiodeDTO) {
+    protected fun sendNySøknad(vararg perioder: SoknadsperiodeDTO) {
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
             id = UUID.randomUUID().toString(),
@@ -131,7 +114,7 @@ internal class HappyCaseTest {
         }.toString())
     }
 
-    private fun sendSøknad(vedtaksperiodeIndeks: Int, vararg perioder: SoknadsperiodeDTO) {
+    protected fun sendSøknad(vedtaksperiodeIndeks: Int, perioder: List<SoknadsperiodeDTO>, egenmeldinger: List<PeriodeDTO> = emptyList()) {
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
@@ -147,7 +130,7 @@ internal class HappyCaseTest {
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
             sendtNav = perioder.maxBy { it.tom!! }?.tom?.atStartOfDay(),
-            egenmeldinger = emptyList(),
+            egenmeldinger = egenmeldinger,
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()
@@ -160,7 +143,7 @@ internal class HappyCaseTest {
         }.toString())
     }
 
-    private fun sendInnteksmelding(
+    protected fun sendInnteksmelding(
         vedtaksperiodeIndeks: Int,
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate
@@ -221,7 +204,7 @@ internal class HappyCaseTest {
         )
     )
 
-    private fun sendNyPåminnelse() {
+    protected fun sendNyPåminnelse() {
         objectMapper.writeValueAsString(
             mapOf(
                 "@id" to UUID.randomUUID().toString(),
@@ -240,7 +223,7 @@ internal class HappyCaseTest {
         ).also { testRapid.sendTestMessage(it) }
     }
 
-    private fun sendManuellSaksbehandling(vedtaksperiodeIndeks: Int, godkjent: Boolean = true) {
+    protected fun sendManuellSaksbehandling(vedtaksperiodeIndeks: Int, godkjent: Boolean = true) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
         sendGeneriskBehov(
             vedtaksperiodeIndeks = vedtaksperiodeIndeks,
@@ -257,7 +240,7 @@ internal class HappyCaseTest {
         )
     }
 
-    private fun sendYtelserUtenHistorikk(vedtaksperiodeIndeks: Int) {
+    protected fun sendYtelserUtenHistorikk(vedtaksperiodeIndeks: Int) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         sendGeneriskBehov(
@@ -270,7 +253,7 @@ internal class HappyCaseTest {
         )
     }
 
-    private fun sendVilkårsgrunnlag(vedtaksperiodeIndeks: Int, egenAnsatt: Boolean = false, inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT.toDouble() }, opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(Triple(ORGNUMMER, 1.januar(2010), null))) {
+    protected fun sendVilkårsgrunnlag(vedtaksperiodeIndeks: Int, egenAnsatt: Boolean = false, inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT.toDouble() }, opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(Triple(ORGNUMMER, 1.januar(2010), null))) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
@@ -298,7 +281,7 @@ internal class HappyCaseTest {
         )
     }
 
-    private fun sendUtbetaling(vedtaksperiodeIndeks: Int, utbetalingOK: Boolean = true) {
+    protected fun sendUtbetaling(vedtaksperiodeIndeks: Int, utbetalingOK: Boolean = true) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
         sendGeneriskBehov(
             vedtaksperiodeIndeks = vedtaksperiodeIndeks,
@@ -315,11 +298,11 @@ internal class HappyCaseTest {
         )
     }
 
-    private fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
+    protected fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
         assertEquals(tilstand.toList(), testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)))
     }
 
-    private class TestRapid() : RapidsConnection() {
+    protected class TestRapid() : RapidsConnection() {
         private val context = TestContext()
         private val messages = mutableListOf<Pair<String?, String>>()
         internal val inspektør get() = RapidInspektør(messages.toList())
@@ -355,14 +338,11 @@ internal class HappyCaseTest {
         }
     }
 
-    private class RapidInspektør(private val messages: List<Pair<String?, String>>) {
+    protected class RapidInspektør(private val messages: List<Pair<String?, String>>) {
         private val jsonmeldinger = mutableMapOf<Int, JsonNode>()
-        private val vedtaksperiodeIder get() = mutableMapOf<Int, UUID>().apply {
-            var vedtaksperiodeteller = 0
+        private val vedtaksperiodeIder get() = mutableSetOf<UUID>().apply {
             events("vedtaksperiode_endret") {
-                val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
-                this.putIfAbsent(vedtaksperiodeteller, id)
-                vedtaksperiodeteller += 1
+                this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
             }
         }
         private val tilstander get() = mutableMapOf<UUID, MutableList<String>>().apply {
@@ -387,10 +367,12 @@ internal class HappyCaseTest {
             if (name == message.path("@event_name").asText()) onEach(message)
         }
 
+        val vedtaksperiodeteller get() = vedtaksperiodeIder.size
+
         fun melding(indeks: Int) = jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
         fun antall() = messages.size
 
-        fun vedtaksperiodeId(indeks: Int) = requireNotNull(vedtaksperiodeIder[indeks]) { "Fant ikke vedtaksperiode" }
+        fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it == behovtype } ?: false
     }

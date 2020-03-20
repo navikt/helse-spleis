@@ -17,6 +17,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
+    private val sykdomshistorier = mutableMapOf<Int, Sykdomshistorikk>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
@@ -69,6 +70,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        sykdomshistorier[vedtaksperiodeindeks] = sykdomshistorikk
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty())
             this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
@@ -98,8 +100,11 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         )
     }
 
-    internal val vedtaksperiodeTeller get() = tilstander.size
+    internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
+    internal fun sykdomshistorikk(indeks: Int) = sykdomshistorier[indeks] ?: Assertions.fail(
+        "Missing collection initialization"
+    )
     internal fun tilstand(indeks: Int) = tilstander[indeks] ?: Assertions.fail(
         "Missing collection initialization"
     )
