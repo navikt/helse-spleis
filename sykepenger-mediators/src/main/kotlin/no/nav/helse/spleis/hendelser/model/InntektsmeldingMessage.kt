@@ -65,6 +65,7 @@ internal class InntektsmeldingMessage(
     )
 
     fun asSpeilDTO() = HendelseDTO.InntektsmeldingDTO(
+        hendelseId = this.id,
         beregnetInntekt = beregnetInntekt,
         førsteFraværsdag = førsteFraværsdag,
         mottattDato = mottattDato

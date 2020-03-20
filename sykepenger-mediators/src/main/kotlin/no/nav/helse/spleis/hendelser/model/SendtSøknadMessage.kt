@@ -74,6 +74,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     private fun harAndreInntektskilder() = this["andreInntektskilder"].isArray && !this["andreInntektskilder"].isEmpty
 
     fun asSpeilDTO(): HendelseDTO = HendelseDTO.SendtSøknadDTO(
+        hendelseId = id,
         rapportertdato = sendtNav,
         sendtNav = sendtNav,
         fom = søknadFom,

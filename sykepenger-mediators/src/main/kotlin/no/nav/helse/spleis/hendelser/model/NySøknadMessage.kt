@@ -50,6 +50,7 @@ internal class NySøknadMessage(
     )
 
     internal fun asSpeilDTO() = NySøknadDTO(
+        hendelseId = id,
         rapportertdato = rapportertdato,
         fom = søknadFom,
         tom = søknadTom

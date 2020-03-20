@@ -11,12 +11,12 @@ import no.nav.helse.person.*
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
-import no.nav.helse.testhelpers.mai
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
@@ -87,26 +87,26 @@ internal class JsonBuilderTest {
 
         internal fun person(sendtSøknad: LocalDate = 1.april): Person =
             Person(aktørId, fnr).apply {
-                håndter(sykmelding(1.januar, 31.januar))
+                håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiodeId()
-                håndter(søknad(1.januar, 31.januar, sendtSøknad.atStartOfDay()))
-                håndter(inntektsmelding(1.januar))
-                håndter(vilkårsgrunnlag)
-                håndter(ytelser)
-                håndter(manuellSaksbehandling)
-                håndter(utbetalt)
+                håndter(søknad(fom = 1.januar, tom = 31.januar, sendtSøknad = sendtSøknad.atStartOfDay()))
+                håndter(inntektsmelding(fom = 1.januar))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt())
             }
 
         internal fun ingenBetalingsperson(sendtSøknad: LocalDate = 1.april): Person =
             Person(aktørId, fnr).apply {
-                håndter(sykmelding(1.januar, 9.januar))
+                håndter(sykmelding(fom = 1.januar, tom = 9.januar))
                 fangeVedtaksperiodeId()
-                håndter(søknad(1.januar, 9.januar, sendtSøknad.atStartOfDay()))
-                håndter(inntektsmelding(1.januar))
-                håndter(vilkårsgrunnlag)
-                håndter(ytelser)
-                håndter(manuellSaksbehandling)
-                håndter(utbetalt)
+                håndter(søknad(fom = 1.januar, tom = 9.januar, sendtSøknad = sendtSøknad.atStartOfDay()))
+                håndter(inntektsmelding(fom = 1.januar))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt())
             }
 
         private fun Person.fangeVedtaksperiodeId() {
@@ -117,16 +117,25 @@ internal class JsonBuilderTest {
             })
         }
 
-        private fun sykmelding(fom: LocalDate, tom: LocalDate) = Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+        internal fun sykmelding(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar
+        ) = Sykmelding(
+            meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
             sykeperioder = listOf(Triple(fom, tom, 100))
         )
 
-        private fun søknad(fom: LocalDate, tom: LocalDate, sendtSøknad: LocalDateTime) = Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
+        internal fun søknad(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON)
+        ) = Søknad(
+            meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
@@ -137,8 +146,11 @@ internal class JsonBuilderTest {
             sendtTilNAV = sendtSøknad
         )
 
-        private fun inntektsmelding(fom: LocalDate) = Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+        internal fun inntektsmelding(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate
+        ) = Inntektsmelding(
+            meldingsreferanseId = hendelseId,
             refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fnr,
@@ -149,84 +161,80 @@ internal class JsonBuilderTest {
             ferieperioder = emptyList()
         )
 
-        private val vilkårsgrunnlag
-            get() = Vilkårsgrunnlag(
-                vedtaksperiodeId = vedtaksperiodeId,
-                aktørId = aktørId,
-                fødselsnummer = fnr,
-                orgnummer = orgnummer,
-                inntektsmåneder = (1.rangeTo(12)).map {
-                    Vilkårsgrunnlag.Måned(
-                        årMåned = YearMonth.of(2018, it),
-                        inntektsliste = listOf(31000.0)
-                    )
-                },
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        orgnummer,
-                        1.januar(2017)
-                    )
-                ),
-                erEgenAnsatt = false
-            )
-
-        private val ytelser
-            get() = Aktivitetslogg().let {
-                Ytelser(
-                    meldingsreferanseId = UUID.randomUUID(),
-                    aktørId = aktørId,
-                    fødselsnummer = fnr,
-                    organisasjonsnummer = orgnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingshistorikk = Utbetalingshistorikk(
-                        ukjentePerioder = emptyList(),
-                        utbetalinger = listOf(
-                            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                                fom = 1.januar.minusYears(1),
-                                tom = 31.januar.minusYears(1),
-                                dagsats = 31000
-                            )
-                        ),
-                        inntektshistorikk = emptyList(),
-                        graderingsliste = emptyList(),
-                        aktivitetslogg = it
-                    ),
-                    foreldrepermisjon = Foreldrepermisjon(
-                        foreldrepengeytelse = Periode(
-                            fom = 1.januar.minusYears(2),
-                            tom = 31.januar.minusYears(2)
-                        ),
-                        svangerskapsytelse = Periode(
-                            fom = 1.juli.minusYears(2),
-                            tom = 31.juli.minusYears(2)
-                        ),
-                        aktivitetslogg = it
-                    ),
-                    aktivitetslogg = it
+        internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            inntektsmåneder = (1.rangeTo(12)).map {
+                Vilkårsgrunnlag.Måned(
+                    årMåned = YearMonth.of(2018, it),
+                    inntektsliste = listOf(31000.0)
                 )
-            }
+            },
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer,
+                    1.januar(2017)
+                )
+            ),
+            erEgenAnsatt = false
+        )
 
-        private val manuellSaksbehandling
-            get() = ManuellSaksbehandling(
-                vedtaksperiodeId = vedtaksperiodeId,
+        internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
+            Ytelser(
+                meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
-                utbetalingGodkjent = true,
-                saksbehandler = "en_saksbehandler_ident",
-                godkjenttidspunkt = LocalDateTime.now()
-            )
-
-        private val utbetalt get() =
-            Utbetaling(
                 vedtaksperiodeId = vedtaksperiodeId,
-                aktørId = aktørId,
-                fødselsnummer = fnr,
-                orgnummer = orgnummer,
-                utbetalingsreferanse = "ref",
-                status = Utbetaling.Status.FERDIG,
-                melding = "hei"
+                utbetalingshistorikk = Utbetalingshistorikk(
+                    ukjentePerioder = emptyList(),
+                    utbetalinger = listOf(
+                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                            fom = 1.januar.minusYears(1),
+                            tom = 31.januar.minusYears(1),
+                            dagsats = 31000
+                        )
+                    ),
+                    inntektshistorikk = emptyList(),
+                    graderingsliste = emptyList(),
+                    aktivitetslogg = it
+                ),
+                foreldrepermisjon = Foreldrepermisjon(
+                    foreldrepengeytelse = Periode(
+                        fom = 1.januar.minusYears(2),
+                        tom = 31.januar.minusYears(2)
+                    ),
+                    svangerskapsytelse = Periode(
+                        fom = 1.juli.minusYears(2),
+                        tom = 31.juli.minusYears(2)
+                    ),
+                    aktivitetslogg = it
+                ),
+                aktivitetslogg = it
             )
+        }
+
+        internal fun manuellSaksbehandling(vedtaksperiodeId: String) = ManuellSaksbehandling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            utbetalingGodkjent = true,
+            saksbehandler = "en_saksbehandler_ident",
+            godkjenttidspunkt = LocalDateTime.now()
+        )
+
+        private fun utbetalt() = Utbetaling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            utbetalingsreferanse = "ref",
+            status = Utbetaling.Status.FERDIG,
+            melding = "hei"
+        )
     }
 }
 

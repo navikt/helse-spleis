@@ -127,6 +127,10 @@ internal class SpeilBuilder : PersonVisitor {
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
 
+    override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        currentState.postVisitSykdomshistorikk(sykdomshistorikk)
+    }
+
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
         hendelseReferanser.add(element.hendelseId)
         currentState.preVisitSykdomshistorikkElement(element)
@@ -333,8 +337,11 @@ internal class SpeilBuilder : PersonVisitor {
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
+            val hendelserForVedtaksperiode = mutableSetOf<UUID>()
             vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinjeListe
-            pushState(SykdomshistorikkState(sykdomstidslinjeListe))
+            vedtaksperiodeMap["hendelser"] = hendelserForVedtaksperiode
+            sykdomshistorikk.sykdomstidslinje().accept(SykdomstidslinjeState(sykdomstidslinjeListe))
+            pushState(FinnHendelserState(hendelserForVedtaksperiode))
         }
 
         override fun preVisitUtbetalingslinjer() {
@@ -368,15 +375,13 @@ internal class SpeilBuilder : PersonVisitor {
         }
     }
 
-    private inner class SykdomshistorikkState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+    private inner class FinnHendelserState(
+        private val hendelser: MutableSet<UUID>
+    ) :
         JsonState {
 
-        override fun preVisitBeregnetSykdomstidslinje() {
-            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
-        }
-
-        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-            popState()
+        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            hendelser.add(element.hendelseId)
         }
 
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

@@ -1,15 +1,28 @@
 package no.nav.helse.serde.api
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.JsonBuilderTest.Companion.ingenBetalingsperson
+import no.nav.helse.serde.JsonBuilderTest.Companion.inntektsmelding
+import no.nav.helse.serde.JsonBuilderTest.Companion.manuellSaksbehandling
 import no.nav.helse.serde.JsonBuilderTest.Companion.person
+import no.nav.helse.serde.JsonBuilderTest.Companion.sykmelding
+import no.nav.helse.serde.JsonBuilderTest.Companion.søknad
+import no.nav.helse.serde.JsonBuilderTest.Companion.vilkårsgrunnlag
+import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
 import no.nav.helse.serde.PersonVisitorProxy
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.juni
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 import kotlin.streams.toList
 
 
@@ -84,6 +97,60 @@ internal class SpeilBuilderTest {
         )
     }
 
+    @Test
+    fun `maybe`() {
+        val aktørId = "1234"
+        val fnr = "5678"
+        var vedtaksperiodeIder: Set<String>
+        val speilBuilder = SpeilBuilder()
+        val hendelseIderVedtak1 = (0.until(3)).map { UUID.randomUUID() }
+        val hendelseIderVedtak2 = (0.until(3)).map { UUID.randomUUID() }
+
+        val person = Person(aktørId, fnr).apply {
+
+            håndter(sykmelding(hendelseId = hendelseIderVedtak1[0], fom = 1.januar, tom = 31.januar))
+            håndter(søknad(hendelseId = hendelseIderVedtak1[1], fom = 1.januar, tom = 31.januar))
+            håndter(inntektsmelding(hendelseId = hendelseIderVedtak1[2], fom = 1.januar))
+
+            vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+
+            håndter(sykmelding(hendelseId = hendelseIderVedtak2[0], fom = 1.februar, tom = 14.februar))
+            håndter(søknad(hendelseId = hendelseIderVedtak2[1], fom = 1.februar, tom = 14.februar))
+            håndter(inntektsmelding(hendelseId = hendelseIderVedtak2[2], fom = 1.februar))
+
+            vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+        }
+
+        person.accept(speilBuilder)
+
+        val (json, _) = serializePersonForSpeil(person)
+
+        val vedtaksperioder = json["arbeidsgivere"][0]["vedtaksperioder"]
+
+        assertEquals(2, vedtaksperioder.size())
+        assertEquals(vedtaksperioder[0]["hendelser"].sortedUUIDs(), hendelseIderVedtak1.sorted())
+        assertEquals(vedtaksperioder[1]["hendelser"].sortedUUIDs(), hendelseIderVedtak2.sorted())
+
+    }
+
+    fun JsonNode.sortedUUIDs() = map(JsonNode::asText).map(UUID::fromString).sorted()
+
+    fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
+        accept(object : PersonVisitor {
+            override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+                add(id.toString())
+            }
+        })
+    }
+
     class DayPadderProxy(
         target: PersonVisitor,
         private val leftPadWithDays: List<LocalDate>,
@@ -119,6 +186,6 @@ internal class SpeilBuilderTest {
         }
     }
 
-
+    companion object {}
 }
 
