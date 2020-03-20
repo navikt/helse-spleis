@@ -1,9 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
@@ -26,11 +24,6 @@ internal class SykmeldingTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
-    @AfterEach
-    internal fun reset() {
-        FeatureToggle.støtterGradertSykdom = false
-    }
-
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
@@ -38,8 +31,7 @@ internal class SykmeldingTest {
     }
 
     @Test
-    internal fun `sykdomsgrad under 100% støttes (epic 18)`() {
-        FeatureToggle.støtterGradertSykdom = true
+    internal fun `sykdomsgrad under 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
         assertFalse(sykmelding.valider().hasErrors())
     }

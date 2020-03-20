@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -30,8 +29,6 @@ class Sykmelding(
 
     override fun melding(klassName: String) = "Sykmelding"
 
-    internal fun hundreProsentSykmeldt() = sykeperioder.all { it.kanBehandles() } // Temporary until partial sickness supported
-
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() = sykeperioder.map(Sykeperiode::sykdomstidslinje).merge(IdentiskDagTurnering)
@@ -52,7 +49,6 @@ class Sykmelding(
         private val tom: LocalDate,
         private val sykdomsgrad: Int
     ) {
-        internal fun kanBehandles() = FeatureToggle.støtterGradertSykdom || sykdomsgrad == 100
 
         internal fun sykdomstidslinje() =
             ConcreteSykdomstidslinje.sykedager(fom, tom, sykdomsgrad.toDouble(), SykmeldingDagFactory)

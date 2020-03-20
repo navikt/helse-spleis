@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
@@ -11,7 +10,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
@@ -38,11 +36,6 @@ internal abstract class AbstractEndToEndTest {
     internal fun setup() {
         person = Person(UNG_PERSON_FNR_2018, AKTØRID)
         observatør = TestObservatør().also { person.addObserver(it) }
-    }
-
-    @AfterEach
-    internal fun reset() {
-        FeatureToggle.støtterGradertSykdom = false
     }
 
     protected fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {

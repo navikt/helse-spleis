@@ -1,12 +1,10 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,22 +26,11 @@ internal class SøknadTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
-    @AfterEach
-    internal fun reset() {
-        FeatureToggle.støtterGradertSykdom = false
-    }
-
     @Test
     internal fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100))
         assertFalse(søknad.valider().hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
-    }
-
-    @Test
-    internal fun `sykdomsgrad under 100% støttes ikke`() {
-        søknad(Sykdom(1.januar, 10.januar, 100), Sykdom(12.januar, 16.januar, 50))
-        assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
@@ -61,31 +48,16 @@ internal class SøknadTest {
     }
 
     @Test
-    internal fun `sykdomsgrad ikke 100`() {
-        søknad(Sykdom(1.januar, 10.januar, 50))
-        assertTrue(søknad.valider().hasErrors())
-    }
-
-    @Test
-    internal fun `sykdom faktiskgrad ikke 100`() {
-        søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
-        assertTrue(søknad.valider().hasErrors())
-    }
-
-    @Test
-    internal fun `sykdomsgrad ikke 100 støttes når støttes (epic 18)`() {
-        FeatureToggle.støtterGradertSykdom = true
+    internal fun `sykdomsgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 50))
         assertFalse(søknad.valider().hasErrors())
     }
 
     @Test
-    internal fun `sykdom faktiskgrad ikke 100 støttes når støttes (epic 18+)`() {
-        FeatureToggle.støtterGradertSykdom = true
+    internal fun `sykdom faktiskgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 100, 50.0))
         assertFalse(søknad.valider().hasErrors())
     }
-
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {

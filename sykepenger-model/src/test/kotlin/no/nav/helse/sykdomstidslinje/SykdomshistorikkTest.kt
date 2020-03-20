@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -35,11 +34,6 @@ internal class SykdomshistorikkTest {
         historikk = Sykdomshistorikk()
     }
 
-    @AfterEach
-    internal fun reset() {
-        FeatureToggle.støtterGradertSykdom = false
-    }
-
     @Test
     internal fun `Sykmelding mottatt`() {
         historikk.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
@@ -66,7 +60,6 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Gradert sykmelding mottatt`() {
-        FeatureToggle.støtterGradertSykdom = true
         historikk.håndter(sykmelding(Triple(1.januar, 5.januar, 50)))
         assertEquals(1, historikk.size)
         assertEquals(5, historikk.sykdomstidslinje().length())
@@ -78,7 +71,6 @@ internal class SykdomshistorikkTest {
 
     @Test
     internal fun `Gradert søknad mottatt`() {
-        FeatureToggle.støtterGradertSykdom = true
         historikk.håndter(sykmelding(Triple(8.januar, 12.januar, 50)))
         historikk.håndter(
             søknad(

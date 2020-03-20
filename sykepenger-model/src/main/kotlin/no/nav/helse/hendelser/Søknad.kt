@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
@@ -97,11 +96,6 @@ class Søknad constructor(
         ) : Periode(fom, tom) {
             override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
                 ConcreteSykdomstidslinje.sykedager(fom, tom, avskjæringsdato, faktiskGrad, SøknadDagFactory)
-
-            override fun valider(søknad: Søknad) {
-                if (grad != 100 && (!FeatureToggle.støtterGradertSykdom)) søknad.error("Søknaden inneholder gradert sykdomsperiode")
-                if (faktiskGrad != grad.toDouble() && (!FeatureToggle.støtterGradertSykdom)) søknad.error("Søker oppgir gradert sykdomsperiode")
-            }
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {

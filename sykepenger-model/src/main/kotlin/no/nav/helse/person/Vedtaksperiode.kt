@@ -106,12 +106,6 @@ internal class Vedtaksperiode private constructor(
         sykmelding.kontekst(this)
         valider(sykmelding) {
             tilstand.håndter(this, sykmelding)
-            if (!sykmelding.hundreProsentSykmeldt()) {
-                // Remove when partial sickness supported...
-                sykmelding.error("Sykmeldingen inneholder graderte sykeperioder")
-                tilstand(sykmelding, TilInfotrygd)
-            }
-
         }
     }
 

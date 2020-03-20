@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.FeatureToggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
@@ -734,7 +733,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     internal fun `Sykmelding med gradering`() {
-        FeatureToggle.støtterGradertSykdom = true
         håndterSykmelding(Triple(3.januar, 26.januar, 50))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 50, 50.00))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
