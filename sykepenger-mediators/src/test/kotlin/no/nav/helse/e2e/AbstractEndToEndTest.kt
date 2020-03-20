@@ -12,7 +12,11 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.HelseBuilder
+import no.nav.helse.spleis.HendelseMediator
+import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.LagrePersonDao
+import no.nav.helse.spleis.db.LagreUtbetalingDao
+import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
@@ -47,7 +51,7 @@ internal abstract class AbstractEndToEndTest {
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
-    private lateinit var helseBuilder: HelseBuilder
+    private lateinit var hendelseMediator: HendelseMediator
 
     @BeforeAll
     internal fun setupAll() {
@@ -55,7 +59,14 @@ internal abstract class AbstractEndToEndTest {
         postgresConnection = embeddedPostgres.postgresDatabase.connection
         val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
         dataSource = HikariDataSource(hikariConfig)
-        helseBuilder = HelseBuilder(dataSource, testRapid)
+
+        hendelseMediator = HendelseMediator(
+            rapidsConnection = testRapid,
+            personRepository = PersonPostgresRepository(dataSource),
+            lagrePersonDao = LagrePersonDao(dataSource),
+            lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
+            hendelseRecorder = HendelseRecorder(dataSource)
+        )
     }
 
     @AfterAll

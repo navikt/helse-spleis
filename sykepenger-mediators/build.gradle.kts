@@ -29,7 +29,6 @@ dependencies {
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
 
     testImplementation("org.awaitility:awaitility:3.1.6")
-    testImplementation("no.nav:kafka-embedded-env:2.3.0")
 
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {

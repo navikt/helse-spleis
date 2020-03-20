@@ -43,8 +43,9 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         lagreMelding(Meldingstype.UTBETALING, message)
     }
 
-    fun hentHendelser(hendelseIder: Set<UUID>) =
-        using(sessionOf(dataSource)) { session ->
+    fun hentHendelser(hendelseIder: Set<UUID>): List<Pair<Meldingstype, String>> {
+        if (hendelseIder.isEmpty()) return emptyList()
+        return using(sessionOf(dataSource)) { session ->
             session.run(queryOf(
                 "SELECT * FROM melding WHERE melding_id in (${hendelseIder.joinToString(",") { "?" }})",
                 *hendelseIder.map { it.toString() }.toTypedArray()
@@ -52,6 +53,7 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
                 Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
             }.asList)
         }
+    }
 
     private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {
         using(sessionOf(dataSource)) { session ->
