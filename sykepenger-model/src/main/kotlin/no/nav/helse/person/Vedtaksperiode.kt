@@ -630,7 +630,6 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
                     )
                 }
-                it.valider { HarArbeidsgivertidslinje(arbeidsgiver) }
                 var engineForTimeline: ByggUtbetalingstidlinjer? = null
                 it.valider {
                     ByggUtbetalingstidlinjer(

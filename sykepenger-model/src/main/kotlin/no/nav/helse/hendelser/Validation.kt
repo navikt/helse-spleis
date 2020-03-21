@@ -37,7 +37,7 @@ internal interface Valideringssteg {
 
 internal class ValiderYtelser(private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid() =
-        !ytelser.valider().let { it.hasBehov() }
+        !ytelser.valider().hasBehov()
 }
 
 internal class Overlappende(
@@ -54,11 +54,6 @@ internal class HarInntektshistorikk(
 ) : Valideringssteg {
     override fun isValid() = arbeidsgiver.inntekt(førsteDag) != null
     override fun feilmelding() = "Vi har ikke inntektshistorikken vi trenger"
-}
-
-internal class HarArbeidsgivertidslinje(private val arbeidsgiver: Arbeidsgiver) : Valideringssteg {
-    override fun isValid() = arbeidsgiver.sykdomstidslinje() != null
-    override fun feilmelding() = "Arbeidsgiver har ikke en sykdomstidslinje"
 }
 
 internal class ByggUtbetalingstidlinjer(
