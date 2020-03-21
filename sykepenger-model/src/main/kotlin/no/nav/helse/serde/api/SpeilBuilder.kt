@@ -328,8 +328,13 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>
     ) : JsonState {
+        private val hendelser = mutableSetOf<UUID>()
+        private val beregnetSykdomstidslinje = mutableListOf<MutableMap<String, Any>>()
+
         init {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap(arbeidsgiver))
+            vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
+            vedtaksperiodeMap["hendelser"] = hendelser
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -337,12 +342,11 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            val sykdomstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
-            val hendelserForVedtaksperiode = mutableSetOf<UUID>()
-            vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinjeListe
-            vedtaksperiodeMap["hendelser"] = hendelserForVedtaksperiode
-            sykdomshistorikk.sykdomstidslinje().accept(SykdomstidslinjeState(sykdomstidslinjeListe))
-            pushState(FinnHendelserState(hendelserForVedtaksperiode))
+            pushState(SykdomshistorikkState(hendelser, beregnetSykdomstidslinje))
+        }
+
+        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            hendelser.add(element.hendelseId)
         }
 
         override fun preVisitUtbetalingslinjer() {
@@ -377,13 +381,21 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         }
     }
 
-    private inner class FinnHendelserState(
-        private val hendelser: MutableSet<UUID>
-    ) :
-        JsonState {
+    private inner class SykdomshistorikkState(
+        private val hendelser: MutableSet<UUID>,
+        private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any>>
+    ) : JsonState {
 
         override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
             hendelser.add(element.hendelseId)
+        }
+
+        override fun preVisitBeregnetSykdomstidslinje() {
+            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
+        }
+
+        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+            popState()
         }
 
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -396,7 +408,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         override fun postVisitBeregnetSykdomstidslinje() {}
     }
 
-    private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
+    private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any>>) :
         JsonState {
 
         override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) =
