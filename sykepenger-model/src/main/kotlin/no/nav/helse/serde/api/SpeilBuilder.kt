@@ -18,27 +18,25 @@ import java.util.*
 
 
 fun serializePersonForSpeil(person: Person): Pair<ObjectNode, Set<UUID>> {
-    val jsonBuilder = SpeilBuilder()
+    val hendelseReferanser = mutableSetOf<UUID>()
+    val jsonBuilder = SpeilBuilder(hendelseReferanser)
     person.accept(jsonBuilder)
-    return jsonBuilder.toJson() to jsonBuilder.hendelseReferanser
+    return jsonBuilder.toJson() to hendelseReferanser
 }
 
-internal class SpeilBuilder : PersonVisitor {
+internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSetOf()) : PersonVisitor {
 
     private val stack: Stack<JsonState> = Stack()
-    internal val hendelseReferanser = mutableSetOf<UUID>()
+    private val rootState = Root()
+    private val currentState: JsonState get() = stack.peek()
 
     init {
-        stack.push(Root())
+        stack.push(rootState)
     }
 
-    internal fun toJson() = currentState.toJson()
+    internal fun toJson() = rootState.toJson()
 
-    private val currentState: JsonState
-        get() = stack.peek()
-
-
-    override fun toString() = currentState.toJson().toPrettyString()
+    override fun toString() = rootState.toJson().toPrettyString()
 
     private fun pushState(state: JsonState) {
         currentState.leaving()
@@ -87,7 +85,7 @@ internal class SpeilBuilder : PersonVisitor {
     }
 
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
-        hendelseReferanser.add(inntekt.hendelseId)
+        hendelser.add(inntekt.hendelseId)
         currentState.visitInntekt(inntekt)
     }
 
@@ -135,7 +133,7 @@ internal class SpeilBuilder : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-        hendelseReferanser.add(element.hendelseId)
+        hendelser.add(element.hendelseId)
         currentState.preVisitSykdomshistorikkElement(element)
     }
 
@@ -189,8 +187,6 @@ internal class SpeilBuilder : PersonVisitor {
     private interface JsonState : PersonVisitor {
         fun entering() {}
         fun leaving() {}
-        fun toJson(): ObjectNode =
-            throw RuntimeException("toJson() kan bare kalles på rotnode. Ble kalt på ${toString()}")
     }
 
     private inner class Root : JsonState {
@@ -206,7 +202,7 @@ internal class SpeilBuilder : PersonVisitor {
 
         override fun toString() = personMap.toString()
 
-        override fun toJson() = jacksonObjectMapper()
+        fun toJson() = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
             .valueToTree<ObjectNode>(personMap)
