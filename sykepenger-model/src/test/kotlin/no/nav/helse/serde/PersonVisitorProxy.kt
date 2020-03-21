@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal open class PersonVisitorProxy(protected val target: PersonVisitor) : PersonVisitor {
@@ -232,12 +233,20 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.preVisitSykdomshistorikk(sykdomshistorikk)
     }
 
-    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-        target.preVisitSykdomshistorikkElement(element)
+    override fun preVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {
+        target.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
-    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-        target.postVisitSykdomshistorikkElement(element)
+    override fun postVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {
+        target.postVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
     override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

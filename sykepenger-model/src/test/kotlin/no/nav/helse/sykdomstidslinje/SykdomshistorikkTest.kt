@@ -12,12 +12,12 @@ import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomshistorikkTest {
@@ -243,8 +243,12 @@ internal class SykdomshistorikkTest {
             }
         }
 
-        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-            hendelser.add(element.hendelseId)
+        override fun preVisitSykdomshistorikkElement(
+            element: Sykdomshistorikk.Element,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
+            hendelser.add(id)
         }
     }
 }

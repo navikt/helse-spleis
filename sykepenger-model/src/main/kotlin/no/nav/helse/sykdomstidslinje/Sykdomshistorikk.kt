@@ -43,20 +43,20 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal class Element private constructor(
-        internal val tidsstempel: LocalDateTime,
+        private val hendelseId: UUID,
+        private val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
-        private val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
-        internal val hendelseId: UUID
+        private val beregnetSykdomstidslinje: ConcreteSykdomstidslinje
     ) {
         fun accept(visitor: SykdomshistorikkVisitor) {
-            visitor.preVisitSykdomshistorikkElement(this)
+            visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
             visitor.preVisitHendelseSykdomstidslinje()
             hendelseSykdomstidslinje.accept(visitor)
             visitor.postVisitHendelseSykdomstidslinje()
             visitor.preVisitBeregnetSykdomstidslinje()
             beregnetSykdomstidslinje.accept(visitor)
             visitor.postVisitBeregnetSykdomstidslinje()
-            visitor.postVisitSykdomshistorikkElement(this)
+            visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
         }
 
         companion object {
@@ -69,13 +69,13 @@ internal class Sykdomshistorikk private constructor(
             ): Element {
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
                 return Element(
+                    hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                     beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
-                    ),
-                    hendelseId = hendelse.meldingsreferanseId()
+                    )
                 )
             }
         }

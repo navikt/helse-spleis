@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor {
@@ -52,8 +53,16 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-    fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {}
-    fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {}
+    fun preVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {}
+    fun postVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {}
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
     fun preVisitHendelseSykdomstidslinje() {}
     fun postVisitHendelseSykdomstidslinje() {}

@@ -69,7 +69,7 @@ internal fun createSykdomshistorikkElement(
     hendelseId: UUID
 ) = Sykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje, hendelseId)
+    .call(hendelseId, timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje)
 
 internal fun createUtbetalingstidslinje(
     utbetalingsdager: MutableList<Utbetalingstidslinje.Utbetalingsdag>

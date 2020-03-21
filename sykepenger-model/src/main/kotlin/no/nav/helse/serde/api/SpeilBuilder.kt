@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -132,9 +133,13 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         currentState.postVisitSykdomshistorikk(sykdomshistorikk)
     }
 
-    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-        hendelser.add(element.hendelseId)
-        currentState.preVisitSykdomshistorikkElement(element)
+    override fun preVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {
+        hendelser.add(id)
+        currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
     override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje()
@@ -147,8 +152,12 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
         currentState.postVisitComposite(compositeSykdomstidslinje)
 
-    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) =
-        currentState.postVisitSykdomshistorikkElement(element)
+    override fun postVisitSykdomshistorikkElement(
+        element: Sykdomshistorikk.Element,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
 
     override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
         currentState.postVisitVedtaksperiode(vedtaksperiode, id)
@@ -345,8 +354,12 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             pushState(SykdomshistorikkState(hendelser, beregnetSykdomstidslinje))
         }
 
-        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-            hendelser.add(element.hendelseId)
+        override fun preVisitSykdomshistorikkElement(
+            element: Sykdomshistorikk.Element,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
+            hendelser.add(id)
         }
 
         override fun preVisitUtbetalingslinjer() {
@@ -386,15 +399,23 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any>>
     ) : JsonState {
 
-        override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
-            hendelser.add(element.hendelseId)
+        override fun preVisitSykdomshistorikkElement(
+            element: Sykdomshistorikk.Element,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
+            hendelser.add(id)
         }
 
         override fun preVisitBeregnetSykdomstidslinje() {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
-        override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element) {
+        override fun postVisitSykdomshistorikkElement(
+            element: Sykdomshistorikk.Element,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
             popState()
         }
 
