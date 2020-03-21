@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -93,8 +92,7 @@ internal class Arbeidsgiver private constructor(
         return perioder.any { it.håndter(påminnelse) }
     }
 
-    internal fun sykdomstidslinje(): ConcreteSykdomstidslinje? =
-        Vedtaksperiode.sykdomstidslinje(perioder)
+    internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)

@@ -667,7 +667,7 @@ internal class Vedtaksperiode private constructor(
             sisteHistoriskeSykedag: LocalDate?
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
-                sykdomstidslinje = arbeidsgiver.sykdomstidslinje()!!,
+                sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 sisteDag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
                 sisteNavDagForArbeidsgiverFørPerioden = sisteHistoriskeSykedag,
