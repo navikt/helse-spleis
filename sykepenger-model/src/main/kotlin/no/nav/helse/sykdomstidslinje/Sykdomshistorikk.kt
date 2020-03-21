@@ -14,7 +14,7 @@ internal class Sykdomshistorikk private constructor(
     internal val size get() = elementer.size
     internal fun isEmpty() = elementer.isEmpty()
 
-    internal fun sykdomstidslinje() = elementer.first().beregnetSykdomstidslinje
+    internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(
@@ -45,7 +45,7 @@ internal class Sykdomshistorikk private constructor(
     internal class Element private constructor(
         internal val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
-        internal val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
+        private val beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
         internal val hendelseId: UUID
     ) {
         fun accept(visitor: SykdomshistorikkVisitor) {
@@ -60,6 +60,8 @@ internal class Sykdomshistorikk private constructor(
         }
 
         companion object {
+            fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+
             fun opprett(
                 historikk: Sykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
