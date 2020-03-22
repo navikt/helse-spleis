@@ -131,6 +131,10 @@
                 },
                 {
                     "member": "srvspurv",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspurv",
                     "role": "CONSUMER"
                 },
                 {
