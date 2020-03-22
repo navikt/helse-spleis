@@ -429,6 +429,15 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertInntekt(1153.8)
     }
 
+    @Test
+    fun `feriedag før siste arbeidsgiverperiodedag`() {
+        (15.E + 1.F + 1.E + 10.S).utbetalingslinjer(
+            inntektshistorikk = Inntekthistorikk().apply {
+                add(17.januar, hendelseId, 31000.toBigDecimal())
+            }
+        )
+        assertEquals(18.januar, inspektør.navdager.first().dato)
+    }
 
     private fun assertInntekt(inntekt: Double) {
         inspektør.navdager.forEach { assertEquals(inntekt, it.inntekt) }
@@ -436,12 +445,13 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.sisteDag(),
-        sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null
+        sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null,
+        inntektshistorikk: Inntekthistorikk = inntekthistorikk
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             sykdomstidslinje = this.kutt(sisteDag)!!,
             sisteDag = sisteDag,
-            inntekthistorikk = inntekthistorikk,
+            inntekthistorikk = inntektshistorikk,
             sisteNavDagForArbeidsgiverFørPerioden = sisteNavDagForArbeidsgiverFørPerioden
         ).result()
     }
