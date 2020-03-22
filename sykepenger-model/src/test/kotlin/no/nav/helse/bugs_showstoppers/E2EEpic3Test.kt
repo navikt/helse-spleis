@@ -5,6 +5,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -420,6 +422,43 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+    }
+
+    @Test
+    internal fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
+        håndterSykmelding(Triple(7.januar, 28.januar, 100))
+        håndterSøknad(Sykdom(7.januar, 28.januar, 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
+            ferieperioder = emptyList(),
+            førsteFraværsdag = 9.januar
+        )
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(3, inspektør.sykdomshistorikk.size)
+        assertEquals(22, inspektør.sykdomshistorikk.sykdomstidslinje().length())
+        assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
+        assertEquals(SykHelgedag.Søknad::class, inspektør.sykdomshistorikk.sykdomstidslinje().dag(7.januar)!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, inspektør.sykdomshistorikk.sykdomstidslinje().dag(8.januar)!!::class)
+        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
+        assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
+    }
+
+    @Test
+    internal fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
+        håndterSykmelding(Triple(7.januar, 28.januar, 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
+            ferieperioder = emptyList(),
+            førsteFraværsdag = 9.januar
+        )
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(2, inspektør.sykdomshistorikk.size)
+        assertEquals(22, inspektør.sykdomshistorikk.sykdomstidslinje().length())
+        assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
+        assertEquals(SykHelgedag.Sykmelding::class, inspektør.sykdomshistorikk.sykdomstidslinje().dag(7.januar)!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, inspektør.sykdomshistorikk.sykdomstidslinje().dag(8.januar)!!::class)
+        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
+        assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
     }
 }
 
