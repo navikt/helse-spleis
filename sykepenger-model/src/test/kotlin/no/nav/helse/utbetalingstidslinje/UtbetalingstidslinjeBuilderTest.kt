@@ -6,8 +6,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -436,7 +435,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 add(17.januar, hendelseId, 31000.toBigDecimal())
             }
         )
-        assertEquals(18.januar, inspektør.navdager.first().dato)
+        assertFalse(inspektør.navdager.first().grad.isNaN())
+        assertFalse(0 == inspektør.navdager.first().utbetaling)
+        assertEquals(17.januar, inspektør.navdager.first().dato)
     }
 
     private fun assertInntekt(inntekt: Double) {
