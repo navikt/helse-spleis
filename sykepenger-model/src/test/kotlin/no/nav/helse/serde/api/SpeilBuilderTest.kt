@@ -126,6 +126,18 @@ internal class SpeilBuilderTest {
         assertEquals(vedtaksperioder[1]["hendelser"].sortedUUIDs(), hendelseIderVedtak2.sorted())
     }
 
+    @Test
+    fun `json-en inneholder de feltene Speil forventer`() {
+        val person = person()
+        val (json, _) = serializePersonForSpeil(person)
+
+        assertTrue(json.hasNonNull("aktørId"))
+        assertTrue(json.hasNonNull("fødselsnummer"))
+        assertTrue(json.hasNonNull("arbeidsgivere"))
+
+        assertTrue(json["arbeidsgivere"].first().hasNonNull("organisasjonsnummer"))
+    }
+
     private fun JsonNode.sortedUUIDs() = map(JsonNode::asText).map(UUID::fromString).sorted()
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
