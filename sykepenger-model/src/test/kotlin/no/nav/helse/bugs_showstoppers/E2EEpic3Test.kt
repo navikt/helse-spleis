@@ -501,7 +501,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    //@Disabled
     internal fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
