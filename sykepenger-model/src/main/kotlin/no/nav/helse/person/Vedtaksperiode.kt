@@ -810,5 +810,9 @@ internal class Vedtaksperiode private constructor(
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }
             .map { it.sykdomshistorikk.sykdomstidslinje() }.join()
+
+        fun sorter(perioder: MutableList<Vedtaksperiode>) {
+            perioder.sortBy { it.periode().start }
+        }
     }
 }
