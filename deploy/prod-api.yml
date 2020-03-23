@@ -1,0 +1,53 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: {{app}}
+  namespace: default
+  labels:
+    team: {{team}}
+spec:
+  image: {{image}}:{{tag}}
+  port: 8080
+  strategy:
+    type: Recreate
+  liveness:
+    path: isalive
+    initialDelay: 5
+  readiness:
+    path: isready
+    initialDelay: 5
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 75
+  prometheus:
+    enabled: true
+    path: /metrics
+  webproxy: true
+  vault:
+    enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/vault
+        kvPath: /kv/prod/fss/spleis-api/default
+      - mountPath: /var/run/secrets/nais.io/azure
+        kvPath: /azuread/data/prod/creds/spleis
+  secureLogs:
+    enabled: true
+  env:
+  - name: DATABASE_HOST
+    value: a01dbfl039.adeo.no
+  - name: DATABASE_PORT
+    value: "5432"
+  - name: DATABASE_NAME
+    value: spleis2
+  - name: VAULT_MOUNTPATH
+    value: postgresql/prod-fss/
+  - name: AZURE_CONFIG_URL
+    value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration

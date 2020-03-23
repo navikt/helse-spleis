@@ -1,0 +1,57 @@
+name: spleis-api
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'sykepenger-api/**'
+    - 'sykepenger-model/**'
+    - 'build.gradle.kts'
+    - 'settings.gradle.kts'
+    - '.github/workflows/**'
+env:
+    APP: spleis-api
+    TEAM: tbd
+    IMAGE: docker.pkg.github.com/${{ github.repository }}/spleis-api
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '12.x'
+    - name: create docker tag
+      run: echo ::set-env name=TAG::$(echo ${{ github.sha }} | cut -c1-7)
+    - name: test and build
+      run: ./gradlew :sykepenger-api:test :sykepenger-api:build
+      env:
+        ORG_GRADLE_PROJECT_githubUser: x-access-token
+        ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+    - name: build docker image
+      run: docker build -f Dockerfile-api . --pull -t ${{ env.IMAGE }}:${{ env.TAG }}
+    - name: push docker image
+      run: |
+        echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
+        docker push ${{ env.IMAGE }}:${{ env.TAG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: deploy to dev
+      uses: nais/deploy/actions/deploy@v1
+      env:
+        APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+        CLUSTER: dev-fss
+        ENVIRONMENT: dev-fss
+        RESOURCE: deploy/dev-api.yml
+        WAIT: false
+        VAR: "image=${{env.IMAGE}},tag=${{env.TAG}},team=${{env.TEAM}},app=${{env.APP}}"
+    - name: deploy to prod
+      uses: nais/deploy/actions/deploy@v1
+      env:
+        APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+        CLUSTER: prod-fss
+        ENVIRONMENT: prod-fss
+        RESOURCE: deploy/prod-api.yml
+        WAIT: false
+        VAR: "image=${{env.IMAGE}},tag=${{env.TAG}},team=${{env.TEAM}},app=${{env.APP}}"
