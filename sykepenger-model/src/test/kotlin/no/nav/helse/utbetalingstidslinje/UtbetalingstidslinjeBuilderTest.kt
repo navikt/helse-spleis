@@ -6,10 +6,8 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -405,12 +403,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(1, inspektør.dagtelling[NavHelgDag::class])
     }
 
-    private val inntekthistorikk = Inntekthistorikk().apply {
-        add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal())
-        add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal())
-        add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal())
-    }
-
     @Test
     fun `riktig inntekt for riktig dag`() {
         resetSeed(1.desember(2017))
@@ -431,15 +423,21 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    @Disabled
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.E + 1.F + 1.E + 10.S).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
                 add(17.januar, hendelseId, 31000.toBigDecimal())
             }
         )
-        assertEquals(17.januar, inspektør.navdager.first().dato)
-        assertEquals(AvvistDag::class, inspektør.navdager.first()::class)
+        assertFalse(inspektør.navdager.first().grad.isNaN())
+        assertFalse(0.0 == inspektør.navdager.first().inntekt)
+        assertEquals(18.januar, inspektør.navdager.first().dato)
+    }
+
+    private val inntekthistorikk = Inntekthistorikk().apply {
+        add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal())
+        add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal())
+        add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal())
     }
 
     private fun assertInntekt(inntekt: Double) {
@@ -503,6 +501,11 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visitForeldetDag(dag: ForeldetDag) {
             datoer[dag.dato] = ForeldetDag::class
             inkrementer(ForeldetDag::class)
+        }
+
+        override fun visitAvvistDag(dag: AvvistDag) {
+            datoer[dag.dato] = AvvistDag::class
+            inkrementer(AvvistDag::class)
         }
 
         private fun inkrementer(klasse: KClass<out Utbetalingsdag>) {
