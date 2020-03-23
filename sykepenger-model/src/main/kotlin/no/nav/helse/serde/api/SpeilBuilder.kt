@@ -276,7 +276,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             vedtaksperioder.add(vedtaksperiodeMap)
 
             utbetalingstidslinje
-                ?.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
+                ?.let { Vedtaksperiode.avgrens(it, vedtaksperiode) }
                 ?.accept(UtbetalingstidslinjeVisitor(avgrensetUtbetalingstidslinje))
         }
 

@@ -86,7 +86,7 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    internal fun periode() = Periode(
+    private fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
@@ -814,5 +814,8 @@ internal class Vedtaksperiode private constructor(
         fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode().start }
         }
+
+        fun avgrens(utbetalingstidslinje: Utbetalingstidslinje, vedtaksperiode: Vedtaksperiode) =
+            utbetalingstidslinje.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
     }
 }
