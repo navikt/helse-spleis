@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions
 import java.time.LocalDate
@@ -26,6 +27,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
+    internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
 
     init {
         person.accept(this)
@@ -46,6 +48,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         vedtaksperiodeindeks += 1
         tilstander[vedtaksperiodeindeks] = mutableListOf()
         vedtaksperiodeIder[vedtaksperiodeindeks] = id
+    }
+
+    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
+        utbetalingslinjer[vedtaksperiodeindeks] = linjer
     }
 
     internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =

@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.LocalDate
@@ -82,10 +83,14 @@ internal class ByggUtbetalingstidlinjer(
     override fun feilmelding() = "Feil ved kalkulering av utbetalingstidslinjer"
 }
 
-internal class ByggUtbetalingslinjer(private val ytelser: Ytelser,
-                                     private val utbetalingstidslinje: Utbetalingstidslinje
+internal class ByggUtbetalingslinjer(
+    private val ytelser: Ytelser,
+    private val vedtaksperiode: Vedtaksperiode,
+    utbetalingstidslinje: Utbetalingstidslinje
 ) : Valideringssteg {
     private lateinit var utbetalingslinjer: List<Utbetalingslinje>
+
+    private val utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiode.periode())
 
     internal fun utbetalingslinjer() = utbetalingslinjer
 

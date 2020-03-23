@@ -187,11 +187,13 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
-    override fun preVisitUtbetalingslinjer() = currentState.preVisitUtbetalingslinjer()
+    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) =
+        currentState.preVisitUtbetalingslinjer(linjer)
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
         currentState.visitUtbetalingslinje(utbetalingslinje)
 
-    override fun postVisitUtbetalingslinjer() = currentState.postVisitUtbetalingslinjer()
+    override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) =
+        currentState.postVisitUtbetalingslinjer(linjer)
 
     private interface JsonState : PersonVisitor {
         fun entering() {}
@@ -362,7 +364,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             hendelser.add(id)
         }
 
-        override fun preVisitUtbetalingslinjer() {
+        override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
             val utbetalingstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
             pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
@@ -380,7 +382,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             linjerForSpeil.add(utbetalingslinje)
         }
 
-        override fun postVisitUtbetalingslinjer() {
+        override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
             linjerForSpeil.forEach { utbetalingslinje ->
                 val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
                     "fom" to utbetalingslinje.fom,

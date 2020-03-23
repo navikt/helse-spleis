@@ -153,12 +153,12 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitTilstand(tilstand)
     }
 
-    override fun preVisitUtbetalingslinjer() {
-        target.preVisitUtbetalingslinjer()
+    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
+        target.preVisitUtbetalingslinjer(linjer)
     }
 
-    override fun postVisitUtbetalingslinjer() {
-        target.postVisitUtbetalingslinjer()
+    override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
+        target.postVisitUtbetalingslinjer(linjer)
     }
 
     override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {

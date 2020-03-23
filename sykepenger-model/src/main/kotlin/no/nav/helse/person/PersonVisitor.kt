@@ -46,8 +46,8 @@ internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, Sykdomshisto
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
-    fun preVisitUtbetalingslinjer() {}
-    fun postVisitUtbetalingslinjer() {}
+    fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
+    fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
 }
 

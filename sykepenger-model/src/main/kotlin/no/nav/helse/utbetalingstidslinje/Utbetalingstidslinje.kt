@@ -1,16 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ForeldetDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
-import kotlin.math.roundToInt
 
 /**
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
@@ -103,16 +96,15 @@ internal class Utbetalingstidslinje private constructor(
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.utbetalingsdager.last().dato, other.utbetalingsdager.last().dato)
 
-    internal fun subset(
-        fom: LocalDate,
-        tom: LocalDate
-    ): Utbetalingstidslinje {
+    internal fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
         return Utbetalingstidslinje(
             utbetalingsdager
                 .filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) }
                 .toMutableList()
         )
     }
+
+    internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
 
     internal interface UtbetalingsdagVisitor {
         fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}

@@ -4,6 +4,7 @@ import no.nav.helse.e2e.AbstractEndToEndTest
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
@@ -461,6 +462,42 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(Arbeidsdag.Inntektsmelding::class, inspektør.sykdomshistorikk.sykdomstidslinje().dag(8.januar)!!::class)
         assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
         assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
+    }
+
+    @Test
+    internal fun `andre vedtaksperiode utbetalingslinjer dekker to perioder`() {
+        håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
+            førsteFraværsdag = 1.januar(2020)
+        )
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
+        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100))
+        håndterYtelser(1)   // No history
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        assertTilstander(0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(1,
+            START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+
+        inspektør.also {
+            assertEquals(1, it.utbetalingslinjer[0]?.size)
+            assertEquals(17.januar(2020), it.utbetalingslinjer[0]?.first()?.fom)
+            assertEquals(31.januar(2020), it.utbetalingslinjer[0]?.first()?.tom)
+            assertEquals(1, it.utbetalingslinjer[1]?.size)
+            assertEquals(3.februar(2020), it.utbetalingslinjer[1]?.first()?.fom) // starts mandag
+            assertEquals(28.februar(2020), it.utbetalingslinjer[1]?.first()?.tom)
+        }
     }
 }
 

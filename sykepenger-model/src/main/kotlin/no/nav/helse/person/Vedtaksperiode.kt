@@ -80,13 +80,13 @@ internal class Vedtaksperiode private constructor(
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         sykdomshistorikk.accept(visitor)
         visitor.visitTilstand(tilstand)
-        visitor.preVisitUtbetalingslinjer()
+        visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
-        visitor.postVisitUtbetalingslinjer()
+        visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    private fun periode() = Periode(
+    internal fun periode() = Periode(
         sykdomshistorikk.sykdomstidslinje().førsteDag(),
         sykdomshistorikk.sykdomstidslinje().sisteDag()
     )
@@ -646,7 +646,7 @@ internal class Vedtaksperiode private constructor(
                     ).also { engineForTimeline = it }
                 }
                 var engineForLine: ByggUtbetalingslinjer? = null
-                it.valider { ByggUtbetalingslinjer(ytelser, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
+                it.valider { ByggUtbetalingslinjer(ytelser, vedtaksperiode, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
