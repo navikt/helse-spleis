@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -499,5 +500,30 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(28.februar(2020), it.utbetalingslinjer[1]?.first()?.tom)
         }
     }
-}
 
+    @Test
+    @Disabled
+    internal fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
+        håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
+            førsteFraværsdag = 1.januar(2020)
+        )
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+
+        håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
+        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100))
+        håndterYtelser(1, Triple(17.januar(2020), 31.januar(2020), 1400))   // Duplicate processing
+
+        assertTilstander(0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(1,
+            START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+}
