@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.application.install
+import io.ktor.features.CallId
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.callIdMdc
 import io.ktor.http.ContentType
 import io.ktor.jackson.JacksonConverter
 import io.ktor.request.path
@@ -20,6 +22,7 @@ import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.util.*
 
 internal val objectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -41,9 +44,15 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
     embeddedServer(Netty, applicationEngineEnvironment {
         ktorConfig.configure(this)
         module {
+            install(CallId) {
+                generate {
+                    UUID.randomUUID().toString()
+                }
+            }
             install(CallLogging) {
                 logger = httpTraceLog
                 level = Level.INFO
+                callIdMdc("callId")
                 filter { call -> call.request.path().startsWith("/api/") }
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }

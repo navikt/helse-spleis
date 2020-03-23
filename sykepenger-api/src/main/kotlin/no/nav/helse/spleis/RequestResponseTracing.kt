@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
+import io.ktor.features.callId
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.request.httpMethod
@@ -29,10 +30,10 @@ internal fun Application.requestResponseTracing(logger: Logger) {
     intercept(ApplicationCallPipeline.Monitoring) {
         val timer = httpRequestDuration.startTimer()
         try {
-            logger.info("incoming method=${call.request.httpMethod.value} uri=${call.request.uri}")
+            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
             proceed()
         } catch (err: Throwable) {
-            logger.info("exception thrown during processing: ${err.message}", err)
+            logger.info("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
             throw err
         } finally {
             timer.observeDuration()
@@ -48,7 +49,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
             call.response.status(status)
         }
 
-        logger.info("responding with status=${status.value}")
+        logger.info("responding with status=${status.value} callId=${call.callId} ")
         httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
     }
 }
