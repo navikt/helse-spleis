@@ -13,6 +13,8 @@ import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import org.slf4j.Logger
 
+private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
+
 internal fun Application.requestResponseTracing(logger: Logger) {
     val httpRequestCounter = Counter.build(
         "http_requests_total",
@@ -30,7 +32,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
     intercept(ApplicationCallPipeline.Monitoring) {
         val timer = httpRequestDuration.startTimer()
         try {
-            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
+            if (call.request.uri !in ignoredPaths) logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
             proceed()
         } catch (err: Throwable) {
             logger.info("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
@@ -49,7 +51,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
             call.response.status(status)
         }
 
-        logger.info("responding with status=${status.value} callId=${call.callId} ")
+        if (call.request.uri !in ignoredPaths) logger.info("responding with status=${status.value} callId=${call.callId} ")
         httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
     }
 }
