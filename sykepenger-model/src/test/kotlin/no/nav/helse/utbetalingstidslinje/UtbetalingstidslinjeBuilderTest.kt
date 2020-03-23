@@ -435,6 +435,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 add(17.januar, hendelseId, 31000.toBigDecimal())
             }
         )
+        // Do we have sykdomGrad in Egenmeldingsdag?
         assertFalse(inspektør.navdager.first().grad.isNaN())
         assertFalse(0 == inspektør.navdager.first().utbetaling)
         assertEquals(17.januar, inspektør.navdager.first().dato)

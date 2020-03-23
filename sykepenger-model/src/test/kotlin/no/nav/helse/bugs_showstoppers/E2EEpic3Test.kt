@@ -416,7 +416,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ),
             førsteFraværsdag = 24.desember(2019)
         )
-
+        // Sykedag beats IM Feriedag; 21 Desember to 5 Januar is another employer period!
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0) // No history
 
@@ -428,6 +428,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     internal fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         håndterSykmelding(Triple(7.januar, 28.januar, 100))
         håndterSøknad(Sykdom(7.januar, 28.januar, 100))
+        // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
             ferieperioder = emptyList(),
@@ -446,6 +447,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     internal fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         håndterSykmelding(Triple(7.januar, 28.januar, 100))
+        // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
             ferieperioder = emptyList(),

@@ -157,6 +157,7 @@ internal class SykdomshistorikkTest {
     internal fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         historikk.håndter(sykmelding(Triple(7.januar, 28.januar, 100)))
         historikk.håndter(søknad(Søknad.Periode.Sykdom(7.januar, 28.januar, 100)))
+        // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
         assertEquals(3, historikk.size)
         assertEquals(22, historikk.sykdomstidslinje().length())
@@ -170,6 +171,7 @@ internal class SykdomshistorikkTest {
     @Test
     internal fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         historikk.håndter(sykmelding(Triple(7.januar, 28.januar, 100)))
+        // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         historikk.håndter(inntektsmelding(listOf(Periode(9.januar, 24.januar)), emptyList(), førsteFraværsdag = 9.januar))
         assertEquals(2, historikk.size)
         assertEquals(22, historikk.sykdomstidslinje().length())
