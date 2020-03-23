@@ -186,7 +186,7 @@
                     "role": "MANAGER"
                 }
             ],
-            "numPartitions": 1,
+            "numPartitions": 3,
             "topicName": "helse-rapid-v1"
         }
     ]
