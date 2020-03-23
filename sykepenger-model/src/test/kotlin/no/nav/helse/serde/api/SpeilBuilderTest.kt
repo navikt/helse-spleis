@@ -16,8 +16,7 @@ import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juni
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -68,18 +67,16 @@ internal class SpeilBuilderTest {
         person.accept(jsonBuilder)
 
         val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
-        assertEquals(
-            1.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].first()["dato"].asText())
-        )
-        assertEquals(
-            31.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
-        )
+        assertEquals(1, json["arbeidsgivere"][0]["vedtaksperioder"].size())
+        val utbetalingstidslinje = json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"]
+        assertEquals("ArbeidsgiverperiodeDag", utbetalingstidslinje.first()["type"].asText())
+        assertEquals("ArbeidsgiverperiodeDag", utbetalingstidslinje[15]["type"].asText())
+        assertEquals("ForeldetDag", utbetalingstidslinje[16]["type"].asText())
+        assertEquals("ForeldetDag", utbetalingstidslinje.last()["type"].asText())
     }
 
     @Test
-    fun `en periode uten utbetalingstidslinje`() {
+    fun `tom utbetalingstidslinje hvis kun sykmelding mottatt`() {
         val person = Person(aktørId, fnr).apply {
             håndter(sykmelding(hendelseId = UUID.randomUUID(), fom = 1.januar, tom = 31.januar))
         }
@@ -88,11 +85,7 @@ internal class SpeilBuilderTest {
         val arbeidsgiver = json["arbeidsgivere"][0]
         val vedtaksperioder = arbeidsgiver["vedtaksperioder"]
 
-        assertEquals(1, vedtaksperioder.size())
-        assertFalse(
-            arbeidsgiver.hasNonNull("utbetalingstidslinje"),
-            "Forventet en arbeidsgiver uten utbetalingstidslinje"
-        )
+        assertEquals(0, vedtaksperioder.first()["utbetalingstidslinje"].size())
     }
 
     @Test
@@ -131,7 +124,6 @@ internal class SpeilBuilderTest {
         assertEquals(2, vedtaksperioder.size())
         assertEquals(vedtaksperioder[0]["hendelser"].sortedUUIDs(), hendelseIderVedtak1.sorted())
         assertEquals(vedtaksperioder[1]["hendelser"].sortedUUIDs(), hendelseIderVedtak2.sorted())
-
     }
 
     private fun JsonNode.sortedUUIDs() = map(JsonNode::asText).map(UUID::fromString).sorted()
