@@ -126,6 +126,10 @@ internal class SpeilBuilderTest {
         assertEquals(vedtaksperioder[1]["hendelser"].sortedUUIDs(), hendelseIderVedtak2.sorted())
     }
 
+    /**
+     * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
+     * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.
+     */
     @Test
     fun `json-en inneholder de feltene Speil forventer`() {
         val person = person()
@@ -135,7 +139,58 @@ internal class SpeilBuilderTest {
         assertTrue(json.hasNonNull("fødselsnummer"))
         assertTrue(json.hasNonNull("arbeidsgivere"))
 
-        assertTrue(json["arbeidsgivere"].first().hasNonNull("organisasjonsnummer"))
+        val arbeidsgiver = json["arbeidsgivere"].first();
+        assertTrue(arbeidsgiver.hasNonNull("organisasjonsnummer"))
+        assertTrue(arbeidsgiver.hasNonNull("id"))
+        assertTrue(arbeidsgiver.hasNonNull("vedtaksperioder"))
+
+        val vedtaksperiode = arbeidsgiver["vedtaksperioder"].first();
+        assertTrue(vedtaksperiode.hasNonNull("id"))
+        assertTrue(vedtaksperiode.hasNonNull("maksdato"))
+        assertTrue(vedtaksperiode.hasNonNull("godkjentAv"))
+        assertTrue(vedtaksperiode.hasNonNull("godkjenttidspunkt"))
+        assertTrue(vedtaksperiode.hasNonNull("utbetalingsreferanse"))
+        assertTrue(vedtaksperiode.hasNonNull("førsteFraværsdag"))
+        assertTrue(vedtaksperiode.hasNonNull("inntektFraInntektsmelding"))
+        assertTrue(vedtaksperiode.hasNonNull("tilstand"))
+        assertTrue(vedtaksperiode.hasNonNull("hendelser"))
+        assertTrue(vedtaksperiode.hasNonNull("dataForVilkårsvurdering"))
+        assertTrue(vedtaksperiode.hasNonNull("sykdomstidslinje"))
+        assertTrue(vedtaksperiode.hasNonNull("utbetalingstidslinje"))
+        assertTrue(vedtaksperiode.hasNonNull("utbetalingslinjer"))
+
+        val dataForVilkårsvurdering = vedtaksperiode["dataForVilkårsvurdering"];
+        assertTrue(dataForVilkårsvurdering.hasNonNull("erEgenAnsatt"))
+        assertTrue(dataForVilkårsvurdering.hasNonNull("beregnetÅrsinntektFraInntektskomponenten"))
+        assertTrue(dataForVilkårsvurdering.hasNonNull("avviksprosent"))
+        assertTrue(dataForVilkårsvurdering.hasNonNull("antallOpptjeningsdagerErMinst"))
+        assertTrue(dataForVilkårsvurdering.hasNonNull("harOpptjening"))
+
+        val sykdomstidslinje = vedtaksperiode["sykdomstidslinje"];
+        sykdomstidslinje.forEach {
+            assertTrue(it.hasNonNull("dagen"))
+            assertTrue(it.hasNonNull("type"))
+            assertTrue(it.hasNonNull("grad"))
+        }
+
+        val utbetalingstidslinje = vedtaksperiode["utbetalingstidslinje"];
+        utbetalingstidslinje.forEach {
+            assertTrue(it.hasNonNull("type"))
+            assertTrue(it.hasNonNull("inntekt"))
+            assertTrue(it.hasNonNull("dato"))
+        }
+        utbetalingstidslinje.filter { it["type"].asText() == "NavDag" }.forEach {
+            assertTrue(it.hasNonNull("utbetaling"))
+            assertTrue(it.hasNonNull("grad"))
+        }
+
+        val utbetalingslinjer = vedtaksperiode["utbetalingslinjer"];
+        utbetalingslinjer.forEach {
+            assertTrue(it.hasNonNull("fom"))
+            assertTrue(it.hasNonNull("tom"))
+            assertTrue(it.hasNonNull("dagsats"))
+            assertTrue(it.hasNonNull("grad"))
+        }
     }
 
     private fun JsonNode.sortedUUIDs() = map(JsonNode::asText).map(UUID::fromString).sorted()
