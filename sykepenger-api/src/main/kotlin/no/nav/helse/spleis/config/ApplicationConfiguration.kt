@@ -66,7 +66,7 @@ internal class AzureAdAppConfig(
                 }
         }
 
-        jwkProvider = JwkProviderBuilder(URL(jwksUri)).build()
+        jwkProvider = JwkProviderBuilder(URL(this.jwksUri)).build()
     }
 
     private fun String.getJson(): JsonNode {
