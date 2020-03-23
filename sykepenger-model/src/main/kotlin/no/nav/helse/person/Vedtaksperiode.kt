@@ -13,7 +13,6 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -222,7 +221,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        sykepengehistorikk(hendelse, sykdomshistorikk.sykdomstidslinje().førsteDag().minusDays(1))
+        sykepengehistorikk(hendelse, arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive)
         foreldrepenger(hendelse)
     }
 
@@ -461,18 +460,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            if (ytelser.valider().hasErrors()) {
-                ytelser.error("Feil i ytelser i %s", AvventerHistorikk.type)
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+            Validation(ytelser).also {
+                it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser) }
+                it.onSuccess {
+                    vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingFerdigGap)
+                }
             }
-
-            val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
-            if (sisteUtbetalteDag != null && sisteUtbetalteDag.harTilstøtende(vedtaksperiode.periode().start)) {
-                ytelser.error("Har tilstøtende periode i Infotrygd som er utbetalt")
-                return vedtaksperiode.tilstand(ytelser, TilInfotrygd)
-            }
-
-            vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingFerdigGap)
         }
 
     }
@@ -573,7 +567,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             if (vilkårsgrunnlag.valider().hasErrors()) {
-                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", AvventerVilkårsprøvingGap.type)
+                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
             }
 
@@ -622,9 +616,8 @@ internal class Vedtaksperiode private constructor(
         ) {
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                it.valider { ValiderYtelser(ytelser) }
+                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
-                val sisteHistoriskeSykedag = ytelser.utbetalingshistorikk().sisteUtbetalteDag()
                 it.valider {
                     HarInntektshistorikk(
                         arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
@@ -636,8 +629,7 @@ internal class Vedtaksperiode private constructor(
                         mapOf(
                             arbeidsgiver to utbetalingstidslinje(
                                 arbeidsgiver,
-                                vedtaksperiode,
-                                sisteHistoriskeSykedag
+                                vedtaksperiode
                             )
                         ),
                         vedtaksperiode.periode(),
@@ -646,7 +638,13 @@ internal class Vedtaksperiode private constructor(
                     ).also { engineForTimeline = it }
                 }
                 var engineForLine: ByggUtbetalingslinjer? = null
-                it.valider { ByggUtbetalingslinjer(ytelser, vedtaksperiode, arbeidsgiver.peekTidslinje()).also { engineForLine = it } }
+                it.valider {
+                    ByggUtbetalingslinjer(
+                        ytelser,
+                        vedtaksperiode,
+                        arbeidsgiver.peekTidslinje()
+                    ).also { engineForLine = it }
+                }
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
@@ -662,14 +660,12 @@ internal class Vedtaksperiode private constructor(
 
         private fun utbetalingstidslinje(
             arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            sisteHistoriskeSykedag: LocalDate?
+            vedtaksperiode: Vedtaksperiode
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 sisteDag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
-                sisteNavDagForArbeidsgiverFørPerioden = sisteHistoriskeSykedag,
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result()
         }

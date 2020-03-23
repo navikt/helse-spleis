@@ -165,9 +165,10 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     return aktiviteter.filterIsInstance<Behov>()
                 }
 
-                internal fun sykepengehistorikk(aktivitetslogg: IAktivitetslogg, utgangspunktForBeregningAvYtelse: LocalDate) {
+                internal fun sykepengehistorikk(aktivitetslogg: IAktivitetslogg, historikkFom: LocalDate, historikkTom: LocalDate) {
                     aktivitetslogg.behov(Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                        "utgangspunktForBeregningAvYtelse" to utgangspunktForBeregningAvYtelse.toString()
+                        "historikkFom" to historikkFom.toString(),
+                        "historikkTom" to historikkTom.toString()
                     ))
                 }
 

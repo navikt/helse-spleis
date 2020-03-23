@@ -354,19 +354,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(1, inspektør.dagtelling[NavHelgDag::class])
     }
 
-
-    @Test
-    fun `NAV betaler første dag når 15-dagers opphold`() {
-        (1.S).utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden = 1.januar.minusDays(16))
-        assertEquals(1, inspektør.dagtelling[NavDag::class])
-    }
-
-    @Test
-    fun `NAV betaler IKKE første dag når 16-dagers opphold`() {
-        (1.S).utbetalingslinjer(sisteNavDagForArbeidsgiverFørPerioden = 1.januar.minusDays(17))
-        assertEquals(null, inspektør.dagtelling[NavDag::class])
-    }
-
     @Test
     fun `siste dag i arbeidsgiverperioden faller på mandag`() {
         (1.S + 3.A + 4.S + 3.A + 11.S + 4.S).utbetalingslinjer()
@@ -446,14 +433,12 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun ConcreteSykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.sisteDag(),
-        sisteNavDagForArbeidsgiverFørPerioden: LocalDate? = null,
         inntektshistorikk: Inntekthistorikk = inntekthistorikk
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             sykdomstidslinje = this.kutt(sisteDag)!!,
             sisteDag = sisteDag,
-            inntekthistorikk = inntektshistorikk,
-            sisteNavDagForArbeidsgiverFørPerioden = sisteNavDagForArbeidsgiverFørPerioden
+            inntekthistorikk = inntektshistorikk
         ).result()
     }
 

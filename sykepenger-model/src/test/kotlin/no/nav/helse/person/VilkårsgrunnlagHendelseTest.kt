@@ -67,16 +67,11 @@ internal class VilkårsgrunnlagHendelseTest {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
-        val utgangspunktForBeregningAvYtelse = inspektør.sykdomstidslinje(0).førsteDag()
+        val historikkFom = inspektør.sykdomstidslinje(0).førsteDag().minusYears(4)
+        val historikkTom = inspektør.sykdomstidslinje(0).sisteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
-        assertEquals(
-            utgangspunktForBeregningAvYtelse.minusDays(1).toString(),
-            hendelse.etterspurtBehov(
-                vedtaksperiodeId,
-                Behovtype.Sykepengehistorikk,
-                "utgangspunktForBeregningAvYtelse"
-            )
-        )
+        assertEquals(historikkFom.toString(), hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkFom"))
+        assertEquals(historikkTom.toString(), hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkTom"))
     }
 
     @Test

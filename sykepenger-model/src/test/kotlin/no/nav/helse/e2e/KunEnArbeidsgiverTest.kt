@@ -6,17 +6,14 @@ import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
-    internal fun `ingen historie med inntektsmelding først`() {
+    fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
@@ -41,7 +38,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `ingen historie med Søknad først`() {
+    fun `ingen historie med Søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -66,7 +63,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `søknad sendt etter 3 mnd`() {
+    fun `søknad sendt etter 3 mnd`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100), sendtTilNav = 1.mai)
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -90,10 +87,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `gap historie før inntektsmelding`() {
+    fun `gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterYtelser(0, Triple(1.januar, 1.januar, 15000))
+        håndterYtelser(0, Triple(1.desember(2017), 15.desember(2017), 15000))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -116,10 +113,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `no-gap historie før inntektsmelding`() {
+    fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterYtelser(0, Triple(1.januar, 2.januar, 15000))
+        håndterYtelser(0, Triple(1.desember(2017), 16.desember(2017), 15000))
         inspektør.also {
             assertTrue(it.personLogg.hasErrors())
             assertMessages(it)
@@ -133,7 +130,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `ingen nav utbetaling kreves`() {
+    fun `ingen nav utbetaling kreves`() {
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 5.januar, 100))
         håndterYtelser(0)   // No history
@@ -150,7 +147,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
 
     @Test
-    internal fun `To perioder med opphold`() {
+    fun `To perioder med opphold`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -185,7 +182,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Kiler tilstand i uferdig venter for inntektsmelding`() {
+    fun `Kiler tilstand i uferdig venter for inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -229,7 +226,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Kilt etter søknad og inntektsmelding`() {
+    fun `Kilt etter søknad og inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -264,7 +261,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Kilt etter inntektsmelding og søknad`() {
+    fun `Kilt etter inntektsmelding og søknad`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -299,7 +296,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Kilt etter inntektsmelding`() {
+    fun `Kilt etter inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -334,7 +331,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
+    fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Triple(1.januar, 2.januar, 15000)) // -> TIL_INFOTRYGD
@@ -358,7 +355,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
+    fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 4.januar)
         inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
@@ -366,7 +363,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
+    fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
@@ -374,7 +371,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
+    fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
@@ -388,7 +385,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
+    fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
@@ -422,7 +419,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `To tilstøtende perioder søknad først`() {
+    fun `To tilstøtende perioder søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
@@ -460,7 +457,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
 
     @Test
-    internal fun `Venter å på bli kilt etter søknad og inntektsmelding`() {
+    fun `Venter å på bli kilt etter søknad og inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 7.januar, 100))
         håndterSykmelding(Triple(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -497,7 +494,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Venter på å bli kilt etter inntektsmelding`() {
+    fun `Venter på å bli kilt etter inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 7.januar, 100))
         håndterSykmelding(Triple(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -534,7 +531,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Fortsetter før andre søknad`() {
+    fun `Fortsetter før andre søknad`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(
@@ -572,7 +569,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `To tilstøtende perioder der den første er utbetalt`() {
+    fun `To tilstøtende perioder der den første er utbetalt`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -604,7 +601,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `To tilstøtende perioder inntektsmelding først`() {
+    fun `To tilstøtende perioder inntektsmelding først`() {
         håndterSykmelding(Triple(3.januar, 7.januar, 100))
         håndterSykmelding(Triple(8.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
@@ -641,7 +638,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
+    fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -665,7 +662,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `ignorer inntektsmeldinger på påfølgende perioder`() {
+    fun `ignorer inntektsmeldinger på påfølgende perioder`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -699,7 +696,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `kiler bare 2nd og ikke 3nd periode i en rekke`() {
+    fun `kiler bare 2nd og ikke 3nd periode i en rekke`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSykmelding(Triple(1.mars, 28.mars, 100))
@@ -732,7 +729,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Sykmelding med gradering`() {
+    fun `Sykmelding med gradering`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 50))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 50, 50.00))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -752,7 +749,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `dupliserte hendelser produserer bare advarsler`() {
+    fun `dupliserte hendelser produserer bare advarsler`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
@@ -786,7 +783,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Sykmelding i omvendt rekkefølge`() {
+    fun `Sykmelding i omvendt rekkefølge`() {
         håndterSykmelding(Triple(10.januar, 20.januar, 100))
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
         håndterInntektsmelding(
@@ -800,7 +797,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
+    fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
         inspektør.also {

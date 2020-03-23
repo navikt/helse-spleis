@@ -11,7 +11,6 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -502,7 +501,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     internal fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))

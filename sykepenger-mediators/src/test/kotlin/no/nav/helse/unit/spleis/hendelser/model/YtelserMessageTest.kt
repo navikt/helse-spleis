@@ -30,7 +30,8 @@ class YtelserMessageTest {
 
 private val json = """
     {
-      "utgangspunktForBeregningAvYtelse": "2019-12-08",
+      "historikkFom": "2014-12-08",
+      "historikkTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger"
@@ -84,7 +85,8 @@ private val json = """
 
 private val ukjentPeriode = """
     {
-      "utgangspunktForBeregningAvYtelse": "2019-12-08",
+      "historikkFom": "2015-12-08",
+      "historikkTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger"
