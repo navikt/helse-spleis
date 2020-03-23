@@ -22,10 +22,10 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
     internal abstract fun dag(dato: LocalDate): Dag?
 
     operator fun plus(other: ConcreteSykdomstidslinje): ConcreteSykdomstidslinje {
-        return this.plus(other, ::ImplisittDag)
+        return this.join(other, ::ImplisittDag)
     }
 
-    fun plus(other: ConcreteSykdomstidslinje, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag): ConcreteSykdomstidslinje {
+    fun join(other: ConcreteSykdomstidslinje, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag): ConcreteSykdomstidslinje {
         require(!overlapperMed(other)) { "Kan ikke koble sammen overlappende tidslinjer uten å oppgi en turneringsmetode." }
         return kobleSammen(other) {
             this.dag(it) ?: other.dag(it) ?: inneklemtDag(it)
@@ -106,7 +106,7 @@ internal abstract class ConcreteSykdomstidslinje : SykdomstidslinjeElement {
 
     companion object {
         internal fun join(liste: List<ConcreteSykdomstidslinje>, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
-            liste.reduce { result, other -> result.plus(other, inneklemtDag)}
+            liste.reduce { result, other -> result.join(other, inneklemtDag)}
 
         internal fun merge(liste: List<ConcreteSykdomstidslinje>, dagturnering: Dagturnering, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) =
             liste.reduce { result, other -> result.merge(other, dagturnering, inneklemtDag) }

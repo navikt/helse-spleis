@@ -79,12 +79,7 @@ class Inntektsmelding(
     override fun padLeft(dato: LocalDate) {
         if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
         if (dato >= sykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
-        sykdomstidslinje = sykdomstidslinje.merge(
-            ConcreteSykdomstidslinje.ikkeSykedager(
-                dato,
-                sykdomstidslinje.førsteDag().minusDays(1),
-                InntektsmeldingDagFactory),
-            InntektsmeldingTurnering)
+        sykdomstidslinje = sykdomstidslinje.join(ConcreteSykdomstidslinje.ikkeSykedager(dato, sykdomstidslinje.førsteDag().minusDays(1), InntektsmeldingDagFactory))
     }
 
     override fun valider(): Aktivitetslogg {
