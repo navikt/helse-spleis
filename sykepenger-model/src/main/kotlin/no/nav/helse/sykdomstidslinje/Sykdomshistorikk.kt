@@ -67,6 +67,7 @@ internal class Sykdomshistorikk private constructor(
                 hendelse: SykdomstidslinjeHendelse,
                 tom: LocalDate
             ): Element {
+                if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),

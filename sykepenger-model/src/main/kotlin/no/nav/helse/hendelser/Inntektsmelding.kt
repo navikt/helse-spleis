@@ -28,7 +28,7 @@ class Inntektsmelding(
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
-    private val sykdomstidslinje: ConcreteSykdomstidslinje
+    private var sykdomstidslinje: ConcreteSykdomstidslinje
 
     init {
         this.arbeidsgiverperioder =
@@ -61,6 +61,7 @@ class Inntektsmelding(
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje
+
     override fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
@@ -72,6 +73,18 @@ class Inntektsmelding(
 
     internal fun trimLeft(dato: LocalDate) {
         forrigeTom = dato
+    }
+
+    // Pad days prior to employer-paid days with assumed work days
+    override fun padLeft(dato: LocalDate) {
+        if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
+        if (dato >= sykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
+        sykdomstidslinje = sykdomstidslinje.merge(
+            ConcreteSykdomstidslinje.ikkeSykedager(
+                dato,
+                sykdomstidslinje.førsteDag().minusDays(1),
+                InntektsmeldingDagFactory),
+            InntektsmeldingTurnering)
     }
 
     override fun valider(): Aktivitetslogg {
@@ -87,17 +100,11 @@ class Inntektsmelding(
 
     override fun organisasjonsnummer() = orgnummer
 
-    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        arbeidsgiver.håndter(this)
-    }
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
-    fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
+    internal fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
         if (refusjon == null) return false
-        refusjon.opphørsdato?.also {
-            if (it <= sisteUtbetalingsdag) {
-                return true
-            }
-        }
+        refusjon.opphørsdato?.also { if (it <= sisteUtbetalingsdag) return true }
         return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
     }
 
