@@ -6,7 +6,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.rest.HendelseDTO.NySøknadDTO
 import java.time.LocalDateTime
 
 // Understands a JSON message representing a Ny Søknad
@@ -47,13 +46,6 @@ internal class NySøknadMessage(
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder
-    )
-
-    internal fun asSpeilDTO() = NySøknadDTO(
-        hendelseId = id,
-        rapportertdato = rapportertdato,
-        fom = søknadFom,
-        tom = søknadTom
     )
 
     object Factory : MessageFactory<NySøknadMessage> {

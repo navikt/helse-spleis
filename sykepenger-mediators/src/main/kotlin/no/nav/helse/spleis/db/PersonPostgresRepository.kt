@@ -13,9 +13,6 @@ class PersonPostgresRepository(private val dataSource: DataSource) : PersonRepos
     override fun hentPerson(fødselsnummer: String) =
         hentPerson(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fødselsnummer))
 
-    override fun hentPersonAktørId(aktørId: String) =
-        hentPerson(queryOf("SELECT data FROM person WHERE aktor_id = ? ORDER BY id DESC LIMIT 1", aktørId))
-
     private fun hentPerson(query: Query) =
         using(sessionOf(dataSource)) { session ->
             session.run(query.map {

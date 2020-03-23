@@ -9,7 +9,6 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.rest.HendelseDTO
 
 // Understands a JSON message representing a Søknad
 internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
@@ -72,14 +71,6 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
     }
 
     private fun harAndreInntektskilder() = this["andreInntektskilder"].isArray && !this["andreInntektskilder"].isEmpty
-
-    fun asSpeilDTO(): HendelseDTO = HendelseDTO.SendtSøknadDTO(
-        hendelseId = id,
-        rapportertdato = sendtNav,
-        sendtNav = sendtNav,
-        fom = søknadFom,
-        tom = søknadTom
-    )
 
     object Factory : MessageFactory<SendtSøknadMessage> {
         override fun createMessage(message: String, problems: MessageProblems) = SendtSøknadMessage(message, problems)

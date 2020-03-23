@@ -173,10 +173,6 @@ internal class HendelseMediatorTest {
             }
         }
 
-        override fun hentPersonAktørId(aktørId: String): Person? {
-            TODO("not implemented")
-        }
-
         init {
             HendelseMediator(
                 rapidsConnection = testRapid,

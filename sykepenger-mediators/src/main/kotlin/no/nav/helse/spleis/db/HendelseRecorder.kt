@@ -6,7 +6,6 @@ import kotliquery.using
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.model.*
-import java.util.*
 import javax.sql.DataSource
 
 internal class HendelseRecorder(private val dataSource: DataSource): MessageProcessor {
@@ -43,18 +42,6 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         lagreMelding(Meldingstype.UTBETALING, message)
     }
 
-    fun hentHendelser(hendelseIder: Set<UUID>): List<Pair<Meldingstype, String>> {
-        if (hendelseIder.isEmpty()) return emptyList()
-        return using(sessionOf(dataSource)) { session ->
-            session.run(queryOf(
-                "SELECT * FROM melding WHERE melding_id in (${hendelseIder.joinToString(",") { "?" }})",
-                *hendelseIder.map { it.toString() }.toTypedArray()
-            ).map {
-                Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
-            }.asList)
-        }
-    }
-
     private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {
         using(sessionOf(dataSource)) { session ->
             session.run(
@@ -70,15 +57,15 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
             PostgresProbe.hendelseSkrevetTilDb()
         }
     }
-}
 
-internal enum class Meldingstype {
-    NY_SØKNAD,
-    SENDT_SØKNAD,
-    INNTEKTSMELDING,
-    PÅMINNELSE,
-    YTELSER,
-    VILKÅRSGRUNNLAG,
-    MANUELL_SAKSBEHANDLING,
-    UTBETALING
+    private enum class Meldingstype {
+        NY_SØKNAD,
+        SENDT_SØKNAD,
+        INNTEKTSMELDING,
+        PÅMINNELSE,
+        YTELSER,
+        VILKÅRSGRUNNLAG,
+        MANUELL_SAKSBEHANDLING,
+        UTBETALING
+    }
 }

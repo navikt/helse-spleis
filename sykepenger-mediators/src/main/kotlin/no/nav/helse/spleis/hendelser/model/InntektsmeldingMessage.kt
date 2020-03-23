@@ -8,7 +8,6 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.spleis.rest.HendelseDTO
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(
@@ -62,13 +61,6 @@ internal class InntektsmeldingMessage(
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder
-    )
-
-    fun asSpeilDTO() = HendelseDTO.InntektsmeldingDTO(
-        hendelseId = this.id,
-        beregnetInntekt = beregnetInntekt,
-        førsteFraværsdag = førsteFraværsdag,
-        mottattDato = mottattDato
     )
 
     object Factory : MessageFactory<InntektsmeldingMessage> {

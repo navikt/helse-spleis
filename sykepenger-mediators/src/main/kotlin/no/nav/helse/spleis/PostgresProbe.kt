@@ -11,10 +11,6 @@ object PostgresProbe {
         Counter.build("person_skrevet_til_db_totals", "Antall ganger vi har skrevet en person til db")
             .register()
 
-    private val utbetalingLestFraDbCounter =
-        Counter.build("utbetaling_lest_fra_db_totals", "Antall ganger vi har lest en utbetaling fra db")
-            .register()
-
     private val utbetalingSkrevetTilDbCounter =
         Counter.build("utbetaling_skrevet_til_db_totals", "Antall ganger vi har skrevet en utbetaling til db")
             .register()
@@ -29,10 +25,6 @@ object PostgresProbe {
 
     fun personSkrevetTilDb() {
         personSkrevetTilDbCounter.inc()
-    }
-
-    fun utbetalingLestFraDb() {
-        utbetalingLestFraDbCounter.inc()
     }
 
     fun utbetalingSkrevetTilDb() {
