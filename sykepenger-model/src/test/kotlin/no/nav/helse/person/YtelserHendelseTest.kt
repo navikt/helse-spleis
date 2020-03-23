@@ -1,7 +1,5 @@
 package no.nav.helse.person
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
 import no.nav.helse.testhelpers.januar
@@ -71,7 +69,7 @@ internal class YtelserHendelseTest {
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(ukjentePerioder = listOf(jacksonObjectMapper().createObjectNode()))
+        håndterYtelser(ukjentePerioder = true)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -122,7 +120,7 @@ internal class YtelserHendelseTest {
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null,
-        ukjentePerioder: List<JsonNode> = emptyList()
+        ukjentePerioder: Boolean = false
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -143,7 +141,7 @@ internal class YtelserHendelseTest {
         person.håndter(søknad())
         person.håndter(ytelser(
             utbetalinger = emptyList(),
-            ukjentePerioder = listOf(jacksonObjectMapper().createObjectNode()),
+            ukjentePerioder = true,
             foreldrepengeYtelse = null,
             svangerskapYtelse = null
         ))
@@ -152,7 +150,7 @@ internal class YtelserHendelseTest {
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
-        ukjentePerioder: List<JsonNode> = emptyList(),
+        ukjentePerioder: Boolean = false,
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -163,7 +161,7 @@ internal class YtelserHendelseTest {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                ukjentePerioder = ukjentePerioder,
+                harUkjentePerioder = ukjentePerioder,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),

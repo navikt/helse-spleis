@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
@@ -10,9 +9,9 @@ import java.util.*
 
 class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
-    private val ukjentePerioder: List<JsonNode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val graderingsliste: List<Graderingsperiode>,
+    private val harUkjentePerioder: Boolean,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
@@ -27,9 +26,7 @@ class Utbetalingshistorikk(
     internal fun valider(): Aktivitetslogg {
         utbetalinger.forEach { it.valider(this, aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
-        if (ukjentePerioder.isNotEmpty()) {
-            aktivitetslogg.error("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
-        }
+        if (harUkjentePerioder) aktivitetslogg.error("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
         return aktivitetslogg
     }
 

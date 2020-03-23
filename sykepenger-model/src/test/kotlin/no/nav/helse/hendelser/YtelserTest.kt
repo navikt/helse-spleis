@@ -64,7 +64,7 @@ internal class YtelserTest {
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                ukjentePerioder = emptyList(),
+                harUkjentePerioder = false,
                 utbetalinger = utbetalinger.map {
                     Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                         it.first,

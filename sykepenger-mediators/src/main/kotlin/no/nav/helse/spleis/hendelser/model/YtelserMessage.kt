@@ -38,9 +38,9 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
         )
 
         val utbetalingshistorikk = Utbetalingshistorikk(
-            ukjentePerioder = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
+            harUkjentePerioder = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
                 it.path("ukjentePerioder")
-            },
+            }.isNotEmpty(),
             utbetalinger = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->
