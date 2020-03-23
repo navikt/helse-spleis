@@ -9,6 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -430,6 +431,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    @Disabled
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.E + 1.F + 1.E + 10.S).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {

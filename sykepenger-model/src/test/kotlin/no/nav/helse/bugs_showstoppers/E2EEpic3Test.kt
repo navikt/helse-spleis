@@ -10,6 +10,7 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -394,6 +395,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled
     internal fun `ferie inni arbeidsgiverperioden`() {
         håndterSykmelding(Triple(21.desember(2019), 5.januar(2020), 80))
         håndterSøknad(
