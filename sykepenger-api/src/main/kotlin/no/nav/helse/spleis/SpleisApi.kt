@@ -69,25 +69,25 @@ private fun håndterPerson(person: Person, hendelseDao: HendelseDao): ObjectNode
     return personJson.apply { putArray("hendelser").addAll(hendelser) }
 }
 
-internal sealed class HendelseDTO(internal val type: String, internal val hendelseId: String) {
+sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
     class NySøknadDTO(json: JsonNode) : HendelseDTO("NY_SØKNAD", json["@id"].asText()) {
-        internal val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
-        internal val fom: LocalDate = LocalDate.parse(json["fom"].asText())
-        internal val tom: LocalDate = LocalDate.parse(json["tom"].asText())
+        val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val fom: LocalDate = LocalDate.parse(json["fom"].asText())
+        val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
 
     class SendtSøknadDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD", json["@id"].asText()) {
-        internal val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
-        internal val sendtNav: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
-        internal val fom: LocalDate = LocalDate.parse(json["fom"].asText())
-        internal val tom: LocalDate = LocalDate.parse(json["tom"].asText())
+        val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val sendtNav: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val fom: LocalDate = LocalDate.parse(json["fom"].asText())
+        val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
 
     class InntektsmeldingDTO(json: JsonNode) : HendelseDTO("INNTEKTSMELDING", json["@id"].asText()) {
-        internal val beregnetInntekt: Number = json["beregnetInntekt"].asDouble()
-        internal val førsteFraværsdag: LocalDate = LocalDate.parse(json["foersteFravaersdag"].asText())
-        internal val mottattDato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val beregnetInntekt: Number = json["beregnetInntekt"].asDouble()
+        val førsteFraværsdag: LocalDate = LocalDate.parse(json["foersteFravaersdag"].asText())
+        val mottattDato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
     }
 }
 
