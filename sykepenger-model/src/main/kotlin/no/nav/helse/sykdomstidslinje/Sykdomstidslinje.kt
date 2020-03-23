@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.tournament.historiskDagturnering
+import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.streams.toList
 
@@ -71,6 +72,7 @@ internal class Sykdomstidslinje private constructor(private val dager: List<Dag>
 
     internal fun toShortString(): String {
         return dager.joinToString(separator = "") {
+            (if (it.dagen.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
             when (it::class) {
                 Sykedag.Søknad::class -> "S"
                 Sykedag.Sykmelding::class -> "S"
