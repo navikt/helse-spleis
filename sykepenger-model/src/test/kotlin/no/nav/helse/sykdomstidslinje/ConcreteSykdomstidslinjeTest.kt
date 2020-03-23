@@ -9,7 +9,7 @@ import java.time.LocalDate
 internal class ConcreteSykdomstidslinjeTest {
 
     @Test
-    internal fun subset() {
+    fun subset() {
         val tidslinje = ConcreteSykdomstidslinje.sykedager(3.januar, 4.januar, 100.0, Søknad.SøknadDagFactory)
         assertTidslinje(tidslinje.subset(null, 4.januar), 3.januar, 4.januar)
         assertTidslinje(tidslinje.subset(null, 5.januar), 3.januar, 4.januar)
@@ -22,8 +22,9 @@ internal class ConcreteSykdomstidslinjeTest {
     }
 
     @Test
-    internal fun kutt() {
+    fun kutt() {
         val tidslinje = ConcreteSykdomstidslinje.sykedager(3.januar, 4.januar, 100.0, Søknad.SøknadDagFactory)
+        assertTidslinje(tidslinje.kutt(3.januar), 3.januar, 3.januar)
         assertTidslinje(tidslinje.kutt(4.januar), 3.januar, 4.januar)
         assertTidslinje(tidslinje.kutt(5.januar), 3.januar, 4.januar)
         assertNull(tidslinje.kutt(2.januar))
