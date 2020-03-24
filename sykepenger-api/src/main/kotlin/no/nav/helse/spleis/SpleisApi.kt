@@ -79,7 +79,7 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
     class SendtSøknadDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD", json["@id"].asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
-        val sendtNav: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val sendtNav: LocalDateTime = LocalDateTime.parse(json["sendtNav"].asText())
         val fom: LocalDate = LocalDate.parse(json["fom"].asText())
         val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
