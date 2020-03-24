@@ -1,17 +1,16 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.person.NySykdomshistorikkVisitor
 import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Sykdomshistorikk private constructor(
+internal class NySykdomshistorikk private constructor(
     private val elementer: MutableList<Element>
 ) {
-    internal constructor() : this(mutableListOf())
-
     internal val size get() = elementer.size
+
     internal fun isEmpty() = elementer.isEmpty()
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
@@ -25,7 +24,7 @@ internal class Sykdomshistorikk private constructor(
         )
     }
 
-    internal fun accept(visitor: SykdomshistorikkVisitor) {
+    internal fun accept(visitor: NySykdomshistorikkVisitor) {
         visitor.preVisitSykdomshistorikk(this)
         elementer.forEach { it.accept(visitor) }
         visitor.postVisitSykdomshistorikk(this)
@@ -33,8 +32,8 @@ internal class Sykdomshistorikk private constructor(
 
     private fun kalkulerBeregnetSykdomstidslinje(
         hendelse: SykdomstidslinjeHendelse,
-        hendelseSykdomstidslinje: ConcreteSykdomstidslinje
-    ): ConcreteSykdomstidslinje {
+        hendelseSykdomstidslinje: NySykdomstidslinje
+    ): NySykdomstidslinje {
         val tidslinje = if (elementer.isEmpty())
             hendelseSykdomstidslinje
         else
@@ -45,17 +44,17 @@ internal class Sykdomshistorikk private constructor(
     internal class Element private constructor(
         private val hendelseId: UUID,
         private val tidsstempel: LocalDateTime,
-        private val hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
-        private val beregnetSykdomstidslinje: ConcreteSykdomstidslinje
+        private val hendelseSykdomstidslinje: NySykdomstidslinje,
+        private val beregnetSykdomstidslinje: NySykdomstidslinje
     ) {
-        fun accept(visitor: SykdomshistorikkVisitor) {
+        fun accept(visitor: NySykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
-            visitor.preVisitHendelseSykdomstidslinje()
+            visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
             hendelseSykdomstidslinje.accept(visitor)
-            visitor.postVisitHendelseSykdomstidslinje()
-            visitor.preVisitBeregnetSykdomstidslinje()
+            visitor.postVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
+            visitor.preVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
             beregnetSykdomstidslinje.accept(visitor)
-            visitor.postVisitBeregnetSykdomstidslinje()
+            visitor.postVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
             visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
         }
 
@@ -63,12 +62,12 @@ internal class Sykdomshistorikk private constructor(
             fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
             fun opprett(
-                historikk: Sykdomshistorikk,
+                historikk: NySykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
                 tom: LocalDate
             ): Element {
                 if (!historikk.isEmpty()) hendelse.old_padLeft(historikk.sykdomstidslinje().førsteDag())
-                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
+                val hendelseSykdomstidslinje = hendelse.nySykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),

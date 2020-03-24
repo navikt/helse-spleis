@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje.dag
-
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinjeVisitor
+import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import java.time.LocalDate
 

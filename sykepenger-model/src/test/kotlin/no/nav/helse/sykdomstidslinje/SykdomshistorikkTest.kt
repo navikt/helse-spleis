@@ -207,7 +207,9 @@ internal class SykdomshistorikkTest {
     private fun sykdomshendelse(dag: Dag): SykdomstidslinjeHendelse {
         return object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
             override fun sykdomstidslinje() = dag
-            override fun sykdomstidslinje(tom: LocalDate) = dag
+            override fun sykdomstidslinje(tom: LocalDate) = sykdomstidslinje()
+            override fun nySykdomstidslinje() = NySykdomstidslinje()
+            override fun nySykdomstidslinje(tom: LocalDate) = nySykdomstidslinje()
             override fun toSpesifikkKontekst() = SpesifikkKontekst("Testhendelse 1")
             override fun valider() = throw NotImplementedError("not implemented")
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw NotImplementedError("not implemented")

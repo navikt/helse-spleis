@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje.dag
 
+import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinjeVisitor
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
