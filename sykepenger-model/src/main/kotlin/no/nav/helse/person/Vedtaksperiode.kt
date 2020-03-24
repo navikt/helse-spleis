@@ -232,6 +232,18 @@ internal class Vedtaksperiode private constructor(
         opptjening(hendelse)
     }
 
+    private fun trengerInntektsmelding() {
+        this.person.trengerInntektsmelding(
+            PersonObserver.ManglendeInntektsmeldingEvent(
+                vedtaksperiodeId = this.id,
+                organisasjonsnummer = this.organisasjonsnummer,
+                fødselsnummer = this.fødselsnummer,
+                opprettet = LocalDate.now(),
+                fom = this.periode().start,
+                tom = this.periode().endInclusive
+            )
+        )
+    }
 
     private fun emitVedtaksperiodeEndret(
         currentState: TilstandType,
@@ -482,6 +494,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerGap)
         }
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.trengerInntektsmelding()
+        }
     }
 
     internal object AvventerUferdigGap : Vedtaksperiodetilstand {
@@ -552,14 +568,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.person.trengerInntektsmelding(PersonObserver.ManglendeInntektsmeldingEvent(
-                vedtaksperiodeId = vedtaksperiode.id,
-                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                fødselsnummer = vedtaksperiode.fødselsnummer,
-                opprettet = LocalDate.now(),
-                fom = vedtaksperiode.periode().start,
-                tom = vedtaksperiode.periode().endInclusive))
+            vedtaksperiode.trengerInntektsmelding()
         }
+
     }
 
     internal object AvventerVilkårsprøvingGap : Vedtaksperiodetilstand {
