@@ -38,7 +38,8 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    private val sykdomshistorikk: Sykdomshistorikk
+    private val sykdomshistorikk: Sykdomshistorikk,
+    private var utbetalingstidslinje: Utbetalingstidslinje?
 ) : Aktivitetskontekst {
     private val påminnelseThreshold = Integer.MAX_VALUE
 
@@ -66,7 +67,8 @@ internal class Vedtaksperiode private constructor(
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
-        sykdomshistorikk = Sykdomshistorikk()
+        sykdomshistorikk = Sykdomshistorikk(),
+        utbetalingstidslinje = null
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
@@ -82,6 +84,9 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
+        visitor.preVisitUtbetalingstidslinje(utbetalingstidslinje)
+        utbetalingstidslinje?.accept(visitor)
+        visitor.postVisitUtbetalingstidslinje(utbetalingstidslinje)
         visitor.postVisitVedtaksperiode(this, id)
     }
 
@@ -669,6 +674,7 @@ internal class Vedtaksperiode private constructor(
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
+                    vedtaksperiode.utbetalingstidslinje = engineForLine?.utbetalingstidslinje
                     vedtaksperiode.utbetalingslinjer.also {
                         it.clear()
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())

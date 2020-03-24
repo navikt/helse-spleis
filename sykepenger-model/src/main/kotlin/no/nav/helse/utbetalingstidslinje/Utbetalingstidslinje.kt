@@ -107,7 +107,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
 
     internal interface UtbetalingsdagVisitor {
-        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
+        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) {}
         fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {}
         fun visitNavDag(dag: NavDag) {}
         fun visitNavHelgDag(dag: NavHelgDag) {}
@@ -116,7 +116,7 @@ internal class Utbetalingstidslinje private constructor(
         fun visitAvvistDag(dag: AvvistDag) {}
         fun visitForeldetDag(dag: ForeldetDag) {}
         fun visitUkjentDag(dag: UkjentDag) {}
-        fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {}
+        fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje?) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :

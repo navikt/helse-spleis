@@ -166,7 +166,8 @@ internal class SpeilBuilderTest {
         assertTrue(dataForVilkårsvurdering.hasNonNull("antallOpptjeningsdagerErMinst"))
         assertTrue(dataForVilkårsvurdering.hasNonNull("harOpptjening"))
 
-        val sykdomstidslinje = vedtaksperiode["sykdomstidslinje"];
+        val sykdomstidslinje = vedtaksperiode["sykdomstidslinje"]
+        assertEquals(31, sykdomstidslinje.size())
         sykdomstidslinje.forEach {
             assertTrue(it.hasNonNull("dagen"))
             assertTrue(it.hasNonNull("type"))
@@ -174,6 +175,7 @@ internal class SpeilBuilderTest {
         }
 
         val utbetalingstidslinje = vedtaksperiode["utbetalingstidslinje"];
+        assertEquals(31, utbetalingstidslinje.size())
         utbetalingstidslinje.forEach {
             assertTrue(it.hasNonNull("type"))
             assertTrue(it.hasNonNull("inntekt"))
@@ -185,6 +187,7 @@ internal class SpeilBuilderTest {
         }
 
         val utbetalingslinjer = vedtaksperiode["utbetalingslinjer"];
+        assertEquals(1, utbetalingslinjer.size())
         utbetalingslinjer.forEach {
             assertTrue(it.hasNonNull("fom"))
             assertTrue(it.hasNonNull("tom"))

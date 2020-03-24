@@ -65,7 +65,7 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitInntekt(inntekt)
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) {
         target.preVisitUtbetalingstidslinje(tidslinje)
     }
 
@@ -105,7 +105,7 @@ internal open class PersonVisitorProxy(protected val target: PersonVisitor) : Pe
         target.visitUkjentDag(dag)
     }
 
-    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
+    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje?) {
         target.postVisitUtbetalingstidslinje(utbetalingstidslinje)
     }
 

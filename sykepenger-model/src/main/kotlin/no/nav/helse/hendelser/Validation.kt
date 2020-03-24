@@ -98,7 +98,7 @@ internal class ByggUtbetalingslinjer(
 ) : Valideringssteg {
     private lateinit var utbetalingslinjer: List<Utbetalingslinje>
 
-    private val utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiode.periode())
+    internal val utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiode.periode())
 
     internal fun utbetalingslinjer() = utbetalingslinjer
 

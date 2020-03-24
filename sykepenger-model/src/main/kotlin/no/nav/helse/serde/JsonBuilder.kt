@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.*
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.UtbetalingstidslinjeData.TypeData
+import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
@@ -86,7 +86,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) = currentState.visitInntekt(inntekt)
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) =
         currentState.preVisitUtbetalingstidslinje(tidslinje)
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
@@ -110,8 +110,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
         currentState.visitUkjentDag(dag)
 
+    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) =
+        currentState.visitForeldetDag(dag)
 
-    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) =
+    override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje?) =
         currentState.postVisitUtbetalingstidslinje(utbetalingstidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
@@ -258,7 +260,7 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
         }
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
@@ -346,9 +348,7 @@ internal class JsonBuilder : PersonVisitor {
             foreldetDagMap.putAll(UtbetalingsdagReflect(dag, TypeData.ForeldetDag).toMap())
         }
 
-        override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) {
-            popState()
-        }
+        override fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje?) = popState()
     }
 
     private inner class VedtaksperiodeState(
@@ -384,6 +384,12 @@ internal class JsonBuilder : PersonVisitor {
             val utbetalingstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
             vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
             pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
+        }
+
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) {
+            val utbetalingstidslinje = mutableMapOf<String, Any?>()
+            vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
+            pushState(UtbetalingstidslinjeState(utbetalingstidslinje))
         }
 
         override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {

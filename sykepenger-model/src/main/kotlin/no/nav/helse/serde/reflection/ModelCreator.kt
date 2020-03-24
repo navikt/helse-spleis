@@ -48,12 +48,13 @@ internal fun createVedtaksperiode(
     utbetalingsreferanse: String?,
     førsteFraværsdag: LocalDate?,
     dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    sykdomshistorikk: Sykdomshistorikk
+    sykdomshistorikk: Sykdomshistorikk,
+    utbetalingstidslinje: Utbetalingstidslinje?
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, forbrukteSykedager, utbetalingslinjer, godkjentAv,
-        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, sykdomshistorikk
+        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, sykdomshistorikk, utbetalingstidslinje
     )
 
 internal fun createSykdomshistorikk(
