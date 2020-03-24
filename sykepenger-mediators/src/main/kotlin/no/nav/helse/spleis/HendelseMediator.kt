@@ -27,7 +27,7 @@ internal class HendelseMediator(
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
-    private val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val parser = Parser(this, rapidsConnection)
 
     private val personMediator = PersonMediator(rapidsConnection, lagreUtbetalingDao)
