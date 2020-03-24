@@ -1,17 +1,21 @@
 package no.nav.helse.sykdomstidslinje.dag
 
 import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinjeVisitor
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-internal abstract class Dag internal constructor(internal val dagen: LocalDate) : ConcreteSykdomstidslinje() {
+internal abstract class Dag internal constructor(internal val dagen: LocalDate) :
+        ConcreteSykdomstidslinje() {
 
+    internal abstract fun accept(visitor: NySykdomstidslinjeVisitor)
+
+    // Remove this behavior with NySykdomstidslinje
     override fun førsteDag() = dagen
     override fun sisteDag() = dagen
     override fun flatten() = listOf(this)
     override fun dag(dato: LocalDate) = if (dato == dagen) this else null
-
     override fun length() = 1
 
     companion object {
