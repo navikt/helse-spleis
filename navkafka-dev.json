@@ -188,9 +188,13 @@
                 {
                     "member": "O142910",
                     "role": "MANAGER"
+                },
+                {
+                    "member": "S157803",
+                    "role": "MANAGER"
                 }
             ],
-            "numPartitions": 3,
+            "numPartitions": 6,
             "topicName": "helse-rapid-v1"
         }
     ]
