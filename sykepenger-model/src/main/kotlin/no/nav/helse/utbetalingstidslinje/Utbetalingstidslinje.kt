@@ -19,9 +19,9 @@ internal class Utbetalingstidslinje private constructor(
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }.toMutableList())
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
-        visitor.preVisitUtbetalingstidslinje(this)
+        visitor.preVisitUtbetalingstidslinje()
         utbetalingsdager.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetalingstidslinje(this)
+        visitor.postVisitUtbetalingstidslinje()
     }
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
@@ -107,7 +107,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
 
     internal interface UtbetalingsdagVisitor {
-        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje?) {}
+        fun preVisitUtbetalingstidslinje() {}
         fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {}
         fun visitNavDag(dag: NavDag) {}
         fun visitNavHelgDag(dag: NavHelgDag) {}
@@ -116,7 +116,7 @@ internal class Utbetalingstidslinje private constructor(
         fun visitAvvistDag(dag: AvvistDag) {}
         fun visitForeldetDag(dag: ForeldetDag) {}
         fun visitUkjentDag(dag: UkjentDag) {}
-        fun postVisitUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje?) {}
+        fun postVisitUtbetalingstidslinje() {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :

@@ -84,9 +84,9 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
-        visitor.preVisitUtbetalingstidslinje(utbetalingstidslinje)
+        visitor.preVisitUtbetalingstidslinje()
         utbetalingstidslinje?.accept(visitor)
-        visitor.postVisitUtbetalingstidslinje(utbetalingstidslinje)
+        visitor.postVisitUtbetalingstidslinje()
         visitor.postVisitVedtaksperiode(this, id)
     }
 
