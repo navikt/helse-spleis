@@ -84,6 +84,10 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }
 
+    fun trengerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+        observers.forEach { it.manglerInntektsmelding(event) }
+    }
+
     fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         observers.forEach {
             it.vedtaksperiodeEndret(event)

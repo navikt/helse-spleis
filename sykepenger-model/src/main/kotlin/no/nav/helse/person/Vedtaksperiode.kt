@@ -550,6 +550,16 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.person.trengerInntektsmelding(PersonObserver.ManglendeInntektsmeldingEvent(
+                vedtaksperiodeId = vedtaksperiode.id,
+                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                fødselsnummer = vedtaksperiode.fødselsnummer,
+                opprettet = LocalDate.now(),
+                fom = vedtaksperiode.periode().start,
+                tom = vedtaksperiode.periode().endInclusive))
+        }
     }
 
     internal object AvventerVilkårsprøvingGap : Vedtaksperiodetilstand {

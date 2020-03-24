@@ -833,4 +833,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
     }
+
+    @Test
+    fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
+        håndterSykmelding(Triple(1.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+        håndterYtelser(0)
+
+        assertNoErrors(inspektør)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
 }

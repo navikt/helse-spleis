@@ -55,6 +55,15 @@ interface PersonObserver {
         val forbrukteSykedager: Int
     )
 
+    data class ManglendeInntektsmeldingEvent(
+        val vedtaksperiodeId: UUID,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val opprettet: LocalDate,
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
@@ -66,4 +75,6 @@ interface PersonObserver {
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
 
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
+
+    fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
 }
