@@ -219,14 +219,17 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Fullført behandling av inntektsmelding")
     }
 
-    private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
-        håndter(hendelse) { nesteTilstand }
-    }
-
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: () -> Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
+    }
+
+    private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
+        sykdomshistorikk.håndter(hendelse)
+        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+            .also { trengerInntektsmelding() }
+        tilstand(hendelse, nesteTilstand)
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
@@ -810,22 +813,12 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse, forrigeTilstand: Vedtaksperiodetilstand) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
-            if (harMottattSøknad(forrigeTilstand)) {
+            if (forrigeTilstand == AvventerGap) {
                 vedtaksperiode.trengerInntektsmelding()
             }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-
-        private fun harMottattSøknad(tilstand: Vedtaksperiodetilstand) = tilstand !in listOf(
-            MottattSykmeldingFerdigGap,
-            MottattSykmeldingFerdigForlengelse,
-            MottattSykmeldingUferdigGap,
-            MottattSykmeldingUferdigForlengelse,
-            AvventerSøknadUferdigForlengelse,
-            AvventerSøknadUferdigGap,
-            AvventerSøknadFerdigGap
-        )
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
