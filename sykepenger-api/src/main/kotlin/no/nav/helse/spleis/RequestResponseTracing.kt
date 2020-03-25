@@ -30,15 +30,15 @@ internal fun Application.requestResponseTracing(logger: Logger) {
         .register()
 
     intercept(ApplicationCallPipeline.Monitoring) {
-        val timer = httpRequestDuration.startTimer()
         try {
-            if (call.request.uri !in ignoredPaths) logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
-            proceed()
+            if (call.request.uri in ignoredPaths) return@intercept proceed()
+            logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
+            httpRequestDuration.startTimer().use {
+                proceed()
+            }
         } catch (err: Throwable) {
             logger.info("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
             throw err
-        } finally {
-            timer.observeDuration()
         }
     }
 
@@ -51,7 +51,8 @@ internal fun Application.requestResponseTracing(logger: Logger) {
             call.response.status(status)
         }
 
-        if (call.request.uri !in ignoredPaths) logger.info("responding with status=${status.value} callId=${call.callId} ")
+        if (call.request.uri in ignoredPaths) return@intercept
+        logger.info("responding with status=${status.value} callId=${call.callId} ")
         httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
     }
 }
