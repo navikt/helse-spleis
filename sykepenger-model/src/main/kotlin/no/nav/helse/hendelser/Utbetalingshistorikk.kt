@@ -23,14 +23,15 @@ class Utbetalingshistorikk(
     private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
         if (førsteFraværsdag == null) return this
         var forrigePeriodeFom: LocalDate = førsteFraværsdag
-        return filter {periode ->
-            (periode.tom.plusWeeks(26) >= forrigePeriodeFom).also {if (it)
-                forrigePeriodeFom = periode.fom
+        return sortedByDescending { it.tom }.filter { periode ->
+            (periode.tom.plusWeeks(26) >= forrigePeriodeFom).also {
+                if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
             }
         }
     }
 
-    internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) = utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
+    internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) =
+        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
 
     internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(this, aktivitetslogg) }
@@ -66,7 +67,10 @@ class Utbetalingshistorikk(
     }
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
-        internal open fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg): Utbetalingstidslinje {
+        internal open fun toTidslinje(
+            graderingsliste: List<Graderingsperiode>,
+            aktivitetslogg: Aktivitetslogg
+        ): Utbetalingstidslinje {
             aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
         }
 
@@ -83,15 +87,16 @@ class Utbetalingshistorikk(
             private fun List<Graderingsperiode>.finnGradForUtbetalingsdag(dag: LocalDate) =
                 this.find { it.datoIPeriode(dag) }?.grad ?: Double.NaN
 
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) = Utbetalingstidslinje().apply {
-                fom.datesUntil(tom.plusDays(1)).forEach {
-                    if (it.erHelg()) this.addHelg(
-                        0.0,
-                        it,
-                        graderingsliste.finnGradForUtbetalingsdag(it)
-                    ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply {
+                    fom.datesUntil(tom.plusDays(1)).forEach {
+                        if (it.erHelg()) this.addHelg(
+                            0.0,
+                            it,
+                            graderingsliste.finnGradForUtbetalingsdag(it)
+                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+                    }
                 }
-            }
 
             override fun valider(historikk: Utbetalingshistorikk, aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.error("Utbetalingsperiode fra Infotrygd har en FOM etter TOM")
