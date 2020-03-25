@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
@@ -31,9 +31,9 @@ class Sykmelding(
 
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
-    override fun nySykdomstidslinje() = sykeperioder.map(Sykeperiode::nySykdomstidslinje).merge(IdentiskDagTurnering)
+    override fun sykdomstidslinje() = sykeperioder.map(Sykeperiode::sykdomstidslinje).merge(IdentiskDagTurnering)
 
-    override fun nySykdomstidslinje(tom: LocalDate) = nySykdomstidslinje()
+    override fun sykdomstidslinje(tom: LocalDate) = sykdomstidslinje()
 
     override fun fødselsnummer() = fnr
 
@@ -50,8 +50,8 @@ class Sykmelding(
         private val tom: LocalDate,
         private val sykdomsgrad: Int
     ) {
-        internal fun nySykdomstidslinje() =
-            NySykdomstidslinje.sykedager(fom, tom, sykdomsgrad.toDouble(), SykmeldingDagFactory)
+        internal fun sykdomstidslinje() =
+            Sykdomstidslinje.sykedager(fom, tom, sykdomsgrad.toDouble(), SykmeldingDagFactory)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)

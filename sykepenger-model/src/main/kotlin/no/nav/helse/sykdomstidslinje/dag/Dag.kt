@@ -1,13 +1,13 @@
 package no.nav.helse.sykdomstidslinje.dag
 
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 internal abstract class Dag internal constructor(internal val dagen: LocalDate) {
 
-    internal abstract fun accept(visitor: NySykdomstidslinjeVisitor)
+    internal abstract fun accept(visitor: SykdomstidslinjeVisitor)
 
     companion object {
         internal val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")

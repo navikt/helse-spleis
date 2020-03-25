@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.person.*
-import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -17,12 +17,12 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-    private val sykdomshistorier = mutableMapOf<Int, NySykdomshistorikk>()
+    private val sykdomshistorier = mutableMapOf<Int, Sykdomshistorikk>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
-    internal lateinit var sykdomshistorikk: NySykdomshistorikk
+    internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
@@ -74,14 +74,14 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         inntekter.getOrPut(arbeidsgiverindeks) { mutableListOf() }.add(inntekt)
     }
 
-    override fun preVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) {
+    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
         sykdomshistorier[vedtaksperiodeindeks] = sykdomshistorikk
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty())
             this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
     }
 
-    private inner class Dagteller : NySykdomstidslinjeVisitor {
+    private inner class Dagteller : SykdomstidslinjeVisitor {
         override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(
             Sykedag::class)
         override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(

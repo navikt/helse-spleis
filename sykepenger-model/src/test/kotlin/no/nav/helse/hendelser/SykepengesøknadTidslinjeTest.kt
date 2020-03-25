@@ -23,7 +23,7 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får sykeperiodene (søknadsperiodene) fra søknaden`() {
-        val tidslinje = søknad().nySykdomstidslinje(sykeperiodeTOM).merge(sykmelding().nySykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
+        val tidslinje = søknad().sykdomstidslinje(sykeperiodeTOM).merge(sykmelding().sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
         assertType(Sykedag.Søknad::class, tidslinje[sykeperiodeFOM])
         assertType(SykHelgedag.Søknad::class, tidslinje[sykeperiodeTOM])
@@ -36,7 +36,7 @@ internal class SykepengesøknadTidslinjeTest {
         val tidslinje = søknad(perioder = listOf(
             Periode.Egenmelding(egenmeldingFom, egenmeldingTom),
             Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100))
-        ).nySykdomstidslinje(sykeperiodeTOM).merge(sykmelding().nySykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
+        ).sykdomstidslinje(sykeperiodeTOM).merge(sykmelding().sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
         assertEquals(egenmeldingFom, tidslinje.førsteDag())
         assertType(Egenmeldingsdag.Søknad::class, tidslinje[egenmeldingFom])
@@ -45,12 +45,12 @@ internal class SykepengesøknadTidslinjeTest {
 
     @Test
     fun `Tidslinjen får ferien fra søknaden`() {
-        val tidslinje = sykmelding().nySykdomstidslinje(sykeperiodeTOM).merge(søknad(
+        val tidslinje = sykmelding().sykdomstidslinje(sykeperiodeTOM).merge(søknad(
             perioder = listOf(
                 Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100),
                 Periode.Ferie(ferieFom, ferieTom)
             )
-        ).nySykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
+        ).sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
         assertType(Feriedag.Søknad::class, tidslinje[ferieFom])
         assertType(Feriedag.Søknad::class, tidslinje[ferieTom])
@@ -65,7 +65,7 @@ internal class SykepengesøknadTidslinjeTest {
                 )
         ).also {
             it.toString()
-        }.nySykdomstidslinje(sykeperiodeTOM)
+        }.sykdomstidslinje(sykeperiodeTOM)
 
         assertType(Permisjonsdag.Søknad::class, tidslinje[1.torsdag])
         assertType(Permisjonsdag.Søknad::class, tidslinje[1.fredag])
@@ -80,7 +80,7 @@ internal class SykepengesøknadTidslinjeTest {
             )
         ).also {
             it.toString()
-        }.nySykdomstidslinje(sykeperiodeTOM)
+        }.sykdomstidslinje(sykeperiodeTOM)
 
         assertType(Sykedag.Søknad::class, tidslinje[1.mandag])
         assertType(Sykedag.Søknad::class, tidslinje[1.tirsdag])

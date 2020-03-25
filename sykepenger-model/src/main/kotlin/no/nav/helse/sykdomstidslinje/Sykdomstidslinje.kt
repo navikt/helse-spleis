@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
 import java.time.DayOfWeek
@@ -9,7 +9,7 @@ import java.time.LocalDate
 import kotlin.streams.toList
 
 // Understands a specific period that probably involves illness
-internal class NySykdomstidslinje internal constructor(private val dager: List<Dag>) {
+internal class Sykdomstidslinje internal constructor(private val dager: List<Dag>) {
 
     internal constructor(): this(emptyList<Dag>())
 
@@ -27,25 +27,25 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
 
     private fun dag(dato: LocalDate) = dager.find { it.dagen == dato }
 
-    internal operator fun plus(other: NySykdomstidslinje) = join(other)
+    internal operator fun plus(other: Sykdomstidslinje) = join(other)
 
-    private fun join(other: NySykdomstidslinje, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag): NySykdomstidslinje {
+    private fun join(other: Sykdomstidslinje, inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag): Sykdomstidslinje {
         require(!overlapperMed(other)) { "Kan ikke koble sammen overlappende tidslinjer uten å oppgi en turneringsmetode." }
         return merge(other) { this.dag(it) ?: other.dag(it) ?: inneklemtDag(it) }
     }
 
-    internal fun merge(other: NySykdomstidslinje, dagturnering: Dagturnering, gapDayCreator: (LocalDate) -> Dag = ::ImplisittDag): NySykdomstidslinje {
+    internal fun merge(other: Sykdomstidslinje, dagturnering: Dagturnering, gapDayCreator: (LocalDate) -> Dag = ::ImplisittDag): Sykdomstidslinje {
         return merge(other) {
             beste(dagturnering, dag(it), other.dag(it)) ?: gapDayCreator(it)
         }
     }
 
-    private fun merge(other: NySykdomstidslinje, mapper: (LocalDate) -> Dag): NySykdomstidslinje {
+    private fun merge(other: Sykdomstidslinje, mapper: (LocalDate) -> Dag): Sykdomstidslinje {
         if (other.size == 0) return this
         if (this.size == 0) return other
         val førsteDag = this.førsteStartdato(other)
         val sisteDag = this.sisteSluttdato(other).plusDays(1)
-        return NySykdomstidslinje(førsteDag.datesUntil(sisteDag).map(mapper).toList())
+        return Sykdomstidslinje(førsteDag.datesUntil(sisteDag).map(mapper).toList())
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -56,32 +56,32 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
             .isEmpty()
     }
 
-    internal fun overlapperMed(other: NySykdomstidslinje) =
+    internal fun overlapperMed(other: Sykdomstidslinje) =
         when {
             this.size == 0 && other.size == 0 -> true
             this.size == 0 || other.size == 0 -> false
             else -> this.overlapp(other)
         }
 
-    private fun overlapp(other: NySykdomstidslinje): Boolean {
+    private fun overlapp(other: Sykdomstidslinje): Boolean {
         if (this.førsteDag() > other.førsteDag()) return other.overlapp(this)
         return this.sisteDag() >= other.førsteDag() && other.sisteDag() >= this.førsteDag() // Trust me!
     }
 
-    internal fun harTilstøtende(other: NySykdomstidslinje) =
+    internal fun harTilstøtende(other: Sykdomstidslinje) =
         this.sisteDag().harTilstøtende(other.førsteDag())
 
-    internal fun subset(fom: LocalDate?, tom:LocalDate): NySykdomstidslinje? {
+    internal fun subset(fom: LocalDate?, tom:LocalDate): Sykdomstidslinje? {
         if (fom == null) return kutt(tom)
         return dager
             .filter { it.dagen >= fom && it.dagen <= tom }
             .takeIf(List<*>::isNotEmpty)
-            ?.let { NySykdomstidslinje(it) }
+            ?.let { Sykdomstidslinje(it) }
     }
 
-    internal fun kutt(kuttDag: LocalDate): NySykdomstidslinje? {
+    internal fun kutt(kuttDag: LocalDate): Sykdomstidslinje? {
         if (kuttDag.isBefore(førsteDag())) return null
-        return NySykdomstidslinje(dager.filterNot { it.dagen.isAfter(kuttDag) })
+        return Sykdomstidslinje(dager.filterNot { it.dagen.isAfter(kuttDag) })
     }
 
     internal fun førsteFraværsdag(): LocalDate? {
@@ -104,16 +104,16 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
             dager.subList(indeksSisteSykedag, dager.size - 1)
         }
 
-    internal fun accept(visitor: NySykdomstidslinjeVisitor) {
+    internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this)
         dager.forEach { it.accept(visitor) }
         visitor.postVisitSykdomstidslinje(this)
     }
 
-    private fun førsteStartdato(other: NySykdomstidslinje) =
+    private fun førsteStartdato(other: Sykdomstidslinje) =
         if (this.førsteDag().isBefore(other.førsteDag())) this.førsteDag() else other.førsteDag()
 
-    private fun sisteSluttdato(other: NySykdomstidslinje) =
+    private fun sisteSluttdato(other: Sykdomstidslinje) =
         if (this.sisteDag().isAfter(other.sisteDag())) this.sisteDag() else other.sisteDag()
 
     override fun toString() = toShortString()
@@ -144,52 +144,52 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
     companion object {
 
         internal fun join(
-            liste: List<NySykdomstidslinje>,
+            liste: List<Sykdomstidslinje>,
             inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag
-        ): NySykdomstidslinje = liste.reduce { result, other -> result.join(other, inneklemtDag) }
+        ): Sykdomstidslinje = liste.reduce { result, other -> result.join(other, inneklemtDag) }
 
         internal fun merge(
-            liste: List<NySykdomstidslinje>,
+            liste: List<Sykdomstidslinje>,
             dagturnering: Dagturnering,
             inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag
         ) = liste.reduce { result, other -> result.merge(other, dagturnering, inneklemtDag) }
 
-        internal fun sykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): NySykdomstidslinje =
+        internal fun sykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, grad, factory, ::sykedag)
 
-        internal fun sykedager(fra: LocalDate, til: LocalDate, avskjæringsdato: LocalDate, grad: Double, factory: DagFactory): NySykdomstidslinje {
+        internal fun sykedager(fra: LocalDate, til: LocalDate, avskjæringsdato: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
-            return NySykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
+            return Sykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
                 if (it < avskjæringsdato) kunArbeidsgiverSykedag(it, grad, factory)
                 else sykedag(it, grad, factory)
             }.toList())
         }
 
-        internal fun ikkeSykedager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun ikkeSykedager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ikkeSykedag)
 
-        internal fun kunArbeidsgiverSykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): NySykdomstidslinje =
+        internal fun kunArbeidsgiverSykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, grad, factory, ::kunArbeidsgiverSykedag)
 
-        internal fun egenmeldingsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun egenmeldingsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::egenmeldingsdag)
 
-        internal fun ferie(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun ferie(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ferie)
 
-        internal fun ubestemtdager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun ubestemtdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ubestemtdag)
 
-        internal fun permisjonsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun permisjonsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::permisjonsdag)
 
-        internal fun studiedager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun studiedager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::studiedag)
 
-        internal fun utenlandsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun utenlandsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::utenlandsdag)
 
-        internal fun implisitteDager(fra: LocalDate, til: LocalDate, factory: DagFactory): NySykdomstidslinje =
+        internal fun implisitteDager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::implisittDag)
 
         private fun dag(fra: LocalDate, til: LocalDate, factory: DagFactory, enDag: EnDag) =
@@ -201,9 +201,9 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
             grad: Double,
             factory: DagFactory,
             enDag: EnDag
-        ): NySykdomstidslinje {
+        ): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
-            return NySykdomstidslinje(fra.datesUntil(til.plusDays(1))
+            return Sykdomstidslinje(fra.datesUntil(til.plusDays(1))
                 .map { enDag(it, grad, factory) }
                 .toList())
         }
@@ -255,17 +255,17 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
     }
 }
 
-internal fun List<NySykdomstidslinje>.join(
+internal fun List<Sykdomstidslinje>.join(
     dagturnering: Dagturnering,
     inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag
-) = NySykdomstidslinje.merge(this, dagturnering, inneklemtDag)
+) = Sykdomstidslinje.merge(this, dagturnering, inneklemtDag)
 
-internal fun List<NySykdomstidslinje>.join(
-    inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) = NySykdomstidslinje.join(this, inneklemtDag)
+internal fun List<Sykdomstidslinje>.join(
+    inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag) = Sykdomstidslinje.join(this, inneklemtDag)
 
-internal fun List<NySykdomstidslinje>.merge(
+internal fun List<Sykdomstidslinje>.merge(
     dagturnering: Dagturnering,
     inneklemtDag: (LocalDate) -> Dag = ::ImplisittDag
-) = NySykdomstidslinje.merge(this, dagturnering, inneklemtDag)
+) = Sykdomstidslinje.merge(this, dagturnering, inneklemtDag)
 
 private typealias EnDag = (LocalDate, Double, DagFactory) -> Dag

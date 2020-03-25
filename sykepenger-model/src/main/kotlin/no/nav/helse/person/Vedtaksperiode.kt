@@ -11,7 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehis
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingstidslinje.*
@@ -38,7 +38,7 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    private val sykdomshistorikk: NySykdomshistorikk,
+    private val sykdomshistorikk: Sykdomshistorikk,
     private var utbetalingstidslinje: Utbetalingstidslinje?
 ) : Aktivitetskontekst {
 
@@ -68,7 +68,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
-        sykdomshistorikk = NySykdomshistorikk(),
+        sykdomshistorikk = Sykdomshistorikk(),
         utbetalingstidslinje = null
     )
 
@@ -183,7 +183,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
         sykdomshistorikk.isEmpty() ||
-            this.sykdomstidslinje().overlapperMed(hendelse.nySykdomstidslinje())
+            this.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,

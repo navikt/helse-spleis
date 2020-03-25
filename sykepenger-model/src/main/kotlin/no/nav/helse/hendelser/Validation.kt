@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.time.LocalDate
@@ -37,7 +37,7 @@ internal interface Valideringssteg {
     fun feilmelding(): String? = null
 }
 
-internal class ValiderYtelser(private val arbeidsgivertidslinje: NySykdomstidslinje, private val ytelser: Ytelser) : Valideringssteg {
+internal class ValiderYtelser(private val arbeidsgivertidslinje: Sykdomstidslinje, private val ytelser: Ytelser) : Valideringssteg {
     override fun isValid(): Boolean {
         if (ytelser.valider().hasBehov()) return false
         val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag() ?: return true

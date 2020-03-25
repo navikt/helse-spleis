@@ -1,10 +1,10 @@
 package no.nav.helse.sykdomstidslinje.dag
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import java.time.LocalDate
 
 internal class Ubestemtdag internal constructor(dato: LocalDate) : Dag(dato) {
 
-    override fun accept(visitor: NySykdomstidslinjeVisitor) {
+    override fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.visitUbestemt(this)
     }
 

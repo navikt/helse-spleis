@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -174,7 +174,7 @@ internal class InntektsmeldingHendelseTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
+        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
         private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
         internal lateinit var personlogg: Aktivitetslogg
 
@@ -199,7 +199,7 @@ internal class InntektsmeldingHendelseTest {
             tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        override fun preVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
         }
 

@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,14 +71,14 @@ internal class KunArbeidsgiverSykedagTest {
         return TestInspektør(søknad)
     }
 
-    private class TestInspektør(søknad: Søknad): NySykdomstidslinjeVisitor {
+    private class TestInspektør(søknad: Søknad): SykdomstidslinjeVisitor {
         internal var dagerTeller = 0
         internal val dagstypeTeller = mutableMapOf<String, Int>()
         init {
-            søknad.nySykdomstidslinje().accept(this)
+            søknad.sykdomstidslinje().accept(this)
         }
 
-        override fun preVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             dagerTeller = 0
         }
 

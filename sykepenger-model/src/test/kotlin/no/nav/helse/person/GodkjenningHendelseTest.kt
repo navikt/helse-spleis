@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -179,7 +179,7 @@ internal class GodkjenningHendelseTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
+        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
         private val vedtaksperiodeIder = mutableSetOf<UUID>()
 
         init {
@@ -196,7 +196,7 @@ internal class GodkjenningHendelseTest {
             tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        override fun preVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
         }
 

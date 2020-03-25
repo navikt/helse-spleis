@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiod
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
@@ -28,7 +28,7 @@ class Inntektsmelding(
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
-    private var nySykdomstidslinje: NySykdomstidslinje
+    private var sykdomstidslinje: Sykdomstidslinje
 
     init {
         this.arbeidsgiverperioder =
@@ -36,17 +36,17 @@ class Inntektsmelding(
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
 
         val førsteFraværsdagtidslinje =
-            NySykdomstidslinje.egenmeldingsdager(førsteFraværsdag, førsteFraværsdag, InntektsmeldingDagFactory)
+            Sykdomstidslinje.egenmeldingsdager(førsteFraværsdag, førsteFraværsdag, InntektsmeldingDagFactory)
 
         val arbeidsgiverperiodetidslinje = this.arbeidsgiverperioder
-            .map { it.nySykdomstidslinje(this) }
+            .map { it.sykdomstidslinje(this) }
             .takeUnless { it.isEmpty() }
             ?.merge(IdentiskDagTurnering) {
-                NySykdomstidslinje.ikkeSykedag(it, InntektsmeldingDagFactory)
+                Sykdomstidslinje.ikkeSykedag(it, InntektsmeldingDagFactory)
             } ?: førsteFraværsdagtidslinje
 
         val ferieperiodetidslinje = this.ferieperioder
-            .map { it.nySykdomstidslinje(this) }
+            .map { it.sykdomstidslinje(this) }
             .takeUnless { it.isEmpty() }
             ?.merge(IdentiskDagTurnering)
 
@@ -54,7 +54,7 @@ class Inntektsmelding(
             ferieperiodetidslinje?.let { arbeidsgiverperiodetidslinje.merge(it, InntektsmeldingTurnering) }
                 ?: arbeidsgiverperiodetidslinje
 
-        this.nySykdomstidslinje = inntektsmeldingtidslinje.let {
+        this.sykdomstidslinje = inntektsmeldingtidslinje.let {
             if (arbeidsgiverperiodetidslinje.overlapperMed(førsteFraværsdagtidslinje)) it else it.merge(
                 førsteFraværsdagtidslinje,
                 InntektsmeldingTurnering
@@ -62,13 +62,13 @@ class Inntektsmelding(
         }
     }
 
-    override fun nySykdomstidslinje() = nySykdomstidslinje
+    override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
+    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
         val subsetFom = forrigeTom?.plusDays(1)
-        return nySykdomstidslinje().subset(subsetFom, tom)
+        return sykdomstidslinje().subset(subsetFom, tom)
             .also { trimLeft(tom) }
             ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen: [$subsetFom, $tom] gav en tom tidslinje")
     }
@@ -80,10 +80,10 @@ class Inntektsmelding(
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {
         if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
-        if (dato >= nySykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
-        nySykdomstidslinje = nySykdomstidslinje.plus(NySykdomstidslinje.ikkeSykedager(
+        if (dato >= sykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
+        sykdomstidslinje = sykdomstidslinje.plus(Sykdomstidslinje.ikkeSykedager(
             dato,
-            nySykdomstidslinje.førsteDag().minusDays(1),
+            sykdomstidslinje.førsteDag().minusDays(1),
             InntektsmeldingDagFactory
         ))
     }
@@ -133,20 +133,20 @@ class Inntektsmelding(
         internal val tom: LocalDate
     ) {
 
-        internal abstract fun nySykdomstidslinje(inntektsmelding: Inntektsmelding): NySykdomstidslinje
+        internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): Sykdomstidslinje
 
         internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
             maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
 
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun nySykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                NySykdomstidslinje.egenmeldingsdager(fom, tom, InntektsmeldingDagFactory)
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
+                Sykdomstidslinje.egenmeldingsdager(fom, tom, InntektsmeldingDagFactory)
 
         }
 
         class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
-            override fun nySykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                NySykdomstidslinje.ferie(fom, tom, InntektsmeldingDagFactory)
+            override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
+                Sykdomstidslinje.ferie(fom, tom, InntektsmeldingDagFactory)
         }
     }
 

@@ -27,7 +27,7 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
-        assertEquals(16, sykmelding.nySykdomstidslinje().length())
+        assertEquals(16, sykmelding.sykdomstidslinje().length())
     }
 
     @Test

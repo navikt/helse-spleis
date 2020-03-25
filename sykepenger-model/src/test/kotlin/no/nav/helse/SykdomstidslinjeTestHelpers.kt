@@ -1,7 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.testhelpers.mandag
@@ -28,42 +28,42 @@ internal val Int.feriedager get() = lagTidslinje(this, DagFactory::feriedag)
 internal val Int.permisjonsdager get() = lagTidslinje(this, DagFactory::permisjonsdag)
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2).merge(historiskDagturnering).test(periode1, periode2)
 }
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    periode3: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    periode3: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2, periode3).merge(historiskDagturnering).test(periode1, periode2, periode3)
 }
 
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    periode3: NySykdomstidslinje,
-    periode4: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    periode3: Sykdomstidslinje,
+    periode4: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2, periode3, periode4).merge(historiskDagturnering).test(periode1, periode2, periode3, periode4)
 }
 
-internal fun NySykdomstidslinje.fra(): NySykdomstidslinje {
+internal fun Sykdomstidslinje.fra(): Sykdomstidslinje {
     return this.fra(this.førsteDag())
 }
 
-internal fun NySykdomstidslinje.fra(fraOgMed: LocalDate, factory: DagFactory = Søknad.SøknadDagFactory): NySykdomstidslinje {
+internal fun Sykdomstidslinje.fra(fraOgMed: LocalDate, factory: DagFactory = Søknad.SøknadDagFactory): Sykdomstidslinje {
     val builder = SykdomstidslinjeBuilder(fraOgMed, factory)
         .antallDager(1)
 
-    return NySykdomstidslinje(this.flatten().flatMap {
+    return Sykdomstidslinje(this.flatten().flatMap {
         when (it) {
             is Sykedag -> builder.sykedager.flatten()
             is SykHelgedag -> builder.sykHelgedag.flatten()
@@ -87,14 +87,14 @@ internal fun fra(): SykdomstidslinjeBuilder {
 private fun lagTidslinje(
     antallDager: Int,
     generator: DagFactory.(LocalDate) -> Dag
-): NySykdomstidslinje =
+): Sykdomstidslinje =
     SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator)
 
 private fun lagTidslinje(
     antallDager: Int,
     generator: DagFactory.(LocalDate, Double) -> Dag,
     grad: Double = 100.0
-): NySykdomstidslinje =
+): Sykdomstidslinje =
     SykdomstidslinjeBuilder().antallDager(antallDager).lagTidslinje(generator, grad)
 
 internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val factory: DagFactory = Søknad.SøknadDagFactory) {
@@ -130,12 +130,12 @@ internal class SykdomstidslinjeBuilder(startdato: LocalDate? = null, private val
         internal val permisjonsdager get() = lagTidslinje(DagFactory::permisjonsdag)
         internal val ubestemtdag get() = lagTidslinje(DagFactory::ubestemtdag)
 
-        internal fun lagTidslinje(generator: DagFactory.(LocalDate) -> Dag): NySykdomstidslinje {
-            return NySykdomstidslinje(dager.map { factory.generator(it) }.toList())
+        internal fun lagTidslinje(generator: DagFactory.(LocalDate) -> Dag): Sykdomstidslinje {
+            return Sykdomstidslinje(dager.map { factory.generator(it) }.toList())
         }
 
-        internal fun lagTidslinje(generator: DagFactory.(LocalDate,Double) -> Dag, grad: Double = 100.0): NySykdomstidslinje {
-            return NySykdomstidslinje(dager.map { factory.generator(it, grad) }.toList())
+        internal fun lagTidslinje(generator: DagFactory.(LocalDate,Double) -> Dag, grad: Double = 100.0): Sykdomstidslinje {
+            return Sykdomstidslinje(dager.map { factory.generator(it, grad) }.toList())
         }
     }
 }
