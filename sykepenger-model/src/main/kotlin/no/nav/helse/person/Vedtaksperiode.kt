@@ -291,10 +291,16 @@ internal class Vedtaksperiode private constructor(
     }
 
     // Gang of four State pattern
-    internal interface Vedtaksperiodetilstand {
+    internal interface Vedtaksperiodetilstand: Aktivitetskontekst {
         val type: TilstandType
 
         val timeout: Duration
+
+        override fun toSpesifikkKontekst(): SpesifikkKontekst {
+            return SpesifikkKontekst("Tilstand", mapOf(
+                "tilstand" to type.name
+            ))
+        }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.warn("Forventet ikke sykmelding i %s", type.name)
@@ -342,9 +348,11 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandling.hendelse.info("Tidligere periode ferdig behandlet")
         }
 
-        fun leaving(aktivitetslogg: IAktivitetslogg) {}
+        fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
+        }
 
-        fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
+        fun leaving(aktivitetslogg: IAktivitetslogg) {}
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -465,6 +473,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
@@ -510,6 +519,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerInntektsmelding()
         }
     }
@@ -536,6 +546,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerInntektsmelding()
         }
     }
@@ -586,6 +597,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerInntektsmelding()
         }
 
@@ -596,6 +608,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
             hendelse.info("Forespør vilkårsgrunnlag")
         }
@@ -631,6 +644,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
 
@@ -717,6 +731,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
@@ -762,6 +777,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             utbetaling(
                 hendelse,
                 vedtaksperiode.utbetalingsreferanse,
@@ -811,6 +827,7 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
         }
 
@@ -833,6 +850,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             hendelse.error("Feilrespons fra oppdrag")
         }
 
