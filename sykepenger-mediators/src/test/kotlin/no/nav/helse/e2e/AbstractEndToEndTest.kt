@@ -196,7 +196,8 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeIndeks: Int,
         behov: List<String> = listOf(),
         løsninger: Map<String, Any> = emptyMap(),
-        ekstraFelter: Map<String, Any> = emptyMap()
+        ekstraFelter: Map<String, Any> = emptyMap(),
+        tilstand: TilstandType = TilstandType.START
     ) = testRapid.sendTestMessage(
         objectMapper.writeValueAsString(
             ekstraFelter + mapOf(
@@ -204,6 +205,7 @@ internal abstract class AbstractEndToEndTest {
                 "@opprettet" to LocalDateTime.now(),
                 "@event_name" to "behov",
                 "@behov" to behov,
+                "tilstand" to tilstand.name,
                 "aktørId" to AKTØRID,
                 "fødselsnummer" to UNG_PERSON_FNR_2018,
                 "organisasjonsnummer" to ORGNUMMER,
@@ -247,7 +249,8 @@ internal abstract class AbstractEndToEndTest {
                 "Godkjenning" to mapOf(
                     "godkjent" to godkjent
                 )
-            )
+            ),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning)
         )
     }
 
@@ -260,7 +263,8 @@ internal abstract class AbstractEndToEndTest {
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
                 "Foreldrepenger" to emptyMap<String, String>()
-            )
+            ),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)
         )
     }
 
@@ -271,6 +275,7 @@ internal abstract class AbstractEndToEndTest {
         sendGeneriskBehov(
             vedtaksperiodeIndeks = vedtaksperiodeIndeks,
             behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening"),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning),
             løsninger = mapOf(
                 "EgenAnsatt" to egenAnsatt,
                 "Inntektsberegning" to inntekter
@@ -297,6 +302,7 @@ internal abstract class AbstractEndToEndTest {
         sendGeneriskBehov(
             vedtaksperiodeIndeks = vedtaksperiodeIndeks,
             behov = listOf("Utbetaling"),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling),
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) "FERDIG" else "FEIL",
@@ -362,12 +368,13 @@ internal abstract class AbstractEndToEndTest {
                 this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
             }
         }
-        private val behov get() = mutableMapOf<UUID, MutableList<Behovtype>>().apply {
+        private val behov get() = mutableMapOf<UUID, MutableList<Pair<Behovtype, TilstandType>>>().apply {
             events("behov") {
                 val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
                 this.getOrPut(id) { mutableListOf() }.apply {
                     it.path("@behov").onEach {
-                        add(Behovtype.valueOf(it.asText()))
+                        add(Behovtype.valueOf(it.asText()) to tilstand)
                     }
                 }
             }
@@ -385,6 +392,7 @@ internal abstract class AbstractEndToEndTest {
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it == behovtype } ?: false
+        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
     }
 }

@@ -202,6 +202,7 @@ internal class HendelseMediatorTest {
                     "@opprettet" to LocalDateTime.now(),
                     "@event_name" to "behov",
                     "@behov" to behov,
+                    "tilstand" to "EN_TILSTAND",
                     "aktørId" to aktørId,
                     "fødselsnummer" to fødselsnummer,
                     "organisasjonsnummer" to organisasjonsnummer,

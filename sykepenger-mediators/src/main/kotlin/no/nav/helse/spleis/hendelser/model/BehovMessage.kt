@@ -14,7 +14,8 @@ internal abstract class BehovMessage(
         requireKey(
             "@behov", "@final", "@løsning",
             "aktørId", "fødselsnummer",
-            "organisasjonsnummer", "vedtaksperiodeId"
+            "organisasjonsnummer", "vedtaksperiodeId",
+            "tilstand"
         )
         require("@opprettet", JsonNode::asLocalDateTime)
         require("@besvart", JsonNode::asLocalDateTime)
