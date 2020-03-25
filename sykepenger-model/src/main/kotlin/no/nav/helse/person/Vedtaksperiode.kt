@@ -303,24 +303,29 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            sykmelding.kontekst(this)
             sykmelding.warn("Forventet ikke sykmelding i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             søknad.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
             søknad.warn("Forventet ikke søknad i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.kontekst(this)
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
             inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vilkårsgrunnlag.kontekst(this)
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+            ytelser.kontekst(this)
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
 
@@ -330,14 +335,17 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
+            manuellSaksbehandling.kontekst(this)
             manuellSaksbehandling.error("Forventet ikke svar på manuell behandling i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            påminnelse.kontekst(this)
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+            utbetaling.kontekst(this)
             utbetaling.error("Forventet ikke utbetaling i %s", type.name)
         }
 
@@ -345,6 +353,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             gjenopptaBehandling.hendelse.info("Tidligere periode ferdig behandlet")
         }
 
@@ -360,6 +369,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            sykmelding.kontekst(this)
             vedtaksperiode.håndter(sykmelding) { nesteTilstand(vedtaksperiode, sykmelding) }
             sykmelding.info("Fullført behandling av sykmelding")
         }
@@ -388,6 +398,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
@@ -398,6 +409,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
         }
@@ -406,6 +418,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
         }
 
@@ -413,6 +426,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
         }
     }
@@ -425,10 +439,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -442,10 +458,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -454,6 +472,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigGap)
         }
     }
@@ -463,6 +482,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -479,11 +499,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            påminnelse.kontekst(this)
             vedtaksperiode.trengerYtelser(påminnelse)
             påminnelse.info("Forespør sykdoms- og inntektshistorikk (Påminnet)")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
 
@@ -493,6 +515,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
+            ytelser.kontekst(this)
             Validation(ytelser).also {
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                     .also { vedtaksperiode.trengerInntektsmelding() }
@@ -511,10 +534,12 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerGap)
         }
 
@@ -529,6 +554,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerVilkårsprøvingGap)
         }
     }
@@ -538,10 +564,12 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigForlengelse)
         }
 
@@ -556,6 +584,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
         }
     }
@@ -565,10 +594,12 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
         }
@@ -579,11 +610,13 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            søknad.kontekst(this)
             vedtaksperiode.håndter(søknad, AvventerUferdigGap)
             søknad.info("Fullført behandling av søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            gjenopptaBehandling.hendelse.kontekst(this)
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerSøknadFerdigGap)
         }
     }
@@ -593,6 +626,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.kontekst(this)
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
 
@@ -614,10 +648,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            påminnelse.kontekst(this)
             vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vilkårsgrunnlag.kontekst(this)
             if (vilkårsgrunnlag.valider().hasErrors()) {
                 vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
@@ -658,6 +694,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            påminnelse.kontekst(this)
             vedtaksperiode.trengerYtelser(påminnelse)
         }
 
@@ -667,6 +704,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
+            ytelser.kontekst(this)
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.førsteFraværsdag) }
@@ -744,6 +782,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
+            manuellSaksbehandling.kontekst(this)
             if (manuellSaksbehandling.utbetalingGodkjent()) {
                 vedtaksperiode.tilstand(
                     manuellSaksbehandling,
@@ -801,6 +840,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+            utbetaling.kontekst(this)
             if (utbetaling.isOK()) {
                 vedtaksperiode.tilstand(utbetaling, Avsluttet) {
                     utbetaling.info("OK fra Oppdragssystemet")
@@ -839,6 +879,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.kontekst(this)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
@@ -869,8 +910,5 @@ internal class Vedtaksperiode private constructor(
         fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode().start }
         }
-
-        fun avgrens(utbetalingstidslinje: Utbetalingstidslinje, vedtaksperiode: Vedtaksperiode) =
-            utbetalingstidslinje.subset(vedtaksperiode.periode().start, vedtaksperiode.periode().endInclusive)
     }
 }
