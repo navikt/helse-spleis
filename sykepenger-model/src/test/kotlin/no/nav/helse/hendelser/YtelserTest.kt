@@ -66,12 +66,12 @@ internal class YtelserTest {
 
     @Test
     fun `sykepengehistorikk før gap større enn 26 uker blir ignorert`() {
-        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april(2019), 30.april(2019), 1000)
         val historikkSenereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april(2019), 30.april(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
-                historikkTidligereEnn26UkerGap,
-                historikkSenereEnn26UkerGap
+                historikkSenereEnn26UkerGap,
+                historikkTidligereEnn26UkerGap
             )
         )
 
@@ -84,12 +84,12 @@ internal class YtelserTest {
 
     @Test
     fun `ukjente perioder tidligere enn gap på 26 uker blir ignorert`() {
-        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 30.april(2019), 1000)
         val historikkSenereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 30.april(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
-                historikkTidligereEnn26UkerGap,
-                historikkSenereEnn26UkerGap
+                historikkSenereEnn26UkerGap,
+                historikkTidligereEnn26UkerGap
             )
         )
 
@@ -102,12 +102,12 @@ internal class YtelserTest {
 
     @Test
     fun `ukjente perioder er ugyldige`() {
-        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 31.mai(2019), 1000)
         val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 31.mai(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
-                ukjentPeriode,
-                refusjonTilArbeidsgiver
+                refusjonTilArbeidsgiver,
+                ukjentPeriode
             )
         )
 

@@ -23,11 +23,11 @@ class Utbetalingshistorikk(
     private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
         if (førsteFraværsdag == null) return this
         var forrigePeriodeFom: LocalDate = førsteFraværsdag
-        return reversed().filter {periode ->
+        return filter {periode ->
             (periode.tom.plusWeeks(26) >= forrigePeriodeFom).also {if (it)
                 forrigePeriodeFom = periode.fom
             }
-        }.reversed()
+        }
     }
 
     internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) = utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
