@@ -11,7 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehis
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingstidslinje.*
@@ -38,9 +38,10 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    private val sykdomshistorikk: Sykdomshistorikk,
+    private val sykdomshistorikk: NySykdomshistorikk,
     private var utbetalingstidslinje: Utbetalingstidslinje?
 ) : Aktivitetskontekst {
+
     private val påminnelseThreshold = Integer.MAX_VALUE
 
     internal constructor(
@@ -67,7 +68,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
-        sykdomshistorikk = Sykdomshistorikk(),
+        sykdomshistorikk = NySykdomshistorikk(),
         utbetalingstidslinje = null
     )
 
@@ -90,10 +91,13 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id)
     }
 
-    internal fun periode() = Periode(
-        sykdomshistorikk.sykdomstidslinje().førsteDag(),
-        sykdomshistorikk.sykdomstidslinje().sisteDag()
-    )
+    internal fun periode() = Periode(førsteDag(), sisteDag())
+
+    internal fun førsteDag() = sykdomstidslinje().førsteDag()
+
+    internal fun sisteDag() = sykdomstidslinje().sisteDag()
+
+    private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
@@ -178,8 +182,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        sykdomshistorikk.isEmpty() || this.sykdomshistorikk.sykdomstidslinje()
-            .overlapperMed(hendelse.sykdomstidslinje())
+        sykdomshistorikk.isEmpty() ||
+            this.sykdomstidslinje().overlapperMed(hendelse.nySykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -205,9 +209,9 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse)
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
-        if (hendelse.førsteFraværsdag > sykdomshistorikk.sykdomstidslinje().sisteDag())
+        if (hendelse.førsteFraværsdag > sisteDag())
             hendelse.warn("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
-        if (hendelse.førsteFraværsdag != sykdomshistorikk.sykdomstidslinje().førsteFraværsdag())
+        if (hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
             hendelse.warn("Inntektsmelding har oppgitt en annen første fraværsdag")
 
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
@@ -272,7 +276,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun harTilstøtende(other: Vedtaksperiode) =
-        this.sykdomshistorikk.sykdomstidslinje().harTilstøtende(other.sykdomshistorikk.sykdomstidslinje())
+        this.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje())
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode, forlengelse: Boolean): Boolean {
         if (this.periode().start >= other.periode().start) return true
@@ -605,7 +609,7 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
             }
 
-            val førsteFraværsdag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteFraværsdag()
+            val førsteFraværsdag = vedtaksperiode.sykdomstidslinje().førsteFraværsdag()
                 ?: vedtaksperiode.periode().start
             val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(førsteFraværsdag)
                 ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
@@ -654,7 +658,7 @@ internal class Vedtaksperiode private constructor(
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 it.valider {
                     HarInntektshistorikk(
-                        arbeidsgiver, vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()
+                        arbeidsgiver, vedtaksperiode.førsteDag()
                     )
                 }
                 var engineForTimeline: ByggUtbetalingstidlinjer? = null
@@ -699,7 +703,7 @@ internal class Vedtaksperiode private constructor(
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
-                sisteDag = vedtaksperiode.sykdomshistorikk.sykdomstidslinje().sisteDag(),
+                sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result()
@@ -853,7 +857,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }
-            .map { it.sykdomshistorikk.sykdomstidslinje() }.join()
+            .map { it.sykdomstidslinje() }.join()
 
         fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode().start }

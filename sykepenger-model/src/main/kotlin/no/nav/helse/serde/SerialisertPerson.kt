@@ -15,8 +15,8 @@ import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
@@ -184,7 +184,7 @@ class SerialisertPerson(val json: String) {
 
     private fun parseSykdomstidslinje(
         tidslinjeData: SykdomstidslinjeData
-    ): CompositeSykdomstidslinje = CompositeSykdomstidslinje(tidslinjeData.map(::parseDag))
+    ): NySykdomstidslinje = NySykdomstidslinje(tidslinjeData.map(::parseDag))
 
     private fun parseDag(
         data: ArbeidsgiverData.VedtaksperiodeData.DagData
@@ -251,7 +251,7 @@ class SerialisertPerson(val json: String) {
 
     private fun parseSykdomshistorikk(
         data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>
-    ): Sykdomshistorikk {
+    ): NySykdomshistorikk {
         return createSykdomshistorikk(data.map { sykdomshistorikkData ->
             createSykdomshistorikkElement(
                 timestamp = sykdomshistorikkData.tidsstempel,

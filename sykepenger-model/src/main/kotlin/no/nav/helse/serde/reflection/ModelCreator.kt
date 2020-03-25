@@ -2,8 +2,8 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -48,7 +48,7 @@ internal fun createVedtaksperiode(
     utbetalingsreferanse: String?,
     førsteFraværsdag: LocalDate?,
     dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
-    sykdomshistorikk: Sykdomshistorikk,
+    sykdomshistorikk: NySykdomshistorikk,
     utbetalingstidslinje: Utbetalingstidslinje?
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
@@ -57,18 +57,19 @@ internal fun createVedtaksperiode(
         godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, sykdomshistorikk, utbetalingstidslinje
     )
 
+
 internal fun createSykdomshistorikk(
-    elementer: List<Sykdomshistorikk.Element>
-) = Sykdomshistorikk::class.primaryConstructor!!
+    elementer: List<NySykdomshistorikk.Element>
+) = NySykdomshistorikk::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(elementer)
 
 internal fun createSykdomshistorikkElement(
     timestamp: LocalDateTime,
-    hendelseSykdomstidslinje: ConcreteSykdomstidslinje,
-    beregnetSykdomstidslinje: ConcreteSykdomstidslinje,
+    hendelseSykdomstidslinje: NySykdomstidslinje,
+    beregnetSykdomstidslinje: NySykdomstidslinje,
     hendelseId: UUID
-) = Sykdomshistorikk.Element::class.primaryConstructor!!
+) = NySykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(hendelseId, timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje)
 

@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -431,7 +431,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         inspektør.navdager.forEach { assertEquals(inntekt, it.inntekt) }
     }
 
-    private fun ConcreteSykdomstidslinje.utbetalingslinjer(
+    private fun NySykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.sisteDag(),
         inntektshistorikk: Inntekthistorikk = inntekthistorikk
     ) {

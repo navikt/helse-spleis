@@ -9,6 +9,8 @@ import java.util.*
 internal class NySykdomshistorikk private constructor(
     private val elementer: MutableList<Element>
 ) {
+    internal constructor() : this(mutableListOf())
+
     internal val size get() = elementer.size
 
     internal fun isEmpty() = elementer.isEmpty()
@@ -18,7 +20,8 @@ internal class NySykdomshistorikk private constructor(
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(
             0, Element.opprett(
-                this, hendelse,
+                this,
+                hendelse,
                 if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
             )
         )
@@ -66,7 +69,7 @@ internal class NySykdomshistorikk private constructor(
                 hendelse: SykdomstidslinjeHendelse,
                 tom: LocalDate
             ): Element {
-                if (!historikk.isEmpty()) hendelse.old_padLeft(historikk.sykdomstidslinje().førsteDag())
+                if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
                 val hendelseSykdomstidslinje = hendelse.nySykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),

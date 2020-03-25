@@ -2,23 +2,11 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
-import no.nav.helse.sykdomstidslinje.dag.Feriedag
-import no.nav.helse.sykdomstidslinje.dag.ImplisittDag
-import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
-import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.dag.Studiedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
-import no.nav.helse.sykdomstidslinje.dag.Utenlandsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
@@ -51,7 +39,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Utbetalingsdag
     ) {}
 }
 
-internal interface VedtaksperiodeVisitor : SykdomstidslinjeVisitor, SykdomshistorikkVisitor, UtbetalingsdagVisitor {
+internal interface VedtaksperiodeVisitor : NySykdomshistorikkVisitor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
     fun visitMaksdato(maksdato: LocalDate?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}

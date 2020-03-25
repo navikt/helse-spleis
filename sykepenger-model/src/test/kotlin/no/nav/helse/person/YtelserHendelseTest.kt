@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -233,7 +233,7 @@ internal class YtelserHendelseTest {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
         private val vedtaksperiodeIder = mutableSetOf<UUID>()
-        private val sykdomstidslinjer = mutableMapOf<Int, CompositeSykdomstidslinje>()
+        private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
         internal lateinit var personlogg: Aktivitetslogg
 
         init {
@@ -254,8 +254,8 @@ internal class YtelserHendelseTest {
             tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = compositeSykdomstidslinje
+        override fun preVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+            sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
         }
 
         internal val vedtaksperiodeTeller get() = tilstander.size

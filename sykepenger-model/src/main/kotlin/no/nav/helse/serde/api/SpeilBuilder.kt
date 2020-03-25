@@ -8,8 +8,8 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.CompositeSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -127,15 +127,15 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         currentState.preVisitVedtaksperiode(vedtaksperiode, id)
     }
 
-    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
+    override fun preVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
 
-    override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+    override fun postVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) {
         currentState.postVisitSykdomshistorikk(sykdomshistorikk)
     }
 
     override fun preVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
+        element: NySykdomshistorikk.Element,
         id: UUID,
         tidsstempel: LocalDateTime
     ) {
@@ -143,18 +143,26 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
-    override fun preVisitHendelseSykdomstidslinje() = currentState.preVisitHendelseSykdomstidslinje()
-    override fun postVisitHendelseSykdomstidslinje() = currentState.postVisitHendelseSykdomstidslinje()
-    override fun preVisitBeregnetSykdomstidslinje() = currentState.preVisitBeregnetSykdomstidslinje()
-    override fun postVisitBeregnetSykdomstidslinje() = currentState.postVisitBeregnetSykdomstidslinje()
-    override fun preVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
-        currentState.preVisitComposite(compositeSykdomstidslinje)
+    override fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.preVisitHendelseSykdomstidslinje(tidslinje)
 
-    override fun postVisitComposite(compositeSykdomstidslinje: CompositeSykdomstidslinje) =
-        currentState.postVisitComposite(compositeSykdomstidslinje)
+    override fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.postVisitHendelseSykdomstidslinje(tidslinje)
+
+    override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.preVisitBeregnetSykdomstidslinje(tidslinje)
+
+    override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
+
+    override fun preVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.preVisitSykdomstidslinje(tidslinje)
+
+    override fun postVisitSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.postVisitSykdomstidslinje(tidslinje)
 
     override fun postVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
+        element: NySykdomshistorikk.Element,
         id: UUID,
         tidsstempel: LocalDateTime
     ) =
@@ -299,12 +307,12 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
         }
 
-        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) {
             pushState(SykdomshistorikkState(hendelser, beregnetSykdomstidslinje))
         }
 
         override fun preVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
+            element: NySykdomshistorikk.Element,
             id: UUID,
             tidsstempel: LocalDateTime
         ) {
@@ -402,33 +410,34 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     ) : JsonState {
 
         override fun preVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
+            element: NySykdomshistorikk.Element,
             id: UUID,
             tidsstempel: LocalDateTime
         ) {
             hendelser.add(id)
         }
 
-        override fun preVisitBeregnetSykdomstidslinje() {
+        override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
         override fun postVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
+            element: NySykdomshistorikk.Element,
             id: UUID,
             tidsstempel: LocalDateTime
         ) {
             popState()
         }
 
-        override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        override fun postVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) {
             popState()
         }
 
-        override fun preVisitHendelseSykdomstidslinje() {}
-        override fun postVisitHendelseSykdomstidslinje() {}
+        override fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
 
-        override fun postVisitBeregnetSykdomstidslinje() {}
+        override fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
+
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
     }
 
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any>>) :
@@ -488,7 +497,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             )
         }
 
-        override fun postVisitBeregnetSykdomstidslinje() {
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
             popState()
         }
     }

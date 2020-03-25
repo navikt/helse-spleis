@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.math.RoundingMode
@@ -13,11 +13,11 @@ import java.time.LocalDate
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
-    private val sykdomstidslinje: ConcreteSykdomstidslinje,
+    private val sykdomstidslinje: NySykdomstidslinje,
     private val sisteDag: LocalDate,
     private val inntekthistorikk: Inntekthistorikk,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : SykdomstidslinjeVisitor {
+) : NySykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
     private var sykedagerIArbeidsgiverperiode = 0

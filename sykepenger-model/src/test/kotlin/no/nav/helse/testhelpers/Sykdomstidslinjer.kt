@@ -1,7 +1,7 @@
 package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import java.time.LocalDate
 
 private var dagensDato = LocalDate.of(2018, 1, 1)
@@ -11,62 +11,63 @@ internal fun resetSeed(frøDato: LocalDate = LocalDate.of(2018, 1, 1)) {
 }
 
 internal val Int.S
-    get() = ConcreteSykdomstidslinje.sykedager(
+    get() = NySykdomstidslinje.sykedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         100.0,
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.F
-    get() = ConcreteSykdomstidslinje.ferie(
+    get() = NySykdomstidslinje.ferie(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.A
-    get() = ConcreteSykdomstidslinje.ikkeSykedager(
+    get() = NySykdomstidslinje.ikkeSykedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.I
-    get() = ConcreteSykdomstidslinje.implisittdager(
+    get() = NySykdomstidslinje.implisitteDager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.E
-    get() = ConcreteSykdomstidslinje.egenmeldingsdager(
+    get() = NySykdomstidslinje.egenmeldingsdager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.P
-    get() = ConcreteSykdomstidslinje.permisjonsdager(
+    get() = NySykdomstidslinje.permisjonsdager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.EDU
-    get() = ConcreteSykdomstidslinje.studiedager(
+    get() = NySykdomstidslinje.studiedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.UT
-    get() = ConcreteSykdomstidslinje.utenlandsdager(
+    get() = NySykdomstidslinje.utenlandsdager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.U
-    get() = ConcreteSykdomstidslinje.ubestemtdager(
+    get() = NySykdomstidslinje.ubestemtdager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FO
-    get() = ConcreteSykdomstidslinje.kunArbeidsgiverDager(
+    get() = NySykdomstidslinje.kunArbeidsgiverSykedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
-        Søknad.SøknadDagFactory, 100.0
+        100.0,
+        Søknad.SøknadDagFactory
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }

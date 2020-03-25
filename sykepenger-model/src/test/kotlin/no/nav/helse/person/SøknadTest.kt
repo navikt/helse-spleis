@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
 import no.nav.helse.hendelser.Søknad.Periode.*
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -157,7 +157,7 @@ internal class SøknadTest {
     private inner class TestPersonInspektør(person: Person) : PersonVisitor {
         private var vedtaksperiodeindeks: Int = -1
         private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, ConcreteSykdomstidslinje>()
+        private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
         internal lateinit var personLogg: Aktivitetslogg
 
         init {
@@ -177,7 +177,7 @@ internal class SøknadTest {
             tilstander[vedtaksperiodeindeks] = tilstand.type
         }
 
-        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: NySykdomshistorikk) {
             sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         }
 
