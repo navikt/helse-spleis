@@ -66,12 +66,12 @@ internal class YtelserTest {
 
     @Test
     fun `sykepengehistorikk før gap større enn 26 uker blir ignorert`() {
-        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april(2019), 30.april(2019), 1000)
         val historikkSenereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april(2019), 30.april(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
-                historikkTidligereEnn26UkerGap,
-                historikkSenereEnn26UkerGap
+                historikkSenereEnn26UkerGap,
+                historikkTidligereEnn26UkerGap
             )
         )
 
@@ -84,12 +84,12 @@ internal class YtelserTest {
 
     @Test
     fun `ukjente perioder tidligere enn gap på 26 uker blir ignorert`() {
-        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 30.april(2019), 1000)
         val historikkSenereEnn26UkerGap = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val historikkTidligereEnn26UkerGap = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 30.april(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
-                historikkTidligereEnn26UkerGap,
-                historikkSenereEnn26UkerGap
+                historikkSenereEnn26UkerGap,
+                historikkTidligereEnn26UkerGap
             )
         )
 
@@ -102,8 +102,36 @@ internal class YtelserTest {
 
     @Test
     fun `ukjente perioder er ugyldige`() {
-        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 31.mai(2019), 1000)
         val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(1.april(2019), 31.mai(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                refusjonTilArbeidsgiver,
+                ukjentPeriode
+            )
+        )
+
+        assertTrue(ytelser.valider(2.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride fullstendig overlappet av refusjonTilAG skal gi error`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(5.november(2019), 10.november(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                refusjonTilArbeidsgiver,
+                ukjentPeriode
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride fullstendig overlappet av refusjonTilAG skal gi error - motsatt rekkefølge`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(5.november(2019), 10.november(2019), 1000)
         val ytelser = ytelser(
             utbetalinger = listOf(
                 ukjentPeriode,
@@ -111,7 +139,79 @@ internal class YtelserTest {
             )
         )
 
-        assertTrue(ytelser.valider(2.mai(2020)).hasErrors())
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride overlapper med slutten på refusjonTilAG skal gi error`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 10.november(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(5.november(2019), 1.desember(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                ukjentPeriode,
+                refusjonTilArbeidsgiver
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride overlapper med slutten på refusjonTilAG skal gi error - motsatt rekkefølge`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(30.oktober(2019), 10.november(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(5.november(2019), 1.desember(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                refusjonTilArbeidsgiver,
+                ukjentPeriode
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride overlapper med starten på refusjonTilAG skal gi error`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.november(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(30.oktober(2019), 10.november(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                refusjonTilArbeidsgiver,
+                ukjentPeriode
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `ukjent peride overlapper med starten på refusjonTilAG skal gi error - motsatt rekkefølge`() {
+        val refusjonTilArbeidsgiver = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.november(2019), 1.desember(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(30.oktober(2019), 10.november(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                ukjentPeriode,
+                refusjonTilArbeidsgiver
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
+    }
+
+    @Test
+    fun `tidligste fom skal brukes i filtrering`() {
+        val refusjonTilArbeidsgiver1 = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.november(2019), 30.november(2019), 1000)
+        val refusjonTilArbeidsgiver2 = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(10.november(2019), 20.november(2019), 1000)
+        val ukjentPeriode = Utbetalingshistorikk.Periode.Ukjent(1.mai(2019), 7.mai(2019), 1000)
+        val ytelser = ytelser(
+            utbetalinger = listOf(
+                refusjonTilArbeidsgiver1,
+                refusjonTilArbeidsgiver2,
+                ukjentPeriode
+            )
+        )
+
+        assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
     }
 
     private class Inspektør: Utbetalingstidslinje.UtbetalingsdagVisitor {
