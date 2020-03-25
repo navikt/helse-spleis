@@ -81,13 +81,13 @@ internal class Vedtaksperiode private constructor(
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         sykdomshistorikk.accept(visitor)
+        visitor.preVisitUtbetalingstidslinje()
+        utbetalingstidslinje?.accept(visitor)
+        visitor.postVisitUtbetalingstidslinje()
         visitor.visitTilstand(tilstand)
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
-        visitor.preVisitUtbetalingstidslinje()
-        utbetalingstidslinje?.accept(visitor)
-        visitor.postVisitUtbetalingstidslinje()
         visitor.postVisitVedtaksperiode(this, id)
     }
 

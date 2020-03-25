@@ -13,11 +13,14 @@ import no.nav.helse.serde.JsonBuilderTest.Companion.sykmelding
 import no.nav.helse.serde.JsonBuilderTest.Companion.søknad
 import no.nav.helse.serde.JsonBuilderTest.Companion.vilkårsgrunnlag
 import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
+import no.nav.helse.serde.api.SpeilBuilder.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juni
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.util.*
 
@@ -152,7 +155,10 @@ internal class SpeilBuilderTest {
         assertTrue(vedtaksperiode.hasNonNull("utbetalingsreferanse"))
         assertTrue(vedtaksperiode.hasNonNull("førsteFraværsdag"))
         assertTrue(vedtaksperiode.hasNonNull("inntektFraInntektsmelding"))
+        assertTrue(vedtaksperiode.hasNonNull("totalbeløpArbeidstaker"))
         assertTrue(vedtaksperiode.hasNonNull("tilstand"))
+        assertTilstand(vedtaksperiode)
+
         assertTrue(vedtaksperiode.hasNonNull("hendelser"))
         assertTrue(vedtaksperiode.hasNonNull("dataForVilkårsvurdering"))
         assertTrue(vedtaksperiode.hasNonNull("sykdomstidslinje"))
@@ -205,5 +211,8 @@ internal class SpeilBuilderTest {
             }
         })
     }
+
+    private fun assertTilstand(jsonNode: JsonNode) =
+        assertDoesNotThrow { TilstandstypeDTO.valueOf(jsonNode["tilstand"].asText()) }
 }
 

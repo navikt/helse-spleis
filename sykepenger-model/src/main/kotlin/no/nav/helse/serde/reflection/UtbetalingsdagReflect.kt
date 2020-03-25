@@ -17,7 +17,10 @@ internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbeta
     )
 }
 
-internal class UtbetalingsdagMedGradReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
+internal class UtbetalingsdagMedGradReflect(
+    utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag,
+    private val type: TypeData
+) {
     private val inntekt: Double = utbetalingsdag["inntekt"]
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val grad: Double = utbetalingsdag["grad"]
