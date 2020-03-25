@@ -856,4 +856,33 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
+
+    @Test
+    fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
+        håndterSykmelding(Triple(1.januar, 20.januar, 100))
+        håndterSykmelding(Triple(21.januar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+
+        assertNoErrors(inspektør)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
+        håndterSykmelding(Triple(21.januar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterYtelser(0, Triple(18.januar, 20.januar, 15000)) // -> TIL_INFOTRYGD
+
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `vedtaksperiode uten søknad som går til infotrygd ber ikke om inntektsmelding`() {
+        håndterSykmelding(Triple(21.januar, 28.februar, 100))
+        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
 }
