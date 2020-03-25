@@ -15,16 +15,25 @@ class Utbetalingshistorikk(
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
-    private val sisteUtbetalteDag: LocalDate? = utbetalinger.maxBy { it.tom }?.tom
-
-    internal fun utbetalingstidslinje() = this.utbetalinger
+    internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate?) = this.utbetalinger
+        .filtrerUtbetalinger(førsteFraværsdag)
         .map { it.toTidslinje(graderingsliste, aktivitetslogg) }
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun sisteUtbetalteDag() = sisteUtbetalteDag
+    private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
+        if (førsteFraværsdag == null) return this
+        var forrigePeriodeFom: LocalDate = førsteFraværsdag
+        return reversed().filter {periode ->
+            (periode.tom.plusWeeks(26) >= forrigePeriodeFom).also {if (it)
+                forrigePeriodeFom = periode.fom
+            }
+        }.reversed()
+    }
 
-    internal fun valider(): Aktivitetslogg {
-        utbetalinger.forEach { it.valider(this, aktivitetslogg) }
+    internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) = utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
+
+    internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
+        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(this, aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         if (harUkjentePerioder) aktivitetslogg.error("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
         return aktivitetslogg

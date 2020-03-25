@@ -37,10 +37,10 @@ internal interface Valideringssteg {
     fun feilmelding(): String? = null
 }
 
-internal class ValiderYtelser(private val arbeidsgivertidslinje: Sykdomstidslinje, private val ytelser: Ytelser) : Valideringssteg {
+internal class ValiderYtelser(private val arbeidsgivertidslinje: Sykdomstidslinje, private val ytelser: Ytelser, private val førsteFraværsdag: LocalDate?) : Valideringssteg {
     override fun isValid(): Boolean {
-        if (ytelser.valider().hasBehov()) return false
-        val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag() ?: return true
+        if (ytelser.valider(førsteFraværsdag).hasBehov()) return false
+        val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag(førsteFraværsdag) ?: return true
         when {
             sisteUtbetalteDag >= arbeidsgivertidslinje.førsteDag() -> ytelser.error("Hele eller deler av perioden til arbeidsgiver er utbetalt i Infotrygd")
             sisteUtbetalteDag >= arbeidsgivertidslinje.førsteDag().minusDays(18) -> ytelser.error("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
@@ -69,13 +69,14 @@ internal class ByggUtbetalingstidlinjer(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val periode: Periode,
     private val ytelser: Ytelser,
-    private val alder: Alder
+    private val alder: Alder,
+    private val førsteFraværsdag: LocalDate?
 ) : Valideringssteg {
     private lateinit var engine: ArbeidsgiverUtbetalinger
     override fun isValid(): Boolean {
         engine = ArbeidsgiverUtbetalinger(
             tidslinjer = tidslinjer,
-            historiskTidslinje = ytelser.utbetalingshistorikk().utbetalingstidslinje(),
+            historiskTidslinje = ytelser.utbetalingshistorikk().utbetalingstidslinje(førsteFraværsdag),
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,

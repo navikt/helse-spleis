@@ -488,7 +488,7 @@ internal class Vedtaksperiode private constructor(
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                     .also { vedtaksperiode.trengerInntektsmelding() }
                 }
-                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser) }
+                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.periode().start) }
                 it.onSuccess {
                     vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingFerdigGap)
                 }
@@ -655,7 +655,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser) }
+                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.førsteFraværsdag) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 it.valider {
                     HarInntektshistorikk(
@@ -673,7 +673,8 @@ internal class Vedtaksperiode private constructor(
                         ),
                         vedtaksperiode.periode(),
                         ytelser,
-                        Alder(vedtaksperiode.fødselsnummer)
+                        Alder(vedtaksperiode.fødselsnummer),
+                        vedtaksperiode.førsteFraværsdag
                     ).also { engineForTimeline = it }
                 }
                 var engineForLine: ByggUtbetalingslinjer? = null
