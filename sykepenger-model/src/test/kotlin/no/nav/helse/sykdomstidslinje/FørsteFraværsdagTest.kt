@@ -140,9 +140,9 @@ internal class FørsteFraværsdagTest {
 
     private fun assertFørsteFraværsdag(sykmelding: Sykmelding, søknad: Søknad, inntektsmelding: Inntektsmelding, tom: LocalDate) {
         val tidslinje = listOf(
-            sykmelding.sykdomstidslinje(),
-            søknad.sykdomstidslinje(),
-            inntektsmelding.sykdomstidslinje()
+            sykmelding.nySykdomstidslinje(),
+            søknad.nySykdomstidslinje(),
+            inntektsmelding.nySykdomstidslinje()
         ).merge(historiskDagturnering)
 
         val førsteFraværsdag = tidslinje.førsteFraværsdag()
@@ -208,29 +208,29 @@ internal class FørsteFraværsdagTest {
         private val sykHelgedag = SykHelgedag.Søknad(LocalDate.now(), 100.0)
 
         private fun assertDagenErUtgangspunktForBeregning(dagen: Dag) {
-            assertDagenErUtgangspunktForBeregning(dagen.dagen, dagen)
+            assertDagenErUtgangspunktForBeregning(dagen.dagen, NySykdomstidslinje(listOf(dagen)))
         }
 
         private fun assertDagenErUtgangspunktForBeregning(
             dagen: LocalDate,
-            sykdomstidslinje: ConcreteSykdomstidslinje
+            sykdomstidslinje: NySykdomstidslinje
         ) {
             val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             assertEquals(dagen, førsteFraværsdag) { "Forventet $dagen, men fikk $førsteFraværsdag.\nTidslinjen:\n$sykdomstidslinje"}
         }
 
-        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: ConcreteSykdomstidslinje) {
+        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: NySykdomstidslinje) {
             assertEquals(sykdomstidslinje.førsteDag(), sykdomstidslinje.førsteFraværsdag())
         }
 
         private fun assertFørsteDagErUtgangspunktForBeregning(
-            perioden: ConcreteSykdomstidslinje,
-            sykdomstidslinje: ConcreteSykdomstidslinje
+            perioden: NySykdomstidslinje,
+            sykdomstidslinje: NySykdomstidslinje
         ) {
             assertDagenErUtgangspunktForBeregning(perioden.førsteDag(), sykdomstidslinje)
         }
 
-        private fun assertUgyldigTilstand(sykdomstidslinje: ConcreteSykdomstidslinje) {
+        private fun assertUgyldigTilstand(sykdomstidslinje: NySykdomstidslinje) {
             assertNull(sykdomstidslinje.førsteFraværsdag())
         }
     }

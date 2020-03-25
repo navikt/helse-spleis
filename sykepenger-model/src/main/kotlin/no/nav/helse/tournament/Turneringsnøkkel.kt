@@ -1,6 +1,6 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
+import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 
 internal enum class Turneringsnøkkel {
@@ -27,7 +27,7 @@ internal enum class Turneringsnøkkel {
     companion object {
         fun fraDag(dag: Dag) = TurneringsnøkkelVisitor(dag).turneringsnøkkel()
 
-        private class TurneringsnøkkelVisitor(private val dag: Dag) : SykdomstidslinjeVisitor {
+        private class TurneringsnøkkelVisitor(private val dag: Dag) : NySykdomstidslinjeVisitor {
 
             private var turneringsnøkkel: Turneringsnøkkel? = null
 

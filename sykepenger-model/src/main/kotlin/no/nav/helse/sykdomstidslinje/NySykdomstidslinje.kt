@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Sykmelding.SykmeldingDagFactory
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -21,6 +20,8 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
     internal fun førsteDag() = dager.first().dagen
 
     internal fun sisteDag() = dager.last().dagen
+
+    internal fun flatten() = dager
 
     operator fun get(dato: LocalDate) = dag(dato)
 
@@ -207,7 +208,7 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
                 .toList())
         }
 
-        private fun sykedag(dato: LocalDate, grad: Double, factory: DagFactory): Dag =
+        internal fun sykedag(dato: LocalDate, grad: Double, factory: DagFactory): Dag =
             if (!dato.erHelg()) factory.sykedag(dato, grad) else factory.sykHelgedag(dato, grad)
 
         private fun kunArbeidsgiverSykedag(dato: LocalDate, grad: Double, factory: DagFactory): Dag =
@@ -217,7 +218,7 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
             if (!dato.erHelg()) factory.utenlandsdag(dato) else factory.implisittDag(dato)
 
         private fun ikkeSykedag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
-            if (!dato.erHelg()) factory.arbeidsdag(dato) else factory.implisittDag(dato)
+            ikkeSykedag(dato, factory)
 
         private fun studiedag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             if (!dato.erHelg()) factory.studiedag(dato) else factory.implisittDag(dato)
@@ -226,21 +227,25 @@ internal class NySykdomstidslinje internal constructor(private val dager: List<D
             if (!dato.erHelg()) factory.permisjonsdag(dato) else factory.implisittDag(dato)
 
         internal fun ikkeSykedag(dato: LocalDate, factory: DagFactory) =  // For gap days
-            ikkeSykedag(dato, Double.NaN, factory)
+            if (!dato.erHelg()) factory.arbeidsdag(dato) else factory.implisittDag(dato)
 
         private fun ferie(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             factory.feriedag(dato)
 
         private fun egenmeldingsdag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
+            egenmeldingsdag(dato, factory)
+
+        internal fun egenmeldingsdag(dato: LocalDate, factory: DagFactory) =
             factory.egenmeldingsdag(dato)
 
         private fun implisittDag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             factory.implisittDag(dato)
 
         private fun ubestemtdag(dato: LocalDate, grad_ignored: Double, factory_ignored: DagFactory) =
-            Ubestemtdag(dato)
+            ubestemtdag(dato)
 
-        internal fun ubestemtdag(dato: LocalDate) = ubestemtdag(dato, Double.NaN, SykmeldingDagFactory)
+        internal fun ubestemtdag(dato: LocalDate) =
+            Ubestemtdag(dato)
 
         private fun beste(dagturnering: Dagturnering, a: Dag?, b: Dag?): Dag? {
             if (a == null) return b

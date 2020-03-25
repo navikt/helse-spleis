@@ -1,6 +1,4 @@
 package no.nav.helse
-
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
 import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -62,6 +60,4 @@ internal class SykdomstidslinjeTestHelpersTest {
             assertEquals(it[2].dagen.plusDays(1), it[3].dagen)
         }
     }
-
-    private operator fun ConcreteSykdomstidslinje.plus(other: ConcreteSykdomstidslinje) = this.merge(other, historiskDagturnering)
 }

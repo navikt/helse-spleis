@@ -1,11 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.Uke
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
+import no.nav.helse.testhelpers.fredag
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.torsdag
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -147,8 +149,8 @@ internal class PersonTest {
     internal fun `sykmelding med periode som ikke er 100 %`() {
         sykmelding(
             perioder = listOf(
-                Triple(Uke(1).mandag, Uke(1).torsdag, 60),
-                Triple(Uke(1).fredag, Uke(1).fredag, 100)
+                Triple(1.mandag, 1.torsdag, 60),
+                Triple(1.fredag, 1.fredag, 100)
             )
         ).also {
             testPerson.håndter(it)

@@ -11,11 +11,7 @@ abstract class SykdomstidslinjeHendelse(
 ) : ArbeidstakerHendelse() {
     internal fun meldingsreferanseId() = meldingsreferanseId
 
-    internal abstract fun sykdomstidslinje(tom: LocalDate): ConcreteSykdomstidslinje
-
     internal abstract fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje
-
-    internal abstract fun sykdomstidslinje(): ConcreteSykdomstidslinje
 
     internal abstract fun nySykdomstidslinje(): NySykdomstidslinje
 

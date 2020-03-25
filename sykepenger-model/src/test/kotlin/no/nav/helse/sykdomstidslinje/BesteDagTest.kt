@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.testhelpers.Uke
+import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.historiskDagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,13 +12,13 @@ import kotlin.reflect.KClass
 internal class BesteDagTest {
 
     companion object {
-        private val implisittDag get() = ImplisittDag(Uke(2).mandag)
-        private val arbeidsdag get() = Arbeidsdag.Søknad(Uke(2).mandag)
-        private val ferieFraInntektsmelding get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
-        private val egenmeldingFraInntektsmelding get() = ConcreteSykdomstidslinje.egenmeldingsdag(Uke(2).mandag, Inntektsmelding.InntektsmeldingDagFactory)
-        private val ferieFraSøknad get() = ConcreteSykdomstidslinje.ferie(Uke(2).mandag, Søknad.SøknadDagFactory)
-        private val sykedagFraSøknad get() = ConcreteSykdomstidslinje.sykedag(Uke(2).mandag, 100.0, Søknad.SøknadDagFactory)
-        private val utenlandsFraSøknad get() = ConcreteSykdomstidslinje.utenlandsdag(Uke(2).mandag, Søknad.SøknadDagFactory)
+        private val implisittDag get() = ImplisittDag(2.mandag)
+        private val arbeidsdag get() = Arbeidsdag.Søknad(2.mandag)
+        private val ferieFraInntektsmelding get() = Inntektsmelding.InntektsmeldingDagFactory.feriedag(2.mandag)
+        private val egenmeldingFraInntektsmelding get() = Inntektsmelding.InntektsmeldingDagFactory.egenmeldingsdag(2.mandag)
+        private val ferieFraSøknad get() = Søknad.SøknadDagFactory.feriedag(2.mandag)
+        private val sykedagFraSøknad get() = Søknad.SøknadDagFactory.sykedag(2.mandag, 100.0)
+        private val utenlandsFraSøknad get() = Søknad.SøknadDagFactory.utenlandsdag(2.mandag)
     }
 
     @Test

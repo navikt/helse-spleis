@@ -4,8 +4,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.NySykdomshistorikk
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -52,25 +50,6 @@ internal interface VedtaksperiodeVisitor : NySykdomshistorikkVisitor, Utbetaling
     fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
-}
-
-internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
-    fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-    fun preVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID,
-        tidsstempel: LocalDateTime
-    ) {}
-    fun postVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID,
-        tidsstempel: LocalDateTime
-    ) {}
-    fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-    fun preVisitHendelseSykdomstidslinje() {}
-    fun postVisitHendelseSykdomstidslinje() {}
-    fun preVisitBeregnetSykdomstidslinje() {}
-    fun postVisitBeregnetSykdomstidslinje() {}
 }
 
 internal interface NySykdomshistorikkVisitor : NySykdomstidslinjeVisitor {

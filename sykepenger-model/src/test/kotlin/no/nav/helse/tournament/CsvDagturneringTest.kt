@@ -3,13 +3,15 @@ package no.nav.helse.tournament
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.ConcreteSykdomstidslinje
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
-import no.nav.helse.testhelpers.Uke
-import no.nav.helse.testhelpers.get
+import no.nav.helse.testhelpers.fredag
+import no.nav.helse.testhelpers.mandag
+import no.nav.helse.testhelpers.onsdag
+import no.nav.helse.testhelpers.torsdag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -35,16 +37,16 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val søknadSykedager = ConcreteSykdomstidslinje.sykedager(Uke(1).mandag, Uke(1).fredag, 100.0, Søknad.SøknadDagFactory)
-        val søknadArbeidsdager = ConcreteSykdomstidslinje.ikkeSykedager(Uke(1).torsdag, Uke(1).fredag, Søknad.SøknadDagFactory)
+        val søknadSykedager = NySykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.0, Søknad.SøknadDagFactory)
+        val søknadArbeidsdager = NySykdomstidslinje.ikkeSykedager(1.torsdag, 1.fredag, Søknad.SøknadDagFactory)
 
         val tidslinje = søknadSykedager.merge(søknadArbeidsdager, historiskDagturnering)
         assertTrue(
-            tidslinje[Uke(1).onsdag] is Sykedag,
+            tidslinje[1.onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
         )
         assertTrue(
-            tidslinje[Uke(1).torsdag] is Arbeidsdag,
+            tidslinje[1.torsdag] is Arbeidsdag,
             "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
         )
     }
@@ -83,20 +85,20 @@ internal class CsvDagturneringTest {
         val sykedag: TestHendelseBuilder
             get() {
                 dagbuilder = { dag:LocalDate, factory:DagFactory ->
-                    ConcreteSykdomstidslinje.sykedag(dag, 100.0, factory)
+                    NySykdomstidslinje.sykedag(dag, 100.0, factory)
                 }
                 return this
             }
 
         val arbeidsdag: TestHendelseBuilder
             get() {
-                dagbuilder = ConcreteSykdomstidslinje.Companion::ikkeSykedag
+                dagbuilder = NySykdomstidslinje.Companion::ikkeSykedag
                 return this
             }
 
         val egenmeldingsdag: TestHendelseBuilder
             get() {
-                dagbuilder = ConcreteSykdomstidslinje.Companion::egenmeldingsdag
+                dagbuilder = NySykdomstidslinje.Companion::egenmeldingsdag
                 return this
             }
 
