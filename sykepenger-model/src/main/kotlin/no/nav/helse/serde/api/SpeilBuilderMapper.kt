@@ -38,8 +38,8 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(): VedtaksperiodeD
     val sykdomstidslinje = this["sykdomstidslinje"] as MutableList<SykdomstidslinjedagDTO>
     return VedtaksperiodeDTO(
         id = this["id"] as UUID,
-        fom = sykdomstidslinje.first().dagen,
-        tom = sykdomstidslinje.last().dagen,
+        fom = sykdomstidslinje.firstOrNull()?.dagen,
+        tom = sykdomstidslinje.lastOrNull()?.dagen,
         maksdato = this["maksdato"] as LocalDate?,
         forbrukteSykedager = this["forbrukteSykedager"] as Int?,
         godkjentAv = this["godkjentAv"] as String?,
