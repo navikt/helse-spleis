@@ -34,7 +34,7 @@ class Utbetalingshistorikk(
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
 
     internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
-        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(this, aktivitetslogg) }
+        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         return aktivitetslogg
     }
@@ -69,23 +69,23 @@ class Utbetalingshistorikk(
         internal open fun toTidslinje(
             graderingsliste: List<Graderingsperiode>,
             aktivitetslogg: Aktivitetslogg
-        ): Utbetalingstidslinje {
-            aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
+        ) = Utbetalingstidslinje()
+
+        open fun valider(aktivitetslogg: Aktivitetslogg) {
+            if (fom > tom) aktivitetslogg.error(
+                "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                this::class.simpleName
+            )
         }
 
-        open fun valider(historikk: Utbetalingshistorikk, aktivitetslogg: Aktivitetslogg) {
-            aktivitetslogg.error("Utbetalingsperioden %s (fra Infotrygd) er ikke støttet", this::class.simpleName)
-        }
+        protected fun List<Graderingsperiode>.finnGradForUtbetalingsdag(dag: LocalDate) =
+            this.find { it.datoIPeriode(dag) }?.grad ?: Double.NaN
 
         class RefusjonTilArbeidsgiver(
             fom: LocalDate,
             tom: LocalDate,
             dagsats: Int
         ) : Periode(fom, tom, dagsats) {
-
-            private fun List<Graderingsperiode>.finnGradForUtbetalingsdag(dag: LocalDate) =
-                this.find { it.datoIPeriode(dag) }?.grad ?: Double.NaN
-
             override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
                 Utbetalingstidslinje().apply {
                     fom.datesUntil(tom.plusDays(1)).forEach {
@@ -96,24 +96,93 @@ class Utbetalingshistorikk(
                         ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
                     }
                 }
+        }
 
-            override fun valider(historikk: Utbetalingshistorikk, aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.error("Utbetalingsperiode fra Infotrygd har en FOM etter TOM")
+        class ReduksjonArbeidsgiverRefusjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply {
+                    fom.datesUntil(tom.plusDays(1)).forEach {
+                        if (it.erHelg()) this.addHelg(
+                            0.0,
+                            it,
+                            graderingsliste.finnGradForUtbetalingsdag(it)
+                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+                    }
+                }
+        }
+
+        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply {
+                    fom.datesUntil(tom.plusDays(1)).forEach {
+                        if (it.erHelg()) this.addHelg(
+                            0.0,
+                            it,
+                            graderingsliste.finnGradForUtbetalingsdag(it)
+                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+                    }
+                }
+        }
+
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply {
+                    fom.datesUntil(tom.plusDays(1)).forEach {
+                        if (it.erHelg()) this.addHelg(
+                            0.0,
+                            it,
+                            graderingsliste.finnGradForUtbetalingsdag(it)
+                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
+                    }
+                }
+        }
+
+        class Ferie(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply {
+                    fom.datesUntil(tom.plusDays(1)).forEach {
+                        this.addFridag(dagsats.toDouble(), it)
+                    }
+                }
+        }
+
+        class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun toTidslinje(
+                graderingsliste: List<Graderingsperiode>,
+                aktivitetslogg: Aktivitetslogg
+            ): Utbetalingstidslinje {
+                aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
+            }
+
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                aktivitetslogg.error(
+                    "Utbetalingsperioden %s (fra Infotrygd) er ikke støttet",
+                    this::class.simpleName
+                )
             }
         }
 
-        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class ReduksjonArbeidsgiverRefusjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Ferie(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class Ugyldig(fom: LocalDate?, tom: LocalDate?, dagsats: Int) :
-            Periode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX, dagsats)
+            Periode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX, dagsats) {
+            override fun toTidslinje(
+                graderingsliste: List<Graderingsperiode>,
+                aktivitetslogg: Aktivitetslogg
+            ): Utbetalingstidslinje {
+                aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
+            }
+
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                aktivitetslogg.error(
+                    "Utbetalingsperioden %s (fra Infotrygd) er ikke støttet",
+                    this::class.simpleName
+                )
+            }
+        }
     }
 }
