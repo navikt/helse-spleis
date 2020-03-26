@@ -80,7 +80,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
     }
 
-
     @Test
     fun `Ferie i arbeidsgiverperiode`() {
         (1.S + 2.F + 13.S + 1.S).utbetalingslinjer()
@@ -419,6 +418,21 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertFalse(inspektør.navdager.first().grad.isNaN())
         assertFalse(0.0 == inspektør.navdager.first().inntekt)
         assertEquals(18.januar, inspektør.navdager.first().dato)
+    }
+
+    @Test
+    fun `feriedag før siste arbeidsgiverperiodedag med påfølgende helg`() {
+        resetSeed(1.januar(2020))
+        (10.E + 7.F + 14.S).utbetalingslinjer(
+            inntektshistorikk = Inntekthistorikk().apply {
+                add(17.januar(2020), hendelseId, 31000.toBigDecimal())
+            }
+        )
+        assertEquals(31, inspektør.datoer.size)
+        assertEquals(Fridag::class, inspektør.datoer[17.januar(2020)])
+        assertEquals(NavHelgDag::class, inspektør.datoer[18.januar(2020)])
+        assertEquals(NavHelgDag::class, inspektør.datoer[19.januar(2020)])
+        assertEquals(NavDag::class, inspektør.datoer[20.januar(2020)])
     }
 
     private val inntekthistorikk = Inntekthistorikk().apply {

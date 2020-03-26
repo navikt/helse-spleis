@@ -261,6 +261,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         override fun sykedagerEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.state(UtbetalingSykedager).also { splitter.håndterNAVdag(dagen, grad) }
         }
+
+        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.håndterNAVHelgedag(dagen, grad)
+        }
     }
 
     private object ArbeidsgiverperiodeOpphold : UtbetalingState() {
