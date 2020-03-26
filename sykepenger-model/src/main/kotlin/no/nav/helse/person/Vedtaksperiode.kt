@@ -41,7 +41,7 @@ internal class Vedtaksperiode private constructor(
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
-    private var utbetalingstidslinje: Utbetalingstidslinje?
+    private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
 ) : Aktivitetskontekst {
 
     private val påminnelseThreshold = Integer.MAX_VALUE
@@ -72,7 +72,7 @@ internal class Vedtaksperiode private constructor(
         dataForSimulering = null,
         dataForVilkårsvurdering = null,
         sykdomshistorikk = Sykdomshistorikk(),
-        utbetalingstidslinje = null
+        utbetalingstidslinje = Utbetalingstidslinje()
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
@@ -85,9 +85,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
         sykdomshistorikk.accept(visitor)
-        visitor.preVisitUtbetalingstidslinje()
-        utbetalingstidslinje?.accept(visitor)
-        visitor.postVisitUtbetalingstidslinje()
+        utbetalingstidslinje.accept(visitor)
         visitor.visitTilstand(tilstand)
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
@@ -712,7 +710,7 @@ internal class Vedtaksperiode private constructor(
                 it.onSuccess {
                     vedtaksperiode.maksdato = engineForTimeline?.maksdato()
                     vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
-                    vedtaksperiode.utbetalingstidslinje = engineForLine?.utbetalingstidslinje
+                    vedtaksperiode.utbetalingstidslinje = engineForLine?.utbetalingstidslinje ?: Utbetalingstidslinje()
                     vedtaksperiode.utbetalingslinjer.also {
                         it.clear()
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())

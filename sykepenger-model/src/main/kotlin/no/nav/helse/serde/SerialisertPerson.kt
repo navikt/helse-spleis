@@ -180,7 +180,7 @@ class SerialisertPerson(val json: String) {
             dataForSimulering = data.dataForSimulering?.let(::parseDataForSimulering),
             dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
             sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
-            utbetalingstidslinje = data.utbetalingstidslinje.let { if (it.dager.isNotEmpty()) konverterTilUtbetalingstidslinje(it) else null }
+            utbetalingstidslinje = konverterTilUtbetalingstidslinje(data.utbetalingstidslinje)
         )
     }
 

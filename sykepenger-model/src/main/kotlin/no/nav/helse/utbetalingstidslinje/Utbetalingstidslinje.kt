@@ -19,12 +19,12 @@ internal class Utbetalingstidslinje private constructor(
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }.toMutableList())
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
-        visitor.preVisitUtbetalingstidslinje()
+        visitor.preVisitUtbetalingstidslinje(this)
         utbetalingsdager.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetalingstidslinje()
+        visitor.postVisitUtbetalingstidslinje(this)
     }
 
-    internal fun gjøreKortere(fom: LocalDate) = subset(fom, utbetalingsdager.last().dato)
+    internal fun gjøreKortere(fom: LocalDate) = subset(fom, sisteDato())
 
     internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse) {
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
@@ -83,7 +83,7 @@ internal class Utbetalingstidslinje private constructor(
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
             val original = this@Utbetalingstidslinje
-            tidligsteDato.datesUntil(original.utbetalingsdager.first().dato).forEach { this.addUkjentDag(it) }
+            tidligsteDato.datesUntil(original.førsteDato()).forEach { this.addUkjentDag(it) }
             this.utbetalingsdager.addAll(original.utbetalingsdager)
             original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1))
                 .forEach { this.addUkjentDag(it) }
@@ -91,10 +91,14 @@ internal class Utbetalingstidslinje private constructor(
 
 
     private fun tidligsteDato(other: Utbetalingstidslinje) =
-        minOf(this.utbetalingsdager.first().dato, other.utbetalingsdager.first().dato)
+        minOf(this.førsteDato(), other.førsteDato())
+
+    internal fun førsteDato() = this.utbetalingsdager.first().dato
 
     private fun sisteDato(other: Utbetalingstidslinje) =
-        maxOf(this.utbetalingsdager.last().dato, other.utbetalingsdager.last().dato)
+        maxOf(this.sisteDato(), other.sisteDato())
+
+    internal fun sisteDato() = this.utbetalingsdager.last().dato
 
     internal fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
         return Utbetalingstidslinje(
@@ -107,7 +111,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
 
     internal interface UtbetalingsdagVisitor {
-        fun preVisitUtbetalingstidslinje() {}
+        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
         fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {}
         fun visitNavDag(dag: NavDag) {}
         fun visitNavHelgDag(dag: NavHelgDag) {}
@@ -116,7 +120,7 @@ internal class Utbetalingstidslinje private constructor(
         fun visitAvvistDag(dag: AvvistDag) {}
         fun visitForeldetDag(dag: ForeldetDag) {}
         fun visitUkjentDag(dag: UkjentDag) {}
-        fun postVisitUtbetalingstidslinje() {}
+        fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
     }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :

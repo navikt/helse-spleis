@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -145,6 +146,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Triple(29.november(2017), 3.desember(2017), 100),
             Triple(13.november(2017), 28.november(2017), 100)
         )
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START,
@@ -179,6 +181,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START,
@@ -296,6 +300,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
 
+        assertNotNull(inspektør.maksdato(1))
+
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
@@ -387,6 +393,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(0) // No history
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
@@ -422,6 +429,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(0) // No history
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
     }
 
@@ -482,6 +490,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
+
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,

@@ -29,6 +29,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -54,6 +55,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
@@ -79,6 +81,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertDoesNotThrow {it.arbeidsgiver.peekTidslinje()}
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
@@ -104,6 +107,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
@@ -169,6 +173,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -205,6 +211,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -248,6 +256,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -283,6 +293,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -318,6 +330,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -342,6 +356,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
 
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
         assertTilstander(
             1,
@@ -406,6 +421,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -438,6 +455,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -475,6 +494,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -512,6 +533,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -556,6 +579,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3.januar, it.førsteFraværsdag(0))
             assertEquals(3.januar, it.førsteFraværsdag(1))
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -584,6 +609,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -619,6 +646,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -650,6 +679,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
 
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -683,6 +713,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -712,6 +744,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -741,6 +774,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
@@ -774,6 +808,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
+        assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
@@ -822,6 +857,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
         assertNoErrors(inspektør)
 
+        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,

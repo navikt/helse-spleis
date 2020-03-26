@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import java.time.LocalDate
 
 internal class MaksimumSykepengedagerfilter(private val alder: Alder,
@@ -11,7 +12,7 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
                                             private val periode: Periode,
                                             private val aktivitetslogg: Aktivitetslogg
 ):
-    Utbetalingstidslinje.UtbetalingsdagVisitor {
+    UtbetalingsdagVisitor {
 
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26*7
@@ -46,6 +47,10 @@ internal class MaksimumSykepengedagerfilter(private val alder: Alder,
         state.leaving(this)
         state = nyState
         state.entering(this)
+    }
+
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        sisteBetalteDag = tidslinje.sisteDato()
     }
 
     override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {

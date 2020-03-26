@@ -95,8 +95,8 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
         currentState.preVisitTidslinjer(tidslinjer)
 
-    override fun preVisitUtbetalingstidslinje() =
-        currentState.preVisitUtbetalingstidslinje()
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
+        currentState.preVisitUtbetalingstidslinje(tidslinje)
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
         currentState.visitArbeidsdag(dag)
@@ -122,8 +122,8 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) =
         currentState.visitForeldetDag(dag)
 
-    override fun postVisitUtbetalingstidslinje() =
-        currentState.postVisitUtbetalingstidslinje()
+    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
+        currentState.postVisitUtbetalingstidslinje(tidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
     override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
@@ -312,7 +312,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
         }
 
-        override fun preVisitUtbetalingstidslinje() {
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
             pushState(UtbetalingstidslinjeState(utbetalingstidslinje, totalbeløpArbeidstaker))
@@ -461,7 +461,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             )
         }
 
-        override fun postVisitUtbetalingstidslinje() {
+        override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             popState()
         }
     }

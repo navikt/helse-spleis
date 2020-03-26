@@ -13,6 +13,7 @@ import java.time.LocalDate
 internal class ArbeidsgiverUtbetalingerTest {
 
     private var maksdato: LocalDate? = null
+    private var forbrukteSykedager: Int? = 0
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
@@ -230,12 +231,13 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    fun `maksdato er udefinert hvis det ikke er utbetalingsdager`() { //(16.S)
+    fun `setter maksdato når ingen dager er brukt`() { //(16.S)
         undersøke(
             UNG_PERSON_FNR_2018,
             16.AP
         )
-        assertNull(maksdato)
+        assertEquals(28.desember, maksdato)
+        assertEquals(0, forbrukteSykedager)
     }
 
 
@@ -318,6 +320,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         ).also {
             it.beregn()
             maksdato = it.maksdato()
+            forbrukteSykedager = it.forbrukteSykedager()
         }
         inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.peekTidslinje())
             .result()

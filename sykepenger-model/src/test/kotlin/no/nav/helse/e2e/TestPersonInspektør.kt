@@ -19,8 +19,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
     private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
-    private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
-    private val sykdomshistorier = mutableMapOf<Int, Sykdomshistorikk>()
+    private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
+    private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
@@ -69,6 +69,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
+    override fun visitMaksdato(maksdato: LocalDate?) {
+        maksdato?.also { maksdatoer[vedtaksperiodeindeks] = it }
+    }
+
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk = inntekthistorikk
     }
@@ -78,7 +82,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        sykdomshistorier[vedtaksperiodeindeks] = sykdomshistorikk
         sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty())
@@ -115,7 +118,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
-    internal fun sykdomshistorikk(indeks: Int) = sykdomshistorier[indeks] ?: Assertions.fail(
+    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: Assertions.fail(
         "Missing collection initialization"
     )
 
