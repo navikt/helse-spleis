@@ -65,7 +65,7 @@ internal class SpeilBuilderTest {
 
     @Test
     internal fun `person med foreldet dager`() {
-        val person = person(1.juni)
+        val person = person(sendtSøknad = 1.juni)
         val jsonBuilder = SpeilBuilder()
         person.accept(jsonBuilder)
 
@@ -135,7 +135,9 @@ internal class SpeilBuilderTest {
      */
     @Test
     fun `json-en inneholder de feltene Speil forventer`() {
-        val person = person()
+        val fom = 1.januar
+        val tom = 31.januar
+        val person = person(fom = fom, tom = tom)
         val (json, _) = serializePersonForSpeil(person)
 
         assertTrue(json.hasNonNull("aktørId"))
@@ -149,6 +151,12 @@ internal class SpeilBuilderTest {
 
         val vedtaksperiode = arbeidsgiver["vedtaksperioder"].first();
         assertTrue(vedtaksperiode.hasNonNull("id"))
+        assertTrue(vedtaksperiode.hasNonNull("fom"))
+        val jsonFom = LocalDate.parse(vedtaksperiode["fom"].asText())
+        assertEquals(fom, jsonFom)
+        assertTrue(vedtaksperiode.hasNonNull("tom"))
+        val jsonTom = LocalDate.parse(vedtaksperiode["tom"].asText())
+        assertEquals(tom, jsonTom)
         assertTrue(vedtaksperiode.hasNonNull("maksdato"))
         assertTrue(vedtaksperiode.hasNonNull("forbrukteSykedager"))
         assertTrue(vedtaksperiode.hasNonNull("godkjentAv"))

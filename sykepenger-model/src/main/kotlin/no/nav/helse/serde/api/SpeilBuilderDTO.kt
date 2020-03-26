@@ -9,6 +9,8 @@ internal data class SykdomstidslinjedagDTO(val dagen: LocalDate, val type: JsonD
 internal data class VedtaksperiodeDTO(
     val sykdomstidslinje: MutableList<SykdomstidslinjedagDTO>,
     val id: UUID,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
     val maksdato: LocalDate?,
     val forbrukteSykedager: Int?,
     val godkjentAv: String?,

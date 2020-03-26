@@ -85,12 +85,12 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
 
-        internal fun person(sendtSøknad: LocalDate = 1.april): Person =
+        internal fun person(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, sendtSøknad: LocalDate = 1.april): Person =
             Person(aktørId, fnr).apply {
-                håndter(sykmelding(fom = 1.januar, tom = 31.januar))
+                håndter(sykmelding(fom = fom, tom = tom))
                 fangeVedtaksperiodeId()
-                håndter(søknad(fom = 1.januar, tom = 31.januar, sendtSøknad = sendtSøknad.atStartOfDay()))
-                håndter(inntektsmelding(fom = 1.januar))
+                håndter(søknad(fom = fom, tom = tom, sendtSøknad = sendtSøknad.atStartOfDay()))
+                håndter(inntektsmelding(fom = fom))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))

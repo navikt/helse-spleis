@@ -34,23 +34,28 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)
 
-internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto() = VedtaksperiodeDTO(
-    id = this["id"] as UUID,
-    maksdato = this["maksdato"] as LocalDate?,
-    forbrukteSykedager = this["forbrukteSykedager"] as Int?,
-    godkjentAv = this["godkjentAv"] as String?,
-    godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
-    sykdomstidslinje = this["sykdomstidslinje"] as MutableList<SykdomstidslinjedagDTO>,
-    utbetalingsreferanse = this["utbetalingsreferanse"] as String?,
-    førsteFraværsdag = this["førsteFraværsdag"] as LocalDate?,
-    inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as Double?,
-    totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Double,
-    tilstand = this["tilstand"] as TilstandstypeDTO,
-    hendelser = this["hendelser"] as MutableSet<UUID>,
-    dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO },
-    utbetalingslinjer = this["utbetalingslinjer"] as MutableList<UtbetalingslinjeDTO>,
-    utbetalingstidslinje = this["utbetalingstidslinje"] as MutableList<UtbetalingstidslinjedagDTO>
-)
+internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(): VedtaksperiodeDTO {
+    val sykdomstidslinje = this["sykdomstidslinje"] as MutableList<SykdomstidslinjedagDTO>
+    return VedtaksperiodeDTO(
+        id = this["id"] as UUID,
+        fom = sykdomstidslinje.first().dagen,
+        tom = sykdomstidslinje.last().dagen,
+        maksdato = this["maksdato"] as LocalDate?,
+        forbrukteSykedager = this["forbrukteSykedager"] as Int?,
+        godkjentAv = this["godkjentAv"] as String?,
+        godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
+        sykdomstidslinje = sykdomstidslinje,
+        utbetalingsreferanse = this["utbetalingsreferanse"] as String?,
+        førsteFraværsdag = this["førsteFraværsdag"] as LocalDate?,
+        inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as Double?,
+        totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Double,
+        tilstand = this["tilstand"] as TilstandstypeDTO,
+        hendelser = this["hendelser"] as MutableSet<UUID>,
+        dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO },
+        utbetalingslinjer = this["utbetalingslinjer"] as MutableList<UtbetalingslinjeDTO>,
+        utbetalingstidslinje = this["utbetalingstidslinje"] as MutableList<UtbetalingstidslinjedagDTO>
+    )
+}
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
     erEgenAnsatt = grunnlagsdata.erEgenAnsatt,
