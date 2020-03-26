@@ -775,6 +775,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
             godkjenning(hendelse)
+            // TODO: temporary until AvventerSimulering is wired in; just to have
+            // some needs on the rapid
+            simulering(
+                aktivitetslogg = hendelse,
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
+                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
+            )
         }
 
         override fun håndter(
