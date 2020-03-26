@@ -10,11 +10,13 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepeng
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(originalMessage: String, private val problems: MessageProblems) : BehovMessage(originalMessage, problems) {
+internal class YtelserMessage(originalMessage: String, private val problems: MessageProblems) :
+    BehovMessage(originalMessage, problems) {
     init {
         requireAll("@behov", Sykepengehistorikk, Foreldrepenger)
         requireKey("@løsning.${Foreldrepenger.name}")
@@ -38,20 +40,19 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
         )
 
         val utbetalingshistorikk = Utbetalingshistorikk(
-            harUkjentePerioder = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
-                it.path("ukjentePerioder")
-            }.isNotEmpty(),
             utbetalinger = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
                 it.path("utbetalteSykeperioder")
             }.map { utbetaling ->
-                val fom = utbetaling["fom"].asLocalDate()
-                val tom = utbetaling["tom"].asLocalDate()
-                val typekode = utbetaling["typeKode"].asText()
+                val fom = utbetaling["fom"].asOptionalLocalDate()
+                val tom = utbetaling["tom"].asOptionalLocalDate()
                 val dagsats = utbetaling["dagsats"].asInt()
-                when (typekode) {
+                if (fom == null || tom == null) {
+                    return@map Periode.Ugyldig(fom, tom, dagsats)
+                }
+                when (val typekode = utbetaling["typeKode"].asText()) {
                     "0" -> Periode.Utbetaling(fom, tom, dagsats)
                     "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats)
-                    in listOf("2", "3") -> Periode.Etterbetaling(fom, tom, dagsats)
+                    "2", "3" -> Periode.Etterbetaling(fom, tom, dagsats)
                     "4" -> Periode.KontertRegnskap(fom, tom, dagsats)
                     "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats)
                     "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats)

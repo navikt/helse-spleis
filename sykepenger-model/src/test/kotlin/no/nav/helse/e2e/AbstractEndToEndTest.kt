@@ -246,7 +246,6 @@ internal abstract class AbstractEndToEndTest {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                harUkjentePerioder = false,
                 utbetalinger = utbetalinger.map {
                     Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                         it.first,

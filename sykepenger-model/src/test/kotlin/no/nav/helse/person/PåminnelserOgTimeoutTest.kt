@@ -231,7 +231,6 @@ class PåminnelserOgTimeoutTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         utbetalingshistorikk = Utbetalingshistorikk(
-            harUkjentePerioder = false,
             utbetalinger = listOf(
                 Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     17.januar(2017),

@@ -5,13 +5,13 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val graderingsliste: List<Graderingsperiode>,
-    private val harUkjentePerioder: Boolean,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
@@ -24,7 +24,7 @@ class Utbetalingshistorikk(
         if (førsteFraværsdag == null) return this
         var forrigePeriodeFom: LocalDate = førsteFraværsdag
         return sortedByDescending { it.tom }.filter { periode ->
-            (periode.tom.plusWeeks(26) >= forrigePeriodeFom).also {
+            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= (26 * 7)).also {
                 if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
             }
         }
@@ -36,7 +36,6 @@ class Utbetalingshistorikk(
     internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(this, aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
-        if (harUkjentePerioder) aktivitetslogg.error("Utbetalingshistorikk fra Infotrygd inneholder ukjente perioder")
         return aktivitetslogg
     }
 
@@ -114,5 +113,7 @@ class Utbetalingshistorikk(
         class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
         class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Ugyldig(fom: LocalDate?, tom: LocalDate?, dagsats: Int) :
+            Periode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX, dagsats)
     }
 }

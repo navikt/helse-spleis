@@ -185,7 +185,6 @@ internal class PersonTest {
                             emptyList(),
                             emptyList(),
                             emptyList(),
-                            false,
                             Aktivitetslogg()
                         ),
                         foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),

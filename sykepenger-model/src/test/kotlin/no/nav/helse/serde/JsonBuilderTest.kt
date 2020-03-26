@@ -189,7 +189,6 @@ internal class JsonBuilderTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
-                    harUkjentePerioder = false,
                     utbetalinger = listOf(
                         Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),

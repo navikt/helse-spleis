@@ -69,7 +69,7 @@ internal class YtelserHendelseTest {
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(ukjentePerioder = true)
+        håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null, 0)))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -119,8 +119,7 @@ internal class YtelserHendelseTest {
     private fun håndterYtelser(
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeytelse: Periode? = null,
-        svangerskapsytelse: Periode? = null,
-        ukjentePerioder: Boolean = false
+        svangerskapsytelse: Periode? = null
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -129,7 +128,6 @@ internal class YtelserHendelseTest {
         person.håndter(
             ytelser(
                 utbetalinger = utbetalinger,
-                ukjentePerioder = ukjentePerioder,
                 foreldrepengeYtelse = foreldrepengeytelse,
                 svangerskapYtelse = svangerskapsytelse
             )
@@ -139,18 +137,18 @@ internal class YtelserHendelseTest {
     private fun håndterUgyldigYtelser() {
         person.håndter(sykmelding())
         person.håndter(søknad())
-        person.håndter(ytelser(
-            utbetalinger = emptyList(),
-            ukjentePerioder = true,
-            foreldrepengeYtelse = null,
-            svangerskapYtelse = null
-        ))
+        person.håndter(
+            ytelser(
+                utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null, 0)),
+                foreldrepengeYtelse = null,
+                svangerskapYtelse = null
+            )
+        )
     }
 
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
-        ukjentePerioder: Boolean = false,
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -161,7 +159,6 @@ internal class YtelserHendelseTest {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                harUkjentePerioder = ukjentePerioder,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),
@@ -175,6 +172,7 @@ internal class YtelserHendelseTest {
             aktivitetslogg = it
         )
     }
+
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
