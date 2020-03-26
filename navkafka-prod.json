@@ -188,6 +188,10 @@
                 {
                     "member": "S157803",
                     "role": "MANAGER"
+                },
+                {
+                    "member": "R154509",
+                    "role": "MANAGER"
                 }
             ],
             "numPartitions": 6,
