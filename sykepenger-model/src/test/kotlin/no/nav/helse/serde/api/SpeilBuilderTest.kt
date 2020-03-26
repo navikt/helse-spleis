@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Vedtaksperiode
@@ -9,123 +8,183 @@ import no.nav.helse.serde.JsonBuilderTest.Companion.ingenBetalingsperson
 import no.nav.helse.serde.JsonBuilderTest.Companion.inntektsmelding
 import no.nav.helse.serde.JsonBuilderTest.Companion.manuellSaksbehandling
 import no.nav.helse.serde.JsonBuilderTest.Companion.person
+import no.nav.helse.serde.JsonBuilderTest.Companion.simulering
 import no.nav.helse.serde.JsonBuilderTest.Companion.sykmelding
 import no.nav.helse.serde.JsonBuilderTest.Companion.søknad
+import no.nav.helse.serde.JsonBuilderTest.Companion.utbetalt
 import no.nav.helse.serde.JsonBuilderTest.Companion.vilkårsgrunnlag
 import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
+import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juni
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import java.time.LocalDate
 import java.util.*
 
 
 internal class SpeilBuilderTest {
     private val aktørId = "1234"
-    private val fnr = "5678"
+    private val fnr = "01010025678"
+
+    private fun hendelser(): Triple<List<UUID>, List<UUID>, List<HendelseDTO>> {
+        val hendelser1 = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+        val hendelser2 = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+        return Triple(
+            hendelser1, hendelser2, listOf(
+                SykmeldingDTO(
+                    id = hendelser1[0].toString(),
+                    type = "NY_SØKNAD",
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    rapportertdato = 1.februar.atStartOfDay()
+                ),
+                SøknadDTO(
+                    id = hendelser1[1].toString(),
+                    type = "SENDT_SØKNAD_NAV",
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    rapportertdato = 1.februar.atStartOfDay(),
+                    sendtNav = 1.februar.atStartOfDay()
+                ),
+                InntektsmeldingDTO(
+                    id = hendelser1[2].toString(),
+                    type = "INNTEKTSMELDING",
+                    mottattDato = 1.januar.atStartOfDay(),
+                    beregnetInntekt = 25000.0
+                ),
+                SykmeldingDTO(
+                    id = hendelser2[0].toString(),
+                    type = "NY_SØKNAD",
+                    fom = 1.februar,
+                    tom = 14.februar,
+                    rapportertdato = 1.februar.atStartOfDay()
+                ),
+                SøknadDTO(
+                    id = hendelser2[1].toString(),
+                    type = "SENDT_SØKNAD_NAV",
+                    fom = 1.februar,
+                    tom = 14.februar,
+                    rapportertdato = 15.februar.atStartOfDay(),
+                    sendtNav = 15.februar.atStartOfDay()
+                ),
+                InntektsmeldingDTO(
+                    id = hendelser2[2].toString(),
+                    type = "INNTEKTSMELDING",
+                    mottattDato = 1.februar.atStartOfDay(),
+                    beregnetInntekt = 25000.0
+                )
+            )
+        )
+    }
 
     @Test
     internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
-        val person = person()
-        val jsonBuilder = SpeilBuilder()
-        person.accept(jsonBuilder)
-
-        val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
+        val (hendelseIder, _, hendelser) = hendelser()
+        val person = person(søknadhendelseId = hendelseIder[1])
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
         assertEquals(
             1.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].first()["dato"].asText())
+            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.first().dato
         )
         assertEquals(
             31.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
+            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.last().dato
         )
     }
 
     @Test
     internal fun `person uten utbetalingsdager`() {
-        val person = ingenBetalingsperson()
-        val jsonBuilder = SpeilBuilder()
-        person.accept(jsonBuilder)
+        val (hendelseIder, _, hendelser) = hendelser()
+        val person = ingenBetalingsperson(søknadhendelseId = hendelseIder[1])
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
 
-        val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
         assertEquals(
             1.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].first()["dato"].asText())
+            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.first().dato
         )
         assertEquals(
             9.januar,
-            LocalDate.parse(json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"].last()["dato"].asText())
+            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.last().dato
         )
     }
 
     @Test
     internal fun `person med foreldet dager`() {
-        val person = person(sendtSøknad = 1.juni)
-        val jsonBuilder = SpeilBuilder()
-        person.accept(jsonBuilder)
+        val (hendelseIder, _, hendelser) = hendelser()
+        val person = person(sendtSøknad = 1.juni, søknadhendelseId = hendelseIder[1])
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
 
-        val json = jacksonObjectMapper().readTree(jsonBuilder.toString())
-        assertEquals(1, json["arbeidsgivere"][0]["vedtaksperioder"].size())
-        val utbetalingstidslinje = json["arbeidsgivere"][0]["vedtaksperioder"][0]["utbetalingstidslinje"]
-        assertEquals("ArbeidsgiverperiodeDag", utbetalingstidslinje.first()["type"].asText())
-        assertEquals("ArbeidsgiverperiodeDag", utbetalingstidslinje[15]["type"].asText())
-        assertEquals("ForeldetDag", utbetalingstidslinje[16]["type"].asText())
-        assertEquals("ForeldetDag", utbetalingstidslinje.last()["type"].asText())
+        assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
+        val utbetalingstidslinje =
+            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje
+        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
+        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje[15].type)
+        assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje[16].type)
+        assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje.last().type)
     }
 
     @Test
-    fun `tom utbetalingstidslinje hvis kun sykmelding mottatt`() {
+    fun `ufullstendig vedtaksperiode når tilstand er Venter`() {
+        val (hendelseIder, _, hendelser) = hendelser()
         val person = Person(aktørId, fnr).apply {
-            håndter(sykmelding(hendelseId = UUID.randomUUID(), fom = 1.januar, tom = 31.januar))
+            håndter(sykmelding(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
         }
-        val (json, _) = serializePersonForSpeil(person)
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
 
-        val arbeidsgiver = json["arbeidsgivere"][0]
-        val vedtaksperioder = arbeidsgiver["vedtaksperioder"]
+        val arbeidsgiver = personDTO.arbeidsgivere[0]
+        val vedtaksperioder = arbeidsgiver.vedtaksperioder
 
-        assertEquals(0, vedtaksperioder.first()["utbetalingstidslinje"].size())
+        assertFalse(vedtaksperioder.first().fullstendig)
     }
 
     @Test
-    fun `passer på at vedtakene har en referanse til hendelsene`() {
+    fun `passer på at vedtakene har alle hendelsene`() {
+        val (hendelseIder, hendelseIder2, hendelser) = hendelser()
+
         var vedtaksperiodeIder: Set<String>
-        val hendelseIderVedtak1 = (0.until(3)).map { UUID.randomUUID() }
-        val hendelseIderVedtak2 = (0.until(3)).map { UUID.randomUUID() }
 
         val person = Person(aktørId, fnr).apply {
 
-            håndter(sykmelding(hendelseId = hendelseIderVedtak1[0], fom = 1.januar, tom = 31.januar))
-            håndter(søknad(hendelseId = hendelseIderVedtak1[1], fom = 1.januar, tom = 31.januar))
-            håndter(inntektsmelding(hendelseId = hendelseIderVedtak1[2], fom = 1.januar))
+            håndter(sykmelding(hendelseId = hendelseIder[0], fom = 1.januar, tom = 31.januar))
+            håndter(søknad(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
+            håndter(inntektsmelding(hendelseId = hendelseIder[2], fom = 1.januar))
 
             vedtaksperiodeIder = collectVedtaksperiodeIder()
 
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
             håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
-            håndter(sykmelding(hendelseId = hendelseIderVedtak2[0], fom = 1.februar, tom = 14.februar))
-            håndter(søknad(hendelseId = hendelseIderVedtak2[1], fom = 1.februar, tom = 14.februar))
-            håndter(inntektsmelding(hendelseId = hendelseIderVedtak2[2], fom = 1.februar))
+            håndter(sykmelding(hendelseId = hendelseIder2[0], fom = 1.februar, tom = 14.februar))
+            håndter(søknad(hendelseId = hendelseIder2[1], fom = 1.februar, tom = 14.februar))
 
             vedtaksperiodeIder = collectVedtaksperiodeIder()
 
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
             håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
         }
 
-        val (json, _) = serializePersonForSpeil(person)
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
 
-        val vedtaksperioder = json["arbeidsgivere"][0]["vedtaksperioder"]
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
 
-        assertEquals(2, vedtaksperioder.size())
-        assertEquals(vedtaksperioder[0]["hendelser"].sortedUUIDs(), hendelseIderVedtak1.sorted())
-        assertEquals(vedtaksperioder[1]["hendelser"].sortedUUIDs(), hendelseIderVedtak2.sorted())
+        assertEquals(2, vedtaksperioder.size)
+        assertEquals(3, vedtaksperioder.first().hendelser.size)
+        assertEquals(2, vedtaksperioder.last().hendelser.size) // Skal ikke ha inntektsmelding
+        assertEquals(
+            hendelseIder.map { it.toString() }.sorted(),
+            vedtaksperioder.first().hendelser.map { it.id }.sorted()
+        )
+        assertEquals(
+            hendelseIder2.subList(0, 2).map { it.toString() }.sorted(),
+            vedtaksperioder[1].hendelser.map { it.id }.sorted()
+        )
     }
 
     /**
@@ -133,84 +192,82 @@ internal class SpeilBuilderTest {
      * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.
      */
     @Test
-    fun `json-en inneholder de feltene Speil forventer`() {
+    fun `personDTO-en inneholder de feltene Speil forventer`() {
         val fom = 1.januar
         val tom = 31.januar
-        val person = person(fom = fom, tom = tom)
-        val (json, _) = serializePersonForSpeil(person)
+        val (hendelseIder, _, hendelser) = hendelser()
 
-        assertTrue(json.hasNonNull("aktørId"))
-        assertTrue(json.hasNonNull("fødselsnummer"))
-        assertTrue(json.hasNonNull("arbeidsgivere"))
+        val person = person(fom = fom, tom = tom, søknadhendelseId = hendelseIder[1])
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
 
-        val arbeidsgiver = json["arbeidsgivere"].first();
-        assertTrue(arbeidsgiver.hasNonNull("organisasjonsnummer"))
-        assertTrue(arbeidsgiver.hasNonNull("id"))
-        assertTrue(arbeidsgiver.hasNonNull("vedtaksperioder"))
+        assertEquals("12020052345", personDTO.fødselsnummer)
+        assertEquals("12345", personDTO.aktørId)
+        assertEquals(1, personDTO.arbeidsgivere.size)
 
-        val vedtaksperiode = arbeidsgiver["vedtaksperioder"].first();
-        assertTrue(vedtaksperiode.hasNonNull("id"))
-        assertTrue(vedtaksperiode.hasNonNull("fom"))
-        val jsonFom = LocalDate.parse(vedtaksperiode["fom"].asText())
-        assertEquals(fom, jsonFom)
-        assertTrue(vedtaksperiode.hasNonNull("tom"))
-        val jsonTom = LocalDate.parse(vedtaksperiode["tom"].asText())
-        assertEquals(tom, jsonTom)
-        assertTrue(vedtaksperiode.hasNonNull("maksdato"))
-        assertTrue(vedtaksperiode.hasNonNull("forbrukteSykedager"))
-        assertTrue(vedtaksperiode.hasNonNull("godkjentAv"))
-        assertTrue(vedtaksperiode.hasNonNull("godkjenttidspunkt"))
-        assertTrue(vedtaksperiode.hasNonNull("utbetalingsreferanse"))
-        assertTrue(vedtaksperiode.hasNonNull("førsteFraværsdag"))
-        assertTrue(vedtaksperiode.hasNonNull("inntektFraInntektsmelding"))
-        assertTrue(vedtaksperiode.hasNonNull("totalbeløpArbeidstaker"))
-        assertTrue(vedtaksperiode.hasNonNull("tilstand"))
-        assertTilstand(vedtaksperiode)
+        val arbeidsgiver = personDTO.arbeidsgivere.first()
+        assertEquals("987654321", arbeidsgiver.organisasjonsnummer)
+        assertEquals(1, arbeidsgiver.vedtaksperioder.size)
 
-        assertTrue(vedtaksperiode.hasNonNull("hendelser"))
-        assertTrue(vedtaksperiode.hasNonNull("dataForVilkårsvurdering"))
-        assertTrue(vedtaksperiode.hasNonNull("sykdomstidslinje"))
-        assertTrue(vedtaksperiode.hasNonNull("utbetalingstidslinje"))
-        assertTrue(vedtaksperiode.hasNonNull("utbetalingslinjer"))
+        val vedtaksperiode = arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO
+        assertEquals(1.januar, vedtaksperiode.fom)
+        assertEquals(31.januar, vedtaksperiode.tom)
+        assertEquals(TilstandstypeDTO.Utbetalt, vedtaksperiode.tilstand)
+        assertTrue(vedtaksperiode.fullstendig)
 
-        val dataForVilkårsvurdering = vedtaksperiode["dataForVilkårsvurdering"];
-        assertTrue(dataForVilkårsvurdering.hasNonNull("erEgenAnsatt"))
-        assertTrue(dataForVilkårsvurdering.hasNonNull("beregnetÅrsinntektFraInntektskomponenten"))
-        assertTrue(dataForVilkårsvurdering.hasNonNull("avviksprosent"))
-        assertTrue(dataForVilkårsvurdering.hasNonNull("antallOpptjeningsdagerErMinst"))
-        assertTrue(dataForVilkårsvurdering.hasNonNull("harOpptjening"))
+        val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
+        assertEquals(31, utbetalingstidslinje.size)
+        assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
+        assertEquals(TypeDataDTO.NavDag, utbetalingstidslinje.last().type)
+        assertEquals(100.0, (utbetalingstidslinje.last() as NavDagDTO).grad)
 
-        val sykdomstidslinje = vedtaksperiode["sykdomstidslinje"]
-        assertEquals(31, sykdomstidslinje.size())
-        sykdomstidslinje.forEach {
-            assertTrue(it.hasNonNull("dagen"))
-            assertTrue(it.hasNonNull("type"))
-            assertTrue(it.hasNonNull("grad"))
-        }
+        assertEquals(15741, vedtaksperiode.totalbeløpArbeidstaker)
 
-        val utbetalingstidslinje = vedtaksperiode["utbetalingstidslinje"];
-        assertEquals(31, utbetalingstidslinje.size())
-        utbetalingstidslinje.forEach {
-            assertTrue(it.hasNonNull("type"))
-            assertTrue(it.hasNonNull("inntekt"))
-            assertTrue(it.hasNonNull("dato"))
-        }
-        utbetalingstidslinje.filter { it["type"].asText() == "NavDag" }.forEach {
-            assertTrue(it.hasNonNull("utbetaling"))
-            assertTrue(it.hasNonNull("grad"))
-        }
+        val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
+        assertEquals(31, sykdomstidslinje.size)
+        assertEquals(JsonDagType.SYKEDAG_SØKNAD, sykdomstidslinje.first().type)
+        assertEquals(1.januar, sykdomstidslinje.first().dagen)
 
-        val utbetalingslinjer = vedtaksperiode["utbetalingslinjer"];
-        assertEquals(1, utbetalingslinjer.size())
-        utbetalingslinjer.forEach {
-            assertTrue(it.hasNonNull("fom"))
-            assertTrue(it.hasNonNull("tom"))
-            assertTrue(it.hasNonNull("dagsats"))
-            assertTrue(it.hasNonNull("grad"))
-        }
+        assertEquals("en_saksbehandler_ident", vedtaksperiode.godkjentAv)
+
+        val vilkår = vedtaksperiode.vilkår
+        val sykepengegrunnlag = vilkår.sykepengegrunnlag
+        assertEquals(`1G`.beløp(fom).toInt(), sykepengegrunnlag.grunnbeløp)
+        assertTrue(sykepengegrunnlag.oppfylt!!)
+        assertEquals(31000.0 * 12, sykepengegrunnlag.sykepengegrunnlag)
+
+        val sykepengedager = vilkår.sykepengedager
+        assertEquals(11, sykepengedager.forbrukteSykedager)
+        assertEquals(fom, sykepengedager.førsteFraværsdag)
+        assertEquals(fom.plusDays(16), sykepengedager.førsteSykepengedag)
+        assertEquals(28.desember, sykepengedager.maksdato)
+
+        val alder = vilkår.alder
+        assertEquals(17, alder.alderSisteSykedag)
+        assertTrue(alder.oppfylt!!)
+
+        val opptjening = vilkår.opptjening
+        assertEquals(365, opptjening?.antallKjenteOpptjeningsdager)
+        assertEquals(1.januar(2017), opptjening?.fom)
+        assertTrue(opptjening?.oppfylt!!)
+
+        val søknadsfrist = vilkår.søknadsfrist
+        assertEquals(tom.plusDays(1).atStartOfDay(), søknadsfrist.sendtNav)
+        assertEquals(fom, søknadsfrist.søknadFom)
+        assertEquals(tom, søknadsfrist.søknadTom)
+        assertTrue(søknadsfrist.oppfylt!!)
+
+        assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
+        assertEquals(1, vedtaksperiode.hendelser.size) // Sender kun inn søknadId til person i denne testen
+
+        val utbetalingslinjer = vedtaksperiode.utbetalingslinjer
+        assertEquals(1, utbetalingslinjer.size)
+        assertEquals(fom.plusDays(16), utbetalingslinjer.first().fom)
+        assertEquals(tom, utbetalingslinjer.first().tom)
+
+        assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
     }
 
-    private fun JsonNode.sortedUUIDs() = map(JsonNode::asText).map(UUID::fromString).sorted()
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
         accept(object : PersonVisitor {
@@ -223,8 +280,5 @@ internal class SpeilBuilderTest {
             }
         })
     }
-
-    private fun assertTilstand(jsonNode: JsonNode) =
-        assertDoesNotThrow { TilstandstypeDTO.valueOf(jsonNode["tilstand"].asText()) }
 }
 

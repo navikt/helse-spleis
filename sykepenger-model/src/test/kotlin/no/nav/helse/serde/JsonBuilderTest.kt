@@ -85,11 +85,23 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
 
-        internal fun person(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, sendtSøknad: LocalDate = 1.april): Person =
+        internal fun person(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = fom, tom = tom))
                 fangeVedtaksperiodeId()
-                håndter(søknad(fom = fom, tom = tom, sendtSøknad = sendtSøknad.atStartOfDay()))
+                håndter(
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    )
+                )
                 håndter(inntektsmelding(fom = fom))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -98,11 +110,21 @@ internal class JsonBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
-        internal fun ingenBetalingsperson(sendtSøknad: LocalDate = 1.april): Person =
+        internal fun ingenBetalingsperson(
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 9.januar))
                 fangeVedtaksperiodeId()
-                håndter(søknad(fom = 1.januar, tom = 9.januar, sendtSøknad = sendtSøknad.atStartOfDay()))
+                håndter(
+                    søknad(
+                        fom = 1.januar,
+                        tom = 9.januar,
+                        sendtSøknad = sendtSøknad.atStartOfDay(),
+                        hendelseId = søknadhendelseId
+                    )
+                )
                 håndter(inntektsmelding(fom = 1.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
@@ -10,6 +9,8 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import no.nav.helse.person.Person
+import no.nav.helse.serde.api.PersonDTO
+import no.nav.helse.serde.api.hendelseReferanserForPerson
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.spleis.HendelseDTO.*
 import no.nav.helse.spleis.dao.HendelseDao
@@ -19,6 +20,9 @@ import no.nav.helse.spleis.dao.UtbetalingDao
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
+import no.nav.helse.serde.api.InntektsmeldingDTO as SerdeInntektsmeldingDTO
+import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
+import no.nav.helse.serde.api.SøknadDTO as SerdeSøknadDTO
 
 internal fun Application.spleisApi(dataSource: DataSource) {
     val hendelseDao = HendelseDao(dataSource)
@@ -30,7 +34,7 @@ internal fun Application.spleisApi(dataSource: DataSource) {
             get("/api/utbetaling/{utbetalingsreferanse}") {
                 utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
                     ?.let { personDao.hentPersonAktørId(it.aktørId) }
-                    ?.let { call.respond(serializePersonForSpeil(it)) }
+                    ?.let { call.respond(serializePersonForSpeil(it)!!) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
 
@@ -51,8 +55,8 @@ internal fun Application.spleisApi(dataSource: DataSource) {
     }
 }
 
-private fun håndterPerson(person: Person, hendelseDao: HendelseDao): ObjectNode {
-    val (personJson, hendelseReferanser) = serializePersonForSpeil(person)
+private fun håndterPerson(person: Person, hendelseDao: HendelseDao): PersonDTO {
+    val hendelseReferanser = hendelseReferanserForPerson(person)
     val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map {
         when (it.first) {
             NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(it.second))
@@ -60,10 +64,52 @@ private fun håndterPerson(person: Person, hendelseDao: HendelseDao): ObjectNode
             SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverDTO(objectMapper.readTree(it.second))
             INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(it.second))
         }
-    }.map { objectMapper.valueToTree<JsonNode>(it) }
-
-    return personJson.apply { putArray("hendelser").addAll(hendelser) }
+    }.mapHendelseDTO()
+    return serializePersonForSpeil(person, hendelser)!!
 }
+
+private fun List<HendelseDTO>.mapHendelseDTO() = this.mapNotNull {
+    when (it.type) {
+        "NY_SØKNAD" -> mapNySøknad(it as NySøknadDTO)
+        "SENDT_SØKNAD_NAV" -> mapSendtSøknad(it as SendtSøknadNavDTO)
+        "SENDT_SØKNAD_ARBEIDSGIVER" -> mapSendtSøknad(it as SendtSøknadArbeidsgiverDTO)
+        "INNTEKTSMELDING" -> mapInntektsmelding(it as InntektsmeldingDTO)
+        else -> null
+    }
+}
+
+private fun mapSendtSøknad(sendtSøknadNavDTO: SendtSøknadNavDTO) = SerdeSøknadDTO(
+    sendtSøknadNavDTO.hendelseId,
+    sendtSøknadNavDTO.type,
+    sendtSøknadNavDTO.fom,
+    sendtSøknadNavDTO.tom,
+    sendtSøknadNavDTO.rapportertdato,
+    sendtSøknadNavDTO.sendtNav
+)
+
+private fun mapSendtSøknad(sendtSøknadArbeidsgiverDTO: SendtSøknadArbeidsgiverDTO) = SerdeSøknadDTO(
+    sendtSøknadArbeidsgiverDTO.hendelseId,
+    sendtSøknadArbeidsgiverDTO.type,
+    sendtSøknadArbeidsgiverDTO.fom,
+    sendtSøknadArbeidsgiverDTO.tom,
+    sendtSøknadArbeidsgiverDTO.rapportertdato,
+    sendtSøknadArbeidsgiverDTO.sendtNav
+)
+
+private fun mapNySøknad(nySøknadDTO: NySøknadDTO) = SerdeSykmeldingDTO(
+    nySøknadDTO.hendelseId,
+    nySøknadDTO.type,
+    nySøknadDTO.fom,
+    nySøknadDTO.tom,
+    nySøknadDTO.rapportertdato
+)
+
+private fun mapInntektsmelding(inntektsmeldingDTO: InntektsmeldingDTO) = SerdeInntektsmeldingDTO(
+    inntektsmeldingDTO.hendelseId,
+    inntektsmeldingDTO.type,
+    inntektsmeldingDTO.mottattDato,
+    inntektsmeldingDTO.beregnetInntekt.toDouble()
+)
 
 sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
@@ -73,7 +119,7 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
         val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
 
-    class SendtSøknadNavDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD", json["@id"].asText()) {
+    class SendtSøknadNavDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_NAV", json["@id"].asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
         val sendtNav: LocalDateTime = LocalDateTime.parse(json["sendtNav"].asText())
         val fom: LocalDate = LocalDate.parse(json["fom"].asText())

@@ -3,6 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.Grunnbeløp
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.*
 
 internal class Alder(fødselsnummer: String) {
     private val individnummer = fødselsnummer.substring(6, 9).toInt()
@@ -32,6 +34,8 @@ internal class Alder(fødselsnummer: String) {
             else -> 0
         }
     )
+
+    internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt();
 
     internal fun minimumInntekt(dato: LocalDate): Double {
         return (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato)

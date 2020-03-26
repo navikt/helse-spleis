@@ -79,6 +79,9 @@ internal class Vedtaksperiode private constructor(
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id, gruppeId)
+        sykdomshistorikk.accept(visitor)
+        utbetalingstidslinje.accept(visitor)
+        visitor.visitTilstand(tilstand)
         visitor.visitMaksdato(maksdato)
         visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
@@ -86,9 +89,6 @@ internal class Vedtaksperiode private constructor(
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        sykdomshistorikk.accept(visitor)
-        utbetalingstidslinje.accept(visitor)
-        visitor.visitTilstand(tilstand)
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer(utbetalingslinjer)

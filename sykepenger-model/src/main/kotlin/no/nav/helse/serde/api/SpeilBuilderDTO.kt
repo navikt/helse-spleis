@@ -5,34 +5,67 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal data class SykdomstidslinjedagDTO(val dagen: LocalDate, val type: JsonDagType, val grad: Double? = null)
-internal data class VedtaksperiodeDTO(
-    val sykdomstidslinje: MutableList<SykdomstidslinjedagDTO>,
-    val id: UUID,
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val maksdato: LocalDate?,
-    val forbrukteSykedager: Int?,
-    val godkjentAv: String?,
-    val godkjenttidspunkt: LocalDateTime?,
-    val utbetalingsreferanse: String?,
-    val førsteFraværsdag: LocalDate?,
-    val inntektFraInntektsmelding: Double?,
-    val totalbeløpArbeidstaker: Double?,
-    val tilstand: TilstandstypeDTO,
-    val hendelser: MutableSet<UUID>,
-    val dataForVilkårsvurdering: GrunnlagsdataDTO?,
-    val utbetalingstidslinje: MutableList<UtbetalingstidslinjedagDTO>,
-    val utbetalingslinjer: MutableList<UtbetalingslinjeDTO>
+data class PersonDTO(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val arbeidsgivere: List<ArbeidsgiverDTO>
 )
 
-internal interface UtbetalingstidslinjedagDTO {
+data class ArbeidsgiverDTO(
+    val organisasjonsnummer: String,
+    val id: UUID,
+    val vedtaksperioder: List<VedtaksperiodeDTOBase>
+)
+
+data class VedtaksperiodeDTO(
+    override val id: UUID,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val tilstand: TilstandstypeDTO,
+    override val fullstendig: Boolean = true,
+    val utbetalingsreferanse: String?,
+    val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
+    val godkjentAv: String?,
+    val godkjenttidspunkt: LocalDateTime?,
+    val vilkår: Vilkår,
+    val førsteFraværsdag: LocalDate,
+    val inntektFraInntektsmelding: Double,
+    val totalbeløpArbeidstaker: Int,
+    val hendelser: List<HendelseDTO>,
+    val dataForVilkårsvurdering: GrunnlagsdataDTO?,
+    val utbetalingslinjer: List<UtbetalingslinjeDTO>
+) : VedtaksperiodeDTOBase
+
+data class UfullstendigVedtaksperiodeDTO(
+    override val id: UUID,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val tilstand: TilstandstypeDTO,
+    override val fullstendig: Boolean = false
+) : VedtaksperiodeDTOBase
+
+interface VedtaksperiodeDTOBase {
+    val id: UUID
+    val fom: LocalDate
+    val tom: LocalDate
+    val tilstand: TilstandstypeDTO
+    val fullstendig: Boolean
+}
+
+data class SykdomstidslinjedagDTO(
+    val dagen: LocalDate,
+    val type: JsonDagType,
+    val grad: Double? = null
+)
+
+interface UtbetalingstidslinjedagDTO {
     val type: TypeDataDTO
     val inntekt: Double
     val dato: LocalDate
 }
 
-internal data class NavDagDTO(
+data class NavDagDTO(
     override val type: TypeDataDTO = TypeDataDTO.NavDag,
     override val inntekt: Double,
     override val dato: LocalDate,
@@ -40,7 +73,7 @@ internal data class NavDagDTO(
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
-internal data class AvvistDagDTO(
+data class AvvistDagDTO(
     override val type: TypeDataDTO = TypeDataDTO.AvvistDag,
     override val inntekt: Double,
     override val dato: LocalDate,
@@ -48,20 +81,20 @@ internal data class AvvistDagDTO(
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
-internal data class UtbetalingsdagDTO(
+data class UtbetalingsdagDTO(
     override val type: TypeDataDTO,
     override val inntekt: Double,
     override val dato: LocalDate
 ) : UtbetalingstidslinjedagDTO
 
-internal data class UtbetalingsdagMedGradDTO(
+data class UtbetalingsdagMedGradDTO(
     override val type: TypeDataDTO,
     override val inntekt: Double,
     override val dato: LocalDate,
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
-internal enum class TypeDataDTO {
+enum class TypeDataDTO {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
@@ -72,7 +105,7 @@ internal enum class TypeDataDTO {
     ForeldetDag
 }
 
-internal data class GrunnlagsdataDTO(
+data class GrunnlagsdataDTO(
     val erEgenAnsatt: Boolean,
     val beregnetÅrsinntektFraInntektskomponenten: Double,
     val avviksprosent: Double,
@@ -80,53 +113,90 @@ internal data class GrunnlagsdataDTO(
     val harOpptjening: Boolean
 )
 
-internal enum class BegrunnelseDTO {
+enum class BegrunnelseDTO {
     SykepengedagerOppbrukt,
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
     MinimumSykdomsgrad
 }
 
-internal data class UtbetalingslinjeDTO(val fom: LocalDate, val tom: LocalDate, val dagsats: Int, val grad: Double)
+data class UtbetalingslinjeDTO(val fom: LocalDate, val tom: LocalDate, val dagsats: Int, val grad: Double)
 
-internal interface HendelseDTO {
-    val hendelseId: UUID
-    val fom: LocalDate
-    val tom: LocalDate
+interface HendelseDTO {
+    val id: String
     val type: String
 }
 
-internal data class InntektsmeldingDTO(
-    override val hendelseId: UUID,
-    override val fom: LocalDate,
-    override val tom: LocalDate,
+data class InntektsmeldingDTO(
+    override val id: String,
     override val type: String,
-    val rapportertdato: LocalDateTime,
+    val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
 ) : HendelseDTO
 
-internal data class SøknadDTO(
-    override val hendelseId: UUID,
-    override val fom: LocalDate,
-    override val tom: LocalDate,
+data class SøknadDTO(
+    override val id: String,
     override val type: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertdato: LocalDateTime,
     val sendtNav: LocalDateTime
 ) : HendelseDTO
 
-internal data class SykmeldingDTO(
-    override val hendelseId: UUID,
-    override val fom: LocalDate,
-    override val tom: LocalDate,
+data class SykmeldingDTO(
+    override val id: String,
     override val type: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val rapportertdato: LocalDateTime
 ) : HendelseDTO
 
-internal enum class TilstandstypeDTO {
+enum class TilstandstypeDTO {
     TilUtbetaling,
     Utbetalt,
     Oppgaver,
     Venter,
     IngenUtbetaling,
-    Feilet
+    Feilet,
+    TilInfotrygd
 }
+
+data class Vilkår(
+    val sykepengedager: Sykepengedager,
+    val alder: Alder,
+    val opptjening: Opptjening?,
+    val søknadsfrist: Søknadsfrist,
+    val sykepengegrunnlag: Sykepengegrunnlag
+)
+
+data class Sykepengedager(
+    val forbrukteSykedager: Int?,
+    val førsteFraværsdag: LocalDate,
+    val førsteSykepengedag: LocalDate?,
+    val maksdato: LocalDate?,
+    val oppfylt: Boolean?
+)
+
+data class Alder(
+    val alderSisteSykedag: Int,
+    val oppfylt: Boolean?
+)
+
+data class Opptjening(
+    val antallKjenteOpptjeningsdager: Int?,
+    val fom: LocalDate?,
+    val oppfylt: Boolean?
+)
+
+data class Søknadsfrist(
+    val sendtNav: LocalDateTime,
+    val søknadFom: LocalDate,
+    val søknadTom: LocalDate,
+    val oppfylt: Boolean?
+)
+
+data class Sykepengegrunnlag(
+    val sykepengegrunnlag: Double?,
+    val grunnbeløp: Int,
+    val oppfylt: Boolean?
+)

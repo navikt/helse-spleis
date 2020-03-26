@@ -1,9 +1,5 @@
 package no.nav.helse.serde.api
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.JsonDagType
@@ -20,14 +16,13 @@ import java.time.LocalDateTime
 import java.util.*
 
 
-fun serializePersonForSpeil(person: Person): Pair<ObjectNode, Set<UUID>> {
-    val hendelseReferanser = mutableSetOf<UUID>()
-    val jsonBuilder = SpeilBuilder(hendelseReferanser)
+fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO? {
+    val jsonBuilder = SpeilBuilder(hendelser)
     person.accept(jsonBuilder)
-    return jsonBuilder.toJson() to hendelseReferanser
+    return jsonBuilder.toJson()
 }
 
-internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSetOf()) : PersonVisitor {
+internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVisitor {
 
     private val stack: Stack<JsonState> = Stack()
     private val rootState = Root()
@@ -38,8 +33,6 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     }
 
     internal fun toJson() = rootState.toJson()
-
-    override fun toString() = rootState.toJson().toPrettyString()
 
     private fun pushState(state: JsonState) {
         currentState.leaving()
@@ -88,7 +81,6 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     }
 
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
-        hendelser.add(inntekt.hendelseId)
         currentState.visitInntekt(inntekt)
     }
 
@@ -146,7 +138,6 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         id: UUID,
         tidsstempel: LocalDateTime
     ) {
-        hendelser.add(id)
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
@@ -229,23 +220,24 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             aktørId: String,
             fødselsnummer: String
         ) {
-            pushState(PersonState(person, personMap))
+            pushState(PersonState(person, personMap, fødselsnummer))
         }
 
         override fun toString() = personMap.toString()
 
-        fun toJson() = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
-            .valueToTree<ObjectNode>(personMap)
+        fun toJson() = personMap.mapTilPersonDto()
     }
 
-    private inner class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : JsonState {
+    private inner class PersonState(
+        person: Person,
+        private val personMap: MutableMap<String, Any?>,
+        private val fødselsnummer: String
+    ) : JsonState {
         init {
             personMap.putAll(PersonReflect(person).toSpeilMap())
         }
 
-        private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
+        private val arbeidsgivere = mutableListOf<ArbeidsgiverDTO>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
@@ -257,8 +249,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             organisasjonsnummer: String
         ) {
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
-            arbeidsgivere.add(arbeidsgiverMap)
-            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap))
+            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere))
         }
 
         override fun postVisitPerson(
@@ -272,18 +263,25 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
 
     private inner class ArbeidsgiverState(
         private val arbeidsgiver: Arbeidsgiver,
-        private val arbeidsgiverMap: MutableMap<String, Any?>
+        private val arbeidsgiverMap: MutableMap<String, Any?>,
+        private val fødselsnummer: String,
+        private val arbeidsgivere: MutableList<ArbeidsgiverDTO>
     ) :
         JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
         }
 
-        private val vedtaksperioder = mutableListOf<VedtaksperiodeDTO>()
+        private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
+        var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
 
         override fun preVisitPerioder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
+        }
+
+        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
+            inntekter.add(inntekt)
         }
 
         override fun preVisitVedtaksperiode(
@@ -291,7 +289,16 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             id: UUID,
             gruppeId: UUID
         ) {
-            pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiver, vedtaksperiodeMap, vedtaksperioder))
+            pushState(
+                VedtaksperiodeState(
+                    vedtaksperiode,
+                    arbeidsgiver,
+                    vedtaksperiodeMap,
+                    vedtaksperioder,
+                    fødselsnummer,
+                    inntekter
+                )
+            )
         }
 
         override fun postVisitArbeidsgiver(
@@ -299,6 +306,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             id: UUID,
             organisasjonsnummer: String
         ) {
+            arbeidsgivere.add(arbeidsgiverMap.mapTilArbeidsgiverDto())
             popState()
         }
     }
@@ -308,35 +316,29 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
-        private val vedtaksperioder: MutableList<VedtaksperiodeDTO>
+        private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
+        private val fødselsnummer: String,
+        private val inntekter: List<Inntekthistorikk.Inntekt>
     ) : JsonState {
-        private val hendelser = mutableSetOf<UUID>()
+        private var fullstendig = false
+        private val vedtaksperiodehendelser = mutableListOf<HendelseDTO>()
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
-        private var totalbeløpArbeidstaker = 0.0
+        private var utbetalinger = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vedtaksperiode, Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
 
+
         init {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap(arbeidsgiver))
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
-            vedtaksperiodeMap["hendelser"] = hendelser
+            vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
         }
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-            val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
-            vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinje, totalbeløpArbeidstaker))
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            vedtaksperiodeMap["tilstand"] =
-                mapTilstander(tilstand = tilstand.type, utbetalt = (totalbeløpArbeidstaker > 0))
-        }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            pushState(SykdomshistorikkState(hendelser, beregnetSykdomstidslinje))
+            pushState(SykdomshistorikkState(vedtaksperiodehendelser, beregnetSykdomstidslinje))
         }
 
         override fun preVisitSykdomshistorikkElement(
@@ -344,8 +346,32 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             id: UUID,
             tidsstempel: LocalDateTime
         ) {
-            hendelser.add(id)
+            hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
+
+        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+            val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
+            vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
+            pushState(UtbetalingstidslinjeState(utbetalingstidslinje, utbetalinger))
+        }
+
+        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+            vedtaksperiodeMap["tilstand"] =
+                mapTilstander(tilstand = tilstand.type, utbetalt = (utbetalinger.sum() > 0))
+            if (tilstand.type in listOf(
+                    TilstandType.AVSLUTTET,
+                    TilstandType.AVVENTER_GODKJENNING,
+                    TilstandType.UTBETALING_FEILET,
+                    TilstandType.TIL_UTBETALING
+                )
+            ) {
+                fullstendig = true
+            } else {
+                vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto())
+                popState()
+            }
+        }
+
 
         override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
             val utbetalingstidslinjeListe = mutableListOf<UtbetalingslinjeDTO>()
@@ -358,8 +384,8 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             id: UUID,
             gruppeId: UUID
         ) {
-            vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpArbeidstaker
-            vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto())
+            vedtaksperiodeMap["totalbeløpArbeidstaker"] = utbetalinger.sum()
+            vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(fødselsnummer, inntekter))
             popState()
         }
     }
@@ -388,7 +414,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
 
     private inner class UtbetalingstidslinjeState(
         private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>,
-        private var totalbeløpArbeidstaker: Double
+        private var utbetalinger: MutableList<Int>
     ) : JsonState {
 
         override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
@@ -421,7 +447,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
                     grad = dag.grad
                 )
             )
-            totalbeløpArbeidstaker += dag.utbetaling
+            utbetalinger.add(dag.utbetaling)
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
@@ -483,7 +509,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     }
 
     private inner class SykdomshistorikkState(
-        private val hendelser: MutableSet<UUID>,
+        private val vedtaksperiodehendelser: MutableList<HendelseDTO>,
         private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>
     ) : JsonState {
 
@@ -492,7 +518,7 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             id: UUID,
             tidsstempel: LocalDateTime
         ) {
-            hendelser.add(id)
+            hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
 
         override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {

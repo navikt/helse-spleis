@@ -26,5 +26,6 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         val `6G` = Grunnbeløp(6.0)
         val halvG = Grunnbeløp(0.5)
         val `2G` = Grunnbeløp(2.0)
+        val `1G` = Grunnbeløp(1.0)
     }
 }

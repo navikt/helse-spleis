@@ -4,15 +4,19 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.math.max
 
-internal class UtbetalingTeller private constructor(private var fom: LocalDate,
-                                                    private val alder: Alder,
-                                                    private val arbeidsgiverRegler: ArbeidsgiverRegler,
-                                                    private var betalteDager: Int,
-                                                    private var gammelpersonDager: Int) {
+internal class UtbetalingTeller private constructor(
+    private var fom: LocalDate,
+    private val alder: Alder,
+    private val arbeidsgiverRegler: ArbeidsgiverRegler,
+    private var betalteDager: Int,
+    private var gammelpersonDager: Int
+) {
 
 
-    internal constructor(alder: Alder,
-                        arbeidsgiverRegler: ArbeidsgiverRegler) :
+    internal constructor(
+        alder: Alder,
+        arbeidsgiverRegler: ArbeidsgiverRegler
+    ) :
         this(LocalDate.MIN, alder, arbeidsgiverRegler, 0, 0)
 
     internal fun inkrementer(dato: LocalDate) {
