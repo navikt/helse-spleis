@@ -22,7 +22,7 @@ fun String.handleRequest(
     con.builder()
 
     con.connectTimeout = 1000
-    con.readTimeout = 1000
+    con.readTimeout = 5000
 
     return con
 }
