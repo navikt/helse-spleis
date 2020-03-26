@@ -150,6 +150,7 @@ internal class SpeilBuilderTest {
         val vedtaksperiode = arbeidsgiver["vedtaksperioder"].first();
         assertTrue(vedtaksperiode.hasNonNull("id"))
         assertTrue(vedtaksperiode.hasNonNull("maksdato"))
+        assertTrue(vedtaksperiode.hasNonNull("forbrukteSykedager"))
         assertTrue(vedtaksperiode.hasNonNull("godkjentAv"))
         assertTrue(vedtaksperiode.hasNonNull("godkjenttidspunkt"))
         assertTrue(vedtaksperiode.hasNonNull("utbetalingsreferanse"))

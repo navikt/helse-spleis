@@ -10,6 +10,7 @@ internal data class VedtaksperiodeDTO(
     val sykdomstidslinje: MutableList<SykdomstidslinjedagDTO>,
     val id: UUID,
     val maksdato: LocalDate?,
+    val forbrukteSykedager: Int?,
     val godkjentAv: String?,
     val godkjenttidspunkt: LocalDateTime?,
     val utbetalingsreferanse: String?,

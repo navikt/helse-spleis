@@ -37,6 +37,7 @@ internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(b
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto() = VedtaksperiodeDTO(
     id = this["id"] as UUID,
     maksdato = this["maksdato"] as LocalDate?,
+    forbrukteSykedager = this["forbrukteSykedager"] as Int?,
     godkjentAv = this["godkjentAv"] as String?,
     godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
     sykdomstidslinje = this["sykdomstidslinje"] as MutableList<SykdomstidslinjedagDTO>,
