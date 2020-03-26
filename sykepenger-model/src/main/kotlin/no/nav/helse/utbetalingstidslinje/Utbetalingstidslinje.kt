@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
@@ -109,19 +110,6 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
-
-    internal interface UtbetalingsdagVisitor {
-        fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
-        fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {}
-        fun visitNavDag(dag: NavDag) {}
-        fun visitNavHelgDag(dag: NavHelgDag) {}
-        fun visitArbeidsdag(dag: Arbeidsdag) {}
-        fun visitFridag(dag: Fridag) {}
-        fun visitAvvistDag(dag: AvvistDag) {}
-        fun visitForeldetDag(dag: ForeldetDag) {}
-        fun visitUkjentDag(dag: UkjentDag) {}
-        fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
-    }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {

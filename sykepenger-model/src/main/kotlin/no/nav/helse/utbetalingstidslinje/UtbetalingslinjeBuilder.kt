@@ -1,7 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.UtbetalingsdagVisitor
+
 internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslinje)
-    : Utbetalingstidslinje.UtbetalingsdagVisitor {
+    : UtbetalingsdagVisitor {
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var helseState: HelseState = Ubetalt()
 

@@ -1,10 +1,12 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
 // Collects assertable statistics for a Utbetalingstidslinje
-internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje.UtbetalingsdagVisitor {
+internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
+    UtbetalingsdagVisitor {
     internal var arbeidsdagTeller = 0
     internal var arbeidsgiverperiodeDagTeller = 0
     internal var avvistDagTeller = 0

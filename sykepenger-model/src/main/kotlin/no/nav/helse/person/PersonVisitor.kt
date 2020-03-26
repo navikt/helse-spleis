@@ -8,7 +8,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -21,7 +20,7 @@ internal interface PersonVisitor : ArbeidsgiverVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, UtbetalingsdagVisitor, VedtaksperiodeVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -52,6 +51,19 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
+}
+
+internal interface UtbetalingsdagVisitor {
+    fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
+    fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
+    fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
+    fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
+    fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
+    fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
+    fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
+    fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {}
+    fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
+    fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {

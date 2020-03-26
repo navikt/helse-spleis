@@ -1,11 +1,12 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import kotlin.reflect.KClass
 
 internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
-    Utbetalingstidslinje.UtbetalingsdagVisitor {
+    UtbetalingsdagVisitor {
 
     internal val dagtelling: MutableMap<KClass<out Utbetalingstidslinje.Utbetalingsdag>, Int> = mutableMapOf()
     internal val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingstidslinje.Utbetalingsdag>>()

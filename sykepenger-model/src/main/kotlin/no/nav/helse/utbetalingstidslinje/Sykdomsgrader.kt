@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.UtbetalingsdagVisitor
 import java.time.LocalDate
 
 internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): UtbetalingsdagVisitor {

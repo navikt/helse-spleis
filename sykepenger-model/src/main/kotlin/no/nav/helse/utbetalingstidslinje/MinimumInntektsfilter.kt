@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
@@ -10,7 +11,7 @@ internal class MinimumInntektsfilter (
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
     private val aktivitetslogg: Aktivitetslogg
-): Utbetalingstidslinje.UtbetalingsdagVisitor {
+): UtbetalingsdagVisitor {
 
     private var inntekter = mutableMapOf<LocalDate, Double>()
 

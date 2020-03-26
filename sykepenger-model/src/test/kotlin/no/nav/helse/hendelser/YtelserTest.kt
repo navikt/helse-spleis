@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
@@ -214,7 +215,7 @@ internal class YtelserTest {
         assertTrue(ytelser.valider(15.mai(2020)).hasErrors())
     }
 
-    private class Inspektør: Utbetalingstidslinje.UtbetalingsdagVisitor {
+    private class Inspektør: UtbetalingsdagVisitor {
         var førsteDag:LocalDate? = null
         var sisteDag:LocalDate? = null
 

@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
@@ -231,7 +232,7 @@ internal class MaksimumSykepengedagerfilterTest {
         return AvvisteDager(this).datoer
     }
 
-    private class AvvisteDager(tidslinje: Utbetalingstidslinje): Utbetalingstidslinje.UtbetalingsdagVisitor {
+    private class AvvisteDager(tidslinje: Utbetalingstidslinje): UtbetalingsdagVisitor {
         internal val datoer = mutableListOf<LocalDate>()
 
         init {
