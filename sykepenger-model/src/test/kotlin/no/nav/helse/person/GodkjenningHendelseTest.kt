@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -53,7 +53,7 @@ internal class GodkjenningHendelseTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
         person.håndter(ytelser())
         assertTilstand(TilstandType.TIL_UTBETALING)
-        assertEquals(1, inspektør.vedtaksperiodeteller)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class GodkjenningHendelseTest {
     private fun assertTilstand(expectedTilstand: TilstandType) {
         assertEquals(
             expectedTilstand,
-            inspektør.tilstand(0)
+            inspektør.sisteTilstand(0)
         )
     }
 
@@ -175,35 +175,4 @@ internal class GodkjenningHendelseTest {
         ).apply {
             hendelse = this
         }
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
-        private val vedtaksperiodeIder = mutableSetOf<UUID>()
-
-        init {
-            person.accept(this)
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.START
-            vedtaksperiodeIder.add(id)
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks] = tilstand.type
-        }
-
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
-        }
-
-        internal val vedtaksperiodeteller get() = vedtaksperiodeindeks + 1
-
-        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks]
-    }
 }

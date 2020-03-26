@@ -553,8 +553,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(3.januar, it.førsteFraværsdager[0])
-            assertEquals(3.januar, it.førsteFraværsdager[1])
+            assertEquals(3.januar, it.førsteFraværsdag(0))
+            assertEquals(3.januar, it.førsteFraværsdag(1))
         }
         assertTilstander(
             0,

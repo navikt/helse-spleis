@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +32,6 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = tolvMånederMedInntekt(1000.0), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -41,7 +40,6 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -50,7 +48,6 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = tolvMånederMedInntekt(1.0), arbeidsforhold = ansattSidenStart2017())
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -65,7 +62,6 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
         val historikkFom = inspektør.sykdomstidslinje(0).førsteDag().minusYears(4)
         val historikkTom = inspektør.sykdomstidslinje(0).sisteDag()
@@ -86,7 +82,6 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -102,7 +97,6 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.vedtaksperiodeIder.size)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -121,7 +115,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun assertTilstand(expectedTilstand: TilstandType) {
         assertEquals(
             expectedTilstand,
-            inspektør.tilstand(0)
+            inspektør.sisteTilstand(0)
         )
     }
 
@@ -192,39 +186,4 @@ internal class VilkårsgrunnlagHendelseTest {
         ).apply {
             hendelse = this
         }
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, TilstandType>()
-        internal val vedtaksperiodeIder = mutableSetOf<UUID>()
-        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
-
-        init {
-            person.accept(this)
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.START
-            vedtaksperiodeIder.add(id)
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks] = tilstand.type
-        }
-
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
-        }
-
-        internal val vedtaksperiodeTeller get() = tilstander.size
-
-        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks]
-
-        internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?: throw IllegalAccessException()
-
-    }
 }

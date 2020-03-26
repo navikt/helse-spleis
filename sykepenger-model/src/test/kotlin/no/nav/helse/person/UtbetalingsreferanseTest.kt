@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -188,27 +189,4 @@ internal class UtbetalingsreferanseTest {
             status = status,
             melding = "hei"
         )
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-
-        private var vedtaksperiodeindeks: Int = -1
-        private val vedtaksperiodeIder = mutableSetOf<UUID>()
-        internal val utbetalingsreferanser = mutableMapOf<Int, String>()
-
-        init {
-            person.accept(this)
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            vedtaksperiodeIder.add(id)
-        }
-
-        override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
-            this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
-        }
-
-        internal fun vedtaksperiodeId(vedtaksperiodeindeks: Int) = vedtaksperiodeIder.elementAt(vedtaksperiodeindeks)
-
-    }
 }

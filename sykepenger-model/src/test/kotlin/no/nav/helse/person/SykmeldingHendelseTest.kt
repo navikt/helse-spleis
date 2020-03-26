@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class SykmeldingTest {
+internal class SykmeldingHendelseTest {
 
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -30,7 +30,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -40,7 +40,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -50,7 +50,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -61,8 +61,8 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.tilstand(1))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class SykmeldingTest {
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
@@ -83,36 +83,4 @@ internal class SykmeldingTest {
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder)
         )
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
-        internal lateinit var personLogg: Aktivitetslogg
-
-        init {
-            person.accept(this)
-        }
-
-        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personLogg = aktivitetslogg
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.START
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks] = tilstand.type
-        }
-
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
-        }
-
-        internal val vedtaksperiodeTeller get() = tilstander.size
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks]
-    }
 }

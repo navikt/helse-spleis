@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
@@ -121,7 +122,7 @@ internal class PersonTest {
     internal fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
         søknad(
@@ -138,7 +139,7 @@ internal class PersonTest {
             assertTrue(it.hasErrors())
         }
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
 
         assertPersonEndret()
@@ -330,32 +331,5 @@ internal class PersonTest {
 
             tilstandsendringer[event.id] = event
         }
-    }
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, TilstandType>()
-        internal lateinit var personLogg: Aktivitetslogg
-
-        init {
-            person.accept(this)
-        }
-
-        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personLogg = aktivitetslogg
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = START
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks] = tilstand.type
-        }
-
-        internal val vedtaksperiodeTeller get() = tilstander.size
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks]
     }
 }

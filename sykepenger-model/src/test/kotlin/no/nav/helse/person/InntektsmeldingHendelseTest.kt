@@ -1,17 +1,16 @@
 package no.nav.helse.person
 
+import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import kotlin.collections.set
 
 internal class InntektsmeldingHendelseTest {
 
@@ -52,7 +51,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -60,9 +59,9 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        assertFalse(inspektør.personlogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -70,9 +69,9 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
-        assertFalse(inspektør.personlogg.hasErrors(), inspektør.personlogg.toString())
+        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -80,16 +79,16 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(sykmelding(Triple(19.januar, 30.januar, 100)))
-        assertTrue(inspektør.personlogg.hasWarnings())
-        assertFalse(inspektør.personlogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
     internal fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personlogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -98,19 +97,19 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personlogg.hasWarnings())
-        assertFalse(inspektør.personlogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.tilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
     internal fun `annen arbeidsgiver`() {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100), orgnr = "123"))
         person.håndter(inntektsmelding(virksomhetsnummer = "456"))
-        assertTrue(inspektør.personlogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -129,7 +128,7 @@ internal class InntektsmeldingHendelseTest {
         assertTrue(inntektsmelding.valider().hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.tilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
     }
 
     private fun inntektsmelding(
@@ -170,43 +169,4 @@ internal class InntektsmeldingHendelseTest {
             harAndreInntektskilder = false,
             sendtTilNAV = perioder.last().tom.atStartOfDay()
         )
-
-    private inner class TestPersonInspektør(person: Person) : PersonVisitor {
-        private var vedtaksperiodeindeks: Int = -1
-        private val tilstander = mutableMapOf<Int, TilstandType>()
-        private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
-        private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
-        internal lateinit var personlogg: Aktivitetslogg
-
-        init {
-            person.accept(this)
-        }
-
-        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            personlogg = aktivitetslogg
-        }
-
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-            vedtaksperiodeindeks += 1
-            tilstander[vedtaksperiodeindeks] = TilstandType.START
-        }
-
-        override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-            førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
-        }
-
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            tilstander[vedtaksperiodeindeks] = tilstand.type
-        }
-
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            sykdomstidslinjer[vedtaksperiodeindeks] = tidslinje
-        }
-
-        internal val vedtaksperiodeTeller get() = tilstander.size
-
-        internal fun tilstand(indeks: Int) = tilstander[indeks]
-        internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks]
-    }
-
 }

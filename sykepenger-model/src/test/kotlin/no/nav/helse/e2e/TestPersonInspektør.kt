@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -17,16 +18,18 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
+    private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
+    private val førsteFraværsdager = mutableMapOf<Int, LocalDate?>()
     private val sykdomshistorier = mutableMapOf<Int, Sykdomshistorikk>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
-    internal val førsteFraværsdager: MutableList<LocalDate> = mutableListOf()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
+    internal val utbetalingsreferanser = mutableMapOf<Int, String>()
 
     init {
         person.accept(this)
@@ -62,7 +65,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
         if (førsteFraværsdag != null) {
-            førsteFraværsdager.add(førsteFraværsdag)
+            førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
         }
     }
 
@@ -76,6 +79,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
         sykdomshistorier[vedtaksperiodeindeks] = sykdomshistorikk
+        sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty())
             this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
@@ -105,12 +109,29 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         )
     }
 
+    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
+        this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
+    }
+
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
     internal fun sykdomshistorikk(indeks: Int) = sykdomshistorier[indeks] ?: Assertions.fail(
         "Missing collection initialization"
     )
+
     internal fun tilstand(indeks: Int) = tilstander[indeks] ?: Assertions.fail(
+        "Missing collection initialization"
+    )
+
+    internal fun sisteTilstand(indeks: Int) = tilstander[indeks]?.last() ?: Assertions.fail(
+        "Missing collection initialization"
+    )
+
+    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?:Assertions.fail(
+        "Missing collection initialization"
+    )
+
+    internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:Assertions.fail(
         "Missing collection initialization"
     )
 
