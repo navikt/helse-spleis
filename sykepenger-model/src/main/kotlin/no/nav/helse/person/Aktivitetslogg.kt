@@ -198,7 +198,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                             mapOf(
                                 "fom" to it.fom.toString(),
                                 "tom" to it.tom.toString(),
-                                "dagsats" to it.dagsats
+                                "dagsats" to it.dagsats,
+                                "grad" to it.grad
                             )
                         },
                         "maksdato" to maksdato.toString(),
@@ -217,7 +218,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                             mapOf(
                                 "fom" to it.fom.toString(),
                                 "tom" to it.tom.toString(),
-                                "dagsats" to it.dagsats
+                                "dagsats" to it.dagsats,
+                                "grad" to it.grad
                             )
                         },
                         "maksdato" to maksdato.toString(),
