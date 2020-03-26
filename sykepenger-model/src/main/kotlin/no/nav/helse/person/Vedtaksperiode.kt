@@ -755,12 +755,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
 
-        private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) = simulering(
-            hendelse, vedtaksperiode.utbetalingsreferanse,
-            vedtaksperiode.utbetalingslinjer,
-            requireNotNull(vedtaksperiode.maksdato),
-            "Spleis"
-        )
+        private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse){
+            simulering(
+                aktivitetslogg = hendelse,
+                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
+                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
+            )
+        }
     }
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {

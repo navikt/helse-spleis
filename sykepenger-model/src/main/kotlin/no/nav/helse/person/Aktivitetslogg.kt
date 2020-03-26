@@ -191,7 +191,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
 
-                internal fun simulering(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, saksbehandler: String) {
+                internal fun simulering(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, forlengelse: Boolean) {
                     aktivitetslogg.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", mapOf(
                         "utbetalingsreferanse" to utbetalingsreferanse,
                         "utbetalingslinjer" to utbetalingslinjer.map {
@@ -203,7 +203,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                             )
                         },
                         "maksdato" to maksdato.toString(),
-                        "saksbehandler" to saksbehandler
+                        "forlengelse" to forlengelse
                     ))
                 }
 
