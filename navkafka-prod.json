@@ -162,6 +162,10 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvsprearbeidsgiver",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
