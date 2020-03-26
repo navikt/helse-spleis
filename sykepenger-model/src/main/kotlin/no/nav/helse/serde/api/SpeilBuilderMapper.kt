@@ -2,7 +2,6 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.api.SpeilBuilder.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,6 +24,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
     TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
     TilstandType.AVVENTER_HISTORIKK,
+    TilstandType.AVVENTER_SIMULERING,
     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.Venter
     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
     TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling

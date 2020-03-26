@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -45,6 +46,7 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
+    fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}

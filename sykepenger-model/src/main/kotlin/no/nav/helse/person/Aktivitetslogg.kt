@@ -191,6 +191,21 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
 
+                internal fun simulering(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, saksbehandler: String) {
+                    aktivitetslogg.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", mapOf(
+                        "utbetalingsreferanse" to utbetalingsreferanse,
+                        "utbetalingslinjer" to utbetalingslinjer.map {
+                            mapOf(
+                                "fom" to it.fom.toString(),
+                                "tom" to it.tom.toString(),
+                                "dagsats" to it.dagsats
+                            )
+                        },
+                        "maksdato" to maksdato.toString(),
+                        "saksbehandler" to saksbehandler
+                    ))
+                }
+
                 internal fun godkjenning(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler")
                 }
@@ -222,6 +237,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Foreldrepenger,
                 EgenAnsatt,
                 Godkjenning,
+                Simulering,
                 Utbetaling,
                 Inntektsberegning,
                 Opptjening

@@ -1,5 +1,6 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -48,13 +49,14 @@ internal fun createVedtaksperiode(
     utbetalingsreferanse: String?,
     førsteFraværsdag: LocalDate?,
     dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
+    dataForSimulering: Simulering.SimuleringResultat?,
     sykdomshistorikk: Sykdomshistorikk,
     utbetalingstidslinje: Utbetalingstidslinje?
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         person, arbeidsgiver, id, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, forbrukteSykedager, utbetalingslinjer, godkjentAv,
-        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, sykdomshistorikk, utbetalingstidslinje
+        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, dataForSimulering, sykdomshistorikk, utbetalingstidslinje
     )
 
 

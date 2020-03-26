@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.*
@@ -176,6 +177,7 @@ class SerialisertPerson(val json: String) {
             godkjenttidspunkt = data.godkjenttidspunkt,
             utbetalingsreferanse = data.utbetalingsreferanse,
             førsteFraværsdag = data.førsteFraværsdag,
+            dataForSimulering = data.dataForSimulering?.let(::parseDataForSimulering),
             dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
             sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
             utbetalingstidslinje = data.utbetalingstidslinje.let { if (it.dager.isNotEmpty()) konverterTilUtbetalingstidslinje(it) else null }
@@ -213,6 +215,7 @@ class SerialisertPerson(val json: String) {
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
         TilstandType.AVVENTER_HISTORIKK -> AvventerHistorikk
         TilstandType.AVVENTER_GODKJENNING -> AvventerGodkjenning
+        TilstandType.AVVENTER_SIMULERING -> AvventerSimulering
         TilstandType.TIL_UTBETALING -> TilUtbetaling
         TilstandType.AVSLUTTET -> Avsluttet
         TilstandType.UTBETALING_FEILET -> UtbetalingFeilet
@@ -248,6 +251,49 @@ class SerialisertPerson(val json: String) {
             harOpptjening = data.harOpptjening,
             antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst
         )
+
+    private fun parseDataForSimulering(
+        data: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData
+    ) = Simulering.SimuleringResultat(
+        totalbeløp = data.totalbeløp,
+        perioder = data.perioder.map { periode ->
+            Simulering.SimulertPeriode(
+                fom = periode.fom,
+                tom = periode.tom,
+                utbetalinger = periode.utbetalinger.map { utbetaling ->
+                    Simulering.SimulertUtbetaling(
+                        forfallsdato = utbetaling.forfallsdato,
+                        utbetalesTil = Simulering.Mottaker(
+                            id = utbetaling.utbetalesTil.id,
+                            navn = utbetaling.utbetalesTil.navn
+                        ),
+                        feilkonto = utbetaling.feilkonto,
+                        detaljer = utbetaling.detaljer.map { detalj ->
+                            Simulering.Detaljer(
+                                fom = detalj.fom,
+                                tom = detalj.tom,
+                                konto = detalj.konto,
+                                beløp = detalj.beløp,
+                                klassekode = Simulering.Klassekode(
+                                    kode = detalj.klassekode.kode,
+                                    beskrivelse = detalj.klassekode.beskrivelse
+                                ),
+                                uføregrad = detalj.uføregrad,
+                                utbetalingstype = detalj.utbetalingstype,
+                                tilbakeføring = detalj.tilbakeføring,
+                                sats = Simulering.Sats(
+                                    sats = detalj.sats.sats,
+                                    antall = detalj.sats.antall,
+                                    type = detalj.sats.type
+                                ),
+                                refunderesOrgnummer = detalj.refunderesOrgnummer
+                            )
+                        }
+                    )
+                }
+            )
+        }
+    )
 
     private fun parseSykdomshistorikk(
         data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>
@@ -321,6 +367,7 @@ internal data class PersonData(
             val utbetalingsreferanse: String,
             val førsteFraværsdag: LocalDate?,
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
+            val dataForSimulering: DataForSimuleringData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
             val utbetalingslinjer: List<UtbetalingslinjeData>,
@@ -346,6 +393,53 @@ internal data class PersonData(
                 val harOpptjening: Boolean,
                 val antallOpptjeningsdagerErMinst: Int
             )
+
+            data class DataForSimuleringData(
+                val totalbeløp: BigDecimal,
+                val perioder: List<SimulertPeriode>
+            ) {
+                data class SimulertPeriode(
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val utbetalinger: List<SimulertUtbetaling>
+                )
+
+                data class SimulertUtbetaling(
+                    val forfallsdato: LocalDate,
+                    val utbetalesTil: Mottaker,
+                    val feilkonto: Boolean,
+                    val detaljer: List<Detaljer>
+                )
+
+                data class Detaljer(
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val konto: String,
+                    val beløp: BigDecimal,
+                    val klassekode: Klassekode,
+                    val uføregrad: Int,
+                    val utbetalingstype: String,
+                    val tilbakeføring: Boolean,
+                    val sats: Sats,
+                    val refunderesOrgnummer: String
+                )
+
+                data class Sats(
+                    val sats: BigDecimal,
+                    val antall: Int,
+                    val type: String
+                )
+
+                data class Klassekode(
+                    val kode: String,
+                    val beskrivelse: String
+                )
+
+                data class Mottaker(
+                    val id: String,
+                    val navn: String
+                )
+            }
 
             data class UtbetalingslinjeData(
                 val fom: LocalDate,

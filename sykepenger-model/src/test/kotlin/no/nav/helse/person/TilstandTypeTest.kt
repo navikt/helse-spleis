@@ -14,6 +14,7 @@ internal class TilstandTypeTest {
         val tilstandstypeneSomSpeilForventer = listOf(
             "AVVENTER_HISTORIKK",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_SIMULERING",
             "TIL_UTBETALING",
             "TIL_INFOTRYGD",
             "AVSLUTTET",

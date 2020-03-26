@@ -7,6 +7,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepeng
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehistorikk
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
@@ -38,6 +39,7 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingsreferanse: String,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
+    private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
     private var utbetalingstidslinje: Utbetalingstidslinje?
 ) : Aktivitetskontekst {
@@ -67,6 +69,7 @@ internal class Vedtaksperiode private constructor(
         godkjenttidspunkt = null,
         utbetalingsreferanse = genererUtbetalingsreferanse(id),
         førsteFraværsdag = null,
+        dataForSimulering = null,
         dataForVilkårsvurdering = null,
         sykdomshistorikk = Sykdomshistorikk(),
         utbetalingstidslinje = null
@@ -80,6 +83,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
+        visitor.visitDataForSimulering(dataForSimulering)
         sykdomshistorikk.accept(visitor)
         visitor.preVisitUtbetalingstidslinje()
         utbetalingstidslinje?.accept(visitor)
@@ -297,15 +301,17 @@ internal class Vedtaksperiode private constructor(
     }
 
     // Gang of four State pattern
-    internal interface Vedtaksperiodetilstand: Aktivitetskontekst {
+    internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
 
         val timeout: Duration
 
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
-            return SpesifikkKontekst("Tilstand", mapOf(
-                "tilstand" to type.name
-            ))
+            return SpesifikkKontekst(
+                "Tilstand", mapOf(
+                    "tilstand" to type.name
+                )
+            )
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
@@ -341,6 +347,10 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
+            simulering.error("Forventet ikke simulering i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
@@ -498,8 +508,9 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser
         ) {
             Validation(ytelser).also {
-                it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd)
-                    .also { vedtaksperiode.trengerInntektsmelding() }
+                it.onError {
+                    vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+                        .also { vedtaksperiode.trengerInntektsmelding() }
                 }
                 it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.periode().start) }
                 it.onSuccess {
@@ -723,6 +734,35 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result()
         }
+    }
+
+    internal object AvventerSimulering : Vedtaksperiodetilstand {
+
+        override val type: TilstandType = AVVENTER_SIMULERING
+        override val timeout: Duration = Duration.ofHours(1)
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            trengerSimulering(vedtaksperiode, påminnelse)
+        }
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            trengerSimulering(vedtaksperiode, hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
+            simulering.valider()
+            if (simulering.hasErrors()) return simulering.warn("Simulering har feil, ignorerer resultatet.")
+
+            vedtaksperiode.dataForSimulering = simulering.simuleringResultat
+            vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
+        }
+
+        private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) = simulering(
+            hendelse, vedtaksperiode.utbetalingsreferanse,
+            vedtaksperiode.utbetalingslinjer,
+            requireNotNull(vedtaksperiode.maksdato),
+            "Spleis"
+        )
     }
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
