@@ -22,6 +22,8 @@ class Person private constructor(
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
 
+    fun håndter(søknad: AvsluttetSøknad) = håndter(søknad, "avsluttet søknad")
+
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, hendelsesmelding: String) {

@@ -48,6 +48,10 @@ object HendelseProbe {
         tell("Søknad")
     }
 
+    fun onAvsluttetSøknad() {
+        tell("AvsluttetSøknad")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

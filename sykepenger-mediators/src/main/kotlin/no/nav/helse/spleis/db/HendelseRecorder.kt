@@ -14,6 +14,10 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         lagreMelding(Meldingstype.NY_SØKNAD, message)
     }
 
+    override fun process(message: AvsluttetSøknadMessage) {
+        lagreMelding(Meldingstype.AVSLUTTET_SØKNAD, message)
+    }
+
     override fun process(message: SendtSøknadMessage) {
         lagreMelding(Meldingstype.SENDT_SØKNAD, message)
     }
@@ -60,6 +64,7 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
 
     private enum class Meldingstype {
         NY_SØKNAD,
+        AVSLUTTET_SØKNAD,
         SENDT_SØKNAD,
         INNTEKTSMELDING,
         PÅMINNELSE,

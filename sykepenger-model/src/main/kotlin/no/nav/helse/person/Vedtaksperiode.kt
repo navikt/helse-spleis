@@ -117,6 +117,12 @@ internal class Vedtaksperiode private constructor(
         valider(sykmelding) { tilstand.håndter(this, sykmelding) }
     }
 
+    internal fun håndter(søknad: AvsluttetSøknad) = overlapperMed(søknad).also {
+        if (!it) return it
+        kontekst(søknad)
+        valider(søknad) { tilstand.håndter(this, søknad) }
+    }
+
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
@@ -317,12 +323,17 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            søknad.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
+            søknad.trimLeft(vedtaksperiode.periode().endInclusive)
             søknad.warn("Forventet ikke søknad i %s", type.name)
         }
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            søknad.trimLeft(vedtaksperiode.periode().endInclusive)
+            søknad.warn("Forventet ikke avsluttet søknad i %s", type.name)
+        }
+
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive) // Kill any overlap with this periode
+            inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
             inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
         }
 

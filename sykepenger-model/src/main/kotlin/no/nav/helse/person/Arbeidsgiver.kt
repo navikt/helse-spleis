@@ -60,6 +60,13 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun håndter(søknad: AvsluttetSøknad) {
+        søknad.kontekst(this)
+        if(perioder.map { it.håndter(søknad)}.none { it } ) {
+            søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
+        }
+    }
+
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
         if(perioder.map { it.håndter(inntektsmelding)}.none { it } ) {

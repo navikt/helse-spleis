@@ -39,6 +39,7 @@ internal class HendelseMediator(
 
     init {
         parser.register(NySøknadMessage.Factory)
+        parser.register(AvsluttetSøknadMessage.Factory)
         parser.register(SendtSøknadMessage.Factory)
         parser.register(InntektsmeldingMessage.Factory)
         parser.register(YtelserMessage.Factory)
