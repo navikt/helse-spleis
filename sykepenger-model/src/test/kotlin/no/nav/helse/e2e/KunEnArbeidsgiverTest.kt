@@ -702,6 +702,40 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
+        håndterManuellSaksbehandling(0, false)
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `kan ikke forlenge en periode som er gått TilInfotrygd`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterManuellSaksbehandling(0, false) // går til TilInfotrygd
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `ignorer inntektsmeldinger på påfølgende perioder`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100, null))
@@ -738,7 +772,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kiler bare 2nd og ikke 3nd periode i en rekke`() {
+    fun `kiler bare andre periode og ikke tredje periode i en rekke`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSykmelding(Triple(1.mars, 28.mars, 100))

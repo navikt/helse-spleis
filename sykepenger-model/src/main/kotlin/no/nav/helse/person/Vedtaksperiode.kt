@@ -182,8 +182,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
-        val forlengelse = arbeidsgiver.tilstøtende(this) != null
-        val ferdig = arbeidsgiver.tidligerePerioderFerdigBehandlet(this, forlengelse)
+        val ferdig = arbeidsgiver.tidligerePerioderFerdigBehandlet(this)
         if (this.periode().start > other.periode().start && ferdig) {
             kontekst(hendelse.hendelse)
             tilstand.håndter(this, hendelse)
@@ -217,12 +216,9 @@ internal class Vedtaksperiode private constructor(
         tilstand = nyTilstand
         block()
 
-        try {
-            event.kontekst(tilstand)
-            tilstand.entering(this, event)
-        } finally {
-            emitVedtaksperiodeEndret(tilstand.type, event, previousState.type, tilstand.timeout)
-        }
+        event.kontekst(tilstand)
+        emitVedtaksperiodeEndret(tilstand.type, event, previousState.type, tilstand.timeout)
+        tilstand.entering(this, event)
     }
 
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
@@ -307,13 +303,9 @@ internal class Vedtaksperiode private constructor(
     internal fun harTilstøtende(other: Vedtaksperiode) =
         this.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje())
 
-    internal fun erFerdigBehandlet(other: Vedtaksperiode, forlengelse: Boolean): Boolean {
+    internal fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
         if (this.periode().start >= other.periode().start) return true
-        if (this.tilstand.type == TIL_INFOTRYGD && forlengelse) return false
-        return this.tilstand.type in listOf(
-            TIL_INFOTRYGD,
-            AVSLUTTET
-        )
+        return this.tilstand.type in listOf(TIL_INFOTRYGD, AVSLUTTET)
     }
 
     // Gang of four State pattern
@@ -403,7 +395,7 @@ internal class Vedtaksperiode private constructor(
         private fun nesteTilstand(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Vedtaksperiodetilstand {
             val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
             val forlengelse = tilstøtende != null
-            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode, forlengelse)
+            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
             return when {
                 forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {
@@ -899,6 +891,7 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
