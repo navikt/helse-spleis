@@ -77,7 +77,7 @@ internal class UtbetalingsreferanseTest {
     }
 
     @Test
-    fun `ikke-tilstøtende perioder får samme utbetalingsreferanse`() {
+    fun `ikke-tilstøtende perioder får ulik utbetalingsreferanse`() {
         person.håndter(sykmelding(1.januar, 19.januar))
         person.håndter(sykmelding(23.januar, 31.januar))
         assertNotEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
