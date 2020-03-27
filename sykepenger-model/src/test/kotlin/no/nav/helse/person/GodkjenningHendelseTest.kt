@@ -111,6 +111,7 @@ internal class GodkjenningHendelseTest {
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),
+                maksDato = null,
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(

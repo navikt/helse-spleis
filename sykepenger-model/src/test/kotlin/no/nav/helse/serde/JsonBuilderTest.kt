@@ -203,6 +203,7 @@ internal class JsonBuilderTest {
                     ),
                     inntektshistorikk = emptyList(),
                     graderingsliste = emptyList(),
+                    maksDato = null,
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(

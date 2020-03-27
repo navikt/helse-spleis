@@ -297,6 +297,7 @@ internal class YtelserTest {
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),
+                maksDato = null,
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(foreldrepenger, svangerskapspenger, it),
@@ -307,7 +308,7 @@ internal class YtelserTest {
     private companion object {
         private val organisasjonsnummer = "123456789"
         private val aktørId = "987654321"
-        private val fødselsnummer = "98765432111"
+        private val fødselsnummer = "01010112345"
         private val vedtaksperiodeId = UUID.randomUUID()
     }
 }

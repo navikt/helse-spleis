@@ -166,6 +166,7 @@ internal class YtelserHendelseTest {
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),
+                maksDato = null,
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(

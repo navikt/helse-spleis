@@ -280,6 +280,7 @@ internal abstract class AbstractEndToEndTest {
                 },
                 inntektshistorikk = inntektshistorikk,
                 graderingsliste = emptyList(),
+                maksDato = null,
                 aktivitetslogg = aktivitetslogg
             ),
             foreldrepermisjon = Foreldrepermisjon(

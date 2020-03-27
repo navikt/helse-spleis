@@ -3,6 +3,9 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -12,6 +15,7 @@ class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val graderingsliste: List<Graderingsperiode>,
+    private val maksDato: LocalDate?,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
@@ -33,10 +37,30 @@ class Utbetalingshistorikk(
     internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) =
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
 
-    internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
+    internal fun valider(
+        førsteFraværsdag: LocalDate?,
+        alder: Alder,
+        arbeidsgiverRegler: ArbeidsgiverRegler
+    ): Aktivitetslogg {
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
+        if (!aktivitetslogg.hasErrors()) {
+            utbetalingstidslinje(førsteFraværsdag).valider(alder, arbeidsgiverRegler)
+        }
         return aktivitetslogg
+    }
+
+    private fun Utbetalingstidslinje.valider(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) {
+        if (isEmpty() || maksDato == null) return
+        val beregnetMaksDato = MaksimumSykepengedagerfilter(
+            alder = alder,
+            arbeidsgiverRegler = arbeidsgiverRegler,
+            periode = Periode(førsteDato(), sisteDato()),
+            aktivitetslogg = aktivitetslogg
+        ).also { accept(it) }.maksdato()
+        if (beregnetMaksDato != maksDato) {
+            aktivitetslogg.warn("Beregnet maksdato er ulik maksdato fra Infotrygd")
+        }
     }
 
     internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
@@ -154,6 +178,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.info(
@@ -162,6 +187,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.info(
@@ -170,6 +196,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.info(
@@ -178,6 +205,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.info(
@@ -186,6 +214,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 if (fom > tom) aktivitetslogg.info(
@@ -194,6 +223,7 @@ class Utbetalingshistorikk(
                 )
             }
         }
+
         class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun toTidslinje(
                 graderingsliste: List<Graderingsperiode>,

@@ -48,7 +48,7 @@ private val json = """
       "@opprettet": "2020-01-24T11:25:00",
       "hendelse": "Ytelser",
       "aktørId": "aktørId",
-      "fødselsnummer": "fnr",
+      "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
@@ -103,7 +103,7 @@ private val ukjentPeriode = """
       "@opprettet": "2020-01-24T11:25:00",
       "hendelse": "Ytelser",
       "aktørId": "aktørId",
-      "fødselsnummer": "fnr",
+      "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
@@ -170,7 +170,7 @@ private val ugyldigPeriode = """
       "@opprettet": "2020-01-24T11:25:00",
       "hendelse": "Ytelser",
       "aktørId": "aktørId",
-      "fødselsnummer": "fnr",
+      "fødselsnummer": "08127411111",
       "organisasjonsnummer": "orgnummer",
       "vedtaksperiodeId": "${UUID.randomUUID()}",
       "@løsning": {
