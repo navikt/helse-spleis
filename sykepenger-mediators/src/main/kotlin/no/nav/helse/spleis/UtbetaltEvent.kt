@@ -20,7 +20,8 @@ private fun List<Utbetalingslinje>.toJson(): List<Map<String, Any>> = this.map {
     mapOf(
         "dagsats" to it.dagsats,
         "fom" to it.fom,
-        "tom" to it.tom
+        "tom" to it.tom,
+        "grad" to it.grad
     )
 }
 
