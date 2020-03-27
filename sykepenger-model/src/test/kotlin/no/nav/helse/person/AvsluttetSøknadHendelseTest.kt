@@ -103,6 +103,47 @@ internal class AvsluttetSøknadHendelseTest {
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
     }
+    @Test
+    internal fun `To søknader med opphold`() {
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(15.januar, 19.januar, 100)))
+        person.håndter(avsluttetSøknad(Sykdom(15.januar, 19.januar, 100)))
+        person.håndter(avsluttetSøknad(Sykdom(1.januar, 5.januar, 100)))
+        assertFalse(inspektør.personLogg.hasErrors())
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
+        assertEquals(5, inspektør.sykdomstidslinje(1).length())
+    }
+
+    @Test
+    internal fun `forlengelse etter avsluttet periode`() {
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(avsluttetSøknad(Sykdom(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
+        person.håndter(avsluttetSøknad(Sykdom(6.januar, 10.januar, 100)))
+        assertFalse(inspektør.personLogg.hasErrors())
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
+        assertEquals(5, inspektør.sykdomstidslinje(1).length())
+    }
+
+    @Test
+    internal fun `gjenopptar første periode etter avslutting av avsluttet periode`() {
+        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
+        assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
+        person.håndter(avsluttetSøknad(Sykdom(1.januar, 5.januar, 100)))
+        assertFalse(inspektør.personLogg.hasErrors())
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
+        assertEquals(5, inspektør.sykdomstidslinje(1).length())
+    }
 
     @Test
     internal fun `avslutter andre periode før første periode behandles`() {

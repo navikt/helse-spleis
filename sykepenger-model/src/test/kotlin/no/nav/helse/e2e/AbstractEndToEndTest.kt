@@ -77,6 +77,10 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder, sendtTilNav = sendtTilNav))
     }
 
+    protected fun håndterAvsluttetSøknad(vararg perioder: AvsluttetSøknad.Periode) {
+        person.håndter(avsluttetSøknad(perioder = *perioder))
+    }
+
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeIndex: Int,
         arbeidsgiverperioder: List<Periode>,
@@ -161,6 +165,18 @@ internal abstract class AbstractEndToEndTest {
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
             sendtTilNAV = sendtTilNav.atStartOfDay()
+        ).apply {
+            hendelselogg = this
+        }
+    }
+
+    private fun avsluttetSøknad(vararg perioder: AvsluttetSøknad.Periode): AvsluttetSøknad {
+        return AvsluttetSøknad(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            orgnummer = ORGNUMMER,
+            perioder = listOf(*perioder)
         ).apply {
             hendelselogg = this
         }

@@ -1,5 +1,6 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.hendelser.AvsluttetSøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
@@ -521,6 +522,30 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `avsluttet søknad etter inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 7.januar, 100))
+        håndterSykmelding(Triple(8.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
+        håndterAvsluttetSøknad(AvsluttetSøknad.Periode.Sykdom(8.januar,  23.februar, 100))
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING
         )
     }
 

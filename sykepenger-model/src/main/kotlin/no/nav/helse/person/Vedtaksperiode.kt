@@ -305,7 +305,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
         if (this.periode().start >= other.periode().start) return true
-        return this.tilstand.type in listOf(TIL_INFOTRYGD, AVSLUTTET)
+        return this.tilstand.type in listOf(TIL_INFOTRYGD, AVSLUTTET, AVSLUTTET_UTEN_UTBETALING)
     }
 
     // Gang of four State pattern
@@ -419,6 +419,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
+            søknad.info("Fullført behandling av avsluttet søknad")
+        }
     }
 
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
@@ -439,7 +444,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av søknad")
+            søknad.info("Fullført behandling av avsluttet søknad")
         }
 
         override fun håndter(
@@ -468,7 +473,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av søknad")
+            søknad.info("Fullført behandling av avsluttet søknad")
         }
     }
 
@@ -486,6 +491,11 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigGap)
             søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
+            søknad.info("Fullført behandling av avsluttet søknad")
         }
 
         override fun håndter(
@@ -607,6 +617,11 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
+            søknad.info("Fullført behandling av avsluttet søknad")
         }
     }
 
