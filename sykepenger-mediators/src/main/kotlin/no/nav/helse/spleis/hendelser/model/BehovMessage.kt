@@ -11,6 +11,7 @@ internal abstract class BehovMessage(
 ) :
     HendelseMessage(originalMessage, problems) {
     init {
+        requireValue("@event_name", "behov")
         requireKey(
             "@behov", "@final", "@løsning",
             "aktørId", "fødselsnummer",
