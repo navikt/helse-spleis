@@ -153,6 +153,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, vilkårsgrunnlag)
     }
 
+    internal fun håndter(simulering: Simulering) {
+        if (id.toString() != simulering.vedtaksperiodeId) return
+        kontekst(simulering)
+        tilstand.håndter(this, simulering)
+    }
+
     internal fun håndter(utbetaling: Utbetaling) {
         if (id.toString() != utbetaling.vedtaksperiodeId) return
         kontekst(utbetaling)
@@ -786,15 +792,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
 
             godkjenning(hendelse)
-            // TODO: temporary until AvventerSimulering is wired in; just to have
-            // some needs on the rapid
-            simulering(
-                aktivitetslogg = hendelse,
-                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
-                utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
-                maksdato = requireNotNull(vedtaksperiode.maksdato),
-                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
-            )
         }
 
         override fun håndter(

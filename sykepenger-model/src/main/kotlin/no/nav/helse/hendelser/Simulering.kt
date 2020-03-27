@@ -11,7 +11,7 @@ class Simulering(
     private val orgnummer: String,
     private val simuleringOK: Boolean,
     private val melding: String,
-    internal val simuleringResultat: SimuleringResultat
+    internal val simuleringResultat: SimuleringResultat?
 ) : ArbeidstakerHendelse() {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

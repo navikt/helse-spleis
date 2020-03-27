@@ -36,6 +36,10 @@ object HendelseProbe {
         tell("Vilkårsgrunnlag")
     }
 
+    fun onSimulering() {
+        tell("Simulering")
+    }
+
     fun onInntektsmelding() {
         tell("Inntektsmelding")
     }

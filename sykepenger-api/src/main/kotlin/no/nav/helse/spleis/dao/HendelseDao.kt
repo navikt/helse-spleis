@@ -30,6 +30,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         YTELSER,
         VILKÅRSGRUNNLAG,
         MANUELL_SAKSBEHANDLING,
-        UTBETALING
+        UTBETALING,
+        SIMULERING
     }
 }

@@ -58,11 +58,7 @@ private fun håndterPerson(person: Person, hendelseDao: HendelseDao): ObjectNode
             NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(it.second))
             SENDT_SØKNAD -> SendtSøknadDTO(objectMapper.readTree(it.second))
             INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(it.second))
-            PÅMINNELSE -> null
-            YTELSER -> null
-            VILKÅRSGRUNNLAG -> null
-            MANUELL_SAKSBEHANDLING -> null
-            UTBETALING -> null
+            else -> null
         }
     }.map { objectMapper.valueToTree<JsonNode>(it) }
 

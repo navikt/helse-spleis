@@ -49,6 +49,11 @@ class Person private constructor(
         finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
     }
 
+    fun håndter(simulering: Simulering) {
+        registrer(simulering, "Behandler simulering")
+        finnArbeidsgiver(simulering).håndter(simulering)
+    }
+
     fun håndter(utbetaling: Utbetaling) {
         registrer(utbetaling, "Behandler utbetaling")
         finnArbeidsgiver(utbetaling).håndter(utbetaling)

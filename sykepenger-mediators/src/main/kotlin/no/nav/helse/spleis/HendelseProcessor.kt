@@ -48,6 +48,13 @@ internal class HendelseProcessor(private val hendelseMediator: HendelseMediator)
         }
     }
 
+    override fun process(message: SimuleringMessage) {
+        håndter(message.asSimulering()) { person, simulering ->
+            HendelseProbe.onSimulering()
+            person.håndter(simulering)
+        }
+    }
+
     override fun process(message: ManuellSaksbehandlingMessage) {
         håndter(message.asManuellSaksbehandling()) { person, manuellSaksbehandling ->
             HendelseProbe.onManuellSaksbehandling()

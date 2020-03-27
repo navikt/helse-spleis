@@ -38,6 +38,10 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         lagreMelding(Meldingstype.VILKÅRSGRUNNLAG, message)
     }
 
+    override fun process(message: SimuleringMessage) {
+        lagreMelding(Meldingstype.SIMULERING, message)
+    }
+
     override fun process(message: ManuellSaksbehandlingMessage) {
         lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message)
     }
@@ -71,6 +75,7 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         YTELSER,
         VILKÅRSGRUNNLAG,
         MANUELL_SAKSBEHANDLING,
-        UTBETALING
+        UTBETALING,
+        SIMULERING
     }
 }

@@ -54,6 +54,9 @@ internal class HendelseMediatorTest {
         sendVilkårsgrunnlag()
         assertTrue(lestVilkårsgrunnlag)
 
+        sendSimulering()
+        assertTrue(lestSimulering)
+
         sendYtelser()
         assertTrue(lestYtelser)
 
@@ -87,6 +90,7 @@ internal class HendelseMediatorTest {
         private var lestPåminnelse = false
         private var lestYtelser = false
         private var lestVilkårsgrunnlag = false
+        private var lestSimulering = false
         private var lestManuellSaksbehandling = false
         private var lestUtbetaling = false
 
@@ -157,6 +161,12 @@ internal class HendelseMediatorTest {
                     håndter(any<Vilkårsgrunnlag>())
                 } answers {
                     lestVilkårsgrunnlag = true
+                }
+
+                every {
+                    håndter(any<Simulering>())
+                } answers {
+                    lestSimulering = true
                 }
 
                 every {
@@ -300,6 +310,64 @@ internal class HendelseMediatorTest {
                         )
                     ),
                     "Opptjening" to emptyList<Any>()
+                )
+            )
+        }
+
+        private fun sendSimulering(
+            aktørId: String = defaultAktørId,
+            fødselsnummer: String = defaultFødselsnummer,
+            organisasjonsnummer: String = defaultOrganisasjonsnummer
+        ) {
+            sendGeneriskBehov(
+                behov = listOf("Simulering"),
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = UUID.randomUUID(),
+                løsninger = mapOf(
+                    "Simulering" to mapOf(
+                        "status" to "OK",
+                        "feilmelding" to "",
+                        "simulering" to mapOf(
+                            "gjelderId" to fødselsnummer,
+                            "gjelderNavn" to "Korona",
+                            "datoBeregnet" to "2020-01-01",
+                            "totalBelop" to 9999,
+                            "periodeList" to listOf(
+                                mapOf(
+                                    "fom" to "2020-01-01",
+                                    "tom" to "2020-01-02",
+                                    "utbetaling" to listOf(
+                                        mapOf(
+                                            "fagSystemId" to "1231203123123",
+                                            "utbetalesTilId" to organisasjonsnummer,
+                                            "utbetalesTilNavn" to "Koronavirus",
+                                            "forfall" to "2020-01-03",
+                                            "feilkonto" to true,
+                                            "detaljer" to listOf(
+                                                mapOf(
+                                                    "faktiskFom" to "2020-01-01",
+                                                    "faktiskTom" to "2020-01-02",
+                                                    "konto" to "12345678910og1112",
+                                                    "belop" to 9999,
+                                                    "tilbakeforing" to false,
+                                                    "sats" to 1111,
+                                                    "typeSats" to "DAGLIG",
+                                                    "antallSats" to 9,
+                                                    "uforegrad" to 100,
+                                                    "klassekode" to "SPREFAG-IOP",
+                                                    "klassekodeBeskrivelse" to "Sykepenger, Refusjon arbeidsgiver",
+                                                    "utbetalingsType" to "YTELSE",
+                                                    "refunderesOrgNr" to organisasjonsnummer
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
                 )
             )
         }

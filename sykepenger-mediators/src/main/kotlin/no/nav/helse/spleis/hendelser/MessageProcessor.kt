@@ -13,4 +13,5 @@ internal interface MessageProcessor {
     fun process(message: VilkårsgrunnlagMessage)
     fun process(message: ManuellSaksbehandlingMessage)
     fun process(message: UtbetalingMessage)
+    fun process(message: SimuleringMessage)
 }
