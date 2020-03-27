@@ -97,7 +97,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(
-            Søknad.Periode.Sykdom(1.januar,  2.januar, 100, null),
+            Søknad.Periode.Sykdom(1.januar,  2.januar, 100),
             Søknad.Periode.Egenmelding(2.januar, 2.januar),
             Søknad.Periode.Arbeid(3.januar, 3.januar),
             Søknad.Periode.Ferie(4.januar, 4.januar),

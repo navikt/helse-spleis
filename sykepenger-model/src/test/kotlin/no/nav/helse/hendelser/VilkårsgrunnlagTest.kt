@@ -220,7 +220,7 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        perioder = listOf(Søknad.Periode.Sykdom(16.januar,  30.januar, 100, null)),
+        perioder = listOf(Søknad.Periode.Sykdom(16.januar,  30.januar, 100)),
         harAndreInntektskilder = false,
         sendtTilNAV = 30.januar.atStartOfDay()
     )

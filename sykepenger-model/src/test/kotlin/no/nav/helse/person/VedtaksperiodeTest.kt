@@ -110,7 +110,7 @@ internal class VedtaksperiodeTest {
 
     private fun søknad(
         perioder: List<Søknad.Periode> = listOf(
-            Søknad.Periode.Sykdom(16.september, 5.oktober, 100, null)
+            Søknad.Periode.Sykdom(16.september, 5.oktober, 100)
         )
     ) =
         Søknad(

@@ -188,7 +188,7 @@ internal class YtelserHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100, null)),
+            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay()
         )

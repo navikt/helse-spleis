@@ -34,7 +34,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -44,7 +44,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 50, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 50)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -52,7 +52,7 @@ internal class SøknadHendelseTest {
 
     @Test
     internal fun `mangler Sykmelding`() {
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
@@ -60,7 +60,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `søknad kan ikke utvide sykdomstidslinje frem i tid`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null), Egenmelding(9.januar, 10.januar)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -70,7 +70,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `søknad kan utvide sykdomstidslinje tilbake i tid`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -80,7 +80,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null), Utdanning(4.januar, 5.januar)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(inspektør.personLogg.hasBehov())
         assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
@@ -89,9 +89,9 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -102,8 +102,8 @@ internal class SøknadHendelseTest {
     internal fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
-        person.håndter(søknad(Sykdom(6.januar,  10.januar, 100, null)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(6.januar,  10.januar, 100)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -115,7 +115,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100, null)))
+        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         person.håndter(sykmelding(Triple(4.januar, 10.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -127,7 +127,7 @@ internal class SøknadHendelseTest {
     internal fun `to forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         person.håndter(
-                søknad(Sykdom(1.januar,  5.januar, 100, null), orgnummer = "orgnummer2")
+                søknad(Sykdom(1.januar,  5.januar, 100), orgnummer = "orgnummer2")
             )
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)

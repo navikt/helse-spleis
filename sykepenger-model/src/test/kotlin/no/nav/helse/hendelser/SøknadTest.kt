@@ -28,28 +28,28 @@ internal class SøknadTest {
 
     @Test
     internal fun `søknad med bare sykdom`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null))
+        søknad(Sykdom(1.januar,  10.januar, 100))
         assertFalse(søknad.valider().hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med ferie`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Ferie(2.januar, 4.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider().hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `søknad med utdanning`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Utdanning(5.januar, 10.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(5.januar, 10.januar))
         assertTrue(søknad.valider().hasBehov())
         assertEquals(10, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `sykdomsgrad under 100 støttes`() {
-        søknad(Sykdom(1.januar,  10.januar, 50, null))
+        søknad(Sykdom(1.januar,  10.januar, 50))
         assertFalse(søknad.valider().hasErrors())
     }
 
@@ -61,38 +61,38 @@ internal class SøknadTest {
 
     @Test
     internal fun `ferie ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Ferie(2.januar, 16.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Ferie(2.januar, 16.januar))
         assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Utdanning(16.januar, 10.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(16.januar, 10.januar))
         assertTrue(søknad.valider().hasBehov())
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Permisjon(2.januar, 16.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Permisjon(2.januar, 16.januar))
         assertTrue(søknad.valider().hasBehov())
     }
 
     @Test
     internal fun `arbeidag ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(1.januar,  10.januar, 100, null), Arbeid(2.januar, 16.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Arbeid(2.januar, 16.januar))
         assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `egenmelding ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(5.januar,  12.januar, 100, null), Egenmelding(2.januar, 3.januar))
+        søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(2.januar, 3.januar))
         assertFalse(søknad.valider().hasErrors())
         assertEquals(11, søknad.sykdomstidslinje().length())
     }
 
     @Test
     internal fun `egenmelding ligger langt utenfor sykdomsvindu`() {
-        søknad(Sykdom(5.januar,  12.januar, 100, null), Egenmelding(19.desember(2017), 20.desember(2017)))
+        søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
         assertFalse(søknad.valider().hasErrors())
         assertTrue(søknad.valider().hasWarnings())
         assertEquals(8, søknad.sykdomstidslinje().length())
@@ -100,13 +100,13 @@ internal class SøknadTest {
 
     @Test
     internal fun `søknad med andre inntektskilder`() {
-        søknad(Sykdom(5.januar,  12.januar, 100, null), harAndreInntektskilder = true)
+        søknad(Sykdom(5.januar,  12.januar, 100), harAndreInntektskilder = true)
         assertTrue(søknad.valider().hasErrors())
     }
 
     @Test
     internal fun `søknad uten andre inntektskilder`() {
-        søknad(Sykdom(5.januar,  12.januar, 100, null), harAndreInntektskilder = false)
+        søknad(Sykdom(5.januar,  12.januar, 100), harAndreInntektskilder = false)
         assertFalse(søknad.valider().hasErrors())
     }
 
