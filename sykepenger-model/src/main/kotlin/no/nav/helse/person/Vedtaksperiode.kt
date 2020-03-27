@@ -252,7 +252,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
-        val beregningSlutt = YearMonth.from(førsteFraværsdag)
+        val beregningSlutt = YearMonth.from(førsteFraværsdag).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         egenAnsatt(hendelse)
         opptjening(hendelse)

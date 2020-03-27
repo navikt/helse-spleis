@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -29,7 +30,11 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `egen ansatt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = true, inntekter = tolvMånederMedInntekt(1000.0), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(
+            egenAnsatt = true,
+            inntekter = tolvMånederMedInntekt(1000.0),
+            arbeidsforhold = ansattSidenStart2017()
+        )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
@@ -45,7 +50,11 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `avvik i inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = tolvMånederMedInntekt(1.0), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(
+            egenAnsatt = false,
+            inntekter = tolvMånederMedInntekt(1.0),
+            arbeidsforhold = ansattSidenStart2017()
+        )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
@@ -66,8 +75,27 @@ internal class VilkårsgrunnlagHendelseTest {
         val historikkFom = inspektør.sykdomstidslinje(0).førsteDag().minusYears(4)
         val historikkTom = inspektør.sykdomstidslinje(0).sisteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
-        assertEquals(historikkFom.toString(), hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkFom"))
-        assertEquals(historikkTom.toString(), hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkTom"))
+        assertEquals(
+            historikkFom.toString(),
+            hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkFom")
+        )
+        assertEquals(
+            historikkTom.toString(),
+            hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkTom")
+        )
+    }
+
+    @Test
+    fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
+        person.håndter(sykmelding(perioder = listOf(Triple(8.januar, 31.januar, 100))))
+        person.håndter(søknad(perioder = listOf(Søknad.Periode.Sykdom(8.januar, 31.januar, 100))))
+        person.håndter(inntektsmelding(beregnetInntekt = 30000.0, arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))))
+        val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
+
+        val inntektsberegningStart = hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningStart")
+        val inntektsberegningSlutt = hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningSlutt")
+        assertEquals("2017-01", inntektsberegningStart)
+        assertEquals("2017-12", inntektsberegningSlutt)
     }
 
     @Test
@@ -131,31 +159,36 @@ internal class VilkårsgrunnlagHendelseTest {
         person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
-    private fun sykmelding() =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "aktørId",
-            orgnummer = ORGNR,
-            sykeperioder = listOf(Triple(1.januar, 31.januar, 100))
-        ).apply {
-            hendelse = this
-        }
+    private fun sykmelding(
+        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(1.januar, 31.januar, 100))
+    ) = Sykmelding(
+        meldingsreferanseId = UUID.randomUUID(),
+        fnr = UNG_PERSON_FNR_2018,
+        aktørId = "aktørId",
+        orgnummer = ORGNR,
+        sykeperioder = perioder
+    ).apply {
+        hendelse = this
+    }
 
-    private fun søknad() =
-        Søknad(
+    private fun søknad(
+        perioder: List<Søknad.Periode> = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100))
+    ) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            perioder = listOf(Søknad.Periode.Sykdom(1.januar, 31.januar, 100)),
+            perioder = perioder,
             harAndreInntektskilder = false,
             sendtTilNAV = 31.januar.atStartOfDay()
         ).apply {
             hendelse = this
         }
 
-    private fun inntektsmelding(beregnetInntekt: Double) =
+    private fun inntektsmelding(
+        beregnetInntekt: Double,
+        arbeidsgiverperioder: List<Periode> = listOf(Periode(1.januar, 16.januar))
+    ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
@@ -164,7 +197,7 @@ internal class VilkårsgrunnlagHendelseTest {
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
             beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList()
         ).apply {
             hendelse = this
