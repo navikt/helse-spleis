@@ -1,9 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.e2e.TestPersonInspektør
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,7 +21,6 @@ internal class UtbetalingsreferanseTest {
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
-    private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -31,119 +28,59 @@ internal class UtbetalingsreferanseTest {
     }
 
     @Test
-    fun `tilstøtende periode får samme utbetalingsreferanse`() {
-        håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
-        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
-        manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
-            .also {
-                person.håndter(it)
-            }
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(
-            inspektør.vedtaksperiodeId(0),
-            Behovtype.Utbetaling,
-            "utbetalingsreferanse"
-        )
-        assertEquals(utbetalingsreferanse1, inspektør.utbetalingsreferanser[0])
-
-        håndterYtelser(fom = 1.februar, tom = 28.februar, sendtInntektsmelding = false, vedtaksperiodeindeks = 1)
-        person.håndter(simulering(inspektør.vedtaksperiodeId(1)))
-        manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
-            .also {
-                person.håndter(it)
-            }
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(
-            inspektør.vedtaksperiodeId(1),
-            Behovtype.Utbetaling,
-            "utbetalingsreferanse"
-        )
-        assertEquals(utbetalingsreferanse2, inspektør.utbetalingsreferanser[1])
-
-        assertEquals(utbetalingsreferanse1, utbetalingsreferanse2)
+    fun `direkte tilstøtende perioder får samme utbetalingsreferanse`() {
+        person.håndter(sykmelding(1.januar, 18.januar))
+        person.håndter(sykmelding(19.januar, 31.januar))
+        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
     }
 
     @Test
-    fun `ikke-tilstøtende periode får unik utbetalingsreferanse`() {
-        håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
+    fun `tilstøtende perioder over helg får samme utbetalingsreferanse`() {
+        person.håndter(sykmelding(1.januar, 19.januar))
+        person.håndter(sykmelding(22.januar, 31.januar))
+        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
+    }
+
+    @Test
+    fun `perioder som blir tilstøtende får samme utbetalingsreferanse`() {
+        person.håndter(sykmelding(1.januar, 19.januar))
+        person.håndter(søknad(1.januar, 19.januar))
+        person.håndter(inntektsmelding(1.januar, 17.januar))
+        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(0)))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
+
+        person.håndter(sykmelding(1.februar, 14.februar))
+
+        person.håndter(sykmelding(22.januar, 31.januar))
+        person.håndter(søknad(22.januar, 31.januar))
+
+        person.håndter(søknad(1.februar, 14.februar))
+        person.håndter(inntektsmelding(1.februar, 14.februar))
+
+        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
+        assertNotEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(2))
+
         person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
-        manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
-            .also {
-                person.håndter(it)
-            }
+        person.håndter(godkjenning(inspektør.vedtaksperiodeId(0), true))
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(
-            inspektør.vedtaksperiodeId(0),
-            Behovtype.Utbetaling,
-            "utbetalingsreferanse"
-        )
 
-        håndterYtelser(fom = 2.februar, tom = 28.februar, sendtInntektsmelding = true, vedtaksperiodeindeks = 1)
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
         person.håndter(simulering(inspektør.vedtaksperiodeId(1)))
-        manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
-            .also {
-                person.håndter(it)
-            }
+        person.håndter(godkjenning(inspektør.vedtaksperiodeId(1), true))
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(
-            inspektør.vedtaksperiodeId(1),
-            Behovtype.Utbetaling,
-            "utbetalingsreferanse"
-        )
 
-        assertNotEquals(utbetalingsreferanse1, utbetalingsreferanse2)
+        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(2)))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(2)))
+
+        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
+        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(2))
     }
 
-    private fun håndterYtelser(
-        fom: LocalDate,
-        tom: LocalDate,
-        sendtInntektsmelding: Boolean,
-        vedtaksperiodeindeks: Int
-    ) {
-        person.håndter(sykmelding(fom, tom))
-        person.håndter(søknad(fom, tom))
-        if (sendtInntektsmelding) person.håndter(inntektsmelding(fom))
-        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(vedtaksperiodeindeks)))
-        person.håndter(ytelser(inspektør.vedtaksperiodeId(vedtaksperiodeindeks)))
-    }
-
-    private fun manuellSaksbehandling(godkjent: Boolean, vedtaksperiodeId: String) = ManuellSaksbehandling(
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent,
-        godkjenttidspunkt = LocalDateTime.now()
-    ).apply {
-        hendelse = this
-    }
-
-    private fun ytelser(
-        vedtaksperiodeId: UUID,
-        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
-        foreldrepengeYtelse: Periode? = null,
-        svangerskapYtelse: Periode? = null
-    ) = Aktivitetslogg().let {
-        Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
-            utbetalingshistorikk = Utbetalingshistorikk(
-                utbetalinger = utbetalinger,
-                inntektshistorikk = emptyList(),
-                graderingsliste = emptyList(),
-                aktivitetslogg = it
-            ),
-            foreldrepermisjon = Foreldrepermisjon(
-                foreldrepengeytelse = foreldrepengeYtelse,
-                svangerskapsytelse = svangerskapYtelse,
-                aktivitetslogg = it
-            ),
-            aktivitetslogg = it
-        )
+    @Test
+    fun `ikke-tilstøtende perioder får samme utbetalingsreferanse`() {
+        person.håndter(sykmelding(1.januar, 19.januar))
+        person.håndter(sykmelding(23.januar, 31.januar))
+        assertNotEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
     }
 
     private fun sykmelding(fom: LocalDate, tom: LocalDate) =
@@ -166,7 +103,7 @@ internal class UtbetalingsreferanseTest {
             sendtTilNAV = tom.atStartOfDay()
         )
 
-    private fun inntektsmelding(fom: LocalDate) =
+    private fun inntektsmelding(fom: LocalDate, tom: LocalDate) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
@@ -175,7 +112,7 @@ internal class UtbetalingsreferanseTest {
             aktørId = "aktørId",
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.0,
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(16))),
+            arbeidsgiverperioder = listOf(Periode(fom, tom)),
             ferieperioder = emptyList()
         )
 
@@ -199,6 +136,27 @@ internal class UtbetalingsreferanseTest {
             )
         )
 
+    private fun ytelser(vedtaksperiodeId: UUID) =
+        Ytelser(
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            meldingsreferanseId = UUID.randomUUID(),
+            utbetalingshistorikk = Utbetalingshistorikk(
+                utbetalinger = emptyList(),
+                inntektshistorikk = emptyList(),
+                graderingsliste = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
+            ),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = null,
+                svangerskapsytelse = null,
+                aktivitetslogg = Aktivitetslogg()
+            ),
+            aktivitetslogg = Aktivitetslogg()
+        )
+
     private fun simulering(vedtaksperiodeId: UUID) =
         Simulering(
             vedtaksperiodeId = vedtaksperiodeId.toString(),
@@ -208,6 +166,17 @@ internal class UtbetalingsreferanseTest {
             simuleringOK = true,
             melding = "",
             simuleringResultat = null
+        )
+
+    private fun godkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
+        ManuellSaksbehandling(
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            utbetalingGodkjent = godkjent,
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandler = ""
         )
 
     private fun utbetaling(vedtaksperiodeId: UUID, status: Utbetaling.Status) =
