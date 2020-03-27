@@ -41,7 +41,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
                                     "tom" to detalj.tom,
                                     "konto" to detalj.konto,
                                     "beløp" to detalj.beløp,
-                                    "klassekonto" to mapOf(
+                                    "klassekode" to mapOf(
                                         "kode" to detalj.klassekode.kode,
                                         "beskrivelse" to detalj.klassekode.beskrivelse
                                     ),

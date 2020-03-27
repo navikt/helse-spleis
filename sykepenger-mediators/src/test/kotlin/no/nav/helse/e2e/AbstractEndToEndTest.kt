@@ -297,6 +297,59 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
+    protected fun sendSimulering(vedtaksperiodeIndeks: Int, simuleringOK: Boolean = true) {
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering))
+        sendGeneriskBehov(
+            vedtaksperiodeIndeks = vedtaksperiodeIndeks,
+            behov = listOf("Simulering"),
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+            løsninger = mapOf(
+                "Simulering" to mapOf(
+                    "status" to if (simuleringOK) "OK" else "FEIL",
+                    "feilmelding" to if (simuleringOK) "" else "FEIL I SIMULERING",
+                    "simulering" to if (!simuleringOK) null else mapOf(
+                        "gjelderId" to UNG_PERSON_FNR_2018,
+                        "gjelderNavn" to "Korona",
+                        "datoBeregnet" to "2020-01-01",
+                        "totalBelop" to 9999,
+                        "periodeList" to listOf(
+                            mapOf(
+                                "fom" to "2020-01-01",
+                                "tom" to "2020-01-02",
+                                "utbetaling" to listOf(
+                                    mapOf(
+                                        "fagSystemId" to "1231203123123",
+                                        "utbetalesTilId" to ORGNUMMER,
+                                        "utbetalesTilNavn" to "Koronavirus",
+                                        "forfall" to "2020-01-03",
+                                        "feilkonto" to true,
+                                        "detaljer" to listOf(
+                                            mapOf(
+                                                "faktiskFom" to "2020-01-01",
+                                                "faktiskTom" to "2020-01-02",
+                                                "konto" to "12345678910og1112",
+                                                "belop" to 9999,
+                                                "tilbakeforing" to false,
+                                                "sats" to 1111,
+                                                "typeSats" to "DAGLIG",
+                                                "antallSats" to 9,
+                                                "uforegrad" to 100,
+                                                "klassekode" to "SPREFAG-IOP",
+                                                "klassekodeBeskrivelse" to "Sykepenger, Refusjon arbeidsgiver",
+                                                "utbetalingsType" to "YTELSE",
+                                                "refunderesOrgNr" to ORGNUMMER
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
     protected fun sendUtbetaling(vedtaksperiodeIndeks: Int, utbetalingOK: Boolean = true) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
         sendGeneriskBehov(

@@ -25,10 +25,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenHistorikk(0)
+        sendSimulering(0)
         sendManuellSaksbehandling(0)
         sendUtbetaling(0)
 
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
+        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
     }
 
     @Test
@@ -44,9 +45,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         sendVilkårsgrunnlag(0)
         sendYtelserUtenHistorikk(0)
+        sendSimulering(0)
 
         assertEquals(5, testRapid.inspektør.vedtaksperiodeteller)
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_GODKJENNING")
+        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
         assertTilstander(1, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE", "AVVENTER_UFERDIG_FORLENGELSE")
         assertTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE")
         assertTilstander(3, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE")

@@ -146,6 +146,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Triple(29.november(2017), 3.desember(2017), 100),
             Triple(13.november(2017), 28.november(2017), 100)
         )
+        håndterSimulering(0)
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
@@ -154,6 +155,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
         )
     }
@@ -170,11 +172,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  4.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
 
         håndterSøknadMedValidering(1, Sykdom(8.januar,  9.januar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
 
         inspektør.also {
@@ -190,6 +194,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVSLUTTET
         )
@@ -201,6 +206,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVSLUTTET
         )
@@ -299,11 +305,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
 
         assertNotNull(inspektør.maksdato(1))
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -391,10 +398,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0) // No history
+        håndterSimulering(0)
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
@@ -427,10 +435,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         // Sykedag beats IM Feriedag; 21 Desember to 5 Januar is another employer period!
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0) // No history
+        håndterSimulering(0)
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
     }
 
     @Test
@@ -482,12 +491,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -496,10 +507,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
 
         inspektør.also {
             assertEquals(1, it.utbetalingslinjer[0]?.size)
@@ -521,6 +532,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -530,7 +542,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK, TIL_INFOTRYGD)

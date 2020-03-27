@@ -20,6 +20,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         inspektør.also {
@@ -33,8 +34,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
     }
@@ -46,6 +54,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         inspektør.also {
@@ -59,8 +68,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
     }
@@ -72,6 +88,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
@@ -80,13 +97,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
-            assertDoesNotThrow {it.arbeidsgiver.peekTidslinje()}
+            assertDoesNotThrow { it.arbeidsgiver.peekTidslinje() }
         }
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVSLUTTET
         )
     }
 
@@ -98,6 +115,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         inspektør.also {
@@ -111,8 +129,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
     }
@@ -159,6 +185,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -167,6 +194,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -179,12 +207,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
-            START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -197,6 +234,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -205,6 +243,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -216,8 +255,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             1,
@@ -228,6 +274,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -244,12 +291,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -261,13 +310,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             1,
-            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVVENTER_UFERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -281,12 +345,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -299,12 +365,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
     }
 
@@ -317,6 +383,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -324,6 +391,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -335,13 +403,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             1,
-            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_SØKNAD_UFERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_SØKNAD_UFERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -356,6 +439,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)), 1.februar)
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
 
         assertNotNull(inspektør.maksdato(1))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
@@ -366,6 +450,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
         )
     }
@@ -382,7 +467,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato for påfølgende perioder`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(27.januar, 7.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar, listOf(Periode(27.januar, 27.januar)))
+        håndterInntektsmeldingMedValidering(
+            0,
+            listOf(Periode(3.januar, 18.januar)),
+            3.januar,
+            listOf(Periode(27.januar, 27.januar))
+        )
         inspektør.also { assertFalse(it.personLogg.hasWarnings()) }
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
@@ -420,12 +510,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
         inspektør.also {
@@ -437,12 +529,20 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
-            START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVVENTER_UFERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -455,10 +555,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -471,7 +573,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
@@ -479,6 +581,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -495,9 +598,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -510,7 +615,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
             1,
@@ -519,6 +624,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -557,10 +663,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
 
         håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -573,7 +681,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
             1,
@@ -582,6 +690,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -600,11 +709,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -619,12 +730,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
     }
 
@@ -635,12 +746,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -649,13 +762,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -671,9 +785,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -686,7 +802,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
             1,
@@ -695,6 +811,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
@@ -708,6 +825,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FEIL)
 
@@ -718,7 +836,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET
         )
         assertTilstander(
             1,
@@ -733,12 +851,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterManuellSaksbehandling(0, false)
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
@@ -751,11 +870,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, false) // går til TilInfotrygd
         håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
@@ -767,6 +887,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -774,6 +895,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
 
@@ -787,12 +909,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
     }
 
@@ -806,6 +928,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
 
@@ -816,8 +939,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             1,
@@ -837,6 +967,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
 
         inspektør.also {
@@ -847,7 +978,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING
+            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
     }
 
@@ -864,6 +995,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
@@ -880,8 +1012,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
     }
@@ -908,9 +1047,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertNoWarnings(it)
         }
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
+        håndterSimulering(0)
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
         håndterUtbetalt(0, Utbetaling.Status.FERDIG)
@@ -919,9 +1059,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1, listOf(Periode(16.januar, 16.februar))) // Touches prior periode
         assertNoErrors(inspektør)
 
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
+        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
         håndterUtbetalt(1, Utbetaling.Status.FERDIG)
         assertNoErrors(inspektør)
@@ -931,19 +1072,19 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
             1,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
     }
 
     @Test
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Triple(1.januar, 31.januar, 100))
-        håndterSøknad(Sykdom(1.januar,  31.januar, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
         håndterYtelser(0)
 
         assertNoErrors(inspektør)
@@ -955,7 +1096,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_GAP`() {
         håndterSykmelding(Triple(1.januar, 20.januar, 100))
         håndterSykmelding(Triple(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar,  28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
 
         assertNoErrors(inspektør)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -967,7 +1108,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
         håndterSykmelding(Triple(1.januar, 20.januar, 100))
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar,  28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
 
         assertNoErrors(inspektør)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -978,7 +1119,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar,  28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterYtelser(0, Triple(18.januar, 20.januar, 15000)) // -> TIL_INFOTRYGD
 
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)

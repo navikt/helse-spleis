@@ -111,12 +111,28 @@ class PåminnelserOgTimeoutTest {
     }
 
     @Test
+    fun `påminnelse i avventer simulering`() {
+        person.håndter(sykmelding())
+        person.håndter(søknad())
+        person.håndter(inntektsmelding())
+        person.håndter(vilkårsgrunnlag())
+        person.håndter(ytelser())
+        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        assertEquals(1, hendelse.behov().size)
+        assertTrue(hendelse.behov().any { it.type == Behovtype.Simulering })
+        person.håndter(påminnelse(TilstandType.AVVENTER_SIMULERING))
+        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        assertEquals(1, hendelse.behov().size)
+    }
+
+    @Test
     fun `påminnelse i til godkjenning`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
+        person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Godkjenning })
@@ -132,6 +148,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
+        person.håndter(simulering())
         person.håndter(manuellSaksbehandling())
         assertEquals(1, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
@@ -159,6 +176,10 @@ class PåminnelserOgTimeoutTest {
 
         person.håndter(ytelser())
         person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
+        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+
+        person.håndter(simulering())
+        person.håndter(påminnelse(TilstandType.AVVENTER_SIMULERING))
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
 
         person.håndter(manuellSaksbehandling())
@@ -221,6 +242,58 @@ class PåminnelserOgTimeoutTest {
             },
             erEgenAnsatt = false,
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
+        ).apply {
+            hendelse = this
+        }
+
+    private fun simulering() =
+        Simulering(
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = orgnummer,
+            simuleringOK = true,
+            melding = "",
+            simuleringResultat = Simulering.SimuleringResultat(
+                totalbeløp = 2000.toBigDecimal(),
+                perioder = listOf(
+                    Simulering.SimulertPeriode(
+                        fom = 17.januar,
+                        tom = 20.januar,
+                        utbetalinger = listOf(
+                            Simulering.SimulertUtbetaling(
+                                forfallsdato = 21.januar,
+                                utbetalesTil = Simulering.Mottaker(
+                                    id = orgnummer,
+                                    navn = "Org Orgesen AS"
+                                ),
+                                feilkonto = false,
+                                detaljer = listOf(
+                                    Simulering.Detaljer(
+                                        fom = 17.januar,
+                                        tom = 20.januar,
+                                        konto = "81549300",
+                                        beløp = 2000.toBigDecimal(),
+                                        klassekode = Simulering.Klassekode(
+                                            kode = "SPREFAG-IOP",
+                                            beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
+                                        ),
+                                        uføregrad = 100,
+                                        utbetalingstype = "YTELSE",
+                                        tilbakeføring = false,
+                                        sats = Simulering.Sats(
+                                            sats = 1000.toBigDecimal(),
+                                            antall = 2,
+                                            type = "DAGLIG"
+                                        ),
+                                        refunderesOrgnummer = orgnummer
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         ).apply {
             hendelse = this
         }

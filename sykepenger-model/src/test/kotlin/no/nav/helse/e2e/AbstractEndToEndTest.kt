@@ -1,13 +1,16 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.reflection.orgnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -110,6 +113,11 @@ internal abstract class AbstractEndToEndTest {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, inntekt))
+    }
+
+    protected fun håndterSimulering(vedtaksperiodeIndex: Int) {
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Simulering))
+        person.håndter(simulering(vedtaksperiodeIndex))
     }
 
     protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
@@ -284,6 +292,58 @@ internal abstract class AbstractEndToEndTest {
             hendelselogg = this
         }
     }
+
+    private fun simulering(vedtaksperiodeIndex: Int, simuleringOK: Boolean = true) =
+        no.nav.helse.hendelser.Simulering(
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = orgnummer,
+            simuleringOK = simuleringOK,
+            melding = "",
+            simuleringResultat = SimuleringResultat(
+                totalbeløp = 2000.toBigDecimal(),
+                perioder = listOf(
+                    SimulertPeriode(
+                        fom = 17.januar,
+                        tom = 20.januar,
+                        utbetalinger = listOf(
+                            SimulertUtbetaling(
+                                forfallsdato = 21.januar,
+                                utbetalesTil = Mottaker(
+                                    id = orgnummer,
+                                    navn = "Org Orgesen AS"
+                                ),
+                                feilkonto = false,
+                                detaljer = listOf(
+                                    Detaljer(
+                                        fom = 17.januar,
+                                        tom = 20.januar,
+                                        konto = "81549300",
+                                        beløp = 2000.toBigDecimal(),
+                                        klassekode = Klassekode(
+                                            kode = "SPREFAG-IOP",
+                                            beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
+                                        ),
+                                        uføregrad = 100,
+                                        utbetalingstype = "YTELSE",
+                                        tilbakeføring = false,
+                                        sats = Sats(
+                                            sats = 1000.toBigDecimal(),
+                                            antall = 2,
+                                            type = "DAGLIG"
+                                        ),
+                                        refunderesOrgnummer = orgnummer
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ).apply {
+            hendelselogg = this
+        }
 
     private fun manuellSaksbehandling(
         vedtaksperiodeIndex: Int,

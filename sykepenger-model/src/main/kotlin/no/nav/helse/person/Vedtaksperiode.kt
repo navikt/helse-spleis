@@ -756,7 +756,7 @@ internal class Vedtaksperiode private constructor(
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
                     }
                     ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
-                    vedtaksperiode.tilstand(ytelser, AvventerGodkjenning)
+                    vedtaksperiode.tilstand(ytelser, AvventerSimulering)
                 }
             }
         }

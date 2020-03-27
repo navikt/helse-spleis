@@ -93,6 +93,7 @@ internal class JsonBuilderTest {
                 håndter(inntektsmelding(fom = fom))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
@@ -223,6 +224,16 @@ internal class JsonBuilderTest {
             utbetalingGodkjent = true,
             saksbehandler = "en_saksbehandler_ident",
             godkjenttidspunkt = LocalDateTime.now()
+        )
+
+        internal fun simulering(vedtaksperiodeId: String) = Simulering(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            simuleringOK = true,
+            melding = "Hei Aron",
+            simuleringResultat = null
         )
 
         internal fun utbetalt(vedtaksperiodeId: String) = Utbetaling(

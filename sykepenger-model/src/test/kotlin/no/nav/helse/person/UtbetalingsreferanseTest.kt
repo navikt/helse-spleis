@@ -33,21 +33,31 @@ internal class UtbetalingsreferanseTest {
     @Test
     fun `tilstøtende periode får samme utbetalingsreferanse`() {
         håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
+        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
             .also {
                 person.håndter(it)
             }
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(
+            inspektør.vedtaksperiodeId(0),
+            Behovtype.Utbetaling,
+            "utbetalingsreferanse"
+        )
         assertEquals(utbetalingsreferanse1, inspektør.utbetalingsreferanser[0])
 
         håndterYtelser(fom = 1.februar, tom = 28.februar, sendtInntektsmelding = false, vedtaksperiodeindeks = 1)
+        person.håndter(simulering(inspektør.vedtaksperiodeId(1)))
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
             .also {
                 person.håndter(it)
             }
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(
+            inspektør.vedtaksperiodeId(1),
+            Behovtype.Utbetaling,
+            "utbetalingsreferanse"
+        )
         assertEquals(utbetalingsreferanse2, inspektør.utbetalingsreferanser[1])
 
         assertEquals(utbetalingsreferanse1, utbetalingsreferanse2)
@@ -56,20 +66,30 @@ internal class UtbetalingsreferanseTest {
     @Test
     fun `ikke-tilstøtende periode får unik utbetalingsreferanse`() {
         håndterYtelser(fom = 1.januar, tom = 31.januar, sendtInntektsmelding = true, vedtaksperiodeindeks = 0)
+        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(0).toString())
             .also {
                 person.håndter(it)
             }
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse1 = hendelse.etterspurtBehov<String>(
+            inspektør.vedtaksperiodeId(0),
+            Behovtype.Utbetaling,
+            "utbetalingsreferanse"
+        )
 
         håndterYtelser(fom = 2.februar, tom = 28.februar, sendtInntektsmelding = true, vedtaksperiodeindeks = 1)
+        person.håndter(simulering(inspektør.vedtaksperiodeId(1)))
         manuellSaksbehandling(true, inspektør.vedtaksperiodeId(1).toString())
             .also {
                 person.håndter(it)
             }
         person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
-        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(1), Behovtype.Utbetaling, "utbetalingsreferanse")
+        val utbetalingsreferanse2 = hendelse.etterspurtBehov<String>(
+            inspektør.vedtaksperiodeId(1),
+            Behovtype.Utbetaling,
+            "utbetalingsreferanse"
+        )
 
         assertNotEquals(utbetalingsreferanse1, utbetalingsreferanse2)
     }
@@ -125,6 +145,7 @@ internal class UtbetalingsreferanseTest {
             aktivitetslogg = it
         )
     }
+
     private fun sykmelding(fom: LocalDate, tom: LocalDate) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -176,6 +197,17 @@ internal class UtbetalingsreferanseTest {
                     1.januar(2017)
                 )
             )
+        )
+
+    private fun simulering(vedtaksperiodeId: UUID) =
+        Simulering(
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = orgnummer,
+            simuleringOK = true,
+            melding = "",
+            simuleringResultat = null
         )
 
     private fun utbetaling(vedtaksperiodeId: UUID, status: Utbetaling.Status) =

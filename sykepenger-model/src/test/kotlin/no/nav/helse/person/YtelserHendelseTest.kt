@@ -76,6 +76,7 @@ internal class YtelserHendelseTest {
     @Test
     fun `fordrepengeytelse før periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
+        person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
@@ -88,12 +89,14 @@ internal class YtelserHendelseTest {
     @Test
     fun `fordrepengeytelse etter periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
+        person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     @Test
     fun `svangerskapsytelse før periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
+        person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
@@ -106,6 +109,7 @@ internal class YtelserHendelseTest {
     @Test
     fun `svangerskapsytelse etter periode`() {
         håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
+        person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
@@ -226,4 +230,16 @@ internal class YtelserHendelseTest {
             erEgenAnsatt = false,
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
         )
+
+    private fun simulering() =
+        Simulering(
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNR,
+            simuleringOK = true,
+            melding = "",
+            simuleringResultat = null
+        )
+
 }

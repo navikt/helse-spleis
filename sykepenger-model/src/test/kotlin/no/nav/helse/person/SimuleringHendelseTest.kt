@@ -1,19 +1,15 @@
 package no.nav.helse.person
 
 import no.nav.helse.e2e.TestPersonInspektør
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class GodkjenningHendelseTest {
+internal class SimuleringHendelseTest {
     companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "12345"
@@ -31,41 +27,17 @@ internal class GodkjenningHendelseTest {
     }
 
     @Test
-    fun `utbetaling er godkjent`() {
+    fun `simulering er OK`() {
         håndterYtelser()
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
-        assertNotNull(utbetalingsreferanse)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
     }
 
     @Test
-    fun `utbetaling ikke godkjent`() {
+    fun `simulering er ikke OK`() {
         håndterYtelser()
-        person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(false))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `hendelse etter til utbetaling`() {
-        håndterYtelser()
-        person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
-        person.håndter(ytelser())
-        assertTilstand(TilstandType.TIL_UTBETALING)
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-    }
-
-    @Test
-    fun `dobbelt svar fra saksbehandler`() {
-        håndterYtelser()
-        person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
-        person.håndter(manuellSaksbehandling(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        person.håndter(simulering(false))
+        assertTilstand(TilstandType.AVVENTER_SIMULERING)
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
@@ -81,18 +53,6 @@ internal class GodkjenningHendelseTest {
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
-    }
-
-    private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
-        saksbehandler = "Ola Nordmann",
-        utbetalingGodkjent = godkjent,
-        godkjenttidspunkt = LocalDateTime.now()
-    ).apply {
-        hendelse = this
     }
 
     private fun ytelser(
@@ -140,7 +100,7 @@ internal class GodkjenningHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100, null)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay()
         ).apply {
@@ -179,13 +139,13 @@ internal class GodkjenningHendelseTest {
             hendelse = this
         }
 
-    private fun simulering() =
+    private fun simulering(simuleringOK: Boolean = true) =
         Simulering(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            simuleringOK = true,
+            simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = null
         ).apply {
