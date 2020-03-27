@@ -1,5 +1,8 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -46,7 +49,12 @@ internal class HendelseMediator(
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
+        sikkerLogg.info(
+            "gjenkjente melding id={} for fnr={} som {}",
+            message.id,
+            message.fødselsnummer,
+            message::class.simpleName
+        )
         try {
             message.accept(hendelseRecorder)
             message.accept(messageProcessor)
@@ -59,10 +67,12 @@ internal class HendelseMediator(
                 MDC.setContextMap(contextMap)
             }
         } catch (err: Exception) {
-            withMDC(mapOf(
-                "melding_id" to message.id.toString(),
-                "melding_type" to (message::class.simpleName ?: "ukjent")
-            )) {
+            withMDC(
+                mapOf(
+                    "melding_id" to message.id.toString(),
+                    "melding_type" to (message::class.simpleName ?: "ukjent")
+                )
+            ) {
                 log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
 
                 withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
@@ -110,10 +120,18 @@ internal class HendelseMediator(
         }
     }
 
-    private class PersonMediator(private val rapidsConnection: RapidsConnection, private val lagreUtbetalingDao: LagreUtbetalingDao) : PersonObserver {
+    private class PersonMediator(
+        private val rapidsConnection: RapidsConnection,
+        private val lagreUtbetalingDao: LagreUtbetalingDao
+    ) : PersonObserver {
 
         override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-            lagreUtbetalingDao.lagreUtbetaling(event.utbetalingsreferanse, event.aktørId, event.organisasjonsnummer, event.vedtaksperiodeId)
+            lagreUtbetalingDao.lagreUtbetaling(
+                event.utbetalingsreferanse,
+                event.aktørId,
+                event.organisasjonsnummer,
+                event.vedtaksperiodeId
+            )
         }
 
         override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
@@ -131,6 +149,15 @@ internal class HendelseMediator(
         override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
             rapidsConnection.publish(vedtaksperiodeEvent.fødselsnummer, vedtaksperiodeEvent.toJson())
         }
+
+        override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+            rapidsConnection.publish(event.fødselsnummer, event.toJson())
+        }
     }
 
 }
+
+internal val objectMapper = jacksonObjectMapper()
+    .registerModule(JavaTimeModule())
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+

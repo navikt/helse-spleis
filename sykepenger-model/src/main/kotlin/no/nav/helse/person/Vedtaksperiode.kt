@@ -258,7 +258,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = this.id,
                 organisasjonsnummer = this.organisasjonsnummer,
                 fødselsnummer = this.fødselsnummer,
-                opprettet = LocalDate.now(),
+                opprettet = LocalDateTime.now(),
                 fom = this.periode().start,
                 tom = this.periode().endInclusive
             )

@@ -1,13 +1,6 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Påminnelse
-
-private val objectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 internal fun Påminnelse.toJson() = objectMapper.writeValueAsString(
     mapOf(
@@ -23,5 +16,3 @@ internal fun Påminnelse.toJson() = objectMapper.writeValueAsString(
         "nestePåminnelsestidspunkt" to this.nestePåminnelsestidspunkt()
     )
 )
-
-
