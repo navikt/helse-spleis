@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.AvsluttetSøknad
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.*
@@ -56,8 +56,8 @@ internal class KunArbeidsgiverSykedagTest {
         }
     }
 
-    @Test internal fun `Avsluttet søknad lager kun KunArbeidsgiverSykedag og SykHelgedag`() {
-        undersøke(avsluttetSøknad()).also {
+    @Test internal fun `Søknad til arbeidsgiver lager kun KunArbeidsgiverSykedag og SykHelgedag`() {
+        undersøke(søknadArbeidsgiver()).also {
             assertEquals(28, it.dagerTeller)
             assertNull(it.dagstypeTeller["Sykedag"])
             assertEquals(20, it.dagstypeTeller["KunArbeidsgiverSykedag"])
@@ -77,13 +77,13 @@ internal class KunArbeidsgiverSykedagTest {
         )
     }
 
-    private fun avsluttetSøknad(): AvsluttetSøknad {
-        return AvsluttetSøknad(
+    private fun søknadArbeidsgiver(): SøknadArbeidsgiver {
+        return SøknadArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(AvsluttetSøknad.Periode.Sykdom(18.januar, 14.februar, 100)) // 10 sykedag januar & februar
+            perioder = listOf(SøknadArbeidsgiver.Periode.Sykdom(18.januar, 14.februar, 100)) // 10 sykedag januar & februar
         )
     }
 

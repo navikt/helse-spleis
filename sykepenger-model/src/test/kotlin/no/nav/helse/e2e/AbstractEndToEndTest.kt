@@ -80,8 +80,8 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder, sendtTilNav = sendtTilNav))
     }
 
-    protected fun håndterAvsluttetSøknad(vararg perioder: AvsluttetSøknad.Periode) {
-        person.håndter(avsluttetSøknad(perioder = *perioder))
+    protected fun håndterSøknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode) {
+        person.håndter(søknadArbeidsgiver(perioder = *perioder))
     }
 
     protected fun håndterInntektsmeldingMedValidering(
@@ -178,8 +178,8 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun avsluttetSøknad(vararg perioder: AvsluttetSøknad.Periode): AvsluttetSøknad {
-        return AvsluttetSøknad(
+    private fun søknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode): SøknadArbeidsgiver {
+        return SøknadArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,

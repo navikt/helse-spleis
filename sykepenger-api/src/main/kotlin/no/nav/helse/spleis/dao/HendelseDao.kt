@@ -12,7 +12,10 @@ internal class HendelseDao(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM melding WHERE melding_id in (${referanser.joinToString(",") { "?" }})",
+                    "SELECT * FROM melding WHERE " +
+                        "melding_type IN (${Meldingstype.values().joinToString { "?" }}) " +
+                        "AND melding_id IN (${referanser.joinToString { "?" }})",
+                    *Meldingstype.values().map(Enum<*>::name).toTypedArray(),
                     *referanser.map { it.toString() }.toTypedArray()
                 ).map {
                     Meldingstype.valueOf(it.string("melding_type")) to it.string("data")
@@ -24,13 +27,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     internal enum class Meldingstype {
         NY_SØKNAD,
-        SENDT_SØKNAD,
-        INNTEKTSMELDING,
-        PÅMINNELSE,
-        YTELSER,
-        VILKÅRSGRUNNLAG,
-        MANUELL_SAKSBEHANDLING,
-        UTBETALING,
-        SIMULERING
+        SENDT_SØKNAD_NAV,
+        SENDT_SØKNAD_ARBEIDSGIVER,
+        INNTEKTSMELDING
     }
 }

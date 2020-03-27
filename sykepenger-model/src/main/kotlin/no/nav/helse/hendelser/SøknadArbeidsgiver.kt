@@ -12,7 +12,7 @@ import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.util.*
 
-class AvsluttetSøknad constructor(
+class SøknadArbeidsgiver constructor(
     meldingsreferanseId: UUID,
     private val fnr: String,
     private val aktørId: String,
@@ -64,15 +64,15 @@ class AvsluttetSøknad constructor(
         arbeidsgiver.håndter(this)
     }
 
-    override fun melding(klassName: String) = "AvsluttetSøknad"
+    override fun melding(klassName: String) = "SøknadArbeidsgiver"
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
 
         internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): Sykdomstidslinje
 
-        internal open fun valider(søknad: AvsluttetSøknad) {}
+        internal open fun valider(søknad: SøknadArbeidsgiver) {}
 
-        internal fun valider(søknad: AvsluttetSøknad, beskjed: String) {
+        internal fun valider(søknad: SøknadArbeidsgiver, beskjed: String) {
             if (fom < søknad.fom || tom > søknad.tom) søknad.error(beskjed)
         }
 
@@ -84,7 +84,7 @@ class AvsluttetSøknad constructor(
         ) : Periode(fom, tom) {
             private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
-            override fun valider(søknad: AvsluttetSøknad) {
+            override fun valider(søknad: SøknadArbeidsgiver) {
                 if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 

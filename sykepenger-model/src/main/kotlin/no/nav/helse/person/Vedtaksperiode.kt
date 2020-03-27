@@ -117,7 +117,7 @@ internal class Vedtaksperiode private constructor(
         valider(sykmelding) { tilstand.håndter(this, sykmelding) }
     }
 
-    internal fun håndter(søknad: AvsluttetSøknad) = overlapperMed(søknad).also {
+    internal fun håndter(søknad: SøknadArbeidsgiver) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
         valider(søknad) { tilstand.håndter(this, søknad) }
@@ -248,7 +248,7 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand)
     }
 
-    private fun håndter(hendelse: AvsluttetSøknad, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
@@ -331,9 +331,9 @@ internal class Vedtaksperiode private constructor(
             søknad.warn("Forventet ikke søknad i %s", type.name)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Forventet ikke avsluttet søknad i %s", type.name)
+            søknad.warn("Forventet ikke søknad til arbeidsgiver i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -420,9 +420,9 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av avsluttet søknad")
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
 
@@ -442,9 +442,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av avsluttet søknad")
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
 
         override fun håndter(
@@ -471,9 +471,9 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av avsluttet søknad")
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
 
@@ -493,9 +493,9 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av avsluttet søknad")
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
 
         override fun håndter(
@@ -619,9 +619,9 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
-            søknad.info("Fullført behandling av avsluttet søknad")
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
 

@@ -13,16 +13,16 @@ internal class HendelseProcessor(private val hendelseMediator: HendelseMediator)
         }
     }
 
-    override fun process(message: AvsluttetSøknadMessage) {
-        håndter(message.asAvsluttetSøknad()) { person, søknad ->
-            HendelseProbe.onAvsluttetSøknad()
+    override fun process(message: SendtSøknadArbeidsgiverMessage) {
+        håndter(message.asSøknadArbeidsgiver()) { person, søknad ->
+            HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
         }
     }
 
-    override fun process(message: SendtSøknadMessage) {
+    override fun process(message: SendtSøknadNavMessage) {
         håndter(message.asSøknad()) { person, søknad ->
-            HendelseProbe.onSøknad()
+            HendelseProbe.onSøknadNav()
             person.håndter(søknad)
         }
     }

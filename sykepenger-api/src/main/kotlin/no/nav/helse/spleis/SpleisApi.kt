@@ -53,12 +53,12 @@ internal fun Application.spleisApi(dataSource: DataSource) {
 
 private fun håndterPerson(person: Person, hendelseDao: HendelseDao): ObjectNode {
     val (personJson, hendelseReferanser) = serializePersonForSpeil(person)
-    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).mapNotNull {
+    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map {
         when (it.first) {
             NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(it.second))
-            SENDT_SØKNAD -> SendtSøknadDTO(objectMapper.readTree(it.second))
+            SENDT_SØKNAD_NAV -> SendtSøknadNavDTO(objectMapper.readTree(it.second))
+            SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverDTO(objectMapper.readTree(it.second))
             INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(it.second))
-            else -> null
         }
     }.map { objectMapper.valueToTree<JsonNode>(it) }
 
@@ -73,7 +73,14 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
         val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
 
-    class SendtSøknadDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD", json["@id"].asText()) {
+    class SendtSøknadNavDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD", json["@id"].asText()) {
+        val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val sendtNav: LocalDateTime = LocalDateTime.parse(json["sendtNav"].asText())
+        val fom: LocalDate = LocalDate.parse(json["fom"].asText())
+        val tom: LocalDate = LocalDate.parse(json["tom"].asText())
+    }
+
+    class SendtSøknadArbeidsgiverDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_ARBEIDSGIVER", json["@id"].asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
         val sendtNav: LocalDateTime = LocalDateTime.parse(json["sendtNav"].asText())
         val fom: LocalDate = LocalDate.parse(json["fom"].asText())

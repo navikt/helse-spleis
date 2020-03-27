@@ -48,12 +48,12 @@ object HendelseProbe {
         tell("Sykmelding")
     }
 
-    fun onSøknad() {
-        tell("Søknad")
+    fun onSøknadNav() {
+        tell("SøknadNav")
     }
 
-    fun onAvsluttetSøknad() {
-        tell("AvsluttetSøknad")
+    fun onSøknadArbeidsgiver() {
+        tell("SøknadArbeidsgiver")
     }
 
     private fun tell(navn: String) {

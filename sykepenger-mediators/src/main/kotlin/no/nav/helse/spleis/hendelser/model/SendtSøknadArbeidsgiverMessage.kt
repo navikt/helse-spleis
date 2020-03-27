@@ -1,15 +1,15 @@
 package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.AvsluttetSøknad
-import no.nav.helse.hendelser.AvsluttetSøknad.Periode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.SøknadArbeidsgiver.Periode.Sykdom
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
-internal class AvsluttetSøknadMessage(originalMessage: String, problems: MessageProblems) :
+internal class SendtSøknadArbeidsgiverMessage(originalMessage: String, problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "sendt_søknad_arbeidsgiver")
@@ -36,8 +36,8 @@ internal class AvsluttetSøknadMessage(originalMessage: String, problems: Messag
         processor.process(this)
     }
 
-    internal fun asAvsluttetSøknad(): AvsluttetSøknad {
-        return AvsluttetSøknad(
+    internal fun asSøknadArbeidsgiver(): SøknadArbeidsgiver {
+        return SøknadArbeidsgiver(
             meldingsreferanseId = this.id,
             fnr = fødselsnummer,
             aktørId = aktørId,
@@ -46,7 +46,7 @@ internal class AvsluttetSøknadMessage(originalMessage: String, problems: Messag
         )
     }
 
-    object Factory : MessageFactory<AvsluttetSøknadMessage> {
-        override fun createMessage(message: String, problems: MessageProblems) = AvsluttetSøknadMessage(message, problems)
+    object Factory : MessageFactory<SendtSøknadArbeidsgiverMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = SendtSøknadArbeidsgiverMessage(message, problems)
     }
 }

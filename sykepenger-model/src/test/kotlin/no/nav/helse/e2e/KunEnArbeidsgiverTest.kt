@@ -1,8 +1,8 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.hendelser.AvsluttetSøknad
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
@@ -633,11 +633,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avsluttet søknad etter inntektsmelding`() {
+    fun `søknad til arbeidsgiver etter inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 7.januar, 100))
         håndterSykmelding(Triple(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterAvsluttetSøknad(AvsluttetSøknad.Periode.Sykdom(8.januar,  23.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  23.februar, 100))
 
         inspektør.also {
             assertNoErrors(it)

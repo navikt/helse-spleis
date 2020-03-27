@@ -10,8 +10,8 @@ import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
-// Understands a JSON message representing a Søknad
-internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
+// Understands a JSON message representing a Søknad that is sent to NAV
+internal class SendtSøknadNavMessage(originalMessage: String, private val problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
         requireValue("@event_name", "sendt_søknad_nav")
@@ -24,7 +24,6 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
         interestedIn("andreInntektskilder")
     }
 
-    private val søknadFom get() = this["fom"].asLocalDate()
     private val søknadTom get() = this["tom"].asLocalDate()
     private val aktørId get() = this["aktorId"].asText()
     private val orgnummer get() = this["arbeidsgiver.orgnummer"].asText()
@@ -72,7 +71,7 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
 
     private fun harAndreInntektskilder() = this["andreInntektskilder"].isArray && !this["andreInntektskilder"].isEmpty
 
-    object Factory : MessageFactory<SendtSøknadMessage> {
-        override fun createMessage(message: String, problems: MessageProblems) = SendtSøknadMessage(message, problems)
+    object Factory : MessageFactory<SendtSøknadNavMessage> {
+        override fun createMessage(message: String, problems: MessageProblems) = SendtSøknadNavMessage(message, problems)
     }
 }
