@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.*
@@ -641,6 +642,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
+            assertEquals(35, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(14, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
             0,

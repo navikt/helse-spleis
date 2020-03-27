@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.AvsluttetSøknad
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -55,25 +56,45 @@ internal class KunArbeidsgiverSykedagTest {
         }
     }
 
+    @Test internal fun `Avsluttet søknad lager kun KunArbeidsgiverSykedag og SykHelgedag`() {
+        undersøke(avsluttetSøknad()).also {
+            assertEquals(28, it.dagerTeller)
+            assertNull(it.dagstypeTeller["Sykedag"])
+            assertEquals(20, it.dagstypeTeller["KunArbeidsgiverSykedag"])
+            assertEquals(8, it.dagstypeTeller["SykHelgedag"])
+        }
+    }
+
     private fun søknad(sendtTilNAV: LocalDate): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(Sykdom(18.januar,  14.februar, 100)), // 10 sykedag januar & februar
+            perioder = listOf(Sykdom(18.januar, 14.februar, 100)), // 10 sykedag januar & februar
             harAndreInntektskilder = false,
             sendtTilNAV = sendtTilNAV.atStartOfDay()
         )
     }
 
-    private fun undersøke(søknad: Søknad): TestInspektør {
+    private fun avsluttetSøknad(): AvsluttetSøknad {
+        return AvsluttetSøknad(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            orgnummer = ORGNUMMER,
+            perioder = listOf(AvsluttetSøknad.Periode.Sykdom(18.januar, 14.februar, 100)) // 10 sykedag januar & februar
+        )
+    }
+
+    private fun undersøke(søknad: SykdomstidslinjeHendelse): TestInspektør {
         return TestInspektør(søknad)
     }
 
-    private class TestInspektør(søknad: Søknad): SykdomstidslinjeVisitor {
+    private class TestInspektør(søknad: SykdomstidslinjeHendelse) : SykdomstidslinjeVisitor {
         internal var dagerTeller = 0
         internal val dagstypeTeller = mutableMapOf<String, Int>()
+
         init {
             søknad.sykdomstidslinje().accept(this)
         }
@@ -84,38 +105,29 @@ internal class KunArbeidsgiverSykedagTest {
 
         private fun oppdateringTeller(dag: Dag) {
             dagerTeller += 1
-            dag.javaClass.canonicalName.split('.').filterNot { it == "Søknad" }.last().also {
+            dag.javaClass.canonicalName.split('.').filterNot { it in listOf("Søknad", "Inntektsmelding", "Sykmelding") }.last().also {
                 dagstypeTeller.set(it, dagstypeTeller.getOrDefault(it, 0).plus(1))
             }
         }
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) {
-            oppdateringTeller(arbeidsdag)
-        }
+        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = oppdateringTeller(dag)
+        override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = oppdateringTeller(dag)
 
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) {
-            oppdateringTeller(egenmeldingsdag)
-        }
+        override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = oppdateringTeller(dag)
 
-        override fun visitFeriedag(feriedag: Feriedag.Søknad) {
-            oppdateringTeller(feriedag)
-        }
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = oppdateringTeller(dag)
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = oppdateringTeller(dag)
 
-        override fun visitImplisittDag(implisittDag: ImplisittDag) {
-            oppdateringTeller(implisittDag)
-        }
+        override fun visitFeriedag(dag: Feriedag.Søknad) = oppdateringTeller(dag)
+        override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = oppdateringTeller(dag)
 
-        override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) {
-            oppdateringTeller(sykedag)
-        }
+        override fun visitImplisittDag(dag: ImplisittDag) = oppdateringTeller(dag)
 
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
-            oppdateringTeller(sykHelgedag)
-        }
+        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = oppdateringTeller(dag)
 
-        override fun visitSykedag(sykedag: Sykedag.Søknad) {
-            oppdateringTeller(sykedag)
-        }
+        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = oppdateringTeller(dag)
 
+        override fun visitSykedag(dag: Sykedag.Søknad) = oppdateringTeller(dag)
+        override fun visitSykedag(dag: Sykedag.Sykmelding) = oppdateringTeller(dag)
     }
 }

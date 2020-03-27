@@ -4,6 +4,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import java.time.DayOfWeek
 import java.time.LocalDate
 import kotlin.streams.toList
@@ -136,6 +137,7 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
                 SykHelgedag.Søknad::class -> "H"
                 Egenmeldingsdag.Inntektsmelding::class -> "E"
                 Egenmeldingsdag.Søknad::class -> "E"
+                AvvistDag::class -> "X"
                 else -> "?"
             }
         }

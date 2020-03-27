@@ -5,6 +5,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.Dag
+import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
@@ -98,6 +99,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
             SykHelgedag::class)
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = inkrementer(
             SykHelgedag::class)
+
+        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = inkrementer(
+            KunArbeidsgiverSykedag::class)
 
         private fun inkrementer(klasse: KClass<out Dag>) {
             dagtelling.compute(klasse) { _, value ->
