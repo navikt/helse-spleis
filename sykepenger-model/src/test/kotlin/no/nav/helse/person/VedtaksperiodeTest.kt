@@ -32,7 +32,8 @@ internal class VedtaksperiodeTest {
                         Søknad.Periode.Sykdom(
                             fom = 21.juli,
                             tom = 25.juli,
-                            grad = 100
+                            gradFraSykmelding = 100,
+                            faktiskGrad = null
                         )
                     )
                 )
@@ -109,11 +110,7 @@ internal class VedtaksperiodeTest {
 
     private fun søknad(
         perioder: List<Søknad.Periode> = listOf(
-            Søknad.Periode.Sykdom(
-                16.september,
-                5.oktober,
-                100
-            )
+            Søknad.Periode.Sykdom(16.september, 5.oktober, 100, null)
         )
     ) =
         Søknad(

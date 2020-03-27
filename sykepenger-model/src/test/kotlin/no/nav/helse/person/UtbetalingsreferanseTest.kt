@@ -140,7 +140,7 @@ internal class UtbetalingsreferanseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(fom,  tom, 100, null)),
             harAndreInntektskilder = false,
             sendtTilNAV = tom.atStartOfDay()
         )

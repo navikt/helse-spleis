@@ -35,7 +35,7 @@ internal class SykepengesøknadTidslinjeTest {
 
         val tidslinje = søknad(perioder = listOf(
             Periode.Egenmelding(egenmeldingFom, egenmeldingTom),
-            Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100))
+            Periode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100, null))
         ).sykdomstidslinje(sykeperiodeTOM).merge(sykmelding().sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
         assertEquals(egenmeldingFom, tidslinje.førsteDag())
@@ -47,7 +47,7 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får ferien fra søknaden`() {
         val tidslinje = sykmelding().sykdomstidslinje(sykeperiodeTOM).merge(søknad(
             perioder = listOf(
-                Periode.Sykdom(sykeperiodeFOM, sykeperiodeTOM, 100),
+                Periode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100, null),
                 Periode.Ferie(ferieFom, ferieTom)
             )
         ).sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
@@ -60,7 +60,7 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får permisjon fra soknaden`() {
         val tidslinje = søknad(
             perioder = listOf(
-                    Periode.Sykdom(1.mandag, 1.fredag, 100),
+                    Periode.Sykdom(1.mandag,  1.fredag, 100, null),
                     Periode.Permisjon(1.torsdag, 1.fredag)
                 )
         ).also {
@@ -75,7 +75,7 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får arbeidsdag resten av perioden hvis soknaden har arbeid gjenopptatt`() {
         val tidslinje = søknad(
             perioder = listOf(
-                Periode.Sykdom(1.mandag, 1.fredag, 100),
+                Periode.Sykdom(1.mandag,  1.fredag, 100, null),
                 Periode.Arbeid(1.onsdag, Uke(10).fredag)
             )
         ).also {
@@ -92,7 +92,7 @@ internal class SykepengesøknadTidslinjeTest {
     private fun assertType(expected: KClass<*>, actual: Any?) =
         assertEquals(expected, actual?.let { it::class })
 
-    private fun søknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september, 5.oktober, 100))) =
+    private fun søknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september,  5.oktober, 100, null))) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",

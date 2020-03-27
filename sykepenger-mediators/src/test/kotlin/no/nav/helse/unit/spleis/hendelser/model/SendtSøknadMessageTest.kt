@@ -40,24 +40,27 @@ internal class SendtSøknadMessageTest {
         sendtNav = LocalDateTime.now(),
         sendtArbeidsgiver = LocalDateTime.now(),
         egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
-        soknadsperioder = listOf(SoknadsperiodeDTO(
-            fom = LocalDate.now(),
-            tom = LocalDate.now(),
-            sykmeldingsgrad = 100,
-            faktiskGrad = 100,
-            avtaltTimer = Double.MIN_VALUE,
-            faktiskTimer = Double.MAX_VALUE,
-            sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
-        )),
+        soknadsperioder = listOf(
+            SoknadsperiodeDTO(
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                sykmeldingsgrad = 100,
+                faktiskGrad = 100,
+                avtaltTimer = Double.MIN_VALUE,
+                faktiskTimer = Double.MAX_VALUE,
+                sykmeldingstype = SykmeldingstypeDTO.AKTIVITET_IKKE_MULIG
+            )
+        ),
         fravar = listOf(FravarDTO(fom = LocalDate.now(), tom = LocalDate.now()))
     )
 
     private val ValidSendtSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.SENDT).toJson()
     private val ValidAvbruttSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.AVBRUTT).toJson()
-    private val ValidSendtSøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.SENDT).asJsonNode().let {
-        it as ObjectNode
-        it.put(UUID.randomUUID().toString(), "foobar")
-    }.toJson()
+    private val ValidSendtSøknadWithUnknownFieldsJson =
+        ValidSøknad.copy(status = SoknadsstatusDTO.SENDT).asJsonNode().let {
+            it as ObjectNode
+            it.put(UUID.randomUUID().toString(), "foobar")
+        }.toJson()
     private val UkjentFraværskode = ValidSøknad.copy().asJsonNode().also {
         (it.path("fravar").first() as ObjectNode).put("type", "INVALID_FRAVÆRSTYPE")
     }.toJson()
@@ -121,6 +124,7 @@ internal class SendtSøknadMessageTest {
     }
 
     private var recognizedSøknad = false
+
     @BeforeEach
     fun reset() {
         recognizedSøknad = false
@@ -137,5 +141,6 @@ private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree
     put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
+
 private fun SykepengesoknadDTO.toJson(): String = asJsonNode().toString()
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

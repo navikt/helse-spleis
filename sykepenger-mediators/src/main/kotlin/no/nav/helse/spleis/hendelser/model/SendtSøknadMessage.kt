@@ -33,8 +33,8 @@ internal class SendtSøknadMessage(originalMessage: String, private val problems
         Periode.Sykdom(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
-            grad = it.path("sykmeldingsgrad").asInt(),
-            faktiskGrad = it.path("faktiskGrad").asDouble(it.path("sykmeldingsgrad").asDouble())
+            gradFraSykmelding = it.path("sykmeldingsgrad").asInt(),
+            faktiskGrad = it.path("faktiskGrad").takeIf(JsonNode::isIntegralNumber)?.asInt()
         )
     } + this["egenmeldinger"].map {
         Periode.Egenmelding(

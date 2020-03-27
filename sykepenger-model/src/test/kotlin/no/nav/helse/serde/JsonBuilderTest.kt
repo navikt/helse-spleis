@@ -140,7 +140,7 @@ internal class JsonBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = listOf(
-                Søknad.Periode.Sykdom(fom, tom, 100)
+                Søknad.Periode.Sykdom(fom,  tom, 100, null)
             ),
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad

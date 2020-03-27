@@ -130,7 +130,8 @@ internal class PersonTest {
                 Søknad.Periode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
-                    grad = 100
+                    gradFraSykmelding = 100,
+                    faktiskGrad = null
                 )
             )
         ).also {
@@ -274,11 +275,7 @@ internal class PersonTest {
 
     private fun søknad(
         perioder: List<Søknad.Periode> = listOf(
-            Søknad.Periode.Sykdom(
-                16.september,
-                5.oktober,
-                100
-            )
+            Søknad.Periode.Sykdom(16.september, 5.oktober, 100, null)
         ),
         sendtTilNAV: LocalDateTime = perioder.last().tom.atStartOfDay()
     ) =

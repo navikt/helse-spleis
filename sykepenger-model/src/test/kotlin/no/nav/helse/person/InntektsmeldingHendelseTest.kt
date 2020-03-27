@@ -57,7 +57,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding etter søknad`() {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
-        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar,  20.januar, 100, null)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -68,7 +68,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar, 20.januar, 100)))
+        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar,  20.januar, 100, null)))
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))

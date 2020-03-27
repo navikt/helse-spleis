@@ -107,7 +107,7 @@ internal class FørsteFraværsdagTest {
     @Test
     internal fun `sykeperiode starter på første fraværsdag`() {
         val sykmelding = sykmelding(Triple(4.februar(2020), 21.februar(2020), 100))
-        val søknad = søknad(Søknad.Periode.Sykdom(4.februar(2020), 21.februar(2020), 100))
+        val søknad = søknad(Søknad.Periode.Sykdom(4.februar(2020),  21.februar(2020), 100, null))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(20.januar(2020), 20.januar(2020)),
             Periode(4.februar(2020), 18.februar(2020))
@@ -118,7 +118,7 @@ internal class FørsteFraværsdagTest {
     @Test
     internal fun `sykeperioden starter etter første fraværsdag`() {
         val sykmelding = sykmelding(Triple(29.januar(2020), 16.februar(2020), 100))
-        val søknad = søknad(Søknad.Periode.Sykdom(29.januar(2020), 16.februar(2020), 100))
+        val søknad = søknad(Søknad.Periode.Sykdom(29.januar(2020),  16.februar(2020), 100, null))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(13.januar(2020), 17.januar(2020)),
             Periode(20.januar(2020), 30.januar(2020))
@@ -129,7 +129,7 @@ internal class FørsteFraværsdagTest {
     @Test
     internal fun `arbeidsgiverperiode med enkeltdager før første fraværsdag`() {
         val sykmelding = sykmelding(Triple(12.februar(2020), 19.februar(2020), 100))
-        val søknad = søknad(Søknad.Periode.Sykdom(12.februar(2020), 19.februar(2020), 100))
+        val søknad = søknad(Søknad.Periode.Sykdom(12.februar(2020),  19.februar(2020), 100, null))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(14.januar(2020), 14.januar(2020)),
             Periode(28.januar(2020), 28.januar(2020)),
