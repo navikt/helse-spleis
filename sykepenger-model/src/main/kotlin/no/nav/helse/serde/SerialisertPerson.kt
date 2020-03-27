@@ -218,6 +218,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_SIMULERING -> AvventerSimulering
         TilstandType.TIL_UTBETALING -> TilUtbetaling
         TilstandType.AVSLUTTET -> Avsluttet
+        TilstandType.AVSLUTTET_UTEN_UTBETALING -> AvsluttetUtenUtbetaling
         TilstandType.UTBETALING_FEILET -> UtbetalingFeilet
         TilstandType.TIL_INFOTRYGD -> TilInfotrygd
         TilstandType.START -> Start

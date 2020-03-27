@@ -252,6 +252,12 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand)
     }
 
+    private fun håndter(hendelse: AvsluttetSøknad, nesteTilstand: Vedtaksperiodetilstand) {
+        sykdomshistorikk.håndter(hendelse)
+        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        tilstand(hendelse, nesteTilstand)
+    }
+
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
         sykepengehistorikk(hendelse, arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive)
         foreldrepenger(hendelse)
@@ -439,6 +445,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, AvventerSøknadUferdigForlengelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
+            søknad.info("Fullført behandling av søknad")
+        }
+
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
@@ -460,6 +471,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerGap)
+            søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: AvsluttetSøknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad")
         }
     }
@@ -897,6 +913,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+    }
+
+    internal object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
+        override val type = AVSLUTTET_UTEN_UTBETALING
+        override val timeout: Duration = Duration.ZERO
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+        }
     }
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {

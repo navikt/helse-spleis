@@ -30,6 +30,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
     TilstandType.AVSLUTTET -> if (utbetalt) TilstandstypeDTO.Utbetalt else TilstandstypeDTO.IngenUtbetaling
+    TilstandType.AVSLUTTET_UTEN_UTBETALING -> TilstandstypeDTO.IngenUtbetaling
 }
 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)

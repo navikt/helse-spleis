@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
 import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
@@ -88,5 +89,6 @@ class AvsluttetSøknad constructor(
 
     internal object SøknadDagFactory : DagFactory {
         override fun kunArbeidsgiverSykedag(dato: LocalDate, grad: Double): KunArbeidsgiverSykedag = KunArbeidsgiverSykedag(dato, grad)
+        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Søknad = SykHelgedag.Søknad(dato, grad)
     }
 }
