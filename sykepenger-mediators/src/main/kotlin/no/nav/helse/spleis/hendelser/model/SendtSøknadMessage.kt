@@ -14,7 +14,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 internal class SendtSøknadMessage(originalMessage: String, private val problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
-        requireValue("@event_name", "sendt_søknad")
+        requireValue("@event_name", "sendt_søknad_nav")
         requireValue("status", "SENDT")
         requireKey("id", "egenmeldinger", "fravar")
         require("fom", JsonNode::asLocalDate)

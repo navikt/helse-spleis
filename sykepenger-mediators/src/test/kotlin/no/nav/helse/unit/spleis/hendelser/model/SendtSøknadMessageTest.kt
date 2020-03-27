@@ -138,7 +138,7 @@ private val objectMapper = jacksonObjectMapper()
 private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree<JsonNode>(this).apply {
     this as ObjectNode
     put("@id", UUID.randomUUID().toString())
-    put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad" else "ukjent")
+    put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
 

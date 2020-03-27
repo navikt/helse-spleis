@@ -12,7 +12,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 internal class AvsluttetSøknadMessage(originalMessage: String, problems: MessageProblems) :
     SøknadMessage(originalMessage, problems) {
     init {
-        requireValue("@event_name", "sendt_søknad")
+        requireValue("@event_name", "sendt_søknad_arbeidsgiver")
         requireValue("status", "SENDT")
         requireKey("id", "egenmeldinger", "fravar")
         require("fom", JsonNode::asLocalDate)

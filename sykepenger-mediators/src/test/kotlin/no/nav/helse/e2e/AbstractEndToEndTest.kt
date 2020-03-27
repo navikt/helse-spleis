@@ -149,7 +149,7 @@ internal abstract class AbstractEndToEndTest {
         testRapid.sendTestMessage(sendtSøknad.toJsonNode().apply {
             this as ObjectNode
             put("@id", UUID.randomUUID().toString())
-            put("@event_name", "sendt_søknad")
+            put("@event_name", "sendt_søknad_nav")
             put("@opprettet", LocalDateTime.now().toString())
         }.toString())
     }
