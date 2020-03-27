@@ -33,6 +33,14 @@ class UtbetalingshistorikkPeriodeTest {
     }
 
     @Test
+    fun `RefusjonTilArbeidsgiver gir error når fom er etter tom`() {
+        val periode = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(10.januar, 1.januar, 1234)
+        periode.valider(aktivitetslogg)
+
+        assertTrue(aktivitetslogg.hasErrors())
+    }
+
+    @Test
     fun `ReduksjonArbeidsgiverRefusjon mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234)
         periode.valider(aktivitetslogg)
@@ -124,6 +132,15 @@ class UtbetalingshistorikkPeriodeTest {
     }
 
     @Test
+    fun `Tilbakeført gir ikke error når fom er etter tom`() {
+        val periode = Utbetalingshistorikk.Periode.Tilbakeført(10.januar, 1.januar, 1234)
+        periode.valider(aktivitetslogg)
+
+        assertFalse(aktivitetslogg.hasErrors())
+        assertEquals(1, aktivitetslogg.aktivitetsteller())
+    }
+
+    @Test
     fun `Konvertert mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.Konvertert(1.januar, 1.januar, 1234)
         periode.valider(aktivitetslogg)
@@ -166,6 +183,15 @@ class UtbetalingshistorikkPeriodeTest {
     fun `Ukjent mappes til utbetalingstidslinje`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar, 1234)
+                .toTidslinje(graderingsliste, aktivitetslogg)
+        }
+    }
+
+
+    @Test
+    fun `Ugyldig mappes til utbetalingstidslinje`() {
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            Utbetalingshistorikk.Periode.Ugyldig(1.januar, null, 1234)
                 .toTidslinje(graderingsliste, aktivitetslogg)
         }
     }

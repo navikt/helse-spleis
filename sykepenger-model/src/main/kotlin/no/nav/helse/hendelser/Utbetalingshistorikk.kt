@@ -146,12 +146,54 @@ class Utbetalingshistorikk(
                 }
         }
 
-        class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
-        class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
+        class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
+        class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
+        class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
+        class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
+        class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
+            override fun valider(aktivitetslogg: Aktivitetslogg) {
+                if (fom > tom) aktivitetslogg.info(
+                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
+                    this::class.simpleName
+                )
+            }
+        }
         class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
             override fun toTidslinje(
                 graderingsliste: List<Graderingsperiode>,
