@@ -80,11 +80,12 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeIndex: Int,
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = 1.januar
+        førsteFraværsdag: LocalDate = 1.januar,
+        ferieperioder: List<Periode> = emptyList()
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag)
+        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder)
     }
 
     protected fun håndterInntektsmelding(

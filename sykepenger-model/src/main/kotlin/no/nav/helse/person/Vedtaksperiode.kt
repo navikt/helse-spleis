@@ -219,7 +219,7 @@ internal class Vedtaksperiode private constructor(
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag > sisteDag())
             hendelse.warn("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
-        if (hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
+        if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
             hendelse.warn("Inntektsmelding har oppgitt en annen første fraværsdag")
 
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)

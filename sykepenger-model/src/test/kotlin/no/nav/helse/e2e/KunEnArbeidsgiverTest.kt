@@ -378,6 +378,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato for påfølgende perioder`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterSykmelding(Triple(27.januar, 7.februar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar, listOf(Periode(27.januar, 27.januar)))
+        inspektør.also { assertFalse(it.personLogg.hasWarnings()) }
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
     fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
