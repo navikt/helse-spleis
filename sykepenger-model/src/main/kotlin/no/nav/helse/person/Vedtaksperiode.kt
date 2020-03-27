@@ -397,6 +397,8 @@ internal class Vedtaksperiode private constructor(
             val forlengelse = tilstøtende != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
+            if (tilstøtende != null) vedtaksperiode.utbetalingsreferanse = tilstøtende.utbetalingsreferanse
+
             return when {
                 forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {
                     sykmelding.error("Forlenger en periode som er gått til infotrygd")
@@ -779,12 +781,15 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_SIMULERING
         override val timeout: Duration = Duration.ofHours(1)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            trengerSimulering(vedtaksperiode, påminnelse)
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.also {
+                vedtaksperiode.utbetalingsreferanse = it.utbetalingsreferanse
+            }
+            trengerSimulering(vedtaksperiode, hendelse)
         }
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            trengerSimulering(vedtaksperiode, hendelse)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            trengerSimulering(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -811,9 +816,6 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val utbetalingsreferanse = lagUtbetalingsReferanse(vedtaksperiode)
-            vedtaksperiode.utbetalingsreferanse = utbetalingsreferanse
-
             godkjenning(hendelse)
         }
 
@@ -843,10 +845,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
             }
         }
-
-        private fun lagUtbetalingsReferanse(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse
-                ?: genererUtbetalingsreferanse(vedtaksperiode.id)
     }
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {

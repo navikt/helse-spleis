@@ -10,7 +10,7 @@ import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
@@ -30,7 +30,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
-    internal val utbetalingsreferanser = mutableMapOf<Int, String>()
+    private val utbetalingsreferanser = mutableMapOf<Int, String>()
 
     init {
         person.accept(this)
@@ -89,6 +89,16 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
             this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
     }
 
+    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+        tilstander[vedtaksperiodeindeks]?.add(tilstand.type) ?: fail {
+            "Missing collection initialization"
+        }
+    }
+
+    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
+        this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
+    }
+
     private inner class Dagteller : SykdomstidslinjeVisitor {
         override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(
             Sykedag::class)
@@ -110,37 +120,31 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
-    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-        tilstander[vedtaksperiodeindeks]?.add(tilstand.type) ?: Assertions.fail(
-            "Missing collection initialization"
-        )
-    }
-
-    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
-        this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
-    }
-
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
-    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: Assertions.fail(
+    internal fun utbetalingsreferanse(indeks: Int) = utbetalingsreferanser[indeks] ?: fail {
         "Missing collection initialization"
-    )
+    }
 
-    internal fun tilstand(indeks: Int) = tilstander[indeks] ?: Assertions.fail(
+    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
         "Missing collection initialization"
-    )
+    }
 
-    internal fun sisteTilstand(indeks: Int) = tilstander[indeks]?.last() ?: Assertions.fail(
+    internal fun tilstand(indeks: Int) = tilstander[indeks] ?: fail {
         "Missing collection initialization"
-    )
+    }
 
-    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?:Assertions.fail(
+    internal fun sisteTilstand(indeks: Int) = tilstander[indeks]?.last() ?: fail {
         "Missing collection initialization"
-    )
+    }
 
-    internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:Assertions.fail(
+    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?:fail {
         "Missing collection initialization"
-    )
+    }
+
+    internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:fail {
+        "Missing collection initialization"
+    }
 
     internal fun dagTeller(klasse: KClass<out Utbetalingstidslinje.Utbetalingsdag>) =
         TestTidslinjeInspektør(arbeidsgiver.peekTidslinje()).dagtelling[klasse] ?: 0
