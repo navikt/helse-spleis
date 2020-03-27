@@ -79,11 +79,17 @@ class AvsluttetSøknad constructor(
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
-            private val grad: Int,
-            private val faktiskGrad: Double = grad.toDouble()
+            private val gradFraSykmelding: Int,
+            faktiskGrad: Int? = null
         ) : Periode(fom, tom) {
+            private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
+            private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
+            override fun valider(søknad: AvsluttetSøknad) {
+                if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+            }
+
             override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-                Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, faktiskGrad, SøknadDagFactory)
+                Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
         }
     }
 

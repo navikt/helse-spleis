@@ -92,16 +92,14 @@ class Søknad constructor(
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
-            val gradFraSykmelding: Int,
+            private val gradFraSykmelding: Int,
             faktiskGrad: Int? = null
         ) : Periode(fom, tom) {
             private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
 
             override fun valider(søknad: Søknad) {
-                if (grad > gradFraSykmelding) {
-                    søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
-                }
+                if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
