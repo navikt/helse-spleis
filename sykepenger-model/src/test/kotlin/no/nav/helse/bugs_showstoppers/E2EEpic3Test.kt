@@ -172,13 +172,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  4.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
 
         håndterSøknadMedValidering(1, Sykdom(8.januar,  9.januar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
-        håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
 
         inspektør.also {
@@ -398,7 +396,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0) // No history
-        håndterSimulering(0)
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
@@ -435,7 +432,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         // Sykedag beats IM Feriedag; 21 Desember to 5 Januar is another employer period!
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0) // No history
-        håndterSimulering(0)
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))

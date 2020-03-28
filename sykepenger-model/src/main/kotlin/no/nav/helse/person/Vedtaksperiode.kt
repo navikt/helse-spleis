@@ -757,7 +757,7 @@ internal class Vedtaksperiode private constructor(
                         it.clear()
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
                     }
-                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Til godkjenning"""")
+                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
                     vedtaksperiode.tilstand(ytelser, AvventerSimulering)
                 }
             }
@@ -785,6 +785,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.also {
                 vedtaksperiode.utbetalingsreferanse = it.utbetalingsreferanse
             }
+
+            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
+                hendelse.warn("Ingen utbetalingslinjer, gjør ingen simulering av utbetaling")
+            }
+
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
@@ -793,9 +798,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            simulering.valider()
-            if (simulering.hasErrors()) return simulering.warn("Simulering har feil, ignorerer resultatet.")
-
+            if (simulering.valider().hasErrors()) return simulering.warn(
+                "Simulering har feil, ignorerer resultatet og prøver på nytt senere."
+            )
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
@@ -825,24 +830,20 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (manuellSaksbehandling.utbetalingGodkjent()) {
-                vedtaksperiode.tilstand(
-                    manuellSaksbehandling,
-                    if (vedtaksperiode.utbetalingslinjer.isNullOrEmpty()) Avsluttet else TilUtbetaling
-                ) {
-                    vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
-                    vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
-                        manuellSaksbehandling.info(
-                            "Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
-                        )
-                    }
-                }
-            } else {
+            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd) {
                 manuellSaksbehandling.error(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
                     manuellSaksbehandling.saksbehandler()
                 )
-                vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd)
+            }
+
+            vedtaksperiode.tilstand(manuellSaksbehandling, if (vedtaksperiode.utbetalingslinjer.isEmpty()) Avsluttet else TilUtbetaling) {
+                vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
+                vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
+                    manuellSaksbehandling.info(
+                        "Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
+                    )
+                }
             }
         }
     }
@@ -877,24 +878,22 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
-            if (utbetaling.isOK()) {
-                vedtaksperiode.tilstand(utbetaling, Avsluttet) {
-                    utbetaling.info("OK fra Oppdragssystemet")
-                    val event = PersonObserver.UtbetaltEvent(
-                        vedtaksperiodeId = vedtaksperiode.id,
-                        aktørId = vedtaksperiode.aktørId,
-                        fødselsnummer = vedtaksperiode.fødselsnummer,
-                        utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
-                        utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
-                        forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
-                        opprettet = LocalDate.now()
-                    )
-                    vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
-                }
-            } else {
-                vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
-                    utbetaling.error("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
-                }
+            if (!utbetaling.isOK()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+                utbetaling.error("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
+            }
+
+            vedtaksperiode.tilstand(utbetaling, Avsluttet) {
+                utbetaling.info("OK fra Oppdragssystemet")
+                val event = PersonObserver.UtbetaltEvent(
+                    vedtaksperiodeId = vedtaksperiode.id,
+                    aktørId = vedtaksperiode.aktørId,
+                    fødselsnummer = vedtaksperiode.fødselsnummer,
+                    utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                    utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
+                    opprettet = LocalDate.now()
+                )
+                vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
             }
         }
     }

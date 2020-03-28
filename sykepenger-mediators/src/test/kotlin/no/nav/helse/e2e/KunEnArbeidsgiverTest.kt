@@ -45,7 +45,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         sendVilkårsgrunnlag(0)
         sendYtelserUtenHistorikk(0)
-        sendSimulering(0)
 
         assertEquals(5, testRapid.inspektør.vedtaksperiodeteller)
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")

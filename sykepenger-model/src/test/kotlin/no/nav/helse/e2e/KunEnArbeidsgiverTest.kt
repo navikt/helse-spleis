@@ -89,7 +89,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
         inspektør.also {
             assertNoErrors(it)
@@ -599,7 +598,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
         håndterYtelser(1)   // No history
@@ -666,7 +664,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
 
         håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
@@ -788,7 +785,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
         håndterYtelser(1)   // No history
