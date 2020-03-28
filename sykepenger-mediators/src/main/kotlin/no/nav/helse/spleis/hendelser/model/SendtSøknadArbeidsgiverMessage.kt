@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Periode.Sykdom
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
@@ -17,7 +18,7 @@ internal class SendtSøknadArbeidsgiverMessage(originalMessage: String, problems
         requireKey("id", "egenmeldinger", "fravar")
         require("fom", JsonNode::asLocalDate)
         require("tom", JsonNode::asLocalDate)
-        require("sendtArbeidsgiver", JsonNode::asLocalDate)
+        require("sendtArbeidsgiver", JsonNode::asLocalDateTime)
         forbid("sendtNav")
     }
 
