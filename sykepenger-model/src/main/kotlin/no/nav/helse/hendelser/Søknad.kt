@@ -99,6 +99,7 @@ class Søknad constructor(
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
 
             override fun valider(søknad: Søknad) {
+                if (grad < 0) søknad.error("Utregnet sykdomsgrad er < 0")
                 if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
