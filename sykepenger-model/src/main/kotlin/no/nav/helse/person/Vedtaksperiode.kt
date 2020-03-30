@@ -254,6 +254,27 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand)
     }
 
+    private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
+        if (vilkårsgrunnlag.valider().hasErrors()) {
+            vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", tilstand.type)
+            return tilstand(vilkårsgrunnlag, TilInfotrygd)
+        }
+
+        val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
+            ?: periode().start
+        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag)
+            ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
+
+        val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, førsteFraværsdag)
+        dataForVilkårsvurdering = resultat.grunnlagsdata
+
+        if (resultat.måBehandlesManuelt) return tilstand(vilkårsgrunnlag, TilInfotrygd)
+
+        vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
+        tilstand(vilkårsgrunnlag, nesteTilstand)
+    }
+
+
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
         sykepengehistorikk(hendelse, arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive)
         foreldrepenger(hendelse)
@@ -669,23 +690,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            if (vilkårsgrunnlag.valider().hasErrors()) {
-                vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", type)
-                return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
-            }
-
-            val førsteFraværsdag = vedtaksperiode.sykdomstidslinje().førsteFraværsdag()
-                ?: vedtaksperiode.periode().start
-            val beregnetInntekt = vedtaksperiode.arbeidsgiver.inntekt(førsteFraværsdag)
-                ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
-
-            val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, førsteFraværsdag)
-            vedtaksperiode.dataForVilkårsvurdering = resultat.grunnlagsdata
-
-            if (resultat.måBehandlesManuelt) return vedtaksperiode.tilstand(vilkårsgrunnlag, TilInfotrygd)
-
-            vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
-            vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)
+            vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
         }
     }
 
@@ -926,6 +931,37 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingArbeidsgiversøknad)
+        }
+    }
+
+    internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
+        override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        override val timeout: Duration = Duration.ZERO
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+        }
+    }
+
+    internal object AvventerVilkårsprøvingArbeidsgiversøknad : Vedtaksperiodetilstand {
+        override val type = AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
+        override val timeout: Duration = Duration.ofHours(1)
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+            hendelse.info("Forespør vilkårsgrunnlag")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetalingMedInntektsmelding)
         }
     }
 

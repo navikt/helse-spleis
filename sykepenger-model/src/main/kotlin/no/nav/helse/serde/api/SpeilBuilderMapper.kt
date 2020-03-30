@@ -16,6 +16,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
     TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
     TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
+    TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
     TilstandType.AVVENTER_GAP,
     TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -31,6 +32,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
     TilstandType.AVSLUTTET -> if (utbetalt) TilstandstypeDTO.Utbetalt else TilstandstypeDTO.IngenUtbetaling
     TilstandType.AVSLUTTET_UTEN_UTBETALING -> TilstandstypeDTO.IngenUtbetaling
+    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING -> TilstandstypeDTO.IngenUtbetaling
 }
 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)

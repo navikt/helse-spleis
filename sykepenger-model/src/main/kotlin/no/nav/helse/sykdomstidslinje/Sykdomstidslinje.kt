@@ -92,18 +92,23 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
     private fun førsteSykedagDagEtterSisteIkkeSykedag() =
         kuttEtterSisteSykedag().let { dager ->
             dager.firstOrNull { it is Arbeidsdag || it is ImplisittDag }?.let { ikkeSykedag ->
-                dager.lastOrNull { it.dagen.isAfter(ikkeSykedag.dagen) && (it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag) }?.dagen
+                dager.lastOrNull {
+                    it.dagen.isAfter(ikkeSykedag.dagen) && erEnSykedag(it)
+                }?.dagen
             }
         }
 
-    private fun førsteSykedag() = dager.firstOrNull() { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag }?.dagen
+    private fun førsteSykedag() = dager.firstOrNull() { erEnSykedag(it) }?.dagen
 
     private fun kuttEtterSisteSykedag(): List<Dag> =
         dager.reversed().let { dager ->
-            val indeksSisteSykedag = dager.indexOfFirst { it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag }
+            val indeksSisteSykedag = dager.indexOfFirst { erEnSykedag(it) }
             if (indeksSisteSykedag < 0) return emptyList()
             dager.subList(indeksSisteSykedag, dager.size - 1)
         }
+
+    private fun erEnSykedag(it: Dag) =
+        it is Sykedag || it is SykHelgedag || it is Egenmeldingsdag || it is KunArbeidsgiverSykedag
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this)

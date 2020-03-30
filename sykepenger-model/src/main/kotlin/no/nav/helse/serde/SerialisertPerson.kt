@@ -219,6 +219,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.TIL_UTBETALING -> TilUtbetaling
         TilstandType.AVSLUTTET -> Avsluttet
         TilstandType.AVSLUTTET_UTEN_UTBETALING -> AvsluttetUtenUtbetaling
+        TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING -> AvsluttetUtenUtbetalingMedInntektsmelding
         TilstandType.UTBETALING_FEILET -> UtbetalingFeilet
         TilstandType.TIL_INFOTRYGD -> TilInfotrygd
         TilstandType.START -> Start
@@ -228,6 +229,7 @@ class SerialisertPerson(val json: String) {
         TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> MottattSykmeldingUferdigGap
         TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> AvventerSøknadFerdigGap
         TilstandType.AVVENTER_VILKÅRSPRØVING_GAP -> AvventerVilkårsprøvingGap
+        TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD -> AvventerVilkårsprøvingArbeidsgiversøknad
         TilstandType.AVVENTER_GAP -> AvventerGap
         TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP -> AvventerSøknadUferdigGap
         TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP -> AvventerInntektsmeldingFerdigGap
