@@ -328,7 +328,11 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
         if (this.periode().start >= other.periode().start) return true
-        return this.tilstand.type in listOf(TIL_INFOTRYGD, AVSLUTTET, AVSLUTTET_UTEN_UTBETALING)
+        return this.tilstand.type in listOf(
+            TIL_INFOTRYGD,
+            AVSLUTTET,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
     }
 
     // Gang of four State pattern

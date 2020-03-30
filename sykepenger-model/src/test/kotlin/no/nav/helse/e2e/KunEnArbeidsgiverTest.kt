@@ -74,6 +74,103 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
+        håndterSykmelding(Triple(3.januar, 5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  5.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 5.januar)), førsteFraværsdag = 3.januar)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+
+        håndterSykmelding(Triple(8.januar, 10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  10.januar, 100))
+        håndterSykmelding(Triple(11.januar, 22.januar, 100))
+        håndterSøknad(Sykdom(11.januar,  22.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
+        håndterVilkårsgrunnlag(1, INNTEKT)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(6, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(4, it.dagtelling[SykHelgedag::class])
+            assertEquals(8, it.dagtelling[Sykedag::class])
+        }
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            2,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
+    fun `ingen historie med to søknader til arbeidsgiver først`() {
+        håndterSykmelding(Triple(3.januar, 5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  5.januar, 100))
+
+        håndterSykmelding(Triple(8.januar, 10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  10.januar, 100))
+        håndterSykmelding(Triple(11.januar, 22.januar, 100))
+        håndterSøknad(Sykdom(11.januar,  22.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1, INNTEKT)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(6, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(4, it.dagtelling[SykHelgedag::class])
+            assertEquals(8, it.dagtelling[Sykedag::class])
+        }
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            2,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK
+        )
+    }
+
+    @Test
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Triple(3.januar, 8.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
