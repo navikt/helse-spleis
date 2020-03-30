@@ -36,7 +36,7 @@ internal class Vedtaksperiode private constructor(
     private val utbetalingslinjer: MutableList<Utbetalingslinje>,
     private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
-    private var utbetalingsreferanse: String,
+    private var utbetalingsreferanse: String?,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
@@ -67,7 +67,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingslinjer = mutableListOf(),
         godkjentAv = null,
         godkjenttidspunkt = null,
-        utbetalingsreferanse = genererUtbetalingsreferanse(id),
+        utbetalingsreferanse = null,
         førsteFraværsdag = null,
         dataForSimulering = null,
         dataForVilkårsvurdering = null,
@@ -767,8 +767,13 @@ internal class Vedtaksperiode private constructor(
                         it.clear()
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
                     }
-                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
-                    vedtaksperiode.tilstand(ytelser, AvventerSimulering)
+                    if (vedtaksperiode.utbetalingslinjer.isEmpty()) return@onSuccess vedtaksperiode.tilstand(ytelser, AvventerGodkjenning) {
+                        ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                    }
+                    vedtaksperiode.utbetalingsreferanse = genererUtbetalingsreferanse(vedtaksperiode.id)
+                    vedtaksperiode.tilstand(ytelser, AvventerSimulering) {
+                        ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
+                    }
                 }
             }
         }
@@ -792,11 +797,14 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.also {
-                vedtaksperiode.utbetalingsreferanse = it.utbetalingsreferanse
+            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse?.also {
+                vedtaksperiode.utbetalingsreferanse = it
             }
 
-            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
+            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(
+                hendelse,
+                AvventerGodkjenning
+            ) {
                 hendelse.warn("Ingen utbetalingslinjer, gjør ingen simulering av utbetaling")
             }
 
@@ -815,10 +823,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
 
-        private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse){
+        private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
                 utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
@@ -840,14 +848,20 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd) {
+            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(
+                manuellSaksbehandling,
+                TilInfotrygd
+            ) {
                 manuellSaksbehandling.error(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
                     manuellSaksbehandling.saksbehandler()
                 )
             }
 
-            vedtaksperiode.tilstand(manuellSaksbehandling, if (vedtaksperiode.utbetalingslinjer.isEmpty()) Avsluttet else TilUtbetaling) {
+            vedtaksperiode.tilstand(
+                manuellSaksbehandling,
+                if (vedtaksperiode.utbetalingslinjer.isEmpty()) Avsluttet else TilUtbetaling
+            ) {
                 vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
                 vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
                     manuellSaksbehandling.info(
@@ -867,7 +881,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             utbetaling(
                 hendelse,
-                vedtaksperiode.utbetalingsreferanse,
+                requireNotNull(vedtaksperiode.utbetalingsreferanse),
                 requireNotNull(vedtaksperiode.utbetalingslinjer),
                 requireNotNull(vedtaksperiode.maksdato),
                 requireNotNull(vedtaksperiode.godkjentAv)
@@ -877,7 +891,7 @@ internal class Vedtaksperiode private constructor(
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
                 utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
                 opprettet = LocalDate.now()
             )
@@ -898,7 +912,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiodeId = vedtaksperiode.id,
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,
-                    utbetalingsreferanse = vedtaksperiode.utbetalingsreferanse,
+                    utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
                     utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
                     forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
                     opprettet = LocalDate.now()

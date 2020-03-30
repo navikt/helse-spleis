@@ -30,7 +30,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
-    private val utbetalingsreferanser = mutableMapOf<Int, String>()
+    private val utbetalingsreferanser = mutableMapOf<Int, String?>()
 
     init {
         person.accept(this)
@@ -95,7 +95,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
-    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String) {
+    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String?) {
         this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
     }
 
@@ -122,11 +122,13 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
-    internal fun utbetalingsreferanse(indeks: Int) = utbetalingsreferanser[indeks] ?: fail {
+    internal fun utbetalingsreferanse(indeks: Int) = utbetalingsreferanser[indeks]
+
+    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
         "Missing collection initialization"
     }
 
-    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
+    internal fun utbetalingslinjer(indeks: Int) = utbetalingslinjer[indeks] ?: fail {
         "Missing collection initialization"
     }
 

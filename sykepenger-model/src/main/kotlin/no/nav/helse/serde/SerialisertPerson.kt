@@ -367,7 +367,7 @@ internal data class PersonData(
             val forbrukteSykedager: Int?,
             val godkjentAv: String?,
             val godkjenttidspunkt: LocalDateTime?,
-            val utbetalingsreferanse: String,
+            val utbetalingsreferanse: String?,
             val førsteFraværsdag: LocalDate?,
             val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             val dataForSimulering: DataForSimuleringData?,

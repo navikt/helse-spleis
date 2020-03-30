@@ -4,8 +4,7 @@ import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -28,59 +27,57 @@ internal class UtbetalingsreferanseTest {
     }
 
     @Test
-    fun `direkte tilstøtende perioder får samme utbetalingsreferanse`() {
+    fun `utbetalingsreferanse blir generert når noe skal utbetales`() {
         person.håndter(sykmelding(1.januar, 18.januar))
-        person.håndter(sykmelding(19.januar, 31.januar))
-        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
-    }
-
-    @Test
-    fun `tilstøtende perioder over helg får samme utbetalingsreferanse`() {
-        person.håndter(sykmelding(1.januar, 19.januar))
-        person.håndter(sykmelding(22.januar, 31.januar))
-        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
-    }
-
-    @Test
-    fun `perioder som blir tilstøtende får samme utbetalingsreferanse`() {
-        person.håndter(sykmelding(1.januar, 19.januar))
-        person.håndter(søknad(1.januar, 19.januar))
-        person.håndter(inntektsmelding(1.januar, 17.januar))
+        person.håndter(søknad(1.januar, 18.januar))
+        person.håndter(inntektsmelding(1.januar, 16.januar))
         person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(0)))
         person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
-
-        person.håndter(sykmelding(1.februar, 14.februar))
-
-        person.håndter(sykmelding(22.januar, 31.januar))
-        person.håndter(søknad(22.januar, 31.januar))
-
-        person.håndter(søknad(1.februar, 14.februar))
-        person.håndter(inntektsmelding(1.februar, 14.februar))
-
-        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
-        assertNotEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(2))
-
-        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
-        person.håndter(godkjenning(inspektør.vedtaksperiodeId(0), true))
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
-
-        person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
-        person.håndter(simulering(inspektør.vedtaksperiodeId(1)))
-        person.håndter(godkjenning(inspektør.vedtaksperiodeId(1), true))
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(1), Utbetaling.Status.FERDIG))
-
-        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(2)))
-        person.håndter(ytelser(inspektør.vedtaksperiodeId(2)))
-
-        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
-        assertEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(2))
+        assertNotNull(inspektør.utbetalingsreferanse(0))
+        assertTrue(inspektør.utbetalingslinjer(0).isNotEmpty())
     }
 
     @Test
-    fun `ikke-tilstøtende perioder får ulik utbetalingsreferanse`() {
-        person.håndter(sykmelding(1.januar, 19.januar))
-        person.håndter(sykmelding(23.januar, 31.januar))
-        assertNotEquals(inspektør.utbetalingsreferanse(0), inspektør.utbetalingsreferanse(1))
+    fun `utbetalingsreferanse blir ikke generert når ingenting skal utbetales`() {
+        person.håndter(sykmelding(1.januar, 26.januar))
+        person.håndter(søknad(1.januar, 26.januar))
+        person.håndter(inntektsmelding(1.januar, 16.januar, listOf(Periode(17.januar, 26.januar))))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
+        assertNull(inspektør.utbetalingsreferanse(0))
+        assertTrue(inspektør.utbetalingslinjer(0).isEmpty())
+    }
+
+    @Test
+    fun `utbetalingsreferanse blir kopiert fra tilstøtende periode med utbetaling`() {
+        person.håndter(sykmelding(1.januar, 26.januar))
+        person.håndter(sykmelding(29.januar, 28.februar))
+        person.håndter(søknad(1.januar, 26.januar))
+        person.håndter(søknad(29.januar, 28.februar))
+        person.håndter(inntektsmelding(1.januar, 16.januar))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
+        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(0)))
+        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
+        person.håndter(godkjenning(inspektør.vedtaksperiodeId(0)))
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
+        assertEquals(inspektør.utbetalingsreferanse(1), inspektør.utbetalingsreferanse(0))
+    }
+
+    @Test
+    fun `utbetalingsreferanse blir ikke kopiert fra tilstøtende periode uten utbetaling`() {
+        person.håndter(sykmelding(1.januar, 26.januar))
+        person.håndter(sykmelding(29.januar, 28.februar))
+        person.håndter(søknad(1.januar, 26.januar))
+        person.håndter(søknad(29.januar, 28.februar))
+        person.håndter(inntektsmelding(1.januar, 16.januar, listOf(Periode(17.januar, 26.januar))))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
+        person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(0)))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
+        person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
+        person.håndter(godkjenning(inspektør.vedtaksperiodeId(0)))
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
+        person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
+        assertNotEquals(inspektør.utbetalingsreferanse(1), inspektør.utbetalingsreferanse(0))
     }
 
     private fun sykmelding(fom: LocalDate, tom: LocalDate) =
@@ -98,12 +95,12 @@ internal class UtbetalingsreferanseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(fom,  tom, 100)),
+            perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = tom.atStartOfDay()
         )
 
-    private fun inntektsmelding(fom: LocalDate, tom: LocalDate) =
+    private fun inntektsmelding(fom: LocalDate, tom: LocalDate, ferieperioder: List<Periode> = emptyList()) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
@@ -113,7 +110,7 @@ internal class UtbetalingsreferanseTest {
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(fom, tom)),
-            ferieperioder = emptyList()
+            ferieperioder = ferieperioder
         )
 
     private fun vilkårsgrunnlag(vedtaksperiodeId: UUID) =
