@@ -25,6 +25,7 @@ class Inntektsmelding(
     ferieperioder: List<Periode>
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
+    private var beingQualified = false
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
@@ -121,6 +122,12 @@ class Inntektsmelding(
             beregnetInntekt.toBigDecimal()
         )
     }
+
+    internal fun beingQualified() {
+        beingQualified = true
+    }
+
+    fun isNotQualified() = !beingQualified
 
     class Refusjon(
         val opphørsdato: LocalDate?,

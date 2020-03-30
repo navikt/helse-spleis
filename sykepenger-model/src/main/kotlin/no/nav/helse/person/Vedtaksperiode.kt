@@ -959,7 +959,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingArbeidsgiversøknad)
+            vedtaksperiode.håndter(inntektsmelding,
+                if (inntektsmelding.isNotQualified()) {
+                        inntektsmelding.beingQualified()
+                        AvventerVilkårsprøvingArbeidsgiversøknad
+                    }
+                else
+                    AvsluttetUtenUtbetalingMedInntektsmelding
+            )
         }
     }
 
