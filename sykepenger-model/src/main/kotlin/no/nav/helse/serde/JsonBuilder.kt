@@ -117,8 +117,12 @@ internal class JsonBuilder : PersonVisitor {
         currentState.postVisitUtbetalingstidslinje(tidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
-    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id)
+    override fun preVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID
+    ) =
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -155,8 +159,12 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
 
-    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id)
+    override fun postVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID
+    ) =
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(arbeidsdag)
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(arbeidsdag)
@@ -280,7 +288,11 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            gruppeId: UUID
+        ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperioder.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
@@ -400,7 +412,11 @@ internal class JsonBuilder : PersonVisitor {
             pushState(UtbetalingstidslinjeState(utbetalingstidslinje))
         }
 
-        override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            gruppeId: UUID
+        ) {
             popState()
         }
     }

@@ -13,7 +13,6 @@ import no.nav.helse.serde.JsonBuilderTest.Companion.sykmelding
 import no.nav.helse.serde.JsonBuilderTest.Companion.søknad
 import no.nav.helse.serde.JsonBuilderTest.Companion.vilkårsgrunnlag
 import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
-import no.nav.helse.serde.api.SpeilBuilder.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juni
@@ -215,7 +214,11 @@ internal class SpeilBuilderTest {
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
         accept(object : PersonVisitor {
-            override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+            override fun preVisitVedtaksperiode(
+                vedtaksperiode: Vedtaksperiode,
+                id: UUID,
+                gruppeId: UUID
+            ) {
                 add(id.toString())
             }
         })

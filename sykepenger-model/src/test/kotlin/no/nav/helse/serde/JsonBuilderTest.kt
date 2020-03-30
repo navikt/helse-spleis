@@ -112,7 +112,11 @@ internal class JsonBuilderTest {
 
         private fun Person.fangeVedtaksperiodeId() {
             accept(object : PersonVisitor {
-                override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+                override fun preVisitVedtaksperiode(
+                    vedtaksperiode: Vedtaksperiode,
+                    id: UUID,
+                    gruppeId: UUID
+                ) {
                     vedtaksperiodeId = id.toString()
                 }
             })

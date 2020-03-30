@@ -38,7 +38,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
 }
 
 internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, UtbetalingsdagVisitor {
-    fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
+    fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {}
     fun visitMaksdato(maksdato: LocalDate?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
     fun visitGodkjentAv(godkjentAv: String?) {}
@@ -50,7 +50,7 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
-    fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {}
+    fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {}
 }
 
 internal interface UtbetalingsdagVisitor {

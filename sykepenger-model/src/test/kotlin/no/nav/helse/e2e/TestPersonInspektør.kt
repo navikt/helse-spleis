@@ -31,12 +31,14 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
     private val utbetalingsreferanser = mutableMapOf<Int, String?>()
+    private val gruppeIder = mutableMapOf<Int, UUID>()
 
     init {
         person.accept(this)
     }
 
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
+    internal fun gruppeId(index: Int) = requireNotNull(gruppeIder[index])
 
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
@@ -47,10 +49,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         this.arbeidsgiver = arbeidsgiver
     }
 
-    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+    override fun preVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID
+    ) {
         vedtaksperiodeindeks += 1
         tilstander[vedtaksperiodeindeks] = mutableListOf()
         vedtaksperiodeIder[vedtaksperiodeindeks] = id
+        gruppeIder[vedtaksperiodeindeks] = gruppeId
     }
 
     override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {

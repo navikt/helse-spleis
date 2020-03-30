@@ -790,6 +790,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Tilstøtende perioder blir gruppert sammen`() {
+        håndterSykmelding(Triple(1.januar, 2.januar, 100))
+        håndterSykmelding(Triple(3.januar, 4.januar, 100))
+
+        assertEquals(inspektør.gruppeId(0), inspektør.gruppeId(1))
+    }
+
+    @Test
+    fun `Perioder med gap blir ikke gruppert sammen`() {
+        håndterSykmelding(Triple(1.januar, 2.januar, 100))
+        håndterSykmelding(Triple(4.januar, 5.januar, 100))
+
+        assertNotEquals(inspektør.gruppeId(0), inspektør.gruppeId(1))
+    }
+
+    @Test
     fun `To tilstøtende perioder der den første er utbetalt`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))

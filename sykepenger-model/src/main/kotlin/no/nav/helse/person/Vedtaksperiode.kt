@@ -27,6 +27,7 @@ internal class Vedtaksperiode private constructor(
     private val person: Person,
     private val arbeidsgiver: Arbeidsgiver,
     private val id: UUID,
+    private var gruppeId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -58,6 +59,7 @@ internal class Vedtaksperiode private constructor(
         person = person,
         arbeidsgiver = arbeidsgiver,
         id = id,
+        gruppeId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
@@ -76,7 +78,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id)
+        visitor.preVisitVedtaksperiode(this, id, gruppeId)
         visitor.visitMaksdato(maksdato)
         visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
@@ -90,7 +92,7 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
         utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
         visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
-        visitor.postVisitVedtaksperiode(this, id)
+        visitor.postVisitVedtaksperiode(this, id, gruppeId)
     }
 
     internal fun periode() = Periode(førsteDag(), sisteDag())
@@ -418,7 +420,7 @@ internal class Vedtaksperiode private constructor(
             val forlengelse = tilstøtende != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
-            if (tilstøtende != null) vedtaksperiode.utbetalingsreferanse = tilstøtende.utbetalingsreferanse
+            if (tilstøtende != null) vedtaksperiode.gruppeId = tilstøtende.gruppeId
 
             return when {
                 forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {

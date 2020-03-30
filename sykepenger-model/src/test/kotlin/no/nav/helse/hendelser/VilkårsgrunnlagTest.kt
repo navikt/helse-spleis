@@ -182,7 +182,11 @@ internal class VilkårsgrunnlagTest {
     private fun vedtaksperiodeId(): String {
         lateinit var _id: UUID
         person.accept(object : PersonVisitor {
-            override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+            override fun preVisitVedtaksperiode(
+                vedtaksperiode: Vedtaksperiode,
+                id: UUID,
+                gruppeId: UUID
+            ) {
                 _id = id
             }
         })

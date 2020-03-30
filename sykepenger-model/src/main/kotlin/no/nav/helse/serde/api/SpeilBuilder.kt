@@ -126,8 +126,12 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
         currentState.postVisitUtbetalingstidslinje(tidslinje)
 
     override fun preVisitPerioder() = currentState.preVisitPerioder()
-    override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id)
+    override fun preVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID
+    ) {
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
@@ -171,8 +175,12 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
 
-    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id)
+    override fun postVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID
+    ) =
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(arbeidsdag)
     override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(arbeidsdag)
@@ -278,7 +286,11 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
         }
 
-        override fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            gruppeId: UUID
+        ) {
             pushState(VedtaksperiodeState(vedtaksperiode, arbeidsgiver, vedtaksperiodeMap, vedtaksperioder))
         }
 
@@ -341,7 +353,11 @@ internal class SpeilBuilder(private val hendelser: MutableSet<UUID> = mutableSet
             pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
         }
 
-        override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID) {
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            gruppeId: UUID
+        ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpArbeidstaker
             vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto())
             popState()

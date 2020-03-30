@@ -166,6 +166,7 @@ class SerialisertPerson(val json: String) {
             person = person,
             arbeidsgiver = arbeidsgiver,
             id = data.id,
+            gruppeId = data.gruppeId,
             aktørId = personData.aktørId,
             fødselsnummer = personData.fødselsnummer,
             organisasjonsnummer = arbeidsgiverData.organisasjonsnummer,
@@ -363,6 +364,7 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             val id: UUID,
+            val gruppeId: UUID,
             val maksdato: LocalDate?,
             val forbrukteSykedager: Int?,
             val godkjentAv: String?,
