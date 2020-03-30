@@ -15,11 +15,9 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
-    internal abstract fun valider(): Aktivitetslogg
+    abstract fun valider(): Aktivitetslogg
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
-
-    internal open fun old_padLeft(dato: LocalDate) {}
 
     internal open fun padLeft(dato: LocalDate) {}
 }

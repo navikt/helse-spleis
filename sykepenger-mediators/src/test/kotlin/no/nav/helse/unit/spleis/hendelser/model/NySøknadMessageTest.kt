@@ -54,7 +54,7 @@ internal class NySøknadMessageTest {
 
     private val ValidNySøknad = ValidSøknad.copy(status = SoknadsstatusDTO.NY).toJson()
     private val ValidAvbruttSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.AVBRUTT).toJson()
-    private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asJsonNode().let {
+    private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asObjectNode().let {
         it as ObjectNode
         it.put(UUID.randomUUID().toString(), "foobar")
     }.toJson()
@@ -101,11 +101,10 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun SykepengesoknadDTO.asJsonNode(): JsonNode = objectMapper.valueToTree<JsonNode>(this).apply {
-    this as ObjectNode
+private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
     put("@event_name", if (this["status"].asText() == "NY") "ny_søknad" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
-private fun SykepengesoknadDTO.toJson(): String = asJsonNode().toString()
+private fun SykepengesoknadDTO.toJson(): String = asObjectNode().toString()
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

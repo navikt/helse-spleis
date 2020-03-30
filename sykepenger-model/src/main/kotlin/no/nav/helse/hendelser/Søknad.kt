@@ -93,9 +93,8 @@ class Søknad constructor(
             fom: LocalDate,
             tom: LocalDate,
             private val gradFraSykmelding: Int,
-            faktiskGrad: Int? = null
+            faktiskSykdomsgrad: Int? = null
         ) : Periode(fom, tom) {
-            private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
 
             override fun valider(søknad: Søknad) {

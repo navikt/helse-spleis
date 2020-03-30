@@ -131,7 +131,7 @@ internal class PersonTest {
                     fom = 10.juli,
                     tom = 30.juli,
                     gradFraSykmelding = 100,
-                    faktiskGrad = null
+                    faktiskSykdomsgrad = null
                 )
             )
         ).also {

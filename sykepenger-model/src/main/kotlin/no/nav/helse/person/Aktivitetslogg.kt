@@ -60,11 +60,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun barn() = Aktivitetslogg(this)
 
-    override fun toString() = this.aktiviteter.map { it.inOrder() }.fold("") { acc, s -> acc + "\n" + s }
+    override fun toString() = this.aktiviteter.map { it.inOrder() }.joinToString(separator = "\n") { it }
 
     override fun aktivitetsteller() = aktiviteter.size
 
-    override fun kontekst(kontekst: Aktivitetskontekst) { kontekster.add(kontekst) }
+    override fun kontekst(kontekst: Aktivitetskontekst) {
+        kontekster.add(kontekst)
+    }
 
     override fun kontekst(person: Person) {
         forelder = person.aktivitetslogg
@@ -76,6 +78,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet -> kontekst in aktivitet })
         }
     }
+
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     private fun warn() = Aktivitet.Warn.filter(aktiviteter)
     override fun behov() = Aktivitet.Behov.filter(aktiviteter)
@@ -131,11 +134,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
 
             }
+
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitInfo(kontekster, this, melding, tidsstempel)
             }
 
         }
+
         internal class Warn(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
@@ -147,6 +152,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
 
             }
+
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitWarn(kontekster, this, melding, tidsstempel)
             }
@@ -165,22 +171,37 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     return aktiviteter.filterIsInstance<Behov>()
                 }
 
-                internal fun sykepengehistorikk(aktivitetslogg: IAktivitetslogg, historikkFom: LocalDate, historikkTom: LocalDate) {
-                    aktivitetslogg.behov(Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                        "historikkFom" to historikkFom.toString(),
-                        "historikkTom" to historikkTom.toString()
-                    ))
+                internal fun sykepengehistorikk(
+                    aktivitetslogg: IAktivitetslogg,
+                    historikkFom: LocalDate,
+                    historikkTom: LocalDate
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
+                            "historikkFom" to historikkFom.toString(),
+                            "historikkTom" to historikkTom.toString()
+                        )
+                    )
                 }
 
                 internal fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(Behovtype.Foreldrepenger, "Trenger informasjon om foreldrepengeytelser fra FPSAK")
+                    aktivitetslogg.behov(
+                        Behovtype.Foreldrepenger,
+                        "Trenger informasjon om foreldrepengeytelser fra FPSAK"
+                    )
                 }
 
-                internal fun inntektsberegning(aktivitetslogg: IAktivitetslogg, beregningStart: YearMonth, beregningSlutt: YearMonth) {
-                    aktivitetslogg.behov(Behovtype.Inntektsberegning, "Trenger inntektsberegning", mapOf(
-                        "beregningStart" to beregningStart.toString(),
-                        "beregningSlutt" to beregningSlutt.toString()
-                    ))
+                internal fun inntektsberegning(
+                    aktivitetslogg: IAktivitetslogg,
+                    beregningStart: YearMonth,
+                    beregningSlutt: YearMonth
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.Inntektsberegning, "Trenger inntektsberegning", mapOf(
+                            "beregningStart" to beregningStart.toString(),
+                            "beregningSlutt" to beregningSlutt.toString()
+                        )
+                    )
                 }
 
                 internal fun egenAnsatt(aktivitetslogg: IAktivitetslogg) {
@@ -191,40 +212,56 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
 
-                internal fun simulering(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, forlengelse: Boolean) {
-                    aktivitetslogg.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", mapOf(
-                        "utbetalingsreferanse" to utbetalingsreferanse,
-                        "utbetalingslinjer" to utbetalingslinjer.map {
-                            mapOf(
-                                "fom" to it.fom.toString(),
-                                "tom" to it.tom.toString(),
-                                "dagsats" to it.dagsats,
-                                "grad" to it.grad
-                            )
-                        },
-                        "maksdato" to maksdato.toString(),
-                        "forlengelse" to forlengelse
-                    ))
+                internal fun simulering(
+                    aktivitetslogg: IAktivitetslogg,
+                    utbetalingsreferanse: String,
+                    utbetalingslinjer: List<Utbetalingslinje>,
+                    maksdato: LocalDate,
+                    forlengelse: Boolean
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", mapOf(
+                            "utbetalingsreferanse" to utbetalingsreferanse,
+                            "utbetalingslinjer" to utbetalingslinjer.map {
+                                mapOf(
+                                    "fom" to it.fom.toString(),
+                                    "tom" to it.tom.toString(),
+                                    "dagsats" to it.dagsats,
+                                    "grad" to it.grad
+                                )
+                            },
+                            "maksdato" to maksdato.toString(),
+                            "forlengelse" to forlengelse
+                        )
+                    )
                 }
 
                 internal fun godkjenning(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler")
                 }
 
-                internal fun utbetaling(aktivitetslogg: IAktivitetslogg, utbetalingsreferanse: String, utbetalingslinjer: List<Utbetalingslinje>, maksdato: LocalDate, saksbehandler: String) {
-                    aktivitetslogg.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", mapOf(
-                        "utbetalingsreferanse" to utbetalingsreferanse,
-                        "utbetalingslinjer" to utbetalingslinjer.map {
-                            mapOf(
-                                "fom" to it.fom.toString(),
-                                "tom" to it.tom.toString(),
-                                "dagsats" to it.dagsats,
-                                "grad" to it.grad
-                            )
-                        },
-                        "maksdato" to maksdato.toString(),
-                        "saksbehandler" to saksbehandler
-                    ))
+                internal fun utbetaling(
+                    aktivitetslogg: IAktivitetslogg,
+                    utbetalingsreferanse: String,
+                    utbetalingslinjer: List<Utbetalingslinje>,
+                    maksdato: LocalDate,
+                    saksbehandler: String
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", mapOf(
+                            "utbetalingsreferanse" to utbetalingsreferanse,
+                            "utbetalingslinjer" to utbetalingslinjer.map {
+                                mapOf(
+                                    "fom" to it.fom.toString(),
+                                    "tom" to it.tom.toString(),
+                                    "dagsats" to it.dagsats,
+                                    "grad" to it.grad
+                                )
+                            },
+                            "maksdato" to maksdato.toString(),
+                            "saksbehandler" to saksbehandler
+                        )
+                    )
                 }
             }
 
@@ -279,6 +316,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
     }
 }
+
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun warn(melding: String, vararg params: Any?)
@@ -349,9 +387,12 @@ interface Aktivitetskontekst {
 }
 
 class SpesifikkKontekst(internal val kontekstType: String, internal val kontekstMap: Map<String, String> = mapOf()) {
-    internal fun melding() = kontekstType + kontekstMap.entries.fold(""){ acc, entry -> acc + " ${entry.key}: ${entry.value}"}
+    internal fun melding() =
+        kontekstType + kontekstMap.entries.joinToString(separator = " ") { "${it.key}: ${it.value}" }
+
     override fun equals(other: Any?) =
         this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap
+
     override fun hashCode() = kontekstMap.hashCode()
 }
 

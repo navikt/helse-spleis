@@ -43,7 +43,7 @@ internal class InntektsmeldingMessageTest {
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now()
-    ).asJsonNode()
+    ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
         inntektsmeldingId = "",
         arbeidstakerFnr = "fødselsnummer",
@@ -64,7 +64,7 @@ internal class InntektsmeldingMessageTest {
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now()
-    ).asJsonNode().toJson()
+    ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
     private val ValidInntektsmeldingWithUnknownFieldsJson = ValidInntektsmelding.let {
@@ -117,8 +117,7 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private fun Inntektsmeldingkontrakt.asJsonNode(): JsonNode = objectMapper.valueToTree<JsonNode>(this).apply {
-    this as ObjectNode
+private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
     put("@event_name", "inntektsmelding")
     put("@opprettet", LocalDateTime.now().toString())

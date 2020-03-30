@@ -33,7 +33,7 @@ internal class VedtaksperiodeTest {
                             fom = 21.juli,
                             tom = 25.juli,
                             gradFraSykmelding = 100,
-                            faktiskGrad = null
+                            faktiskSykdomsgrad = null
                         )
                     )
                 )

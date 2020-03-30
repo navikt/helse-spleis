@@ -122,21 +122,21 @@ internal class SøknadTest {
 
     @Test
     internal fun `angitt arbeidsgrad kan ikke føre til sykegrad høyere enn graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 79))
+        søknad(Sykdom(1.januar, 31.januar,  20, 21))
         søknad.valider()
         assertTrue(søknad.hasErrors())
     }
 
     @Test
     internal fun `angitt arbeidsgrad kan føre til lavere sykegrad enn graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 81))
+        søknad(Sykdom(1.januar, 31.januar,  20, 19))
         søknad.valider()
         assertFalse(søknad.hasErrors())
     }
 
     @Test
     internal fun `angitt arbeidsgrad kan føre til lik sykegrad som graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 80))
+        søknad(Sykdom(1.januar, 31.januar,  20, 20))
         søknad.valider()
         assertFalse(søknad.hasErrors())
     }
