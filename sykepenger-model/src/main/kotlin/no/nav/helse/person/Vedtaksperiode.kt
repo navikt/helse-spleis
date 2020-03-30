@@ -537,6 +537,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
+        }
     }
 
     internal object AvventerGap : Vedtaksperiodetilstand {
@@ -643,7 +648,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
+            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }

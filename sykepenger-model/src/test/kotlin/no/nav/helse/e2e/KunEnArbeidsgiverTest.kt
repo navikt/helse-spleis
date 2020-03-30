@@ -74,6 +74,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
+        håndterSykmelding(Triple(3.januar, 8.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
+        assertNoWarnings(inspektør)
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  8.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+            assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(4, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(2, it.dagtelling[SykHelgedag::class])
+        }
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+    }
+
+    @Test
     fun `ingen historie med Søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
@@ -677,7 +702,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
-            AVSLUTTET_UTEN_UTBETALING
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
         )
     }
 
