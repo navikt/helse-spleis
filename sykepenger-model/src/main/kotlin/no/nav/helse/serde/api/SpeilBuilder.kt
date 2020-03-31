@@ -195,6 +195,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun visitSykedag(sykedag: Sykedag.Søknad) = currentState.visitSykedag(sykedag)
     override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitUbestemt(ubestemtdag)
     override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitUtenlandsdag(utenlandsdag)
+    override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) =
+        currentState.visitKunArbeidsgiverSykedag(sykedag)
+
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
@@ -491,7 +494,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
-                    type = if (dag.dato.erHelg())  TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
+                    type = if (dag.dato.erHelg()) TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
                     inntekt = dag.inntekt,
                     dato = dag.dato
                 )
@@ -608,6 +611,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
         override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
+
+        override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) =
+            leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykedag)
 
         private fun leggTilDag(jsonDagType: JsonDagType, dag: Dag) {
             sykdomstidslinjeListe.add(

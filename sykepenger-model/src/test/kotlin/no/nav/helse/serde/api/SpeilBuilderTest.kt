@@ -117,12 +117,17 @@ internal class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)!!
 
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
-        val utbetalingstidslinje =
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje
+
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
         assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
         assertEquals(TypeDataDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje[15].type)
         assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje[16].type)
         assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje.last().type)
+
+        val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
+        assertEquals(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykdomstidslinje.last().type)
     }
 
     @Test
