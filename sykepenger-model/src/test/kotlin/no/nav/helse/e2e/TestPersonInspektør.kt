@@ -4,10 +4,7 @@ import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Dag
-import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
+import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.fail
@@ -119,6 +116,14 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
         override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = inkrementer(
             KunArbeidsgiverSykedag::class)
+
+        override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = inkrementer(
+            Arbeidsdag::class
+        )
+
+        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = inkrementer(
+            Arbeidsdag::class
+        )
 
         private fun inkrementer(klasse: KClass<out Dag>) {
             dagtelling.compute(klasse) { _, value ->

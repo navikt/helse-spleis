@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
@@ -540,5 +541,29 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    internal fun `helg i gap i arbeidsgiverperioden`() {
+        håndterSykmelding(Triple(3.januar, 10.januar, 100))
+        håndterInntektsmelding(listOf(Periode(3.januar, 4.januar), Periode(9.januar, 10.januar)), 3.januar)
+        håndterSøknad(Sykdom(3.januar, 10.januar, 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+
+        inspektør.also {
+            assertEquals(4, it.dagtelling[Sykedag::class])
+            assertEquals(2, it.dagtelling[SykHelgedag::class])
+            assertEquals(2, it.dagtelling[Arbeidsdag::class])
+        }
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING
+        )
     }
 }

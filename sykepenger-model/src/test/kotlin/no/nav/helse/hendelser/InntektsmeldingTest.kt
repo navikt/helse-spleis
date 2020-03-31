@@ -185,6 +185,25 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    internal fun `helg i opphold i arbeidsgiverperioden skal være helgedager`() {
+        inntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 4.januar), Periode(9.januar, 10.januar))
+        )
+
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[1.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[2.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[3.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[4.januar]!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, tidslinje[5.januar]!!::class)
+        assertEquals(ImplisittDag::class, tidslinje[6.januar]!!::class)
+        assertEquals(ImplisittDag::class, tidslinje[7.januar]!!::class)
+        assertEquals(Arbeidsdag.Inntektsmelding::class, tidslinje[8.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[9.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[10.januar]!!::class)
+    }
+
+    @Test
     internal fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
         assertEquals(2.januar, inntektsmelding.sykdomstidslinje().førsteDag())
