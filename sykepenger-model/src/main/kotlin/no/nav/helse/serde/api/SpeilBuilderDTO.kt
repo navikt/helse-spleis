@@ -101,8 +101,9 @@ enum class TypeDataDTO {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
+    Helgedag,
     Arbeidsdag,
-    Fridag,
+    Feriedag,
     AvvistDag,
     UkjentDag,
     ForeldetDag

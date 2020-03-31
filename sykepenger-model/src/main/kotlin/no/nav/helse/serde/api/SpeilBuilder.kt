@@ -491,7 +491,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
-                    type = TypeDataDTO.Fridag,
+                    type = if (dag.dato.erHelg())  TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
                     inntekt = dag.inntekt,
                     dato = dag.dato
                 )
