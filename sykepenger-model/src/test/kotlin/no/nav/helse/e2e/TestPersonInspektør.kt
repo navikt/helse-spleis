@@ -1,5 +1,6 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -74,6 +75,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype)
+
+    internal inline fun <reified T> etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, felt: String) =
+        personLogg.etterspurtBehov<T>(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype, felt)
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
         personLogg = aktivitetslogg

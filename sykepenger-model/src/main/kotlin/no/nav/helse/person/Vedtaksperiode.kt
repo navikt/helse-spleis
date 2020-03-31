@@ -846,7 +846,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
                 utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
-                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode) != null
+                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse != null
             )
         }
     }

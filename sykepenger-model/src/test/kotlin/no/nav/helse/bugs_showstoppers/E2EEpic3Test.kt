@@ -4,7 +4,9 @@ import no.nav.helse.e2e.AbstractEndToEndTest
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.Utbetaling
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
@@ -515,6 +517,54 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(3.februar(2020), it.utbetalingslinjer[1]?.first()?.fom) // starts mandag
             assertEquals(28.februar(2020), it.utbetalingslinjer[1]?.first()?.tom)
         }
+    }
+
+    @Test
+    fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
+        håndterSykmelding(Triple(28.januar(2020), 10.februar(2020), 100))
+        håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(28.januar(2020), 10.februar(2020), 100))
+        håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
+            førsteFraværsdag = 28.januar(2020)
+        )
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(1)   // No history
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertNull(inspektør.utbetalingsreferanse(0))
+        val utbetalingsreferanse = inspektør.utbetalingsreferanse(1) ?: fail { "utbetalingsreferanse er forventet å være satt" }
+        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(1, Behovtype.Simulering, "utbetalingsreferanse"))
+        assertEquals(false, inspektør.etterspurteBehov(1, Behovtype.Simulering, "forlengelse"))
+    }
+
+    @Test
+    fun `simulering av periode der tilstøtende ble utbetalt`() {
+        håndterSykmelding(Triple(17.januar(2020), 10.februar(2020), 100))
+        håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
+        håndterSøknad(Sykdom(17.januar(2020), 10.februar(2020), 100))
+        håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
+            førsteFraværsdag = 18.januar(2020)
+        )
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+        håndterSimulering(0)
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, Utbetaling.Status.FERDIG)
+        håndterYtelser(1)   // No history
+
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        val utbetalingsreferanse = inspektør.utbetalingsreferanse(0) ?: fail { "utbetalingsreferanse er forventet å være satt" }
+        assertEquals(utbetalingsreferanse, inspektør.utbetalingsreferanse(1))
+        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(0, Behovtype.Simulering, "utbetalingsreferanse"))
+        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(1, Behovtype.Simulering, "utbetalingsreferanse"))
+        assertEquals(false, inspektør.etterspurteBehov(0, Behovtype.Simulering, "forlengelse"))
+        assertEquals(true, inspektør.etterspurteBehov(1, Behovtype.Simulering, "forlengelse"))
     }
 
     @Test
