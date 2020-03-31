@@ -143,6 +143,8 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
                 Egenmeldingsdag.Inntektsmelding::class -> "E"
                 Egenmeldingsdag.Søknad::class -> "E"
                 AvvistDag::class -> "X"
+                Feriedag.Inntektsmelding::class -> "F"
+                Feriedag.Søknad::class -> "F"
                 else -> "?"
             }
         }

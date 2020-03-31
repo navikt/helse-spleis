@@ -113,7 +113,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `overlapp med ferie og arbeidsgiverperiode`() {
+    internal fun `kaster ut ved konflikt mellom sykedager i sykmelding og ferie i inntektsmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(1.januar, INNTEKT, emptyList()),
@@ -125,7 +125,7 @@ internal class InntektsmeldingHendelseTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(Periode(16.januar, 31.januar))
         )
-        assertTrue(inntektsmelding.valider().hasErrors())
+        assertFalse(inntektsmelding.valider().hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))

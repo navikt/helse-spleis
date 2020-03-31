@@ -95,8 +95,8 @@ internal class InntektsmeldingTest {
     @Test
     internal fun `overlapp i ferieperioder`() {
         inntektsmelding(
-            listOf(Periode(1.januar, 2.januar)),
-            listOf(Periode(3.januar, 4.januar), Periode(3.januar, 4.januar)),
+            arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
+            ferieperioder = listOf(Periode(3.januar, 4.januar), Periode(3.januar, 4.januar)),
             førsteFraværsdag = 1.januar
         )
         val tidslinje = inntektsmelding.sykdomstidslinje()
@@ -157,24 +157,31 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidgiverperioden kan ikke ha overlappende perioder`() {
+    internal fun `arbeidgiverperioden kan ha overlappende perioder`() {
         inntektsmelding(
             listOf(
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
             ), emptyList()
         )
         inntektsmelding.valider()
-        assertTrue(inntektsmelding.hasErrors())
+        assertFalse(inntektsmelding.hasErrors())
     }
 
     @Test
-    internal fun `arbeidgiverperioden kan ikke overlappe med ferieperioder`() {
+    internal fun `arbeidgiverdager vinner over feriedager`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
             ferieperioder = listOf(Periode(3.januar, 4.januar))
         )
         inntektsmelding.valider()
-        assertTrue(inntektsmelding.hasErrors())
+        assertFalse(inntektsmelding.hasErrors())
+
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[1.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[2.januar]!!::class)
+        assertEquals(Feriedag.Inntektsmelding::class, tidslinje[3.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[4.januar]!!::class)
+        assertEquals(Egenmeldingsdag.Inntektsmelding::class, tidslinje[5.januar]!!::class)
     }
 
     @Test

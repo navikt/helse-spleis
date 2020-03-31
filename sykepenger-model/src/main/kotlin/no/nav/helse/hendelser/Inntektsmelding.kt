@@ -90,7 +90,6 @@ class Inntektsmelding(
     }
 
     override fun valider(): Aktivitetslogg {
-        if (!ingenOverlappende()) aktivitetslogg.error("Inntektsmelding inneholder arbeidsgiverperioder eller ferieperioder som overlapper med hverandre")
         if (refusjon == null) aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
         else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
         return aktivitetslogg
@@ -109,11 +108,6 @@ class Inntektsmelding(
         refusjon.opphørsdato?.also { if (it <= sisteUtbetalingsdag) return true }
         return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
     }
-
-    private fun ingenOverlappende() = (arbeidsgiverperioder + ferieperioder)
-        .sortedBy { it.fom }
-        .zipWithNext(InntektsmeldingPeriode::ingenOverlappende)
-        .all { it }
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         inntekthistorikk.add(
@@ -142,9 +136,6 @@ class Inntektsmelding(
 
         internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): Sykdomstidslinje
 
-        internal fun ingenOverlappende(other: InntektsmeldingPeriode) =
-            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
-
         class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
                 Sykdomstidslinje.egenmeldingsdager(fom, tom, InntektsmeldingDagFactory)
@@ -170,6 +161,8 @@ class Inntektsmelding(
                 høyre is ImplisittDag -> venstre
                 venstre is Feriedag.Inntektsmelding && høyre is Arbeidsdag.Inntektsmelding -> venstre
                 høyre is Feriedag.Inntektsmelding && venstre is Arbeidsdag.Inntektsmelding -> høyre
+                venstre is Egenmeldingsdag.Inntektsmelding && høyre is Feriedag.Inntektsmelding -> venstre
+                høyre is Egenmeldingsdag.Inntektsmelding && venstre is Feriedag.Inntektsmelding -> høyre
                 else -> Ubestemtdag(venstre.dagen)
             }
         }
