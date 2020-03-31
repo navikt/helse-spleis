@@ -35,7 +35,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal abstract class AbstractEndToEndTest {
+internal abstract class AbstractEndToEndMediatorTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
@@ -427,7 +427,7 @@ internal abstract class AbstractEndToEndTest {
                 val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
                 this.getOrPut(id) { mutableListOf() }.apply {
                     it.path("@behov").onEach {
-                        add(Behovtype.valueOf(it.asText()) to tilstand)
+                        add(valueOf(it.asText()) to tilstand)
                     }
                 }
             }

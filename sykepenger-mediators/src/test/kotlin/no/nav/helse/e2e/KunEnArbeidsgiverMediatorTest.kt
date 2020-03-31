@@ -9,7 +9,7 @@ import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
+internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `påminnelse for vedtaksperiode som ikke finnes`() {
