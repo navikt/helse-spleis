@@ -140,7 +140,7 @@ data class SøknadDTO(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
-    val sendtNav: LocalDateTime
+    val sendtNav: LocalDateTime? = null
 ) : HendelseDTO
 
 data class SykmeldingDTO(

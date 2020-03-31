@@ -92,8 +92,7 @@ private fun mapSendtSøknad(sendtSøknadArbeidsgiverDTO: SendtSøknadArbeidsgive
     sendtSøknadArbeidsgiverDTO.type,
     sendtSøknadArbeidsgiverDTO.fom,
     sendtSøknadArbeidsgiverDTO.tom,
-    sendtSøknadArbeidsgiverDTO.rapportertdato,
-    sendtSøknadArbeidsgiverDTO.sendtNav
+    sendtSøknadArbeidsgiverDTO.rapportertdato
 )
 
 private fun mapNySøknad(nySøknadDTO: NySøknadDTO) = SerdeSykmeldingDTO(
@@ -128,7 +127,6 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
     class SendtSøknadArbeidsgiverDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_ARBEIDSGIVER", json["@id"].asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
-        val sendtNav: LocalDateTime = LocalDateTime.parse(json["sendtNav"].asText())
         val fom: LocalDate = LocalDate.parse(json["fom"].asText())
         val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }

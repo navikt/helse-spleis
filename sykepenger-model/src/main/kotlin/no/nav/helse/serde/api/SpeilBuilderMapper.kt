@@ -152,7 +152,7 @@ internal fun mapVilkår(
         )
     }
     val søknadsfrist = Søknadsfrist(
-        sendtNav = søknad.sendtNav,
+        sendtNav = søknad.sendtNav!!,
         søknadFom = søknad.fom,
         søknadTom = søknad.tom,
         oppfylt = søknadsfristOppfylt(søknad)
@@ -178,7 +178,7 @@ private fun sykepengegrunnlagOppfylt(
 }
 
 private fun søknadsfristOppfylt(søknad: SøknadDTO): Boolean {
-    val søknadSendtMåned = søknad.sendtNav.toLocalDate().withDayOfMonth(1)
+    val søknadSendtMåned = søknad.sendtNav!!.toLocalDate().withDayOfMonth(1)
     val senesteMuligeSykedag = søknad.fom.plusMonths(3)
     return søknadSendtMåned.isBefore(senesteMuligeSykedag.plusDays(1))
 }
