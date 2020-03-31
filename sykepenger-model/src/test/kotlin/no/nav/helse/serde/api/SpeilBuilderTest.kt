@@ -26,7 +26,7 @@ import java.util.*
 
 internal class SpeilBuilderTest {
     private val aktørId = "1234"
-    private val fnr = "01010025678"
+    private val fnr = "12020052345"
 
     private fun hendelser(): Triple<List<UUID>, List<UUID>, List<HendelseDTO>> {
         val hendelser1 = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
