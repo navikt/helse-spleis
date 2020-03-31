@@ -167,19 +167,32 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar, 4.januar, 100))
         håndterSykmelding(Triple(8.januar, 9.januar, 100))
         håndterSykmelding(Triple(15.januar, 16.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(
-            Periode(3.januar, 4.januar),
-            Periode(15.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(
+            0,
+            listOf(
+                Periode(3.januar, 4.januar),
+                Periode(15.januar, 16.januar)
+            ),
+            3.januar
+        )
 
         håndterSøknadMedValidering(0, Sykdom(3.januar,  4.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
-        håndterManuellSaksbehandling(0, true)
+
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET
+        )
 
         håndterSøknadMedValidering(1, Sykdom(8.januar,  9.januar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
-        håndterManuellSaksbehandling(1, true)
 
         inspektør.also {
             assertNoErrors(it)
@@ -188,16 +201,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertNotNull(inspektør.maksdato(1))
         assertTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
-        )
-        assertTilstander(
             1,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
@@ -205,7 +208,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
             AVSLUTTET
         )
 
@@ -399,8 +401,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(4, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)

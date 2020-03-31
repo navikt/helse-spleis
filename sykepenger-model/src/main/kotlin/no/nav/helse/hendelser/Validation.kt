@@ -106,7 +106,7 @@ internal class ByggUtbetalingslinjer(
     override fun isValid(): Boolean {
         utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje).result()
         if (utbetalingslinjer.isEmpty())
-            ytelser.warn("Ingen utbetalingslinjer bygget")
+            ytelser.info("Ingen utbetalingslinjer bygget")
         else
             ytelser.info("Utbetalingslinjer bygget vellykket")
         return !ytelser.hasErrors()

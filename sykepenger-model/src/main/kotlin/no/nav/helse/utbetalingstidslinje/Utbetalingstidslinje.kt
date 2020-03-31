@@ -116,6 +116,15 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
 
+    internal fun kunArbeidsgiverdager() =
+        this.utbetalingsdager.all {
+            it is ArbeidsgiverperiodeDag ||
+                it is Arbeidsdag ||
+                it is NavHelgDag ||
+                it is Fridag
+        }
+
+
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {
 

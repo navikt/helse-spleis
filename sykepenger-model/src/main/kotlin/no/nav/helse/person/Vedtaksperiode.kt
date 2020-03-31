@@ -784,6 +784,11 @@ internal class Vedtaksperiode private constructor(
                         it.clear()
                         it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
                     }
+                    if (vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() &&
+                        person.aktivitetslogg.logg(vedtaksperiode).hasOnlyInfoAndNeeds()
+                    ) return@onSuccess vedtaksperiode.tilstand(ytelser, Avsluttet) {
+                        ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+                    }
                     if (vedtaksperiode.utbetalingslinjer.isEmpty()) return@onSuccess vedtaksperiode.tilstand(ytelser, AvventerGodkjenning) {
                         ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                     }

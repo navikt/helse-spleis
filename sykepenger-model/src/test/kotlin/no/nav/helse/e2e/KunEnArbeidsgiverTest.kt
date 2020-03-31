@@ -365,7 +365,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ingen nav utbetaling kreves`() {
+    fun `ingen nav utbetaling kreves, blir automatisk behandlet og avsluttet`() {
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  5.januar, 100))
         håndterYtelser(0)   // No history
@@ -374,12 +374,40 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
         }
         assertFalse(hendelselogg.hasErrors())
+
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+
+        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVSLUTTET
         )
     }
 
+    @Test
+    fun `ikke automatisk behandling hvis warnings`() {
+        håndterSykmelding(Triple(3.januar, 5.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar,  5.januar, 100))
+        håndterSøknad(Sykdom(3.januar,  5.januar, 100))
+        håndterYtelser(0)   // No history
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertFalse(hendelselogg.hasErrors())
+
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)   // No history
+
+        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
+        assertTilstander(
+            0,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING
+        )
+    }
 
     @Test
     fun `To perioder med opphold`() {

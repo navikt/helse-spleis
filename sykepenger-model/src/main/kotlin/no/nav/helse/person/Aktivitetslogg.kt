@@ -54,6 +54,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     override fun hasWarnings() = warn().isNotEmpty() || hasBehov()
 
+    internal fun hasOnlyInfoAndNeeds() = !hasErrors() && warn().isEmpty()
+
     override fun hasBehov() = behov().isNotEmpty() || hasErrors()
 
     override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
