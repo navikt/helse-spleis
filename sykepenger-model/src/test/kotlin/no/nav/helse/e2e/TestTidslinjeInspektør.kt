@@ -45,6 +45,16 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.Fridag::class)
     }
 
+    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+        datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.ForeldetDag::class
+        inkrementer(Utbetalingstidslinje.Utbetalingsdag.ForeldetDag::class)
+    }
+
+    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+        datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class
+        inkrementer(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class)
+    }
+
     private fun inkrementer(klasse: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         dagtelling.compute(klasse) { _, value -> 1 + (value ?: 0) }
     }

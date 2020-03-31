@@ -27,6 +27,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
+    internal val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
+    private var inVedtaksperiode = false
     private val utbetalingsreferanser = mutableMapOf<Int, String?>()
     private val gruppeIder = mutableMapOf<Int, UUID>()
 
@@ -55,6 +57,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         tilstander[vedtaksperiodeindeks] = mutableListOf()
         vedtaksperiodeIder[vedtaksperiodeindeks] = id
         gruppeIder[vedtaksperiodeindeks] = gruppeId
+        inVedtaksperiode = true
+    }
+
+    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
+    }
+
+    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {
+        inVedtaksperiode = false
     }
 
     override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
@@ -157,6 +168,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:fail {
+        "Missing collection initialization"
+    }
+
+    internal fun utbetalingstidslinjer(indeks: Int) = utbetalingstidslinjer[indeks] ?: fail {
         "Missing collection initialization"
     }
 

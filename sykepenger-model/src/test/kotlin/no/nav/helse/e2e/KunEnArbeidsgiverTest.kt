@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -294,6 +295,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertDoesNotThrow { it.arbeidsgiver.peekTidslinje() }
+            assertTrue(it.utbetalingslinjer(0).isEmpty())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+                assertEquals(7, tidslinjeInspektør.dagtelling[ForeldetDag::class])
+                assertEquals(2, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(1, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
+            }
         }
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
