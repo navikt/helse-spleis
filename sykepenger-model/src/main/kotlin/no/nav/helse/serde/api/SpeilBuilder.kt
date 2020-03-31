@@ -306,11 +306,39 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             organisasjonsnummer: String
         ) {
-            arbeidsgivere.add(arbeidsgiverMap.mapTilArbeidsgiverDto())
+            val fellesVedaksperiodedata = mutableMapOf<UUID, GrunnlagsdataDTO>()
+            val fellesOpptjening = mutableMapOf<UUID, OpptjeningDTO>()
+
+            val arbeidsgiverDTO = arbeidsgiverMap.mapTilArbeidsgiverDto()
+            arbeidsgiverDTO.vedtaksperioder.forEach { vedtaksperiode ->
+                if (vedtaksperiode.fullstendig) {
+                    (vedtaksperiode as VedtaksperiodeDTO).dataForVilkårsvurdering?.also {
+                        fellesVedaksperiodedata.putIfAbsent(vedtaksperiode.gruppeId, it)
+                    }
+                    vedtaksperiode.vilkår.opptjening?.also {
+                        fellesOpptjening.putIfAbsent(vedtaksperiode.gruppeId, it)
+                    }
+                }
+            }
+
+            val mappedeArbeidsgivere = arbeidsgiverDTO.copy(
+                vedtaksperioder = arbeidsgiverDTO.vedtaksperioder
+                    .map { vedtaksperiode ->
+                        if (vedtaksperiode.fullstendig) {
+                            (vedtaksperiode as VedtaksperiodeDTO).copy(
+                                dataForVilkårsvurdering = fellesVedaksperiodedata[vedtaksperiode.gruppeId],
+                                vilkår = vedtaksperiode.vilkår.copy(opptjening = fellesOpptjening[vedtaksperiode.gruppeId])
+                            )
+                        } else {
+                            vedtaksperiode
+                        }
+                    }
+            )
+
+            arbeidsgivere.add(mappedeArbeidsgivere)
             popState()
         }
     }
-
 
     private inner class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
@@ -327,7 +355,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vedtaksperiode, Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
-
 
         init {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap(arbeidsgiver))

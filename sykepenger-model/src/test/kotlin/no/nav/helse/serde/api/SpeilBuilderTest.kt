@@ -187,6 +187,47 @@ internal class SpeilBuilderTest {
         )
     }
 
+    @Test
+    fun `passer på at alle vedtak får fellesdata for sykefraværet`() {
+        val (hendelseIder, hendelseIder2, hendelser) = hendelser()
+
+        var vedtaksperiodeIder: Set<String>
+
+        val person = Person(aktørId, fnr).apply {
+
+            håndter(sykmelding(hendelseId = hendelseIder[0], fom = 1.januar, tom = 31.januar))
+            håndter(søknad(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
+            håndter(inntektsmelding(hendelseId = hendelseIder[2], fom = 1.januar))
+
+            vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
+
+            håndter(sykmelding(hendelseId = hendelseIder2[0], fom = 1.februar, tom = 14.februar))
+            håndter(søknad(hendelseId = hendelseIder2[1], fom = 1.februar, tom = 14.februar))
+
+            vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)!!
+
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
+
+        assertEquals(2, vedtaksperioder.size)
+        assertEquals(vedtaksperioder.first().gruppeId, vedtaksperioder.last().gruppeId)
+        assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder.last().dataForVilkårsvurdering)
+        assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder.last().vilkår.opptjening)
+    }
+
     /**
      * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
      * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.

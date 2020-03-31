@@ -19,6 +19,7 @@ data class ArbeidsgiverDTO(
 
 data class VedtaksperiodeDTO(
     override val id: UUID,
+    override val gruppeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tilstand: TilstandstypeDTO,
@@ -28,7 +29,7 @@ data class VedtaksperiodeDTO(
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val godkjentAv: String?,
     val godkjenttidspunkt: LocalDateTime?,
-    val vilkår: Vilkår,
+    val vilkår: VilkårDTO,
     val førsteFraværsdag: LocalDate,
     val inntektFraInntektsmelding: Double,
     val totalbeløpArbeidstaker: Int,
@@ -39,6 +40,7 @@ data class VedtaksperiodeDTO(
 
 data class UfullstendigVedtaksperiodeDTO(
     override val id: UUID,
+    override val gruppeId: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tilstand: TilstandstypeDTO,
@@ -47,6 +49,7 @@ data class UfullstendigVedtaksperiodeDTO(
 
 interface VedtaksperiodeDTOBase {
     val id: UUID
+    val gruppeId: UUID
     val fom: LocalDate
     val tom: LocalDate
     val tilstand: TilstandstypeDTO
@@ -161,15 +164,15 @@ enum class TilstandstypeDTO {
     TilInfotrygd
 }
 
-data class Vilkår(
-    val sykepengedager: Sykepengedager,
-    val alder: Alder,
-    val opptjening: Opptjening?,
-    val søknadsfrist: Søknadsfrist,
-    val sykepengegrunnlag: Sykepengegrunnlag
+data class VilkårDTO(
+    val sykepengedager: SykepengedagerDTO,
+    val alder: AlderDTO,
+    val opptjening: OpptjeningDTO?,
+    val søknadsfrist: SøknadsfristDTO,
+    val sykepengegrunnlag: SykepengegrunnlagDTO
 )
 
-data class Sykepengedager(
+data class SykepengedagerDTO(
     val forbrukteSykedager: Int?,
     val førsteFraværsdag: LocalDate,
     val førsteSykepengedag: LocalDate?,
@@ -177,25 +180,25 @@ data class Sykepengedager(
     val oppfylt: Boolean?
 )
 
-data class Alder(
+data class AlderDTO(
     val alderSisteSykedag: Int,
     val oppfylt: Boolean?
 )
 
-data class Opptjening(
+data class OpptjeningDTO(
     val antallKjenteOpptjeningsdager: Int?,
     val fom: LocalDate?,
     val oppfylt: Boolean?
 )
 
-data class Søknadsfrist(
+data class SøknadsfristDTO(
     val sendtNav: LocalDateTime,
     val søknadFom: LocalDate,
     val søknadTom: LocalDate,
     val oppfylt: Boolean?
 )
 
-data class Sykepengegrunnlag(
+data class SykepengegrunnlagDTO(
     val sykepengegrunnlag: Double?,
     val grunnbeløp: Int,
     val oppfylt: Boolean?

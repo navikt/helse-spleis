@@ -137,5 +137,3 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
         val mottattDato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
     }
 }
-
-
