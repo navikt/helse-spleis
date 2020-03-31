@@ -281,6 +281,8 @@ internal class SpeilBuilderTest {
         assertEquals(fom, sykepengedager.førsteFraværsdag)
         assertEquals(fom.plusDays(16), sykepengedager.førsteSykepengedag)
         assertEquals(28.desember, sykepengedager.maksdato)
+        assertEquals(237, sykepengedager.gjenståendeDager)
+        assertTrue(sykepengedager.oppfylt!!)
 
         val alder = vilkår.alder
         assertEquals(17, alder.alderSisteSykedag)

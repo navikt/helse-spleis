@@ -6,6 +6,7 @@ import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.TilstandType
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -114,6 +115,7 @@ internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnla
     harOpptjening = grunnlagsdata.harOpptjening
 )
 
+
 internal fun mapVilkår(
     vedtaksperiodeMap: Map<String, Any?>,
     utbetalingslinjer: List<UtbetalingslinjeDTO>,
@@ -134,11 +136,13 @@ internal fun mapVilkår(
     val forbrukteSykedager = vedtaksperiodeMap["forbrukteSykedager"] as Int?
     val over67 = personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
     val maksdato = vedtaksperiodeMap["maksdato"] as LocalDate?
+    val gjenståendeDager = maksdato?.let { val dagerIgjen = sisteSykepengedagEllerSisteDagIPerioden.datesUntil(it).filter {d -> !d.erHelg() }.count().toInt(); if (dagerIgjen < 0) 0 else dagerIgjen }
     val sykepengedager = SykepengedagerDTO(
         forbrukteSykedager = forbrukteSykedager,
         førsteFraværsdag = førsteFraværsdag,
         førsteSykepengedag = førsteSykepengedag,
         maksdato = maksdato,
+        gjenståendeDager = gjenståendeDager,
         oppfylt = ikkeOppbruktSykepengedager(maksdato, sisteSykepengedagEllerSisteDagIPerioden)
     )
     val alderSisteSykepengedag = personalder.alderPåDato(sisteSykepengedagEllerSisteDagIPerioden)
@@ -188,4 +192,4 @@ private fun søknadsfristOppfylt(søknad: SøknadDTO): Boolean {
 private fun ikkeOppbruktSykepengedager(
     maksdato: LocalDate?,
     sisteSykepengedag: LocalDate
-) = maksdato?.isBefore(sisteSykepengedag)
+) = maksdato?.isAfter(sisteSykepengedag)

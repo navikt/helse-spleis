@@ -178,6 +178,7 @@ data class SykepengedagerDTO(
     val førsteFraværsdag: LocalDate,
     val førsteSykepengedag: LocalDate?,
     val maksdato: LocalDate?,
+    val gjenståendeDager: Int?,
     val oppfylt: Boolean?
 )
 
@@ -187,9 +188,9 @@ data class AlderDTO(
 )
 
 data class OpptjeningDTO(
-    val antallKjenteOpptjeningsdager: Int?,
-    val fom: LocalDate?,
-    val oppfylt: Boolean?
+    val antallKjenteOpptjeningsdager: Int,
+    val fom: LocalDate,
+    val oppfylt: Boolean
 )
 
 data class SøknadsfristDTO(
