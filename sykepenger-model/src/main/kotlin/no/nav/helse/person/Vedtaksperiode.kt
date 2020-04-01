@@ -334,6 +334,35 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
+    private fun høstingsresultater(
+        engineForTimeline: ByggUtbetalingstidlinjer?,
+        engineForLine: ByggUtbetalingslinjer?,
+        ytelser: Ytelser
+    ) {
+        maksdato = engineForTimeline?.maksdato()
+        forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
+        utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
+        utbetalingslinjer.also {
+            it.clear()
+            it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
+        }
+        if (utbetalingstidslinje.kunArbeidsgiverdager() &&
+            person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
+        ) return tilstand(ytelser, Avsluttet) {
+            ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+        }
+        if (utbetalingslinjer.isEmpty()) return tilstand(
+            ytelser,
+            AvventerGodkjenning
+        ) {
+            ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+        }
+        utbetalingsreferanse = genererUtbetalingsreferanse(id)
+        tilstand(ytelser, AvventerSimulering) {
+            ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
+        }
+    }
+
     internal fun harTilstøtende(other: Vedtaksperiode) =
         this.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje())
 
@@ -773,29 +802,11 @@ internal class Vedtaksperiode private constructor(
                     ByggUtbetalingslinjer(
                         ytelser,
                         vedtaksperiode,
-                        arbeidsgiver.peekTidslinje()
+                        arbeidsgiver.nåværendeTidslinje()
                     ).also { engineForLine = it }
                 }
                 it.onSuccess {
-                    vedtaksperiode.maksdato = engineForTimeline?.maksdato()
-                    vedtaksperiode.forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
-                    vedtaksperiode.utbetalingstidslinje = engineForLine?.utbetalingstidslinje ?: Utbetalingstidslinje()
-                    vedtaksperiode.utbetalingslinjer.also {
-                        it.clear()
-                        it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
-                    }
-                    if (vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() &&
-                        person.aktivitetslogg.logg(vedtaksperiode).hasOnlyInfoAndNeeds()
-                    ) return@onSuccess vedtaksperiode.tilstand(ytelser, Avsluttet) {
-                        ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
-                    }
-                    if (vedtaksperiode.utbetalingslinjer.isEmpty()) return@onSuccess vedtaksperiode.tilstand(ytelser, AvventerGodkjenning) {
-                        ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-                    }
-                    vedtaksperiode.utbetalingsreferanse = genererUtbetalingsreferanse(vedtaksperiode.id)
-                    vedtaksperiode.tilstand(ytelser, AvventerSimulering) {
-                        ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
-                    }
+                    vedtaksperiode.høstingsresultater(engineForTimeline, engineForLine, ytelser)
                 }
             }
         }

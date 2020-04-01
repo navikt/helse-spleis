@@ -95,16 +95,14 @@ internal class ByggUtbetalingstidlinjer(
 internal class ByggUtbetalingslinjer(
     private val ytelser: Ytelser,
     private val vedtaksperiode: Vedtaksperiode,
-    utbetalingstidslinje: Utbetalingstidslinje
+    private val utbetalingstidslinje: Utbetalingstidslinje
 ) : Valideringssteg {
     private lateinit var utbetalingslinjer: List<Utbetalingslinje>
-
-    internal val utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiode.periode())
 
     internal fun utbetalingslinjer() = utbetalingslinjer
 
     override fun isValid(): Boolean {
-        utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje).result()
+        utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje, vedtaksperiode.periode()).result()
         if (utbetalingslinjer.isEmpty())
             ytelser.info("Ingen utbetalingslinjer bygget")
         else

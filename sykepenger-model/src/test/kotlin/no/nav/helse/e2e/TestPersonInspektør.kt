@@ -186,5 +186,5 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal fun dagTeller(klasse: KClass<out Utbetalingstidslinje.Utbetalingsdag>) =
-        TestTidslinjeInspektør(arbeidsgiver.peekTidslinje()).dagtelling[klasse] ?: 0
+        TestTidslinjeInspektør(arbeidsgiver.nåværendeTidslinje()).dagtelling[klasse] ?: 0
 }

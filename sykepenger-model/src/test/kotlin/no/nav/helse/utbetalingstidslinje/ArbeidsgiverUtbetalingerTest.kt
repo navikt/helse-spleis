@@ -322,7 +322,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             maksdato = it.maksdato()
             forbrukteSykedager = it.forbrukteSykedager()
         }
-        inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.peekTidslinje())
+        inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.nåværendeTidslinje())
             .result()
     }
 

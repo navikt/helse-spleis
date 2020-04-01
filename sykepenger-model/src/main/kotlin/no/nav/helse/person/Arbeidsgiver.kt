@@ -40,7 +40,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun peekTidslinje() = tidslinjer.last()
+    internal fun nåværendeTidslinje() = tidslinjer.last()
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 

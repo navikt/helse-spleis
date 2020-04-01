@@ -294,7 +294,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
-            assertDoesNotThrow { it.arbeidsgiver.peekTidslinje() }
+            assertDoesNotThrow { it.arbeidsgiver.nåværendeTidslinje() }
             assertTrue(it.utbetalingslinjer(0).isEmpty())
             TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
                 assertEquals(7, tidslinjeInspektør.dagtelling[ForeldetDag::class])

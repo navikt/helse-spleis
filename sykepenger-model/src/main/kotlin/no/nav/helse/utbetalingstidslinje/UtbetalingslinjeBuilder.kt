@@ -1,14 +1,18 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
 
-internal class UtbetalingslinjeBuilder(private val tidslinje: Utbetalingstidslinje)
-    : UtbetalingsdagVisitor {
+internal class UtbetalingslinjeBuilder(
+    tidslinje: Utbetalingstidslinje,
+    periode: Periode
+) : UtbetalingsdagVisitor {
+    internal val utbetalingstidslinje = tidslinje.subset(periode)
     private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
     private var helseState: HelseState = Ubetalt()
 
     internal fun result(): List<Utbetalingslinje> {
-        tidslinje.accept(this)
+        utbetalingstidslinje.accept(this)
         return utbetalingslinjer
     }
 

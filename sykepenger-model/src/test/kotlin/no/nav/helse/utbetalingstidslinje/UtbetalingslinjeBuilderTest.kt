@@ -88,7 +88,7 @@ internal class UtbetalingslinjeBuilderTest {
             Periode(1.januar, 1.mars),
             Aktivitetslogg()
         ).beregn()
-        linjer = UtbetalingslinjeBuilder(tidslinje).result()
+        linjer = UtbetalingslinjeBuilder(tidslinje, Periode(tidslinje.førsteDato(), tidslinje.sisteDato())).result()
     }
 
 }
