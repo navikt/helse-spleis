@@ -1,5 +1,6 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 
@@ -23,11 +24,19 @@ internal val Int.ARB get() = this.ARB(1200.00)
 internal fun Int.ARB(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsdag, inntekt)
 internal val Int.FRI get() = this.FRI(1200.00)
 internal fun Int.FRI(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addFridag, inntekt)
+internal val Int.FOR get() = this.FOR(1200.00)
+internal fun Int.FOR(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addForeldetDag, inntekt)
+internal val Int.AVV get() = this.AVV(1200.00)
+internal fun Int.AVV(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addAvvistDag, inntekt)
 internal val Int.HELG get() = this.HELG(1200.00)
 internal fun Int.HELG(inntekt: Double, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addHelg, inntekt, grad)
 internal val Int.UTELATE get() = Utbetalingsdager(this, Utbetalingstidslinje::utelate, 0.00)
 
 private fun Utbetalingstidslinje.utelate(inntekt: Double, dato: LocalDate, grad: Double) {}
+private fun Utbetalingstidslinje.addForeldetDag(inntekt: Double, dato: LocalDate, grad: Double) =
+    this.addForeldetDag(dato)
+private fun Utbetalingstidslinje.addAvvistDag(inntekt: Double, dato: LocalDate, grad: Double) =
+    this.addAvvistDag(inntekt, dato, grad, Begrunnelse.MinimumSykdomsgrad)
 
 internal data class Utbetalingsdager(
     val antallDager: Int,

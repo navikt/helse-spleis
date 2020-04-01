@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 
 internal fun PersonObserver.UtbetaltEvent.toJson() = objectMapper.writeValueAsString(
     mapOf(

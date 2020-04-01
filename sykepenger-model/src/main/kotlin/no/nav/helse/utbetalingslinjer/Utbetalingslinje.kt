@@ -1,9 +1,9 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 
 data class Utbetalingslinje(
-    val fom: LocalDate,
+    var fom: LocalDate,
     var tom: LocalDate,
     val dagsats: Int,
     val grad: Double

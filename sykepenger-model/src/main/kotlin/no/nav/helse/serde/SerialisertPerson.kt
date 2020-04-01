@@ -19,8 +19,8 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import java.math.BigDecimal
@@ -243,7 +243,13 @@ class SerialisertPerson(val json: String) {
 
     private fun parseUtbetalingslinje(
         data: ArbeidsgiverData.VedtaksperiodeData.UtbetalingslinjeData
-    ): Utbetalingslinje = Utbetalingslinje(fom = data.fom, tom = data.tom, dagsats = data.dagsats, grad = data.grad)
+    ): Utbetalingslinje =
+        Utbetalingslinje(
+            fom = data.fom,
+            tom = data.tom,
+            dagsats = data.dagsats,
+            grad = data.grad
+        )
 
     private fun parseDataForVilkårsvurdering(
         data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData

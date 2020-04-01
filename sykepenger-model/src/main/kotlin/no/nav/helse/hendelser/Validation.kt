@@ -4,8 +4,12 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.UtbetalingslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 
 internal class Validation(private val hendelse: ArbeidstakerHendelse) {
@@ -102,7 +106,10 @@ internal class ByggUtbetalingslinjer(
     internal fun utbetalingslinjer() = utbetalingslinjer
 
     override fun isValid(): Boolean {
-        utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje, vedtaksperiode.periode()).result()
+        utbetalingslinjer = UtbetalingslinjeBuilder(
+            utbetalingstidslinje,
+            vedtaksperiode.periode()
+        ).result()
         if (utbetalingslinjer.isEmpty())
             ytelser.info("Ingen utbetalingslinjer bygget")
         else

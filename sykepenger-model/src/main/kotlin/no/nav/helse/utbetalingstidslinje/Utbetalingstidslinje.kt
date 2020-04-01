@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
@@ -124,6 +125,11 @@ internal class Utbetalingstidslinje private constructor(
                 it is Fridag
         }
 
+    internal fun reverse(): Utbetalingstidslinje {
+        return Utbetalingstidslinje(utbetalingsdager.asReversed())
+    }
+
+    internal fun kutt(sisteDato: LocalDate) = subset(førsteDato(), sisteDato)
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {

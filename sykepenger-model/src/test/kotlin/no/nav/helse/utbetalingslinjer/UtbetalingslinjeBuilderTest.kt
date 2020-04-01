@@ -1,8 +1,10 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -88,7 +90,10 @@ internal class UtbetalingslinjeBuilderTest {
             Periode(1.januar, 1.mars),
             Aktivitetslogg()
         ).beregn()
-        linjer = UtbetalingslinjeBuilder(tidslinje, Periode(tidslinje.førsteDato(), tidslinje.sisteDato())).result()
+        linjer = UtbetalingslinjeBuilder(
+            tidslinje,
+            Periode(tidslinje.førsteDato(), tidslinje.sisteDato())
+        ).result()
     }
 
 }

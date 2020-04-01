@@ -1,7 +1,8 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class UtbetalingslinjeBuilder(
     tidslinje: Utbetalingstidslinje,
@@ -49,7 +50,8 @@ internal class UtbetalingslinjeBuilder(
         fun ikkeBetalingsdag() {}
     }
 
-    internal inner class Ubetalt : HelseState {
+    internal inner class Ubetalt :
+        HelseState {
         override fun betalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             utbetalingslinjer.add(dag.utbetalingslinje())
             helseState = Betalt()
