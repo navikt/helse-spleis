@@ -113,7 +113,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `kaster ut ved konflikt mellom sykedager i sykmelding og ferie i inntektsmelding`() {
+    internal fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(1.januar, INNTEKT, emptyList()),
@@ -128,7 +128,7 @@ internal class InntektsmeldingHendelseTest {
         assertFalse(inntektsmelding.valider().hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
     private fun inntektsmelding(
