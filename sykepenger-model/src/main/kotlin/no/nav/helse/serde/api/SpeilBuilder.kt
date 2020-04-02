@@ -392,9 +392,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     TilstandType.AVSLUTTET,
                     TilstandType.AVVENTER_GODKJENNING,
                     TilstandType.UTBETALING_FEILET,
-                    TilstandType.TIL_UTBETALING,
-                    TilstandType.AVSLUTTET_UTEN_UTBETALING,
-                    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+                    TilstandType.TIL_UTBETALING
                 )
             ) {
                 fullstendig = true
