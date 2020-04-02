@@ -149,7 +149,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, simulering)
     }
 
-    internal fun håndter(utbetaling: Utbetaling) {
+    internal fun håndter(utbetaling: UtbetalingHendelse) {
         if (id.toString() != utbetaling.vedtaksperiodeId) return
         kontekst(utbetaling)
         tilstand.håndter(this, utbetaling)
@@ -432,7 +432,7 @@ internal class Vedtaksperiode private constructor(
             simulering.error("Forventet ikke simulering i %s", type.name)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             utbetaling.error("Forventet ikke utbetaling i %s", type.name)
         }
 
@@ -957,7 +957,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             if (utbetaling.valider().hasErrors()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
                 utbetaling.error("Utbetaling ble ikke gjennomført")
             }

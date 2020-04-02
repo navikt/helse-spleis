@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.Utbetaling.Oppdragstatus
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.hendelser.Utbetaling as ModelUtbetaling
+import no.nav.helse.hendelser.UtbetalingHendelse as ModelUtbetaling
 
 internal class UtbetalingMessage(originalMessage: String, problems: MessageProblems) : BehovMessage(originalMessage, problems) {
     init {

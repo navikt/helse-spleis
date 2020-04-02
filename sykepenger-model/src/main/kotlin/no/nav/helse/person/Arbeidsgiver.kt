@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -12,7 +13,8 @@ internal class Arbeidsgiver private constructor(
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
     private val tidslinjer: MutableList<Utbetalingstidslinje>,
-    private val perioder: MutableList<Vedtaksperiode>
+    private val perioder: MutableList<Vedtaksperiode>,
+    private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
 
     internal fun inntektshistorikk() = inntekthistorikk.clone()
@@ -23,7 +25,8 @@ internal class Arbeidsgiver private constructor(
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
         tidslinjer = mutableListOf(),
-        perioder = mutableListOf()
+        perioder = mutableListOf(),
+        utbetalinger = mutableListOf()
     )
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -32,6 +35,9 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitTidslinjer(tidslinjer)
         tidslinjer.forEach { it.accept(visitor) }
         visitor.postVisitTidslinjer(tidslinjer)
+        visitor.preVisitUtbetalinger(utbetalinger)
+        utbetalinger.forEach { it.accept(visitor) }
+        visitor.postVisitUtbetalinger(utbetalinger)
         visitor.preVisitPerioder()
         perioder.forEach { it.accept(visitor) }
         visitor.postVisitPerioder()
@@ -94,7 +100,7 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(simulering) }
     }
 
-    internal fun håndter(utbetaling: Utbetaling) {
+    internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
         perioder.forEach { it.håndter(utbetaling) }
     }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class MaksimumUtbetalingTest {
+internal class MaksimumUtbetalingHendelseTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 

@@ -6,6 +6,8 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -20,14 +22,14 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
     ) {}
-    fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
+    fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
+    fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder() {}
     fun postVisitPerioder() {}
     fun postVisitArbeidsgiver(
@@ -46,9 +48,9 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitUtbetalingsreferanse(utbetalingsreferanse: String?) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
-    fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
+    fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
     fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {}
 }

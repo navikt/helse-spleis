@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.Utbetaling
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -494,14 +494,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertNotNull(inspektør.maksdato(0))
         assertNotNull(inspektør.maksdato(1))
@@ -558,7 +558,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterYtelser(1)   // No history
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
@@ -583,7 +583,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))

@@ -176,7 +176,7 @@ internal class HendelseMediatorTest {
                 }
 
                 every {
-                    håndter(any<Utbetaling>())
+                    håndter(any<UtbetalingHendelse>())
                 } answers {
                     lestUtbetaling = true
                 }

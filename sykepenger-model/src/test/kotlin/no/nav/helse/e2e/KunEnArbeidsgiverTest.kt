@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.Utbetaling
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
@@ -24,7 +24,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -254,7 +254,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -321,7 +321,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -419,7 +419,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
@@ -428,7 +428,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -468,7 +468,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterYtelser(1)   // No history
@@ -477,7 +477,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -525,14 +525,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -579,14 +579,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -617,7 +617,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
@@ -625,7 +625,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -745,13 +745,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(0)
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -790,11 +790,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(0)
 
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -835,7 +835,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -902,7 +902,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -943,13 +943,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -996,14 +996,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertNotNull(inspektør.maksdato(0))
         assertNotNull(inspektør.maksdato(1))
@@ -1038,7 +1038,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -1074,7 +1074,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AVVIST)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AVVIST)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
@@ -1136,7 +1136,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
@@ -1144,7 +1144,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
 
         inspektør.also {
@@ -1177,7 +1177,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -1244,7 +1244,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterSøknad(Sykdom(3.januar,  26.januar, 100))
@@ -1300,7 +1300,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(0)
         forventetEndringTeller++
         håndterManuellSaksbehandling(0, true)
-        håndterUtbetalt(0, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(16.januar, 16.februar))) // Touches prior periode
@@ -1311,7 +1311,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterManuellSaksbehandling(1, true)
-        håndterUtbetalt(1, Utbetaling.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertNoErrors(inspektør)
 
         assertNotNull(inspektør.maksdato(0))

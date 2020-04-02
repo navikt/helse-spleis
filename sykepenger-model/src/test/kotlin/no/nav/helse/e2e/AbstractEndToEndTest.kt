@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Simulering.*
-import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -136,12 +135,12 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
     }
 
-    protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Oppdragstatus) {
+    protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) {
         person.håndter(utbetaling(vedtaksperiodeIndex, status))
     }
 
-    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Oppdragstatus) =
-        Utbetaling(
+    private fun utbetaling(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) =
+        UtbetalingHendelse(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,

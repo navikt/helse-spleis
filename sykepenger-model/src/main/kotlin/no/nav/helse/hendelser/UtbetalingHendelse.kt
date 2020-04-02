@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
 
-class Utbetaling(
+class UtbetalingHendelse(
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingTellerTest {
+internal class UtbetalingHendelseTellerTest {
     internal val UNG_PERSON_FNR_2018 = Alder("15010052345")
     internal val PERSON_67_ÅR_FNR_2018 = Alder("15015112345")
     internal val PERSON_70_ÅR_FNR_2018 = Alder("15014812345")

@@ -54,7 +54,7 @@ class Person private constructor(
         finnArbeidsgiver(simulering).håndter(simulering)
     }
 
-    fun håndter(utbetaling: Utbetaling) {
+    fun håndter(utbetaling: UtbetalingHendelse) {
         registrer(utbetaling, "Behandler utbetaling")
         finnArbeidsgiver(utbetaling).håndter(utbetaling)
     }

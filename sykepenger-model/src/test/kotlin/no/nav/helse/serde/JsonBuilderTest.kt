@@ -327,13 +327,13 @@ internal class JsonBuilderTest {
             simuleringResultat = null
         )
 
-        internal fun utbetalt(vedtaksperiodeId: String) = Utbetaling(
+        internal fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             utbetalingsreferanse = "ref",
-            status = Utbetaling.Oppdragstatus.AKSEPTERT,
+            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei"
         )
     }
