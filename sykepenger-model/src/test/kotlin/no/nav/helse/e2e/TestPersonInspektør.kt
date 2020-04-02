@@ -126,6 +126,11 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(
             Sykedag::class)
 
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = inkrementer(
+            Egenmeldingsdag::class)
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = inkrementer(
+            Egenmeldingsdag::class)
+
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = inkrementer(
             SykHelgedag::class)
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = inkrementer(

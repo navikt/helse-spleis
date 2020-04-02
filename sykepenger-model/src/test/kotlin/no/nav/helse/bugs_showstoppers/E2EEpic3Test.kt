@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Utbetaling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.Egenmeldingsdag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.*
@@ -618,4 +619,27 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING
         )
     }
+
+    @Test
+    internal fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas først`() {
+        håndterSykmelding(Triple(20.februar(2020), 8.mars(2020), 100))
+        håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
+        håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 5.mars(2020), 100))
+
+        inspektør.also {
+            assertNull(it.dagtelling[Egenmeldingsdag::class])
+        }
+    }
+
+    @Test
+    internal fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas sist`() {
+        håndterSykmelding(Triple(20.februar(2020), 8.mars(2020), 100))
+        håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 5.mars(2020), 100))
+        håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
+
+        inspektør.also {
+            assertNull(it.dagtelling[Egenmeldingsdag::class])
+        }
+    }
+
 }
