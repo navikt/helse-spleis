@@ -5,6 +5,6 @@ import java.time.LocalDate
 data class Utbetalingslinje(
     var fom: LocalDate,
     var tom: LocalDate,
-    val dagsats: Int,
+    var dagsats: Int,
     val grad: Double
 )

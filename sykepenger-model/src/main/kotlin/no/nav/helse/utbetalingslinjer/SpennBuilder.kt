@@ -25,12 +25,21 @@ internal class SpennBuilder(
         println(tidslinje)
     }
 
+    private val linje get() = linjer.first()
+
     override fun visitNavDag(dag: NavDag) {
-        tilstand.betalingsdag(dag)
+        if (linjer.isEmpty()) return tilstand.nyLinje(dag)
+        if (dag.grad == linje.grad && (linje.dagsats == 0 || linje.dagsats == dag.utbetaling))
+            tilstand.betalingsdag(dag)
+        else
+            tilstand.nyLinje(dag)
     }
 
     override fun visitNavHelgDag(dag: NavHelgDag) {
-        // ignorer
+        if (linjer.isEmpty() || dag.grad != linje.grad)
+            tilstand.nyLinje(dag)
+        else
+            tilstand.helgedag(dag)
     }
 
     override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
@@ -57,15 +66,37 @@ internal class SpennBuilder(
         linjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dag.utbetaling, dag.grad))
     }
 
+    private fun addLinje(dag: NavHelgDag) {
+        linjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad))
+    }
+
     private interface Tilstand {
         fun betalingsdag(dag: NavDag) {}
+        fun helgedag(dag: NavHelgDag) {}
+        fun nyLinje(dag: NavDag) {}
+        fun nyLinje(dag: NavHelgDag) {}
         fun ikkeBetalingsdag() {}
     }
 
     private inner class Ubetalt : Tilstand {
         override fun betalingsdag(dag: NavDag) {
-            linjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dag.utbetaling, dag.grad))
+            addLinje(dag)
             tilstand = Betalt()
+        }
+
+        override fun nyLinje(dag: NavDag) {
+            addLinje(dag)
+            tilstand = Betalt()
+        }
+
+        override fun helgedag(dag: NavHelgDag) {
+            addLinje(dag)
+            tilstand = HelgBetalt()
+        }
+
+        override fun nyLinje(dag: NavHelgDag) {
+            addLinje(dag)
+            tilstand = HelgBetalt()
         }
     }
 
@@ -75,10 +106,44 @@ internal class SpennBuilder(
         }
 
         override fun betalingsdag(dag: NavDag) {
-            if (linjer.first().dagsats == dag.utbetaling && linjer.first().grad == dag.grad)
-                linjer.first().fom = dag.dato
-            else
-                addLinje(dag)
+            linje.fom = dag.dato
+        }
+
+        override fun nyLinje(dag: NavDag) {
+            addLinje(dag)
+        }
+
+        override fun helgedag(dag: NavHelgDag) {
+            linje.fom = dag.dato
+        }
+
+        override fun nyLinje(dag: NavHelgDag) {
+            addLinje(dag)
+        }
+    }
+
+    private inner class HelgBetalt : Tilstand {
+        override fun ikkeBetalingsdag() {
+            tilstand = Ubetalt()
+        }
+
+        override fun betalingsdag(dag: NavDag) {
+            linje.dagsats = dag.utbetaling
+            linje.fom = dag.dato
+            tilstand = Betalt()
+        }
+
+        override fun nyLinje(dag: NavDag) {
+            addLinje(dag)
+            tilstand = Betalt()
+        }
+
+        override fun helgedag(dag: NavHelgDag) {
+            linje.fom = dag.dato
+        }
+
+        override fun nyLinje(dag: NavHelgDag) {
+            addLinje(dag)
         }
     }
 

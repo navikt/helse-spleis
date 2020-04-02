@@ -26,7 +26,7 @@ internal class SpennBuilderTest {
         opprett(2.HELG, 5.NAV, 2.HELG)
 
         assertEquals(1, linjer.size)
-        assertLinje(0, 3.januar, 7.januar)
+        assertLinje(0, 1.januar, 9.januar)
     }
 
     @Test
@@ -56,7 +56,7 @@ internal class SpennBuilderTest {
 
     @Test
     internal fun `Endring i utbetaling pga grad`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 60.0), 2.HELG, 2.NAV(1500.0, 60.0))
+        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 60.0), 2.HELG(1500.0, 60.0), 2.NAV(1500.0, 60.0))
 
         assertEquals(2, linjer.size)
         assertLinje(0, 1.januar, 3.januar, 1500, 100.0)
@@ -65,17 +65,17 @@ internal class SpennBuilderTest {
 
     @Test
     internal fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1875.0, 80.0), 2.HELG, 2.NAV(1500.0, 80.0))
+        opprett(3.NAV(1500.0, 100.0), 2.NAV(1875.0, 80.0), 2.HELG(1500.0, 80.0), 2.NAV(1500.0, 80.0))
 
         assertEquals(3, linjer.size)
         assertLinje(0, 1.januar, 3.januar, 1500, 100.0)
         assertLinje(1, 4.januar, 5.januar, 1500, 80.0)
-        assertLinje(2, 8.januar, 9.januar, (1500 * 0.8).toInt(), 80.0)
+        assertLinje(2, 6.januar, 9.januar, (1500 * 0.8).toInt(), 80.0)
     }
 
     @Test
     internal fun `Endring i sykdomsgrad`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 80.0), 2.HELG, 2.NAV(1500.0, 80.0))
+        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 80.0), 2.HELG(1500.0, 80.0), 2.NAV(1500.0, 80.0))
 
         assertEquals(2, linjer.size)
         assertLinje(0, 1.januar, 3.januar, 1500, 100.0)
