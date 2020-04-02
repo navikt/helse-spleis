@@ -24,6 +24,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.io.TempDir
+import java.net.Socket
 import java.nio.file.Path
 import java.sql.Connection
 import java.util.*
@@ -60,6 +61,12 @@ internal class RestApiTest {
 
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
+        await("vent på WireMockServer har startet")
+            .atMost(5, SECONDS)
+            .until {
+                try { Socket("localhost", wireMockServer.port()).use { it.isConnected } }
+                catch (err: Exception) { false }
+            }
         jwtStub = JwtStub("Microsoft Azure AD", wireMockServer)
         stubFor(jwtStub.stubbedJwkProvider())
         stubFor(jwtStub.stubbedConfigProvider())
