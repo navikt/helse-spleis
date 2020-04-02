@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.serde.UtbetalingslinjeData
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
@@ -12,7 +13,7 @@ internal class Utbetalingslinjer(
         linjer.forEach { it.accept(visitor) }
     }
 }
-class Utbetalingslinje private constructor(
+internal class Utbetalingslinje private constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
     internal var dagsats: Int,
@@ -27,8 +28,11 @@ class Utbetalingslinje private constructor(
         grad: Double
     ): this(fom, tom, dagsats, grad, 1, null)
 
-    fun accept(visitor: UtbetalingVisitor) {
+    internal fun accept(visitor: UtbetalingVisitor) {
         visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId)
     }
+
+    internal fun toData() : UtbetalingslinjeData =
+        UtbetalingslinjeData(fom, tom, dagsats, grad)
 
 }

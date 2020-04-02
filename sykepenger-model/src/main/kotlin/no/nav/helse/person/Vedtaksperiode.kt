@@ -948,7 +948,7 @@ internal class Vedtaksperiode private constructor(
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                 utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                utbetalingslinjer = requireNotNull(utbetalingslinjerData(vedtaksperiode)),
                 opprettet = LocalDate.now()
             )
 
@@ -969,13 +969,16 @@ internal class Vedtaksperiode private constructor(
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,
                     utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                    utbetalingslinjer = requireNotNull(vedtaksperiode.utbetalingslinjer),
+                    utbetalingslinjer = requireNotNull(utbetalingslinjerData(vedtaksperiode)),
                     forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
                     opprettet = LocalDate.now()
                 )
                 vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
             }
         }
+
+        private fun utbetalingslinjerData(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.utbetalingslinjer.map { it.toData() }
     }
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {

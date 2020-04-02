@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.serde.UtbetalingslinjeData
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,7 +42,7 @@ interface PersonObserver {
         val fødselsnummer: String,
         val organisasjonsnummer: String,
         val utbetalingsreferanse: String,
-        val utbetalingslinjer: List<Utbetalingslinje>,
+        val utbetalingslinjer: List<UtbetalingslinjeData>,
         val opprettet: LocalDate
     )
 
@@ -51,7 +51,7 @@ interface PersonObserver {
         val aktørId: String,
         val fødselsnummer: String,
         val utbetalingsreferanse: String,
-        val utbetalingslinjer: List<Utbetalingslinje>,
+        val utbetalingslinjer: List<UtbetalingslinjeData>,
         val opprettet: LocalDate,
         val forbrukteSykedager: Int
     )

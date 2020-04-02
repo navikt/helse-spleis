@@ -2,7 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.serde.UtbetalingslinjeData
 
 internal fun PersonObserver.UtbetaltEvent.toJson() = JsonMessage.newMessage(mapOf(
     "@event_name" to "utbetalt",
@@ -15,7 +15,7 @@ internal fun PersonObserver.UtbetaltEvent.toJson() = JsonMessage.newMessage(mapO
     "opprettet" to this.opprettet
 )).toJson()
 
-private fun List<Utbetalingslinje>.toJson(): List<Map<String, Any>> = this.map {
+private fun List<UtbetalingslinjeData>.toJson(): List<Map<String, Any>> = this.map {
     mapOf(
         "dagsats" to it.dagsats,
         "fom" to it.fom,

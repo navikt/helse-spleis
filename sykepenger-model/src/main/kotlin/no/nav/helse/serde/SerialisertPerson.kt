@@ -244,7 +244,7 @@ class SerialisertPerson(val json: String) {
     }
 
     private fun parseUtbetalingslinje(
-        data: ArbeidsgiverData.VedtaksperiodeData.UtbetalingslinjeData
+        data: UtbetalingslinjeData
     ): Utbetalingslinje =
         Utbetalingslinje(
             fom = data.fom,
@@ -453,16 +453,16 @@ internal data class PersonData(
                     val navn: String
                 )
             }
-
-            data class UtbetalingslinjeData(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val dagsats: Int,
-                val grad: Double
-            )
         }
     }
 }
+
+data class UtbetalingslinjeData(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dagsats: Int,
+    val grad: Double
+)
 
 data class UtbetalingstidslinjeData(
     val dager: List<UtbetalingsdagData>
