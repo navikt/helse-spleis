@@ -132,6 +132,29 @@ internal class JsonBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
+        internal fun ingenutbetalingPåfølgendeBetaling(
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = 1.januar, tom = 9.januar))
+                fangeVedtaksperiodeId()
+                håndter(
+                    søknadSendtTilArbeidsgiver(
+                        hendelseId = søknadhendelseId,
+                        fom = 1.januar,
+                        tom = 9.januar
+                    )
+                )
+                håndter(sykmelding(fom = 10.januar, tom = 25.januar))
+                håndter(søknad(fom = 10.januar, tom = 25.januar))
+                fangeVedtaksperiodeId()
+                håndter(inntektsmelding(fom = 16.januar))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+            }
+
         private fun Person.fangeVedtaksperiodeId() {
             accept(object : PersonVisitor {
                 override fun preVisitVedtaksperiode(
@@ -166,11 +189,21 @@ internal class JsonBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(
-                Søknad.Periode.Sykdom(fom,  tom, 100)
-            ),
+            perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad
+        )
+
+        internal fun søknadSendtTilArbeidsgiver(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar
+        ) = SøknadArbeidsgiver(
+            meldingsreferanseId = hendelseId,
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            perioder = listOf(SøknadArbeidsgiver.Periode.Sykdom(fom, tom, 100, 100))
         )
 
         internal fun inntektsmelding(

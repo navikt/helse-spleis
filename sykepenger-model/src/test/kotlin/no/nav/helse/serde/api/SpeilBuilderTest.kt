@@ -1,26 +1,19 @@
 package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.JsonBuilderTest.Companion.ingenBetalingsperson
-import no.nav.helse.serde.JsonBuilderTest.Companion.inntektsmelding
-import no.nav.helse.serde.JsonBuilderTest.Companion.manuellSaksbehandling
-import no.nav.helse.serde.JsonBuilderTest.Companion.person
-import no.nav.helse.serde.JsonBuilderTest.Companion.simulering
-import no.nav.helse.serde.JsonBuilderTest.Companion.sykmelding
-import no.nav.helse.serde.JsonBuilderTest.Companion.søknad
-import no.nav.helse.serde.JsonBuilderTest.Companion.utbetalt
-import no.nav.helse.serde.JsonBuilderTest.Companion.vilkårsgrunnlag
-import no.nav.helse.serde.JsonBuilderTest.Companion.ytelser
 import no.nav.helse.serde.mapping.JsonDagType
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juni
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.YearMonth
 import java.util.*
 
 
@@ -28,62 +21,10 @@ internal class SpeilBuilderTest {
     private val aktørId = "1234"
     private val fnr = "12020052345"
 
-    private fun hendelser(): Triple<List<UUID>, List<UUID>, List<HendelseDTO>> {
-        val hendelser1 = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
-        val hendelser2 = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
-        return Triple(
-            hendelser1, hendelser2, listOf(
-                SykmeldingDTO(
-                    id = hendelser1[0].toString(),
-                    type = "NY_SØKNAD",
-                    fom = 1.januar,
-                    tom = 31.januar,
-                    rapportertdato = 1.februar.atStartOfDay()
-                ),
-                SøknadDTO(
-                    id = hendelser1[1].toString(),
-                    type = "SENDT_SØKNAD_NAV",
-                    fom = 1.januar,
-                    tom = 31.januar,
-                    rapportertdato = 1.februar.atStartOfDay(),
-                    sendtNav = 1.februar.atStartOfDay()
-                ),
-                InntektsmeldingDTO(
-                    id = hendelser1[2].toString(),
-                    type = "INNTEKTSMELDING",
-                    mottattDato = 1.januar.atStartOfDay(),
-                    beregnetInntekt = 25000.0
-                ),
-                SykmeldingDTO(
-                    id = hendelser2[0].toString(),
-                    type = "NY_SØKNAD",
-                    fom = 1.februar,
-                    tom = 14.februar,
-                    rapportertdato = 1.februar.atStartOfDay()
-                ),
-                SøknadDTO(
-                    id = hendelser2[1].toString(),
-                    type = "SENDT_SØKNAD_NAV",
-                    fom = 1.februar,
-                    tom = 14.februar,
-                    rapportertdato = 15.februar.atStartOfDay(),
-                    sendtNav = 15.februar.atStartOfDay()
-                ),
-                InntektsmeldingDTO(
-                    id = hendelser2[2].toString(),
-                    type = "INNTEKTSMELDING",
-                    mottattDato = 1.februar.atStartOfDay(),
-                    beregnetInntekt = 25000.0
-                )
-            )
-        )
-    }
-
     @Test
     internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
-        val (hendelseIder, _, hendelser) = hendelser()
-        val person = person(søknadhendelseId = hendelseIder[1])
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(
             1.januar,
             (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.first().dato
@@ -96,9 +37,8 @@ internal class SpeilBuilderTest {
 
     @Test
     internal fun `person uten utbetalingsdager`() {
-        val (hendelseIder, _, hendelser) = hendelser()
-        val person = ingenBetalingsperson(søknadhendelseId = hendelseIder[1])
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val (person, hendelser) = ingenBetalingsperson()
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         assertEquals(
             1.januar,
@@ -112,9 +52,8 @@ internal class SpeilBuilderTest {
 
     @Test
     internal fun `person med foreldet dager`() {
-        val (hendelseIder, _, hendelser) = hendelser()
-        val person = person(sendtSøknad = 1.juni, søknadhendelseId = hendelseIder[1])
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val (person, hendelser) = person(sendtSøknad = 1.juni)
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
 
@@ -132,11 +71,12 @@ internal class SpeilBuilderTest {
 
     @Test
     fun `ufullstendig vedtaksperiode når tilstand er Venter`() {
-        val (hendelseIder, _, hendelser) = hendelser()
-        val person = Person(aktørId, fnr).apply {
-            håndter(sykmelding(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            val (sykmelding, sykmeldingDTO) = sykmelding(fom = 1.januar, tom = 31.januar)
+            håndter(sykmelding)
+            this to listOf(sykmeldingDTO)
         }
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         val arbeidsgiver = personDTO.arbeidsgivere[0]
         val vedtaksperioder = arbeidsgiver.vedtaksperioder
@@ -146,84 +86,112 @@ internal class SpeilBuilderTest {
 
     @Test
     fun `passer på at vedtakene har alle hendelsene`() {
-        val (hendelseIder, hendelseIder2, hendelser) = hendelser()
-
         var vedtaksperiodeIder: Set<String>
 
-        val person = Person(aktørId, fnr).apply {
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.januar, tom = 31.januar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
 
-            håndter(sykmelding(hendelseId = hendelseIder[0], fom = 1.januar, tom = 31.januar))
-            håndter(søknad(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
-            håndter(inntektsmelding(hendelseId = hendelseIder[2], fom = 1.januar))
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
 
-            vedtaksperiodeIder = collectVedtaksperiodeIder()
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.februar, tom = 14.februar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
 
-            håndter(sykmelding(hendelseId = hendelseIder2[0], fom = 1.februar, tom = 14.februar))
-            håndter(søknad(hendelseId = hendelseIder2[1], fom = 1.februar, tom = 14.februar))
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
 
-            vedtaksperiodeIder = collectVedtaksperiodeIder()
-
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            }
         }
 
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
 
         assertEquals(2, vedtaksperioder.size)
         assertEquals(3, vedtaksperioder.first().hendelser.size)
-        assertEquals(2, vedtaksperioder.last().hendelser.size) // Skal ikke ha inntektsmelding
+        assertEquals(2, vedtaksperioder.last().hendelser.size)
         assertEquals(
-            hendelseIder.map { it.toString() }.sorted(),
+            hendelser.subList(0, 3).map { it.id }.sorted(),
             vedtaksperioder.first().hendelser.map { it.id }.sorted()
         )
         assertEquals(
-            hendelseIder2.subList(0, 2).map { it.toString() }.sorted(),
-            vedtaksperioder[1].hendelser.map { it.id }.sorted()
+            hendelser.subList(3, 5).map { it.id }.sorted(),
+            vedtaksperioder.last().hendelser.map { it.id }.sorted()
         )
     }
 
     @Test
     fun `passer på at alle vedtak får fellesdata for sykefraværet`() {
-        val (hendelseIder, hendelseIder2, hendelser) = hendelser()
-
         var vedtaksperiodeIder: Set<String>
 
-        val person = Person(aktørId, fnr).apply {
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.januar, tom = 31.januar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
 
-            håndter(sykmelding(hendelseId = hendelseIder[0], fom = 1.januar, tom = 31.januar))
-            håndter(søknad(hendelseId = hendelseIder[1], fom = 1.januar, tom = 31.januar))
-            håndter(inntektsmelding(hendelseId = hendelseIder[2], fom = 1.januar))
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
 
-            vedtaksperiodeIder = collectVedtaksperiodeIder()
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.februar, tom = 14.februar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
 
-            håndter(sykmelding(hendelseId = hendelseIder2[0], fom = 1.februar, tom = 14.februar))
-            håndter(søknad(hendelseId = hendelseIder2[1], fom = 1.februar, tom = 14.februar))
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
 
-            vedtaksperiodeIder = collectVedtaksperiodeIder()
-
-            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-            håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            }
         }
 
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
 
@@ -241,10 +209,9 @@ internal class SpeilBuilderTest {
     fun `personDTO-en inneholder de feltene Speil forventer`() {
         val fom = 1.januar
         val tom = 31.januar
-        val (hendelseIder, _, hendelser) = hendelser()
 
-        val person = person(fom = fom, tom = tom, søknadhendelseId = hendelseIder[1])
-        val personDTO = serializePersonForSpeil(person, hendelser)!!
+        val (person, hendelser) = person(fom = fom, tom = tom, sendtSøknad = 1.februar)
+        val personDTO = serializePersonForSpeil(person, hendelser)
 
         assertEquals("12020052345", personDTO.fødselsnummer)
         assertEquals("12345", personDTO.aktørId)
@@ -277,7 +244,7 @@ internal class SpeilBuilderTest {
 
         val vilkår = vedtaksperiode.vilkår
         val sykepengegrunnlag = vilkår.sykepengegrunnlag
-        assertEquals(`1G`.beløp(fom).toInt(), sykepengegrunnlag.grunnbeløp)
+        assertEquals(`1G`.beløp(fom).toInt(), sykepengegrunnlag!!.grunnbeløp)
         assertTrue(sykepengegrunnlag.oppfylt!!)
         assertEquals(31000.0 * 12, sykepengegrunnlag.sykepengegrunnlag)
 
@@ -299,13 +266,13 @@ internal class SpeilBuilderTest {
         assertTrue(opptjening?.oppfylt!!)
 
         val søknadsfrist = vilkår.søknadsfrist
-        assertEquals(tom.plusDays(1).atStartOfDay(), søknadsfrist.sendtNav)
-        assertEquals(fom, søknadsfrist.søknadFom)
-        assertEquals(tom, søknadsfrist.søknadTom)
-        assertTrue(søknadsfrist.oppfylt!!)
+        assertEquals(tom.plusDays(1).atStartOfDay(), søknadsfrist?.sendtNav)
+        assertEquals(fom, søknadsfrist?.søknadFom)
+        assertEquals(tom, søknadsfrist?.søknadTom)
+        assertTrue(søknadsfrist!!.oppfylt)
 
         assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
-        assertEquals(1, vedtaksperiode.hendelser.size) // Sender kun inn søknadId til person i denne testen
+        assertEquals(3, vedtaksperiode.hendelser.size)
 
         val utbetalingslinjer = vedtaksperiode.utbetalingslinjer
         assertEquals(1, utbetalingslinjer.size)
@@ -316,6 +283,14 @@ internal class SpeilBuilderTest {
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
     }
 
+    @Test
+    fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
+        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[1].fullstendig)
+    }
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
         accept(object : PersonVisitor {
@@ -327,6 +302,290 @@ internal class SpeilBuilderTest {
                 add(id.toString())
             }
         })
+    }
+
+    companion object {
+        private const val aktørId = "12345"
+        private const val fnr = "12020052345"
+        private const val orgnummer = "987654321"
+        private lateinit var vedtaksperiodeId: String
+
+        internal fun person(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                }
+            }
+
+        internal fun ingenBetalingsperson(
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = 1.januar, tom = 9.januar).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        fom = 1.januar,
+                        tom = 9.januar,
+                        sendtSøknad = sendtSøknad.atStartOfDay(),
+                        hendelseId = søknadhendelseId
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                }
+            }
+
+        internal fun ingenutbetalingPåfølgendeBetaling(
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = 1.januar, tom = 9.januar).also { (sykmelding, sykmeldingDto) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDto)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknadSendtTilArbeidsgiver(
+                        hendelseId = søknadhendelseId,
+                        fom = 1.januar,
+                        tom = 9.januar
+                    ).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    sykmelding(fom = 10.januar, tom = 25.januar).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    søknad(fom = 10.januar, tom = 25.januar).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    fangeVedtaksperiodeId()
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                }
+            }
+
+        private fun Person.fangeVedtaksperiodeId() {
+            accept(object : PersonVisitor {
+                override fun preVisitVedtaksperiode(
+                    vedtaksperiode: Vedtaksperiode,
+                    id: UUID,
+                    gruppeId: UUID
+                ) {
+                    vedtaksperiodeId = id.toString()
+                }
+            })
+        }
+
+        internal fun sykmelding(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar
+        ) = Sykmelding(
+            meldingsreferanseId = hendelseId,
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            sykeperioder = listOf(Triple(fom, tom, 100))
+        ) to SykmeldingDTO(
+            id = hendelseId.toString(),
+            fom = fom,
+            tom = tom,
+            rapportertdato = fom.atStartOfDay()
+        )
+
+        internal fun søknad(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON)
+        ) = Søknad(
+            meldingsreferanseId = hendelseId,
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
+            harAndreInntektskilder = false,
+            sendtTilNAV = sendtSøknad
+        ) to SøknadNavDTO(
+            id = hendelseId.toString(),
+            fom = fom,
+            tom = tom,
+            rapportertdato = sendtSøknad,
+            sendtNav = sendtSøknad
+        )
+
+        internal fun søknadSendtTilArbeidsgiver(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtTilArbeidsgiver: LocalDateTime = tom.atStartOfDay()
+        ) = SøknadArbeidsgiver(
+            meldingsreferanseId = hendelseId,
+            fnr = fnr,
+            aktørId = aktørId,
+            orgnummer = orgnummer,
+            perioder = listOf(SøknadArbeidsgiver.Periode.Sykdom(fom, tom, 100, 100))
+        ) to SøknadArbeidsgiverDTO(
+            id = hendelseId.toString(),
+            fom = fom,
+            tom = tom,
+            rapportertdato = tom.atStartOfDay(),
+            sendtArbeidsgiver = sendtTilArbeidsgiver
+        )
+
+        internal fun inntektsmelding(
+            hendelseId: UUID = UUID.randomUUID(),
+            fom: LocalDate
+        ) = Inntektsmelding(
+            meldingsreferanseId = hendelseId,
+            refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+            orgnummer = orgnummer,
+            fødselsnummer = fnr,
+            aktørId = aktørId,
+            førsteFraværsdag = fom,
+            beregnetInntekt = 31000.00,
+            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            ferieperioder = emptyList()
+        ) to InntektsmeldingDTO(
+            id = hendelseId.toString(),
+            beregnetInntekt = 31000.00,
+            mottattDato = fom.atStartOfDay()
+        )
+
+        internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            inntektsmåneder = (1.rangeTo(12)).map {
+                Vilkårsgrunnlag.Måned(
+                    årMåned = YearMonth.of(2018, it),
+                    inntektsliste = listOf(31000.0)
+                )
+            },
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer,
+                    1.januar(2017)
+                )
+            ),
+            erEgenAnsatt = false
+        )
+
+        internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
+            Ytelser(
+                meldingsreferanseId = hendelseId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                organisasjonsnummer = orgnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingshistorikk = Utbetalingshistorikk(
+                    utbetalinger = listOf(
+                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                            fom = 1.januar.minusYears(1),
+                            tom = 31.januar.minusYears(1),
+                            dagsats = 31000
+                        )
+                    ),
+                    inntektshistorikk = emptyList(),
+                    graderingsliste = emptyList(),
+                    maksDato = null,
+                    aktivitetslogg = it
+                ),
+                foreldrepermisjon = Foreldrepermisjon(
+                    foreldrepengeytelse = Periode(
+                        fom = 1.januar.minusYears(2),
+                        tom = 31.januar.minusYears(2)
+                    ),
+                    svangerskapsytelse = Periode(
+                        fom = 1.juli.minusYears(2),
+                        tom = 31.juli.minusYears(2)
+                    ),
+                    aktivitetslogg = it
+                ),
+                aktivitetslogg = it
+            )
+        }
+
+        internal fun manuellSaksbehandling(vedtaksperiodeId: String) = ManuellSaksbehandling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            utbetalingGodkjent = true,
+            saksbehandler = "en_saksbehandler_ident",
+            godkjenttidspunkt = LocalDateTime.now()
+        )
+
+        internal fun simulering(vedtaksperiodeId: String) = Simulering(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            simuleringOK = true,
+            melding = "Hei Aron",
+            simuleringResultat = null
+        )
+
+        internal fun utbetalt(vedtaksperiodeId: String) = Utbetaling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            utbetalingsreferanse = "ref",
+            status = Utbetaling.Status.FERDIG,
+            melding = "hei"
+        )
     }
 }
 

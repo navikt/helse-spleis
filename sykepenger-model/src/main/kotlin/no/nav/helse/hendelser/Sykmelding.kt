@@ -21,7 +21,9 @@ class Sykmelding(
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
-        this.sykeperioder = sykeperioder.sortedBy { it.first }.map { Sykeperiode(it.first, it.second, it.third) }
+        this.sykeperioder = sykeperioder
+            .sortedBy { (fom, _, _) -> fom }
+            .map { (fom, tom, grad) -> Sykeperiode(fom, tom, grad) }
         if (!ingenOverlappende()) severe("Sykeperioder overlapper")
     }
 
@@ -58,7 +60,9 @@ class Sykmelding(
     }
 
     internal object SykmeldingDagFactory : DagFactory {
-        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Sykmelding = SykHelgedag.Sykmelding(dato, grad)
+        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Sykmelding =
+            SykHelgedag.Sykmelding(dato, grad)
+
         override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Sykmelding = Sykedag.Sykmelding(dato, grad)
     }
 

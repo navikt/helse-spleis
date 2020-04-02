@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 
-fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO? {
+fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
     val jsonBuilder = SpeilBuilder(hendelser)
     person.accept(jsonBuilder)
     return jsonBuilder.toJson()
@@ -392,7 +392,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     TilstandType.AVSLUTTET,
                     TilstandType.AVVENTER_GODKJENNING,
                     TilstandType.UTBETALING_FEILET,
-                    TilstandType.TIL_UTBETALING
+                    TilstandType.TIL_UTBETALING,
+                    TilstandType.AVSLUTTET_UTEN_UTBETALING,
+                    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
                 )
             ) {
                 fullstendig = true

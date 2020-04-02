@@ -22,7 +22,8 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 import no.nav.helse.serde.api.InntektsmeldingDTO as SerdeInntektsmeldingDTO
 import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
-import no.nav.helse.serde.api.SøknadDTO as SerdeSøknadDTO
+import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
+import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
 internal fun Application.spleisApi(dataSource: DataSource) {
     val hendelseDao = HendelseDao(dataSource)
@@ -34,7 +35,7 @@ internal fun Application.spleisApi(dataSource: DataSource) {
             get("/api/utbetaling/{utbetalingsreferanse}") {
                 utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
                     ?.let { personDao.hentPersonAktørId(it.aktørId) }
-                    ?.let { call.respond(serializePersonForSpeil(it)!!) }
+                    ?.let { call.respond(serializePersonForSpeil(it)) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
 
@@ -57,47 +58,44 @@ internal fun Application.spleisApi(dataSource: DataSource) {
 
 private fun håndterPerson(person: Person, hendelseDao: HendelseDao): PersonDTO {
     val hendelseReferanser = hendelseReferanserForPerson(person)
-    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map {
-        when (it.first) {
-            NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(it.second))
-            SENDT_SØKNAD_NAV -> SendtSøknadNavDTO(objectMapper.readTree(it.second))
-            SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverDTO(objectMapper.readTree(it.second))
-            INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(it.second))
+    val hendelser = hendelseDao.hentHendelser(hendelseReferanser).map { (type, hendelseJson) ->
+        when (type) {
+            NY_SØKNAD -> NySøknadDTO(objectMapper.readTree(hendelseJson))
+            SENDT_SØKNAD_NAV -> SendtSøknadNavDTO(objectMapper.readTree(hendelseJson))
+            SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverDTO(objectMapper.readTree(hendelseJson))
+            INNTEKTSMELDING -> InntektsmeldingDTO(objectMapper.readTree(hendelseJson))
         }
     }.mapHendelseDTO()
-    return serializePersonForSpeil(person, hendelser)!!
+    return serializePersonForSpeil(person, hendelser)
 }
 
-private fun List<HendelseDTO>.mapHendelseDTO() = this.mapNotNull {
-    when (it.type) {
-        "NY_SØKNAD" -> mapNySøknad(it as NySøknadDTO)
-        "SENDT_SØKNAD_NAV" -> mapSendtSøknad(it as SendtSøknadNavDTO)
-        "SENDT_SØKNAD_ARBEIDSGIVER" -> mapSendtSøknad(it as SendtSøknadArbeidsgiverDTO)
-        "INNTEKTSMELDING" -> mapInntektsmelding(it as InntektsmeldingDTO)
-        else -> null
+private fun List<HendelseDTO>.mapHendelseDTO() = map {
+    when (it) {
+        is NySøknadDTO -> mapNySøknad(it)
+        is SendtSøknadNavDTO -> mapSendtSøknad(it)
+        is SendtSøknadArbeidsgiverDTO -> mapSendtSøknad(it)
+        is InntektsmeldingDTO -> mapInntektsmelding(it)
     }
 }
 
-private fun mapSendtSøknad(sendtSøknadNavDTO: SendtSøknadNavDTO) = SerdeSøknadDTO(
+private fun mapSendtSøknad(sendtSøknadNavDTO: SendtSøknadNavDTO) = SerdeSøknadNavDTO(
     sendtSøknadNavDTO.hendelseId,
-    sendtSøknadNavDTO.type,
     sendtSøknadNavDTO.fom,
     sendtSøknadNavDTO.tom,
     sendtSøknadNavDTO.rapportertdato,
     sendtSøknadNavDTO.sendtNav
 )
 
-private fun mapSendtSøknad(sendtSøknadArbeidsgiverDTO: SendtSøknadArbeidsgiverDTO) = SerdeSøknadDTO(
+private fun mapSendtSøknad(sendtSøknadArbeidsgiverDTO: SendtSøknadArbeidsgiverDTO) = SerdeSøknadArbeidsgiverDTO(
     sendtSøknadArbeidsgiverDTO.hendelseId,
-    sendtSøknadArbeidsgiverDTO.type,
     sendtSøknadArbeidsgiverDTO.fom,
     sendtSøknadArbeidsgiverDTO.tom,
-    sendtSøknadArbeidsgiverDTO.rapportertdato
+    sendtSøknadArbeidsgiverDTO.rapportertdato,
+    sendtSøknadArbeidsgiverDTO.sendtArbeidsgiver
 )
 
 private fun mapNySøknad(nySøknadDTO: NySøknadDTO) = SerdeSykmeldingDTO(
     nySøknadDTO.hendelseId,
-    nySøknadDTO.type,
     nySøknadDTO.fom,
     nySøknadDTO.tom,
     nySøknadDTO.rapportertdato
@@ -105,7 +103,6 @@ private fun mapNySøknad(nySøknadDTO: NySøknadDTO) = SerdeSykmeldingDTO(
 
 private fun mapInntektsmelding(inntektsmeldingDTO: InntektsmeldingDTO) = SerdeInntektsmeldingDTO(
     inntektsmeldingDTO.hendelseId,
-    inntektsmeldingDTO.type,
     inntektsmeldingDTO.mottattDato,
     inntektsmeldingDTO.beregnetInntekt.toDouble()
 )
@@ -127,6 +124,7 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
     class SendtSøknadArbeidsgiverDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_ARBEIDSGIVER", json["@id"].asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
+        val sendtArbeidsgiver: LocalDateTime = LocalDateTime.parse(json["sendtArbeidsgiver"].asText())
         val fom: LocalDate = LocalDate.parse(json["fom"].asText())
         val tom: LocalDate = LocalDate.parse(json["tom"].asText())
     }
