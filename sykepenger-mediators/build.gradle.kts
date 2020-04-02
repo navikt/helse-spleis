@@ -27,7 +27,6 @@ val githubPassword: String by project
 
 repositories {
     maven("https://kotlin.bintray.com/ktor")
-    maven("http://packages.confluent.io/maven/")
 
     maven {
         url = uri("https://maven.pkg.github.com/navikt/rapids-and-rivers")
