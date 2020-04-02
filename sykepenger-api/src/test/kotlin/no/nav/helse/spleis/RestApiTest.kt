@@ -23,6 +23,8 @@ import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Path
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
@@ -49,8 +51,11 @@ internal class RestApiTest {
     private lateinit var appBaseUrl: String
 
     @BeforeAll
-    internal fun `start embedded environment`() {
-        embeddedPostgres = EmbeddedPostgres.builder().start()
+    internal fun `start embedded environment`(@TempDir postgresPath: Path) {
+        embeddedPostgres = EmbeddedPostgres.builder()
+            .setOverrideWorkingDirectory(postgresPath.toFile())
+            .setDataDirectory(postgresPath.resolve("datadir"))
+            .start()
         postgresConnection = embeddedPostgres.postgresDatabase.connection
 
         //Stub ID provider (for authentication of REST endpoints)

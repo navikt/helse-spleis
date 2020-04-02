@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,8 +56,11 @@ internal abstract class AbstractEndToEndMediatorTest {
     private lateinit var hendelseMediator: HendelseMediator
 
     @BeforeAll
-    internal fun setupAll() {
-        embeddedPostgres = EmbeddedPostgres.builder().start()
+    internal fun setupAll(@TempDir postgresPath: Path) {
+        embeddedPostgres = EmbeddedPostgres.builder()
+            .setOverrideWorkingDirectory(postgresPath.toFile())
+            .setDataDirectory(postgresPath.resolve("datadir"))
+            .start()
         postgresConnection = embeddedPostgres.postgresDatabase.connection
         val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
         dataSource = HikariDataSource(hikariConfig)
