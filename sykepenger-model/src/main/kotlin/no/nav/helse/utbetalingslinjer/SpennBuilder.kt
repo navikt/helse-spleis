@@ -11,7 +11,7 @@ internal class SpennBuilder(
     sisteDato: LocalDate = tidslinje.sisteDato()
 ) : UtbetalingsdagVisitor {
     private val linjer = mutableListOf<Utbetalingslinje>()
-    private var tilstand: Tilstand = Ubetalt()
+    private var tilstand: Tilstand = MellomLinjer()
 
     init {
         tidslinje.kutt(sisteDato).reverse().accept(this)
@@ -78,31 +78,31 @@ internal class SpennBuilder(
         fun ikkeBetalingsdag() {}
     }
 
-    private inner class Ubetalt : Tilstand {
+    private inner class MellomLinjer : Tilstand {
         override fun betalingsdag(dag: NavDag) {
             addLinje(dag)
-            tilstand = Betalt()
+            tilstand = LinjeMedSats()
         }
 
         override fun nyLinje(dag: NavDag) {
             addLinje(dag)
-            tilstand = Betalt()
+            tilstand = LinjeMedSats()
         }
 
         override fun helgedag(dag: NavHelgDag) {
             addLinje(dag)
-            tilstand = HelgBetalt()
+            tilstand = LinjeUtenSats()
         }
 
         override fun nyLinje(dag: NavHelgDag) {
             addLinje(dag)
-            tilstand = HelgBetalt()
+            tilstand = LinjeUtenSats()
         }
     }
 
-    private inner class Betalt : Tilstand {
+    private inner class LinjeMedSats : Tilstand {
         override fun ikkeBetalingsdag() {
-            tilstand = Ubetalt()
+            tilstand = MellomLinjer()
         }
 
         override fun betalingsdag(dag: NavDag) {
@@ -119,23 +119,24 @@ internal class SpennBuilder(
 
         override fun nyLinje(dag: NavHelgDag) {
             addLinje(dag)
+            tilstand = LinjeUtenSats()
         }
     }
 
-    private inner class HelgBetalt : Tilstand {
+    private inner class LinjeUtenSats : Tilstand {
         override fun ikkeBetalingsdag() {
-            tilstand = Ubetalt()
+            tilstand = MellomLinjer()
         }
 
         override fun betalingsdag(dag: NavDag) {
             linje.dagsats = dag.utbetaling
             linje.fom = dag.dato
-            tilstand = Betalt()
+            tilstand = LinjeMedSats()
         }
 
         override fun nyLinje(dag: NavDag) {
             addLinje(dag)
-            tilstand = Betalt()
+            tilstand = LinjeMedSats()
         }
 
         override fun helgedag(dag: NavHelgDag) {

@@ -22,11 +22,28 @@ internal class SpennBuilderTest {
     }
 
     @Test
-    internal fun `helg ved start og slutt i perioden utelates`() {
-        opprett(2.HELG, 5.NAV, 2.HELG)
+    internal fun `helg ved start og slutt i perioden utelates ikke`() {
+        opprett(2.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
 
         assertEquals(1, linjer.size)
-        assertLinje(0, 1.januar, 9.januar)
+        assertLinje(0, 1.januar, 9.januar, 1200, 100.0)
+    }
+
+    @Test
+    internal fun `gap-dag som første og siste dag i perioden`() {
+        opprett(1.ARB, 3.NAV, 1.ARB)
+
+        assertEquals(1, linjer.size)
+        assertLinje(0, 2.januar, 4.januar)
+    }
+
+    @Test
+    internal fun `grad endres i løpet av helgen`() {
+        opprett(5.NAV(1500.0), 1.HELG(1500.0), 1.HELG(1500.0, 80.0), 5.NAV(1500.0, 80.0))
+
+        assertEquals(2, linjer.size)
+        assertLinje(0, 1.januar, 6.januar, 1500, 100.0)
+        assertLinje(1, 7.januar, 12.januar, (1500 * 0.8).toInt(), 80.0)
     }
 
     @Test
@@ -113,9 +130,6 @@ internal class SpennBuilderTest {
             Periode(1.januar, 1.mars),
             Aktivitetslogg()
         ).beregn()
-        linjer = SpennBuilder(
-            tidslinje,
-            sisteDato ?: tidslinje.sisteDato()
-        ).result()
+        linjer = SpennBuilder(tidslinje, sisteDato ?: tidslinje.sisteDato()).result()
     }
 }
