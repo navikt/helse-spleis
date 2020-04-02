@@ -34,7 +34,7 @@ allprojects {
     }
 
     tasks.withType<Wrapper> {
-        gradleVersion = "5.6.4"
+        gradleVersion = "6.3"
     }
 
 }
