@@ -115,6 +115,7 @@ class Person private constructor(
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, aktørId, fødselsnummer)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
+        aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()

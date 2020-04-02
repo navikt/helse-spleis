@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal interface PersonVisitor : ArbeidsgiverVisitor {
+internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun preVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}

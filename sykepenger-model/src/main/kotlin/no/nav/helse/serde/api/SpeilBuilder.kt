@@ -52,6 +52,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         fødselsnummer: String
     ) = currentState.preVisitPerson(person, aktørId, fødselsnummer)
 
+    override fun visitWarn(
+        kontekster: List<SpesifikkKontekst>,
+        aktivitet: Aktivitetslogg.Aktivitet.Warn,
+        melding: String,
+        tidsstempel: String
+    ) = currentState.visitWarn(kontekster, aktivitet, melding, tidsstempel)
+
     override fun postVisitPerson(
         person: Person,
         aktørId: String,
@@ -241,9 +248,24 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private val arbeidsgivere = mutableListOf<ArbeidsgiverDTO>()
+        private val aktivitetslogg = mutableListOf<AktivitetDTO>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
+        }
+
+        override fun visitWarn(
+            kontekster: List<SpesifikkKontekst>,
+            aktivitet: Aktivitetslogg.Aktivitet.Warn,
+            melding: String,
+            tidsstempel: String
+        ) {
+            kontekster.find { it.kontekstType == "Vedtaksperiode" }
+                ?.let { it.kontekstMap["vedtaksperiodeId"] }
+                ?.let(UUID::fromString)
+                ?.also { vedtaksperiodeId ->
+                    aktivitetslogg.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
+                }
         }
 
         override fun preVisitArbeidsgiver(
@@ -252,7 +274,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             organisasjonsnummer: String
         ) {
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
-            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere))
+            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere, aktivitetslogg))
         }
 
         override fun postVisitPerson(
@@ -268,9 +290,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val arbeidsgiver: Arbeidsgiver,
         private val arbeidsgiverMap: MutableMap<String, Any?>,
         private val fødselsnummer: String,
-        private val arbeidsgivere: MutableList<ArbeidsgiverDTO>
-    ) :
-        JsonState {
+        private val arbeidsgivere: MutableList<ArbeidsgiverDTO>,
+        private val aktivitetslogg: List<AktivitetDTO>
+    ) : JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
         }
@@ -299,7 +321,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     vedtaksperiodeMap,
                     vedtaksperioder,
                     fødselsnummer,
-                    inntekter
+                    inntekter,
+                    aktivitetslogg
                 )
             )
         }
@@ -349,7 +372,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val fødselsnummer: String,
-        private val inntekter: List<Inntekthistorikk.Inntekt>
+        private val inntekter: List<Inntekthistorikk.Inntekt>,
+        aktivitetslogg: List<AktivitetDTO>
     ) : JsonState {
         private var fullstendig = false
         private val vedtaksperiodehendelser = mutableListOf<HendelseDTO>()
@@ -360,10 +384,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             ?.let { mapDataForVilkårsvurdering(it) }
 
         init {
-            vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toSpeilMap(arbeidsgiver))
+            val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
+            vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver))
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
             vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
+            vedtaksperiodeMap["aktivitetslogg"] = aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }
         }
 
 
@@ -593,7 +619,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
 
         override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
-        override fun visitImplisittDag(implisittDag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
+        override fun visitImplisittDag(implisittDag: ImplisittDag) =
+            leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
+
         override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
             leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)
 
@@ -607,10 +635,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) =
             leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
 
-        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
+        override fun visitSykedag(sykedag: Sykedag.Sykmelding) =
+            leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
+
         override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
         override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
-        override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
+        override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) =
+            leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
 
         override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) =
             leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykedag)

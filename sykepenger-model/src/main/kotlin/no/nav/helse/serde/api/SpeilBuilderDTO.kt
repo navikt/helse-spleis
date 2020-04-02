@@ -11,6 +11,13 @@ data class PersonDTO(
     val arbeidsgivere: List<ArbeidsgiverDTO>
 )
 
+data class AktivitetDTO (
+    val vedtaksperiodeId: UUID,
+    val alvorlighetsgrad: String,
+    val melding: String,
+    val tidsstempel: String
+)
+
 data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
@@ -35,7 +42,8 @@ data class VedtaksperiodeDTO(
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,
     val dataForVilkårsvurdering: GrunnlagsdataDTO?,
-    val utbetalingslinjer: List<UtbetalingslinjeDTO>
+    val utbetalingslinjer: List<UtbetalingslinjeDTO>,
+    val aktivitetslogg: List<AktivitetDTO>
 ) : VedtaksperiodeDTOBase
 
 data class UfullstendigVedtaksperiodeDTO(

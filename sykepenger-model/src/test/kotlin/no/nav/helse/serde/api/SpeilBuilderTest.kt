@@ -202,6 +202,31 @@ internal class SpeilBuilderTest {
         assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder.last().vilkår.opptjening)
     }
 
+    @Test
+    fun aktivitetslogger() {
+        val (person, _) = person()
+        sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, _) ->
+            person.håndter(sykmelding)
+        }
+
+        val mappetPerson = serializePersonForSpeil(person)
+
+        assertEquals(
+            1,
+            (mappetPerson.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.size
+        )
+    }
+
+    @Disabled("This test will not pass until SpeilBuilder can map empoyers period correctly - https://trello.com/c/4FjMVwna")
+    @Test
+    fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
+        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[1].fullstendig)
+    }
+
     /**
      * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
      * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.
@@ -282,16 +307,8 @@ internal class SpeilBuilderTest {
 
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
-    }
 
-    @Disabled("This test will not pass until SpeilBuilder can map empoyers period correctly - https://trello.com/c/4FjMVwna")
-    @Test
-    fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
-        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
-        val personDTO = serializePersonForSpeil(person, hendelser)
-
-        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
-        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[1].fullstendig)
+        assertTrue(vedtaksperiode.aktivitetslogg.isEmpty(), "Aktivitetsloggen skal være tom")
     }
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {

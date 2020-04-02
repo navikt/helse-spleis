@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
-    private val id: UUID = vedtaksperiode["id"]
+    internal val id: UUID = vedtaksperiode["id"]
     private val gruppeId: UUID = vedtaksperiode["gruppeId"]
     private val aktørId: String = vedtaksperiode["aktørId"]
     private val fødselsnummer: String = vedtaksperiode["fødselsnummer"]
