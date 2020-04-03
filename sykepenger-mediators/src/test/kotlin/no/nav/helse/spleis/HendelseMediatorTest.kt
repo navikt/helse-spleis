@@ -386,8 +386,8 @@ internal class HendelseMediatorTest {
                 vedtaksperiodeId = UUID.randomUUID(),
                 løsninger = mapOf(
                     "Utbetaling" to mapOf(
-                        "status" to if (utbetalingOK) "FERDIG" else "FEIL",
-                        "melding" to if (!utbetalingOK) "FEIL fra Spenn" else ""
+                        "status" to if (utbetalingOK) Utbetaling.Oppdragstatus.AKSEPTERT.name else Utbetaling.Oppdragstatus.AVVIST.name,
+                        "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
                     )
                 ),
                 ekstraFelter = mapOf(

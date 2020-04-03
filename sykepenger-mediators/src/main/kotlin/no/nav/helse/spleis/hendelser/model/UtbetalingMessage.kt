@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.hendelser.Utbetaling.Status
+import no.nav.helse.hendelser.Utbetaling.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.MessageFactory
@@ -11,8 +11,8 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
     init {
         requireAll("@behov", Utbetaling)
         requireKey("@løsning.${Utbetaling.name}")
-        requireAny("@løsning.${Utbetaling.name}.status", Status.values().map(Enum<*>::name))
-        requireKey("@løsning.${Utbetaling.name}.melding")
+        requireAny("@løsning.${Utbetaling.name}.status", Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name))
+        requireKey("@løsning.${Utbetaling.name}.beskrivelse")
         requireKey("utbetalingsreferanse")
     }
 
@@ -28,7 +28,7 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
             orgnummer = this["organisasjonsnummer"].asText(),
             utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
             status = enumValueOf(this["@løsning.${Utbetaling.name}.status"].asText()),
-            melding = this["@løsning.${Utbetaling.name}.melding"].asText()
+            melding = this["@løsning.${Utbetaling.name}.beskrivelse"].asText()
         )
     }
 

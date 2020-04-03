@@ -363,8 +363,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling),
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
-                    "status" to if (utbetalingOK) "FERDIG" else "FEIL",
-                    "melding" to if (!utbetalingOK) "FEIL fra Spenn" else ""
+                    "status" to if (utbetalingOK) no.nav.helse.hendelser.Utbetaling.Oppdragstatus.AKSEPTERT.name else no.nav.helse.hendelser.Utbetaling.Oppdragstatus.AVVIST.name,
+                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
                 )
             ),
             ekstraFelter = mapOf(

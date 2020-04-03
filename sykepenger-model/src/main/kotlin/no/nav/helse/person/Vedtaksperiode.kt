@@ -943,8 +943,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: Utbetaling) {
-            if (!utbetaling.isOK()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
-                utbetaling.error("Feilmelding fra Oppdragssystemet: ${utbetaling.melding}")
+            if (utbetaling.valider().hasErrors()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+                utbetaling.error("Utbetaling ble ikke gjennomført")
             }
 
             vedtaksperiode.tilstand(utbetaling, Avsluttet) {
