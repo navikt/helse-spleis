@@ -9,7 +9,7 @@ import java.util.*
 internal class Utbetalingslinjer(
     private val linjer: List<Utbetalingslinje> = listOf(),
     private val utbetalingsreferanse: String = genererUtbetalingsreferanse(UUID.randomUUID()),
-    private val linjerType: Linjetype = Ny
+    private val linjertype: Linjetype = Ny
 ): List<Utbetalingslinje> by linjer {
 
     internal fun accept(visitor: UtbetalingVisitor) {
