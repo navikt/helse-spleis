@@ -17,8 +17,9 @@ internal class SpennBuilder(
         tidslinje.kutt(sisteDato).reverse().accept(this)
     }
 
-    internal fun result(): List<Utbetalingslinje> {
-        return linjer
+    internal fun result(): Utbetalingslinjer {
+        linjer.zipWithNext { a, b -> b.linkTo(a) }
+        return Utbetalingslinjer(linjer)
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

@@ -31,12 +31,12 @@ internal class Utbetaling
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg
-        ) = Utbetalingslinjer(SpennBuilder(tidslinje, sisteDato).result().also {
+        ) = SpennBuilder(tidslinje, sisteDato).result().also {
             if (it.isEmpty())
                 aktivitetslogg.info("Ingen utbetalingslinjer bygget")
             else
                 aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
-        })
+        }
 
         private fun buildPerson(
             tidslinje: Utbetalingstidslinje,

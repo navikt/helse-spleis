@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
@@ -85,9 +86,9 @@ internal class SpennBuilderTest {
         opprett(3.NAV(1500.0, 100.0), 2.NAV(1875.0, 80.0), 2.HELG(1500.0, 80.0), 2.NAV(1500.0, 80.0))
 
         assertEquals(3, linjer.size)
-        assertLinje(0, 1.januar, 3.januar, 1500, 100.0)
-        assertLinje(1, 4.januar, 5.januar, 1500, 80.0)
-        assertLinje(2, 6.januar, 9.januar, (1500 * 0.8).toInt(), 80.0)
+        assertLinje(0, 1.januar, 3.januar, 1500, 100.0, 1)
+        assertLinje(1, 4.januar, 5.januar, 1500, 80.0, 2, 1)
+        assertLinje(2, 6.januar, 9.januar, (1500 * 0.8).toInt(), 80.0, 3, 2)
     }
 
     @Test
@@ -104,12 +105,16 @@ internal class SpennBuilderTest {
         fom: LocalDate,
         tom: LocalDate,
         sats: Int = linjer[index].dagsats,
-        grad: Double = linjer[index].grad
+        grad: Double = linjer[index].grad,
+        delytelseId: Int = linjer[index]["delytelseId"],
+        refDelytelseId: Int? = linjer[index]["refDelytelseId"]
     ) {
         assertEquals(fom, linjer[index].fom)
         assertEquals(tom, linjer[index].tom)
         assertEquals(grad, linjer[index].grad)
         assertEquals(sats, linjer[index].dagsats)
+        assertEquals(delytelseId, linjer[index]["delytelseId"])
+        assertEquals(refDelytelseId, linjer[index]["refDelytelseId"] ?: null)
     }
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
