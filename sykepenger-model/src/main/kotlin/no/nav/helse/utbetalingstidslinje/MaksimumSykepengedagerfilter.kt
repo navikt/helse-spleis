@@ -39,9 +39,9 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 
         if (avvisteDatoer in periode)
-            aktivitetslogg.warn("Maksimum sykdomsgrense nådd")
+            aktivitetslogg.warn("Maksimalt antall sykedager overskrides i perioden")
         else
-            aktivitetslogg.info("Maksimum sykdomsgrense ikke nådd")
+            aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
     }
 
     private fun state(nyState: State) {

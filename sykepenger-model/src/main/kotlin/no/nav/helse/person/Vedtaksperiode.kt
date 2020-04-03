@@ -232,9 +232,9 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag > sisteDag())
-            hendelse.warn("Inntektsmelding har oppgitt første fraværsdag etter tidslinjen til perioden")
+            hendelse.warn("Første fraværsdag i inntektsmeldingen er etter sykmeldingsperioden")
         if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
-            hendelse.warn("Inntektsmelding har oppgitt en annen første fraværsdag")
+            hendelse.warn("Første fraværsdag i inntektsmeldingen er ikke den samme som første fraværsdag i sykdomsperioden")
 
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
@@ -585,7 +585,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()) {
-                søknad.warn("Søknad inneholder egenmeldingsdager tidligere enn første oppgitte dag i inntektsmeldingen")
+                søknad.warn("Søknaden inneholder egenmeldingsdager tidligere enn oppgitte dager i inntektsmeldingen")
                 søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
@@ -846,7 +846,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 AvventerGodkjenning
             ) {
-                hendelse.warn("Ingen utbetalingslinjer, gjør ingen simulering av utbetaling")
+                hendelse.warn("Ingen simulering av utbetaling på grunn av manglende utbetalingsinformasjon")
             }
 
             trengerSimulering(vedtaksperiode, hendelse)
@@ -858,7 +858,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (simulering.valider().hasErrors()) return simulering.warn(
-                "Simulering har feil, ignorerer resultatet og prøver på nytt senere."
+                "Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt"
             )
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)

@@ -22,9 +22,9 @@ internal class MinimumInntektsfilter (
         tidslinjer.forEach { it.avvis(inntekterUnderMinimum.keys.toList(), Begrunnelse.MinimumInntekt) }
 
         if (inntekterUnderMinimum.keys.toList() in periode)
-            aktivitetslogg.warn("Avvist minst en dag som faller under minimum inntekt")
+            aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av inntekt under krav til minste sykepengegrunnlag")
         else
-            aktivitetslogg.info("Minimum inntekt har blitt sjekket uten problemer")
+            aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
     }
 
     override fun visitNavDag(dag: NavDag) {

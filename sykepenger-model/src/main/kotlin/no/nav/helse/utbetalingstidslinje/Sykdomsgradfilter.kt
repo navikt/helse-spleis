@@ -24,7 +24,7 @@ internal class Sykdomsgradfilter(
         }
         tidslinjer.forEach { it.avvis(avvisteDager, Begrunnelse.MinimumSykdomsgrad) }
         if (harForLavSykdomsgrad)
-            aktivitetslogg.warn("Sykdomsgrad er under 20%% for minst én dag i perioden")
+            aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20%%")
         else
             aktivitetslogg.info("Ingen avviste dager på grunn av 20%% samlet sykdomsgrad-regel")
     }

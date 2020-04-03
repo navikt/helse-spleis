@@ -127,8 +127,8 @@ class Søknad constructor(
                 Sykdomstidslinje.egenmeldingsdager(fom, tom, SøknadDagFactory)
 
             override fun valider(søknad: Søknad) {
-                if (fom < søknad.fom.minusDays(tidslinjegrense)) søknad.warn("Søknaden inneholder Egenmeldingsdager eldre enn $tidslinjegrense dager før perioden")
-                if (tom > søknad.tom) søknad.warn("Søknaden inneholder Egenmeldingsdager nyere enn perioden")
+                if (fom < søknad.fom.minusDays(tidslinjegrense)) søknad.warn("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
+                if (tom > søknad.tom) søknad.warn("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden")
             }
         }
 
