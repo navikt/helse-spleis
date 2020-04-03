@@ -8,22 +8,16 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import java.time.LocalDateTime
 
-internal class UtbetalingReflect(utbetaling: Utbetaling) {
-    private val utbetalingstidslinje =
-        UtbetalingstidslinjeReflect(Utbetaling["utbetalingstidslinje"]).toMap()
-    private val arbeidsgiverUtbetalingslinjer =
-        UtbetalingslinjerReflect(Utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap()
-    private val personUtbetalingslinjer =
-        UtbetalingslinjerReflect(Utbetaling["personUtbetalingslinjer"]).toMap()
-    private val tidsstempel: LocalDateTime = utbetaling["tidsstempel"]
-
+internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap() = mutableMapOf(
-        "utbetalingstidslinje" to utbetalingstidslinje,
-        "arbeidsgiverUtbetalingslinjer" to arbeidsgiverUtbetalingslinjer,
-        "personUtbetalingslinjer" to personUtbetalingslinjer,
-        "tidsstempel" to tidsstempel
+        "utbetalingstidslinje" to
+            UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
+        "arbeidsgiverUtbetalingslinjer" to
+            UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
+        "personUtbetalingslinjer" to
+            UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
+        "tidsstempel" to utbetaling["tidsstempel"]
     )
 }
 

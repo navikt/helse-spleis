@@ -47,7 +47,6 @@ internal class Utbetaling
         }
     }
 
-
     fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(this, tidsstempel)
         utbetalingstidslinje.accept(visitor)
