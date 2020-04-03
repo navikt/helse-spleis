@@ -4,25 +4,25 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
 
 internal enum class Turneringsnøkkel {
-    I,
-    WD_A,
-    WD_IM,
-    S_SM,
-    S_A,
-    K_A,
-    V_A,
-    V_IM,
-    Le_Areg,
-    Le_A,
-    SW_SM,
-    SW_A,
-    SRD_IM,
-    SRD_A,
-    EDU,
-    OI_Int,
-    OI_A,
-    DA,
-    Undecided;
+    ImplisittDag,
+    Arbeidsdag_SØ,
+    Arbeidsdag_IM,
+    Sykedag_SM,
+    Sykedag_SØ,
+    Kun_arbeidsgiverdag,
+    Feriedag_SØ,
+    Feriedag_IM,
+    Permisjonsdag_AAREG,
+    Permisjonsdag_SØ,
+    SykHelgedag_SM,
+    SykHelgedag_SØ,
+    Egenmeldingsdag_IM,
+    Egenmeldingsdag_SØ,
+    Studiedag,
+    AnnenInntekt_INNTK,
+    AnnenInntekt_SØ,
+    Utenlandsdag,
+    UbestemtDag;
 
     companion object {
         fun fraDag(dag: Dag) = TurneringsnøkkelVisitor(dag).turneringsnøkkel()
@@ -38,77 +38,77 @@ internal enum class Turneringsnøkkel {
             internal fun turneringsnøkkel() = requireNotNull(turneringsnøkkel) { "Finner ikke turneringsnøkkel for ${dag::class.simpleName}"}
 
             override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) {
-                turneringsnøkkel = WD_IM
+                turneringsnøkkel = Arbeidsdag_IM
             }
 
             override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) {
-                turneringsnøkkel = WD_A
+                turneringsnøkkel = Arbeidsdag_SØ
             }
 
             override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) {
-                turneringsnøkkel = SRD_IM
+                turneringsnøkkel = Egenmeldingsdag_IM
             }
 
             override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) {
-                turneringsnøkkel = SRD_A
+                turneringsnøkkel = Egenmeldingsdag_SØ
             }
 
             override fun visitFeriedag(dag: Feriedag.Inntektsmelding) {
-                turneringsnøkkel = V_IM
+                turneringsnøkkel = Feriedag_IM
             }
 
             override fun visitFeriedag(dag: Feriedag.Søknad) {
-                turneringsnøkkel = V_A
+                turneringsnøkkel = Feriedag_SØ
             }
 
             override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) {
-                turneringsnøkkel = V_IM
+                turneringsnøkkel = Feriedag_IM
             }
             override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) {
-                turneringsnøkkel = V_A
+                turneringsnøkkel = Feriedag_SØ
             }
 
-            override fun visitImplisittDag(dag: ImplisittDag) {
-                turneringsnøkkel = I
+            override fun visitImplisittDag(dag: no.nav.helse.sykdomstidslinje.dag.ImplisittDag) {
+                turneringsnøkkel = ImplisittDag
             }
 
             override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) {
-                turneringsnøkkel = K_A
+                turneringsnøkkel = Kun_arbeidsgiverdag
             }
 
             override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) {
-                turneringsnøkkel = Le_A
+                turneringsnøkkel = Permisjonsdag_SØ
             }
 
             override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) {
-                turneringsnøkkel = Le_Areg
+                turneringsnøkkel = Permisjonsdag_AAREG
             }
 
-            override fun visitStudiedag(dag: Studiedag) {
-                turneringsnøkkel = EDU
+            override fun visitStudiedag(dag: no.nav.helse.sykdomstidslinje.dag.Studiedag) {
+                turneringsnøkkel = Studiedag
             }
 
             override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) {
-                turneringsnøkkel = SW_SM
+                turneringsnøkkel = SykHelgedag_SM
             }
 
             override fun visitSykHelgedag(dag: SykHelgedag.Søknad) {
-                turneringsnøkkel = SW_A
+                turneringsnøkkel = SykHelgedag_SØ
             }
 
             override fun visitSykedag(dag: Sykedag.Sykmelding) {
-                turneringsnøkkel = S_SM
+                turneringsnøkkel = Sykedag_SM
             }
 
             override fun visitSykedag(dag: Sykedag.Søknad) {
-                turneringsnøkkel = S_A
+                turneringsnøkkel = Sykedag_SØ
             }
 
             override fun visitUbestemt(dag: Ubestemtdag) {
-                turneringsnøkkel = Undecided
+                turneringsnøkkel = UbestemtDag
             }
-            override fun visitUtenlandsdag(dag: Utenlandsdag) {
-                turneringsnøkkel = DA
+            override fun visitUtenlandsdag(dag: no.nav.helse.sykdomstidslinje.dag.Utenlandsdag) {
+                turneringsnøkkel = Utenlandsdag
             }
 
         }

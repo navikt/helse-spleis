@@ -1,4 +1,4 @@
-,I,WD_A,S_A
-I,L,,
-WD_A,R,U,
-S_A,L,C,X
+,ImplisittDag,Arbeidsdag_SØ,Sykedag_SØ
+ImplisittDag,L,,
+Arbeidsdag_SØ,R,U,
+Sykedag_SØ,L,C,X
