@@ -602,7 +602,7 @@ internal class SpeilBuilderTest {
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             utbetalingsreferanse = "ref",
-            status = Utbetaling.Status.FERDIG,
+            status = Utbetaling.Oppdragstatus.AKSEPTERT,
             melding = "hei"
         )
     }

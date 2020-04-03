@@ -58,7 +58,7 @@ internal class UtbetalingsreferanseTest {
         person.håndter(vilkårsgrunnlag(inspektør.vedtaksperiodeId(0)))
         person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
         person.håndter(godkjenning(inspektør.vedtaksperiodeId(0)))
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Oppdragstatus.AKSEPTERT))
         person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
         assertEquals(inspektør.utbetalingsreferanse(1), inspektør.utbetalingsreferanse(0))
     }
@@ -75,7 +75,7 @@ internal class UtbetalingsreferanseTest {
         person.håndter(ytelser(inspektør.vedtaksperiodeId(0)))
         person.håndter(simulering(inspektør.vedtaksperiodeId(0)))
         person.håndter(godkjenning(inspektør.vedtaksperiodeId(0)))
-        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Status.FERDIG))
+        person.håndter(utbetaling(inspektør.vedtaksperiodeId(0), Utbetaling.Oppdragstatus.AKSEPTERT))
         person.håndter(ytelser(inspektør.vedtaksperiodeId(1)))
         assertNotEquals(inspektør.utbetalingsreferanse(1), inspektør.utbetalingsreferanse(0))
     }
@@ -177,7 +177,7 @@ internal class UtbetalingsreferanseTest {
             saksbehandler = ""
         )
 
-    private fun utbetaling(vedtaksperiodeId: UUID, status: Utbetaling.Status) =
+    private fun utbetaling(vedtaksperiodeId: UUID, status: Utbetaling.Oppdragstatus) =
         Utbetaling(
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = "aktørId",

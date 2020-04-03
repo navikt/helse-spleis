@@ -136,11 +136,11 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
     }
 
-    protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Status) {
+    protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: Utbetaling.Oppdragstatus) {
         person.håndter(utbetaling(vedtaksperiodeIndex, status))
     }
 
-    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Status) =
+    private fun utbetaling(vedtaksperiodeIndex: Int, status: Utbetaling.Oppdragstatus) =
         Utbetaling(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             aktørId = AKTØRID,
