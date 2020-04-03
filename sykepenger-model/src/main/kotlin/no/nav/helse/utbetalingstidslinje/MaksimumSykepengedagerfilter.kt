@@ -34,7 +34,7 @@ internal class MaksimumSykepengedagerfilter(
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, historiskTidslinje: Utbetalingstidslinje) {
         require(tidslinjer.size == 1) { "Flere arbeidsgivere er ikke støttet enda" }
-        val tidslinje = (tidslinjer + historiskTidslinje).reduce(Utbetalingstidslinje::plus)
+        val tidslinje = (tidslinjer + listOf(historiskTidslinje)).reduce(Utbetalingstidslinje::plus)
         tidslinje.accept(this)
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 
