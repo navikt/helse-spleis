@@ -7,7 +7,7 @@ import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
 
-internal class AktivitetsloggReflect(private val aktivitetslogg: Aktivitetslogg) {
+internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
     private val aktiviteter = Aktivitetslogginspektør(aktivitetslogg).aktiviteter
 
     internal fun toMap() = mutableMapOf(

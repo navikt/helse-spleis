@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
@@ -13,7 +14,7 @@ import java.time.LocalDate
 
 internal class Utbetalingstidslinje private constructor(
     private val utbetalingsdager: MutableList<Utbetalingsdag>
-) {
+) : MutableList<Utbetalingsdag> by utbetalingsdager {
 
     internal constructor() : this(mutableListOf())
 
@@ -104,8 +105,6 @@ internal class Utbetalingstidslinje private constructor(
         maxOf(this.sisteDato(), other.sisteDato())
 
     internal fun sisteDato() = this.utbetalingsdager.last().dato
-
-    internal fun isEmpty() = utbetalingsdager.isEmpty()
 
     internal fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
         return Utbetalingstidslinje(
