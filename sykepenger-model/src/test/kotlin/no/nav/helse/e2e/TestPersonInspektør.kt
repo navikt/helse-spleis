@@ -121,9 +121,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     private inner class Dagteller : SykdomstidslinjeVisitor {
-        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = inkrementer(
+        override fun visitSykedag(dag: Sykedag.Sykmelding) = inkrementer(
             Sykedag::class)
-        override fun visitSykedag(sykedag: Sykedag.Søknad) = inkrementer(
+        override fun visitSykedag(dag: Sykedag.Søknad) = inkrementer(
             Sykedag::class)
 
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = inkrementer(
@@ -131,9 +131,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = inkrementer(
             Egenmeldingsdag::class)
 
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = inkrementer(
+        override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = inkrementer(
             SykHelgedag::class)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = inkrementer(
+        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = inkrementer(
             SykHelgedag::class)
 
         override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = inkrementer(
@@ -142,10 +142,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = inkrementer(
             Arbeidsdag::class
         )
-
         override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = inkrementer(
             Arbeidsdag::class
         )
+
+        override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = inkrementer(Feriedag::class)
+        override fun visitFeriedag(dag: Feriedag.Søknad) = inkrementer(Feriedag::class)
+
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = inkrementer(FriskHelgedag::class)
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = inkrementer(FriskHelgedag::class)
 
         private fun inkrementer(klasse: KClass<out Dag>) {
             dagtelling.compute(klasse) { _, value ->

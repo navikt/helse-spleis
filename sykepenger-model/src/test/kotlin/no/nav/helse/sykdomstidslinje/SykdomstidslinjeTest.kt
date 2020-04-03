@@ -28,7 +28,7 @@ internal class SykdomstidslinjeTest {
         val tidslinje = tidslinje1.merge(tidslinje2, KonfliktskyDagturnering) {
             Sykdomstidslinje.ikkeSykedag(it, Inntektsmelding.InntektsmeldingDagFactory)
         }
-        assertEquals(" SSSAAII AASSS", tidslinje.toShortString())
+        assertEquals(" SSSAARR AASSS", tidslinje.toShortString())
     }
 
     @Test

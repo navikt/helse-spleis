@@ -153,6 +153,7 @@ class Inntektsmelding(
         override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Inntektsmelding(dato)
         override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Inntektsmelding(dato)
         override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Inntektsmelding(dato)
+        override fun friskHelgedag(dato: LocalDate): FriskHelgedag = FriskHelgedag.Inntektsmelding(dato)
     }
 
     private object InntektsmeldingTurnering : Dagturnering {
@@ -164,6 +165,8 @@ class Inntektsmelding(
                 høyre is Feriedag.Inntektsmelding && venstre is Arbeidsdag.Inntektsmelding -> høyre
                 venstre is Egenmeldingsdag.Inntektsmelding && høyre is Feriedag.Inntektsmelding -> venstre
                 høyre is Egenmeldingsdag.Inntektsmelding && venstre is Feriedag.Inntektsmelding -> høyre
+                venstre is FriskHelgedag.Inntektsmelding && høyre is Feriedag.Inntektsmelding -> høyre
+                høyre is FriskHelgedag.Inntektsmelding && venstre is Feriedag.Inntektsmelding -> venstre
                 else -> Ubestemtdag(venstre.dagen)
             }
         }

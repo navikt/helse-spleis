@@ -91,7 +91,7 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
 
     private fun førsteSykedagDagEtterSisteIkkeSykedag() =
         kuttEtterSisteSykedag().let { dager ->
-            dager.firstOrNull { it is Arbeidsdag || it is ImplisittDag }?.let { ikkeSykedag ->
+            dager.firstOrNull { it is Arbeidsdag || it is FriskHelgedag || it is ImplisittDag }?.let { ikkeSykedag ->
                 dager.lastOrNull {
                     it.dagen.isAfter(ikkeSykedag.dagen) && erEnSykedag(it)
                 }?.dagen
@@ -133,18 +133,14 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
         return dager.joinToString(separator = "") {
             (if (it.dagen.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
             when (it::class) {
-                Sykedag.Søknad::class -> "S"
-                Sykedag.Sykmelding::class -> "S"
-                Arbeidsdag.Inntektsmelding::class -> "A"
-                Arbeidsdag.Søknad::class -> "A"
+                Sykedag.Søknad::class, Sykedag.Sykmelding::class -> "S"
+                Arbeidsdag.Inntektsmelding::class, Arbeidsdag.Søknad::class -> "A"
                 ImplisittDag::class -> "I"
-                SykHelgedag.Sykmelding::class -> "H"
-                SykHelgedag.Søknad::class -> "H"
-                Egenmeldingsdag.Inntektsmelding::class -> "E"
-                Egenmeldingsdag.Søknad::class -> "E"
+                SykHelgedag.Sykmelding::class, SykHelgedag.Søknad::class -> "H"
+                Egenmeldingsdag.Inntektsmelding::class, Egenmeldingsdag.Søknad::class -> "E"
                 AvvistDag::class -> "X"
-                Feriedag.Inntektsmelding::class -> "F"
-                Feriedag.Søknad::class -> "F"
+                Feriedag.Inntektsmelding::class, Feriedag.Søknad::class -> "F"
+                FriskHelgedag.Inntektsmelding::class, FriskHelgedag.Søknad::class -> "R"
                 KunArbeidsgiverSykedag::class -> "K"
                 else -> "?"
             }
@@ -227,9 +223,6 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
         private fun utenlandsdag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             if (!dato.erHelg()) factory.utenlandsdag(dato) else factory.implisittDag(dato)
 
-        private fun ikkeSykedag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
-            ikkeSykedag(dato, factory)
-
         private fun studiedag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             if (!dato.erHelg()) factory.studiedag(dato) else factory.implisittDag(dato)
 
@@ -237,7 +230,10 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
             if (!dato.erHelg()) factory.permisjonsdag(dato) else factory.implisittDag(dato)
 
         internal fun ikkeSykedag(dato: LocalDate, factory: DagFactory) =  // For gap days
-            if (!dato.erHelg()) factory.arbeidsdag(dato) else factory.implisittDag(dato)
+            if (!dato.erHelg()) factory.arbeidsdag(dato) else factory.friskHelgedag(dato)
+
+        private fun ikkeSykedag(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
+            ikkeSykedag(dato, factory)
 
         private fun ferie(dato: LocalDate, grad_ignored: Double, factory: DagFactory) =
             factory.feriedag(dato)

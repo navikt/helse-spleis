@@ -124,12 +124,21 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
+    fun `2 - Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
         (16.S + 16.F + 1.A + 3.S).utbetalingslinjer()
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(18, inspektør.dagtelling[Fridag::class])
         assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
         assertEquals(1, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `Ferie rett etter arbeidsgiverperioden teller ikke som opphold`() {
+        (3.A + 16.S + 16.F + 1.A + 3.S).utbetalingslinjer()
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(16, inspektør.dagtelling[Fridag::class])
+        assertEquals(4, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(3, inspektør.dagtelling[NavDag::class])
     }
 
     @Test

@@ -52,12 +52,12 @@ internal class CsvDagturneringTest {
     }
 
     @Test
-    internal fun `sykedag fra arbeidsgiver taper mot syk helgedag fra sykmeldingen`() {
-        val egenmeldingsdagFraArbeidsgiver = søndag.egenmeldingsdag.fraInntektsmelding.rapportertSent
+    internal fun `egenmeldingsdag fra arbeidsgiver vinner mot syk helgedag fra sykmeldingen`() {
         val sykHelgedag = søndag.sykedag.fraSykmelding.rapportertTidlig
+        val egenmeldingsdagFraArbeidsgiver = søndag.egenmeldingsdag.fraInntektsmelding.rapportertSent
 
         val vinner = turnering.beste(egenmeldingsdagFraArbeidsgiver, sykHelgedag)
-        assertEquals(sykHelgedag, vinner)
+        assertEquals(egenmeldingsdagFraArbeidsgiver, vinner)
     }
 
     @Test

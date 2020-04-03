@@ -61,6 +61,11 @@ internal class JsonBuilderTest {
         testSerialiseringAvPerson(ingenBetalingsperson())
     }
 
+    @Test
+    fun `gjenoppbygd person med friske helgedager er lik opprinnelig person med friske helgedager`() {
+        testSerialiseringAvPerson(friskeHelgedagerPerson())
+    }
+
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
@@ -128,6 +133,31 @@ internal class JsonBuilderTest {
                 håndter(inntektsmelding(fom = 1.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+            }
+
+        internal fun friskeHelgedagerPerson(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = fom, tom = tom))
+                fangeVedtaksperiodeId()
+                håndter(
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    )
+                )
+                håndter(inntektsmelding(fom = fom, perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))))
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
@@ -208,7 +238,8 @@ internal class JsonBuilderTest {
 
         internal fun inntektsmelding(
             hendelseId: UUID = UUID.randomUUID(),
-            fom: LocalDate
+            fom: LocalDate,
+            perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15)))
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
             refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
@@ -217,7 +248,7 @@ internal class JsonBuilderTest {
             aktørId = aktørId,
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.00,
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            arbeidsgiverperioder = perioder,
             ferieperioder = emptyList()
         )
 

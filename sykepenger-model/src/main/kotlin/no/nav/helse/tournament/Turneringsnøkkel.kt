@@ -61,6 +61,13 @@ internal enum class Turneringsnøkkel {
                 turneringsnøkkel = V_A
             }
 
+            override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) {
+                turneringsnøkkel = V_IM
+            }
+            override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) {
+                turneringsnøkkel = V_A
+            }
+
             override fun visitImplisittDag(implisittDag: ImplisittDag) {
                 turneringsnøkkel = I
             }

@@ -93,6 +93,8 @@ internal interface SykdomstidslinjeVisitor {
     fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) {}
     fun visitFeriedag(dag: Feriedag.Inntektsmelding) {}
     fun visitFeriedag(dag: Feriedag.Søknad) {}
+    fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) {}
+    fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) {}
     fun visitImplisittDag(dag: ImplisittDag) {}
     fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) {}
     fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) {}

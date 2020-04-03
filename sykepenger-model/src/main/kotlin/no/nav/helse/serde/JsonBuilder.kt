@@ -176,6 +176,9 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(feriedag)
     override fun visitFeriedag(feriedag: Feriedag.Søknad) = currentState.visitFeriedag(feriedag)
+    override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = currentState.visitFriskHelgedag(dag)
+    override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = currentState.visitFriskHelgedag(dag)
+
     override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitImplisittDag(implisittDag)
     override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
         currentState.visitPermisjonsdag(permisjonsdag)
@@ -489,6 +492,10 @@ internal class JsonBuilder : PersonVisitor {
             leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
 
         override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
+
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
+
         override fun visitImplisittDag(implisittDag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
         override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
             leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)

@@ -13,6 +13,7 @@ internal interface DagFactory {
     fun studiedag(dato: LocalDate): Studiedag { error("Studiedag ikke støttet") }
     fun sykedag(dato: LocalDate, grad: Double): Sykedag { error("Sykedag ikke støttet") }
     fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag { error("SykHelgedag ikke støttet") }
+    fun friskHelgedag(dato: LocalDate): FriskHelgedag { error("FriskHelgedag ikke støttet") }
     fun ubestemtdag(dato: LocalDate): Ubestemtdag = Ubestemtdag(dato)
     fun utenlandsdag(dato: LocalDate): Utenlandsdag { error("Utenlandsdag ikke støttet") }
 }

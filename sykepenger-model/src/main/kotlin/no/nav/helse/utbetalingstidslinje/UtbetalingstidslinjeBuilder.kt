@@ -43,6 +43,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitImplisittDag(implisittDag: ImplisittDag) = implisittDag(implisittDag.dagen)
     override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = fridag(feriedag.dagen)
     override fun visitFeriedag(feriedag: Feriedag.Søknad) = fridag(feriedag.dagen)
+    override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = fridag(dag.dagen)
+    override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = fridag(dag.dagen)
     override fun visitSykedag(sykedag: Sykedag.Sykmelding) = sykedag(sykedag.dagen, sykedag.grad)
     override fun visitSykedag(sykedag: Sykedag.Søknad) = sykedag(sykedag.dagen, sykedag.grad)
     override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) = egenmeldingsdag(egenmeldingsdag.dagen)
