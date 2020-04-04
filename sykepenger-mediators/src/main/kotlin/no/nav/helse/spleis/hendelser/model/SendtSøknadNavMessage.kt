@@ -3,10 +3,7 @@ package no.nav.helse.spleis.hendelser.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import kotlin.math.max
@@ -17,7 +14,18 @@ internal class SendtSøknadNavMessage(originalMessage: String, private val probl
     init {
         requireValue("@event_name", "sendt_søknad_nav")
         requireValue("status", "SENDT")
-        requireKey("id", "egenmeldinger", "fravar")
+        requireKey("id")
+        requireArray("egenmeldinger") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
+        }
+        requireArray("fravar") {
+            requireKey("type")
+            require("fom", JsonNode::asLocalDate)
+            require("tom") {
+                if (!it.isMissingOrNull()) it.asLocalDate()
+            }
+        }
         require("fom", JsonNode::asLocalDate)
         require("tom", JsonNode::asLocalDate)
         require("sendtNav", JsonNode::asLocalDateTime)

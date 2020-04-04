@@ -1,4 +1,3 @@
-val ktorVersion = "1.2.4"
 val flywayVersion = "6.3.1"
 val hikariVersion = "3.4.2"
 val vaultJdbcVersion = "1.3.1"
@@ -8,7 +7,7 @@ val mockkVersion = "1.9.3"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.06d0f27")
+    implementation("com.github.navikt:rapids-and-rivers:1.a1c8748")
     implementation(project(":sykepenger-model"))
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
