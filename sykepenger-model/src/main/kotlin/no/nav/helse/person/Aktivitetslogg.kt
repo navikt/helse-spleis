@@ -390,7 +390,7 @@ interface Aktivitetskontekst {
 
 class SpesifikkKontekst(internal val kontekstType: String, internal val kontekstMap: Map<String, String> = mapOf()) {
     internal fun melding() =
-        kontekstType + kontekstMap.entries.joinToString(separator = " ") { "${it.key}: ${it.value}" }
+        kontekstType + " " + kontekstMap.entries.joinToString(separator = " ") { "${it.key}: ${it.value}" }
 
     override fun equals(other: Any?) =
         this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap
