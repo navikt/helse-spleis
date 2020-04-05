@@ -48,34 +48,27 @@ internal class HendelseMediator(
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        sikkerLogg.info(
-            "gjenkjente melding id={} for fnr={} som {}",
-            message.id,
-            message.fødselsnummer,
-            message::class.simpleName
-        )
-        try {
-            message.accept(hendelseRecorder)
-            message.accept(messageProcessor)
-        } catch (err: Aktivitetslogg.AktivitetException) {
-            val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+        withMDC(mapOf(
+            "melding_id" to message.id.toString(),
+            "melding_type" to (message::class.simpleName ?: "ukjent")
+        )) {
+            sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
             try {
-                MDC.setContextMap(contextMap + err.kontekst())
-                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-            } finally {
-                MDC.setContextMap(contextMap)
-            }
-        } catch (err: Exception) {
-            withMDC(
-                mapOf(
+                message.accept(hendelseRecorder)
+                message.accept(messageProcessor)
+            } catch (err: Aktivitetslogg.AktivitetException) {
+                withMDC(err.kontekst()) {
+                    sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                }
+            } catch (err: Exception) {
+                withMDC(mapOf(
                     "melding_id" to message.id.toString(),
                     "melding_type" to (message::class.simpleName ?: "ukjent")
-                )
-            ) {
-                log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-
-                withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
-                    sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                )) {
+                    log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                    withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
+                        sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                    }
                 }
             }
         }
@@ -103,8 +96,8 @@ internal class HendelseMediator(
         lagrePersonDao.lagrePerson(person, hendelse)
 
         if (!hendelse.hasMessages()) return
-        if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors: ${hendelse.toLogString()}")
-        sikkerLogg.info("aktivitetslogg inneholder meldinger: ${hendelse.toLogString()}")
+        if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
+        sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
 
         behovMediator.håndter(hendelse)
     }
