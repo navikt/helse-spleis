@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import java.time.LocalDateTime
@@ -28,18 +29,22 @@ internal class BehovMediator(
                 "@opprettet" to LocalDateTime.now(),
                 "@id" to id,
                 "@behov" to behovsliste
-            ).apply {
-                putAll(kontekst)
-                behov.forEach {
-                    require(it.type.name !in behovsliste) { "Kan ikke produsere samme behov $it.type.name på samme kontekst" }
-                    require(it.detaljer().filterKeys { this.containsKey(it) }.isEmpty()) { "Kan ikke produsere behov med duplikate detaljer" }
-                    behovsliste.add(it.type.name)
-                    putAll(it.detaljer())
+            )
+                .apply {
+                    putAll(kontekst)
+                    behov.forEach {
+                        require(it.type.name !in behovsliste) { "Kan ikke produsere samme behov $it.type.name på samme kontekst" }
+                        require(it.detaljer().filterKeys { this.containsKey(it) }
+                            .isEmpty()) { "Kan ikke produsere behov med duplikate detaljer" }
+                        behovsliste.add(it.type.name)
+                        putAll(it.detaljer())
+                    }
                 }
-
-                sikkerLogg.info("sender {} som {}", id, this.toJson())
-                rapidsConnection.publish(hendelse.fødselsnummer(), this.toJson())
-            }
+                .let { JsonMessage.newMessage(it) }
+                .also {
+                    sikkerLogg.info("sender {} som {}", id, it.toJson())
+                    rapidsConnection.publish(hendelse.fødselsnummer(), it.toJson())
+                }
         }
     }
 
