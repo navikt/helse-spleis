@@ -16,7 +16,7 @@ import java.util.*
 
 class PåminnelserOgTimeoutTest {
 
-    companion object {
+    private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "1234"
     }
@@ -46,11 +46,22 @@ class PåminnelserOgTimeoutTest {
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
         assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingArbeidsgiversøknad.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingGap.timeout)
-        assertEquals(Duration.ofDays(7), Vedtaksperiode.AvventerGodkjenning.timeout)
+        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerSimulering.timeout)
+        assertTrue(Duration.ofDays(3) <= Vedtaksperiode.AvventerGodkjenning.timeout) {
+            "Timeout på avventer godjenning skal være minst tre dager"
+        }
+        assertTrue(Duration.ofDays(5) >= Vedtaksperiode.AvventerGodkjenning.timeout) {
+            "Timeout på avventer godjenning skal være maksimalt fem dager"
+        }
         assertEquals(Duration.ZERO, Vedtaksperiode.TilUtbetaling.timeout)
         assertEquals(Duration.ZERO, Vedtaksperiode.TilInfotrygd.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.UtbetalingFeilet.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.Avsluttet.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.AvsluttetUtenUtbetaling.timeout)
+        assertEquals(Duration.ZERO, Vedtaksperiode.AvsluttetUtenUtbetalingMedInntektsmelding.timeout)
     }
 
     @Test

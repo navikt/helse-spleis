@@ -21,6 +21,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
+import java.time.DayOfWeek.*
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -877,7 +878,16 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
-        override val timeout: Duration = Duration.ofDays(7)
+
+        // lar perioden ligge til godkjenning i tre hverdager
+        override val timeout: Duration get() {
+            val ekstraDager = when (LocalDate.now().dayOfWeek) {
+                WEDNESDAY, THURSDAY, FRIDAY -> 2
+                SATURDAY -> 1
+                else -> 0
+            }
+            return Duration.ofDays(ekstraDager + 3L)
+        }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             godkjenning(hendelse)
