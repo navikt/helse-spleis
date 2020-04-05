@@ -15,6 +15,12 @@ internal class InntektsmeldingTest {
     private lateinit var inntektsmelding: Inntektsmelding
 
     @Test
+    fun `inntektsmelding uten arbeidsgiverperiode`() {
+        inntektsmelding(emptyList())
+        assertTrue(inntektsmelding.valider().hasWarnings())
+    }
+
+    @Test
     internal fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
         val tidslinje = inntektsmelding.sykdomstidslinje()
