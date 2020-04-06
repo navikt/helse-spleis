@@ -72,6 +72,8 @@ internal class ByggUtbetalingstidlinjer(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val periode: Periode,
     private val ytelser: Ytelser,
+    private val fødselsnummer: String,
+    private val organisasjonsnummer: String,
     private val alder: Alder,
     private val førsteFraværsdag: LocalDate?
 ) : Valideringssteg {
@@ -83,7 +85,9 @@ internal class ByggUtbetalingstidlinjer(
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,
-            aktivitetslogg = ytelser.aktivitetslogg
+            aktivitetslogg = ytelser.aktivitetslogg,
+            organisasjonsnummer = organisasjonsnummer,
+            fødselsnummer = fødselsnummer
         ).also { engine ->
             engine.beregn()
         }

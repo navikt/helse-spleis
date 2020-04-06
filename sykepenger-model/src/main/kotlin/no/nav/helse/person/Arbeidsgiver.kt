@@ -50,6 +50,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
 
+    internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
+
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         if(perioder.map { it.håndter(sykmelding)}.none { it } ) {

@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
@@ -11,7 +12,9 @@ internal class ArbeidsgiverUtbetalinger(
     private val periode: Periode,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
-    private val aktivitetslogg: Aktivitetslogg
+    private val aktivitetslogg: Aktivitetslogg,
+    private val organisasjonsnummer: String,
+    private val fødselsnummer: String
 ) {
     init {
         require(tidslinjer.size == 1) { "Flere arbeidsgivere er ikke støttet ennå" }
@@ -31,7 +34,16 @@ internal class ArbeidsgiverUtbetalinger(
             forbrukteSykedager = it.forbrukteSykedager()
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogg).beregn()
-        this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) -> arbeidsgiver.push(utbetalingstidslinje) }
+        this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
+            arbeidsgiver.push(utbetalingstidslinje)
+            arbeidsgiver.push(Utbetaling(
+                fødselsnummer,
+                organisasjonsnummer,
+                utbetalingstidslinje,
+                periode.endInclusive,
+                aktivitetslogg
+            ))
+        }
     }
 
     internal fun maksdato() = maksdato

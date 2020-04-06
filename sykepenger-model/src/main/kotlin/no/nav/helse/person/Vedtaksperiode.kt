@@ -811,6 +811,8 @@ internal class Vedtaksperiode private constructor(
                         ),
                         vedtaksperiode.periode(),
                         ytelser,
+                        vedtaksperiode.fødselsnummer,
+                        vedtaksperiode.organisasjonsnummer,
                         Alder(vedtaksperiode.fødselsnummer),
                         vedtaksperiode.førsteFraværsdag
                     ).also { engineForTimeline = it }

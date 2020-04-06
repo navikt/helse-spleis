@@ -315,7 +315,9 @@ internal class ArbeidsgiverUtbetalingerTest {
             Periode(1.januar, 31.desember(2019)),
             Alder(fnr),
             NormalArbeidstaker,
-            aktivitetslogg
+            aktivitetslogg,
+            "88888888",
+            fnr
         ).also {
             it.beregn()
             maksdato = it.maksdato()
