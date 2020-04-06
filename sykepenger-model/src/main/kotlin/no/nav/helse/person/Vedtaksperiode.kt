@@ -21,11 +21,8 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
+import java.time.*
 import java.time.DayOfWeek.*
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 internal class Vedtaksperiode private constructor(
@@ -837,6 +834,7 @@ internal class Vedtaksperiode private constructor(
 
         override val type: TilstandType = AVVENTER_SIMULERING
         override val timeout: Duration = Duration.ofHours(1)
+        private val åpningstider = LocalTime.of(6, 0)..LocalTime.of(21, 59, 59)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse?.also {
@@ -854,13 +852,16 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (utenforÅpningstid()) påminnelse.info("Oppdragsystemet har stengt, simulering utsettes til Oppdragsystemet har åpnet")
             trengerSimulering(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider().hasErrors()) return simulering.warn(
-                "Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt"
-            )
+            if (simulering.valider().hasErrors()) {
+                if (utenforÅpningstid())
+                    return simulering.info("Simulering feilet, men Oppdragsystemet har stengt og simulering utsettes til Oppdragsystemet har åpnet")
+                return simulering.warn("Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt")
+            }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
@@ -874,6 +875,8 @@ internal class Vedtaksperiode private constructor(
                 forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse != null
             )
         }
+
+        private fun utenforÅpningstid() = LocalTime.now() !in åpningstider
     }
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
