@@ -170,6 +170,18 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspokelse",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvspre-oppgaver",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvspre-oppgaver",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
