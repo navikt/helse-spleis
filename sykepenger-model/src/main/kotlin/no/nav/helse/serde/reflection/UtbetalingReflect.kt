@@ -28,7 +28,7 @@ private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetaling
         "sjekksum" to utbetalingslinjer["sjekksum"]
     )
 }
-˚
+
 internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalingslinje) {
     internal fun toMap() = mutableMapOf<String, Any?>(
         "fom" to utbetalingslinje["fom"],
