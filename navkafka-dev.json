@@ -170,6 +170,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspokelse",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
