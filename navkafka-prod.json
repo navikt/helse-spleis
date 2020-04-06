@@ -174,11 +174,11 @@
                     "role": "PRODUCER"
                 },
                 {
-                    "member": "srvspre-oppgaver",
+                    "member": "srvspreoppgaver",
                     "role": "CONSUMER"
                 },
                 {
-                    "member": "srvspre-oppgaver",
+                    "member": "srvspreoppgaver",
                     "role": "PRODUCER"
                 },
                 {
