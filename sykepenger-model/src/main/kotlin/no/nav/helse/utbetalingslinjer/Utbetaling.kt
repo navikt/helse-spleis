@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -10,28 +11,34 @@ import java.time.LocalDateTime
 internal class Utbetaling
     private constructor(
         private val utbetalingstidslinje: Utbetalingstidslinje,
-        private val arbeidsgiverUtbetalingslinjer: Utbetalingslinjer = Utbetalingslinjer(),
-        private val personUtbetalingslinjer: Utbetalingslinjer = Utbetalingslinjer(),
+        private val arbeidsgiverUtbetalingslinjer: Utbetalingslinjer,
+        private val personUtbetalingslinjer: Utbetalingslinjer,
         private val tidsstempel: LocalDateTime
     ) {
 
     internal constructor(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         sisteDato: LocalDate,
         aktivitetslogg: Aktivitetslogg
     ) : this(
         utbetalingstidslinje,
-        buildArb(utbetalingstidslinje, sisteDato, aktivitetslogg),
-        buildPerson(utbetalingstidslinje, sisteDato, aktivitetslogg),
+        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg),
+        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg),
         LocalDateTime.now()
     )
 
     companion object {
         private fun buildArb(
+            organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg
-        ) = SpennBuilder(tidslinje, sisteDato).result().also {
+        ) = Utbetalingslinjer(
+                organisasjonsnummer,
+                Mottakertype.Arbeidsgiver,
+                SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()).also {
             if (it.isEmpty())
                 aktivitetslogg.info("Ingen utbetalingslinjer bygget")
             else
@@ -39,11 +46,12 @@ internal class Utbetaling
         }
 
         private fun buildPerson(
+            fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg
         ): Utbetalingslinjer {
-            return Utbetalingslinjer()
+            return Utbetalingslinjer(fødselsnummer, Mottakertype.Person)
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.UtbetalingStrategy
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
@@ -8,36 +9,37 @@ import java.time.LocalDate
 
 internal class SpennBuilder(
     tidslinje: Utbetalingstidslinje,
-    sisteDato: LocalDate = tidslinje.sisteDato()
+    sisteDato: LocalDate = tidslinje.sisteDato(),
+    private val dagStrategy: UtbetalingStrategy = NavDag.arbeidsgiverUtbetaling
 ) : UtbetalingsdagVisitor {
-    private val linjer = mutableListOf<Utbetalingslinje>()
+    private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
 
     init {
         tidslinje.kutt(sisteDato).reverse().accept(this)
     }
 
-    internal fun result(): Utbetalingslinjer {
-        linjer.zipWithNext { a, b -> b.linkTo(a) }
-        return Utbetalingslinjer(linjer)
+    internal fun result(): MutableList<Utbetalingslinje> {
+        arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
+        return arbeisdsgiverLinjer
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         println(tidslinje)
     }
 
-    private val linje get() = linjer.first()
+    private val linje get() = arbeisdsgiverLinjer.first()
 
     override fun visitNavDag(dag: NavDag) {
-        if (linjer.isEmpty()) return tilstand.nyLinje(dag)
-        if (dag.grad == linje.grad && (linje.dagsats == 0 || linje.dagsats == dag.utbetaling))
+        if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag)
+        if (dag.grad == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
             tilstand.betalingsdag(dag)
         else
             tilstand.nyLinje(dag)
     }
 
     override fun visitNavHelgDag(dag: NavHelgDag) {
-        if (linjer.isEmpty() || dag.grad != linje.grad)
+        if (arbeisdsgiverLinjer.isEmpty() || dag.grad != linje.grad)
             tilstand.nyLinje(dag)
         else
             tilstand.helgedag(dag)
@@ -64,11 +66,11 @@ internal class SpennBuilder(
     }
 
     private fun addLinje(dag: NavDag) {
-        linjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dag.utbetaling, dag.grad))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.grad))
     }
 
     private fun addLinje(dag: NavHelgDag) {
-        linjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad))
     }
 
     private interface Tilstand {
@@ -130,7 +132,7 @@ internal class SpennBuilder(
         }
 
         override fun betalingsdag(dag: NavDag) {
-            linje.dagsats = dag.utbetaling
+            linje.dagsats = dagStrategy(dag)
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
         }

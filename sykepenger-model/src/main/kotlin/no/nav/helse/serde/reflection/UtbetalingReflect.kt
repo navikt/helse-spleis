@@ -2,10 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.utbetalingslinjer.Linjetype
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
@@ -23,9 +20,12 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 
 private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
     internal fun toMap() = mutableMapOf(
+        "mottaker" to utbetalingslinjer["mottaker"],
+        "mottakertype" to utbetalingslinjer.get<Utbetalingslinjer, Mottakertype>("mottakertype").melding,
         "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
         "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
-        "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").melding
+        "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").melding,
+        "sjekksum" to utbetalingslinjer["sjekksum"]
     )
 }
 

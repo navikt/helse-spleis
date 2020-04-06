@@ -156,6 +156,10 @@ internal class Utbetalingstidslinje private constructor(
 
             internal constructor(inntekt: Double, dato: LocalDate, grad: Double) : this(inntekt, dato, 0, grad)
 
+            companion object {
+                internal val arbeidsgiverUtbetaling = { dag: NavDag -> dag.utbetaling }
+            }
+
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
             internal fun utbetalingslinje() =
                 Utbetalingslinje(dato, dato, utbetaling, grad)
@@ -214,6 +218,8 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 }
+
+internal typealias UtbetalingStrategy = (NavDag) -> Int
 
 enum class Begrunnelse {
     SykepengedagerOppbrukt,

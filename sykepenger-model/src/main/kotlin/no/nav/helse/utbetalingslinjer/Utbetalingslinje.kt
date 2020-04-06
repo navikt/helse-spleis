@@ -6,11 +6,27 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
 
-internal class Utbetalingslinjer(
-    private val linjer: List<Utbetalingslinje> = listOf(),
-    private val utbetalingsreferanse: String = genererUtbetalingsreferanse(UUID.randomUUID()),
-    private val linjertype: Linjetype = Ny
+internal class Utbetalingslinjer private constructor(
+    private val mottaker: String,
+    private val mottakertype: Mottakertype,
+    private val linjer: List<Utbetalingslinje>,
+    private val utbetalingsreferanse: String,
+    private val linjertype: Linjetype,
+    private val sjekksum: Int
 ): List<Utbetalingslinje> by linjer {
+
+    internal constructor(
+        mottaker: String,
+        mottakertype: Mottakertype,
+        linjer: List<Utbetalingslinje> = listOf()
+    ): this(
+        mottaker,
+        mottakertype,
+        linjer,
+        genererUtbetalingsreferanse(UUID.randomUUID()),
+        Ny,
+        linjer.hashCode() * 67 + mottaker.hashCode()
+    )
 
     internal fun accept(visitor: UtbetalingVisitor) {
         linjer.forEach { it.accept(visitor) }
@@ -44,8 +60,19 @@ internal class Utbetalingslinje private constructor(
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
     }
+
+    override fun hashCode(): Int {
+        return fom.hashCode() * 37 +
+            tom.hashCode() * 17 +
+            dagsats.hashCode() * 41 +
+            grad.hashCode()
+    }
 }
 
 internal enum class Linjetype(internal val melding: String) {
     Ny("NY"), Uendret("UEND"), Endret("ENDR")
+}
+
+internal enum class Mottakertype(internal val melding: String) {
+    Arbeidsgiver("ARBEIDSGIVER"), Person("PERSON");
 }
