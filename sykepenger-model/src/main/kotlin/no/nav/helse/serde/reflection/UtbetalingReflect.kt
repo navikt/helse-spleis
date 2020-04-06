@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
-    internal fun toMap() = mutableMapOf(
+    internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "utbetalingstidslinje" to
             UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
         "arbeidsgiverUtbetalingslinjer" to
@@ -24,12 +24,12 @@ private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetaling
         "mottakertype" to utbetalingslinjer.get<Utbetalingslinjer, Mottakertype>("mottakertype").melding,
         "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
         "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
-        "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").melding,
+        "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").toString(),
         "sjekksum" to utbetalingslinjer["sjekksum"]
     )
 }
-
-private class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalingslinje) {
+˚
+internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalingslinje) {
     internal fun toMap() = mutableMapOf<String, Any?>(
         "fom" to utbetalingslinje["fom"],
         "tom" to utbetalingslinje["tom"],
@@ -37,7 +37,7 @@ private class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalingsl
         "grad" to utbetalingslinje["grad"],
         "delytelseId" to utbetalingslinje["delytelseId"],
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
-        "linjetype" to utbetalingslinje.get<Utbetalingslinje, Linjetype>("linjetype").melding
+        "linjetype" to utbetalingslinje.get<Utbetalingslinje, Linjetype>("linjetype").toString()
         )
 }
 

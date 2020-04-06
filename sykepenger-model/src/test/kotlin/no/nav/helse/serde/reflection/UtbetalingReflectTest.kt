@@ -15,7 +15,7 @@ internal class UtbetalingReflectTest {
         private const val ORGNUMMER = "987654321"
     }
 
-    private lateinit var map: MutableMap<String, MutableMap<String, out Any?>>
+    private lateinit var map: MutableMap<String, Any?>
 
     @Test internal fun `Reflect mapper riktige verdier`() {
         map = UtbetalingReflect(Utbetaling(
@@ -31,6 +31,7 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinje(0, 4.januar, "tom")
         assertUtbetalingslinje(0, 1, "delytelseId")
         assertUtbetalingslinje(0, null, "refDelytelseId")
+        assertUtbetalingslinje(0, "NY", "linjetype")
     }
 
     private fun assertUtbetalingslinje(index: Int, expected: Any?, key: String) {

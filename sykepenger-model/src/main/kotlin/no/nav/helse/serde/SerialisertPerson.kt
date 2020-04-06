@@ -19,7 +19,10 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Linjetype
+import no.nav.helse.utbetalingslinjer.Mottakertype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -93,7 +96,8 @@ class SerialisertPerson(val json: String) {
             id = data.id,
             inntekthistorikk = inntekthistorikk,
             tidslinjer = data.utbetalingstidslinjer.map(::konverterTilUtbetalingstidslinje).toMutableList(),
-            perioder = vedtaksperioder
+            perioder = vedtaksperioder,
+            utbetalinger = data.utbetalinger.map(::konverterTilUtbetaling).toMutableList()
         )
 
         vedtaksperioder.addAll(data.vedtaksperioder.map {
@@ -108,6 +112,24 @@ class SerialisertPerson(val json: String) {
         Vedtaksperiode.sorter(vedtaksperioder)
 
         return arbeidsgiver
+    }
+
+    private fun konverterTilUtbetaling(data: UtbetalingData) = createUtbetaling(
+        konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
+        konverterTilUtbetalingslinjer(data.arbeidsgiverUtbetalingslinjer),
+        konverterTilUtbetalingslinjer(data.personUtbetalingslinjer),
+        data.tidsstempel
+    )
+
+    private fun konverterTilUtbetalingslinjer(data: UtbetalingslinjerData): Utbetalingslinjer {
+        return createUtbetalingslinjer(
+            data.mottaker,
+            Mottakertype.valueOf(data.mottakertype),
+            data.linjer.map(::konverterTilUtbetalingslinje),
+            data.utbetalingsreferanse,
+            Linjetype.valueOf(data.linjertype),
+            data.sjekksum
+        )
     }
 
     private fun konverterTilUtbetalingstidslinje(data: UtbetalingstidslinjeData): Utbetalingstidslinje {
@@ -155,6 +177,8 @@ class SerialisertPerson(val json: String) {
             .toMutableList())
     }
 
+
+
     private fun parseVedtaksperiode(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
@@ -173,7 +197,7 @@ class SerialisertPerson(val json: String) {
             tilstand = parseTilstand(data.tilstand),
             maksdato = data.maksdato,
             forbrukteSykedager = data.forbrukteSykedager,
-            utbetalingslinjer = data.utbetalingslinjer.map(::parseUtbetalingslinje),
+            utbetalingslinjer = data.utbetalingslinjer.map(::konverterTilUtbetalingslinje),
             godkjentAv = data.godkjentAv,
             godkjenttidspunkt = data.godkjenttidspunkt,
             utbetalingsreferanse = data.utbetalingsreferanse,
@@ -243,15 +267,17 @@ class SerialisertPerson(val json: String) {
         TilstandType.AVVENTER_UFERDIG_FORLENGELSE -> AvventerUferdigForlengelse
     }
 
-    private fun parseUtbetalingslinje(
+    private fun konverterTilUtbetalingslinje(
         data: UtbetalingslinjeData
-    ): Utbetalingslinje =
-        Utbetalingslinje(
-            fom = data.fom,
-            tom = data.tom,
-            dagsats = data.dagsats,
-            grad = data.grad
-        )
+    ): Utbetalingslinje = createUtbetalingslinje(
+        data.fom,
+        data.tom,
+        data.dagsats,
+        data.grad,
+        data.delytelseId,
+        data.refDelytelseId,
+        Linjetype.valueOf(data.linjetype)
+    )
 
     private fun parseDataForVilkårsvurdering(
         data: ArbeidsgiverData.VedtaksperiodeData.DataForVilkårsvurderingData
@@ -362,7 +388,8 @@ internal data class PersonData(
         val id: UUID,
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
-        val utbetalingstidslinjer: List<UtbetalingstidslinjeData>
+        val utbetalingstidslinjer: List<UtbetalingstidslinjeData>,
+        val utbetalinger: List<UtbetalingData>
     ) {
         data class InntektData(
             val fom: LocalDate,
@@ -457,11 +484,30 @@ internal data class PersonData(
     }
 }
 
+data class UtbetalingData(
+    val utbetalingstidslinje: UtbetalingstidslinjeData,
+    val arbeidsgiverUtbetalingslinjer: UtbetalingslinjerData,
+    val personUtbetalingslinjer: UtbetalingslinjerData,
+    val tidsstempel: LocalDateTime
+)
+
+data class UtbetalingslinjerData(
+    val mottaker: String,
+    val mottakertype: String,
+    val linjer: List<UtbetalingslinjeData>,
+    val utbetalingsreferanse: String,
+    val linjertype: String,
+    val sjekksum: Int
+)
+
 data class UtbetalingslinjeData(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagsats: Int,
-    val grad: Double
+    val grad: Double,
+    val delytelseId: Int,
+    val refDelytelseId: Int?,
+    val linjetype: String
 )
 
 data class UtbetalingstidslinjeData(

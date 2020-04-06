@@ -24,10 +24,6 @@ internal class SpennBuilder(
         return arbeisdsgiverLinjer
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
-        println(tidslinje)
-    }
-
     private val linje get() = arbeisdsgiverLinjer.first()
 
     override fun visitNavDag(dag: NavDag) {

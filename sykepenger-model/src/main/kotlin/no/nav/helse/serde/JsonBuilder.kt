@@ -8,6 +8,7 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDateTime
@@ -199,6 +200,12 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
         currentState.visitUtbetalingslinje(utbetalingslinje)
 
+    override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
+        currentState.preVisitUtbetalinger(utbetalinger)
+
+    override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) =
+        currentState.preVisitUtbetaling(utbetaling, tidsstempel)
+
     override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) = currentState.postVisitUtbetalingslinjer(linjer)
 
     private interface JsonState : PersonVisitor {
@@ -283,6 +290,16 @@ internal class JsonBuilder : PersonVisitor {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
+        }
+
+        private val utbetalinger = mutableListOf<MutableMap<String, Any?>>()
+
+        override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            arbeidsgiverMap["utbetalinger"] = utbetalinger
+        }
+
+        override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
+            utbetalinger.add(UtbetalingReflect(utbetaling).toMap())
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
@@ -427,13 +444,7 @@ internal class JsonBuilder : PersonVisitor {
     private inner class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
         override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {
-            val utbetalingstidslinjeMap = mutableMapOf<String, Any?>(
-                "fom" to utbetalingslinje.fom,
-                "tom" to utbetalingslinje.tom,
-                "dagsats" to utbetalingslinje.dagsats,
-                "grad" to utbetalingslinje.grad
-            )
-            utbetalingstidslinjeListe.add(utbetalingstidslinjeMap)
+            utbetalingstidslinjeListe.add(UtbetalingslinjeReflect(utbetalingslinje).toMap())
         }
 
         override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {

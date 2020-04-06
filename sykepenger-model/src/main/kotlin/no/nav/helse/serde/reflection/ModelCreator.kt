@@ -5,7 +5,11 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Linjetype
+import no.nav.helse.utbetalingslinjer.Mottakertype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,10 +32,11 @@ internal fun createArbeidsgiver(
     id: UUID,
     inntekthistorikk: Inntekthistorikk,
     tidslinjer: MutableList<Utbetalingstidslinje>,
-    perioder: MutableList<Vedtaksperiode>
+    perioder: MutableList<Vedtaksperiode>,
+    utbetalinger: MutableList<Utbetaling>
 ) = Arbeidsgiver::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder)
+    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, utbetalinger)
 
 internal fun createVedtaksperiode(
     person: Person,
@@ -56,10 +61,58 @@ internal fun createVedtaksperiode(
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
-        person, arbeidsgiver, id, gruppeId, aktørId, fødselsnummer, organisasjonsnummer, tilstand, maksdato, forbrukteSykedager, utbetalingslinjer, godkjentAv,
-        godkjenttidspunkt, utbetalingsreferanse, førsteFraværsdag, dataForVilkårsvurdering, dataForSimulering, sykdomshistorikk, utbetalingstidslinje
+        person,
+        arbeidsgiver,
+        id,
+        gruppeId,
+        aktørId,
+        fødselsnummer,
+        organisasjonsnummer,
+        tilstand,
+        maksdato,
+        forbrukteSykedager,
+        utbetalingslinjer,
+        godkjentAv,
+        godkjenttidspunkt,
+        utbetalingsreferanse,
+        førsteFraværsdag,
+        dataForVilkårsvurdering,
+        dataForSimulering,
+        sykdomshistorikk,
+        utbetalingstidslinje
     )
 
+internal fun createUtbetaling(
+    utbetalingstidslinje: Utbetalingstidslinje,
+    arbeidsgiverUtbetalingslinjer: Utbetalingslinjer,
+    personUtbetalingslinjer: Utbetalingslinjer,
+    tidsstempel: LocalDateTime
+) = Utbetaling::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(utbetalingstidslinje, arbeidsgiverUtbetalingslinjer, personUtbetalingslinjer, tidsstempel)
+
+internal fun createUtbetalingslinjer(
+    mottaker: String,
+    mottakertype: Mottakertype,
+    linjer: List<Utbetalingslinje>,
+    utbetalingsreferanse: String,
+    linjertype: Linjetype,
+    sjekksum: Int
+) = Utbetalingslinjer::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(mottaker, mottakertype, linjer, utbetalingsreferanse, linjertype, sjekksum)
+
+internal fun createUtbetalingslinje(
+    fom: LocalDate,
+    tom: LocalDate,
+    dagsats: Int,
+    grad: Double,
+    delytelseId: Int,
+    refDelytelseId: Int? = null,
+    linjetype: Linjetype
+) = Utbetalingslinje::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, linjetype)
 
 internal fun createSykdomshistorikk(
     elementer: List<Sykdomshistorikk.Element>
