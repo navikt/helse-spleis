@@ -392,22 +392,22 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.warn("Forventet ikke sykmelding i %s", type.name)
+            sykmelding.warn("Mottatt flere sykmeldinger - den første sykmeldingen som ble mottatt er lagt til grunn. (%s)", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Forventet ikke søknad i %s", type.name)
+            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Forventet ikke søknad til arbeidsgiver i %s", type.name)
+            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
-            inntektsmelding.warn("Forventet ikke inntektsmelding i %s", type.name)
+            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. (%s)", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
