@@ -1056,7 +1056,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
-    companion object {
+    internal companion object {
         internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
             .filter { it.harTilstøtende(other) }
             .minBy { it.periode().start }
@@ -1065,7 +1065,7 @@ internal class Vedtaksperiode private constructor(
             .filterNot { it.tilstand == TilInfotrygd }
             .map { it.sykdomstidslinje() }.join()
 
-        fun sorter(perioder: MutableList<Vedtaksperiode>) {
+        internal fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode().start }
         }
     }
