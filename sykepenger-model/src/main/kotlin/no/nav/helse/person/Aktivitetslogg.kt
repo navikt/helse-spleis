@@ -81,6 +81,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         }
     }
 
+    override fun kontekster() =
+        aktiviteter
+            .groupBy { it.kontekst(listOf("Person", "Arbeidsgiver", "Vedtaksperiode")) }
+            .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
+
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     private fun warn() = Aktivitet.Warn.filter(aktiviteter)
     override fun behov() = Aktivitet.Behov.filter(aktiviteter)
@@ -108,8 +113,12 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         }
 
-        fun kontekst(): Map<String, String> =
-            kontekster.fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
+        fun kontekst(): Map<String, String> = kontekst(emptyList())
+
+        internal fun kontekst(typer: List<String>): Map<String, String> =
+            kontekster
+                .let { if (typer.isEmpty()) it else it.filter { it.kontekstType in typer } }
+                .fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
             .let { if (it == 0) other.alvorlighetsgrad.compareTo(this.alvorlighetsgrad) else it }
@@ -338,6 +347,7 @@ interface IAktivitetslogg {
     fun barn(): Aktivitetslogg
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
+    fun kontekster(): List<IAktivitetslogg>
 }
 
 internal interface AktivitetsloggVisitor {

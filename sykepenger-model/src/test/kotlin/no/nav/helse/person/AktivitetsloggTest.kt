@@ -13,7 +13,7 @@ internal class AktivitetsloggTest {
 
     @BeforeEach
     internal fun setUp() {
-        person = TestKontekst("Person")
+        person = TestKontekst("Person", "Person 1")
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -36,6 +36,30 @@ internal class AktivitetsloggTest {
         assertTrue(aktivitetslogg.hasErrors())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertSevere(melding)
+    }
+
+    @Test
+    internal fun `kontekster`() {
+        val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse1.kontekst(person)
+        val arbeidsgiver1 = TestKontekst(" Arbeidsgiver", "Arbeidsgiver 1")
+        hendelse1.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+        hendelse1.kontekst(vedtaksperiode1)
+        hendelse1.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning")
+        hendelse1.warn("Advarsel")
+        val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
+        hendelse2.kontekst(person)
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
+        hendelse2.kontekst(arbeidsgiver2)
+        val tilstand = TestKontekst("Tilstand", "Tilstand 1")
+        hendelse2.kontekst(tilstand)
+        hendelse2.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling, "Skal utbetale")
+        hendelse2.info("Infomelding")
+
+        assertEquals(2, aktivitetslogg.kontekster().size)
+        assertTrue(aktivitetslogg.kontekster().first().hasBehov())
+        assertTrue(aktivitetslogg.kontekster().last().hasBehov())
     }
 
     @Test
@@ -75,9 +99,9 @@ internal class AktivitetsloggTest {
     internal fun `Melding sendt fra barnebarn til forelder`(){
         val hendelse = TestHendelse("Hendelse", aktivitetslogg.barn())
         hendelse.kontekst(person)
-        val arbeidsgiver = TestKontekst("Arbeidsgiver")
+        val arbeidsgiver = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver)
-        val vedtaksperiode = TestKontekst("Vedtaksperiode")
+        val vedtaksperiode = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode)
         "info message".also {
             hendelse.info(it)
@@ -99,18 +123,18 @@ internal class AktivitetsloggTest {
     internal fun `Vis bare arbeidsgiveraktivitet`(){
         val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse1.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.info("info message")
         hendelse1.warn("warn message")
         hendelse1.error("error message")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
-        val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
         hendelse2.kontekst(arbeidsgiver2)
-        val vedtaksperiode2 = TestKontekst("Vedtaksperiode 2")
+        val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
         hendelse2.kontekst(vedtaksperiode2)
         hendelse2.info("info message")
         hendelse2.error("error message")
@@ -133,7 +157,7 @@ internal class AktivitetsloggTest {
         assertEquals(1, aktivitetslogg.behov().size)
         assertEquals(1, aktivitetslogg.behov().first().kontekst().size)
         assertEquals(2, aktivitetslogg.behov().first().detaljer().size)
-        assertEquals("Person", aktivitetslogg.behov().first().kontekst()["Person"])
+        assertEquals("Person 1", aktivitetslogg.behov().first().kontekst()["Person"])
         assertEquals(param1, aktivitetslogg.behov().first().detaljer()["param1"])
         assertEquals(param2, aktivitetslogg.behov().first().detaljer()["param2"])
     }
@@ -183,9 +207,10 @@ internal class AktivitetsloggTest {
     }
 
     private class TestKontekst(
+        private val type: String,
         private val melding: String
     ): Aktivitetskontekst {
-        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding, mapOf(melding to melding))
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 
     private class TestHendelse(

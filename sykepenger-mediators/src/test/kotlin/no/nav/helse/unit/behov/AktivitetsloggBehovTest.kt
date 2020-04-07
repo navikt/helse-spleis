@@ -16,7 +16,7 @@ internal class AktivitetsloggBehovTest {
 
     @BeforeEach
     internal fun setUp() {
-        person = TestKontekst("Person")
+        person = TestKontekst("Person", "Person")
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -24,28 +24,32 @@ internal class AktivitetsloggBehovTest {
     internal fun `kan hente ut behov`(){
         val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse1.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.behov(Godkjenning, "Trenger godkjenning")
         hendelse1.warn("Advarsel")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
-        val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
         hendelse2.kontekst(arbeidsgiver2)
+        val tilstand = TestKontekst("Tilstand", "Tilstand 1")
+        hendelse2.kontekst(tilstand)
         hendelse2.behov(Utbetaling, "Skal utbetale")
         hendelse2.info("Infomelding")
 
         assertEquals(2, aktivitetslogg.behov().size)
         assertEquals(3, aktivitetslogg.behov().first().kontekst().size)
-        assertEquals(2, aktivitetslogg.behov().last().kontekst().size)
+        assertEquals(3, aktivitetslogg.behov().last().kontekst().size)
+        assertEquals("Tilstand 1", aktivitetslogg.behov().last().kontekst()["Tilstand"])
     }
 
     private class TestKontekst(
+        private val type: String,
         private val melding: String
     ): Aktivitetskontekst {
-        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding, mapOf(melding to melding))
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 
     private class TestHendelse(

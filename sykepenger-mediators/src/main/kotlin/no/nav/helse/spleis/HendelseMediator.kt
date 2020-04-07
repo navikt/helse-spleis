@@ -96,9 +96,8 @@ internal class HendelseMediator(
         lagrePersonDao.lagrePerson(person, hendelse)
 
         if (!hendelse.hasMessages()) return
-        if (hendelse.hasErrors()) return sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
-        sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
-
+        if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
+        else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
         behovMediator.håndter(hendelse)
     }
 

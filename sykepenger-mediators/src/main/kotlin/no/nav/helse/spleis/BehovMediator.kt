@@ -1,8 +1,6 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,14 +12,12 @@ internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
     private val sikkerLogg: Logger
 ) {
-    private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
+    internal fun håndter(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekster().forEach { if (!it.hasErrors()) håndter(hendelse, it.behov()) }
     }
 
-    internal fun håndter(hendelse: ArbeidstakerHendelse) {
-        hendelse.behov().groupBy { it.kontekst() }.forEach { (kontekst, behov) ->
+    private fun håndter(hendelse: ArbeidstakerHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
+        behov.groupBy { it.kontekst() }.forEach { (kontekst, behov) ->
             val behovsliste = mutableListOf<String>()
             val id = UUID.randomUUID()
             mutableMapOf(
@@ -47,7 +43,5 @@ internal class BehovMediator(
                 }
         }
     }
-
-    private fun Map<String, Any>.toJson() = objectMapper.writeValueAsString(this)
 
 }

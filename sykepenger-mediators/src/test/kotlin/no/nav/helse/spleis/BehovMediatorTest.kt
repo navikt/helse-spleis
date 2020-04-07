@@ -19,8 +19,8 @@ import java.util.*
 internal class BehovMediatorTest {
 
     private companion object {
-        private val aktørId = "aktørId"
-        private val fødselsnummer = "fnr"
+        private const val aktørId = "aktørId"
+        private const val fødselsnummer = "fnr"
 
         private lateinit var behovMediator: BehovMediator
 
@@ -55,21 +55,23 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    internal fun `grupperer behov`(){
+    internal fun `grupperer behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
             "historikkFom" to LocalDate.now()
         ))
         hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
-        val arbeidsgiver2 = TestKontekst("Arbeidsgiver 2")
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
         hendelse.kontekst(arbeidsgiver2)
-        val vedtaksperiode2 = TestKontekst("Vedtaksperiode 2")
+        val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
         hendelse.kontekst(vedtaksperiode2)
+        hendelse.kontekst(TestKontekst("Tilstand", "Tilstand 1"))
+        hendelse.kontekst(TestKontekst("Tilstand", "Tilstand 2"))
         hendelse.behov(Utbetaling, "Skal utbetale")
 
         behovMediator.håndter(hendelse)
@@ -88,8 +90,8 @@ internal class BehovMediatorTest {
             assertEquals("behov", it["@event_name"].asText())
             assertEquals(aktørId, it["aktørId"].asText())
             assertEquals(fødselsnummer, it["fødselsnummer"].asText())
-            assertEquals("Arbeidsgiver 1", it["Arbeidsgiver 1"].asText())
-            assertEquals("Vedtaksperiode 1", it["Vedtaksperiode 1"].asText())
+            assertEquals("Arbeidsgiver 1", it["Arbeidsgiver"].asText())
+            assertEquals("Vedtaksperiode 1", it["Vedtaksperiode"].asText())
             assertEquals(LocalDate.now().toString(), it["historikkFom"].asText())
         }
         objectMapper.readTree(messages[1].second).also {
@@ -102,8 +104,8 @@ internal class BehovMediatorTest {
             assertEquals("behov", it["@event_name"].asText())
             assertEquals(aktørId, it["aktørId"].asText())
             assertEquals(fødselsnummer, it["fødselsnummer"].asText())
-            assertEquals("Arbeidsgiver 2", it["Arbeidsgiver 2"].asText())
-            assertEquals("Vedtaksperiode 2", it["Vedtaksperiode 2"].asText())
+            assertEquals("Arbeidsgiver 2", it["Arbeidsgiver"].asText())
+            assertEquals("Vedtaksperiode 2", it["Vedtaksperiode"].asText())
         }
     }
 
@@ -111,9 +113,9 @@ internal class BehovMediatorTest {
     internal fun `sjekker etter duplikatverdier`(){
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
             "historikkFom" to LocalDate.now()
@@ -129,9 +131,9 @@ internal class BehovMediatorTest {
     internal fun `kan ikke produsere samme behov`(){
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
-        val arbeidsgiver1 = TestKontekst("Arbeidsgiver 1")
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
-        val vedtaksperiode1 = TestKontekst("Vedtaksperiode 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
@@ -140,9 +142,10 @@ internal class BehovMediatorTest {
     }
 
     private class TestKontekst(
+        private val type: String,
         private val melding: String
     ): Aktivitetskontekst {
-        override fun toSpesifikkKontekst() = SpesifikkKontekst(melding, mapOf(melding to melding))
+        override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 
     private class TestHendelse(
