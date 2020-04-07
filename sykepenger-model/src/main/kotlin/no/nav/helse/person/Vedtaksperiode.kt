@@ -284,7 +284,7 @@ internal class Vedtaksperiode private constructor(
         foreldrepenger(hendelse)
     }
 
-    internal fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
+    private fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
         val beregningSlutt = YearMonth.from(førsteFraværsdag).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         egenAnsatt(hendelse)
@@ -364,9 +364,6 @@ internal class Vedtaksperiode private constructor(
             ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
         }
     }
-
-    internal fun harTilstøtende(other: Vedtaksperiode) =
-        this.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje())
 
     internal fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
         if (this.periode().start >= other.periode().start) return true
@@ -1044,7 +1041,7 @@ internal class Vedtaksperiode private constructor(
 
     internal companion object {
         internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
-            .filter { it.harTilstøtende(other) }
+            .filter { it.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje()) }
             .minBy { it.periode().start }
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
