@@ -893,7 +893,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            godkjenning(hendelse)
+            godkjenning(hendelse, periodeFom = vedtaksperiode.førsteDag(), periodeTom = vedtaksperiode.sisteDag())
         }
 
         override fun håndter(

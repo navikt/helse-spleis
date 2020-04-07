@@ -238,8 +238,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
-                internal fun godkjenning(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler")
+                internal fun godkjenning(aktivitetslogg: IAktivitetslogg, periodeFom: LocalDate, periodeTom: LocalDate) {
+                    aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
+                        "periodeFom" to periodeFom.toString(),
+                        "periodeTom" to periodeTom.toString()
+                    ))
                 }
 
                 internal fun utbetaling(
