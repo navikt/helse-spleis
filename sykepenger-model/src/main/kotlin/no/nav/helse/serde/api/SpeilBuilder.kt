@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -303,6 +304,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
+        val fellesGrunnlagsdata = mutableMapOf<UUID, GrunnlagsdataDTO>()
+        val fellesOpptjening = mutableMapOf<UUID, OpptjeningDTO>()
         var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
 
         override fun preVisitPerioder() {
@@ -323,6 +326,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     vedtaksperiode,
                     arbeidsgiver,
                     vedtaksperiodeMap,
+                    fellesGrunnlagsdata,
+                    fellesOpptjening,
                     vedtaksperioder,
                     fødselsnummer,
                     inntekter,
@@ -336,27 +341,15 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             organisasjonsnummer: String
         ) {
-            val fellesVedaksperiodedata = mutableMapOf<UUID, GrunnlagsdataDTO>()
-            val fellesOpptjening = mutableMapOf<UUID, OpptjeningDTO>()
 
             val arbeidsgiverDTO = arbeidsgiverMap.mapTilArbeidsgiverDto()
-            arbeidsgiverDTO.vedtaksperioder.forEach { vedtaksperiode ->
-                if (vedtaksperiode.fullstendig) {
-                    (vedtaksperiode as VedtaksperiodeDTO).dataForVilkårsvurdering?.also {
-                        fellesVedaksperiodedata.putIfAbsent(vedtaksperiode.gruppeId, it)
-                    }
-                    vedtaksperiode.vilkår.opptjening?.also {
-                        fellesOpptjening.putIfAbsent(vedtaksperiode.gruppeId, it)
-                    }
-                }
-            }
 
             val mappedeArbeidsgivere = arbeidsgiverDTO.copy(
                 vedtaksperioder = arbeidsgiverDTO.vedtaksperioder
                     .map { vedtaksperiode ->
                         if (vedtaksperiode.fullstendig) {
                             (vedtaksperiode as VedtaksperiodeDTO).copy(
-                                dataForVilkårsvurdering = fellesVedaksperiodedata[vedtaksperiode.gruppeId],
+                                dataForVilkårsvurdering = fellesGrunnlagsdata[vedtaksperiode.gruppeId],
                                 vilkår = vedtaksperiode.vilkår.copy(opptjening = fellesOpptjening[vedtaksperiode.gruppeId])
                             )
                         } else {
@@ -374,6 +367,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
+        private val fellesGrunnlagsdata: MutableMap<UUID, GrunnlagsdataDTO>,
+        private val fellesOpptjening: MutableMap<UUID, OpptjeningDTO>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val fødselsnummer: String,
         private val inntekter: List<Inntekthistorikk.Inntekt>,
@@ -393,7 +388,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
             vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
-            vedtaksperiodeMap["aktivitetslogg"] = aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }
+            vedtaksperiodeMap["aktivitetslogg"] =
+                aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }
         }
 
 
@@ -428,7 +424,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                 fullstendig = true
             } else {
                 vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto())
-                popState()
             }
         }
 
@@ -445,8 +440,22 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             gruppeId: UUID
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = utbetalinger.sum()
-            vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(fødselsnummer, inntekter))
+            if (fullstendig) {
+                vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(fødselsnummer, inntekter))
+            }
+            samleFellesdata(gruppeId)
             popState()
+        }
+
+        private fun samleFellesdata(gruppeId: UUID) {
+            val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
+            val opptjening = førsteFraværsdag?.let {
+                dataForVilkårsvurdering?.let {
+                    mapOpptjening(førsteFraværsdag, it)
+                }
+            }
+            dataForVilkårsvurdering?.let { fellesGrunnlagsdata.putIfAbsent(gruppeId, it) }
+            opptjening?.let { fellesOpptjening.putIfAbsent(gruppeId, it) }
         }
     }
 
@@ -625,7 +634,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
 
         override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) =
+            leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
 
         override fun visitImplisittDag(implisittDag: ImplisittDag) =
             leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)

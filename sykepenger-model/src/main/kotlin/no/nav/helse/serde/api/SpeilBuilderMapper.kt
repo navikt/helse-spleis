@@ -116,6 +116,14 @@ internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnla
     harOpptjening = grunnlagsdata.harOpptjening
 )
 
+internal fun mapOpptjening(
+    førsteFraværsdag: LocalDate,
+    dataForVilkårsvurdering: GrunnlagsdataDTO
+) = OpptjeningDTO(
+    antallKjenteOpptjeningsdager = dataForVilkårsvurdering.antallOpptjeningsdagerErMinst,
+    fom = førsteFraværsdag.minusDays(dataForVilkårsvurdering.antallOpptjeningsdagerErMinst.toLong()),
+    oppfylt = dataForVilkårsvurdering.harOpptjening
+)
 
 internal fun mapVilkår(
     vedtaksperiodeMap: Map<String, Any?>,
@@ -154,13 +162,10 @@ internal fun mapVilkår(
         alderSisteSykedag = alderSisteSykepengedag,
         oppfylt = personalder.øvreAldersgrense.isAfter(sisteSykepengedagEllerSisteDagIPerioden)
     )
-    val opptjening = førsteFraværsdag?.let { dataForVilkårsvurdering?.let {
-        OpptjeningDTO(
-            antallKjenteOpptjeningsdager = it.antallOpptjeningsdagerErMinst,
-            fom = førsteFraværsdag.minusDays(it.antallOpptjeningsdagerErMinst.toLong()),
-            oppfylt = it.harOpptjening
-        )
-    }
+    val opptjening = førsteFraværsdag?.let {
+        dataForVilkårsvurdering?.let {
+            mapOpptjening(førsteFraværsdag, it)
+        }
     }
     val søknadsfrist = søknadNav?.let {
         SøknadsfristDTO(
