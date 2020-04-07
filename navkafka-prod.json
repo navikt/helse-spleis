@@ -54,6 +54,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkelnorg",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelnorg",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvsparkelvilkar",
                     "role": "PRODUCER"
                 },
