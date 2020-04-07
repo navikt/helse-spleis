@@ -38,7 +38,7 @@ internal class SpennBuilderTest {
     }
 
     @Test
-    internal fun `a`() {
+    internal fun `Blanding av dagtyper`() {
         opprett(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(1, linjer.size)

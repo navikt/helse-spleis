@@ -5,6 +5,8 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -21,12 +23,15 @@ internal class UtbetalingReflectTest {
         map = UtbetalingReflect(Utbetaling(
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
-            tidslinjeOf(4.NAV), 4.januar, Aktivitetslogg())
+            tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
+            4.januar,
+            Aktivitetslogg()
+        )
         ).toMap()
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
         assertUtbetalingslinjer("SPREF", "mottakertype")
         assertUtbetalingslinjer("NY", "linjertype")
-        assertUtbetalingslinjer(2032024440, "sjekksum")
+        assertUtbetalingslinjer(-874556451, "sjekksum")
         assertUtbetalingslinje(0, 1.januar, "fom")
         assertUtbetalingslinje(0, 4.januar, "tom")
         assertUtbetalingslinje(0, 1, "delytelseId")
@@ -49,4 +54,7 @@ internal class UtbetalingReflectTest {
             [key]
         ))
     }
+
+    private fun tidslinjeMedDagsats(tidslinje: Utbetalingstidslinje) =
+        tidslinje.onEach { if (it is NavDag) it.utbetaling = it.inntekt.toInt()  }
 }
