@@ -35,7 +35,6 @@ internal class ArbeidsgiverUtbetalinger(
         }
         MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogg).beregn()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            arbeidsgiver.push(utbetalingstidslinje)
             arbeidsgiver.push(Utbetaling(
                 fødselsnummer,
                 organisasjonsnummer,

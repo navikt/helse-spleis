@@ -5,11 +5,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Linjetype
-import no.nav.helse.utbetalingslinjer.Mottakertype
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,12 +27,11 @@ internal fun createArbeidsgiver(
     organisasjonsnummer: String,
     id: UUID,
     inntekthistorikk: Inntekthistorikk,
-    tidslinjer: MutableList<Utbetalingstidslinje>,
     perioder: MutableList<Vedtaksperiode>,
     utbetalinger: MutableList<Utbetaling>
 ) = Arbeidsgiver::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(person, organisasjonsnummer, id, inntekthistorikk, tidslinjer, perioder, utbetalinger)
+    .call(person, organisasjonsnummer, id, inntekthistorikk, perioder, utbetalinger)
 
 internal fun createVedtaksperiode(
     person: Person,

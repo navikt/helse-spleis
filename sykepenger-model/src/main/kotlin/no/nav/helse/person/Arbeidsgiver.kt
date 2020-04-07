@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -12,7 +11,6 @@ internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
-    private val tidslinjer: MutableList<Utbetalingstidslinje>,
     private val perioder: MutableList<Vedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
@@ -24,7 +22,6 @@ internal class Arbeidsgiver private constructor(
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
-        tidslinjer = mutableListOf(),
         perioder = mutableListOf(),
         utbetalinger = mutableListOf()
     )
@@ -32,9 +29,6 @@ internal class Arbeidsgiver private constructor(
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntekthistorikk.accept(visitor)
-        visitor.preVisitTidslinjer(tidslinjer)
-        tidslinjer.forEach { it.accept(visitor) }
-        visitor.postVisitTidslinjer(tidslinjer)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -46,9 +40,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun nåværendeTidslinje() = tidslinjer.last()
-
-    internal fun push(tidslinje: Utbetalingstidslinje) = tidslinjer.add(tidslinje)
+    internal fun nåværendeTidslinje() = utbetalinger.last().utbetalingstidslinje()
 
     internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
 

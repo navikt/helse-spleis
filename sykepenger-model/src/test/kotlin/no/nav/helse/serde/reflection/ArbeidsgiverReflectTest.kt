@@ -13,7 +13,6 @@ internal class ArbeidsgiverReflectTest {
             skalIkkeMappes = listOf(
                 "inntekthistorikk",
                 "perioder",
-                "tidslinjer",
                 "utbetalinger",
                 "person"
             )
