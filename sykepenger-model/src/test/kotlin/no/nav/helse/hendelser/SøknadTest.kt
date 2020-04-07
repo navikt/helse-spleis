@@ -93,8 +93,7 @@ internal class SøknadTest {
     @Test
     internal fun `egenmelding ligger langt utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
-        assertFalse(søknad.valider().hasErrors())
-        assertTrue(søknad.valider().hasWarnings())
+        assertFalse(søknad.valider().hasErrors()) { aktivitetslogg.toString() }
         assertEquals(8, søknad.sykdomstidslinje().length())
     }
 

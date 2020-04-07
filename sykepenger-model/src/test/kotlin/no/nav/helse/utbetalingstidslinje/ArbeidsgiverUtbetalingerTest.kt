@@ -57,8 +57,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(10805 + 6000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
     }
 
     @Test

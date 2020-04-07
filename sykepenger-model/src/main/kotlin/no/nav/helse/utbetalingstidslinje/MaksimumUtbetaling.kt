@@ -23,7 +23,7 @@ internal class MaksimumUtbetaling(
     internal fun beregn() {
         tidslinjer.forEach { it.accept(this) }
         if (harRedusertUtbetaling)
-            aktivitetslogg.warn("Redusert utbetaling minst en dag på grunn av inntekt over 6G")
+            aktivitetslogg.info("Redusert utbetaling minst én dag på grunn av inntekt over 6G")
         else
             aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
     }

@@ -22,7 +22,7 @@ internal class MinimumInntektsfilter (
         tidslinjer.forEach { it.avvis(inntekterUnderMinimum.keys.toList(), Begrunnelse.MinimumInntekt) }
 
         if (inntekterUnderMinimum.keys.toList() in periode)
-            aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av inntekt under krav til minste sykepengegrunnlag")
+            aktivitetslogg.warn("Inntekt under krav til minste sykepengegrunnlag")
         else
             aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
     }

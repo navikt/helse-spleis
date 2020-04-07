@@ -59,7 +59,7 @@ class Utbetalingshistorikk(
             aktivitetslogg = aktivitetslogg
         ).also { accept(it) }.maksdato()
         if (beregnetMaksDato != maksDato) {
-            aktivitetslogg.warn("Maksdatoen som er beregnet fra historikken i Infotrygd er ulik maksdatoen satt i Infotrygd")
+            aktivitetslogg.info("Maksdatoen som er beregnet fra historikken i Infotrygd er ulik maksdatoen satt i Infotrygd")
         }
     }
 

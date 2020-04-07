@@ -178,23 +178,6 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Validerer ikke hvis beregnet maksdato og maksdato fra Infotrygd er forskjellige`() {
-        val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
-        )
-        val utbetalingshistorikk = Utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            graderingsliste = graderingsliste,
-            maksDato = 13.desember,
-            aktivitetslogg = aktivitetslogg
-        )
-
-        utbetalingshistorikk.valider(1.januar, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-        assertTrue(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
-    }
-
-    @Test
     fun `Validerer ok hvis maksdato ikke er oppgitt fra Infotrygd`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)

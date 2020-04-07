@@ -39,7 +39,7 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 
         if (avvisteDatoer in periode)
-            aktivitetslogg.warn("Maksimalt antall sykedager overskrides i perioden")
+            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
     }

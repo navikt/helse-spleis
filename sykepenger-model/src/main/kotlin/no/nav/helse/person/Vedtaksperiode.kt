@@ -230,9 +230,9 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag > sisteDag())
-            hendelse.warn("Første fraværsdag i inntektsmeldingen er etter sykmeldingsperioden")
+            hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
         if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
-            hendelse.warn("Første fraværsdag i inntektsmeldingen er ikke den samme som første fraværsdag i sykdomsperioden")
+            hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik første fraværsdag i sykdomsperioden")
 
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
@@ -583,7 +583,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()) {
-                søknad.warn("Søknaden inneholder egenmeldingsdager tidligere enn oppgitte dager i inntektsmeldingen")
+                søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
                 søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
@@ -845,7 +845,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 AvventerGodkjenning
             ) {
-                hendelse.warn("Ingen simulering av utbetaling på grunn av manglende utbetalingsinformasjon")
+                hendelse.warn("Simulering har feilet")
             }
 
             trengerSimulering(vedtaksperiode, hendelse)
@@ -860,7 +860,7 @@ internal class Vedtaksperiode private constructor(
             if (simulering.valider().hasErrors()) {
                 if (utenforÅpningstid())
                     return simulering.info("Simulering feilet, men Oppdragsystemet har stengt og simulering utsettes til Oppdragsystemet har åpnet")
-                return simulering.warn("Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt")
+                return simulering.info("Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt")
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)

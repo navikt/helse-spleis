@@ -37,7 +37,6 @@ internal class MaksimumUtbetalingTest {
         ).beregn()
         undersøke(tidslinje)
         assertEquals(21610, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasWarnings())
     }
 
     @Test fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
@@ -66,7 +65,6 @@ internal class MaksimumUtbetalingTest {
         ).beregn()
         undersøke(tidslinje)
         assertEquals(10810, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasWarnings())
     }
 
     @Test fun `utbetaling for tidslinje med gradert sykdom får gradert utbetaling`() {
