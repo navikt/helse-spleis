@@ -21,7 +21,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to utbetalingslinjer["mottaker"],
-        "mottakertype" to utbetalingslinjer.get<Utbetalingslinjer, Mottakertype>("mottakertype").melding,
+        "mottakertype" to utbetalingslinjer.get<Utbetalingslinjer, Mottakertype>("mottakertype").toString(),
         "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
         "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
         "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").toString(),
@@ -43,7 +43,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
 
 private class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbetalingstidslinje) {
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "utbetalingsdager" to utbetalingstidslinje.map {
+        "dager" to utbetalingstidslinje.map {
             when(it::class) {
                 Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()
                 ArbeidsgiverperiodeDag::class -> UtbetalingsdagReflect(it, TypeData.ArbeidsgiverperiodeDag).toMap()

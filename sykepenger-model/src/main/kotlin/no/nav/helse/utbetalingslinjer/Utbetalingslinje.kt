@@ -73,6 +73,6 @@ enum class Linjetype {
     NY, UEND, ENDR
 }
 
-internal enum class Mottakertype(internal val melding: String) {
-    Arbeidsgiver("ARBEIDSGIVER"), Person("PERSON");
+internal enum class Mottakertype {
+    ARBEIDSGIVER, PERSON
 }

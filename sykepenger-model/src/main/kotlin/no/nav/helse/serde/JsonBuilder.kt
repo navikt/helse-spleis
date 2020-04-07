@@ -203,6 +203,9 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
         currentState.preVisitUtbetalinger(utbetalinger)
 
+    override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
+        currentState.postVisitUtbetalinger(utbetalinger)
+
     override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) =
         currentState.preVisitUtbetaling(utbetaling, tidsstempel)
 
@@ -292,14 +295,10 @@ internal class JsonBuilder : PersonVisitor {
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
-        private val utbetalinger = mutableListOf<MutableMap<String, Any?>>()
-
         override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-            arbeidsgiverMap["utbetalinger"] = utbetalinger
-        }
-
-        override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
-            utbetalinger.add(UtbetalingReflect(utbetaling).toMap())
+            arbeidsgiverMap["utbetalinger"] = mutableListOf<MutableMap<String, Any?>>().also {
+                pushState(UtbetalingerState(it))
+            }
         }
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
@@ -324,6 +323,17 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             organisasjonsnummer: String
         ) {
+            popState()
+        }
+    }
+
+    private inner class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : JsonState {
+
+        override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
+            utbetalinger.add(UtbetalingReflect(utbetaling).toMap())
+        }
+
+        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             popState()
         }
     }
