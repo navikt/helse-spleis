@@ -365,7 +365,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
+    private fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
         if (this.periode().start >= other.periode().start) return true
         return this.tilstand.type in listOf(
             TIL_INFOTRYGD,
@@ -1051,5 +1051,8 @@ internal class Vedtaksperiode private constructor(
         internal fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode().start }
         }
+
+        internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
+            perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
     }
 }
