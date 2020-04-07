@@ -702,6 +702,25 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal object AvventerVilkårsprøvingArbeidsgiversøknad : Vedtaksperiodetilstand {
+        override val type = AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
+
+        override val timeout: Duration = Duration.ofHours(1)
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+            hendelse.info("Forespør vilkårsgrunnlag")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetalingMedInntektsmelding)
+        }
+
+    }
+
     internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_GAP
         override val timeout: Duration = Duration.ofDays(30)
@@ -959,23 +978,12 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object TilInfotrygd : Vedtaksperiodetilstand {
-        override val type = TIL_INFOTRYGD
-        override val timeout: Duration = Duration.ZERO
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-    }
-
-    internal object Avsluttet : Vedtaksperiodetilstand {
-        override val type = AVSLUTTET
+    internal object UtbetalingFeilet : Vedtaksperiodetilstand {
+        override val type = UTBETALING_FEILET
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+            hendelse.error("Feilrespons fra oppdrag")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -1010,30 +1018,23 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerVilkårsprøvingArbeidsgiversøknad : Vedtaksperiodetilstand {
-        override val type = AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
-        override val timeout: Duration = Duration.ofHours(1)
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
-            hendelse.info("Forespør vilkårsgrunnlag")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetalingMedInntektsmelding)
-        }
-    }
-
-    internal object UtbetalingFeilet : Vedtaksperiodetilstand {
-        override val type = UTBETALING_FEILET
+    internal object Avsluttet : Vedtaksperiodetilstand {
+        override val type = AVSLUTTET
         override val timeout: Duration = Duration.ZERO
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.error("Feilrespons fra oppdrag")
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+    }
+
+    internal object TilInfotrygd : Vedtaksperiodetilstand {
+        override val type = TIL_INFOTRYGD
+        override val timeout: Duration = Duration.ZERO
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
