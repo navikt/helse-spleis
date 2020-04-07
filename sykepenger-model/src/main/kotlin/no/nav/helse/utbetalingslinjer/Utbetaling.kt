@@ -30,6 +30,7 @@ internal class Utbetaling
     )
 
     companion object {
+
         private fun buildArb(
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
@@ -37,7 +38,7 @@ internal class Utbetaling
             aktivitetslogg: Aktivitetslogg
         ) = Utbetalingslinjer(
                 organisasjonsnummer,
-                Mottakertype.ARBEIDSGIVER,
+                Mottakertype.SPREF,
                 SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()).also {
             if (it.isEmpty())
                 aktivitetslogg.info("Ingen utbetalingslinjer bygget")
@@ -51,11 +52,11 @@ internal class Utbetaling
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg
         ): Utbetalingslinjer {
-            return Utbetalingslinjer(fødselsnummer, Mottakertype.PERSON)
+            return Utbetalingslinjer(fødselsnummer, Mottakertype.SP)
         }
     }
 
-    fun accept(visitor: UtbetalingVisitor) {
+    internal fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(this, tidsstempel)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverUtbetalingslinjer)
@@ -69,3 +70,5 @@ internal class Utbetaling
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 }
+
+

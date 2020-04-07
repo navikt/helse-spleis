@@ -10,7 +10,6 @@ import no.nav.helse.serde.reflection.VedtaksperiodeReflect
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -212,15 +211,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
-
-    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) =
-        currentState.preVisitUtbetalingslinjer(linjer)
-
-    override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
-        currentState.visitUtbetalingslinje(utbetalingslinje)
-
-    override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) =
-        currentState.postVisitUtbetalingslinjer(linjer)
 
     private interface JsonState : PersonVisitor {
         fun entering() {}
@@ -427,13 +417,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             }
         }
 
-
-        override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
-            val utbetalingstidslinjeListe = mutableListOf<UtbetalingslinjeDTO>()
-            vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
-            pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
-        }
-
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
@@ -456,28 +439,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             }
             dataForVilkårsvurdering?.let { fellesGrunnlagsdata.putIfAbsent(gruppeId, it) }
             opptjening?.let { fellesOpptjening.putIfAbsent(gruppeId, it) }
-        }
-    }
-
-    private inner class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<UtbetalingslinjeDTO>) :
-        JsonState {
-        private val linjerForSpeil = mutableListOf<Utbetalingslinje>()
-
-        override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {
-            linjerForSpeil.add(utbetalingslinje)
-        }
-
-        override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
-            linjerForSpeil.forEach { utbetalingslinje ->
-                val utbetalingstidslinjeMap = UtbetalingslinjeDTO(
-                    utbetalingslinje.fom,
-                    utbetalingslinje.tom,
-                    utbetalingslinje.dagsats,
-                    utbetalingslinje.grad
-                )
-                utbetalingstidslinjeListe.add(utbetalingstidslinjeMap)
-            }
-            popState()
         }
     }
 

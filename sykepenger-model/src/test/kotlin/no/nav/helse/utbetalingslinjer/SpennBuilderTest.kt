@@ -31,6 +31,27 @@ internal class SpennBuilderTest {
     }
 
     @Test
+    internal fun `kun helgedager`() {
+        opprett(2.HELG)
+
+        assertEquals(0, linjer.size)
+    }
+
+    @Test
+    internal fun `a`() {
+        opprett(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
+
+        assertEquals(1, linjer.size)
+    }
+
+    @Test
+    internal fun `kun helgedager med feriedager`() {
+        opprett(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
+
+        assertEquals(0, linjer.size)
+    }
+
+    @Test
     internal fun `gap-dag som første og siste dag i perioden`() {
         opprett(1.ARB, 3.NAV, 1.ARB)
 

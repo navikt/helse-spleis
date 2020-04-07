@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 /**
@@ -130,7 +131,24 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun kutt(sisteDato: LocalDate) = subset(førsteDato(), sisteDato)
 
-    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag || it is NavHelgDag }
+    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
+
+    override fun toString(): String {
+        return utbetalingsdager.joinToString(separator = "") {
+            (if (it.dato.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
+                when (it::class) {
+                    NavDag::class -> "N"
+                    NavHelgDag::class -> "H"
+                    Arbeidsdag::class -> "A"
+                    ArbeidsgiverperiodeDag::class -> "P"
+                    Fridag::class -> "F"
+                    AvvistDag::class -> "X"
+                    UkjentDag::class -> "U"
+                    ForeldetDag::class -> "O"
+                    else -> "?"
+                }
+        }
+    }
 
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {

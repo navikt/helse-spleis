@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.serde.UtbetalingslinjeData
 import no.nav.helse.utbetalingslinjer.Linjetype.NY
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
@@ -74,5 +75,5 @@ enum class Linjetype {
 }
 
 internal enum class Mottakertype {
-    ARBEIDSGIVER, PERSON
+    SPREF, SP
 }

@@ -514,12 +514,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
 
         inspektør.also {
-            assertEquals(1, it.utbetalingslinjer[0]?.size)
-            assertEquals(17.januar(2020), it.utbetalingslinjer[0]?.first()?.fom)
-            assertEquals(31.januar(2020), it.utbetalingslinjer[0]?.first()?.tom)
-            assertEquals(1, it.utbetalingslinjer[1]?.size)
-            assertEquals(3.februar(2020), it.utbetalingslinjer[1]?.first()?.fom) // starts mandag
-            assertEquals(28.februar(2020), it.utbetalingslinjer[1]?.first()?.tom)
+            assertEquals(1, it.arbeidsgiverUtbetalingslinjer[0]?.size)
+            assertEquals(17.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.fom)
+            assertEquals(31.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.tom)
+            assertEquals(1, it.arbeidsgiverUtbetalingslinjer[1]?.size)
+            assertEquals(3.februar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.fom) // starts mandag
+            assertEquals(28.februar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.tom)
         }
     }
 

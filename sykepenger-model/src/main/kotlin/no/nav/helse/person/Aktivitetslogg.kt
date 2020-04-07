@@ -2,7 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -225,25 +226,14 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
                 internal fun simulering(
                     aktivitetslogg: IAktivitetslogg,
-                    utbetalingsreferanse: String,
-                    utbetalingslinjer: List<Utbetalingslinje>,
+                    utbetaling: Utbetaling,
                     maksdato: LocalDate,
-                    forlengelse: Boolean
+                    saksbehandler: String
                 ) {
                     aktivitetslogg.behov(
-                        Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", mapOf(
-                            "utbetalingsreferanse" to utbetalingsreferanse,
-                            "utbetalingslinjer" to utbetalingslinjer.map {
-                                mapOf(
-                                    "fom" to it.fom.toString(),
-                                    "tom" to it.tom.toString(),
-                                    "dagsats" to it.dagsats,
-                                    "grad" to it.grad
-                                )
-                            },
-                            "maksdato" to maksdato.toString(),
-                            "forlengelse" to forlengelse
-                        )
+                        Behovtype.Simulering,
+                        "Trenger simulering fra Oppdragssystemet",
+                        OppdragReflect(utbetaling, maksdato, saksbehandler).toMap()
                     )
                 }
 
@@ -256,25 +246,14 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
                 internal fun utbetaling(
                     aktivitetslogg: IAktivitetslogg,
-                    utbetalingsreferanse: String,
-                    utbetalingslinjer: List<Utbetalingslinje>,
+                    utbetaling: Utbetaling,
                     maksdato: LocalDate,
                     saksbehandler: String
                 ) {
                     aktivitetslogg.behov(
-                        Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", mapOf(
-                            "utbetalingsreferanse" to utbetalingsreferanse,
-                            "utbetalingslinjer" to utbetalingslinjer.map {
-                                mapOf(
-                                    "fom" to it.fom.toString(),
-                                    "tom" to it.tom.toString(),
-                                    "dagsats" to it.dagsats,
-                                    "grad" to it.grad
-                                )
-                            },
-                            "maksdato" to maksdato.toString(),
-                            "saksbehandler" to saksbehandler
-                        )
+                        Behovtype.Utbetaling,
+                        "Trenger å sende utbetaling til Oppdrag",
+                        OppdragReflect(utbetaling, maksdato, saksbehandler).toMap()
                     )
                 }
             }

@@ -9,7 +9,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDateTime
 import java.util.*
@@ -196,10 +195,6 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
-    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) = currentState.preVisitUtbetalingslinjer(linjer)
-    override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
-        currentState.visitUtbetalingslinje(utbetalingslinje)
-
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
         currentState.preVisitUtbetalinger(utbetalinger)
 
@@ -208,8 +203,6 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) =
         currentState.preVisitUtbetaling(utbetaling, tidsstempel)
-
-    override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) = currentState.postVisitUtbetalingslinjer(linjer)
 
     private interface JsonState : PersonVisitor {
         fun entering() {}
@@ -430,12 +423,6 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
         }
 
-        override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
-            val utbetalingstidslinjeListe = mutableListOf<MutableMap<String, Any?>>()
-            vedtaksperiodeMap["utbetalingslinjer"] = utbetalingstidslinjeListe
-            pushState(UtbetalingslinjeState(utbetalingstidslinjeListe))
-        }
-
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinje = mutableMapOf<String, Any?>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
@@ -447,17 +434,6 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             gruppeId: UUID
         ) {
-            popState()
-        }
-    }
-
-    private inner class UtbetalingslinjeState(private val utbetalingstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
-        JsonState {
-        override fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {
-            utbetalingstidslinjeListe.add(UtbetalingslinjeReflect(utbetalingslinje).toMap())
-        }
-
-        override fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
             popState()
         }
     }

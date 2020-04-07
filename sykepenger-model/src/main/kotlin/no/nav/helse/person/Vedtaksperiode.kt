@@ -12,6 +12,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehis
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
@@ -35,7 +36,7 @@ internal class Vedtaksperiode private constructor(
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
     private var forbrukteSykedager: Int?,
-    private var godkjentAv: String?,
+    private var godkjentAv: String,
     private var godkjenttidspunkt: LocalDateTime?,
     private var utbetalingsreferanse: String?,
     private var førsteFraværsdag: LocalDate?,
@@ -66,7 +67,7 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand,
         maksdato = null,
         forbrukteSykedager = null,
-        godkjentAv = null,
+        godkjentAv = "Spleis",
         godkjenttidspunkt = null,
         utbetalingsreferanse = null,
         førsteFraværsdag = null,
@@ -332,7 +333,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun høstingsresultater(
         engineForTimeline: ByggUtbetalingstidlinjer?,
-        engineForLine: ByggUtbetalingslinjer?,
         ytelser: Ytelser
     ) {
         maksdato = engineForTimeline?.maksdato()
@@ -807,11 +807,8 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.førsteFraværsdag
                     ).also { engineForTimeline = it }
                 }
-                var engineForLine: ByggUtbetalingslinjer? = null
-                it.valider {
-                    ByggUtbetalingslinjer(ytelser, vedtaksperiode.periode(), arbeidsgiver.nåværendeTidslinje()).also {
-                        engineForLine = it
-                    }
+                it.onSuccess {
+                    vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
                 }
                 it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, engineForLine, ytelser) }
             }
@@ -866,10 +863,9 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                utbetalingslinjer = vedtaksperiode.utbetalingslinjer,
+                utbetaling = vedtaksperiode.arbeidsgiver.utbetaling(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
-                forlengelse = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse != null
+                saksbehandler = vedtaksperiode.godkjentAv
             )
         }
 
@@ -908,7 +904,7 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.tilstand(
                 manuellSaksbehandling,
-                if (vedtaksperiode.utbetalingslinjer.isEmpty()) Avsluttet else TilUtbetaling
+                if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) Avsluttet else TilUtbetaling
             ) {
                 vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
                 vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
@@ -929,8 +925,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             utbetaling(
                 hendelse,
-                requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                requireNotNull(vedtaksperiode.utbetalingslinjer),
+                requireNotNull(vedtaksperiode.arbeidsgiver.utbetaling()),
                 requireNotNull(vedtaksperiode.maksdato),
                 requireNotNull(vedtaksperiode.godkjentAv)
             )
@@ -939,8 +934,11 @@ internal class Vedtaksperiode private constructor(
                 aktørId = vedtaksperiode.aktørId,
                 fødselsnummer = vedtaksperiode.fødselsnummer,
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                utbetalingslinjer = requireNotNull(utbetalingslinjerData(vedtaksperiode)),
+                utbetaling = requireNotNull(OppdragReflect(
+                    vedtaksperiode.arbeidsgiver.utbetaling(),
+                    requireNotNull(vedtaksperiode.maksdato),
+                    vedtaksperiode.godkjentAv
+                ).toMap()),
                 opprettet = LocalDate.now()
             )
 
@@ -960,17 +958,18 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiodeId = vedtaksperiode.id,
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,
-                    utbetalingsreferanse = requireNotNull(vedtaksperiode.utbetalingsreferanse),
-                    utbetalingslinjer = requireNotNull(utbetalingslinjerData(vedtaksperiode)),
+                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                    utbetaling = requireNotNull(OppdragReflect(
+                        vedtaksperiode.arbeidsgiver.utbetaling(),
+                        requireNotNull(vedtaksperiode.maksdato),
+                        vedtaksperiode.godkjentAv
+                    ).toMap()),
                     forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
                     opprettet = LocalDate.now()
                 )
                 vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
             }
         }
-
-        private fun utbetalingslinjerData(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.utbetalingslinjer.map { it.toData() }
     }
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {

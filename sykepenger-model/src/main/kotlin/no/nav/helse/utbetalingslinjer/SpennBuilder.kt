@@ -20,6 +20,7 @@ internal class SpennBuilder(
     }
 
     internal fun result(): MutableList<Utbetalingslinje> {
+        arbeisdsgiverLinjer.removeAll { it.dagsats == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         return arbeisdsgiverLinjer
     }

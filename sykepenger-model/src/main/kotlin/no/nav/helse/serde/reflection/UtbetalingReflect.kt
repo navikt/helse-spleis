@@ -5,6 +5,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import java.time.LocalDate
 
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
@@ -15,6 +16,21 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "personUtbetalingslinjer" to
             UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"]
+    )
+}
+
+internal class OppdragReflect(
+    private val utbetaling: Utbetaling,
+    private val maksdato: LocalDate,
+    private val saksbehandler: String
+) {
+    internal fun toMap(): MutableMap<String, Any> = mutableMapOf(
+        "arbeidsgiverUtbetalingslinjer" to
+            UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
+        "personUtbetalingslinjer" to
+            UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
+        "maksdato" to maksdato,
+        "saksbehandler" to saksbehandler
     )
 }
 

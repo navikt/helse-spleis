@@ -6,7 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -27,7 +27,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
-    internal val utbetalingslinjer = mutableMapOf<Int, List<Utbetalingslinje>>()
+    internal val arbeidsgiverUtbetalingslinjer = mutableListOf<Utbetalingslinjer>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
@@ -71,8 +71,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         inVedtaksperiode = false
     }
 
-    override fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {
-        utbetalingslinjer[vedtaksperiodeindeks] = linjer
+    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {
+        arbeidsgiverUtbetalingslinjer.add(linjer)
     }
 
     internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
@@ -167,7 +167,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         "Missing collection initialization"
     }
 
-    internal fun utbetalingslinjer(indeks: Int) = utbetalingslinjer[indeks] ?: fail {
+    internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverUtbetalingslinjer[indeks] ?: fail {
         "Missing collection initialization"
     }
 

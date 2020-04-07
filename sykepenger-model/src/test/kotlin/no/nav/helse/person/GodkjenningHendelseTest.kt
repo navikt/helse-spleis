@@ -1,12 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.e2e.TestPersonInspektør
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -36,8 +33,6 @@ internal class GodkjenningHendelseTest {
         person.håndter(simulering())
         person.håndter(manuellSaksbehandling(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
-        val utbetalingsreferanse = hendelse.etterspurtBehov<String>(inspektør.vedtaksperiodeId(0), Behovtype.Utbetaling, "utbetalingsreferanse")
-        assertNotNull(utbetalingsreferanse)
     }
 
     @Test

@@ -116,15 +116,6 @@ internal class HendelseMediator(
         private val lagreUtbetalingDao: LagreUtbetalingDao
     ) : PersonObserver {
 
-        override fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-            lagreUtbetalingDao.lagreUtbetaling(
-                event.utbetalingsreferanse,
-                event.aktørId,
-                event.organisasjonsnummer,
-                event.vedtaksperiodeId
-            )
-        }
-
         override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
             rapidsConnection.publish(påminnelse.fødselsnummer(), påminnelse.toJson())
         }

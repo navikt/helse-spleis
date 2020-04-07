@@ -3,8 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.UtbetalingslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -97,23 +95,4 @@ internal class ByggUtbetalingstidlinjer(
     internal fun maksdato() = engine.maksdato()
     internal fun forbrukteSykedager() = engine.forbrukteSykedager()
     override fun feilmelding() = "Feil ved kalkulering av utbetalingstidslinjer"
-}
-
-internal class ByggUtbetalingslinjer(
-    private val ytelser: Ytelser,
-    private val periode: Periode,
-    private val utbetalingstidslinje: Utbetalingstidslinje
-) : Valideringssteg {
-    private lateinit var utbetalingslinjer: List<Utbetalingslinje>
-
-    internal fun utbetalingslinjer() = utbetalingslinjer
-
-    override fun isValid(): Boolean {
-        utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje, periode).result()
-        if (utbetalingslinjer.isEmpty()) ytelser.info("Ingen utbetalingslinjer bygget")
-        else ytelser.info("Utbetalingslinjer bygget vellykket")
-        return !ytelser.hasErrors()
-    }
-
-    override fun feilmelding()   = "Feil ved kalkulering av utbetalingslinjer"
 }
