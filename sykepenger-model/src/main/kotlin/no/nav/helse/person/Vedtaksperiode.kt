@@ -97,22 +97,8 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id, gruppeId)
     }
 
-    private fun periode() = Periode(førsteDag(), sisteDag())
-
-    private fun førsteDag() = sykdomstidslinje().førsteDag()
-
-    private fun sisteDag() = sykdomstidslinje().sisteDag()
-
-    private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
-    }
-
-    private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
-        if (hendelse.valider().hasErrors())
-            return tilstand(hendelse, TilInfotrygd)
-        block()
     }
 
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
@@ -196,6 +182,20 @@ internal class Vedtaksperiode private constructor(
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
+    }
+
+    private fun periode() = Periode(førsteDag(), sisteDag())
+
+    private fun førsteDag() = sykdomstidslinje().førsteDag()
+
+    private fun sisteDag() = sykdomstidslinje().sisteDag()
+
+    private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
+
+    private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
+        if (hendelse.valider().hasErrors())
+            return tilstand(hendelse, TilInfotrygd)
+        block()
     }
 
     private fun kontekst(hendelse: ArbeidstakerHendelse) {
