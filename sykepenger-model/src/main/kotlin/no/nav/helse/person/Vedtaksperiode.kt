@@ -97,11 +97,11 @@ internal class Vedtaksperiode private constructor(
         visitor.postVisitVedtaksperiode(this, id, gruppeId)
     }
 
-    internal fun periode() = Periode(førsteDag(), sisteDag())
+    private fun periode() = Periode(førsteDag(), sisteDag())
 
-    internal fun førsteDag() = sykdomstidslinje().førsteDag()
+    private fun førsteDag() = sykdomstidslinje().førsteDag()
 
-    internal fun sisteDag() = sykdomstidslinje().sisteDag()
+    private fun sisteDag() = sykdomstidslinje().sisteDag()
 
     private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
@@ -783,11 +783,7 @@ internal class Vedtaksperiode private constructor(
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.førsteFraværsdag) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
-                it.valider {
-                    HarInntektshistorikk(
-                        arbeidsgiver, vedtaksperiode.førsteDag()
-                    )
-                }
+                it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
                 var engineForTimeline: ByggUtbetalingstidlinjer? = null
                 it.valider {
                     ByggUtbetalingstidlinjer(
@@ -805,15 +801,11 @@ internal class Vedtaksperiode private constructor(
                 }
                 var engineForLine: ByggUtbetalingslinjer? = null
                 it.valider {
-                    ByggUtbetalingslinjer(
-                        ytelser,
-                        vedtaksperiode,
-                        arbeidsgiver.nåværendeTidslinje()
-                    ).also { engineForLine = it }
+                    ByggUtbetalingslinjer(ytelser, vedtaksperiode.periode(), arbeidsgiver.nåværendeTidslinje()).also {
+                        engineForLine = it
+                    }
                 }
-                it.onSuccess {
-                    vedtaksperiode.høstingsresultater(engineForTimeline, engineForLine, ytelser)
-                }
+                it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, engineForLine, ytelser) }
             }
         }
 
@@ -841,10 +833,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.utbetalingsreferanse = it
             }
 
-            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerGodkjenning
-            ) {
+            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
                 hendelse.warn("Simulering har feilet")
             }
 
@@ -902,10 +891,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(
-                manuellSaksbehandling,
-                TilInfotrygd
-            ) {
+            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd) {
                 manuellSaksbehandling.error(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
                     manuellSaksbehandling.saksbehandler()

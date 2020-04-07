@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingslinjeBuilder
@@ -98,7 +97,7 @@ internal class ByggUtbetalingstidlinjer(
 
 internal class ByggUtbetalingslinjer(
     private val ytelser: Ytelser,
-    private val vedtaksperiode: Vedtaksperiode,
+    private val periode: Periode,
     private val utbetalingstidslinje: Utbetalingstidslinje
 ) : Valideringssteg {
     private lateinit var utbetalingslinjer: List<Utbetalingslinje>
@@ -106,14 +105,9 @@ internal class ByggUtbetalingslinjer(
     internal fun utbetalingslinjer() = utbetalingslinjer
 
     override fun isValid(): Boolean {
-        utbetalingslinjer = UtbetalingslinjeBuilder(
-            utbetalingstidslinje,
-            vedtaksperiode.periode()
-        ).result()
-        if (utbetalingslinjer.isEmpty())
-            ytelser.info("Ingen utbetalingslinjer bygget")
-        else
-            ytelser.info("Utbetalingslinjer bygget vellykket")
+        utbetalingslinjer = UtbetalingslinjeBuilder(utbetalingstidslinje, periode).result()
+        if (utbetalingslinjer.isEmpty()) ytelser.info("Ingen utbetalingslinjer bygget")
+        else ytelser.info("Utbetalingslinjer bygget vellykket")
         return !ytelser.hasErrors()
     }
 
