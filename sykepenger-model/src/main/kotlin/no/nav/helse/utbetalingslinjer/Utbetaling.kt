@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
 import java.time.LocalDate
@@ -68,29 +68,4 @@ internal class Utbetaling
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
-}
-
-internal interface UtbetalingVisitor: UtbetalingsdagVisitor, UtbetalingslinjerVisitor {
-    fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
-    fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun preVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun postVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
-}
-
-internal interface UtbetalingslinjerVisitor {
-    fun preVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun visitUtbetalingslinje(
-        utbetalingslinje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        dagsats: Int,
-        grad: Double,
-        delytelseId: Int,
-        refDelytelseId: Int?
-    ) {}
-    fun postVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
 }

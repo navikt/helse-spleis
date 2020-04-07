@@ -7,8 +7,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,9 +49,6 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
-    fun preVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
-    fun visitUtbetalingslinje(utbetalingslinje: Utbetalingslinje) {}
-    fun postVisitUtbetalingslinjer(linjer: List<Utbetalingslinje>) {}
     fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {}
 }
 
@@ -117,4 +114,29 @@ internal interface InntekthistorikkVisitor {
     fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {}
 //    fun postVisitTidslinjer() {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
+}
+
+internal interface UtbetalingVisitor: UtbetalingsdagVisitor, UtbetalingslinjerVisitor {
+    fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
+    fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
+    fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
+    fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun preVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun postVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
+}
+
+internal interface UtbetalingslinjerVisitor {
+    fun preVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun visitUtbetalingslinje(
+        utbetalingslinje: Utbetalingslinje,
+        fom: LocalDate,
+        tom: LocalDate,
+        dagsats: Int,
+        grad: Double,
+        delytelseId: Int,
+        refDelytelseId: Int?
+    ) {}
+    fun postVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
 }

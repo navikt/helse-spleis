@@ -15,7 +15,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -36,7 +35,6 @@ internal class Vedtaksperiode private constructor(
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
     private var forbrukteSykedager: Int?,
-    private val utbetalingslinjer: MutableList<Utbetalingslinje>,
     private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
     private var utbetalingsreferanse: String?,
@@ -68,13 +66,12 @@ internal class Vedtaksperiode private constructor(
         tilstand = tilstand,
         maksdato = null,
         forbrukteSykedager = null,
-        utbetalingslinjer = mutableListOf(),
         godkjentAv = null,
         godkjenttidspunkt = null,
         utbetalingsreferanse = null,
         førsteFraværsdag = null,
-        dataForSimulering = null,
         dataForVilkårsvurdering = null,
+        dataForSimulering = null,
         sykdomshistorikk = Sykdomshistorikk(),
         utbetalingstidslinje = Utbetalingstidslinje()
     )
@@ -91,9 +88,6 @@ internal class Vedtaksperiode private constructor(
         visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.preVisitUtbetalingslinjer(utbetalingslinjer)
-        utbetalingslinjer.forEach { visitor.visitUtbetalingslinje(it) }
-        visitor.postVisitUtbetalingslinjer(utbetalingslinjer)
         visitor.postVisitVedtaksperiode(this, id, gruppeId)
     }
 
@@ -344,16 +338,12 @@ internal class Vedtaksperiode private constructor(
         maksdato = engineForTimeline?.maksdato()
         forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
-        utbetalingslinjer.also {
-            it.clear()
-            it.addAll(engineForLine?.utbetalingslinjer() ?: emptyList())
-        }
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&
             person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
         ) return tilstand(ytelser, Avsluttet) {
             ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
         }
-        if (utbetalingslinjer.isEmpty()) return tilstand(
+        if (!utbetalingstidslinje.harUtbetalinger()) return tilstand(
             ytelser,
             AvventerGodkjenning
         ) {
@@ -851,7 +841,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.utbetalingsreferanse = it
             }
 
-            if (vedtaksperiode.utbetalingslinjer.isEmpty()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
+            if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
                 hendelse.warn("Simulering har feilet")
             }
 

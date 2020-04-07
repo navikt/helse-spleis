@@ -130,6 +130,8 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun kutt(sisteDato: LocalDate) = subset(førsteDato(), sisteDato)
 
+    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag || it is NavHelgDag }
+
     internal sealed class Utbetalingsdag(internal val inntekt: Double, internal val dato: LocalDate) :
         Comparable<Utbetalingsdag> {
 
