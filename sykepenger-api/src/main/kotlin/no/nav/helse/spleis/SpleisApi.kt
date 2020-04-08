@@ -62,7 +62,7 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
 
     routing {
         authenticate(authProviderName) {
-            get("/api/person-snapshot}") {
+            get("/api/person-snapshot") {
                 personDao.hentPerson(call.request.header("fnr")!!)
                     ?.let { håndterPerson(it, hendelseDao) }
                     ?.let { call.respond(it) }
