@@ -59,7 +59,9 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
             requestResponseTracing(httpTraceLog)
             nais()
             azureAdAppAuthentication(azureConfig)
-            spleisApi(dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly))
+            val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
+            spleisApi(dataSource, API_BRUKER)
+            spesialistApi(dataSource, API_SERVICE)
         }
     })
 

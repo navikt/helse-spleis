@@ -8,8 +8,8 @@ import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import no.nav.helse.spleis.config.AzureAdAppConfig
 
-const val API_BRUKER = "api_bruker"
-const val API_SERVICE = "api_service"
+internal const val API_BRUKER = "api_bruker"
+internal const val API_SERVICE = "api_service"
 
 internal fun Application.azureAdAppAuthentication(config: AzureAdAppConfig) {
     install(Authentication) {

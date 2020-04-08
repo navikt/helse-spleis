@@ -26,13 +26,13 @@ import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
 import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
-internal fun Application.spleisApi(dataSource: DataSource) {
+internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
     val utbetalingDao = UtbetalingDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
-        authenticate(API_BRUKER) {
+        authenticate(authProviderName) {
             get("/api/utbetaling/{utbetalingsreferanse}") {
                 utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
                     ?.let { personDao.hentPersonAktørId(it.aktørId) }
@@ -54,8 +54,14 @@ internal fun Application.spleisApi(dataSource: DataSource) {
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
         }
+    }
+}
+internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
+    val hendelseDao = HendelseDao(dataSource)
+    val personDao = PersonDao(dataSource)
 
-        authenticate(API_SERVICE) {
+    routing {
+        authenticate(authProviderName) {
             get("/api/person-snapshot}") {
                 personDao.hentPerson(call.request.header("fnr")!!)
                     ?.let { håndterPerson(it, hendelseDao) }
