@@ -74,7 +74,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         else
             state.sykedagerIArbeidsgiverperioden(this, dagen, grad)
 
-    private fun sykHelgedag(dagen: LocalDate, grad: Double) = state.sykHelgedag(this, dagen, grad)
+    private fun sykHelgedag(dagen: LocalDate, grad: Double) =
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
+            state.sykHelgedagEtterArbeidsgiverperioden(this, dagen, grad)
+        else
+            state.sykHelgedagIArbeidsgiverperioden(this, dagen, grad)
 
     private fun arbeidsdag(dagen: LocalDate) =
         if (arbeidsgiverRegler.burdeStarteNyArbeidsgiverperiode(ikkeSykedager))
@@ -153,11 +157,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         open fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {}
         open fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {}
         open fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {}
-        open fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {}
+        open fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {}
+        open fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {}
 
         open fun entering(splitter: UtbetalingstidslinjeBuilder) {}
         open fun leaving(splitter: UtbetalingstidslinjeBuilder) {}
-
     }
 
     private object Initiell : UtbetalingState() {
@@ -180,10 +184,16 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.state(UtbetalingSykedager)
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.setNåværendeInntekt(dagen.minusDays(1))
             splitter.håndterArbeidsgiverdag(dagen)
             splitter.state(ArbeidsgiverperiodeSykedager)
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.setNåværendeInntekt(dagen.minusDays(1))
+            splitter.håndterNAVHelgedag(dagen, grad)
+            splitter.state(UtbetalingSykedager)
         }
 
         override fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
@@ -205,7 +215,12 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.state(UtbetalingSykedager).also { splitter.håndterNAVdag(dagen, grad) }
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.håndterNAVHelgedag(dagen, grad)
+            splitter.state(UtbetalingSykedager)
+        }
+
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterArbeidsgiverdag(dagen)
         }
 
@@ -236,10 +251,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
         override fun sykedagerIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.sykedagerIArbeidsgiverperiode += splitter.fridager
-            if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedagerIArbeidsgiverperiode)) splitter.state(
-                    UtbetalingSykedager
-                )
-                .also { splitter.håndterNAVdag(dagen, grad) }
+            if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedagerIArbeidsgiverperiode))
+                splitter.state(UtbetalingSykedager).also { splitter.håndterNAVdag(dagen, grad) }
             else splitter.state(ArbeidsgiverperiodeSykedager)
                 .also { splitter.håndterArbeidsgiverdag(dagen) }
         }
@@ -259,12 +272,22 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.state(Ugyldig)
         }
 
-
         override fun sykedagerEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.state(UtbetalingSykedager).also { splitter.håndterNAVdag(dagen, grad) }
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.sykedagerIArbeidsgiverperiode += splitter.fridager
+            if (splitter.arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(splitter.sykedagerIArbeidsgiverperiode)) {
+                splitter.håndterNAVHelgedag(dagen, grad)
+                splitter.state(UtbetalingSykedager)
+            } else {
+                splitter.håndterArbeidsgiverdag(dagen)
+                splitter.state(ArbeidsgiverperiodeSykedager)
+            }
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterNAVHelgedag(dagen, grad)
         }
     }
@@ -298,9 +321,14 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.håndterFridag(dagen)
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
-            splitter.inkrementerIkkeSykedager()
-            splitter.håndterFridag(dagen)
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.håndterArbeidsgiverdag(dagen)
+            splitter.state(ArbeidsgiverperiodeSykedager)
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.håndterNAVHelgedag(dagen, grad)
+            splitter.state(UtbetalingSykedager)
         }
     }
 
@@ -309,7 +337,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.ikkeSykedager = 0
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.state(Ugyldig)
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterNAVHelgedag(dagen, grad)
         }
 
@@ -364,8 +396,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.state(Ugyldig)
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.state(Ugyldig)
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterNAVHelgedag(dagen, grad)
+            splitter.state(UtbetalingSykedager)
         }
     }
 
@@ -393,7 +430,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.inkrementerIkkeSykedager()
         }
 
-        override fun sykHelgedag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+        override fun sykHelgedagIArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
+            splitter.state(Ugyldig)
+        }
+
+        override fun sykHelgedagEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterFridag(dagen)
             splitter.inkrementerIkkeSykedager()
         }

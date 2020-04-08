@@ -639,8 +639,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
 
         inspektør.also {
+            assertNull(it.dagtelling[Egenmeldingsdag::class])
             assertEquals(3, it.dagtelling[Arbeidsdag::class])
-            assertEquals(4, it.dagtelling[Egenmeldingsdag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertEquals(12, it.dagtelling[Sykedag::class])
         }
     }
@@ -651,38 +652,71 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 1.januar(2020)), Periode(11.januar(2020), 25.januar(2020))),
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020))),
+            førsteFraværsdag = 11.januar(2020)
+        )
+        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+
+        inspektør.also {
+            assertEquals(16, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
+            assertEquals(8, it.dagtelling[Feriedag::class])
+            assertEquals(1, it.dagtelling[Arbeidsdag::class])
+
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[Fridag::class])
+                assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(5, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(1, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
+            }
+        }
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+    }
+
+    @Test
+    fun `Syk, ferie og syk`() {
+        håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 2.januar(2020)), Periode(11.januar(2020), 24.januar(2020))),
+            ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
-
         inspektør.also {
-            assertEquals(16, it.dagtelling[Sykedag::class])
-            assertEquals(1, it.dagtelling[SykHelgedag::class])
-            assertEquals(5, it.dagtelling[Egenmeldingsdag::class])
+            assertEquals(17, it.dagtelling[Sykedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertEquals(8, it.dagtelling[Feriedag::class])
-            assertEquals(1, it.dagtelling[Arbeidsdag::class])
 
             TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
-                assertEquals(17, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class]) // TODO skal være 16
+                assertEquals(8, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(8, tidslinjeInspektør.dagtelling[Fridag::class])
-                assertEquals(null, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(5, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(1, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(null, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
             }
         }
-//        assertTilstander(
-//            0,
-//            START,
-//            MOTTATT_SYKMELDING_FERDIG_GAP,
-//            AVVENTER_GAP,
-//            AVVENTER_VILKÅRSPRØVING_GAP,
-//            AVVENTER_HISTORIKK,
-//            AVVENTER_SIMULERING
-//        )
-
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -690,37 +724,34 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 1.januar(2020)), Periode(11.januar(2020), 25.januar(2020))),
-            førsteFraværsdag = 1.januar(2020)
+            førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
-
         inspektør.also {
             assertEquals(16, it.dagtelling[Sykedag::class])
-            assertEquals(5, it.dagtelling[Egenmeldingsdag::class])
-            assertEquals(1, it.dagtelling[SykHelgedag::class])
+            assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertEquals(7, it.dagtelling[Arbeidsdag::class])
             assertEquals(2, it.dagtelling[FriskHelgedag::class])
 
             TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
-                assertEquals(17, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class]) // TODO: Skal være 16
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(2, tidslinjeInspektør.dagtelling[Fridag::class])
-                assertEquals(null, tidslinjeInspektør.dagtelling[NavHelgDag::class]) // TODO: Skal være 1
+                assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
                 assertEquals(5, tidslinjeInspektør.dagtelling[NavDag::class])
                 assertEquals(7, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
             }
         }
-//        assertTilstander(
-//            0,
-//            START,
-//            MOTTATT_SYKMELDING_FERDIG_GAP,
-//            AVVENTER_GAP,
-//            AVVENTER_VILKÅRSPRØVING_GAP,
-//            AVVENTER_HISTORIKK,
-//            AVVENTER_SIMULERING
-//        )
-
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 }
