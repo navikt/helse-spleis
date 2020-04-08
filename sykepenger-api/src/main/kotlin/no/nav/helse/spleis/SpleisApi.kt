@@ -5,6 +5,7 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
@@ -25,13 +26,13 @@ import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
 import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
-internal fun Application.spleisApi(dataSource: DataSource) {
+internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
     val utbetalingDao = UtbetalingDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
-        authenticate {
+        authenticate(authProviderName) {
             get("/api/utbetaling/{utbetalingsreferanse}") {
                 utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
                     ?.let { personDao.hentPersonAktørId(it.aktørId) }
@@ -48,6 +49,21 @@ internal fun Application.spleisApi(dataSource: DataSource) {
 
             get("/api/person/fnr/{fnr}") {
                 personDao.hentPerson(call.parameters["fnr"]!!)
+                    ?.let { håndterPerson(it, hendelseDao) }
+                    ?.let { call.respond(it) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
+            }
+        }
+    }
+}
+internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
+    val hendelseDao = HendelseDao(dataSource)
+    val personDao = PersonDao(dataSource)
+
+    routing {
+        authenticate(authProviderName) {
+            get("/api/person-snapshot}") {
+                personDao.hentPerson(call.request.header("fnr")!!)
                     ?.let { håndterPerson(it, hendelseDao) }
                     ?.let { call.respond(it) }
                     ?: call.respond(HttpStatusCode.NotFound, "Resource not found")

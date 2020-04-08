@@ -22,7 +22,8 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         configurationUrl = env["AZURE_CONFIG_URL"],
         issuer = env["AZURE_ISSUER"],
         jwksUri = env["AZURE_JWKS_URI"],
-        requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
+        requiredGroup = env.getValue("AZURE_REQUIRED_GROUP"),
+        spesialistClientId = env.getValue("SPESIALIST_CLIENT_ID")
     )
 
     internal val dataSourceConfiguration = DataSourceConfiguration(
@@ -49,6 +50,7 @@ internal class AzureAdAppConfig(
     configurationUrl: String?,
     issuer: String? = null,
     jwksUri: String? = null,
+    internal val spesialistClientId: String,
     internal val requiredGroup: String) {
     internal val issuer: String
     internal val jwkProvider: JwkProvider

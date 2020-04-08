@@ -93,7 +93,8 @@ internal class RestApiTest {
             AzureAdAppConfig(
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config",
-                requiredGroup = "sykepenger-saksbehandler-gruppe"
+                requiredGroup = "sykepenger-saksbehandler-gruppe",
+                spesialistClientId = UUID.randomUUID().toString()
             ),
             DataSourceConfiguration(
                 jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
