@@ -805,7 +805,7 @@ internal class Vedtaksperiode private constructor(
                 it.onSuccess {
                     vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
                 }
-                it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, engineForLine, ytelser) }
+                it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, ytelser) }
             }
         }
 

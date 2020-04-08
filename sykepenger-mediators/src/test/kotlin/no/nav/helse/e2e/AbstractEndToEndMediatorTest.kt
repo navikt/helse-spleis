@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
@@ -363,7 +364,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling),
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
-                    "status" to if (utbetalingOK) no.nav.helse.hendelser.Utbetaling.Oppdragstatus.AKSEPTERT.name else no.nav.helse.hendelser.Utbetaling.Oppdragstatus.AVVIST.name,
+                    "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
                     "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
                 )
             ),
