@@ -29,6 +29,10 @@ internal class Utbetaling
         LocalDateTime.now()
     )
 
+    internal fun arbeidsgiverUtbetalingslinjer() = arbeidsgiverUtbetalingslinjer
+
+    internal fun personUtbetalingslinjer() = personUtbetalingslinjer
+
     companion object {
 
         private fun buildArb(

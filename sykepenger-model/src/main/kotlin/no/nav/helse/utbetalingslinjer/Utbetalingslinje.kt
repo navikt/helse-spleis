@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.serde.UtbetalingslinjeData
 import no.nav.helse.utbetalingslinjer.Linjetype.NY
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
@@ -32,6 +31,8 @@ internal class Utbetalingslinjer private constructor(
     internal fun accept(visitor: UtbetalingVisitor) {
         linjer.forEach { it.accept(visitor) }
     }
+
+    internal fun referanse() = utbetalingsreferanse
 }
 
 internal class Utbetalingslinje private constructor(
@@ -54,9 +55,6 @@ internal class Utbetalingslinje private constructor(
         visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId)
     }
 
-    internal fun toData() : UtbetalingslinjeData =
-        UtbetalingslinjeData(fom, tom, dagsats, grad, delytelseId, refDelytelseId, linjetype.toString())
-
     internal fun linkTo(other: Utbetalingslinje) {
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
@@ -74,6 +72,13 @@ enum class Linjetype {
     NY, UEND, ENDR
 }
 
-internal enum class Mottakertype {
-    SPREF, SP
+internal enum class Mottakertype(private val linjerStrategy: (Utbetaling) -> Utbetalingslinjer) {
+    SPREF(Utbetaling::arbeidsgiverUtbetalingslinjer),
+    SP(Utbetaling::personUtbetalingslinjer);
+
+    internal fun utbetalingslinjer(utbetaling: Utbetaling): Utbetalingslinjer =
+        linjerStrategy(utbetaling)
+
+    internal fun referanse(utbetaling: Utbetaling): String =
+        utbetalingslinjer(utbetaling).referanse()
 }

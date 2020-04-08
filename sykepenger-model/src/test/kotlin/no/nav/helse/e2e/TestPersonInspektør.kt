@@ -31,7 +31,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
-    private val utbetalingsreferanser = mutableMapOf<Int, String?>()
     private val gruppeIder = mutableMapOf<Int, UUID>()
 
     init {
@@ -116,10 +115,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
-    override fun visitUtbetalingsreferanse(utbetalingsreferanse: String?) {
-        this.utbetalingsreferanser[vedtaksperiodeindeks] = utbetalingsreferanse
-    }
-
     private inner class Dagteller : SykdomstidslinjeVisitor {
         override fun visitSykedag(dag: Sykedag.Sykmelding) = inkrementer(
             Sykedag::class)
@@ -160,8 +155,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
-
-    internal fun utbetalingsreferanse(indeks: Int) = utbetalingsreferanser[indeks]
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
         "Missing collection initialization"

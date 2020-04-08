@@ -57,21 +57,23 @@ internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     fødselsnummer: String,
-    inntekter: List<Inntekthistorikk.Inntekt>
+    inntekter: List<Inntekthistorikk.Inntekt>,
+    førsteSykepengedag: LocalDate?,
+    sisteSykepengedag: LocalDate?
 ): VedtaksperiodeDTO {
     val sykdomstidslinje = this["sykdomstidslinje"] as List<SykdomstidslinjedagDTO>
-    val utbetalingslinjer = this["utbetalingslinjer"] as List<UtbetalingslinjeDTO>
     val dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO }
     val hendelser = this["hendelser"] as List<HendelseDTO>
     val søknad = hendelser.find { it.type == "SENDT_SØKNAD_NAV" } as? SøknadNavDTO
     val vilkår = mapVilkår(
         this,
-        utbetalingslinjer,
         sykdomstidslinje,
         fødselsnummer,
         dataForVilkårsvurdering,
         søknad,
-        inntekter
+        inntekter,
+        førsteSykepengedag,
+        sisteSykepengedag
     )
     return VedtaksperiodeDTO(
         id = this["id"] as UUID,
@@ -82,16 +84,15 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         fullstendig = true,
         utbetalingsreferanse = this["utbetalingsreferanse"] as String?,
         utbetalingstidslinje = this["utbetalingstidslinje"] as List<UtbetalingstidslinjedagDTO>,
-        godkjentAv = this["godkjentAv"] as String?,
-        vilkår = vilkår,
-        godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
         sykdomstidslinje = sykdomstidslinje,
+        godkjentAv = this["godkjentAv"] as String?,
+        godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
+        vilkår = vilkår,
         førsteFraværsdag = this["førsteFraværsdag"] as? LocalDate,
         inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as? Double,
         totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Int,
         hendelser = hendelser,
         dataForVilkårsvurdering = dataForVilkårsvurdering,
-        utbetalingslinjer = utbetalingslinjer,
         aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>
     )
 }
@@ -127,20 +128,18 @@ internal fun mapOpptjening(
 
 internal fun mapVilkår(
     vedtaksperiodeMap: Map<String, Any?>,
-    utbetalingslinjer: List<UtbetalingslinjeDTO>,
     sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     fødselsnummer: String,
     dataForVilkårsvurdering: GrunnlagsdataDTO?,
     søknadNav: SøknadNavDTO?,
-    inntekter: List<Inntekthistorikk.Inntekt>
+    inntekter: List<Inntekthistorikk.Inntekt>,
+    førsteSykepengedag: LocalDate?,
+    sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
     val beregnetMånedsinntekt = (førsteFraværsdag?.let { Inntekthistorikk.Inntekt.inntekt(inntekter, it) }
         ?: inntekter.firstOrNull()?.beløp)?.toDouble()
-
-    val førsteSykepengedag = utbetalingslinjer.map { it.fom }.min()
-    val sisteSykepengedagEllerSisteDagIPerioden =
-        utbetalingslinjer.map { it.tom }.max() ?: sykdomstidslinje.last().dagen
+    val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = SpleisAlder(fødselsnummer)
     val forbrukteSykedager = vedtaksperiodeMap["forbrukteSykedager"] as Int?
     val over67 = personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)

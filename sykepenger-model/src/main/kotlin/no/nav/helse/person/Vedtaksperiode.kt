@@ -20,7 +20,6 @@ import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.*
 import java.time.DayOfWeek.*
 import java.util.*
@@ -38,7 +37,6 @@ internal class Vedtaksperiode private constructor(
     private var forbrukteSykedager: Int?,
     private var godkjentAv: String,
     private var godkjenttidspunkt: LocalDateTime?,
-    private var utbetalingsreferanse: String?,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
@@ -69,7 +67,6 @@ internal class Vedtaksperiode private constructor(
         forbrukteSykedager = null,
         godkjentAv = "Spleis",
         godkjenttidspunkt = null,
-        utbetalingsreferanse = null,
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
@@ -86,7 +83,6 @@ internal class Vedtaksperiode private constructor(
         visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
-        visitor.visitUtbetalingsreferanse(utbetalingsreferanse)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
         visitor.postVisitVedtaksperiode(this, id, gruppeId)
@@ -349,7 +345,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
         }
-        utbetalingsreferanse = genererUtbetalingsreferanse(id)
         tilstand(ytelser, AvventerSimulering) {
             ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
         }
@@ -834,10 +829,6 @@ internal class Vedtaksperiode private constructor(
         private val åpningstider = LocalTime.of(6, 0)..LocalTime.of(21, 59, 59)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.utbetalingsreferanse?.also {
-                vedtaksperiode.utbetalingsreferanse = it
-            }
-
             if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
                 hendelse.warn("Simulering har feilet")
             }

@@ -302,11 +302,6 @@ internal class SpeilBuilderTest {
         assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
         assertEquals(3, vedtaksperiode.hendelser.size)
 
-        val utbetalingslinjer = vedtaksperiode.utbetalingslinjer
-        assertEquals(1, utbetalingslinjer.size)
-        assertEquals(fom.plusDays(16), utbetalingslinjer.first().fom)
-        assertEquals(tom, utbetalingslinjer.first().tom)
-
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
 

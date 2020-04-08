@@ -42,7 +42,6 @@ data class VedtaksperiodeDTO(
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,
     val dataForVilkårsvurdering: GrunnlagsdataDTO?,
-    val utbetalingslinjer: List<UtbetalingslinjeDTO>,
     val aktivitetslogg: List<AktivitetDTO>
 ) : VedtaksperiodeDTOBase
 

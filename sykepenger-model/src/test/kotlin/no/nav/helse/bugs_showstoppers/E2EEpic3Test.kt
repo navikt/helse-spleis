@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
@@ -518,7 +517,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(17.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.fom)
             assertEquals(31.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.tom)
             assertEquals(1, it.arbeidsgiverUtbetalingslinjer[1]?.size)
-            assertEquals(3.februar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.fom) // starts mandag
+            assertEquals(17.januar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.fom)
             assertEquals(28.februar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.tom)
         }
     }
@@ -538,10 +537,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertNull(inspektør.utbetalingsreferanse(0))
-        val utbetalingsreferanse = inspektør.utbetalingsreferanse(1) ?: fail { "utbetalingsreferanse er forventet å være satt" }
-        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(1, Behovtype.Simulering, "utbetalingsreferanse"))
-        assertEquals(false, inspektør.etterspurteBehov(1, Behovtype.Simulering, "forlengelse"))
     }
 
     @Test
@@ -563,12 +558,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        val utbetalingsreferanse = inspektør.utbetalingsreferanse(0) ?: fail { "utbetalingsreferanse er forventet å være satt" }
-        assertEquals(utbetalingsreferanse, inspektør.utbetalingsreferanse(1))
-        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(0, Behovtype.Simulering, "utbetalingsreferanse"))
-        assertEquals(utbetalingsreferanse, inspektør.etterspurteBehov(1, Behovtype.Simulering, "utbetalingsreferanse"))
-        assertEquals(false, inspektør.etterspurteBehov(0, Behovtype.Simulering, "forlengelse"))
-        assertEquals(true, inspektør.etterspurteBehov(1, Behovtype.Simulering, "forlengelse"))
     }
 
     @Test

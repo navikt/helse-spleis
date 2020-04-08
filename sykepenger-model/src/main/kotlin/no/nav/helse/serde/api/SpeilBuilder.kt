@@ -395,9 +395,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
 
+        private var førsteSykepengedag: LocalDate? = null
+        private var sisteSykepengedag: LocalDate? = null
+
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
+            førsteSykepengedag = tidslinje.førsteSykepengedag()
+            sisteSykepengedag = tidslinje.sisteSykepengedag()
             pushState(UtbetalingstidslinjeState(utbetalingstidslinje, utbetalinger))
         }
 
@@ -424,7 +429,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = utbetalinger.sum()
             if (fullstendig) {
-                vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(fødselsnummer, inntekter))
+                vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(
+                fødselsnummer,
+                inntekter,
+                førsteSykepengedag,
+                sisteSykepengedag
+            ))
             }
             samleFellesdata(gruppeId)
             popState()

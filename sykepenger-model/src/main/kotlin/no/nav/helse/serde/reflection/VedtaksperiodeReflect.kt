@@ -19,7 +19,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
-    private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
@@ -81,7 +80,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
-        "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering
@@ -94,7 +92,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
-        "utbetalingsreferanse" to utbetalingsreferanse,
         "førsteFraværsdag" to førsteFraværsdag,
         "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.toDouble() }
     )

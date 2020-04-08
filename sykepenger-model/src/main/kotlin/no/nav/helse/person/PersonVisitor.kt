@@ -45,7 +45,6 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
     fun visitGodkjentAv(godkjentAv: String?) {}
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
-    fun visitUtbetalingsreferanse(utbetalingsreferanse: String?) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
