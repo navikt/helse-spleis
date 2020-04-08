@@ -67,10 +67,8 @@ internal class InntektsmeldingMessageTest {
     ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()
-    private val ValidInntektsmeldingWithUnknownFieldsJson = ValidInntektsmelding.let {
-        it as ObjectNode
-        it.put(UUID.randomUUID().toString(), "foobar")
-    }.toJson()
+    private val ValidInntektsmeldingWithUnknownFieldsJson =
+        ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
     @Test
     internal fun `invalid messages`() {

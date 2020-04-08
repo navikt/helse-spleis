@@ -131,7 +131,7 @@ internal class SpeilBuilderTest {
 
         val personDTO = serializePersonForSpeil(person, hendelser)
 
-        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
 
         assertEquals(2, vedtaksperioder.size)
         assertEquals(3, vedtaksperioder.first().hendelser.size)

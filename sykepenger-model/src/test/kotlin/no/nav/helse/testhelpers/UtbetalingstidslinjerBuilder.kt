@@ -30,9 +30,8 @@ internal val Int.AVV get() = this.AVV(1200.00)
 internal fun Int.AVV(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addAvvistDag, inntekt)
 internal val Int.HELG get() = this.HELG(1200.00)
 internal fun Int.HELG(inntekt: Double, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addHelg, inntekt, grad)
-internal val Int.UTELATE get() = Utbetalingsdager(this, Utbetalingstidslinje::utelate, 0.00)
+internal val Int.UTELATE get() = Utbetalingsdager(this, { _, _, _ -> }, 0.00)
 
-private fun Utbetalingstidslinje.utelate(inntekt: Double, dato: LocalDate, grad: Double) {}
 private fun Utbetalingstidslinje.addForeldetDag(inntekt: Double, dato: LocalDate, grad: Double) =
     this.addForeldetDag(dato)
 private fun Utbetalingstidslinje.addAvvistDag(inntekt: Double, dato: LocalDate, grad: Double) =

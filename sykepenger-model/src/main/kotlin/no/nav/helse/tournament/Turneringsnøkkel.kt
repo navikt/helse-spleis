@@ -37,27 +37,27 @@ internal enum class Turneringsnøkkel {
 
             internal fun turneringsnøkkel() = requireNotNull(turneringsnøkkel) { "Finner ikke turneringsnøkkel for ${dag::class.simpleName}"}
 
-            override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) {
+            override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) {
                 turneringsnøkkel = WD_IM
             }
 
-            override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) {
+            override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) {
                 turneringsnøkkel = WD_A
             }
 
-            override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) {
+            override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) {
                 turneringsnøkkel = SRD_IM
             }
 
-            override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) {
+            override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) {
                 turneringsnøkkel = SRD_A
             }
 
-            override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) {
+            override fun visitFeriedag(dag: Feriedag.Inntektsmelding) {
                 turneringsnøkkel = V_IM
             }
 
-            override fun visitFeriedag(feriedag: Feriedag.Søknad) {
+            override fun visitFeriedag(dag: Feriedag.Søknad) {
                 turneringsnøkkel = V_A
             }
 
@@ -68,46 +68,46 @@ internal enum class Turneringsnøkkel {
                 turneringsnøkkel = V_A
             }
 
-            override fun visitImplisittDag(implisittDag: ImplisittDag) {
+            override fun visitImplisittDag(dag: ImplisittDag) {
                 turneringsnøkkel = I
             }
 
-            override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) {
+            override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) {
                 turneringsnøkkel = K_A
             }
 
-            override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) {
+            override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) {
                 turneringsnøkkel = Le_A
             }
 
-            override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) {
+            override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) {
                 turneringsnøkkel = Le_Areg
             }
 
-            override fun visitStudiedag(studiedag: Studiedag) {
+            override fun visitStudiedag(dag: Studiedag) {
                 turneringsnøkkel = EDU
             }
 
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) {
+            override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) {
                 turneringsnøkkel = SW_SM
             }
 
-            override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) {
+            override fun visitSykHelgedag(dag: SykHelgedag.Søknad) {
                 turneringsnøkkel = SW_A
             }
 
-            override fun visitSykedag(sykedag: Sykedag.Sykmelding) {
+            override fun visitSykedag(dag: Sykedag.Sykmelding) {
                 turneringsnøkkel = S_SM
             }
 
-            override fun visitSykedag(sykedag: Sykedag.Søknad) {
+            override fun visitSykedag(dag: Sykedag.Søknad) {
                 turneringsnøkkel = S_A
             }
 
-            override fun visitUbestemt(ubestemtdag: Ubestemtdag) {
+            override fun visitUbestemt(dag: Ubestemtdag) {
                 turneringsnøkkel = Undecided
             }
-            override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) {
+            override fun visitUtenlandsdag(dag: Utenlandsdag) {
                 turneringsnøkkel = DA
             }
 

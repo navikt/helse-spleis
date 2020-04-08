@@ -166,32 +166,32 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(arbeidsdag)
-    override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(arbeidsdag)
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) =
-        currentState.visitEgenmeldingsdag(egenmeldingsdag)
+    override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(dag)
+    override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(dag)
+    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) =
+        currentState.visitEgenmeldingsdag(dag)
 
-    override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) =
-        currentState.visitEgenmeldingsdag(egenmeldingsdag)
+    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) =
+        currentState.visitEgenmeldingsdag(dag)
 
-    override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(feriedag)
-    override fun visitFeriedag(feriedag: Feriedag.Søknad) = currentState.visitFeriedag(feriedag)
+    override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(dag)
+    override fun visitFeriedag(dag: Feriedag.Søknad) = currentState.visitFeriedag(dag)
     override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = currentState.visitFriskHelgedag(dag)
     override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = currentState.visitFriskHelgedag(dag)
 
-    override fun visitImplisittDag(implisittDag: ImplisittDag) = currentState.visitImplisittDag(implisittDag)
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
-        currentState.visitPermisjonsdag(permisjonsdag)
+    override fun visitImplisittDag(dag: ImplisittDag) = currentState.visitImplisittDag(dag)
+    override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) =
+        currentState.visitPermisjonsdag(dag)
 
-    override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) = currentState.visitPermisjonsdag(permisjonsdag)
-    override fun visitStudiedag(studiedag: Studiedag) = currentState.visitStudiedag(studiedag)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = currentState.visitSykHelgedag(sykHelgedag)
-    override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = currentState.visitSykHelgedag(sykHelgedag)
-    override fun visitSykedag(sykedag: Sykedag.Sykmelding) = currentState.visitSykedag(sykedag)
-    override fun visitSykedag(sykedag: Sykedag.Søknad) = currentState.visitSykedag(sykedag)
-    override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) = currentState.visitKunArbeidsgiverSykedag(sykedag)
-    override fun visitUbestemt(ubestemtdag: Ubestemtdag) = currentState.visitUbestemt(ubestemtdag)
-    override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = currentState.visitUtenlandsdag(utenlandsdag)
+    override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = currentState.visitPermisjonsdag(dag)
+    override fun visitStudiedag(dag: Studiedag) = currentState.visitStudiedag(dag)
+    override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = currentState.visitSykHelgedag(dag)
+    override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = currentState.visitSykHelgedag(dag)
+    override fun visitSykedag(dag: Sykedag.Sykmelding) = currentState.visitSykedag(dag)
+    override fun visitSykedag(dag: Sykedag.Søknad) = currentState.visitSykedag(dag)
+    override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = currentState.visitKunArbeidsgiverSykedag(dag)
+    override fun visitUbestemt(dag: Ubestemtdag) = currentState.visitUbestemt(dag)
+    override fun visitUtenlandsdag(dag: Utenlandsdag) = currentState.visitUtenlandsdag(dag)
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
@@ -416,7 +416,7 @@ internal class JsonBuilder : PersonVisitor {
             val elementMap = mutableMapOf<String, Any?>()
             sykdomshistorikkElementer.add(elementMap)
 
-            pushState(SykdomshistorikkElementState(element, id, tidsstempel, elementMap))
+            pushState(SykdomshistorikkElementState(id, tidsstempel, elementMap))
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -439,7 +439,6 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     private inner class SykdomshistorikkElementState(
-        element: Sykdomshistorikk.Element,
         id: UUID,
         tidsstempel: LocalDateTime,
         private val elementMap: MutableMap<String, Any?>
@@ -473,41 +472,41 @@ internal class JsonBuilder : PersonVisitor {
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<MutableMap<String, Any?>>) :
         JsonState {
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Inntektsmelding) =
-            leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, arbeidsdag)
+        override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) =
+            leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, dag)
 
-        override fun visitArbeidsdag(arbeidsdag: Arbeidsdag.Søknad) =
-            leggTilDag(JsonDagType.ARBEIDSDAG_SØKNAD, arbeidsdag)
+        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) =
+            leggTilDag(JsonDagType.ARBEIDSDAG_SØKNAD, dag)
 
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Inntektsmelding) =
-            leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, egenmeldingsdag)
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) =
+            leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, dag)
 
-        override fun visitEgenmeldingsdag(egenmeldingsdag: Egenmeldingsdag.Søknad) =
-            leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, egenmeldingsdag)
+        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) =
+            leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, dag)
 
-        override fun visitFeriedag(feriedag: Feriedag.Inntektsmelding) =
-            leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, feriedag)
+        override fun visitFeriedag(dag: Feriedag.Inntektsmelding) =
+            leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, dag)
 
-        override fun visitFeriedag(feriedag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, feriedag)
+        override fun visitFeriedag(dag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, dag)
 
         override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
         override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
 
-        override fun visitImplisittDag(implisittDag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, implisittDag)
-        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Søknad) =
-            leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, permisjonsdag)
+        override fun visitImplisittDag(dag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, dag)
+        override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) =
+            leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, dag)
 
-        override fun visitPermisjonsdag(permisjonsdag: Permisjonsdag.Aareg) =
-            leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, permisjonsdag)
+        override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) =
+            leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, dag)
 
-        override fun visitStudiedag(studiedag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, studiedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Sykmelding) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, sykHelgedag)
-        override fun visitSykHelgedag(sykHelgedag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, sykHelgedag)
-        override fun visitSykedag(sykedag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, sykedag)
-        override fun visitSykedag(sykedag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, sykedag)
-        override fun visitKunArbeidsgiverSykedag(sykedag: KunArbeidsgiverSykedag) = leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykedag)
-        override fun visitUbestemt(ubestemtdag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, ubestemtdag)
-        override fun visitUtenlandsdag(utenlandsdag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, utenlandsdag)
+        override fun visitStudiedag(dag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, dag)
+        override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, dag)
+        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, dag)
+        override fun visitSykedag(dag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, dag)
+        override fun visitSykedag(dag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, dag)
+        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, dag)
+        override fun visitUbestemt(dag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, dag)
+        override fun visitUtenlandsdag(dag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, dag)
 
         private fun leggTilDag(jsonDagType: JsonDagType, dag: Dag) {
             sykdomstidslinjeListe.add(

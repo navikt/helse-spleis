@@ -54,10 +54,8 @@ internal class NySøknadMessageTest {
 
     private val ValidNySøknad = ValidSøknad.copy(status = SoknadsstatusDTO.NY).toJson()
     private val ValidAvbruttSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.AVBRUTT).toJson()
-    private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asObjectNode().let {
-        it as ObjectNode
-        it.put(UUID.randomUUID().toString(), "foobar")
-    }.toJson()
+    private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asObjectNode()
+        .put(UUID.randomUUID().toString(), "foobar").toJson()
 
     @Test
     internal fun `invalid messages`() {

@@ -69,7 +69,7 @@ class Søknad constructor(
 
     override fun melding(klassName: String) = "Søknad"
 
-    private fun avskjæringsdato(): LocalDate? = sendtTilNAV?.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1)
+    private fun avskjæringsdato(): LocalDate? = sendtTilNAV.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1)
 
     sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
 
