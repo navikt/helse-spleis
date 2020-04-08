@@ -90,6 +90,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkelarena",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelarena",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvspock",
                     "role": "PRODUCER"
                 },
