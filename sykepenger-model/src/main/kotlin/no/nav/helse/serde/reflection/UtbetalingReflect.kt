@@ -29,7 +29,7 @@ internal class OppdragReflect(
             UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
         "personUtbetalingslinjer" to
             UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
-        "maksdato" to maksdato,
+        "maksdato" to maksdato.toString(),
         "saksbehandler" to saksbehandler
     )
 }
@@ -37,23 +37,23 @@ internal class OppdragReflect(
 private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to utbetalingslinjer["mottaker"],
-        "mottakertype" to utbetalingslinjer.get<Utbetalingslinjer, Mottakertype>("mottakertype").toString(),
+        "mottakertype" to utbetalingslinjer.get<Mottakertype>("mottakertype").toString(),
         "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
         "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
-        "linjertype" to utbetalingslinjer.get<Utbetalingslinjer, Linjetype>("linjertype").toString(),
+        "linjertype" to utbetalingslinjer.get<Linjetype>("linjertype").toString(),
         "sjekksum" to utbetalingslinjer["sjekksum"]
     )
 }
 
 internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalingslinje) {
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "fom" to utbetalingslinje["fom"],
-        "tom" to utbetalingslinje["tom"],
+        "fom" to utbetalingslinje.get<LocalDate>("fom").toString(),
+        "tom" to utbetalingslinje.get<LocalDate>("tom").toString(),
         "dagsats" to utbetalingslinje["dagsats"],
         "grad" to utbetalingslinje["grad"],
         "delytelseId" to utbetalingslinje["delytelseId"],
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
-        "linjetype" to utbetalingslinje.get<Utbetalingslinje, Linjetype>("linjetype").toString()
+        "linjetype" to utbetalingslinje.get<Linjetype>("linjetype").toString()
         )
 }
 

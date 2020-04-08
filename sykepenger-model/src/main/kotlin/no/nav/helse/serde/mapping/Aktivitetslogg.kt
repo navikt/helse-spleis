@@ -8,7 +8,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData): Aktivitetslogg {
     val aktivitetslogg = Aktivitetslogg()
 
-    val aktiviteter = aktivitetslogg.get<Aktivitetslogg, MutableList<Any>>("aktiviteter")
+    val aktiviteter = aktivitetslogg.get<MutableList<Any>>("aktiviteter")
     aktivitetsloggData.aktiviteter.forEach {
         val kontekster = it.kontekster.map { SpesifikkKontekst(it.kontekstType, it.kontekstMap) }
         aktiviteter.add(when (it.alvorlighetsgrad) {

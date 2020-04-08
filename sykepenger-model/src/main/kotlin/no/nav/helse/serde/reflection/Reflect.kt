@@ -57,10 +57,10 @@ internal class ReflectInstance private constructor(
         private fun getReflectInstance(instance: Any) =
             ReflectInstance(getReflectClass(instance), instance)
 
-        internal operator fun <T : Any, R> T.get(property: String): R =
+        internal operator fun <R> Any.get(property: String): R =
             getReflectInstance(this)[property]
 
-        internal operator fun <T : Any> T.get(nestedClassName: String, property: String) =
+        internal operator fun Any.get(nestedClassName: String, property: String) =
             getReflectInstance(this)[nestedClassName, property]
     }
 }

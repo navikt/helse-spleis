@@ -21,7 +21,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val utbetalingsreferanse: String? = vedtaksperiode["utbetalingsreferanse"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
-    private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, Simulering.SimuleringResultat?>("dataForSimulering")?.let {
+    private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
             "perioder" to it.perioder.map { periode ->
@@ -64,7 +64,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         )
     }
 
-    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vedtaksperiode, Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
+    private val dataForVilkårsvurdering: Map<String, Any>? = vedtaksperiode.get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
             "erEgenAnsatt" to it.erEgenAnsatt,
             "beregnetÅrsinntektFraInntektskomponenten" to it.beregnetÅrsinntektFraInntektskomponenten,

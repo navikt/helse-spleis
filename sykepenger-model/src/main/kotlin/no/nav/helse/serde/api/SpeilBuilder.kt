@@ -369,7 +369,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private var utbetalinger = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
-            .get<Vedtaksperiode, Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
+            .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
 
         init {
