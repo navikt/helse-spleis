@@ -19,10 +19,7 @@ import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingslinjer.Linjetype
-import no.nav.helse.utbetalingslinjer.Mottakertype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -123,7 +120,7 @@ class SerialisertPerson(val json: String) {
     private fun konverterTilUtbetalingslinjer(data: UtbetalingslinjerData): Utbetalingslinjer {
         return createUtbetalingslinjer(
             data.mottaker,
-            Mottakertype.valueOf(data.mottakertype),
+            Fagområde.valueOf(data.fagområde),
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.utbetalingsreferanse,
             Linjetype.valueOf(data.linjertype),
@@ -273,7 +270,8 @@ class SerialisertPerson(val json: String) {
         data.grad,
         data.delytelseId,
         data.refDelytelseId,
-        Linjetype.valueOf(data.linjetype)
+        Linjetype.valueOf(data.linjetype),
+        Klassekode.from(data.klassekode)
     )
 
     private fun parseDataForVilkårsvurdering(
@@ -487,7 +485,7 @@ data class UtbetalingData(
 
 data class UtbetalingslinjerData(
     val mottaker: String,
-    val mottakertype: String,
+    val fagområde: String,
     val linjer: List<UtbetalingslinjeData>,
     val utbetalingsreferanse: String,
     val linjertype: String,
@@ -501,7 +499,8 @@ data class UtbetalingslinjeData(
     val grad: Double,
     val delytelseId: Int,
     val refDelytelseId: Int?,
-    val linjetype: String
+    val linjetype: String,
+    val klassekode: String
 )
 
 data class UtbetalingstidslinjeData(

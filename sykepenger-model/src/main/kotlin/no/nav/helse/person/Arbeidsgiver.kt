@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.utbetalingslinjer.Mottakertype
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -43,7 +43,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun utbetaling() = utbetalinger.last()
 
-    internal fun referanse(type: Mottakertype) = type.referanse(utbetaling())
+    internal fun referanse(type: Fagområde) = type.referanse(utbetaling())
 
     internal fun nåværendeTidslinje() = utbetaling().utbetalingstidslinje()
 

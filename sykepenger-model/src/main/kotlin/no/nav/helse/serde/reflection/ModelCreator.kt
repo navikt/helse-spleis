@@ -84,14 +84,14 @@ internal fun createUtbetaling(
 
 internal fun createUtbetalingslinjer(
     mottaker: String,
-    mottakertype: Mottakertype,
+    fagområde: Fagområde,
     linjer: List<Utbetalingslinje>,
     utbetalingsreferanse: String,
     linjertype: Linjetype,
     sjekksum: Int
 ) = Utbetalingslinjer::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(mottaker, mottakertype, linjer, utbetalingsreferanse, linjertype, sjekksum)
+    .call(mottaker, fagområde, linjer, utbetalingsreferanse, linjertype, sjekksum)
 
 internal fun createUtbetalingslinje(
     fom: LocalDate,
@@ -100,10 +100,11 @@ internal fun createUtbetalingslinje(
     grad: Double,
     delytelseId: Int,
     refDelytelseId: Int? = null,
-    linjetype: Linjetype
+    linjetype: Linjetype,
+    klassekode: Klassekode
 ) = Utbetalingslinje::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, linjetype)
+    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, linjetype, klassekode)
 
 internal fun createSykdomshistorikk(
     elementer: List<Sykdomshistorikk.Element>

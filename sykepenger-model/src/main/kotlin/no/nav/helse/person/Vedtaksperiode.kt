@@ -854,7 +854,7 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                utbetaling = vedtaksperiode.arbeidsgiver.utbetaling(),
+                utbetalingslinjer = vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 saksbehandler = vedtaksperiode.godkjentAv
             )

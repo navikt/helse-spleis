@@ -25,19 +25,17 @@ internal class OppdragReflect(
     private val saksbehandler: String
 ) {
     internal fun toMap(): MutableMap<String, Any> = mutableMapOf(
-        "arbeidsgiverUtbetalingslinjer" to
+        "utbetalingslinjer" to
             UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
-        "personUtbetalingslinjer" to
-            UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
         "maksdato" to maksdato.toString(),
         "saksbehandler" to saksbehandler
     )
 }
 
-private class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
+internal class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to utbetalingslinjer["mottaker"],
-        "mottakertype" to utbetalingslinjer.get<Mottakertype>("mottakertype").toString(),
+        "fagområde" to utbetalingslinjer.get<Fagområde>("fagområde").toString(),
         "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
         "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
         "linjertype" to utbetalingslinjer.get<Linjetype>("linjertype").toString(),
@@ -53,7 +51,8 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "grad" to utbetalingslinje["grad"],
         "delytelseId" to utbetalingslinje["delytelseId"],
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
-        "linjetype" to utbetalingslinje.get<Linjetype>("linjetype").toString()
+        "linjetype" to utbetalingslinje.get<Linjetype>("linjetype").toString(),
+        "klassekode" to utbetalingslinje.get<Klassekode>("klassekode").verdi
         )
 }
 

@@ -42,7 +42,7 @@ internal class Utbetaling
             aktivitetslogg: Aktivitetslogg
         ) = Utbetalingslinjer(
                 organisasjonsnummer,
-                Mottakertype.SPREF,
+                Fagområde.SPREF,
                 SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()).also {
             if (it.isEmpty())
                 aktivitetslogg.info("Ingen utbetalingslinjer bygget")
@@ -56,7 +56,7 @@ internal class Utbetaling
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg
         ): Utbetalingslinjer {
-            return Utbetalingslinjer(fødselsnummer, Mottakertype.SP)
+            return Utbetalingslinjer(fødselsnummer, Fagområde.SP)
         }
     }
 

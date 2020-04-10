@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.utbetalingslinjer.Mottakertype.SPREF
+import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
