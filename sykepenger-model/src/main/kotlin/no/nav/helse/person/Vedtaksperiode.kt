@@ -815,9 +815,6 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.førsteFraværsdag
                     ).also { engineForTimeline = it }
                 }
-                it.onSuccess {
-                    vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
-                }
                 it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, ytelser) }
             }
         }
@@ -936,9 +933,9 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             utbetaling(
                 hendelse,
-                requireNotNull(vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer()),
+                vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer(),
                 requireNotNull(vedtaksperiode.maksdato),
-                requireNotNull(vedtaksperiode.godkjentAv)
+                vedtaksperiode.godkjentAv
             )
         }
 
