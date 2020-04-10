@@ -16,6 +16,8 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
         requireKey("@løsning.${Inntektsberegning.name}")
         requireKey("@løsning.${EgenAnsatt.name}")
         requireKey("@løsning.${Opptjening.name}")
+        requireKey("@løsning.${Dagpenger.name}")
+        requireKey("@løsning.${Arbeidsavklaringspenger.name}")
     }
 
     override fun accept(processor: MessageProcessor) {

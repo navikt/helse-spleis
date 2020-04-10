@@ -28,12 +28,12 @@ internal class BehovMediator(
             )
                 .apply {
                     putAll(kontekst)
-                    behov.forEach {
-                        require(it.type.name !in behovsliste) { "Kan ikke produsere samme behov ${it.type.name} på samme kontekst" }
-                        require(it.detaljer().filterKeys { this.containsKey(it) }
+                    behov.forEach { behov ->
+                        require(behov.type.name !in behovsliste) { "Kan ikke produsere samme behov ${behov.type.name} på samme kontekst" }
+                        require(behov.detaljer().filterKeys { this.containsKey(it) && this[it] != behov.detaljer()[it] }
                             .isEmpty()) { "Kan ikke produsere behov med duplikate detaljer" }
-                        behovsliste.add(it.type.name)
-                        putAll(it.detaljer())
+                        behovsliste.add(behov.type.name)
+                        putAll(behov.detaljer())
                     }
                 }
                 .let { JsonMessage.newMessage(it) }

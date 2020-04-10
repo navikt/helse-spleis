@@ -309,7 +309,9 @@ internal class HendelseMediatorTest {
                             )
                         )
                     ),
-                    "Opptjening" to emptyList<Any>()
+                    "Opptjening" to emptyList<Any>(),
+                    "Dagpenger" to emptyList<Any>(),
+                    "Arbeidsavklaringspenger" to emptyList<Any>()
                 )
             )
         }

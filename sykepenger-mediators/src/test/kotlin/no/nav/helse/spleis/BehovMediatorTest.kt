@@ -110,7 +110,7 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    internal fun `sjekker etter duplikatverdier`(){
+    internal fun `duplikatnøkler er ok når verdi er lik`(){
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -119,6 +119,24 @@ internal class BehovMediatorTest {
         hendelse.kontekst(vedtaksperiode1)
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
             "historikkFom" to LocalDate.now()
+        ))
+        hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
+            "historikkFom" to LocalDate.now()
+        ))
+
+        assertDoesNotThrow { behovMediator.håndter(hendelse) }
+    }
+
+    @Test
+    internal fun `sjekker etter duplikatverdier`(){
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+            "historikkFom" to LocalDate.now().minusDays(1)
         ))
         hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
             "historikkFom" to LocalDate.now()

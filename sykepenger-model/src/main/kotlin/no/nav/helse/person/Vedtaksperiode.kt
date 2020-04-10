@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
@@ -279,6 +281,8 @@ internal class Vedtaksperiode private constructor(
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         egenAnsatt(hendelse)
         opptjening(hendelse)
+        dagpenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
+        arbeidsavklaringspenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
     }
 
     private fun trengerInntektsmelding() {

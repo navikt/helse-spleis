@@ -224,6 +224,20 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
 
+                internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+                    aktivitetslogg.behov(Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
+                        "periodeFom" to fom.toString(),
+                        "periodeTom" to tom.toString()
+                    ))
+                }
+
+                internal fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+                    aktivitetslogg.behov(Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
+                        "periodeFom" to fom.toString(),
+                        "periodeTom" to tom.toString()
+                    ))
+                }
+
                 internal fun simulering(
                     aktivitetslogg: IAktivitetslogg,
                     utbetalingslinjer: Utbetalingslinjer,
@@ -278,7 +292,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Simulering,
                 Utbetaling,
                 Inntektsberegning,
-                Opptjening
+                Opptjening,
+                Dagpenger,
+                Arbeidsavklaringspenger
             }
         }
 
