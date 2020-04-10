@@ -327,11 +327,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun høstingsresultater(
-        engineForTimeline: ByggUtbetalingstidlinjer?,
+        engineForTimeline: ByggUtbetalingstidlinjer,
         ytelser: Ytelser
     ) {
-        maksdato = engineForTimeline?.maksdato()
-        forbrukteSykedager = engineForTimeline?.forbrukteSykedager()
+        maksdato = engineForTimeline.maksdato()
+        forbrukteSykedager = engineForTimeline.forbrukteSykedager()
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&
             person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
@@ -798,7 +798,7 @@ internal class Vedtaksperiode private constructor(
                 it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.førsteFraværsdag) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
-                var engineForTimeline: ByggUtbetalingstidlinjer? = null
+                lateinit var engineForTimeline: ByggUtbetalingstidlinjer
                 it.valider {
                     ByggUtbetalingstidlinjer(
                         mapOf(
