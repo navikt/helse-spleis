@@ -35,23 +35,25 @@ interface PersonObserver {
         val endringstidspunkt = LocalDateTime.now()
     }
 
-    data class UtbetalingEvent(
-        val vedtaksperiodeId: UUID,
-        val aktørId: String,
-        val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val utbetaling: Map<String, Any>,
-        val opprettet: LocalDate
-    )
-
     data class UtbetaltEvent(
         val vedtaksperiodeId: UUID,
         val aktørId: String,
         val fødselsnummer: String,
-        val organisasjonsnummer: String,
-        val utbetaling: Map<String, Any>,
-        val opprettet: LocalDate,
+        val utbetalingslinjer: List<Utbetalingslinjer>,
+        val opprettet: LocalDateTime,
         val forbrukteSykedager: Int
+    )
+
+    data class Utbetalingslinjer(
+        val utbetalingsreferanse: String,
+        val utbetalingslinjer: List<Utbetalingslinje>
+    )
+
+    data class Utbetalingslinje(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagsats: Int,
+        val grad: Double
     )
 
     data class ManglendeInntektsmeldingEvent(
@@ -66,8 +68,6 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
-
-    fun vedtaksperiodeTilUtbetaling(event: UtbetalingEvent) {}
 
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
 

@@ -83,10 +83,6 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
-    fun vedtaksperiodeTilUtbetaling(event: PersonObserver.UtbetalingEvent) {
-        observers.forEach { it.vedtaksperiodeTilUtbetaling(event) }
-    }
-
     fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }

@@ -12,7 +12,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehis
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
@@ -374,22 +373,34 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.warn("Mottatt flere sykmeldinger - den første sykmeldingen som ble mottatt er lagt til grunn. (%s)", type.name)
+            sykmelding.warn(
+                "Mottatt flere sykmeldinger - den første sykmeldingen som ble mottatt er lagt til grunn. (%s)",
+                type.name
+            )
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)", type.name)
+            søknad.warn(
+                "Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)",
+                type.name
+            )
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)", type.name)
+            søknad.warn(
+                "Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn. (%s)",
+                type.name
+            )
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
-            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. (%s)", type.name)
+            inntektsmelding.warn(
+                "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. (%s)",
+                type.name
+            )
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -564,7 +575,9 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofDays(30)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag()) {
+            if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje()
+                    .førsteDag()
+            ) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
                 søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
@@ -829,7 +842,10 @@ internal class Vedtaksperiode private constructor(
         private val åpningstider = LocalTime.of(6, 0)..LocalTime.of(21, 59, 59)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(hendelse, AvventerGodkjenning) {
+            if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(
+                hendelse,
+                AvventerGodkjenning
+            ) {
                 hendelse.warn("Simulering har feilet")
             }
 
@@ -867,14 +883,15 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_GODKJENNING
 
         // lar perioden ligge til godkjenning i tre hverdager
-        override val timeout: Duration get() {
-            val ekstraDager = when (LocalDate.now().dayOfWeek) {
-                WEDNESDAY, THURSDAY, FRIDAY -> 2
-                SATURDAY -> 1
-                else -> 0
+        override val timeout: Duration
+            get() {
+                val ekstraDager = when (LocalDate.now().dayOfWeek) {
+                    WEDNESDAY, THURSDAY, FRIDAY -> 2
+                    SATURDAY -> 1
+                    else -> 0
+                }
+                return Duration.ofDays(ekstraDager + 3L)
             }
-            return Duration.ofDays(ekstraDager + 3L)
-        }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             godkjenning(hendelse, periodeFom = vedtaksperiode.førsteDag(), periodeTom = vedtaksperiode.sisteDag())
@@ -886,7 +903,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(manuellSaksbehandling, TilInfotrygd) {
+            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(
+                manuellSaksbehandling,
+                TilInfotrygd
+            ) {
                 manuellSaksbehandling.error(
                     "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
                     manuellSaksbehandling.saksbehandler()
@@ -920,22 +940,6 @@ internal class Vedtaksperiode private constructor(
                 requireNotNull(vedtaksperiode.maksdato),
                 requireNotNull(vedtaksperiode.godkjentAv)
             )
-            val event = PersonObserver.UtbetalingEvent(
-                vedtaksperiodeId = vedtaksperiode.id,
-                aktørId = vedtaksperiode.aktørId,
-                fødselsnummer = vedtaksperiode.fødselsnummer,
-                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                utbetaling = requireNotNull(OppdragReflect(
-                    vedtaksperiode.arbeidsgiver.utbetaling(),
-                    requireNotNull(vedtaksperiode.maksdato),
-                    vedtaksperiode.godkjentAv
-                ).toMap()),
-                opprettet = LocalDate.now()
-            )
-
-            hendelse.info("Satt til utbetaling")
-
-            vedtaksperiode.person.vedtaksperiodeTilUtbetaling(event)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
@@ -945,19 +949,15 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.tilstand(utbetaling, Avsluttet) {
                 utbetaling.info("OK fra Oppdragssystemet")
-                val event = PersonObserver.UtbetaltEvent(
+
+                val event = tilUtbetaltEvent(
                     vedtaksperiodeId = vedtaksperiode.id,
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,
-                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    utbetaling = requireNotNull(OppdragReflect(
-                        vedtaksperiode.arbeidsgiver.utbetaling(),
-                        requireNotNull(vedtaksperiode.maksdato),
-                        vedtaksperiode.godkjentAv
-                    ).toMap()),
-                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
-                    opprettet = LocalDate.now()
+                    utbetaling = vedtaksperiode.arbeidsgiver.utbetaling(),
+                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager)
                 )
+
                 vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
             }
         }
@@ -983,12 +983,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding,
+            vedtaksperiode.håndter(
+                inntektsmelding,
                 if (inntektsmelding.isNotQualified()) {
-                        inntektsmelding.beingQualified()
-                        AvventerVilkårsprøvingArbeidsgiversøknad
-                    }
-                else
+                    inntektsmelding.beingQualified()
+                    AvventerVilkårsprøvingArbeidsgiversøknad
+                } else
                     AvsluttetUtenUtbetalingMedInntektsmelding
             )
         }
