@@ -916,7 +916,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             utbetaling(
                 hendelse,
-                requireNotNull(vedtaksperiode.arbeidsgiver.utbetaling()),
+                requireNotNull(vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer()),
                 requireNotNull(vedtaksperiode.maksdato),
                 requireNotNull(vedtaksperiode.godkjentAv)
             )

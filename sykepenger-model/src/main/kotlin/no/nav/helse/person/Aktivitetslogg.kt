@@ -2,9 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
-import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.UtbetalingslinjerReflect
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -251,14 +249,17 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
                 internal fun utbetaling(
                     aktivitetslogg: IAktivitetslogg,
-                    utbetaling: Utbetaling,
+                    utbetalingslinjer: Utbetalingslinjer,
                     maksdato: LocalDate,
                     saksbehandler: String
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Utbetaling,
                         "Trenger å sende utbetaling til Oppdrag",
-                        OppdragReflect(utbetaling, maksdato, saksbehandler).toMap()
+                        mutableMapOf(
+                            "maksdato" to maksdato.toString(),
+                            "saksbehandler" to saksbehandler
+                        ) + UtbetalingslinjerReflect(utbetalingslinjer).toMap()
                     )
                 }
             }
