@@ -33,6 +33,10 @@ internal class Utbetalingslinjer private constructor(
     }
 
     internal fun referanse() = utbetalingsreferanse
+
+    infix fun forskjell(other: Utbetalingslinjer): Utbetalingslinjer {
+        return Utbetalingslinjer(mottaker, mottakertype)
+    }
 }
 
 internal class Utbetalingslinje private constructor(
