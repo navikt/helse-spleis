@@ -35,13 +35,15 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
                     it["årMåned"].asYearMonth() to it["inntektsliste"].map { it["beløp"].asDouble() }
                 }.associate { it }
             ),
-            arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
-                Vilkårsgrunnlag.Arbeidsforhold(
-                    orgnummer = it["orgnummer"].asText(),
-                    fom = it["ansattSiden"].asLocalDate(),
-                    tom = it["ansattTil"].asOptionalLocalDate()
-                )
-            },
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(
+                arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
+                    Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(
+                        orgnummer = it["orgnummer"].asText(),
+                        fom = it["ansattSiden"].asLocalDate(),
+                        tom = it["ansattTil"].asOptionalLocalDate()
+                    )
+                }
+            ),
             erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean()
         )
     }

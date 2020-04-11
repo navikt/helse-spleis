@@ -227,7 +227,7 @@ internal class YtelserHendelseTest {
                 .map { YearMonth.of(2018, it) to 31000.0 }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017))))
         )
 
     private fun simulering() =

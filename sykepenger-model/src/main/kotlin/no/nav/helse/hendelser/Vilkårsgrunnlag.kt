@@ -7,22 +7,17 @@ import java.math.MathContext
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.roundToInt
-import kotlin.streams.toList
 
-@Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
+@Deprecated("inntektsvurdering, opptjeningvurdering og erEgenAnsatt sendes som tre parametre til modellen")
 class Vilkårsgrunnlag(
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
-    private val arbeidsforhold: List<Arbeidsforhold>,
+    private val opptjeningvurdering: Opptjeningvurdering,
     private val erEgenAnsatt: Boolean
 ) : ArbeidstakerHendelse() {
-    private companion object {
-        private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
-    }
-
     private var grunnlagsdata: Grunnlagsdata? = null
 
     override fun aktørId() = aktørId
@@ -31,20 +26,16 @@ class Vilkårsgrunnlag(
 
     internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate): Aktivitetslogg {
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt)
-        val antallOpptjeningsdager = Arbeidsforhold.antallOptjeningsdager(arbeidsforhold, førsteFraværsdag, orgnummer)
+        opptjeningvurdering.valider(aktivitetslogg, orgnummer, førsteFraværsdag)
+        if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
+        else info("er ikke egen ansatt")
         grunnlagsdata = Grunnlagsdata(
             erEgenAnsatt = erEgenAnsatt,
             beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
             avviksprosent = inntektsvurdering.avviksprosent(),
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
-            harOpptjening = antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-        ).also {
-            if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
-            else info("er ikke egen ansatt")
-
-            if (it.harOpptjening) info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
-            else error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
-        }
+            antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
+            harOpptjening = opptjeningvurdering.harOpptjening(orgnummer)
+        )
         return aktivitetslogg
     }
 
@@ -85,21 +76,41 @@ class Vilkårsgrunnlag(
         private fun BigDecimal.omregnetÅrsinntekt() = this * 12.toBigDecimal()
     }
 
-    class Arbeidsforhold(
-        private val orgnummer: String,
-        private val fom: LocalDate,
-        private val tom: LocalDate? = null
+    class Opptjeningvurdering(
+        private val arbeidsforhold: List<Arbeidsforhold>
     ) {
-        companion object {
-            fun antallOptjeningsdager(liste: List<Arbeidsforhold>, førsteFraværsdag: LocalDate, orgnummer: String) = liste
-                .filter { it.orgnummer == orgnummer }
-                .filter { it.fom <= førsteFraværsdag }
-                .filter { it.tom == null || it.tom.isAfter(førsteFraværsdag) }
-                .map { it.fom }
-                .min()
-                ?.datesUntil(førsteFraværsdag)
-                ?.toList()
-                ?.size ?: 0
+        private companion object {
+            private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
+        }
+
+        private val antallOpptjeningsdager = mutableMapOf<String, Int>()
+
+        internal fun opptjeningsdager(orgnummer: String) = antallOpptjeningsdager[orgnummer] ?: 0
+        internal fun harOpptjening(orgnummer: String) = opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+
+        fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, førsteFraværsdag: LocalDate): Aktivitetslogg {
+            Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, førsteFraværsdag)
+            if (harOpptjening(orgnummer)) aktivitetslogg.info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+            else aktivitetslogg.error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+            return aktivitetslogg
+        }
+
+        class Arbeidsforhold(
+            private val orgnummer: String,
+            private val fom: LocalDate,
+            private val tom: LocalDate? = null
+        ) {
+            private fun opptjeningsdager(førsteFraværsdag: LocalDate): Int {
+                if (fom > førsteFraværsdag) return 0
+                if (tom != null && tom < førsteFraværsdag) return 0
+                return fom.datesUntil(førsteFraværsdag).count().toInt()
+            }
+
+            companion object {
+                fun opptjeningsdager(liste: List<Arbeidsforhold>, map: MutableMap<String, Int>, førsteFraværsdag: LocalDate) {
+                    liste.forEach { map[it.orgnummer] = it.opptjeningsdager(førsteFraværsdag) }
+                }
+            }
         }
     }
 

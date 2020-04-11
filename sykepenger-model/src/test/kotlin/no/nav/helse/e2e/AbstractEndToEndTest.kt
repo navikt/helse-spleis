@@ -225,7 +225,7 @@ internal abstract class AbstractEndToEndTest {
                 }.groupBy({ it.first }) { it.second }
             ),
             erEgenAnsatt = false,
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))))
         ).apply {
             hendelselogg = this
         }

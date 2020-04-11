@@ -260,12 +260,12 @@ internal class JsonBuilderTest {
             inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering((1..12)
                 .map { YearMonth.of(2018, it) to 31000.0 }
                 .groupBy({ it.first }) { it.second }),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(
+                Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(
                     orgnummer,
                     1.januar(2017)
                 )
-            ),
+            )),
             erEgenAnsatt = false
         )
 

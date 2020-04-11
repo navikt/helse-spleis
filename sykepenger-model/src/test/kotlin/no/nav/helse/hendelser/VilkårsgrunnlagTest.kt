@@ -58,7 +58,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `27 dager opptjening fører til manuell saksbehandling`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 5.desember(2017)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(27, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -69,7 +69,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -80,7 +80,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 4.desember(2017)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -91,7 +91,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -158,8 +158,8 @@ internal class VilkårsgrunnlagTest {
         inntektsmåneder: Map<YearMonth, List<Double>> = (1..12).map {
             YearMonth.of(2017, it) to INNTEKT
         }.groupBy({ it.first }) { it.second },
-        arbeidsforhold: List<Arbeidsforhold> = listOf(
-            Arbeidsforhold(
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
+            Opptjeningvurdering.Arbeidsforhold(
                 orgnummer,
                 4.desember(2017)
             )
@@ -170,7 +170,7 @@ internal class VilkårsgrunnlagTest {
         fødselsnummer = fødselsnummer,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
-        arbeidsforhold = arbeidsforhold,
+        opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         erEgenAnsatt = false
     )
 

@@ -129,7 +129,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun ansattSidenStart2017() =
-        listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
+        listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Double): Map<YearMonth, List<Double>> {
@@ -148,7 +148,7 @@ internal class VilkårsgrunnlagHendelseTest {
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
         inntekter: Map<YearMonth, List<Double>>,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
+        arbeidsforhold: List<Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -203,7 +203,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
         inntekter: Map<YearMonth, List<Double>>,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
+        arbeidsforhold: List<Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
@@ -212,7 +212,7 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(inntekter),
             erEgenAnsatt = egenAnsatt,
-            arbeidsforhold = arbeidsforhold
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(arbeidsforhold)
         ).apply {
             hendelse = this
         }

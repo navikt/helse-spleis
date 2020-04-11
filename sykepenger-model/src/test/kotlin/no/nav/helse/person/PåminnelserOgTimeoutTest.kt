@@ -252,7 +252,7 @@ class PåminnelserOgTimeoutTest {
                 .map { YearMonth.of(2018, it) to 31000.0 }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))))
         ).apply {
             hendelse = this
         }
