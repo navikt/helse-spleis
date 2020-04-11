@@ -55,9 +55,90 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Linjetype.NY, actual[1].linjetype)
     }
 
+    @Test internal fun `grad endres`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 5.januar grad 80, 15.januar to 19.januar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.NY, actual[0].linjetype)
+        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
+        assertEquals(actual[0].id + 1, actual[1].id)
+    }
+
+    @Test internal fun `dagsats endres`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 5.januar dagsats 1000, 15.januar to 19.januar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.NY, actual[0].linjetype)
+        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
+        assertEquals(actual[0].id + 1, actual[1].id)
+    }
+
+    @Test internal fun `potpourri`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            6.januar to 12.januar grad 50,
+            13.januar to 19.januar grad 80
+        )
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            6.januar to 17.januar grad 50,  // extended tom
+            18.januar to 19.januar grad 80,
+            1.februar to 9.februar
+        )
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.ENDR, actual[1].linjetype)
+        assertEquals(Linjetype.NY, actual[2].linjetype)
+        assertEquals(Linjetype.NY, actual[3].linjetype)
+        assertEquals(original[1].id, actual[1].id)      // picks up id from original
+        assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
+        assertEquals(actual[2].id + 1, actual[3].id)
+    }
+
+    @Test internal fun `potpourri2`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            6.januar to 12.januar grad 50,
+            13.januar to 19.januar grad 80,
+            1.februar to 3.februar,
+            4.februar to 6.februar,
+            7.februar to 8.februar
+        )
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            6.januar to 17.januar grad 50,  // extended tom
+            18.januar to 19.januar grad 80,
+            1.februar to 9.februar
+        )
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.ENDR, actual[1].linjetype)
+        assertEquals(Linjetype.NY, actual[2].linjetype)
+        assertEquals(Linjetype.NY, actual[3].linjetype)
+        assertEquals(original[1].id, actual[1].id)      // picks up id from original
+        assertEquals(original[5].id + 1, actual[2].id)  // chained off of last of original
+        assertEquals(actual[2].id + 1, actual[3].id)
+    }
+
     private val Utbetalingslinjer.linjertype get() = this.get<Linjetype>("linjertype")
 
     private val Utbetalingslinje.linjetype get() = this.get<Linjetype>("linjetype")
+
+    private val Utbetalingslinje.id get() = this.get<Int>("delytelseId")
 
     private val Utbetalingslinjer.referanse get() = this.get<String>("utbetalingsreferanse")
 
@@ -72,10 +153,14 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     private fun linjer(vararg linjer: TestUtbetalingslinje) =
-        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() })
+        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }).also {
+            it.zipWithNext { a, b -> b.linkTo(a) }
+        }
 
     private fun linjer(vararg linjer: Utbetalingslinje) =
-        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.toList())
+        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.toList()).also {
+            it.zipWithNext { a, b -> b.linkTo(a) }
+        }
 
     private inner class TestUtbetalingslinje(
         private val fom: LocalDate,

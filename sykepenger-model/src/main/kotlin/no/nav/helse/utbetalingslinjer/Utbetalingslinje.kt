@@ -68,6 +68,12 @@ internal class Utbetalingslinjer private constructor(
         nåværende.linjertype = UEND
         linkTo = tidligere.last()
         nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
+        if (nåværende.size <= tidligere.size) return@also
+        nåværende[tidligere.size - 1].linkTo(tidligere.last())
+        nåværende
+            .subList(tidligere.size - 1, nåværende.size)
+            .zipWithNext()
+            .map { (a, b) -> b.linkTo(a) }
     }
 
     private interface Tilstand {
