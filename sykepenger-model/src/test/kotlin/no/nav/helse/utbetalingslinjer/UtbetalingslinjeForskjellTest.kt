@@ -14,14 +14,14 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test internal fun `ingen forskjell`() {
-        val original = 1.januar to 5.januar grad 100 dagsats 1200
+        val original = linjer(1.januar to 5.januar grad 100 dagsats 1200)
         val recalculated = 1.januar to 5.januar grad 100 dagsats 1200
         val expected = Utbetalingslinjer(ORGNUMMER, SPREF)
         assertUtbetalinger(expected, recalculated forskjell original)
     }
 
     private fun assertUtbetalinger(expected: Utbetalingslinjer, actual: Utbetalingslinjer) {
-        assertEquals(expected.size, actual.size, "Utbetalingslinjer are different sizes")
+        assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
         (expected zip actual).forEach { (a, b) ->
             assertEquals(a.fom, b.fom, "fom stemmer ikke overens")
             assertEquals(a.tom, b.tom, "tom stemmer ikke overens")
@@ -30,8 +30,11 @@ internal class UtbetalingslinjeForskjellTest {
         }
     }
 
-    private fun linjer(vararg utbetalinger: Utbetalingslinje) =
-        Utbetalingslinjer(ORGNUMMER, SPREF, utbetalinger.toList())
+    private fun linjer(vararg linjer: TestUtbetalingslinjer) =
+        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() })
+
+    private fun linjer(vararg linjer: Utbetalingslinje) =
+        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.toList())
 
     private inner class TestUtbetalingslinjer(
         private val fom: LocalDate,
@@ -54,7 +57,9 @@ internal class UtbetalingslinjeForskjellTest {
 
         internal infix fun forskjell(other: Utbetalingslinjer) = this.asUtbetalingslinjer() forskjell other
 
-        private fun asUtbetalingslinjer() = linjer(Utbetalingslinje(fom, tom, dagsats, grad))
+        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, grad)
+
+        private fun asUtbetalingslinjer() = linjer(asUtbetalingslinje())
     }
 
     private infix fun LocalDate.to(other: LocalDate) = TestUtbetalingslinjer(this, other)

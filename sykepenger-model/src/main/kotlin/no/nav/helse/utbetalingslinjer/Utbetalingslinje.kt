@@ -69,7 +69,7 @@ internal class Utbetalingslinje internal constructor(
 }
 
 internal enum class Linjetype {
-    NY, UEND, ENDR
+    NY, UEND, ENDR, KUN_SPLEIS
 }
 
 internal enum class Klassekode(internal val verdi: String) {
