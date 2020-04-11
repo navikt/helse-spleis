@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingForskjellTest {
+internal class UtbetalingslinjeForskjellTest {
 
     protected companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
@@ -30,7 +30,10 @@ internal class UtbetalingForskjellTest {
         }
     }
 
-    private class TestUtbetalingslinjer(
+    private fun linjer(vararg utbetalinger: Utbetalingslinje) =
+        Utbetalingslinjer(ORGNUMMER, SPREF, utbetalinger.toList())
+
+    private inner class TestUtbetalingslinjer(
         private val fom: LocalDate,
         private val tom: LocalDate
     ) {
@@ -51,8 +54,7 @@ internal class UtbetalingForskjellTest {
 
         internal infix fun forskjell(other: Utbetalingslinjer) = this.asUtbetalingslinjer() forskjell other
 
-        private fun asUtbetalingslinjer() =
-            Utbetalingslinjer(ORGNUMMER, SPREF, listOf(Utbetalingslinje(fom, tom, dagsats, grad)))
+        private fun asUtbetalingslinjer() = linjer(Utbetalingslinje(fom, tom, dagsats, grad))
     }
 
     private infix fun LocalDate.to(other: LocalDate) = TestUtbetalingslinjer(this, other)

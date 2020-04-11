@@ -40,7 +40,7 @@ internal class Utbetalingslinjer private constructor(
     }
 }
 
-internal class Utbetalingslinje private constructor(
+internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
     internal var dagsats: Int,
@@ -50,12 +50,6 @@ internal class Utbetalingslinje private constructor(
     private val linjetype: Linjetype = NY,
     private val klassekode: Klassekode = Arbeidsgiverlinje
 ) {
-    internal constructor(
-        fom: LocalDate,
-        tom: LocalDate,
-        dagsats: Int,
-        grad: Double
-    ): this(fom, tom, dagsats, grad, 1, null, NY, Arbeidsgiverlinje)
 
     internal fun accept(visitor: UtbetalingVisitor) {
         visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId)
