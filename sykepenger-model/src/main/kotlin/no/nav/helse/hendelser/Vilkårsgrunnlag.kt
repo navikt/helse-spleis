@@ -19,6 +19,11 @@ class Vilkårsgrunnlag(
     private val arbeidsforhold: List<Arbeidsforhold>,
     private val erEgenAnsatt: Boolean
 ) : ArbeidstakerHendelse() {
+    private companion object {
+        private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
+        private const val MAKSIMALT_TILLATT_AVVIK = .25
+    }
+
     private val sammenligningsgrunnlag: BigDecimal
 
     init {
@@ -46,7 +51,7 @@ class Vilkårsgrunnlag(
             .divide(sammenligningsgrunnlag, MathContext.DECIMAL128)
 
     internal fun harAvvikIOppgittInntekt(beregnetInntekt: BigDecimal) =
-        avviksprosentInntekt(beregnetInntekt) > 0.25.toBigDecimal()
+        avviksprosentInntekt(beregnetInntekt) > MAKSIMALT_TILLATT_AVVIK.toBigDecimal()
 
     internal fun måHåndteresManuelt(
         beregnetInntekt: BigDecimal,
@@ -61,7 +66,7 @@ class Vilkårsgrunnlag(
             ).toDouble(),
             avviksprosent = avviksprosentInntekt(beregnetInntekt).toDouble(),
             antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
-            harOpptjening = antallOpptjeningsdager >= 28
+            harOpptjening = antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
         )
 
         val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(beregnetInntekt)
@@ -69,11 +74,11 @@ class Vilkårsgrunnlag(
         if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else info("er ikke egen ansatt")
 
-        if (harAvvikIOppgittInntekt) error("Har mer enn 25 %% avvik")
-        else info("Har 25 %% eller mindre avvik i inntekt (${grunnlag.avviksprosent * 100} %%)")
+        if (harAvvikIOppgittInntekt) error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)
+        else info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK * 100, grunnlag.avviksprosent * 100)
 
-        if (grunnlag.harOpptjening) info("Har minst 28 dager opptjening")
-        else error("Har mindre enn 28 dager opptjening")
+        if (grunnlag.harOpptjening) info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+        else error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
 
         return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
     }
