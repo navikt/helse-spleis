@@ -251,25 +251,19 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        if (vilkårsgrunnlag.valider().hasErrors()) {
-            vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", tilstand.type)
-            return tilstand(vilkårsgrunnlag, TilInfotrygd)
-        }
-
         val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
             ?: periode().start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag)
             ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
-
-        val resultat = vilkårsgrunnlag.måHåndteresManuelt(beregnetInntekt, førsteFraværsdag)
-        dataForVilkårsvurdering = resultat.grunnlagsdata
-
-        if (resultat.måBehandlesManuelt) return tilstand(vilkårsgrunnlag, TilInfotrygd)
-
+        if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
+            dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
+        }) {
+            vilkårsgrunnlag.error("Feil i vilkårsgrunnlag i %s", tilstand.type)
+            return tilstand(vilkårsgrunnlag, TilInfotrygd)
+        }
         vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
     }
-
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
         sykepengehistorikk(hendelse, arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive)

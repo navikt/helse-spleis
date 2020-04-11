@@ -8,7 +8,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -16,9 +16,13 @@ import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
-    private val aktørId = "123"
-    private val fødselsnummer = "234"
-    private val orgnummer = "345"
+    private companion object {
+        private const val aktørId = "123"
+        private const val fødselsnummer = "234"
+        private const val orgnummer = "345"
+        private const val INNTEKT = 1000.0
+    }
+
     private lateinit var person: Person
 
     @BeforeEach
@@ -31,47 +35,19 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `ugyldige verdier`() {
-        vilkårsgrunnlag(emptyList()).also {
-            assertTrue(it.valider().hasErrors())
-        }
-
-        vilkårsgrunnlag(listOf(Måned(YearMonth.now(), listOf(0.0)))).also {
-            assertTrue(it.valider().hasErrors())
-        }
-    }
-
-    @Test
-    internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
-        val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(1000.0)) })
-
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1000.00.toBigDecimal()))
-        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.01.toBigDecimal()))
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(1250.00.toBigDecimal()))
-        assertTrue(vilkårsgrunnlag.harAvvikIOppgittInntekt(749.99.toBigDecimal()))
-        assertFalse(vilkårsgrunnlag.harAvvikIOppgittInntekt(750.00.toBigDecimal()))
-
-    }
-
-    @Test
     internal fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
-        val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(1000.0)) })
-
+        val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(0.0, dataForVilkårsvurdering()?.avviksprosent)
         assertEquals(12000.0, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
-        val vilkårsgrunnlag = vilkårsgrunnlag((1..12)
-            .map { Måned(YearMonth.of(2017, it), listOf(1250.0)) })
-
+        val vilkårsgrunnlag = vilkårsgrunnlag(
+            (1..12).map { YearMonth.of(2017, it) to 1250.0 }.groupBy({ it.first }) { it.second }
+        )
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(0.20, dataForVilkårsvurdering()?.avviksprosent)
         assertEquals(15000.00, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(false, dataForVilkårsvurdering()?.erEgenAnsatt)
@@ -82,42 +58,31 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `27 dager opptjening fører til manuell saksbehandling`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
-            listOf(Arbeidsforhold(orgnummer, 5.desember(2017)))
+            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
-
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(27, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
-
     }
 
     @Test
     internal fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
-            listOf(Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
+            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
         )
-
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
-
     }
 
     @Test
     internal fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
-            listOf(Arbeidsforhold(orgnummer, 4.desember(2017)))
+            arbeidsforhold = listOf(Arbeidsforhold(orgnummer, 4.desember(2017)))
         )
-
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
@@ -126,11 +91,9 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
-            listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
+            arbeidsforhold = listOf(Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
@@ -139,11 +102,9 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `ingen arbeidsforhold gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { Måned(YearMonth.of(2017, it), listOf(1250.0)) },
-            emptyList()
+            arbeidsforhold = emptyList()
         )
         person.håndter(vilkårsgrunnlag)
-
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
@@ -194,7 +155,9 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: List<Måned>,
+        inntektsmåneder: Map<YearMonth, List<Double>> = (1..12).map {
+            YearMonth.of(2017, it) to INNTEKT
+        }.groupBy({ it.first }) { it.second },
         arbeidsforhold: List<Arbeidsforhold> = listOf(
             Arbeidsforhold(
                 orgnummer,
@@ -206,7 +169,7 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         orgnummer = orgnummer,
-        inntektsmåneder = inntektsmåneder,
+        inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         arbeidsforhold = arbeidsforhold,
         erEgenAnsatt = false
     )
@@ -224,7 +187,7 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        perioder = listOf(Søknad.Periode.Sykdom(16.januar,  30.januar, 100)),
+        perioder = listOf(Søknad.Periode.Sykdom(16.januar, 30.januar, 100)),
         harAndreInntektskilder = false,
         sendtTilNAV = 30.januar.atStartOfDay()
     )

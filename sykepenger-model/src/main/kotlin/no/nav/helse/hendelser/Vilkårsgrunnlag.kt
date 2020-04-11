@@ -4,9 +4,9 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.math.BigDecimal
 import java.math.MathContext
-import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.roundToInt
 import kotlin.streams.toList
 
 @Deprecated("inntektsmåneder, arbeidsforhold og erEgenAnsatt sendes som tre parametre til modellen")
@@ -15,78 +15,75 @@ class Vilkårsgrunnlag(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
-    private val inntektsmåneder: List<Måned>,
+    private val inntektsvurdering: Inntektsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>,
     private val erEgenAnsatt: Boolean
 ) : ArbeidstakerHendelse() {
     private companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
-        private const val MAKSIMALT_TILLATT_AVVIK = .25
     }
 
-    private val sammenligningsgrunnlag: BigDecimal
-
-    init {
-        sammenligningsgrunnlag = inntektsmåneder
-            .flatMap { it.inntektsliste }
-            .sumByDouble { it }
-            .toBigDecimal()
-    }
+    private var grunnlagsdata: Grunnlagsdata? = null
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
-
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(): Aktivitetslogg {
-        if (inntektsmåneder.size > 12) error("Forventer 12 eller færre inntektsmåneder")
-        if (sammenligningsgrunnlag <= BigDecimal.ZERO) error("sammenligningsgrunnlaget er <= 0")
+    internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate): Aktivitetslogg {
+        inntektsvurdering.valider(aktivitetslogg, beregnetInntekt)
+        val antallOpptjeningsdager = Arbeidsforhold.antallOptjeningsdager(arbeidsforhold, førsteFraværsdag, orgnummer)
+        grunnlagsdata = Grunnlagsdata(
+            erEgenAnsatt = erEgenAnsatt,
+            beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
+            avviksprosent = inntektsvurdering.avviksprosent(),
+            antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
+            harOpptjening = antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+        ).also {
+            if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
+            else info("er ikke egen ansatt")
+
+            if (it.harOpptjening) info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+            else error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+        }
         return aktivitetslogg
     }
 
-    private fun avviksprosentInntekt(beregnetInntekt: BigDecimal) =
-        (beregnetInntekt * 12.toBigDecimal())
-            .minus(sammenligningsgrunnlag)
-            .abs()
-            .divide(sammenligningsgrunnlag, MathContext.DECIMAL128)
+    internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
-    internal fun harAvvikIOppgittInntekt(beregnetInntekt: BigDecimal) =
-        avviksprosentInntekt(beregnetInntekt) > MAKSIMALT_TILLATT_AVVIK.toBigDecimal()
+    class Inntektsvurdering(
+        private val perioder: Map<YearMonth, List<Double>>
+    ) {
+        private companion object {
+            private const val MAKSIMALT_TILLATT_AVVIK = .25
+        }
 
-    internal fun måHåndteresManuelt(
-        beregnetInntekt: BigDecimal,
-        førsteFraværsdag: LocalDate
-    ): Resultat {
-        val antallOpptjeningsdager = Arbeidsforhold.antallOptjeningsdager(arbeidsforhold, førsteFraværsdag, orgnummer)
-        val grunnlag = Grunnlagsdata(
-            erEgenAnsatt = erEgenAnsatt,
-            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.setScale(
-                2,
-                RoundingMode.HALF_UP
-            ).toDouble(),
-            avviksprosent = avviksprosentInntekt(beregnetInntekt).toDouble(),
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdager,
-            harOpptjening = antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-        )
+        private val sammenligningsgrunnlag = perioder.flatMap { it.value }.sum()
+        private var avviksprosent = Double.POSITIVE_INFINITY
 
-        val harAvvikIOppgittInntekt = harAvvikIOppgittInntekt(beregnetInntekt)
+        internal fun sammenligningsgrunnlag(): Double =
+            (sammenligningsgrunnlag * 100).roundToInt() / 100.0 // behold to desimaler
+        internal fun avviksprosent() = avviksprosent
 
-        if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
-        else info("er ikke egen ansatt")
+        fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal): Aktivitetslogg {
+            if (antallPerioder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
+            if (sammenligningsgrunnlag <= 0.0) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
+            avviksprosent = avviksprosent(beregnetInntekt)
+            if (avviksprosent > MAKSIMALT_TILLATT_AVVIK) aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)
+            else aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK * 100, avviksprosent * 100)
+            return aktivitetslogg
+        }
 
-        if (harAvvikIOppgittInntekt) error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)
-        else info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK * 100, grunnlag.avviksprosent * 100)
+        private fun antallPerioder() = perioder.keys.size
+        private fun avviksprosent(beregnetInntekt: BigDecimal) =
+            sammenligningsgrunnlag.toBigDecimal().let { sammenligningsgrunnlag ->
+                beregnetInntekt.omregnetÅrsinntekt()
+                    .minus(sammenligningsgrunnlag)
+                    .abs()
+                    .divide(sammenligningsgrunnlag, MathContext.DECIMAL128)
+            }.toDouble()
 
-        if (grunnlag.harOpptjening) info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
-        else error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
-
-        return Resultat(erEgenAnsatt || harAvvikIOppgittInntekt || !grunnlag.harOpptjening, grunnlag)
+        private fun BigDecimal.omregnetÅrsinntekt() = this * 12.toBigDecimal()
     }
-
-    class Måned(
-        internal val årMåned: YearMonth,
-        internal val inntektsliste: List<Double>
-    )
 
     class Arbeidsforhold(
         private val orgnummer: String,
@@ -105,11 +102,6 @@ class Vilkårsgrunnlag(
                 ?.size ?: 0
         }
     }
-
-    class Resultat(
-        internal val måBehandlesManuelt: Boolean,
-        internal val grunnlagsdata: Grunnlagsdata
-    )
 
     class Grunnlagsdata(
         internal val erEgenAnsatt: Boolean,

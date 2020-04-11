@@ -257,12 +257,9 @@ internal class JsonBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsmåneder = (1.rangeTo(12)).map {
-                Vilkårsgrunnlag.Måned(
-                    årMåned = YearMonth.of(2018, it),
-                    inntektsliste = listOf(31000.0)
-                )
-            },
+            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering((1..12)
+                .map { YearMonth.of(2018, it) to 31000.0 }
+                .groupBy({ it.first }) { it.second }),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(
                     orgnummer,

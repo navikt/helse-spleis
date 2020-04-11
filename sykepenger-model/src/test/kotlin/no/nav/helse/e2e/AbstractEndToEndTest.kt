@@ -219,12 +219,11 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            inntektsmåneder = (1..12).map {
-                Vilkårsgrunnlag.Måned(
-                    YearMonth.of(2017, it),
-                    listOf(inntekt)
-                )
-            },
+            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(
+                perioder = (1..12).map {
+                   YearMonth.of(2017, it) to inntekt
+                }.groupBy({ it.first }) { it.second }
+            ),
             erEgenAnsatt = false,
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
         ).apply {

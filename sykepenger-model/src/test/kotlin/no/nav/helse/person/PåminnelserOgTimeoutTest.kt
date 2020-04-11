@@ -248,11 +248,9 @@ class PåminnelserOgTimeoutTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsmåneder = (1..12).map {
-                Vilkårsgrunnlag.Måned(
-                    YearMonth.of(2017, it), listOf(31000.0)
-                )
-            },
+            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering((1..12)
+                .map { YearMonth.of(2018, it) to 31000.0 }
+                .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
         ).apply {

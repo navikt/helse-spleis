@@ -42,7 +42,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `ingen inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyMap(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertTilstand(TilstandType.TIL_INFOTRYGD)
@@ -132,12 +132,9 @@ internal class VilkårsgrunnlagHendelseTest {
         listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Double): List<Vilkårsgrunnlag.Måned> {
-        return (1..12).map {
-            Vilkårsgrunnlag.Måned(
-                YearMonth.of(2018, it), listOf(beregnetInntekt)
-            )
-        }
+    private fun tolvMånederMedInntekt(beregnetInntekt: Double): Map<YearMonth, List<Double>> {
+        return (1..12).map { YearMonth.of(2018, it) to beregnetInntekt }
+            .groupBy({ it.first }) { it.second }
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
@@ -150,7 +147,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
-        inntekter: List<Vilkårsgrunnlag.Måned>,
+        inntekter: Map<YearMonth, List<Double>>,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -205,7 +202,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: List<Vilkårsgrunnlag.Måned>,
+        inntekter: Map<YearMonth, List<Double>>,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
@@ -213,7 +210,7 @@ internal class VilkårsgrunnlagHendelseTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            inntektsmåneder = inntekter,
+            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(inntekter),
             erEgenAnsatt = egenAnsatt,
             arbeidsforhold = arbeidsforhold
         ).apply {

@@ -30,12 +30,11 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
             aktørId = this["aktørId"].asText(),
             fødselsnummer = fødselsnummer,
             orgnummer = this["organisasjonsnummer"].asText(),
-            inntektsmåneder = this["@løsning.${Inntektsberegning.name}"].map {
-                Vilkårsgrunnlag.Måned(
-                    årMåned = it["årMåned"].asYearMonth(),
-                    inntektsliste = it["inntektsliste"].map { it["beløp"].asDouble() }
-                )
-            },
+            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(
+                perioder = this["@løsning.${Inntektsberegning.name}"].map {
+                    it["årMåned"].asYearMonth() to it["inntektsliste"].map { it["beløp"].asDouble() }
+                }.associate { it }
+            ),
             arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
                 Vilkårsgrunnlag.Arbeidsforhold(
                     orgnummer = it["orgnummer"].asText(),
