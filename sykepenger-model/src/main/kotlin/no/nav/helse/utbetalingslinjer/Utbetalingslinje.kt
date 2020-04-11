@@ -11,7 +11,7 @@ internal class Utbetalingslinjer private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
     private val linjer: List<Utbetalingslinje>,
-    private val utbetalingsreferanse: String,
+    private var utbetalingsreferanse: String,
     private val linjertype: Linjetype,
     private val sjekksum: Int
 ): List<Utbetalingslinje> by linjer {
@@ -41,9 +41,19 @@ internal class Utbetalingslinjer private constructor(
 
     infix fun forskjell(tidligere: Utbetalingslinjer): Utbetalingslinjer {
         return when {
-            this.førstedato > tidligere.sistedato -> this
-            else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
+            this.førstedato > tidligere.sistedato ->
+                this
+            this.førstedato <= tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
+                appended(tidligere)
+            else ->
+                throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
+    }
+
+    private fun appended(tidligere: Utbetalingslinjer) = this.also {
+        it.first().linkTo(tidligere.last())
+        zipWithNext().map { (a, b) -> b.linkTo(a) }
+        it.utbetalingsreferanse = tidligere.utbetalingsreferanse
     }
 }
 
