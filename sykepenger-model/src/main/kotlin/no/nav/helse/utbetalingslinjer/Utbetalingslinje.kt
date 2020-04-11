@@ -68,11 +68,11 @@ internal class Utbetalingslinje internal constructor(
     }
 }
 
-enum class Linjetype {
+internal enum class Linjetype {
     NY, UEND, ENDR
 }
 
-enum class Klassekode(val verdi: String) {
+internal enum class Klassekode(internal val verdi: String) {
     Arbeidsgiverlinje(verdi = "SPREFAG-IOP");
 
     companion object {
