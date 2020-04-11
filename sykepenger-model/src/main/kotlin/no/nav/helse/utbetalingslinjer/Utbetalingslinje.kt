@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Klassekode.Arbeidsgiverlinje
-import no.nav.helse.utbetalingslinjer.Linjetype.NY
+import no.nav.helse.utbetalingslinjer.Linjetype.*
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
@@ -12,7 +12,7 @@ internal class Utbetalingslinjer private constructor(
     private val fagområde: Fagområde,
     private val linjer: List<Utbetalingslinje>,
     private var utbetalingsreferanse: String,
-    private val linjertype: Linjetype,
+    private var linjertype: Linjetype,
     private val sjekksum: Int
 ): List<Utbetalingslinje> by linjer {
 
@@ -43,17 +43,64 @@ internal class Utbetalingslinjer private constructor(
         return when {
             this.førstedato > tidligere.sistedato ->
                 this
-            this.førstedato <= tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
+            this.førstedato < tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
                 appended(tidligere)
+            this.førstedato == tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
+                ghosted(tidligere)
             else ->
                 throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
 
-    private fun appended(tidligere: Utbetalingslinjer) = this.also {
-        it.first().linkTo(tidligere.last())
+    private fun appended(tidligere: Utbetalingslinjer) = this.also { nåværende ->
+        nåværende.first().linkTo(tidligere.last())
         zipWithNext().map { (a, b) -> b.linkTo(a) }
-        it.utbetalingsreferanse = tidligere.utbetalingsreferanse
+        nåværende.utbetalingsreferanse = tidligere.utbetalingsreferanse
+        nåværende.linjertype = UEND
+    }
+
+    private var tilstand: Tilstand = Identisk()
+
+    private lateinit var linkTo: Utbetalingslinje
+
+    private fun ghosted(tidligere: Utbetalingslinjer) = this.also { nåværende ->
+        nåværende.utbetalingsreferanse = tidligere.utbetalingsreferanse
+        nåværende.linjertype = UEND
+        linkTo = tidligere.last()
+        nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
+    }
+
+    private interface Tilstand {
+        fun forskjell(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje
+        )
+    }
+
+    private inner class Identisk : Tilstand {
+        override fun forskjell(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje
+        ) {
+            if (nåværende.equals(tidligere)) return nåværende.ghostFrom(tidligere)
+            if (nåværende.kunTomForskjelligFra(tidligere)) {
+                nåværende.utvidTom(tidligere)
+                tilstand = Ny()
+                return
+            }
+            nåværende.linkTo(linkTo)
+            linkTo = nåværende
+        }
+    }
+
+    private inner class Ny: Tilstand {
+        override fun forskjell(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje
+        ) {
+            nåværende.linkTo(linkTo)
+            linkTo = nåværende
+        }
     }
 }
 
@@ -64,8 +111,8 @@ internal class Utbetalingslinje internal constructor(
     internal val grad: Double,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
-    private val linjetype: Linjetype = NY,
-    private val klassekode: Klassekode = Arbeidsgiverlinje
+    private var linjetype: Linjetype = NY,
+    private var klassekode: Klassekode = Arbeidsgiverlinje
 ) {
 
     internal fun accept(visitor: UtbetalingVisitor) {
@@ -77,11 +124,35 @@ internal class Utbetalingslinje internal constructor(
         this.refDelytelseId = other.delytelseId
     }
 
+    override fun equals(other: Any?) = other is Utbetalingslinje && this.equals(other)
+
+    private fun equals(other: Utbetalingslinje) =
+        this.fom == other.fom &&
+            this.tom == other.tom &&
+            this.dagsats == other.dagsats &&
+            this.grad == other.grad
+
+    internal fun kunTomForskjelligFra(other: Utbetalingslinje) =
+        this.fom == other.fom &&
+            this.dagsats == other.dagsats &&
+            this.grad == other.grad
+
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
             tom.hashCode() * 17 +
             dagsats.hashCode() * 41 +
             grad.hashCode()
+    }
+
+    internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(KUN_SPLEIS, tidligere)
+
+    internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
+
+    private fun copyWith(linjetype: Linjetype, tidligere: Utbetalingslinje) {
+        this.delytelseId = tidligere.delytelseId
+        this.refDelytelseId = tidligere.refDelytelseId
+        this.klassekode = tidligere.klassekode
+        this.linjetype = linjetype
     }
 }
 

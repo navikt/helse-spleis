@@ -5,6 +5,7 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -16,20 +17,35 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test internal fun `helt separate utbetalingslinjer`() {
-        val original = linjer(1.januar to 5.januar grad 100 dagsats 1200)
-        val recalculated = linjer(5.februar to 9.februar grad 100 dagsats 1200)
-        val expected = linjer(5.februar to 9.februar grad 100 dagsats 1200)
-        assertUtbetalinger(expected, recalculated forskjell original)
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(5.februar to 9.februar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(5.februar to 9.februar), actual)
+        assertNotEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.NY, actual.linjertype)
     }
 
     @Test internal fun `fullstendig overskriv`() {
-        val original = linjer(8.januar to 13.januar grad 100 dagsats 1200)
-        val recalculated = linjer(1.januar to 9.februar grad 100 dagsats 1200)
-        val expected = linjer(1.januar to 9.februar grad 100 dagsats 1200)
+        val original = linjer(8.januar to 13.januar)
+        val recalculated = linjer(1.januar to 9.februar)
         val actual = recalculated forskjell original
-        assertUtbetalinger(expected, actual)
-        assertEquals(original.get<String>("utbetalingsreferanse"), actual.get<String>("utbetalingsreferanse"))
+        assertUtbetalinger(linjer(1.januar to 9.februar), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
     }
+
+    @Test internal fun `ny tom`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 13.januar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 13.januar), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+    }
+
+    private val Utbetalingslinjer.linjertype get() = this.get<Linjetype>("linjertype")
+
+    private val Utbetalingslinjer.referanse get() = this.get<String>("utbetalingsreferanse")
 
     private fun assertUtbetalinger(expected: Utbetalingslinjer, actual: Utbetalingslinjer) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
