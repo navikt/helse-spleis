@@ -8,25 +8,28 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal fun tilUtbetaltEvent(
-    vedtaksperiodeId: UUID,
     aktørId: String,
     fødselsnummer: String,
+    gruppeId: UUID,
+    vedtaksperiodeId: UUID,
     utbetaling: Utbetaling,
     forbrukteSykedager: Int
 ) = UtbetalingslinjerMapper(
-    vedtaksperiodeId = vedtaksperiodeId,
     aktørId = aktørId,
     fødselsnummer = fødselsnummer,
+    gruppeId = gruppeId,
+    vedtaksperiodeId = vedtaksperiodeId,
     utbetaling = utbetaling,
     forbrukteSykedager = forbrukteSykedager
 ).tilEvent()
 
 private class UtbetalingslinjerMapper(
-    val vedtaksperiodeId: UUID,
-    val aktørId: String,
-    val fødselsnummer: String,
-    val utbetaling: Utbetaling,
-    val forbrukteSykedager: Int
+    private val aktørId: String,
+    private val fødselsnummer: String,
+    private val gruppeId: UUID,
+    private val vedtaksperiodeId: UUID,
+    private val utbetaling: Utbetaling,
+    private val forbrukteSykedager: Int
 ) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
     private val utbetalingslinjeListe = mutableListOf<PersonObserver.Utbetalingslinje>()
@@ -36,12 +39,13 @@ private class UtbetalingslinjerMapper(
         utbetaling.accept(this)
 
         return PersonObserver.UtbetaltEvent(
-            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            gruppeId = gruppeId,
+            vedtaksperiodeId = vedtaksperiodeId,
             utbetalingslinjer = utbetalingslinjerListe.toList(),
-            forbrukteSykedager = forbrukteSykedager,
-            opprettet = opprettet
+            opprettet = opprettet,
+            forbrukteSykedager = forbrukteSykedager
         )
     }
 

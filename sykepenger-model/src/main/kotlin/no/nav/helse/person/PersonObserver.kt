@@ -36,9 +36,10 @@ interface PersonObserver {
     }
 
     data class UtbetaltEvent(
-        val vedtaksperiodeId: UUID,
         val aktørId: String,
         val fødselsnummer: String,
+        val gruppeId: UUID,
+        val vedtaksperiodeId: UUID,
         val utbetalingslinjer: List<Utbetalingslinjer>,
         val opprettet: LocalDateTime,
         val forbrukteSykedager: Int
