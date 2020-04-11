@@ -8,8 +8,9 @@ internal fun PersonObserver.UtbetaltEvent.toJson() = JsonMessage.newMessage(
         "@event_name" to "utbetalt",
         "aktørId" to this.aktørId,
         "fødselsnummer" to this.fødselsnummer,
-        "utbetaling" to this.utbetalingslinjer.map { it.toJson() },
+        "gruppeId" to this.gruppeId.toString(),
         "vedtaksperiodeId" to this.vedtaksperiodeId.toString(),
+        "utbetaling" to this.utbetalingslinjer.map { it.toJson() },
         "forbrukteSykedager" to this.forbrukteSykedager,
         "opprettet" to this.opprettet
     )

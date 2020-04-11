@@ -44,8 +44,8 @@ private class UtbetalingslinjerMapper(
             gruppeId = gruppeId,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingslinjer = utbetalingslinjerListe.toList(),
-            opprettet = opprettet,
-            forbrukteSykedager = forbrukteSykedager
+            forbrukteSykedager = forbrukteSykedager,
+            opprettet = opprettet
         )
     }
 

@@ -41,8 +41,8 @@ interface PersonObserver {
         val gruppeId: UUID,
         val vedtaksperiodeId: UUID,
         val utbetalingslinjer: List<Utbetalingslinjer>,
-        val opprettet: LocalDateTime,
-        val forbrukteSykedager: Int
+        val forbrukteSykedager: Int,
+        val opprettet: LocalDateTime
     )
 
     data class Utbetalingslinjer(
