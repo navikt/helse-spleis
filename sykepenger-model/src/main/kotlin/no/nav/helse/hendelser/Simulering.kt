@@ -24,7 +24,7 @@ class Simulering(
             simuleringResultat == null -> {
                 warn("Ingenting ble simulert")
             }
-            utbetalingslinjer.sumBy { it.dagsats } != simuleringResultat.totalbeløp.intValueExact() -> {
+            utbetalingslinjer.totalbeløp() != simuleringResultat.totalbeløp.intValueExact() -> {
                 warn("Simulering kom frem til et annet totalbeløp")
             }
             utbetalingslinjer.any { linje -> simuleringResultat.perioder.none { linje.fom == it.fom && linje.tom == it.tom } } -> {
@@ -35,6 +35,9 @@ class Simulering(
             }
         }
     }
+
+    private fun List<Utbetalingslinje>.totalbeløp() =
+        sumBy { it.dagsats * it.fom.datesUntil(it.tom.plusDays(1)).count().toInt() }
 
     class SimuleringResultat(
         internal val totalbeløp: BigDecimal,

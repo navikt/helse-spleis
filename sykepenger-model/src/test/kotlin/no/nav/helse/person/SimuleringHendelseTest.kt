@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +33,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
-        assertTrue(inspektør.personLogg.hasWarnings())
+        assertTrue(inspektør.personLogg.hasOnlyInfoAndNeeds())
     }
 
     @Test
@@ -149,7 +150,36 @@ internal class SimuleringHendelseTest {
             orgnummer = orgnummer,
             simuleringOK = simuleringOK,
             melding = "",
-            simuleringResultat = null
+            simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
+                totalbeløp = 21465.toBigDecimal(),
+                perioder = listOf(
+                    Simulering.SimulertPeriode(
+                        fom = 17.januar,
+                        tom = 31.januar,
+                        utbetalinger = listOf(
+                            Simulering.SimulertUtbetaling(
+                                forfallsdato = 1.februar,
+                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018, "Ung Person"),
+                                feilkonto = false,
+                                detaljer = listOf(
+                                    Simulering.Detaljer(
+                                        fom = 17.januar,
+                                        tom = 31.januar,
+                                        konto = "11111111111",
+                                        beløp = 21465.toBigDecimal(),
+                                        klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
+                                        uføregrad = 100,
+                                        utbetalingstype = "YTELSE",
+                                        tilbakeføring = false,
+                                        sats = Simulering.Sats(1431.toBigDecimal(), 15, "DAGLIG"),
+                                        refunderesOrgnummer = orgnummer
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         ).apply {
             hendelse = this
         }
