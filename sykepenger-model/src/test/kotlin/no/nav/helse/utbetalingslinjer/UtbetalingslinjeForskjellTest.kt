@@ -41,9 +41,23 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 13.januar), actual)
         assertEquals(original.referanse, actual.referanse)
         assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.ENDR, actual[0].linjetype)
+    }
+
+    @Test internal fun `bare flere utbetalingslinjer`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 5.januar, 15.januar to 19.januar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.NY, actual[1].linjetype)
     }
 
     private val Utbetalingslinjer.linjertype get() = this.get<Linjetype>("linjertype")
+
+    private val Utbetalingslinje.linjetype get() = this.get<Linjetype>("linjetype")
 
     private val Utbetalingslinjer.referanse get() = this.get<String>("utbetalingsreferanse")
 
