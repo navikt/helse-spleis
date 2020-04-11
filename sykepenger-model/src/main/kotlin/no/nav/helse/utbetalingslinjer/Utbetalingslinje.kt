@@ -35,8 +35,15 @@ internal class Utbetalingslinjer private constructor(
 
     internal fun referanse() = utbetalingsreferanse
 
-    infix fun forskjell(other: Utbetalingslinjer): Utbetalingslinjer {
-        return Utbetalingslinjer(mottaker, fagområde)
+    private val førstedato get() = linjer.first().fom
+
+    private val sistedato get() = linjer.last().tom
+
+    infix fun forskjell(tidligere: Utbetalingslinjer): Utbetalingslinjer {
+        return when {
+            this.førstedato > tidligere.sistedato -> this
+            else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
+        }
     }
 }
 

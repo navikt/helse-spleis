@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,10 +14,10 @@ internal class UtbetalingslinjeForskjellTest {
         private const val ORGNUMMER = "987654321"
     }
 
-    @Test internal fun `ingen forskjell`() {
+    @Test internal fun `helt separate utbetalingslinjer`() {
         val original = linjer(1.januar to 5.januar grad 100 dagsats 1200)
-        val recalculated = 1.januar to 5.januar grad 100 dagsats 1200
-        val expected = Utbetalingslinjer(ORGNUMMER, SPREF)
+        val recalculated = linjer(5.februar to 9.februar grad 100 dagsats 1200)
+        val expected = linjer(5.februar to 9.februar grad 100 dagsats 1200)
         assertUtbetalinger(expected, recalculated forskjell original)
     }
 
