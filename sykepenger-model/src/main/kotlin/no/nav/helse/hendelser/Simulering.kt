@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -17,8 +18,22 @@ class Simulering(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    fun valider() = aktivitetslogg.apply {
+    internal fun valider(utbetalingslinjer: List<Utbetalingslinje>) = aktivitetslogg.apply {
         if (!simuleringOK) error("Feil under simulering: %s", melding)
+        when {
+            simuleringResultat == null -> {
+                warn("Ingenting ble simulert")
+            }
+            utbetalingslinjer.sumBy { it.dagsats } != simuleringResultat.totalbeløp.intValueExact() -> {
+                warn("Simulering kom frem til et annet totalbeløp")
+            }
+            utbetalingslinjer.any { linje -> simuleringResultat.perioder.none { linje.fom == it.fom && linje.tom == it.tom } } -> {
+                warn("Simulering inneholder ikke alle periodene som skal betales")
+            }
+            utbetalingslinjer.size != simuleringResultat.perioder.size -> {
+                warn("Simulering inneholder flere perioder")
+            }
+        }
     }
 
     class SimuleringResultat(

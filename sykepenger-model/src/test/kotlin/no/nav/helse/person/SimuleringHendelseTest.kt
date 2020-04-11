@@ -4,6 +4,7 @@ import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -31,6 +32,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertTrue(inspektør.personLogg.hasWarnings())
     }
 
     @Test
@@ -38,6 +40,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering(false))
         assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        assertTrue(inspektør.personLogg.hasWarnings())
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {

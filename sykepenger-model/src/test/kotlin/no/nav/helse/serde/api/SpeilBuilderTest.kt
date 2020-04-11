@@ -202,21 +202,6 @@ internal class SpeilBuilderTest {
     }
 
     @Test
-    fun aktivitetslogger() {
-        val (person, _) = person()
-        sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, _) ->
-            person.håndter(sykmelding)
-        }
-
-        val mappetPerson = serializePersonForSpeil(person)
-
-        assertEquals(
-            1,
-            (mappetPerson.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.size
-        )
-    }
-
-    @Test
     fun `hvis første vedtaksperiode er ferdigbehandlet arbeidsgiverperiode vises den som ferdigbehandlet`() {
         val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -304,8 +289,6 @@ internal class SpeilBuilderTest {
 
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
-
-        assertTrue(vedtaksperiode.aktivitetslogg.isEmpty(), "Aktivitetsloggen skal være tom")
     }
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {

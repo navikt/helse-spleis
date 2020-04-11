@@ -853,7 +853,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider().hasErrors()) {
+            if (simulering.valider(vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer()).hasErrors()) {
                 if (utenforÅpningstid())
                     return simulering.info("Simulering feilet, men Oppdragsystemet har stengt og simulering utsettes til Oppdragsystemet har åpnet")
                 return simulering.info("Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt")
