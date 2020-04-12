@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -37,7 +38,10 @@ class Simulering(
     }
 
     private fun List<Utbetalingslinje>.totalbeløp() =
-        sumBy { it.dagsats * it.fom.datesUntil(it.tom.plusDays(1)).count().toInt() }
+        sumBy { it.dagsats * it.antallDagerUtenHelg() }
+
+    private fun Utbetalingslinje.antallDagerUtenHelg() =
+        fom.datesUntil(tom.plusDays(1)).filter { !it.erHelg() }.count().toInt()
 
     class SimuleringResultat(
         internal val totalbeløp: BigDecimal,
