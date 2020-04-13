@@ -16,7 +16,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.LagreUtbetalingDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJsonNode
@@ -70,7 +69,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             rapidsConnection = testRapid,
             personRepository = PersonPostgresRepository(dataSource),
             lagrePersonDao = LagrePersonDao(dataSource),
-            lagreUtbetalingDao = LagreUtbetalingDao(dataSource),
             hendelseRecorder = HendelseRecorder(dataSource)
         )
     }

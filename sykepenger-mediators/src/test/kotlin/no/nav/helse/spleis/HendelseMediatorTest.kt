@@ -188,7 +188,6 @@ internal class HendelseMediatorTest {
                 rapidsConnection = testRapid,
                 personRepository = this,
                 lagrePersonDao = mockk(relaxed = true),
-                lagreUtbetalingDao = mockk(relaxed = true),
                 hendelseRecorder = mockk(relaxed = true)
             )
         }

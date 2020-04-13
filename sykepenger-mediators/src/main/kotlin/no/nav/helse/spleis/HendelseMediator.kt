@@ -9,7 +9,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.LagreUtbetalingDao
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
@@ -23,14 +22,13 @@ internal class HendelseMediator(
     rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
     private val lagrePersonDao: LagrePersonDao,
-    lagreUtbetalingDao: LagreUtbetalingDao,
     private val hendelseRecorder: HendelseRecorder
 ) : Parser.ParserDirector {
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val parser = Parser(this, rapidsConnection)
 
-    private val personMediator = PersonMediator(rapidsConnection, lagreUtbetalingDao)
+    private val personMediator = PersonMediator(rapidsConnection)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
     private val messageProcessor = HendelseProcessor(this)
 
@@ -111,29 +109,32 @@ internal class HendelseMediator(
         }
     }
 
-    private class PersonMediator(
-        private val rapidsConnection: RapidsConnection,
-        private val lagreUtbetalingDao: LagreUtbetalingDao
-    ) : PersonObserver {
+    private class PersonMediator(private val rapidsConnection: RapidsConnection) : PersonObserver {
+
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-            rapidsConnection.publish(påminnelse.fødselsnummer(), påminnelse.toJson())
+            publish(påminnelse.fødselsnummer(), påminnelse.toJson())
         }
 
         override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-            rapidsConnection.publish(event.fødselsnummer, event.toJson())
+            publish(event.fødselsnummer, event.toJson())
         }
 
         override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-            rapidsConnection.publish(event.fødselsnummer, event.toJson())
+            publish(event.fødselsnummer, event.toJson())
         }
 
         override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-            rapidsConnection.publish(vedtaksperiodeEvent.fødselsnummer, vedtaksperiodeEvent.toJson())
+            publish(vedtaksperiodeEvent.fødselsnummer, vedtaksperiodeEvent.toJson())
         }
 
         override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-            rapidsConnection.publish(event.fødselsnummer, event.toJson())
+            publish(event.fødselsnummer, event.toJson())
+        }
+
+        private fun publish(fødselsnummer: String, message: String) {
+            rapidsConnection.publish(fødselsnummer, message.also { sikkerLogg.info("sender $it") })
         }
     }
 }

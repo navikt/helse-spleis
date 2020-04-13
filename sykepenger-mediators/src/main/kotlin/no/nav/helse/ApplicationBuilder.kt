@@ -5,7 +5,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.LagreUtbetalingDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 
 // Understands how to build our application server
@@ -17,7 +16,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val hendelseRecorder = HendelseRecorder(dataSource)
     private val personRepository = PersonPostgresRepository(dataSource)
     private val lagrePersonDao = LagrePersonDao(dataSource)
-    private val lagreUtbetalingDao = LagreUtbetalingDao(dataSource)
 
     private val rapidsConnection = RapidApplication.create(env)
 
@@ -27,7 +25,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             rapidsConnection = rapidsConnection,
             personRepository = personRepository,
             lagrePersonDao = lagrePersonDao,
-            lagreUtbetalingDao = lagreUtbetalingDao,
             hendelseRecorder = hendelseRecorder
         )
     }
