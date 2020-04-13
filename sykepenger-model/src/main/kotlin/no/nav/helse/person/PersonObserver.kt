@@ -30,7 +30,7 @@ interface PersonObserver {
         val sykdomshendelse: ArbeidstakerHendelse,
         val aktivitetslogg: Aktivitetslogg,
         val timeout: Duration,
-        val hendelsesIder: Set<UUID>
+        val hendelser: Set<UUID>
     ) {
         val endringstidspunkt = LocalDateTime.now()
     }

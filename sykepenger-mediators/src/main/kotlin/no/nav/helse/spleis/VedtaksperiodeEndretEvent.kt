@@ -16,7 +16,7 @@ internal fun PersonObserver.VedtaksperiodeEndretTilstandEvent.toJson() = JsonMes
     "på_grunn_av" to (this.sykdomshendelse::class.simpleName ?: "UKJENT"),
     "aktivitetslogg" to this.aktivitetslogg.toMap(),
     "timeout" to this.timeout.toSeconds(),
-    "hendelsesIder" to this.hendelsesIder
+    "hendelser" to this.hendelser
 )).toJson()
 
 

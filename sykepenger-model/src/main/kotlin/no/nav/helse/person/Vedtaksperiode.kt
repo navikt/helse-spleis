@@ -298,14 +298,14 @@ internal class Vedtaksperiode private constructor(
         previousState: TilstandType,
         varighet: Duration
     ) {
-        val hendelsesIder = mutableSetOf<UUID>()
+        val hendelser = mutableSetOf<UUID>()
         sykdomshistorikk.accept(object : SykdomshistorikkVisitor {
             override fun postVisitSykdomshistorikkElement(
                 element: Sykdomshistorikk.Element,
                 id: UUID,
                 tidsstempel: LocalDateTime
             ) {
-                hendelsesIder.add(id)
+                hendelser.add(id)
             }
         })
         val event = PersonObserver.VedtaksperiodeEndretTilstandEvent(
@@ -318,7 +318,7 @@ internal class Vedtaksperiode private constructor(
             sykdomshendelse = tidslinjeEvent,
             aktivitetslogg = tidslinjeEvent.aktivitetslogg,
             timeout = varighet,
-            hendelsesIder = hendelsesIder
+            hendelser = hendelser
         )
 
         person.vedtaksperiodeEndret(event)
