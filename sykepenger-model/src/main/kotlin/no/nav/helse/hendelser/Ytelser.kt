@@ -4,6 +4,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import java.time.LocalDate
 import java.util.*
 
@@ -22,7 +23,8 @@ class Ytelser(
 
     internal fun foreldrepenger() = foreldrepermisjon
 
-    fun valider(førsteFraværsdag: LocalDate? = null) = utbetalingshistorikk.valider(førsteFraværsdag)
+    internal fun valider(arbeidsgivertidslinje: Sykdomstidslinje, førsteFraværsdag: LocalDate? = null) =
+        utbetalingshistorikk.valider(arbeidsgivertidslinje, førsteFraværsdag)
 
     internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
         utbetalingshistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)

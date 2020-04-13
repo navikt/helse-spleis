@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -33,8 +34,18 @@ class Utbetalingshistorikk(
     internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) =
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
 
-    internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
-        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(aktivitetslogg) }
+    internal fun valider(arbeidsgivertidslinje: Sykdomstidslinje, førsteFraværsdag: LocalDate?): Aktivitetslogg {
+        utbetalinger.filtrerUtbetalinger(førsteFraværsdag)
+            .onEach { it.valider(aktivitetslogg) }
+            .maxBy { it.tom }
+            ?.tom
+            ?.also { sisteUtbetalteDag ->
+                val førsteDag = arbeidsgivertidslinje.førsteDag()
+                if (sisteUtbetalteDag >= førsteDag)
+                    aktivitetslogg.error("Hele eller deler av perioden til arbeidsgiver er utbetalt i Infotrygd")
+                else if (sisteUtbetalteDag >= førsteDag.minusDays(18))
+                    aktivitetslogg.error("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
+            }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         return aktivitetslogg
     }

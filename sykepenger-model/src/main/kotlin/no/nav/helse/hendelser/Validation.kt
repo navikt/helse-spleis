@@ -38,15 +38,12 @@ internal interface Valideringssteg {
     fun feilmelding(): String? = null
 }
 
-internal class ValiderYtelser(private val arbeidsgivertidslinje: Sykdomstidslinje, private val ytelser: Ytelser, private val førsteFraværsdag: LocalDate?) : Valideringssteg {
+internal class ValiderYtelser(
+    private val arbeidsgivertidslinje: Sykdomstidslinje,
+    private val ytelser: Ytelser,
+    private val førsteFraværsdag: LocalDate?) : Valideringssteg {
     override fun isValid(): Boolean {
-        if (ytelser.valider(førsteFraværsdag).hasBehov()) return false
-        val sisteUtbetalteDag = ytelser.utbetalingshistorikk().sisteUtbetalteDag(førsteFraværsdag) ?: return true
-        when {
-            sisteUtbetalteDag >= arbeidsgivertidslinje.førsteDag() -> ytelser.error("Hele eller deler av perioden til arbeidsgiver er utbetalt i Infotrygd")
-            sisteUtbetalteDag >= arbeidsgivertidslinje.førsteDag().minusDays(18) -> ytelser.error("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
-        }
-        return !ytelser.hasErrors()
+        return !ytelser.valider(arbeidsgivertidslinje, førsteFraværsdag).hasErrors()
     }
 }
 

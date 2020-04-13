@@ -2,7 +2,7 @@ package no.nav.helse.unit.spleis.hendelser.model
 
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.YtelserMessage
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -10,29 +10,17 @@ class YtelserMessageTest {
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-        YtelserMessage(json, MessageProblems("{}")).asYtelser().also {
-            it.valider()
-            assertFalse(it.hasErrors())
-            assertEquals(0, it.aktivitetsteller())
-        }
+        assertDoesNotThrow { YtelserMessage(json, MessageProblems("{}")).asYtelser() }
     }
 
     @Test
-    fun `ukjente perioder gir feil i mapping`() {
-        YtelserMessage(ukjentPeriode, MessageProblems("{}")).asYtelser().also {
-            it.valider()
-            assertTrue(it.hasErrors())
-            assertEquals(1, it.aktivitetsteller())
-        }
+    fun `håndterer ukjente perioder`() {
+        assertDoesNotThrow { YtelserMessage(ukjentPeriode, MessageProblems("{}")).asYtelser() }
     }
 
     @Test
-    fun `ugyldig periode gir feil i mapping`() {
-        YtelserMessage(ugyldigPeriode, MessageProblems("{}")).asYtelser().also {
-            it.valider()
-            assertTrue(it.hasErrors())
-            assertEquals(2, it.aktivitetsteller())
-        }
+    fun `håndterer ugyldig periode`() {
+        assertDoesNotThrow { YtelserMessage(ugyldigPeriode, MessageProblems("{}")).asYtelser() }
     }
 }
 

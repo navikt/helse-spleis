@@ -2,11 +2,12 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -161,8 +162,56 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.januar)
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.januar, 100.0))), 1.januar)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+    }
+
+    @Test
+    fun `Utbetalinger i Infotrygd som overlapper med tidslinjen`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            graderingsliste = graderingsliste,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.januar, 100.0))), 1.januar)
+        assertTrue(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+    }
+
+    @Test
+    fun `Utbetalinger i Infotrygd som er nærmere enn 18 dager fra tidslinjen`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            graderingsliste = graderingsliste,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(28.januar, 100.0))), 28.januar)
+        assertTrue(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+    }
+
+    @Test
+    fun `Utbetalinger i Infotrygd som er eldre enn 18 dager fra tidslinjen`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            graderingsliste = graderingsliste,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(29.januar, 100.0))), 29.januar)
+        assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
     }
 
     @Test
@@ -178,7 +227,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.august)
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.august, 100.0))), 1.august)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
@@ -194,7 +243,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.august)
+        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.august, 100.0))), 1.august)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
