@@ -25,7 +25,8 @@ internal class UtbetalingReflectTest {
             ORGNUMMER,
             tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
             4.januar,
-            Aktivitetslogg()
+            Aktivitetslogg(),
+            null
         )
         ).toMap()
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")

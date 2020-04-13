@@ -25,6 +25,15 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Linjetype.NY, actual.linjertype)
     }
 
+    @Test internal fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
+        val original = Utbetalingslinjer(ORGNUMMER, SPREF)
+        val recalculated = linjer(5.februar to 9.februar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(5.februar to 9.februar), actual)
+        assertNotEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.NY, actual.linjertype)
+    }
+
     @Test internal fun `fullstendig overskriv`() {
         val original = linjer(8.januar to 13.januar)
         val recalculated = linjer(1.januar to 9.februar)

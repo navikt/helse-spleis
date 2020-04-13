@@ -356,6 +356,9 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun utbetaling() =
+        arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -853,7 +856,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider(vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer().removeUEND()).hasErrors()) {
+            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverUtbetalingslinjer().removeUEND()).hasErrors()) {
                 if (utenforÅpningstid())
                     return simulering.info("Simulering feilet, men Oppdragsystemet har stengt og simulering utsettes til Oppdragsystemet har åpnet")
                 return simulering.info("Teknisk info: Simulering hadde feil, ignorerte resultatet og prøvde på nytt")
@@ -865,7 +868,7 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                utbetalingslinjer = vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer().removeUEND(),
+                utbetalingslinjer = vedtaksperiode.utbetaling().arbeidsgiverUtbetalingslinjer().removeUEND(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 saksbehandler = vedtaksperiode.godkjentAv
             )
@@ -931,7 +934,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             utbetaling(
                 hendelse,
-                vedtaksperiode.arbeidsgiver.utbetaling().arbeidsgiverUtbetalingslinjer(),
+                vedtaksperiode.utbetaling().arbeidsgiverUtbetalingslinjer(),
                 requireNotNull(vedtaksperiode.maksdato),
                 vedtaksperiode.godkjentAv
             )
@@ -950,7 +953,7 @@ internal class Vedtaksperiode private constructor(
                     fødselsnummer = vedtaksperiode.fødselsnummer,
                     gruppeId = vedtaksperiode.gruppeId,
                     vedtaksperiodeId = vedtaksperiode.id,
-                    utbetaling = vedtaksperiode.arbeidsgiver.utbetaling(),
+                    utbetaling = vedtaksperiode.utbetaling(),
                     forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager)
                 )
 

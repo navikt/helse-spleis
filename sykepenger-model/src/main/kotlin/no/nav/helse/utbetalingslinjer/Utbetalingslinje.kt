@@ -36,9 +36,9 @@ internal class Utbetalingslinjer private constructor(
 
     internal fun referanse() = utbetalingsreferanse
 
-    private val førstedato get() = linjer.first().fom
+    private val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 
-    private val sistedato get() = linjer.last().tom
+    private val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 
     internal fun removeUEND() = Utbetalingslinjer(
         mottaker,
@@ -53,6 +53,8 @@ internal class Utbetalingslinjer private constructor(
 
     infix fun forskjell(tidligere: Utbetalingslinjer): Utbetalingslinjer {
         return when {
+            this.isEmpty() ->
+                this
             this.førstedato > tidligere.sistedato ->
                 this
             this.førstedato < tidligere.førstedato && this.sistedato >= tidligere.sistedato ->

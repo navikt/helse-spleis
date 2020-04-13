@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
 import java.time.LocalDate
@@ -21,11 +22,12 @@ internal class Utbetaling
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         sisteDato: LocalDate,
-        aktivitetslogg: Aktivitetslogg
+        aktivitetslogg: Aktivitetslogg,
+        tidligere: Utbetaling?
     ) : this(
         utbetalingstidslinje,
-        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg),
+        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
+        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
         LocalDateTime.now()
     )
 
@@ -39,22 +41,27 @@ internal class Utbetaling
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: Aktivitetslogg
+            aktivitetslogg: Aktivitetslogg,
+            tidligere: Utbetaling?
         ) = Utbetalingslinjer(
-                organisasjonsnummer,
-                Fagområde.SPREF,
-                SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()).also {
-            if (it.isEmpty())
-                aktivitetslogg.info("Ingen utbetalingslinjer bygget")
-            else
-                aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
-        }
+            organisasjonsnummer,
+            SPREF,
+            SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()
+        )
+            .forskjell(tidligere?.arbeidsgiverUtbetalingslinjer ?: Utbetalingslinjer(organisasjonsnummer, SPREF))
+            .also {
+                if (it.isEmpty())
+                    aktivitetslogg.info("Ingen utbetalingslinjer bygget")
+                else
+                    aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
+            }
 
         private fun buildPerson(
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: Aktivitetslogg
+            aktivitetslogg: Aktivitetslogg,
+            tidligere: Utbetaling?
         ): Utbetalingslinjer {
             return Utbetalingslinjer(fødselsnummer, Fagområde.SP)
         }

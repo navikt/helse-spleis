@@ -40,7 +40,8 @@ internal class ArbeidsgiverUtbetalinger(
                 organisasjonsnummer,
                 utbetalingstidslinje,
                 periode.endInclusive,
-                aktivitetslogg
+                aktivitetslogg,
+                arbeidsgiver.utbetaling()
             ))
         }
     }

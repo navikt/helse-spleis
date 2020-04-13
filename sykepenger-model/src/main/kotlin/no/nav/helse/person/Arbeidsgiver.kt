@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,11 +40,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun utbetaling() = utbetalinger.last()
+    internal fun utbetaling() = utbetalinger.lastOrNull()
 
-    internal fun referanse(type: Fagområde) = type.referanse(utbetaling())
-
-    internal fun nåværendeTidslinje() = utbetaling().utbetalingstidslinje()
+    internal fun nåværendeTidslinje() =
+        utbetaling()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
     internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
 
