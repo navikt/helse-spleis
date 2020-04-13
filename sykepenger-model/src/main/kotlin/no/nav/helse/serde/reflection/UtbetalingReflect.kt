@@ -19,21 +19,6 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     )
 }
 
-internal class OppdragReflect(
-    private val utbetaling: Utbetaling,
-    private val maksdato: LocalDate,
-    private val saksbehandler: String
-) {
-    internal fun toMap(): MutableMap<String, Any> = mutableMapOf(
-        "utbetalingslinjer" to
-            UtbetalingslinjerReflect(utbetaling
-                .get<Utbetalingslinjer>("arbeidsgiverUtbetalingslinjer").removeUEND())
-                .toMap(),
-        "maksdato" to maksdato.toString(),
-        "saksbehandler" to saksbehandler
-    )
-}
-
 internal class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to utbetalingslinjer["mottaker"],

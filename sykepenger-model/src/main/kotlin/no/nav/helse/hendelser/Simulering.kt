@@ -1,8 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -19,7 +18,7 @@ class Simulering(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(utbetalingslinjer: List<Utbetalingslinje>) = aktivitetslogg.apply {
+    internal fun valider(utbetalingslinjer: Utbetalingslinjer) = aktivitetslogg.apply {
         if (!simuleringOK) error("Feil under simulering: %s", melding)
         when {
             simuleringResultat == null -> {
@@ -36,12 +35,6 @@ class Simulering(
             }
         }
     }
-
-    private fun List<Utbetalingslinje>.totalbeløp() =
-        sumBy { it.dagsats * it.antallDagerUtenHelg() }
-
-    private fun Utbetalingslinje.antallDagerUtenHelg() =
-        fom.datesUntil(tom.plusDays(1)).filter { !it.erHelg() }.count().toInt()
 
     class SimuleringResultat(
         internal val totalbeløp: BigDecimal,

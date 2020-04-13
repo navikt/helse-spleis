@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Klassekode.Arbeidsgiverlinje
 import no.nav.helse.utbetalingslinjer.Linjetype.*
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
@@ -47,6 +48,8 @@ internal class Utbetalingslinjer private constructor(
         linjertype,
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
+
+    internal fun totalbeløp() = this.sumBy { it.totalbeløp() }
 
     infix fun forskjell(tidligere: Utbetalingslinjer): Utbetalingslinjer {
         return when {
@@ -138,6 +141,14 @@ internal class Utbetalingslinje internal constructor(
         this.delytelseId = other.delytelseId + 1
         this.refDelytelseId = other.delytelseId
     }
+
+    internal fun totalbeløp() = dagsats * antallDager()
+
+    private fun antallDager() = fom
+        .datesUntil(tom.plusDays(1))
+        .filter { !it.erHelg() }
+        .count()
+        .toInt()
 
     override fun equals(other: Any?) = other is Utbetalingslinje && this.equals(other)
 
