@@ -4,6 +4,7 @@ import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +17,7 @@ internal class SimuleringHendelseTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "12345"
         private val førsteSykedag = 1.januar
-        private val sisteSykedag = 31.januar
+        private val sisteSykedag = 28.februar
     }
 
     private lateinit var person: Person
@@ -150,7 +151,7 @@ internal class SimuleringHendelseTest {
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
-                totalbeløp = 15741.toBigDecimal(),
+                totalbeløp = 44361.toBigDecimal(),
                 perioder = listOf(
                     Simulering.SimulertPeriode(
                         fom = 17.januar,
@@ -171,6 +172,31 @@ internal class SimuleringHendelseTest {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(1431.toBigDecimal(), 11, "DAGLIG"),
+                                        refunderesOrgnummer = orgnummer
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    Simulering.SimulertPeriode(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        utbetalinger = listOf(
+                            Simulering.SimulertUtbetaling(
+                                forfallsdato = 1.mars,
+                                utbetalesTil = Simulering.Mottaker(UNG_PERSON_FNR_2018, "Ung Person"),
+                                feilkonto = false,
+                                detaljer = listOf(
+                                    Simulering.Detaljer(
+                                        fom = 17.januar,
+                                        tom = 31.januar,
+                                        konto = "11111111111",
+                                        beløp = 28620.toBigDecimal(),
+                                        klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
+                                        uføregrad = 100,
+                                        utbetalingstype = "YTELSE",
+                                        tilbakeføring = false,
+                                        sats = Simulering.Sats(1431.toBigDecimal(), 20, "DAGLIG"),
                                         refunderesOrgnummer = orgnummer
                                     )
                                 )

@@ -27,11 +27,8 @@ class Simulering(
             utbetalingslinjer.totalbeløp() != simuleringResultat.totalbeløp.intValueExact() -> {
                 warn("Simulering kom frem til et annet totalbeløp")
             }
-            utbetalingslinjer.any { linje -> simuleringResultat.perioder.none { linje.fom == it.fom && linje.tom == it.tom } } -> {
+            simuleringResultat.perioder.map { Periode(it.fom, it.tom) }.any { periode -> utbetalingslinjer.none { periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
-            }
-            utbetalingslinjer.size != simuleringResultat.perioder.size -> {
-                warn("Simulering inneholder flere perioder")
             }
         }
     }
