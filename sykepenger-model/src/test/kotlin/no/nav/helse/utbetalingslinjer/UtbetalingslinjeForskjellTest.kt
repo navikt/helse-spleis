@@ -51,7 +51,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
         assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.UEND, actual[0].linjetype)
         assertEquals(Linjetype.NY, actual[1].linjetype)
     }
 
@@ -97,7 +97,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
         assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.UEND, actual[0].linjetype)
         assertEquals(Linjetype.ENDR, actual[1].linjetype)
         assertEquals(Linjetype.NY, actual[2].linjetype)
         assertEquals(Linjetype.NY, actual[3].linjetype)
@@ -125,7 +125,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
         assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.KUN_SPLEIS, actual[0].linjetype)
+        assertEquals(Linjetype.UEND, actual[0].linjetype)
         assertEquals(Linjetype.ENDR, actual[1].linjetype)
         assertEquals(Linjetype.NY, actual[2].linjetype)
         assertEquals(Linjetype.NY, actual[3].linjetype)

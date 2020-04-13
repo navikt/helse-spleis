@@ -39,6 +39,15 @@ internal class Utbetalingslinjer private constructor(
 
     private val sistedato get() = linjer.last().tom
 
+    internal fun removeUEND() = Utbetalingslinjer(
+        mottaker,
+        fagområde,
+        linjer.filter { it.erForskjell() },
+        utbetalingsreferanse,
+        linjertype,
+        linjer.hashCode() * 67 + mottaker.hashCode()
+    )
+
     infix fun forskjell(tidligere: Utbetalingslinjer): Utbetalingslinjer {
         return when {
             this.førstedato > tidligere.sistedato ->
@@ -150,7 +159,7 @@ internal class Utbetalingslinje internal constructor(
             grad.hashCode()
     }
 
-    internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(KUN_SPLEIS, tidligere)
+    internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
 
     internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
 
@@ -160,10 +169,12 @@ internal class Utbetalingslinje internal constructor(
         this.klassekode = tidligere.klassekode
         this.linjetype = linjetype
     }
+
+    internal fun erForskjell() = linjetype != UEND
 }
 
 internal enum class Linjetype {
-    NY, UEND, ENDR, KUN_SPLEIS
+    NY, UEND, ENDR
 }
 
 internal enum class Klassekode(internal val verdi: String) {

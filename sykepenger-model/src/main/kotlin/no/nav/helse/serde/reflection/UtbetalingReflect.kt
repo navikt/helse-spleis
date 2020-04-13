@@ -26,7 +26,9 @@ internal class OppdragReflect(
 ) {
     internal fun toMap(): MutableMap<String, Any> = mutableMapOf(
         "utbetalingslinjer" to
-            UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
+            UtbetalingslinjerReflect(utbetaling
+                .get<Utbetalingslinjer>("arbeidsgiverUtbetalingslinjer").removeUEND())
+                .toMap(),
         "maksdato" to maksdato.toString(),
         "saksbehandler" to saksbehandler
     )
