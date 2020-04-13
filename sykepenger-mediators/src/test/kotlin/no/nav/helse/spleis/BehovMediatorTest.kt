@@ -8,6 +8,7 @@ import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.hendelser.model.HendelseMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,6 +28,8 @@ internal class BehovMediatorTest {
         private val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
+
+        private val message = mockk<HendelseMessage>(relaxed = true)
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -74,7 +77,7 @@ internal class BehovMediatorTest {
         hendelse.kontekst(TestKontekst("Tilstand", "Tilstand 2"))
         hendelse.behov(Utbetaling, "Skal utbetale")
 
-        behovMediator.håndter(hendelse)
+        behovMediator.håndter(message, hendelse)
 
         assertEquals(2, messages.size)
         assertEquals(fødselsnummer, messages[0].first)
@@ -124,7 +127,7 @@ internal class BehovMediatorTest {
             "historikkFom" to LocalDate.now()
         ))
 
-        assertDoesNotThrow { behovMediator.håndter(hendelse) }
+        assertDoesNotThrow { behovMediator.håndter(message, hendelse) }
     }
 
     @Test
@@ -142,7 +145,7 @@ internal class BehovMediatorTest {
             "historikkFom" to LocalDate.now()
         ))
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(hendelse) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(message, hendelse) }
     }
 
     @Test
@@ -156,7 +159,7 @@ internal class BehovMediatorTest {
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(hendelse) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(message, hendelse) }
     }
 
     private class TestKontekst(

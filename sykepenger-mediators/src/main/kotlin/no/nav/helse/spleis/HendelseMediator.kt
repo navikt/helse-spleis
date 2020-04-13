@@ -1,10 +1,8 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
@@ -14,6 +12,8 @@ import no.nav.helse.spleis.hendelser.Parser
 import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import java.time.LocalDateTime
+import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -80,23 +80,23 @@ internal class HendelseMediator(
         sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
-    internal fun person(arbeidstakerHendelse: ArbeidstakerHendelse): Person {
-        return (personRepository.hentPerson(arbeidstakerHendelse.fødselsnummer()) ?: Person(
-            aktørId = arbeidstakerHendelse.aktørId(),
-            fødselsnummer = arbeidstakerHendelse.fødselsnummer()
+    internal fun person(message: HendelseMessage, hendelse: ArbeidstakerHendelse): Person {
+        return (personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
+            aktørId = hendelse.aktørId(),
+            fødselsnummer = hendelse.fødselsnummer()
         )).also {
-            it.addObserver(personMediator)
+            personMediator.observer(it, message, hendelse)
             it.addObserver(VedtaksperiodeProbe)
         }
     }
 
-    internal fun finalize(person: Person, hendelse: ArbeidstakerHendelse) {
+    internal fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
         lagrePersonDao.lagrePerson(person, hendelse)
 
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
-        behovMediator.håndter(hendelse)
+        behovMediator.håndter(message, hendelse)
     }
 
     private fun withMDC(context: Map<String, String>, block: () -> Unit) {
@@ -109,32 +109,100 @@ internal class HendelseMediator(
         }
     }
 
-    private class PersonMediator(private val rapidsConnection: RapidsConnection) : PersonObserver {
+    private class PersonMediator(private val rapidsConnection: RapidsConnection) {
 
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-            publish(påminnelse.fødselsnummer(), påminnelse.toJson())
-        }
-
-        override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-            publish(event.fødselsnummer, event.toJson())
-        }
-
-        override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-            publish(event.fødselsnummer, event.toJson())
-        }
-
-        override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-            publish(vedtaksperiodeEvent.fødselsnummer, vedtaksperiodeEvent.toJson())
-        }
-
-        override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-            publish(event.fødselsnummer, event.toJson())
+        fun observer(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
+            person.addObserver(Observatør(message, hendelse))
         }
 
         private fun publish(fødselsnummer: String, message: String) {
             rapidsConnection.publish(fødselsnummer, message.also { sikkerLogg.info("sender $it") })
+        }
+
+        private inner class Observatør(
+            private val message: HendelseMessage,
+            private val hendelse: ArbeidstakerHendelse
+        ): PersonObserver {
+            override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+                publish("vedtaksperiode_påminnet", JsonMessage.newMessage(mapOf(
+                    "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
+                    "tilstand" to påminnelse.tilstand(),
+                    "antallGangerPåminnet" to påminnelse.antallGangerPåminnet(),
+                    "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt(),
+                    "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt(),
+                    "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt()
+                )))
+            }
+
+            override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
+                publish("vedtaksperiode_endret", JsonMessage.newMessage(mapOf(
+                    "vedtaksperiodeId" to event.id,
+                    "gjeldendeTilstand" to event.gjeldendeTilstand,
+                    "forrigeTilstand" to event.forrigeTilstand,
+                    "endringstidspunkt" to event.endringstidspunkt,
+                    "på_grunn_av" to (event.sykdomshendelse::class.simpleName ?: "UKJENT"),
+                    "aktivitetslogg" to event.aktivitetslogg.toMap(),
+                    "timeout" to event.timeout.toSeconds(),
+                    "hendelser" to event.hendelser
+                )))
+            }
+
+            override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
+                publish("utbetalt", JsonMessage.newMessage(mapOf(
+                    "gruppeId" to event.gruppeId.toString(),
+                    "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
+                    "utbetaling" to event.utbetalingslinjer.map {
+                        mapOf(
+                            "utbetalingsreferanse" to it.utbetalingsreferanse,
+                            "utbetalingslinjer" to it.utbetalingslinjer.map {
+                                mapOf(
+                                    "fom" to it.fom,
+                                    "tom" to it.tom,
+                                    "dagsats" to it.dagsats,
+                                    "grad" to it.grad
+                                )
+                            }
+                        )
+                    },
+                    "forbrukteSykedager" to event.forbrukteSykedager,
+                    "opprettet" to event.opprettet
+                )))
+            }
+
+            override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
+                publish("vedtaksperiode_ikke_funnet", JsonMessage.newMessage(mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
+                )))
+            }
+
+            override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
+                publish("trenger_inntektsmelding", JsonMessage.newMessage(mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "opprettet" to event.opprettet,
+                    "fom" to event.fom,
+                    "tom" to event.tom
+                )))
+            }
+
+            private fun leggPåStandardfelter(event: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {
+                this["@event_name"] = event
+                this["@id"] = UUID.randomUUID()
+                this["@opprettet"] = LocalDateTime.now()
+                this["@forårsaket_av"] = mapOf(
+                    "@event_name" to message.navn,
+                    "@id" to message.id,
+                    "@opprettet" to message.opprettet
+                )
+                this["aktørId"] = hendelse.aktørId()
+                this["fødselsnummer"] = hendelse.fødselsnummer()
+                this["organisasjonsnummer"] = hendelse.organisasjonsnummer()
+            }
+
+            private fun publish(event: String, outgoingMessage: JsonMessage) {
+                publish(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
+            }
         }
     }
 }

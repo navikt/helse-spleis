@@ -61,7 +61,7 @@ internal class ParserTest : Parser.ParserDirector {
             requireKey("key")
             message2 = this
         }
-        parser.onMessage("{\"@id\": \"foo\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
+        parser.onMessage("{\"@id\": \"${UUID.randomUUID()}\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
 
         assertEquals(message2, recognizedMessage)
         assertTrue(messageProblems.isEmpty())
@@ -76,7 +76,7 @@ internal class ParserTest : Parser.ParserDirector {
         }
         messageFactory("key")
 
-        parser.onMessage("{\"@id\": \"foo\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
+        parser.onMessage("{\"@id\": \"${UUID.randomUUID()}\", \"@event_name\": \"foo\", \"@opprettet\": \"${LocalDateTime.now()}\", \"key\": \"value\"}", context)
 
         assertEquals(message1, recognizedMessage)
     }
@@ -151,7 +151,6 @@ internal class ParserTest : Parser.ParserDirector {
     }
 
     private class TestMessage(originalJson: String, problems: MessageProblems) : HendelseMessage(originalJson, problems) {
-        override val id = UUID.randomUUID()
         override val fødselsnummer = UUID.randomUUID().toString()
     }
 }

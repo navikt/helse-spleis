@@ -61,10 +61,11 @@ interface PersonObserver {
         val vedtaksperiodeId: UUID,
         val fødselsnummer: String,
         val organisasjonsnummer: String,
-        val opprettet: LocalDateTime,
         val fom: LocalDate,
         val tom: LocalDate
-    )
+    ) {
+        val opprettet = LocalDateTime.now()
+    }
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 

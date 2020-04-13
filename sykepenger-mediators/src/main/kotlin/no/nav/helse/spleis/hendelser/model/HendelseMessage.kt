@@ -16,7 +16,10 @@ internal abstract class HendelseMessage(originalMessage: String, problems: Messa
         require("@opprettet", JsonNode::asLocalDateTime)
     }
 
-    internal open val id: UUID get() = UUID.fromString(this["@id"].asText())
+    internal val id: UUID get() = UUID.fromString(this["@id"].asText())
+    internal val navn get() = this["@event_name"].asText()
+    internal val opprettet get() = this["@opprettet"].asLocalDateTime()
+
     internal abstract val fødselsnummer: String
 
     open fun accept(processor: MessageProcessor) {}
