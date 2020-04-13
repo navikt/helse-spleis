@@ -180,6 +180,13 @@ class UtbetalingshistorikkPeriodeTest {
     }
 
     @Test
+    fun `Ukjent lager warning`() {
+        Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar, 1234).valider(aktivitetslogg)
+        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarnings())
+    }
+
+    @Test
     fun `Ukjent mappes til utbetalingstidslinje`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar, 1234)
@@ -187,6 +194,12 @@ class UtbetalingshistorikkPeriodeTest {
         }
     }
 
+    @Test
+    fun `Ugyldig lager warning`() {
+        Utbetalingshistorikk.Periode.Ugyldig(1.januar, null, 1234).valider(aktivitetslogg)
+        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarnings())
+    }
 
     @Test
     fun `Ugyldig mappes til utbetalingstidslinje`() {

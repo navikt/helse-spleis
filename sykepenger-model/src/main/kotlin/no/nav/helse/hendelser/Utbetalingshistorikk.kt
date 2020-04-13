@@ -21,19 +21,6 @@ class Utbetalingshistorikk(
         .map { it.toTidslinje(graderingsliste, aktivitetslogg) }
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
-        if (førsteFraværsdag == null) return this
-        var forrigePeriodeFom: LocalDate = førsteFraværsdag
-        return sortedByDescending { it.tom }.filter { periode ->
-            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= (26 * 7)).also {
-                if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
-            }
-        }
-    }
-
-    internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) =
-        utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
-
     internal fun valider(arbeidsgivertidslinje: Sykdomstidslinje, førsteFraværsdag: LocalDate?): Aktivitetslogg {
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag)
             .onEach { it.valider(aktivitetslogg) }
@@ -52,6 +39,16 @@ class Utbetalingshistorikk(
 
     internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, inntekthistorikk) }
+    }
+
+    private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
+        if (førsteFraværsdag == null) return this
+        var forrigePeriodeFom: LocalDate = førsteFraværsdag
+        return sortedByDescending { it.tom }.filter { periode ->
+            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= (26 * 7)).also {
+                if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
+            }
+        }
     }
 
     class Inntektsopplysning(
@@ -220,8 +217,8 @@ class Utbetalingshistorikk(
             }
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {
-                aktivitetslogg.error(
-                    "Utbetalingsperioden %s (fra Infotrygd) er ikke støttet",
+                aktivitetslogg.warn(
+                    "Det er en utbetalingsperiode som er lagt inn i Infotrygd uten at inntektsopplysninger er registrert.",
                     this::class.simpleName
                 )
             }
@@ -237,8 +234,8 @@ class Utbetalingshistorikk(
             }
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {
-                aktivitetslogg.error(
-                    "Utbetalingsperioden %s (fra Infotrygd) er ikke støttet",
+                aktivitetslogg.warn(
+                    "Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato",
                     this::class.simpleName
                 )
             }
