@@ -191,9 +191,9 @@ internal class HendelseMediator(
                 this["@id"] = UUID.randomUUID()
                 this["@opprettet"] = LocalDateTime.now()
                 this["@forårsaket_av"] = mapOf(
-                    "@event_name" to message.navn,
-                    "@id" to message.id,
-                    "@opprettet" to message.opprettet
+                    "event_name" to message.navn,
+                    "id" to message.id,
+                    "opprettet" to message.opprettet
                 )
                 this["aktørId"] = hendelse.aktørId()
                 this["fødselsnummer"] = hendelse.fødselsnummer()

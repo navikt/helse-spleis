@@ -27,9 +27,9 @@ internal class BehovMediator(
                 "@id" to id,
                 "@behov" to behovsliste,
                 "@forårsaket_av" to mapOf(
-                    "@event_name" to message.navn,
-                    "@id" to message.id,
-                    "@opprettet" to message.opprettet
+                    "event_name" to message.navn,
+                    "id" to message.id,
+                    "opprettet" to message.opprettet
                 )
             )
                 .apply {
