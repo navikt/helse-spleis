@@ -15,6 +15,9 @@ class Utbetalingshistorikk(
     private val graderingsliste: List<Graderingsperiode>,
     private val aktivitetslogg: Aktivitetslogg
 ) {
+    private companion object {
+        private const val TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE = 26 * 7
+    }
 
     internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate?) = this.utbetalinger
         .filtrerUtbetalinger(førsteFraværsdag)
@@ -45,7 +48,7 @@ class Utbetalingshistorikk(
         if (førsteFraværsdag == null) return this
         var forrigePeriodeFom: LocalDate = førsteFraværsdag
         return sortedByDescending { it.tom }.filter { periode ->
-            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= (26 * 7)).also {
+            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
                 if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
             }
         }
