@@ -1379,4 +1379,18 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
+
+    @Test
+    fun `refusjon opphører i perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(14.januar, INNTEKT, emptyList()))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `refusjon endres i perioden`() {
+        håndterSykmelding(Triple(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null, INNTEKT, listOf(14.januar)))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+    }
 }

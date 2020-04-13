@@ -116,7 +116,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(1.januar, INNTEKT, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
@@ -132,16 +132,13 @@ internal class InntektsmeldingHendelseTest {
     }
 
     private fun inntektsmelding(
-        refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjonOpphørsdato: LocalDate = 1.januar,
-        endringerIRefusjon: List<LocalDate> = emptyList(),
         virksomhetsnummer: String = ORGNR
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = virksomhetsnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,

@@ -91,8 +91,13 @@ class Inntektsmelding(
 
     override fun valider(): Aktivitetslogg {
         if (refusjon == null) aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-        else if (refusjon.beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+        else refusjon.valider(aktivitetslogg, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode")
+        return aktivitetslogg
+    }
+
+    fun valider(periode: Periode): Aktivitetslogg {
+        refusjon?.valider(aktivitetslogg, periode)
         return aktivitetslogg
     }
 
@@ -103,12 +108,6 @@ class Inntektsmelding(
     override fun organisasjonsnummer() = orgnummer
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
-
-    internal fun harEndringIRefusjon(sisteUtbetalingsdag: LocalDate): Boolean {
-        if (refusjon == null) return false
-        refusjon.opphørsdato?.also { if (it <= sisteUtbetalingsdag) return true }
-        return refusjon.endringerIRefusjon.any { it <= sisteUtbetalingsdag }
-    }
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         inntekthistorikk.add(
@@ -125,10 +124,30 @@ class Inntektsmelding(
     fun isNotQualified() = !beingQualified
 
     class Refusjon(
-        val opphørsdato: LocalDate?,
-        val beløpPrMåned: Double,
-        val endringerIRefusjon: List<LocalDate> = emptyList()
-    )
+        private val opphørsdato: LocalDate?,
+        private val beløpPrMåned: Double,
+        private val endringerIRefusjon: List<LocalDate> = emptyList()
+    ) {
+
+        fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double): Aktivitetslogg {
+            if (beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+            return aktivitetslogg
+        }
+
+        fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode): Aktivitetslogg {
+            when {
+                opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
+                endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
+            }
+            return aktivitetslogg
+        }
+
+        private fun opphørerRefusjon(periode: Periode) =
+            opphørsdato?.let { it in periode } ?: false
+
+        private fun endrerRefusjon(periode: Periode) =
+            endringerIRefusjon.any { it in periode }
+    }
 
     sealed class InntektsmeldingPeriode(
         internal val fom: LocalDate,

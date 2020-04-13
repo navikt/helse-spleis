@@ -87,23 +87,26 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeIndex: Int,
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
-        ferieperioder: List<Periode> = emptyList()
+        ferieperioder: List<Periode> = emptyList(),
+        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder)
+        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
     }
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
-        ferieperioder: List<Periode> = emptyList()
+        ferieperioder: List<Periode> = emptyList(),
+        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
         person.håndter(
             inntektsmelding(
                 arbeidsgiverperioder,
                 ferieperioder = ferieperioder,
-                førsteFraværsdag = førsteFraværsdag
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = refusjon
             )
         )
     }
@@ -192,15 +195,13 @@ internal abstract class AbstractEndToEndTest {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
-        refusjonBeløp: Double = INNTEKT,
         beregnetInntekt: Double = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
-        endringerIRefusjon: List<LocalDate> = emptyList()
+        refusjon: Triple<LocalDate?, Double, List<LocalDate>>
     ): Inntektsmelding {
         return Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
+            refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,

@@ -234,27 +234,36 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `når refusjonsopphørsdato er før siste utbetalingsdag, gir det endring i refusjon`() {
+    internal fun `refusjon opphører før perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
-            refusjonOpphørsdato = 2.januar,
-            endringerIRefusjon = listOf(2.januar)
+            refusjonOpphørsdato = 1.januar,
+            endringerIRefusjon = listOf(16.januar)
         )
-        val sisteUtbetalingsdag = 3.januar
-        assertTrue(inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag))
+        assertFalse(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
     }
 
     @Test
-    internal fun `når refusjonsopphørsdato er etter siste utbetalingsdag, gir det ikke endring i refusjon`() {
+    internal fun `refusjon opphører i perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
-            refusjonOpphørsdato = 4.januar,
-            endringerIRefusjon = listOf(4.januar)
+            refusjonOpphørsdato = 10.januar,
+            endringerIRefusjon = listOf(16.januar)
         )
-        val sisteUtbetalingsdag = 3.januar
-        assertFalse(inntektsmelding.harEndringIRefusjon(sisteUtbetalingsdag))
+        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
+    }
+
+    @Test
+    internal fun `endring i refusjon i perioden`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 3.januar)),
+            emptyList(),
+            refusjonOpphørsdato = 16.januar,
+            endringerIRefusjon = listOf(10.januar)
+        )
+        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
     }
 
     private fun inntektsmelding(
