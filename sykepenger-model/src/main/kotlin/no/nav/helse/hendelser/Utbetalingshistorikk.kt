@@ -3,9 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -15,7 +12,6 @@ class Utbetalingshistorikk(
     private val utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     private val graderingsliste: List<Graderingsperiode>,
-    private val maksDato: LocalDate?,
     private val aktivitetslogg: Aktivitetslogg
 ) {
 
@@ -37,30 +33,10 @@ class Utbetalingshistorikk(
     internal fun sisteUtbetalteDag(førsteFraværsdag: LocalDate? = null) =
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).maxBy { it.tom }?.tom
 
-    internal fun valider(
-        førsteFraværsdag: LocalDate?,
-        alder: Alder,
-        arbeidsgiverRegler: ArbeidsgiverRegler
-    ): Aktivitetslogg {
+    internal fun valider(førsteFraværsdag: LocalDate?): Aktivitetslogg {
         utbetalinger.filtrerUtbetalinger(førsteFraværsdag).forEach { it.valider(aktivitetslogg) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
-        if (!aktivitetslogg.hasErrors()) {
-            utbetalingstidslinje(førsteFraværsdag).valider(alder, arbeidsgiverRegler)
-        }
         return aktivitetslogg
-    }
-
-    private fun Utbetalingstidslinje.valider(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler) {
-        if (isEmpty() || maksDato == null) return
-        val beregnetMaksDato = MaksimumSykepengedagerfilter(
-            alder = alder,
-            arbeidsgiverRegler = arbeidsgiverRegler,
-            periode = Periode(førsteDato(), sisteDato()),
-            aktivitetslogg = aktivitetslogg
-        ).also { accept(it) }.maksdato()
-        if (beregnetMaksDato != maksDato) {
-            aktivitetslogg.info("Maksdatoen som er beregnet fra historikken i Infotrygd er ulik maksdatoen satt i Infotrygd")
-        }
     }
 
     internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {

@@ -3,12 +3,10 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.august
-import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -33,7 +31,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -57,7 +54,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -82,7 +78,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -108,7 +103,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -132,7 +126,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -151,7 +144,6 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = null,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -161,50 +153,15 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Validerer beregnet maksdato mot maksdato fra Infotrygd`() {
-        val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
-        )
-        val utbetalingshistorikk = Utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            graderingsliste = graderingsliste,
-            maksDato = 12.desember,
-            aktivitetslogg = aktivitetslogg
-        )
-
-        utbetalingshistorikk.valider(1.januar, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
-    }
-
-    @Test
-    fun `Validerer ok hvis maksdato ikke er oppgitt fra Infotrygd`() {
-        val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234)
-        )
-        val utbetalingshistorikk = Utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            graderingsliste = graderingsliste,
-            maksDato = null,
-            aktivitetslogg = aktivitetslogg
-        )
-
-        utbetalingshistorikk.valider(1.januar, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
-    }
-
-    @Test
     fun `Validerer ok hvis det ikke finnes noen utbetalinger fra Infotrygd`() {
         val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = emptyList(),
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = 1.desember,
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.januar, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        utbetalingshistorikk.valider(1.januar)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
@@ -218,11 +175,10 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = 12.desember,
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.august, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        utbetalingshistorikk.valider(1.august)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
@@ -235,11 +191,10 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList(),
             graderingsliste = graderingsliste,
-            maksDato = 1.desember,
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(1.august, Alder("01010154321"), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        utbetalingshistorikk.valider(1.august)
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 

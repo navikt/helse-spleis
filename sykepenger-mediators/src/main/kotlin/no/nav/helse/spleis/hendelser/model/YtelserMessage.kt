@@ -83,9 +83,6 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
                     it["grad"].asDouble()
                 )
             },
-            maksDato = this["@løsning.${Sykepengehistorikk.name}"].mapNotNull {
-                it.path("maksDato").asOptionalLocalDate()
-            }.max(),
             aktivitetslogg = aktivitetslogg
         )
 

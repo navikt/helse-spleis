@@ -535,7 +535,6 @@ internal class SpeilBuilderTest {
                     ),
                     inntektshistorikk = emptyList(),
                     graderingsliste = emptyList(),
-                    maksDato = null,
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(

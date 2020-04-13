@@ -325,7 +325,6 @@ class PåminnelserOgTimeoutTest {
             ),
             inntektshistorikk = emptyList(),
             graderingsliste = emptyList(),
-            maksDato = null,
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(

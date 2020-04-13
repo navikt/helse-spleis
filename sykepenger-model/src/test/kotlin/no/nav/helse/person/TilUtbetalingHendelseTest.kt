@@ -119,7 +119,6 @@ internal class TilUtbetalingHendelseTest {
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 graderingsliste = emptyList(),
-                maksDato = null,
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(
