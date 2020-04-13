@@ -21,7 +21,7 @@ internal class InntektsmeldingMessage(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
-            "endringIRefusjoner", "status", "arkivreferanse"
+            "status", "arkivreferanse"
         )
         requireArray("arbeidsgiverperioder") {
             require("fom", JsonNode::asLocalDate)
@@ -30,6 +30,9 @@ internal class InntektsmeldingMessage(
         requireArray("ferieperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
+        }
+        requireArray("endringIRefusjoner") {
+            require("endringsdato", JsonNode::asLocalDate)
         }
         require("mottattDato", JsonNode::asLocalDateTime)
         require("foersteFravaersdag", JsonNode::asLocalDate)
