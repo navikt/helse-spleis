@@ -461,7 +461,7 @@ internal class Vedtaksperiode private constructor(
 
             return when {
                 forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {
-                    sykmelding.error("Forlenger en periode som er gått til infotrygd")
+                    sykmelding.error("Forlenger en vedtaksperiode som har gått til Infotrygd")
                     TilInfotrygd
                 }
                 forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
@@ -775,7 +775,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.let {
                 vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
                 if (it.tilstand == TilInfotrygd) {
-                    hendelse.error("Kan ikke forlenge en sak som er gått til infotrygd")
+                    hendelse.error("Tilstøtende vedtaksperiode har gått til Infotrygd")
                     vedtaksperiode.tilstand(hendelse, TilInfotrygd)
                 }
             }
