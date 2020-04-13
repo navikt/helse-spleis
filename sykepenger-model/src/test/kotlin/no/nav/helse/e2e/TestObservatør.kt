@@ -14,7 +14,7 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-        tilstander.getOrPut(event.id) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+        tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
     }
 
     override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {

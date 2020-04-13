@@ -21,13 +21,12 @@ interface PersonObserver {
     )
 
     data class VedtaksperiodeEndretTilstandEvent(
-        val id: UUID,
+        val vedtaksperiodeId: UUID,
         val aktørId: String,
         val fødselsnummer: String,
         val organisasjonsnummer: String,
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
-        val sykdomshendelse: ArbeidstakerHendelse,
         val aktivitetslogg: Aktivitetslogg,
         val timeout: Duration,
         val hendelser: Set<UUID>

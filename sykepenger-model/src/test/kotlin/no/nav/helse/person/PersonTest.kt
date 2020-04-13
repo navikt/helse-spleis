@@ -325,7 +325,7 @@ internal class PersonTest {
             forrigeVedtaksperiodetilstand = event.forrigeTilstand
             gjeldendeVedtaksperiodetilstand = event.gjeldendeTilstand
 
-            tilstandsendringer[event.id] = event
+            tilstandsendringer[event.vedtaksperiodeId] = event
         }
     }
 }

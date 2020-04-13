@@ -15,7 +15,7 @@ object VedtaksperiodeProbe : PersonObserver {
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         log.info(
             "vedtaksperiode endret {}, {}, {}",
-            keyValue("vedtaksperiodeId", "${event.id}"),
+            keyValue("vedtaksperiodeId", "${event.vedtaksperiodeId}"),
             keyValue("tilstand", event.gjeldendeTilstand.name),
             keyValue("forrigeTilstand", event.forrigeTilstand.name)
         )

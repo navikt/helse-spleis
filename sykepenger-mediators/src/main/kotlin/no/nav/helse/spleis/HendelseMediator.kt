@@ -138,11 +138,10 @@ internal class HendelseMediator(
 
             override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
                 publish("vedtaksperiode_endret", JsonMessage.newMessage(mapOf(
-                    "vedtaksperiodeId" to event.id,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "gjeldendeTilstand" to event.gjeldendeTilstand,
                     "forrigeTilstand" to event.forrigeTilstand,
                     "endringstidspunkt" to event.endringstidspunkt,
-                    "på_grunn_av" to (event.sykdomshendelse::class.simpleName ?: "UKJENT"),
                     "aktivitetslogg" to event.aktivitetslogg.toMap(),
                     "timeout" to event.timeout.toSeconds(),
                     "hendelser" to event.hendelser
