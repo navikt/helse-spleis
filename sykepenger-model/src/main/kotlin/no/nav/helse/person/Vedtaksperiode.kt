@@ -769,16 +769,16 @@ internal class Vedtaksperiode private constructor(
         override val timeout: Duration = Duration.ofHours(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerYtelser(hendelse)
-            hendelse.info("Forespør sykdoms- og inntektshistorikk")
-
-            vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)?.let {
-                vedtaksperiode.førsteFraværsdag = it.førsteFraværsdag
-                if (it.tilstand == TilInfotrygd) {
-                    hendelse.error("Tilstøtende vedtaksperiode har gått til Infotrygd")
-                    vedtaksperiode.tilstand(hendelse, TilInfotrygd)
+            val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
+            if (tilstøtende != null) {
+                vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
+                if (tilstøtende.tilstand == TilInfotrygd) {
+                    hendelse.error("Tilstøtende vedtaksperiode er gått til Infotrygd")
+                    return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
                 }
             }
+            vedtaksperiode.trengerYtelser(hendelse)
+            hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
