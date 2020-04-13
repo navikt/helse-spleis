@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Periode.Companion.etter
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.juli
@@ -34,5 +35,13 @@ internal class PeriodeTest {
         assertThrows<IllegalArgumentException> {
             Periode(2.juli, 1.juli)
         }
+    }
+
+    @Test
+    internal fun `periode på eller etter dato`() {
+        assertFalse(listOf(Periode(1.juli, 2.juli)).etter(3.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(2.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(1.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(30.juni))
     }
 }

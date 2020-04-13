@@ -276,6 +276,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
         sendGeneriskBehov(
             vedtaksperiodeIndeks = vedtaksperiodeIndeks,
             behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger"),

@@ -212,7 +212,9 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(inntekter),
             erEgenAnsatt = egenAnsatt,
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(arbeidsforhold)
+            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(arbeidsforhold),
+            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }

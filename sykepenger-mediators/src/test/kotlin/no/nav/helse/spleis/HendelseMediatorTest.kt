@@ -293,7 +293,7 @@ internal class HendelseMediatorTest {
             egenAnsatt: Boolean = false
         ) {
             sendGeneriskBehov(
-                behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening"),
+                behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger"),
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,

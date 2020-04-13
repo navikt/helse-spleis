@@ -18,13 +18,21 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
     internal fun overlapperMed(other: Periode) =
         this.start in other || this.endInclusive in other || this in other || other in this
 
+    internal fun etter(other: LocalDate) =
+        this.endInclusive >= other
+
     private operator fun contains(other: Periode) =
         this.start < other.endInclusive && this.endInclusive > other.start
 
     internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in range }
 
     override fun toString(): String {
-        var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return start.format(formatter) + " til " + endInclusive.format(formatter)
+    }
+
+    companion object {
+        private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        fun List<Periode>.etter(grense: LocalDate) = any { it.etter(grense)}
     }
 }

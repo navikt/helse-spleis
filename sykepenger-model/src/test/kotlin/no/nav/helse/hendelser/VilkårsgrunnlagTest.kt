@@ -120,6 +120,7 @@ internal class VilkårsgrunnlagTest {
         return requireNotNull(_førsteFraværsdag)
     }
 
+
     private fun dataForVilkårsvurdering(): Grunnlagsdata? {
         var _dataForVilkårsvurdering: Grunnlagsdata? = null
         person.accept(object : PersonVisitor {
@@ -163,7 +164,10 @@ internal class VilkårsgrunnlagTest {
                 orgnummer,
                 4.desember(2017)
             )
-        )
+        ),
+        dagpenger: List<Periode> = emptyList(),
+        arbeidsavklaringspenger: List<Periode> = emptyList()
+
     ) = Vilkårsgrunnlag(
         vedtaksperiodeId = vedtaksperiodeId(),
         aktørId = aktørId,
@@ -171,7 +175,9 @@ internal class VilkårsgrunnlagTest {
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-        erEgenAnsatt = false
+        erEgenAnsatt = false,
+        dagpenger = Dagpenger(dagpenger),
+        arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
     )
 
     private fun sykmelding() = Sykmelding(

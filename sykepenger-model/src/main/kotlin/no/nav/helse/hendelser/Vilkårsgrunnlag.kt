@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Periode.Companion.etter
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.math.BigDecimal
@@ -16,7 +17,9 @@ class Vilkårsgrunnlag(
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
-    private val erEgenAnsatt: Boolean
+    private val erEgenAnsatt: Boolean,
+    private val dagpenger: Dagpenger,
+    private val arbeidsavklaringspenger: Arbeidsavklaringspenger
 ) : ArbeidstakerHendelse() {
     private var grunnlagsdata: Grunnlagsdata? = null
 
@@ -36,6 +39,8 @@ class Vilkårsgrunnlag(
             antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
             harOpptjening = opptjeningvurdering.harOpptjening(orgnummer)
         )
+        dagpenger.valider(aktivitetslogg, førsteFraværsdag)
+        arbeidsavklaringspenger.valider(aktivitetslogg, førsteFraværsdag)
         return aktivitetslogg
     }
 
@@ -86,11 +91,15 @@ class Vilkårsgrunnlag(
         private val antallOpptjeningsdager = mutableMapOf<String, Int>()
 
         internal fun opptjeningsdager(orgnummer: String) = antallOpptjeningsdager[orgnummer] ?: 0
-        internal fun harOpptjening(orgnummer: String) = opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+        internal fun harOpptjening(orgnummer: String) =
+            opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
         fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, førsteFraværsdag: LocalDate): Aktivitetslogg {
             Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, førsteFraværsdag)
-            if (harOpptjening(orgnummer)) aktivitetslogg.info("Har minst %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
+            if (harOpptjening(orgnummer)) aktivitetslogg.info(
+                "Har minst %d dager opptjening",
+                TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+            )
             else aktivitetslogg.error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
             return aktivitetslogg
         }
@@ -107,7 +116,11 @@ class Vilkårsgrunnlag(
             }
 
             companion object {
-                fun opptjeningsdager(liste: List<Arbeidsforhold>, map: MutableMap<String, Int>, førsteFraværsdag: LocalDate) {
+                fun opptjeningsdager(
+                    liste: List<Arbeidsforhold>,
+                    map: MutableMap<String, Int>,
+                    førsteFraværsdag: LocalDate
+                ) {
                     liste.forEach { map[it.orgnummer] = it.opptjeningsdager(førsteFraværsdag) }
                 }
             }
@@ -121,5 +134,23 @@ class Vilkårsgrunnlag(
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean
     )
+
+    class Dagpenger(private val perioder: List<Periode>) {
+        fun valider(aktivitetslogg: Aktivitetslogg, førsteFraværsdag: LocalDate): Aktivitetslogg {
+            if (perioder.etter(førsteFraværsdag.minusWeeks(4))) {
+                aktivitetslogg.warn("Bruker har mottatt dagpenger innenfor 4 uker av første fraværsdag")
+            }
+            return aktivitetslogg
+        }
+    }
+
+    class Arbeidsavklaringspenger(private val perioder: List<Periode>) {
+        fun valider(aktivitetslogg: Aktivitetslogg, førsteFraværsdag: LocalDate): Aktivitetslogg {
+            if (perioder.etter(førsteFraværsdag.minusMonths(6))) {
+                aktivitetslogg.warn("Bruker har mottatt AAP innenfor 6 måneder av første fraværsdag")
+            }
+            return aktivitetslogg
+        }
+    }
 }
 

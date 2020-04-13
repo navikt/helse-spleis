@@ -266,7 +266,9 @@ internal class JsonBuilderTest {
                     1.januar(2017)
                 )
             )),
-            erEgenAnsatt = false
+            erEgenAnsatt = false,
+            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
         )
 
         internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {

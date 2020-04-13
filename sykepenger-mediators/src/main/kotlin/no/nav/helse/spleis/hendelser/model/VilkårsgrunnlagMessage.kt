@@ -44,7 +44,9 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
                     )
                 }
             ),
-            erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean()
+            erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean(),
+            dagpenger = Vilkårsgrunnlag.Dagpenger(this["@løsning.${Dagpenger.name}"].map(::asPeriode)),
+            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(this["@løsning.${Arbeidsavklaringspenger.name}"].map(::asPeriode))
         )
     }
 
