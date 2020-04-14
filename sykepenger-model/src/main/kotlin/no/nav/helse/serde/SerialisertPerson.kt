@@ -123,7 +123,7 @@ class SerialisertPerson(val json: String) {
             data.mottaker,
             Fagområde.valueOf(data.fagområde),
             data.linjer.map(::konverterTilUtbetalingslinje),
-            data.utbetalingsreferanse,
+            data.fagsystemId,
             Endringskode.valueOf(data.endringskode),
             data.sjekksum
         )
@@ -486,7 +486,7 @@ data class OppdragData(
     val mottaker: String,
     val fagområde: String,
     val linjer: List<UtbetalingslinjeData>,
-    val utbetalingsreferanse: String,
+    val fagsystemId: String,
     val endringskode: String,
     val sjekksum: Int
 )

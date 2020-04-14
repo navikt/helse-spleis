@@ -206,7 +206,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     private val Utbetalingslinje.refId get() = this.get<Int>("refDelytelseId")
 
-    private val Oppdrag.referanse get() = this.get<String>("utbetalingsreferanse")
+    private val Oppdrag.referanse get() = this.get<String>("fagsystemId")
 
     private fun assertUtbetalinger(expected: Oppdrag, actual: Oppdrag) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")

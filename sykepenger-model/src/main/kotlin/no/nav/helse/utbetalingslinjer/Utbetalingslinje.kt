@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
-import no.nav.helse.utbetalingslinjer.Klassekode.Arbeidsgiverlinje
+import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import java.time.LocalDate
 
 internal class Utbetalingslinje internal constructor(
@@ -15,7 +15,7 @@ internal class Utbetalingslinje internal constructor(
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,
-    private var klassekode: Klassekode = Arbeidsgiverlinje
+    private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig
 ) {
 
     internal fun accept(visitor: UtbetalingVisitor) {
@@ -76,13 +76,11 @@ internal enum class Endringskode {
 }
 
 internal enum class Klassekode(internal val verdi: String) {
-    Arbeidsgiverlinje(verdi = "SPREFAG-IOP");
+    RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP");
 
     companion object {
-        fun from(verdi: String) = when(verdi) {
-            "SPREFAG-IOP" -> Arbeidsgiverlinje
-            else -> throw UnsupportedOperationException("Vi støtter ikke klassekoden: $verdi")
-        }
+        private val map = values().associateBy(Klassekode::verdi)
+        fun from(verdi: String) = map[verdi] ?: throw IllegalArgumentException("Støtter ikke klassekode: $verdi")
     }
 }
 

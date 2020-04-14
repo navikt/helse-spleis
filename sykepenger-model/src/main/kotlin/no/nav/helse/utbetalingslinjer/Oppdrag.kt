@@ -9,7 +9,7 @@ internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
     private val linjer: List<Utbetalingslinje>,
-    private var utbetalingsreferanse: String,
+    private var fagsystemId: String,
     private var endringskode: Endringskode,
     private val sjekksum: Int
 ): List<Utbetalingslinje> by linjer {
@@ -32,7 +32,7 @@ internal class Oppdrag private constructor(
         linjer.forEach { it.accept(visitor) }
     }
 
-    internal fun referanse() = utbetalingsreferanse
+    internal fun referanse() = fagsystemId
 
     private val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 
@@ -42,7 +42,7 @@ internal class Oppdrag private constructor(
         mottaker,
         fagområde,
         linjer.filter { it.erForskjell() },
-        utbetalingsreferanse,
+        fagsystemId,
         endringskode,
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
@@ -67,7 +67,7 @@ internal class Oppdrag private constructor(
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.first().linkTo(tidligere.last())
         zipWithNext().map { (a, b) -> b.linkTo(a) }
-        nåværende.utbetalingsreferanse = tidligere.utbetalingsreferanse
+        nåværende.fagsystemId = tidligere.fagsystemId
         nåværende.endringskode = Endringskode.UEND
     }
 
@@ -76,7 +76,7 @@ internal class Oppdrag private constructor(
     private lateinit var linkTo: Utbetalingslinje
 
     private fun ghosted(tidligere: Oppdrag) = this.also { nåværende ->
-        nåværende.utbetalingsreferanse = tidligere.utbetalingsreferanse
+        nåværende.fagsystemId = tidligere.fagsystemId
         nåværende.endringskode = Endringskode.UEND
         linkTo = tidligere.last()
         nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
