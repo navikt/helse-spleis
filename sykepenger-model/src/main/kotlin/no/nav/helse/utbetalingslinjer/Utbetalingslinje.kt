@@ -11,7 +11,7 @@ internal class Utbetalingslinje internal constructor(
     internal var tom: LocalDate,
     internal var dagsats: Int,
     internal val grad: Double,
-    private var refFagsystemId: String,
+    internal var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,

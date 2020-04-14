@@ -496,7 +496,7 @@ data class UtbetalingslinjeData(
     val tom: LocalDate,
     val dagsats: Int,
     val grad: Double,
-    val refFagsystemId: String,
+    val refFagsystemId: String?,
     val delytelseId: Int,
     val refDelytelseId: Int?,
     val endringskode: String,

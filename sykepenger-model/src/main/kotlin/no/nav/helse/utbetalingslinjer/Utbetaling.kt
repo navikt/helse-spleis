@@ -43,7 +43,7 @@ internal class Utbetaling
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
-        ) = SpennBuilder(tidslinje, organisasjonsnummer, SPREF, sisteDato, arbeidsgiverUtbetaling).result()
+        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SPREF, sisteDato, arbeidsgiverUtbetaling).result()
 
             .forskjell(tidligere?.arbeidsgiverOppdrag ?: Oppdrag(organisasjonsnummer, SPREF))
             .also {

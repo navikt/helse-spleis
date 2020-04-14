@@ -98,7 +98,7 @@ internal fun createUtbetalingslinje(
     tom: LocalDate,
     dagsats: Int,
     grad: Double,
-    refFagsystemId: String,
+    refFagsystemId: String? = null,
     delytelseId: Int,
     refDelytelseId: Int? = null,
     endringskode: Endringskode,

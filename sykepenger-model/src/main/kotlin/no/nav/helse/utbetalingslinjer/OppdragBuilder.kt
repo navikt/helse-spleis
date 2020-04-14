@@ -9,7 +9,7 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
 
-internal class SpennBuilder(
+internal class OppdragBuilder(
     tidslinje: Utbetalingstidslinje,
     private val orgnummer: String,
     private val fagområde: Fagområde,
@@ -27,7 +27,8 @@ internal class SpennBuilder(
     internal fun result(): Oppdrag {
         arbeisdsgiverLinjer.removeAll { it.dagsats == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
-        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer)
+        arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
+        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId)
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()
