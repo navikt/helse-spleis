@@ -222,10 +222,12 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse)
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
-        if (hendelse.førsteFraværsdag > sisteDag())
-            hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
-        if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
-            hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik første fraværsdag i sykdomsperioden")
+        if (hendelse.førsteFraværsdag != null) {
+            if (hendelse.førsteFraværsdag > sisteDag())
+                hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
+            if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
+                hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik første fraværsdag i sykdomsperioden")
+        }
         hendelse.valider(periode())
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)

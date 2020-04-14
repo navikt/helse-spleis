@@ -2,10 +2,7 @@ package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
@@ -35,15 +32,15 @@ internal class InntektsmeldingMessage(
             require("endringsdato", JsonNode::asLocalDate)
         }
         require("mottattDato", JsonNode::asLocalDateTime)
-        require("foersteFravaersdag", JsonNode::asLocalDate)
+        interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         interestedIn("refusjon.beloepPrMnd")
-        interestedIn("refusjon.opphoersdato")
+        interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
         interestedIn("arbeidsforholdId", "begrunnelseForReduksjonEllerIkkeUtbetalt")
     }
 
     override val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val refusjon
-        get() = this["refusjon.beloepPrMnd"].takeUnless { it.isMissingNode || it.isNull }?.let { beløpPerMåned ->
+        get() = this["refusjon.beloepPrMnd"].takeUnless (JsonNode::isMissingOrNull)?.let { beløpPerMåned ->
             Inntektsmelding.Refusjon(
                 this["refusjon.opphoersdato"].asOptionalLocalDate(),
                 beløpPerMåned.asDouble(),
@@ -53,7 +50,7 @@ internal class InntektsmeldingMessage(
     private val orgnummer get() = this["virksomhetsnummer"].asText()
     private val aktørId get() = this["arbeidstakerAktorId"].asText()
     private val mottattDato get() = this["mottattDato"].asLocalDateTime()
-    private val førsteFraværsdag get() = this["foersteFravaersdag"].asLocalDate()
+    private val førsteFraværsdag get() = this["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt get() = this["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder get() = this["arbeidsgiverperioder"].map(::asPeriode)
     private val ferieperioder get() = this["ferieperioder"].map(::asPeriode)

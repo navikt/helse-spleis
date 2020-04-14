@@ -19,7 +19,7 @@ class Inntektsmelding(
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
-    internal val førsteFraværsdag: LocalDate,
+    internal val førsteFraværsdag: LocalDate?,
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
@@ -38,15 +38,14 @@ class Inntektsmelding(
             arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
         this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
 
-        val førsteFraværsdagtidslinje =
-            Sykdomstidslinje.egenmeldingsdager(førsteFraværsdag, førsteFraværsdag, InntektsmeldingDagFactory)
+        val førsteFraværsdagtidslinje = førsteFraværsdag?.let { Sykdomstidslinje.egenmeldingsdager(it, it, InntektsmeldingDagFactory) }
 
         val arbeidsgiverperiodetidslinje = this.arbeidsgiverperioder
             .map { it.sykdomstidslinje(this) }
             .takeUnless { it.isEmpty() }
             ?.merge(IdentiskDagTurnering) {
                 Sykdomstidslinje.ikkeSykedag(it, InntektsmeldingDagFactory)
-            } ?: førsteFraværsdagtidslinje
+            } ?: førsteFraværsdagtidslinje ?: severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
 
         val ferieperiodetidslinje = this.ferieperioder
             .map { it.sykdomstidslinje(this) }
@@ -58,7 +57,7 @@ class Inntektsmelding(
                 ?: arbeidsgiverperiodetidslinje
 
         this.sykdomstidslinje = inntektsmeldingtidslinje.let {
-            if (arbeidsgiverperiodetidslinje.overlapperMed(førsteFraværsdagtidslinje)) it else it.merge(
+            if (førsteFraværsdagtidslinje == null || arbeidsgiverperiodetidslinje.overlapperMed(førsteFraværsdagtidslinje)) it else it.merge(
                 førsteFraværsdagtidslinje,
                 InntektsmeldingTurnering
             )
@@ -118,6 +117,7 @@ class Inntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
+        if (førsteFraværsdag == null) return
         inntekthistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),

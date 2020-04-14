@@ -1,9 +1,11 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 
@@ -12,9 +14,25 @@ internal class InntektsmeldingTest {
     private lateinit var inntektsmelding: Inntektsmelding
 
     @Test
-    fun `inntektsmelding uten arbeidsgiverperiode`() {
-        inntektsmelding(emptyList())
+    fun `inntektsmelding uten arbeidsgiverperiode og førsteFraværsdag er null`() {
+        assertThrows<Aktivitetslogg.AktivitetException> { inntektsmelding(emptyList(), førsteFraværsdag = null) }
+    }
+
+    @Test
+    fun `inntektsmelding hvor førsteFraværsdag er null`() {
+        inntektsmelding(listOf(Periode(1.januar, 2.januar)), førsteFraværsdag = null)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(1.januar, tidslinje.førsteDag())
+        assertEquals(2.januar, tidslinje.sisteDag())
+    }
+
+    @Test
+    fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
+        inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
         assertTrue(inntektsmelding.valider().hasWarnings())
+        assertEquals(1.januar, tidslinje.førsteDag())
+        assertEquals(1.januar, tidslinje.sisteDag())
     }
 
     @Test
@@ -298,7 +316,7 @@ internal class InntektsmeldingTest {
         ferieperioder: List<Periode> = emptyList(),
         refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
-        førsteFraværsdag: LocalDate = 1.januar,
+        førsteFraværsdag: LocalDate? = 1.januar,
         refusjonOpphørsdato: LocalDate = 1.januar,
         endringerIRefusjon: List<LocalDate> = emptyList(),
         arbeidsforholdId: String? = null,
