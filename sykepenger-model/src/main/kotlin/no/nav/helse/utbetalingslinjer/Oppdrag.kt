@@ -17,12 +17,13 @@ internal class Oppdrag private constructor(
     internal constructor(
         mottaker: String,
         fagområde: Fagområde,
-        linjer: List<Utbetalingslinje> = listOf()
+        linjer: List<Utbetalingslinje> = listOf(),
+        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
     ): this(
         mottaker,
         fagområde,
         linjer,
-        genererUtbetalingsreferanse(UUID.randomUUID()),
+        fagsystemId,
         Endringskode.NY,
         linjer.hashCode() * 67 + mottaker.hashCode()
     )

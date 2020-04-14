@@ -5,24 +5,29 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingStrategy
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
+import java.util.*
 
 internal class SpennBuilder(
     tidslinje: Utbetalingstidslinje,
+    private val orgnummer: String,
+    private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
     private val dagStrategy: UtbetalingStrategy = NavDag.arbeidsgiverUtbetaling
 ) : UtbetalingsdagVisitor {
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
+    private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
 
     init {
         tidslinje.kutt(sisteDato).reverse().accept(this)
     }
 
-    internal fun result(): MutableList<Utbetalingslinje> {
+    internal fun result(): Oppdrag {
         arbeisdsgiverLinjer.removeAll { it.dagsats == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
-        return arbeisdsgiverLinjer
+        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer)
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()
@@ -63,11 +68,11 @@ internal class SpennBuilder(
     }
 
     private fun addLinje(dag: NavDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.grad))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.grad, fagsystemId))
     }
 
     private fun addLinje(dag: NavHelgDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad, fagsystemId))
     }
 
     private interface Tilstand {

@@ -11,6 +11,7 @@ internal class Utbetalingslinje internal constructor(
     internal var tom: LocalDate,
     internal var dagsats: Int,
     internal val grad: Double,
+    private var refFagsystemId: String,
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,
@@ -23,6 +24,7 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun linkTo(other: Utbetalingslinje) {
         this.delytelseId = other.delytelseId + 1
+        this.refFagsystemId = other.refFagsystemId
         this.refDelytelseId = other.delytelseId
     }
 
@@ -59,6 +61,7 @@ internal class Utbetalingslinje internal constructor(
     internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
 
     private fun copyWith(linjetype: Endringskode, tidligere: Utbetalingslinje) {
+        this.refFagsystemId = tidligere.refFagsystemId
         this.delytelseId = tidligere.delytelseId
         this.refDelytelseId = tidligere.refDelytelseId
         this.klassekode = tidligere.klassekode

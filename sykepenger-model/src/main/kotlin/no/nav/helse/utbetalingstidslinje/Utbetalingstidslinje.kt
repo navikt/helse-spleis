@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.DayOfWeek
@@ -185,12 +184,6 @@ internal class Utbetalingstidslinje private constructor(
             }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
-            internal fun utbetalingslinje() =
-                Utbetalingslinje(dato, dato, utbetaling, grad)
-
-            internal fun oppdater(last: Utbetalingslinje) {
-                last.tom = dato
-            }
 
             internal fun avvistDag(begrunnelse: Begrunnelse, grad: Double) =
                 AvvistDag(inntekt = inntekt, dato = dato, begrunnelse = begrunnelse, grad = grad)
@@ -200,9 +193,6 @@ internal class Utbetalingstidslinje private constructor(
             Utbetalingsdag(0.0, dato) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavHelgDag(this)
-            internal fun oppdater(last: Utbetalingslinje) {
-                last.tom = dato
-            }
         }
 
         internal class Arbeidsdag(inntekt: Double, dato: LocalDate) : Utbetalingsdag(inntekt, dato) {

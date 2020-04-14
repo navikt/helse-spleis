@@ -13,6 +13,7 @@ internal class UtbetalingslinjeForskjellTest {
     protected companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "987654321"
+        private const val FAGSYSTEMID = "FAGSYSTEMID"
     }
 
     @Test internal fun `helt separate utbetalingslinjer`() {
@@ -248,7 +249,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() forskjell other
 
-        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, grad)
+        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, grad, FAGSYSTEMID)
 
         private fun asUtbetalingslinjer() = linjer(asUtbetalingslinje())
     }

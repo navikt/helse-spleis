@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,6 +14,13 @@ import java.time.LocalDate
 internal class SpennBuilderTest {
 
     private lateinit var linjer: List<Utbetalingslinje>
+
+    protected companion object {
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val AKTØRID = "42"
+        private const val ORGNUMMER = "987654321"
+        const val INNTEKT = 31000.00
+    }
 
     @Test
     internal fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
@@ -156,6 +164,11 @@ internal class SpennBuilderTest {
             Periode(1.januar, 1.mars),
             Aktivitetslogg()
         ).beregn()
-        linjer = SpennBuilder(tidslinje, sisteDato ?: tidslinje.sisteDato()).result()
+        linjer = SpennBuilder(
+            tidslinje,
+            ORGNUMMER,
+            SPREF,
+            sisteDato ?: tidslinje.sisteDato()
+        ).result()
     }
 }

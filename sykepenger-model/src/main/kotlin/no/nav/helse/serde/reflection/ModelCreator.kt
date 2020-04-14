@@ -98,13 +98,14 @@ internal fun createUtbetalingslinje(
     tom: LocalDate,
     dagsats: Int,
     grad: Double,
+    refFagsystemId: String,
     delytelseId: Int,
     refDelytelseId: Int? = null,
     endringskode: Endringskode,
     klassekode: Klassekode
 ) = Utbetalingslinje::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, endringskode, klassekode)
+    .call(fom, tom, dagsats, grad, refFagsystemId, delytelseId, refDelytelseId, endringskode, klassekode)
 
 internal fun createSykdomshistorikk(
     elementer: List<Sykdomshistorikk.Element>
