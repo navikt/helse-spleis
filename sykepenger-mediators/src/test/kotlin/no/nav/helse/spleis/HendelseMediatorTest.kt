@@ -394,7 +394,7 @@ internal class HendelseMediatorTest {
                     )
                 ),
                 ekstraFelter = mapOf(
-                    "utbetalingsreferanse" to "123456789"
+                    "fagsystemId" to "123456789"
                 )
             )
         }

@@ -371,7 +371,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 )
             ),
             ekstraFelter = mapOf(
-                "utbetalingsreferanse" to "123456789"
+                "fagsystemId" to "123456789"
             )
         )
     }

@@ -13,7 +13,7 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
         requireKey("@løsning.${Utbetaling.name}")
         requireAny("@løsning.${Utbetaling.name}.status", Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name))
         requireKey("@løsning.${Utbetaling.name}.beskrivelse")
-        requireKey("utbetalingsreferanse")
+        requireKey("fagsystemId")
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -26,7 +26,7 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
             aktørId = this["aktørId"].asText(),
             fødselsnummer = fødselsnummer,
             orgnummer = this["organisasjonsnummer"].asText(),
-            utbetalingsreferanse = this["utbetalingsreferanse"].asText(),
+            utbetalingsreferanse = this["fagsystemId"].asText(),
             status = enumValueOf(this["@løsning.${Utbetaling.name}.status"].asText()),
             melding = this["@løsning.${Utbetaling.name}.beskrivelse"].asText()
         )
