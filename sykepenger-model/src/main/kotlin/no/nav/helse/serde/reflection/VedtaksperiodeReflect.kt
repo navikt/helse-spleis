@@ -25,8 +25,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
             "totalbeløp" to it.totalbeløp,
             "perioder" to it.perioder.map { periode ->
                 mapOf(
-                    "fom" to periode.fom,
-                    "tom" to periode.tom,
+                    "fom" to periode.periode.start,
+                    "tom" to periode.periode.endInclusive,
                     "utbetalinger" to periode.utbetalinger.map { utbetaling ->
                         mapOf(
                             "forfallsdato" to utbetaling.forfallsdato,
@@ -37,8 +37,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
                             "feilkonto" to utbetaling.feilkonto,
                             "detaljer" to utbetaling.detaljer.map { detalj ->
                                 mapOf(
-                                    "fom" to detalj.fom,
-                                    "tom" to detalj.tom,
+                                    "fom" to detalj.periode.start,
+                                    "tom" to detalj.periode.endInclusive,
                                     "konto" to detalj.konto,
                                     "beløp" to detalj.beløp,
                                     "klassekode" to mapOf(

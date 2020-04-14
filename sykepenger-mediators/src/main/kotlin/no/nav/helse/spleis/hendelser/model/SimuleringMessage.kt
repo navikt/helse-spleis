@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -40,11 +41,10 @@ internal class SimuleringMessage(originalMessage: String, problems: MessageProbl
             simuleringResultat = this["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
                 ?.let {
                     Simulering.SimuleringResultat(
-                        totalbeløp = it.path("totalBelop").decimalValue(),
+                        totalbeløp = it.path("totalBelop").asInt(),
                         perioder = it.path("periodeList").map { periode ->
                             Simulering.SimulertPeriode(
-                                fom = periode.path("fom").asLocalDate(),
-                                tom = periode.path("tom").asLocalDate(),
+                                periode = Periode(periode.path("fom").asLocalDate(), periode.path("tom").asLocalDate()),
                                 utbetalinger = periode.path("utbetaling").map { utbetaling ->
                                     Simulering.SimulertUtbetaling(
                                         forfallsdato = utbetaling.path("forfall").asLocalDate(),
@@ -55,10 +55,9 @@ internal class SimuleringMessage(originalMessage: String, problems: MessageProbl
                                         feilkonto = utbetaling.path("feilkonto").asBoolean(),
                                         detaljer = utbetaling.path("detaljer").map { detalj ->
                                             Simulering.Detaljer(
-                                                fom = detalj.path("faktiskFom").asLocalDate(),
-                                                tom = detalj.path("faktiskTom").asLocalDate(),
+                                                periode = Periode(detalj.path("faktiskFom").asLocalDate(), detalj.path("faktiskTom").asLocalDate()),
                                                 konto = detalj.path("konto").asText(),
-                                                beløp = detalj.path("belop").decimalValue(),
+                                                beløp = detalj.path("belop").asInt(),
                                                 klassekode = Simulering.Klassekode(
                                                     kode = detalj.path("klassekode").asText(),
                                                     beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
@@ -68,7 +67,7 @@ internal class SimuleringMessage(originalMessage: String, problems: MessageProbl
                                                 refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
                                                 tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
                                                 sats = Simulering.Sats(
-                                                    sats = detalj.path("sats").decimalValue(),
+                                                    sats = detalj.path("sats").asInt(),
                                                     antall = detalj.path("antallSats").asInt(),
                                                     type = detalj.path("typeSats").asText()
                                                 )

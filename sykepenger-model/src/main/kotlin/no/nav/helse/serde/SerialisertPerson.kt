@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
@@ -291,8 +292,7 @@ class SerialisertPerson(val json: String) {
         totalbeløp = data.totalbeløp,
         perioder = data.perioder.map { periode ->
             Simulering.SimulertPeriode(
-                fom = periode.fom,
-                tom = periode.tom,
+                periode = Periode(periode.fom, periode.tom),
                 utbetalinger = periode.utbetalinger.map { utbetaling ->
                     Simulering.SimulertUtbetaling(
                         forfallsdato = utbetaling.forfallsdato,
@@ -303,8 +303,7 @@ class SerialisertPerson(val json: String) {
                         feilkonto = utbetaling.feilkonto,
                         detaljer = utbetaling.detaljer.map { detalj ->
                             Simulering.Detaljer(
-                                fom = detalj.fom,
-                                tom = detalj.tom,
+                                periode = Periode(detalj.fom, detalj.tom),
                                 konto = detalj.konto,
                                 beløp = detalj.beløp,
                                 klassekode = Simulering.Klassekode(
@@ -338,8 +337,7 @@ class SerialisertPerson(val json: String) {
                 beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
                 hendelseId = sykdomshistorikkData.hendelseId
             )
-        }
-        )
+        })
     }
 
 }
@@ -427,7 +425,7 @@ internal data class PersonData(
             )
 
             data class DataForSimuleringData(
-                val totalbeløp: BigDecimal,
+                val totalbeløp: Int,
                 val perioder: List<SimulertPeriode>
             ) {
                 data class SimulertPeriode(
@@ -447,7 +445,7 @@ internal data class PersonData(
                     val fom: LocalDate,
                     val tom: LocalDate,
                     val konto: String,
-                    val beløp: BigDecimal,
+                    val beløp: Int,
                     val klassekode: Klassekode,
                     val uføregrad: Int,
                     val utbetalingstype: String,
@@ -457,7 +455,7 @@ internal data class PersonData(
                 )
 
                 data class Sats(
-                    val sats: BigDecimal,
+                    val sats: Int,
                     val antall: Int,
                     val type: String
                 )

@@ -153,11 +153,10 @@ internal class SimuleringHendelseTest {
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
-                totalbeløp = 44361.toBigDecimal(),
+                totalbeløp = 44361,
                 perioder = listOf(
                     Simulering.SimulertPeriode(
-                        fom = 17.januar,
-                        tom = 31.januar,
+                        periode = Periode(17.januar, 31.januar),
                         utbetalinger = listOf(
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 1.februar,
@@ -165,15 +164,14 @@ internal class SimuleringHendelseTest {
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Simulering.Detaljer(
-                                        fom = 17.januar,
-                                        tom = 31.januar,
+                                        periode = Periode(17.januar, 31.januar),
                                         konto = "11111111111",
-                                        beløp = 15741.toBigDecimal(),
+                                        beløp = 15741,
                                         klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(1431.toBigDecimal(), 11, "DAGLIG"),
+                                        sats = Simulering.Sats(1431, 11, "DAGLIG"),
                                         refunderesOrgnummer = orgnummer
                                     )
                                 )
@@ -181,8 +179,7 @@ internal class SimuleringHendelseTest {
                         )
                     ),
                     Simulering.SimulertPeriode(
-                        fom = 1.februar,
-                        tom = 28.februar,
+                        periode = Periode(1.februar, 28.februar),
                         utbetalinger = listOf(
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 1.mars,
@@ -190,15 +187,14 @@ internal class SimuleringHendelseTest {
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Simulering.Detaljer(
-                                        fom = 17.januar,
-                                        tom = 31.januar,
+                                        periode = Periode(17.januar, 31.januar),
                                         konto = "11111111111",
-                                        beløp = 28620.toBigDecimal(),
+                                        beløp = 28620,
                                         klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(1431.toBigDecimal(), 20, "DAGLIG"),
+                                        sats = Simulering.Sats(1431, 20, "DAGLIG"),
                                         refunderesOrgnummer = orgnummer
                                     )
                                 )

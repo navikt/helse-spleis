@@ -303,11 +303,10 @@ internal abstract class AbstractEndToEndTest {
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = SimuleringResultat(
-                totalbeløp = 2000.toBigDecimal(),
+                totalbeløp = 2000,
                 perioder = listOf(
                     SimulertPeriode(
-                        fom = 17.januar,
-                        tom = 20.januar,
+                        periode = Periode(17.januar, 20.januar),
                         utbetalinger = listOf(
                             SimulertUtbetaling(
                                 forfallsdato = 21.januar,
@@ -318,10 +317,9 @@ internal abstract class AbstractEndToEndTest {
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Detaljer(
-                                        fom = 17.januar,
-                                        tom = 20.januar,
+                                        periode = Periode(17.januar, 20.januar),
                                         konto = "81549300",
-                                        beløp = 2000.toBigDecimal(),
+                                        beløp = 2000,
                                         klassekode = Klassekode(
                                             kode = "SPREFAG-IOP",
                                             beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
@@ -330,7 +328,7 @@ internal abstract class AbstractEndToEndTest {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Sats(
-                                            sats = 1000.toBigDecimal(),
+                                            sats = 1000,
                                             antall = 2,
                                             type = "DAGLIG"
                                         ),

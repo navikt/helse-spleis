@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
-import java.math.BigDecimal
 import java.time.LocalDate
 
 class Simulering(
@@ -24,23 +23,22 @@ class Simulering(
             simuleringResultat == null -> {
                 warn("Ingenting ble simulert")
             }
-            utbetalingslinjer.totalbeløp() != simuleringResultat.totalbeløp.intValueExact() -> {
+            utbetalingslinjer.totalbeløp() != simuleringResultat.totalbeløp -> {
                 warn("Simulering kom frem til et annet totalbeløp")
             }
-            simuleringResultat.perioder.map { Periode(it.fom, it.tom) }.any { periode -> utbetalingslinjer.none { periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
+            simuleringResultat.perioder.any { simulertPeriode -> utbetalingslinjer.none { simulertPeriode.periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
             }
         }
     }
 
     class SimuleringResultat(
-        internal val totalbeløp: BigDecimal,
+        internal val totalbeløp: Int,
         internal val perioder: List<SimulertPeriode>
     )
 
     class SimulertPeriode(
-        internal val fom: LocalDate,
-        internal val tom: LocalDate,
+        internal val periode: Periode,
         internal val utbetalinger: List<SimulertUtbetaling>
     )
 
@@ -52,10 +50,9 @@ class Simulering(
     )
 
     class Detaljer(
-        internal val fom: LocalDate,
-        internal val tom: LocalDate,
+        internal val periode: Periode,
         internal val konto: String,
-        internal val beløp: BigDecimal,
+        internal val beløp: Int,
         internal val klassekode: Klassekode,
         internal val uføregrad: Int,
         internal val utbetalingstype: String,
@@ -65,7 +62,7 @@ class Simulering(
     )
 
     class Sats(
-        internal val sats: BigDecimal,
+        internal val sats: Int,
         internal val antall: Int,
         internal val type: String
     )
