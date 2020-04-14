@@ -6,9 +6,9 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -119,15 +119,15 @@ internal interface UtbetalingVisitor: UtbetalingsdagVisitor, UtbetalingslinjerVi
     fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
     fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun preVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
-    fun postVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {}
+    fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {}
+    fun preVisitPersonUtbetalingslinjer(linjer: Oppdrag) {}
+    fun postVisitPersonUtbetalingslinjer(linjer: Oppdrag) {}
     fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
 }
 
 internal interface UtbetalingslinjerVisitor {
-    fun preVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun preVisitUtbetalingslinjer(linjer: Oppdrag) {}
     fun visitUtbetalingslinje(
         utbetalingslinje: Utbetalingslinje,
         fom: LocalDate,
@@ -137,5 +137,5 @@ internal interface UtbetalingslinjerVisitor {
         delytelseId: Int,
         refDelytelseId: Int?
     ) {}
-    fun postVisitUtbetalingslinjer(linjer: Utbetalingslinjer) {}
+    fun postVisitUtbetalingslinjer(linjer: Oppdrag) {}
 }

@@ -11,22 +11,22 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "utbetalingstidslinje" to
             UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
-        "arbeidsgiverUtbetalingslinjer" to
-            UtbetalingslinjerReflect(utbetaling["arbeidsgiverUtbetalingslinjer"]).toMap(),
-        "personUtbetalingslinjer" to
-            UtbetalingslinjerReflect(utbetaling["personUtbetalingslinjer"]).toMap(),
+        "arbeidsgiverOppdrag" to
+            OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
+        "personOppdrag" to
+            OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"]
     )
 }
 
-internal class UtbetalingslinjerReflect(private val utbetalingslinjer: Utbetalingslinjer) {
+internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toMap() = mutableMapOf(
-        "mottaker" to utbetalingslinjer["mottaker"],
-        "fagområde" to utbetalingslinjer.get<Fagområde>("fagområde").toString(),
-        "linjer" to utbetalingslinjer.map { UtbetalingslinjeReflect(it).toMap() },
-        "utbetalingsreferanse" to utbetalingslinjer["utbetalingsreferanse"],
-        "linjertype" to utbetalingslinjer.get<Linjetype>("linjertype").toString(),
-        "sjekksum" to utbetalingslinjer["sjekksum"]
+        "mottaker" to oppdrag["mottaker"],
+        "fagområde" to oppdrag.get<Fagområde>("fagområde").toString(),
+        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
+        "utbetalingsreferanse" to oppdrag["utbetalingsreferanse"],
+        "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
+        "sjekksum" to oppdrag["sjekksum"]
     )
 }
 
@@ -38,7 +38,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "grad" to utbetalingslinje["grad"],
         "delytelseId" to utbetalingslinje["delytelseId"],
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
-        "linjetype" to utbetalingslinje.get<Linjetype>("linjetype").toString(),
+        "endringskode" to utbetalingslinje.get<Endringskode>("endringskode").toString(),
         "klassekode" to utbetalingslinje.get<Klassekode>("klassekode").verdi
         )
 }

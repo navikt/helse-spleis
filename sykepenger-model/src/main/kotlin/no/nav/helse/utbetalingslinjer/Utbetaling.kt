@@ -12,8 +12,8 @@ import java.time.LocalDateTime
 internal class Utbetaling
     private constructor(
         private val utbetalingstidslinje: Utbetalingstidslinje,
-        private val arbeidsgiverUtbetalingslinjer: Utbetalingslinjer,
-        private val personUtbetalingslinjer: Utbetalingslinjer,
+        private val arbeidsgiverOppdrag: Oppdrag,
+        private val personOppdrag: Oppdrag,
         private val tidsstempel: LocalDateTime
     ) {
 
@@ -31,9 +31,9 @@ internal class Utbetaling
         LocalDateTime.now()
     )
 
-    internal fun arbeidsgiverUtbetalingslinjer() = arbeidsgiverUtbetalingslinjer
+    internal fun arbeidsgiverUtbetalingslinjer() = arbeidsgiverOppdrag
 
-    internal fun personUtbetalingslinjer() = personUtbetalingslinjer
+    internal fun personUtbetalingslinjer() = personOppdrag
 
     companion object {
 
@@ -43,12 +43,12 @@ internal class Utbetaling
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
-        ) = Utbetalingslinjer(
+        ) = Oppdrag(
             organisasjonsnummer,
             SPREF,
             SpennBuilder(tidslinje, sisteDato, arbeidsgiverUtbetaling).result()
         )
-            .forskjell(tidligere?.arbeidsgiverUtbetalingslinjer ?: Utbetalingslinjer(organisasjonsnummer, SPREF))
+            .forskjell(tidligere?.arbeidsgiverOppdrag ?: Oppdrag(organisasjonsnummer, SPREF))
             .also {
                 if (it.isEmpty())
                     aktivitetslogg.info("Ingen utbetalingslinjer bygget")
@@ -62,20 +62,20 @@ internal class Utbetaling
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
-        ): Utbetalingslinjer {
-            return Utbetalingslinjer(fødselsnummer, Fagområde.SP)
+        ): Oppdrag {
+            return Oppdrag(fødselsnummer, Fagområde.SP)
         }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(this, tidsstempel)
         utbetalingstidslinje.accept(visitor)
-        visitor.preVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverUtbetalingslinjer)
-        arbeidsgiverUtbetalingslinjer.accept(visitor)
-        visitor.postVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverUtbetalingslinjer)
-        visitor.preVisitPersonUtbetalingslinjer(personUtbetalingslinjer)
-        personUtbetalingslinjer.accept(visitor)
-        visitor.postVisitPersonUtbetalingslinjer(personUtbetalingslinjer)
+        visitor.preVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverOppdrag)
+        arbeidsgiverOppdrag.accept(visitor)
+        visitor.postVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverOppdrag)
+        visitor.preVisitPersonUtbetalingslinjer(personOppdrag)
+        personOppdrag.accept(visitor)
+        visitor.postVisitPersonUtbetalingslinjer(personOppdrag)
         visitor.postVisitUtbetaling(this, tidsstempel)
     }
 

@@ -75,23 +75,23 @@ internal fun createVedtaksperiode(
 
 internal fun createUtbetaling(
     utbetalingstidslinje: Utbetalingstidslinje,
-    arbeidsgiverUtbetalingslinjer: Utbetalingslinjer,
-    personUtbetalingslinjer: Utbetalingslinjer,
+    arbeidsgiverOppdrag: Oppdrag,
+    personOppdrag: Oppdrag,
     tidsstempel: LocalDateTime
 ) = Utbetaling::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(utbetalingstidslinje, arbeidsgiverUtbetalingslinjer, personUtbetalingslinjer, tidsstempel)
+    .call(utbetalingstidslinje, arbeidsgiverOppdrag, personOppdrag, tidsstempel)
 
-internal fun createUtbetalingslinjer(
+internal fun createOppdrag(
     mottaker: String,
     fagområde: Fagområde,
     linjer: List<Utbetalingslinje>,
     utbetalingsreferanse: String,
-    linjertype: Linjetype,
+    endringskode: Endringskode,
     sjekksum: Int
-) = Utbetalingslinjer::class.primaryConstructor!!
+) = Oppdrag::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(mottaker, fagområde, linjer, utbetalingsreferanse, linjertype, sjekksum)
+    .call(mottaker, fagområde, linjer, utbetalingsreferanse, endringskode, sjekksum)
 
 internal fun createUtbetalingslinje(
     fom: LocalDate,
@@ -100,11 +100,11 @@ internal fun createUtbetalingslinje(
     grad: Double,
     delytelseId: Int,
     refDelytelseId: Int? = null,
-    linjetype: Linjetype,
+    endringskode: Endringskode,
     klassekode: Klassekode
 ) = Utbetalingslinje::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, linjetype, klassekode)
+    .call(fom, tom, dagsats, grad, delytelseId, refDelytelseId, endringskode, klassekode)
 
 internal fun createSykdomshistorikk(
     elementer: List<Sykdomshistorikk.Element>

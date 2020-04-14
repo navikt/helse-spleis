@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -53,11 +53,11 @@ private class UtbetalingslinjerMapper(
         opprettet = tidsstempel
     }
 
-    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {
+    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {
         utbetalingslinjeListe.clear()
     }
 
-    override fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {
+    override fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
             utbetalingsreferanse = linjer.referanse(),
             utbetalingslinjer = utbetalingslinjeListe.toList()
@@ -66,11 +66,11 @@ private class UtbetalingslinjerMapper(
             ?.also { utbetalingslinjerListe.add(it) }
     }
 
-    override fun preVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {
+    override fun preVisitPersonUtbetalingslinjer(linjer: Oppdrag) {
         utbetalingslinjeListe.clear()
     }
 
-    override fun postVisitPersonUtbetalingslinjer(linjer: Utbetalingslinjer) {
+    override fun postVisitPersonUtbetalingslinjer(linjer: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
             utbetalingsreferanse = linjer.referanse(),
             utbetalingslinjer = utbetalingslinjeListe.toList()

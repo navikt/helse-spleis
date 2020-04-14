@@ -6,7 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -27,7 +27,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
-    internal val arbeidsgiverUtbetalingslinjer = mutableListOf<Utbetalingslinjer>()
+    internal val arbeidsgiverUtbetalingslinjer = mutableListOf<Oppdrag>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
@@ -70,7 +70,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         inVedtaksperiode = false
     }
 
-    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Utbetalingslinjer) {
+    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {
         arbeidsgiverUtbetalingslinjer.add(linjer)
     }
 

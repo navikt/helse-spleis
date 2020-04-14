@@ -2,8 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
-import no.nav.helse.serde.reflection.UtbetalingslinjerReflect
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -240,7 +240,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
                 internal fun simulering(
                     aktivitetslogg: IAktivitetslogg,
-                    utbetalingslinjer: Utbetalingslinjer,
+                    oppdrag: Oppdrag,
                     maksdato: LocalDate,
                     saksbehandler: String
                 ) {
@@ -250,7 +250,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                         mutableMapOf(
                             "maksdato" to maksdato.toString(),
                             "saksbehandler" to saksbehandler
-                        ) + UtbetalingslinjerReflect(utbetalingslinjer).toMap()
+                        ) + OppdragReflect(oppdrag).toMap()
                     )
                 }
 
@@ -263,7 +263,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
                 internal fun utbetaling(
                     aktivitetslogg: IAktivitetslogg,
-                    utbetalingslinjer: Utbetalingslinjer,
+                    oppdrag: Oppdrag,
                     maksdato: LocalDate,
                     saksbehandler: String
                 ) {
@@ -273,7 +273,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                         mutableMapOf(
                             "maksdato" to maksdato.toString(),
                             "saksbehandler" to saksbehandler
-                        ) + UtbetalingslinjerReflect(utbetalingslinjer).toMap()
+                        ) + OppdragReflect(oppdrag).toMap()
                     )
                 }
             }

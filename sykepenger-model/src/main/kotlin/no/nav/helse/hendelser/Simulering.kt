@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.utbetalingslinjer.Utbetalingslinjer
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
 
 class Simulering(
@@ -17,16 +17,16 @@ class Simulering(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(utbetalingslinjer: Utbetalingslinjer) = aktivitetslogg.apply {
+    internal fun valider(oppdrag: Oppdrag) = aktivitetslogg.apply {
         if (!simuleringOK) error("Feil under simulering: %s", melding)
         when {
             simuleringResultat == null -> {
                 warn("Ingenting ble simulert")
             }
-            utbetalingslinjer.totalbeløp() != simuleringResultat.totalbeløp -> {
+            oppdrag.totalbeløp() != simuleringResultat.totalbeløp -> {
                 warn("Simulering kom frem til et annet totalbeløp")
             }
-            simuleringResultat.perioder.any { simulertPeriode -> utbetalingslinjer.none { simulertPeriode.periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
+            simuleringResultat.perioder.any { simulertPeriode -> oppdrag.none { simulertPeriode.periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
             }
         }

@@ -113,18 +113,18 @@ class SerialisertPerson(val json: String) {
 
     private fun konverterTilUtbetaling(data: UtbetalingData) = createUtbetaling(
         konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
-        konverterTilUtbetalingslinjer(data.arbeidsgiverUtbetalingslinjer),
-        konverterTilUtbetalingslinjer(data.personUtbetalingslinjer),
+        konverterTilUtbetalingslinjer(data.arbeidsgiverOppdrag),
+        konverterTilUtbetalingslinjer(data.personOppdrag),
         data.tidsstempel
     )
 
-    private fun konverterTilUtbetalingslinjer(data: UtbetalingslinjerData): Utbetalingslinjer {
-        return createUtbetalingslinjer(
+    private fun konverterTilUtbetalingslinjer(data: OppdragData): Oppdrag {
+        return createOppdrag(
             data.mottaker,
             Fagområde.valueOf(data.fagområde),
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.utbetalingsreferanse,
-            Linjetype.valueOf(data.linjertype),
+            Endringskode.valueOf(data.endringskode),
             data.sjekksum
         )
     }
@@ -271,7 +271,7 @@ class SerialisertPerson(val json: String) {
         data.grad,
         data.delytelseId,
         data.refDelytelseId,
-        Linjetype.valueOf(data.linjetype),
+        Endringskode.valueOf(data.endringskode),
         Klassekode.from(data.klassekode)
     )
 
@@ -476,17 +476,17 @@ internal data class PersonData(
 
 data class UtbetalingData(
     val utbetalingstidslinje: UtbetalingstidslinjeData,
-    val arbeidsgiverUtbetalingslinjer: UtbetalingslinjerData,
-    val personUtbetalingslinjer: UtbetalingslinjerData,
+    val arbeidsgiverOppdrag: OppdragData,
+    val personOppdrag: OppdragData,
     val tidsstempel: LocalDateTime
 )
 
-data class UtbetalingslinjerData(
+data class OppdragData(
     val mottaker: String,
     val fagområde: String,
     val linjer: List<UtbetalingslinjeData>,
     val utbetalingsreferanse: String,
-    val linjertype: String,
+    val endringskode: String,
     val sjekksum: Int
 )
 
@@ -497,7 +497,7 @@ data class UtbetalingslinjeData(
     val grad: Double,
     val delytelseId: Int,
     val refDelytelseId: Int?,
-    val linjetype: String,
+    val endringskode: String,
     val klassekode: String
 )
 

@@ -21,16 +21,16 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.NY, actual.linjertype)
+        assertEquals(Endringskode.NY, actual.linjertype)
     }
 
     @Test internal fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
-        val original = Utbetalingslinjer(ORGNUMMER, SPREF)
+        val original = Oppdrag(ORGNUMMER, SPREF)
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.NY, actual.linjertype)
+        assertEquals(Endringskode.NY, actual.linjertype)
     }
 
     @Test internal fun `fullstendig overskriv`() {
@@ -39,7 +39,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(1.januar to 9.februar), actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
     }
 
     @Test internal fun `ny tom`() {
@@ -48,8 +48,8 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(1.januar to 13.januar), actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.ENDR, actual[0].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.ENDR, actual[0].linjetype)
     }
 
     @Test internal fun `bare flere utbetalingslinjer`() {
@@ -58,9 +58,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.UEND, actual[0].linjetype)
-        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.UEND, actual[0].linjetype)
+        assertEquals(Endringskode.NY, actual[1].linjetype)
     }
 
     @Test internal fun `grad endres`() {
@@ -69,9 +69,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.NY, actual[0].linjetype)
-        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.NY, actual[0].linjetype)
+        assertEquals(Endringskode.NY, actual[1].linjetype)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
     }
@@ -82,9 +82,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.NY, actual[0].linjetype)
-        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.NY, actual[0].linjetype)
+        assertEquals(Endringskode.NY, actual[1].linjetype)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
     }
@@ -105,12 +105,12 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(intermediate.referanse, actual.referanse)
 
         assertEquals(original[0].id, actual[0].id)
-        assertEquals(Linjetype.NY, original[0].linjetype)
-        assertEquals(Linjetype.ENDR, intermediate[0].linjetype)
+        assertEquals(Endringskode.NY, original[0].linjetype)
+        assertEquals(Endringskode.ENDR, intermediate[0].linjetype)
 
         assertEquals(original[0].id + 1, actual[1].id)
-        assertEquals(Linjetype.UEND, actual[0].linjetype)
-        assertEquals(Linjetype.NY, actual[1].linjetype)
+        assertEquals(Endringskode.UEND, actual[0].linjetype)
+        assertEquals(Endringskode.NY, actual[1].linjetype)
     }
 
     @Test internal fun `potpourri`() {
@@ -128,11 +128,11 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.UEND, actual[0].linjetype)
-        assertEquals(Linjetype.ENDR, actual[1].linjetype)
-        assertEquals(Linjetype.NY, actual[2].linjetype)
-        assertEquals(Linjetype.NY, actual[3].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.UEND, actual[0].linjetype)
+        assertEquals(Endringskode.ENDR, actual[1].linjetype)
+        assertEquals(Endringskode.NY, actual[2].linjetype)
+        assertEquals(Endringskode.NY, actual[3].linjetype)
         assertEquals(original[1].id, actual[1].id)      // picks up id from original
         assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
@@ -156,11 +156,11 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.UEND, actual[0].linjetype)
-        assertEquals(Linjetype.ENDR, actual[1].linjetype)
-        assertEquals(Linjetype.NY, actual[2].linjetype)
-        assertEquals(Linjetype.NY, actual[3].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.UEND, actual[0].linjetype)
+        assertEquals(Endringskode.ENDR, actual[1].linjetype)
+        assertEquals(Endringskode.NY, actual[2].linjetype)
+        assertEquals(Endringskode.NY, actual[3].linjetype)
         assertEquals(original[1].id, actual[1].id)      // picks up id from original
         assertEquals(original[5].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
@@ -172,8 +172,8 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(1.januar to 10.januar), actual)
         assertEquals(original.referanse, actual.referanse)
-        assertEquals(Linjetype.UEND, actual.linjertype)
-        assertEquals(Linjetype.NY, actual[0].linjetype)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.NY, actual[0].linjetype)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
     }
@@ -188,26 +188,26 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[1].id, actual[1].id)
         assertEquals(original[2].id + 1, actual[2].id)
 
-        assertEquals(Linjetype.NY, original[0].linjetype)
-        assertEquals(Linjetype.NY, original[1].linjetype)
-        assertEquals(Linjetype.NY, original[2].linjetype)
+        assertEquals(Endringskode.NY, original[0].linjetype)
+        assertEquals(Endringskode.NY, original[1].linjetype)
+        assertEquals(Endringskode.NY, original[2].linjetype)
 
-        assertEquals(Linjetype.UEND, actual[0].linjetype)
-        assertEquals(Linjetype.ENDR, actual[1].linjetype)
-        assertEquals(Linjetype.NY, actual[2].linjetype)
+        assertEquals(Endringskode.UEND, actual[0].linjetype)
+        assertEquals(Endringskode.ENDR, actual[1].linjetype)
+        assertEquals(Endringskode.NY, actual[2].linjetype)
     }
 
-    private val Utbetalingslinjer.linjertype get() = this.get<Linjetype>("linjertype")
+    private val Oppdrag.linjertype get() = this.get<Endringskode>("endringskode")
 
-    private val Utbetalingslinje.linjetype get() = this.get<Linjetype>("linjetype")
+    private val Utbetalingslinje.linjetype get() = this.get<Endringskode>("endringskode")
 
     private val Utbetalingslinje.id get() = this.get<Int>("delytelseId")
 
     private val Utbetalingslinje.refId get() = this.get<Int>("refDelytelseId")
 
-    private val Utbetalingslinjer.referanse get() = this.get<String>("utbetalingsreferanse")
+    private val Oppdrag.referanse get() = this.get<String>("utbetalingsreferanse")
 
-    private fun assertUtbetalinger(expected: Utbetalingslinjer, actual: Utbetalingslinjer) {
+    private fun assertUtbetalinger(expected: Oppdrag, actual: Oppdrag) {
         assertEquals(expected.size, actual.size, "Utbetalingslinjer er i forskjellige størrelser")
         (expected zip actual).forEach { (a, b) ->
             assertEquals(a.fom, b.fom, "fom stemmer ikke overens")
@@ -218,12 +218,12 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     private fun linjer(vararg linjer: TestUtbetalingslinje) =
-        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }).also {
+        Oppdrag(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }).also {
             it.zipWithNext { a, b -> b.linkTo(a) }
         }
 
     private fun linjer(vararg linjer: Utbetalingslinje) =
-        Utbetalingslinjer(ORGNUMMER, SPREF, linjer.toList()).also {
+        Oppdrag(ORGNUMMER, SPREF, linjer.toList()).also {
             it.zipWithNext { a, b -> b.linkTo(a) }
         }
 
@@ -246,7 +246,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         internal infix fun forskjell(other: TestUtbetalingslinje) = this forskjell other.asUtbetalingslinjer()
 
-        internal infix fun forskjell(other: Utbetalingslinjer) = this.asUtbetalingslinjer() forskjell other
+        internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() forskjell other
 
         internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, grad)
 

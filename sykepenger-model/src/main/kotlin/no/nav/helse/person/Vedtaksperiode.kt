@@ -17,6 +17,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -866,7 +867,7 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                utbetalingslinjer = vedtaksperiode.utbetaling().arbeidsgiverUtbetalingslinjer().removeUEND(),
+                oppdrag = Fagområde.SPREF.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 saksbehandler = vedtaksperiode.godkjentAv
             )

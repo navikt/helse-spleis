@@ -31,19 +31,19 @@ internal class UtbetalingReflectTest {
         ).toMap()
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
         assertUtbetalingslinjer("SPREF", "fagområde")
-        assertUtbetalingslinjer("NY", "linjertype")
+        assertUtbetalingslinjer("NY", "endringskode")
         assertUtbetalingslinjer(-874556451, "sjekksum")
         assertUtbetalingslinje(0, 1.januar.toString(), "fom")
         assertUtbetalingslinje(0, 4.januar.toString(), "tom")
         assertUtbetalingslinje(0, 1, "delytelseId")
         assertUtbetalingslinje(0, null, "refDelytelseId")
-        assertUtbetalingslinje(0, "NY", "linjetype")
+        assertUtbetalingslinje(0, "NY", "endringskode")
         assertUtbetalingslinje(0, "SPREFAG-IOP", "klassekode")
     }
 
     private fun assertUtbetalingslinje(index: Int, expected: Any?, key: String) {
         assertEquals(expected, ((map
-            ["arbeidsgiverUtbetalingslinjer"] as Map<String, String>)
+            ["arbeidsgiverOppdrag"] as Map<String, String>)
             ["linjer"] as List<Map<String, String>>)
             [index]
             [key]
@@ -52,7 +52,7 @@ internal class UtbetalingReflectTest {
 
     private fun assertUtbetalingslinjer(expected: Any?, key: String) {
         assertEquals(expected, ((map
-            ["arbeidsgiverUtbetalingslinjer"] as Map<String, String>)
+            ["arbeidsgiverOppdrag"] as Map<String, String>)
             [key]
         ))
     }
