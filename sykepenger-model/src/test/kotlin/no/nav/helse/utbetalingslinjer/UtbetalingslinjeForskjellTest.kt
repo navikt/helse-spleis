@@ -1,8 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -90,6 +89,30 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(actual[0].id + 1, actual[1].id)
     }
 
+    @Test internal fun `Tre perioder hvor grad endres i siste periode`() {
+        val original = linjer(17.juni(2020) to 30.juni(2020))
+        val new = linjer(17.juni(2020) to 31.juli(2020))
+        val intermediate = new forskjell original
+        assertEquals(original.referanse, intermediate.referanse)
+
+        val new2 = linjer(
+            17.juni(2020) to 31.juli(2020),
+            1.august(2020) to 31.august(2020) grad 50)
+
+        val actual = new2 forskjell intermediate
+
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(intermediate.referanse, actual.referanse)
+
+        assertEquals(original[0].id, actual[0].id)
+        assertEquals(Linjetype.NY, original[0].linjetype)
+        assertEquals(Linjetype.ENDR, intermediate[0].linjetype)
+
+        assertEquals(original[0].id + 1, actual[1].id)
+        assertEquals(Linjetype.UEND, actual[0].linjetype)
+        assertEquals(Linjetype.NY, actual[1].linjetype)
+    }
+
     @Test internal fun `potpourri`() {
         val original = linjer(
             1.januar to 5.januar,
@@ -115,7 +138,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(actual[2].id + 1, actual[3].id)
     }
 
-    @Test internal fun `potpourri2`() {
+    @Test internal fun `potpourri 2`() {
         val original = linjer(
             1.januar to 5.januar,
             6.januar to 12.januar grad 50,
@@ -143,11 +166,44 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(actual[2].id + 1, actual[3].id)
     }
 
+    @Test internal fun `fom endres`() {
+        val original = linjer(5.januar to 10.januar)
+        val recalculated = linjer(1.januar to 10.januar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 10.januar), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Linjetype.UEND, actual.linjertype)
+        assertEquals(Linjetype.NY, actual[0].linjetype)
+        assertEquals(original[0].id + 1, actual[0].id)
+        assertEquals(original[0].id, actual[0].refId)
+    }
+
+    @Test internal fun `potpourri 3`() {
+        val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50, 13.januar to 19.januar)
+        val new = linjer(1.januar to 5.januar, 6.januar to 19.januar grad 50, 20.januar to 26.januar)
+        val actual = new forskjell original
+        assertEquals(original.referanse, actual.referanse)
+
+        assertEquals(original[0].id, actual[0].id)
+        assertEquals(original[1].id, actual[1].id)
+        assertEquals(original[2].id + 1, actual[2].id)
+
+        assertEquals(Linjetype.NY, original[0].linjetype)
+        assertEquals(Linjetype.NY, original[1].linjetype)
+        assertEquals(Linjetype.NY, original[2].linjetype)
+
+        assertEquals(Linjetype.UEND, actual[0].linjetype)
+        assertEquals(Linjetype.ENDR, actual[1].linjetype)
+        assertEquals(Linjetype.NY, actual[2].linjetype)
+    }
+
     private val Utbetalingslinjer.linjertype get() = this.get<Linjetype>("linjertype")
 
     private val Utbetalingslinje.linjetype get() = this.get<Linjetype>("linjetype")
 
     private val Utbetalingslinje.id get() = this.get<Int>("delytelseId")
+
+    private val Utbetalingslinje.refId get() = this.get<Int>("refDelytelseId")
 
     private val Utbetalingslinjer.referanse get() = this.get<String>("utbetalingsreferanse")
 

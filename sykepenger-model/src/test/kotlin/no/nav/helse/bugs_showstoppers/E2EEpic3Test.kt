@@ -743,4 +743,63 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
     }
+
+    @Test
+    fun `Utbetaling med forlengelse`(){
+        håndterSykmelding(Triple(1.juni(2020), 30.juni(2020), 100))
+        håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
+
+        håndterSykmelding(Triple(1.juli(2020), 31.juli(2020), 100))
+        håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100))
+
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+        håndterSimulering(0)
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterYtelser(1)
+        håndterSimulering(1)
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        inspektør.also {
+            assertEquals(it.arbeidsgiverUtbetalingslinjer[0].referanse(), it.arbeidsgiverUtbetalingslinjer[1].referanse())
+        }
+    }
+
+    @Test
+    fun `Grad endrer tredje periode`(){
+        håndterSykmelding(Triple(1.juni(2020), 30.juni(2020), 100))
+        håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
+
+        håndterSykmelding(Triple(1.juli(2020), 31.juli(2020), 100))
+        håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100))
+
+        håndterSykmelding(Triple(1.august(2020), 31.august(2020), 50))
+        håndterSøknad(Sykdom(1.august(2020), 31.august(2020), 50))
+
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+        håndterSimulering(0)
+        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterYtelser(1)
+        håndterSimulering(1)
+        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterYtelser(2)
+        håndterSimulering(2)
+        håndterManuellSaksbehandling(2, true)
+        håndterUtbetalt(2, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        inspektør.also {
+            assertEquals(it.arbeidsgiverUtbetalingslinjer[0].referanse(), it.arbeidsgiverUtbetalingslinjer[1].referanse())
+            assertEquals(it.arbeidsgiverUtbetalingslinjer[1].referanse(), it.arbeidsgiverUtbetalingslinjer[2].referanse())
+        }
+    }
 }
